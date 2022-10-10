@@ -18,6 +18,7 @@ import { notifyFileRead } from './broadcast.js';
 import { write } from './write.js';
 
 const { promises } = fs;
+const { deserialize } = v8;
 
 const getUrlFetcher = () => {
   if (isBrowser) {
@@ -45,7 +46,10 @@ const getExternalFileFetcher = () => {
         if (e.code && e.code === 'ENOENT') {
           return {};
         }
-        logError('sys/getExternalFile/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
+        logError(
+          'sys/getExternalFile/error',
+          `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+        );
       }
     };
   } else if (isBrowser || isWebWorker) {
@@ -64,12 +68,15 @@ const getInternalFileFetcher = () => {
       try {
         let data = await promises.readFile(qualifiedPath);
         // FIX: Use a proper version.
-        return { data, version: 0 };
+        return { data: deserialize(data), version: 0 };
       } catch (e) {
         if (e.code && e.code === 'ENOENT') {
           return {};
         }
-        logError('sys/getExternalFile/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
+        logError(
+          'sys/getExternalFile/error',
+          `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+        );
       }
     };
   } else if (isBrowser || isWebWorker) {
@@ -110,7 +117,10 @@ const fetchPersistent = (qualifiedPath, { workspace }) => {
     if (e.code && e.code === 'ENOENT') {
       return {};
     }
-    logError('sys/fetchPersistent/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
+    logError(
+      'sys/fetchPersistent/error',
+      `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+    );
   }
 };
 
@@ -123,7 +133,10 @@ const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
     if (e.code && e.code === 'ENOENT') {
       return;
     }
-    logError('sys/fetchPersistentVersion/error', `qualifiedPath=${qualifiedPath} error=${e.toString()}`);
+    logError(
+      'sys/fetchPersistentVersion/error',
+      `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+    );
   }
 };
 
@@ -183,10 +196,10 @@ export const read = async (path, options = {}) => {
 
   if (file.data && workspace && !ephemeral) {
     // Check that the version is still up to date.
-    const persistentVersion = await fetchPersistentVersion(qualifiedPath, { workspace });
-    if (
-      file.version !== persistentVersion) {
-      console.log(`QQ/read/invalidate: version ${file.version} vs ${persistentVersion}`);
+    const persistentVersion = await fetchPersistentVersion(qualifiedPath, {
+      workspace,
+    });
+    if (file.version !== persistentVersion) {
       file.data = undefined;
     }
   }

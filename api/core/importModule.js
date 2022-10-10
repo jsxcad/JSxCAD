@@ -75,15 +75,15 @@ export const buildImportModule =
         emitGroup = saveEmitGroup();
         await release();
       }
-      // FIX: The module cache should be per workspace.
-      if (readCache && CACHED_MODULES.has(name)) {
+      const qualifiedName = `${workspace}/${name}`;
+      if (readCache && CACHED_MODULES.has(qualifiedName)) {
         // It's ok for a module to evaluate to undefined so we need to check has explicitly.
-        return CACHED_MODULES.get(name);
+        return CACHED_MODULES.get(qualifiedName);
       }
       const internalModule = DYNAMIC_MODULES.get(name);
       if (internalModule !== undefined) {
         const module = await import(internalModule);
-        CACHED_MODULES.set(name, module);
+        CACHED_MODULES.set(qualifiedName, module);
         return module;
       }
       let script;
@@ -110,6 +110,7 @@ export const buildImportModule =
         clearUpdateEmits,
         workspace,
       });
+      CACHED_MODULES.set(qualifiedName, builtModule);
       return builtModule;
     } catch (error) {
       throw error;

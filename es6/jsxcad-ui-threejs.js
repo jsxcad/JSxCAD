@@ -1,4 +1,5 @@
 import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Matrix4, Plane, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, PointsMaterial, Color, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { isNode } from './jsxcad-sys.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 
@@ -99,6 +100,261 @@ const buildScene = ({
   }
   return { camera, canvas: renderer.domElement, renderer, scene };
 };
+
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var FileReaderAsync = createCommonjsModule(function (module, exports) {
+(function (global, factory) {
+  {
+    factory(exports);
+  }
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : commonjsGlobal, function (_exports) {
+
+  _exports.__esModule = true;
+  _exports.default = void 0;
+
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+  var FileReaderAsync = /*#__PURE__*/function () {
+    function FileReaderAsync() {
+      this.r = new FileReader();
+      Object.defineProperty(this, 'r', {
+        configurable: true
+      });
+    }
+
+    var _proto = FileReaderAsync.prototype;
+
+    _proto.readAs = function readAs(dataType, file) {
+      var _this = this;
+
+      switch (dataType) {
+        case 'ArrayBuffer':
+        case 'Text':
+        case 'BinaryString':
+        case 'DataURL':
+          break;
+
+        default:
+          throw new Error('Unrecognized data type');
+      }
+
+      return new Promise(function (resolve, reject) {
+        var r = _this.r;
+
+        if (r.readyState !== FileReader.EMPTY) {
+          reject('The reader is already in used');
+          return;
+        }
+
+        r.onload = function () {
+          resolve(r.result);
+        };
+
+        r.onerror = function () {
+          reject(r.error);
+        };
+
+        r['readAs' + dataType](file);
+      });
+    };
+
+    _proto.readAsText = function readAsText(file) {
+      return this.readAs('Text', file);
+    };
+
+    _proto.readAsArrayBuffer = function readAsArrayBuffer(file) {
+      return this.readAs('ArrayBuffer', file);
+    };
+
+    _proto.readAsBinaryString = function readAsBinaryString(file) {
+      return this.readAs('BinaryString', file);
+    };
+
+    _proto.readAsDataURL = function readAsDataURL(file) {
+      return this.readAs('DataURL', file);
+    };
+
+    _createClass(FileReaderAsync, [{
+      key: "readyState",
+      get: function get() {
+        return this.r.readyState;
+      }
+    }]);
+
+    return FileReaderAsync;
+  }();
+
+  var _default = FileReaderAsync;
+  _exports.default = _default;
+});
+
+});
+
+unwrapExports(FileReaderAsync);
+
+var FileReaderSync = createCommonjsModule(function (module, exports) {
+(function (global, factory) {
+  {
+    factory(exports);
+  }
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : commonjsGlobal, function (_exports) {
+
+  _exports.__esModule = true;
+  _exports.default = void 0;
+
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+  var FileReaderSync = /*#__PURE__*/function () {
+    function FileReaderSync() {
+      Object.defineProperty(this, '_s', {
+        writable: true,
+        configurable: true,
+        value: FileReader.EMPTY
+      });
+    }
+
+    var _proto = FileReaderSync.prototype;
+
+    _proto.readAs = function readAs(dataType, file) {
+      if (this._s !== FileReader.EMPTY) {
+        throw new Error('The reader is already in used');
+      }
+
+      this._s = FileReader.LOADING;
+
+      switch (dataType) {
+        case 'ArrayBuffer':
+        case 'Text':
+        case 'BinaryString':
+        case 'DataURL':
+          break;
+
+        default:
+          throw new Error('Unrecognized data type');
+      }
+
+      var url;
+      var xhr;
+      var text;
+
+      try {
+        url = URL.createObjectURL(file);
+        xhr = new XMLHttpRequest();
+        xhr.open('GET', url, false);
+        xhr.overrideMimeType('text/plain; charset=x-user-defined');
+        xhr.send();
+        text = xhr.responseText;
+        this._s = FileReader.DONE;
+      } catch (e) {
+        throw new Error('Error while reading file');
+      } finally {
+        if (url) URL.revokeObjectURL(url);
+      }
+
+      switch (dataType) {
+        case 'ArrayBuffer':
+          {
+            return binaryToArrayBuffer(text);
+          }
+
+        case 'Text':
+          {
+            return new TextDecoder().decode(binaryToArrayBuffer(text));
+          }
+
+        case 'BinaryString':
+          {
+            return text;
+          }
+
+        case 'DataURL':
+          {
+            var type = xhr.getResponseHeader('content-type');
+            type = type ? type.split(';')[0] : '';
+            return 'data:' + type + ';base64,' + btoa(text);
+          }
+      }
+
+      return null;
+    };
+
+    _proto.readAsText = function readAsText(file) {
+      return this.readAs('Text', file);
+    };
+
+    _proto.readAsArrayBuffer = function readAsArrayBuffer(file) {
+      return this.readAs('ArrayBuffer', file);
+    };
+
+    _proto.readAsBinaryString = function readAsBinaryString(file) {
+      return this.readAs('BinaryString', file);
+    };
+
+    _proto.readAsDataURL = function readAsDataURL(file) {
+      return this.readAs('DataURL', file);
+    };
+
+    _createClass(FileReaderSync, [{
+      key: "readyState",
+      get: function get() {
+        return this._s;
+      }
+    }]);
+
+    return FileReaderSync;
+  }();
+
+  function binaryToArrayBuffer(binStr) {
+    var len = binStr.length;
+    var arr = new Uint8Array(len);
+
+    for (var i = 0; i < len; i++) {
+      arr[i] = binStr.charCodeAt(i);
+    }
+
+    return arr.buffer;
+  }
+
+  var _default = FileReaderSync;
+  _exports.default = _default;
+});
+
+});
+
+unwrapExports(FileReaderSync);
+
+var dist = createCommonjsModule(function (module, exports) {
+(function (global, factory) {
+  {
+    factory(exports, FileReaderAsync, FileReaderSync);
+  }
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : commonjsGlobal, function (_exports, _FileReaderAsync, _FileReaderSync) {
+
+  _exports.__esModule = true;
+  _FileReaderAsync = _interopRequireDefault(_FileReaderAsync);
+  _exports.FileReaderAsync = _FileReaderAsync.default;
+  _FileReaderSync = _interopRequireDefault(_FileReaderSync);
+  _exports.FileReaderSync = _FileReaderSync.default;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+});
+
+});
+
+var FileReaderForNode = unwrapExports(dist);
 
 let geometryRaycaster = new Raycaster();
 geometryRaycaster.layers.set(GEOMETRY_LAYER);
@@ -1662,6 +1918,8 @@ const orbitDisplay = async (
   };
 };
 
+/* global OffscreenCanvas */
+
 let locked = false;
 const pending = [];
 
@@ -1699,6 +1957,10 @@ const staticDisplay = async (
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
+
+  if (!canvas) {
+    canvas = new OffscreenCanvas(width, height);
+  }
 
   const geometryLayers = new Layers();
   geometryLayers.set(GEOMETRY_LAYER);
@@ -1746,6 +2008,8 @@ const staticDisplay = async (
   return { canvas: displayCanvas, renderer };
 };
 
+/* global FileReader */
+
 const UP = [0, 0.0001, 1];
 
 const staticView = async (
@@ -1776,8 +2040,22 @@ const staticView = async (
   return rendererCanvas;
 };
 
+const getFileReader = () =>
+  isNode ? new FileReaderForNode.FileReaderAsync() : new FileReader();
+
 const dataUrl = async (shape, options) => {
-  const dataUrl = (await staticView(shape, options)).toDataURL('png');
+  const canvas = await staticView(shape, options);
+  const blob = await canvas.convertToBlob();
+  const dataUrl = await new Promise((resolve, reject) => {
+    const fileReader = getFileReader();
+    fileReader.addEventListener('load', () => resolve(fileReader.result));
+    fileReader.addEventListener('error', () =>
+      reject(new Error('readAsDataURL failed'))
+    );
+    fileReader.readAsDataURL(blob);
+  });
+  // const dataUrl = getFileReaderSync().readAsDataURL(blob);
+  // const dataUrl = (await staticView(shape, options)).toDataURL('png');
   return dataUrl;
 };
 

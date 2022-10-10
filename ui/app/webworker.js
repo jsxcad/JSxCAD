@@ -1,9 +1,10 @@
-/* global FileReaderSync, postMessage, self */
+/* global postMessage, self */
 
 import * as sys from '@jsxcad/sys';
 
 import baseApi, { evaluate as evaluateScript } from '@jsxcad/api';
 
+import { dataUrl } from '@jsxcad/ui-threejs';
 import hashSum from 'hash-sum';
 
 // Compatibility with threejs.
@@ -32,16 +33,7 @@ sys.setPendingErrorHandler(reportError);
 
 const agent = async ({ ask, message, type, tell }) => {
   const { op } = message;
-  const {
-    config,
-    offscreenCanvas,
-    id,
-    path,
-    workspace,
-    script,
-    sha = 'master',
-    view,
-  } = message;
+  const { config, id, path, workspace, script, sha = 'master', view } = message;
 
   if (workspace) {
     sys.setupFilesystem({ fileBase: workspace });
@@ -56,6 +48,8 @@ const agent = async ({ ask, message, type, tell }) => {
       case 'app/staticView':
         for (;;) {
           const geometry = await sys.readOrWatch(path, { workspace });
+          return await dataUrl(baseApi.Shape.fromGeometry(geometry), view);
+          /*
           const { staticView } = await import('@jsxcad/ui-threejs');
           await staticView(baseApi.Shape.fromGeometry(geometry), {
             ...view,
@@ -66,6 +60,7 @@ const agent = async ({ ask, message, type, tell }) => {
           });
           const dataURL = new FileReaderSync().readAsDataURL(blob);
           return dataURL;
+*/
         }
       case 'app/evaluate':
         sys.clearEmitted();

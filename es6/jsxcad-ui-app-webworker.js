@@ -1,5 +1,6 @@
 import * as sys from './jsxcad-sys.js';
 import baseApi, { evaluate } from './jsxcad-api.js';
+import { dataUrl } from './jsxcad-ui-threejs.js';
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -69,7 +70,7 @@ function sum (o) {
 
 var hashSum = sum;
 
-/* global FileReaderSync, postMessage, self */
+/* global postMessage, self */
 
 self.window = {};
 
@@ -108,7 +109,6 @@ const agent = async ({
   } = message;
   const {
     config,
-    offscreenCanvas,
     id,
     path,
     workspace,
@@ -135,17 +135,19 @@ const agent = async ({
           const geometry = await sys.readOrWatch(path, {
             workspace
           });
-          const {
-            staticView
-          } = await import('./jsxcad-ui-threejs.js');
-          await staticView(baseApi.Shape.fromGeometry(geometry), { ...view,
-            canvas: offscreenCanvas
+          return await dataUrl(baseApi.Shape.fromGeometry(geometry), view);
+          /*
+          const { staticView } = await import('./jsxcad-ui-threejs.js');
+          await staticView(baseApi.Shape.fromGeometry(geometry), {
+            ...view,
+            canvas: offscreenCanvas,
           });
           const blob = await offscreenCanvas.convertToBlob({
-            type: 'image/png'
+            type: 'image/png',
           });
           const dataURL = new FileReaderSync().readAsDataURL(blob);
           return dataURL;
+          */
         }
 
       case 'app/evaluate':

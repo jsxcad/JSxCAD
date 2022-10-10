@@ -1,4 +1,4 @@
-import { readOrWatch, read, logInfo, write, unwatchFile, watchFile, boot, log, remove, ask, askService, setConfig, clearCacheDb, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, read, write, unwatchFile, watchFile, boot, log, remove, ask, askService, setConfig, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { orbitDisplay, raycast } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
@@ -1784,7 +1784,7 @@ function (_ref, ref) {
 Col.displayName = 'Col';
 
 var _excluded$f = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
-var defaultProps$9 = {
+var defaultProps$b = {
   column: false,
   srOnly: false
 };
@@ -1824,7 +1824,7 @@ var FormLabel = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
   );
 });
 FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$9;
+FormLabel.defaultProps = defaultProps$b;
 var FormLabel$1 = FormLabel;
 
 var _excluded$e = ["bsPrefix", "className", "as", "muted"];
@@ -1898,7 +1898,7 @@ function createWithBsPrefix(prefix, _temp) {
 
 var _excluded$c = ["bsPrefix", "inline", "className", "validated", "as"];
 var FormRow = createWithBsPrefix('form-row');
-var defaultProps$8 = {
+var defaultProps$a = {
   inline: false
 };
 var FormImpl = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
@@ -1917,7 +1917,7 @@ var FormImpl = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
   }));
 });
 FormImpl.displayName = 'Form';
-FormImpl.defaultProps = defaultProps$8;
+FormImpl.defaultProps = defaultProps$a;
 FormImpl.Row = FormRow;
 FormImpl.Group = FormGroup$1;
 FormImpl.Control = FormControl$1;
@@ -2119,7 +2119,7 @@ SafeAnchor.displayName = 'SafeAnchor';
 var SafeAnchor$1 = SafeAnchor;
 
 var _excluded$9 = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
-var defaultProps$7 = {
+var defaultProps$9 = {
   variant: 'primary',
   active: false,
   disabled: false
@@ -2162,10 +2162,10 @@ var Button = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
   }));
 });
 Button.displayName = 'Button';
-Button.defaultProps = defaultProps$7;
+Button.defaultProps = defaultProps$9;
 
 var _excluded$8 = ["bsPrefix", "size", "toggle", "vertical", "className", "as"];
-var defaultProps$6 = {
+var defaultProps$8 = {
   vertical: false,
   toggle: false,
   role: 'group'
@@ -2189,7 +2189,7 @@ var ButtonGroup = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
   }));
 });
 ButtonGroup.displayName = 'ButtonGroup';
-ButtonGroup.defaultProps = defaultProps$6;
+ButtonGroup.defaultProps = defaultProps$8;
 
 /*
  * base64-arraybuffer 1.0.2 <https://github.com/niklasvh/base64-arraybuffer>
@@ -5155,98 +5155,33 @@ class MdNote extends ReactDOM$3.PureComponent {
 
 }
 
-var cssUnit = {
-    cm: true,
-    mm: true,
-    in: true,
-    px: true,
-    pt: true,
-    pc: true,
-    em: true,
-    ex: true,
-    ch: true,
-    rem: true,
-    vw: true,
-    vh: true,
-    vmin: true,
-    vmax: true,
-    "%": true,
-};
-/**
- * If size is a number, append px to the value as default unit.
- * If size is a string, validate against list of valid units.
- * If unit is valid, return size as is.
- * If unit is invalid, console warn issue, replace with px as the unit.
- *
- * @param {(number | string)} size
- * @return {LengthObject} LengthObject
- */
-function parseLengthAndUnit(size) {
-    if (typeof size === "number") {
-        return {
-            value: size,
-            unit: "px",
-        };
-    }
-    var value;
-    var valueString = (size.match(/^[0-9.]*/) || "").toString();
-    if (valueString.includes(".")) {
-        value = parseFloat(valueString);
-    }
-    else {
-        value = parseInt(valueString, 10);
-    }
-    var unit = (size.match(/[^0-9]*$/) || "").toString();
-    if (cssUnit[unit]) {
-        return {
-            value: value,
-            unit: unit,
-        };
-    }
-    console.warn("React Spinners: ".concat(size, " is not a valid css value. Defaulting to ").concat(value, "px."));
-    return {
-        value: value,
-        unit: "px",
-    };
-}
-/**
- * Take value as an input and return valid css value
- *
- * @param {(number | string)} value
- * @return {string} valid css value
- */
-function cssValue(value) {
-    var lengthWithunit = parseLengthAndUnit(value);
-    return "".concat(lengthWithunit.value).concat(lengthWithunit.unit);
-}
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
 
-var createAnimation = function (loaderName, frames, suffix) {
-    var animationName = "react-spinners-".concat(loaderName, "-").concat(suffix);
-    if (typeof window == "undefined" || !window.document) {
-        return animationName;
-    }
-    var styleEl = document.createElement("style");
-    document.head.appendChild(styleEl);
-    var styleSheet = styleEl.sheet;
-    var keyFrames = "\n    @keyframes ".concat(animationName, " {\n      ").concat(frames, "\n    }\n  ");
-    if (styleSheet) {
-        styleSheet.insertRule(keyFrames, 0);
-    }
-    return animationName;
-};
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
 
-var __assign$3 = (undefined && undefined.__assign) || function () {
-    __assign$3 = Object.assign || function(t) {
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+var __assign$3 = function() {
+    __assign$3 = Object.assign || function __assign(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
             s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
         }
         return t;
     };
     return __assign$3.apply(this, arguments);
 };
-var __rest = (undefined && undefined.__rest) || function (s, e) {
+
+function __rest(s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
         t[p] = s[p];
@@ -5256,34 +5191,84 @@ var __rest = (undefined && undefined.__rest) || function (s, e) {
                 t[p[i]] = s[p[i]];
         }
     return t;
-};
-var moon = createAnimation("MoonLoader", "100% {transform: rotate(360deg)}", "moon");
-function MoonLoader(_a) {
-    var _b = _a.loading, loading = _b === void 0 ? true : _b, _c = _a.color, color = _c === void 0 ? "#000000" : _c, _d = _a.speedMultiplier, speedMultiplier = _d === void 0 ? 1 : _d, _e = _a.cssOverride, cssOverride = _e === void 0 ? {} : _e, _f = _a.size, size = _f === void 0 ? 60 : _f, additionalprops = __rest(_a, ["loading", "color", "speedMultiplier", "cssOverride", "size"]);
-    var _g = parseLengthAndUnit(size), value = _g.value, unit = _g.unit;
-    var moonSize = value / 7;
-    var wrapper = __assign$3({ display: "inherit", position: "relative", width: "".concat("".concat(value + moonSize * 2).concat(unit)), height: "".concat("".concat(value + moonSize * 2).concat(unit)), animation: "".concat(moon, " ").concat(0.6 / speedMultiplier, "s 0s infinite linear"), animationFillMode: "forwards" }, cssOverride);
-    var ballStyle = function (size) {
-        return {
-            width: cssValue(size),
-            height: cssValue(size),
-            borderRadius: "100%",
-        };
-    };
-    var ball = __assign$3(__assign$3({}, ballStyle(moonSize)), { backgroundColor: "".concat(color), opacity: "0.8", position: "absolute", top: "".concat("".concat(value / 2 - moonSize / 2).concat(unit)), animation: "".concat(moon, " ").concat(0.6 / speedMultiplier, "s 0s infinite linear"), animationFillMode: "forwards" });
-    var circle = __assign$3(__assign$3({}, ballStyle(value)), { border: "".concat(moonSize, "px solid ").concat(color), opacity: "0.1", boxSizing: "content-box", position: "absolute" });
-    if (!loading) {
-        return null;
-    }
-    return (v$1("span", __assign$3({ style: wrapper }, additionalprops),
-        v$1("span", { style: ball }),
-        v$1("span", { style: circle })));
 }
+
+var defaultProps$7 = {
+    color: '#38ad48',
+    enabled: true,
+    size: 50,
+    style: {},
+};
+var normalizeSize = function (size) { return (parseFloat(size.toString()).toString() === size.toString()
+    ? size + "px"
+    : size.toString()); };
+var withSharedProps = function (Component) {
+    var Wrapper = function (props) {
+        var color = props.color, enabled = props.enabled, size = props.size, style = props.style, otherProps = __rest(props, ["color", "enabled", "size", "style"]);
+        var componentProps = __assign$3(__assign$3({}, otherProps), { style: __assign$3({ color: color, overflow: 'visible', width: normalizeSize(size) }, style) });
+        if (!enabled)
+            return null;
+        return ReactDOM$3.createElement(Component, __assign$3({}, componentProps));
+    };
+    Wrapper.defaultProps = defaultProps$7;
+    return Wrapper;
+};
+
+var defaultProps$6 = {
+    speed: 100,
+    still: false,
+    thickness: 100,
+};
+var secondaryColorDefaultProps = __assign$3(__assign$3({}, defaultProps$6), { secondaryColor: 'rgba(0,0,0,0.44)' });
+
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css_248z = "@keyframes spinners-react-circular-split{0%{stroke-dashoffset:1;stroke-dasharray:5,170}10%{stroke-dashoffset:13;stroke-dasharray:30,145}13%{stroke-dashoffset:-11;stroke-dasharray:5,145}50%{stroke-dasharray:5,0,5,165;stroke-dashoffset:-82}51%{stroke-dasharray:2,0,2,139;stroke-dashoffset:-85}61%{stroke-dasharray:15,0,15,165;stroke-dashoffset:-72}64%{stroke-dasharray:5,20,5,145;stroke-dashoffset:-72}}";
+styleInject(css_248z);
+
+var Component = function (_a) {
+    var secondaryColor = _a.secondaryColor, speed = _a.speed, still = _a.still, thickness = _a.thickness, svgProps = __rest(_a, ["secondaryColor", "speed", "still", "thickness"]);
+    var strokeWidth = 4 * (thickness / 100);
+    var circleStyle = !still
+        ? { animation: "spinners-react-circular-split " + 140 / speed + "s linear infinite" }
+        : {};
+    return (ReactDOM$3.createElement("svg", __assign$3({ fill: "none" }, svgProps, { viewBox: "0 0 66 66" }),
+        ReactDOM$3.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: secondaryColor, strokeWidth: strokeWidth }),
+        ReactDOM$3.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: "currentColor", strokeDasharray: "5, 170", strokeDashoffset: "1", strokeLinecap: "round", strokeWidth: strokeWidth, style: circleStyle, transform: "rotate(-90 33 33)" })));
+};
+Component.defaultProps = secondaryColorDefaultProps;
+var SpinnerCircularSplit = withSharedProps(Component);
 
 class ViewNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$1.exports.object,
+      notebookPath: propTypes$1.exports.string,
       onClickView: propTypes$1.exports.func,
       selected: propTypes$1.exports.boolean,
       workspace: propTypes$1.exports.string
@@ -5294,6 +5279,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
 
   render() {
     const {
+      notebookPath,
       note,
       onClickView,
       selected,
@@ -5312,6 +5298,8 @@ class ViewNote extends ReactDOM$3.PureComponent {
       if (onClickView) {
         onClickView({
           event,
+          notebookPath,
+          note,
           path: note.path,
           view: note.view,
           workspace,
@@ -5321,9 +5309,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
     };
 
     if (!note.url) {
-      return v$1(MoonLoader, {
-        width: width,
-        height: height,
+      return v$1(SpinnerCircularSplit, {
         color: "#36d7b7",
         size: Math.min(width, height) * 0.8
       });
@@ -5358,7 +5344,6 @@ const updateNotebookState = async (application, {
   workspace
 }) => {
   const {
-    id,
     path
   } = sourceLocation;
 
@@ -5419,71 +5404,63 @@ const updateNotebookState = async (application, {
 
     if (note.view) {
       if (!note.url) {
-        const cachedUrl = await read(`thumbnail/${note.hash}`, {
-          workspace
-        });
-
-        if (cachedUrl) {
-          updateNote({
-            hash: note.hash,
-            url: cachedUrl
-          });
-          continue;
-        }
-
-        if (note.path && !note.data) {
-          note.data = await read(note.path, {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(`thumbnail/${note.hash}`, {
             workspace
           });
-        }
 
-        const {
-          path,
-          view
-        } = note;
-        const {
-          width,
-          height
-        } = view;
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const offscreenCanvas = canvas.transferControlToOffscreen();
-
-        const render = async () => {
-          try {
-            logInfo('app/App', `Ask render for ${path}/${id}`);
-            const url = await application.ask({
-              op: 'app/staticView',
+          if (!url) {
+            const {
               path,
-              workspace,
-              view,
-              offscreenCanvas
-            }, {
-              path
-            }, [offscreenCanvas]);
-            console.log(`Finished render for ${path}/${id}`); // Cache the thumbnail for next time.
+              view
+            } = note;
+            const {
+              width,
+              height
+            } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
 
-            await write(`thumbnail/${note.hash}`, url, {
-              workspace
-            });
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                url = await application.ask({
+                  op: 'app/staticView',
+                  path,
+                  workspace,
+                  view,
+                  offscreenCanvas
+                }, {
+                  path
+                }, [offscreenCanvas]); // Cache the thumbnail for next time.
+
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace
+                });
+                updateNote({
+                  hash: note.hash,
+                  url
+                });
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
+            }
+          }
+
+          if (url) {
             updateNote({
               hash: note.hash,
               url
             });
-          } catch (error) {
-            if (error.message === 'Terminated') {
-              // Try again.
-              return render();
-            } else {
-              window.alert(error.stack);
-            }
           }
-        }; // Render the image asynchronously -- it won't affect layout.
+        }; // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
 
 
-        console.log(`Schedule render for ${path}/${id}`);
-        render();
+        setTimeout(loadThumbnail, 200);
       }
     }
   }
@@ -5491,9 +5468,11 @@ const updateNotebookState = async (application, {
 class Notebook extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      notes: propTypes$1.exports.array,
+      notes: propTypes$1.exports.object,
       onClickView: propTypes$1.exports.func,
       selectedLine: propTypes$1.exports.number,
+      notebookPath: propTypes$1.exports.string,
+      state: propTypes$1.exports.string,
       workspace: propTypes$1.exports.string
     };
   }
@@ -5501,9 +5480,11 @@ class Notebook extends ReactDOM$3.PureComponent {
   render() {
     try {
       const {
+        notebookPath,
         notes,
         onClickView,
         selectedLine,
+        state = 'idle',
         workspace
       } = this.props;
       const children = [];
@@ -5598,21 +5579,22 @@ class Notebook extends ReactDOM$3.PureComponent {
       }
 
       console.log(`render Notebook`);
-
-      if (children.length === 0) {
-        return v$1(MoonLoader, {
-          color: "#36d7b7",
-          size: "128px"
-        });
-      }
-
       y(() => mermaid.init(undefined, '.mermaid'));
       return v$1("div", {
-        classList: "notes",
+        id: notebookPath,
+        classList: "notebook notes",
         style: {
           overflow: 'auto'
         }
-      }, children);
+      }, children, state === 'running' && v$1(SpinnerCircularSplit, {
+        color: "#36d7b7",
+        size: 64,
+        style: {
+          position: 'fixed',
+          right: 32,
+          top: 32
+        }
+      }));
     } catch (e) {
       console.log(e.stack);
       throw e;
@@ -42731,136 +42713,6 @@ class JsEditorUi extends ReactDOM$3.PureComponent {
 
 }
 
-class JsViewerUi extends ReactDOM$3.PureComponent {
-  static get propTypes() {
-    return {
-      path: propTypes$1.exports.string,
-      data: propTypes$1.exports.string,
-      advice: propTypes$1.exports.object,
-      onChange: propTypes$1.exports.func,
-      onClose: propTypes$1.exports.func
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  async componentDidMount() {
-    const {
-      advice
-    } = this.props;
-
-    if (!advice) {
-      return;
-    }
-
-    const {
-      notebookDefinitions
-    } = advice;
-    let updating = false;
-
-    const update = async () => {
-      try {
-        if (updating) {
-          return;
-        }
-
-        const container = this.view;
-
-        if (!container) {
-          return;
-        }
-
-        updating = true;
-        await animationFrame();
-
-        if (advice && advice.definitions) {
-          const orderedNotes = [];
-
-          for (const definition of Object.keys(notebookDefinitions)) {
-            const {
-              domElements,
-              notes
-            } = notebookDefinitions[definition];
-            const {
-              initSourceLocation
-            } = advice.definitions.get(definition);
-            const line = initSourceLocation.start.line;
-            orderedNotes.push({
-              domElements,
-              notes,
-              line
-            });
-          }
-
-          orderedNotes.sort((a, b) => a.line - b.line);
-
-          while (container.firstChild) {
-            container.removeChild(container.firstChild);
-          }
-
-          for (const {
-            domElements
-          } of orderedNotes) {
-            for (const domElement of domElements) {
-              domElement.style.visibility = '';
-              domElement.style.position = '';
-              container.appendChild(domElement);
-            }
-          }
-
-          mermaid.init(undefined, '.mermaid');
-        }
-      } finally {
-        updating = false;
-      }
-    };
-
-    const finished = () => {};
-
-    advice.onUpdate = update;
-    advice.onFinished = finished;
-    update();
-  }
-
-  async update() {}
-
-  async componentWillUnmount() {
-    const {
-      onClose,
-      advice = {}
-    } = this.props;
-    const {
-      notebookNotes
-    } = advice;
-
-    if (notebookNotes) {
-      notebookNotes.onUpdate = undefined;
-      notebookNotes.onFinished = undefined;
-    }
-
-    if (onClose) {
-      await onClose();
-    }
-  }
-
-  render() {
-    return v$1(Col, {
-      style: {
-        height: '100%',
-        width: '100%'
-      },
-      onKeyDown: this.onKeyDown,
-      ref: ref => {
-        this.view = ref;
-      }
-    });
-  }
-
-}
-
 function defaultKey(key) {
   return 'default' + key.charAt(0).toUpperCase() + key.substr(1);
 }
@@ -44119,8 +43971,10 @@ class App extends ReactDOM$3.Component {
         op,
         entry,
         identifier,
+        notes,
         options,
-        path
+        path,
+        sourceLocation
       } = message;
 
       switch (op) {
@@ -44134,7 +43988,11 @@ class App extends ReactDOM$3.Component {
           return log(entry);
 
         case 'notes':
-          return updateNotebookState(this, message);
+          return updateNotebookState(this, {
+            notes,
+            sourceLocation,
+            workspace
+          });
 
         /*
           {
@@ -44156,13 +44014,14 @@ class App extends ReactDOM$3.Component {
               updateNote(note);
               if (note.view) {
                 if (!note.url) {
-                  const cachedUrl = await read(`thumbnail/${note.hash}`, {
+                  const cachedUrl = await (note.needsThumbnail ? read : readOrWatch)(`thumbnail/${note.hash}`, {
                     workspace,
                   });
                   if (cachedUrl) {
                     console.log(`QQ/cachedUrl: ${note.hash} ${cachedUrl}`);
                     updateNote({ hash: note.hash, url: cachedUrl });
                   } else if (note.view && !note.url) {
+                    console.log('QQ/renderingUrl -- SHOULD NOT HAPPEN -- !!!');
                     const { path, view } = note;
                     const { width, height } = view;
                     const canvas = document.createElement('canvas');
@@ -44575,7 +44434,7 @@ class App extends ReactDOM$3.Component {
 
       try {
         await this.updateState({
-          NotebookState: 'running'
+          [`NotebookState/${NotebookPath}`]: 'running'
         }); // Terminate any services running for this path, since we're going to restart evaluating it.
 
         await terminateActiveServices(context => context.path === path); // CHECK: Can we get rid of this?
@@ -44586,15 +44445,18 @@ class App extends ReactDOM$3.Component {
         if (!NotebookPath.endsWith('.js') && !NotebookPath.endsWith('.nb')) {
           // We don't know how to run anything else.
           return;
-        } // FIX: This is a bit awkward.
+        }
+        /*
+        // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
         // renders the notebook.
-
-
-        const notebookControlData = await getNotebookControlData();
+        const notebookControlData = await getNotebookControlData(NotebookPath);
         await write(`control/${NotebookPath}`, notebookControlData, {
-          workspace
+          workspace,
         });
+        */
+
+
         let script = this.Clipboard.getCode() + NotebookText;
 
         const evaluate = async script => {
@@ -44659,7 +44521,7 @@ class App extends ReactDOM$3.Component {
         window.alert(error.stack);
       } finally {
         await this.updateState({
-          NotebookState: 'idle'
+          [`NotebookState/${NotebookPath}`]: 'idle'
         });
         logInfo('app/App', `Completed notebook run ${path}`);
         logProfile();
@@ -45262,6 +45124,21 @@ class App extends ReactDOM$3.Component {
 
     this.Workspace = {};
 
+    this.Workspace.getSelectedPaths = path => {
+      const selectedPaths = [];
+
+      for (const input of document.querySelectorAll('input:checked')) {
+        if (!input.id.startsWith('WorkspaceSelect/')) {
+          continue;
+        }
+
+        const file = input.id.substring('WorkspaceSelect/'.length);
+        selectedPaths.push(file);
+      }
+
+      return selectedPaths;
+    };
+
     this.Workspace.loadWorkingPath = async path => {
       const {
         model,
@@ -45415,8 +45292,12 @@ class App extends ReactDOM$3.Component {
         }
       };
 
+      const selectedPaths = this.Workspace.getSelectedPaths();
+
+      const isSelectedPath = path => selectedPaths.length === 0 || selectedPaths.includes(path);
+
       for (const path of WorkspaceFiles) {
-        if (path.startsWith(sourcePrefix)) {
+        if (path.startsWith(sourcePrefix) && isSelectedPath(path)) {
           const file = await getFile(directory, path.substring(sourcePrefix.length).split('/'));
           const writable = await file.createWritable();
           const data = await read(path, {
@@ -45454,15 +45335,7 @@ class App extends ReactDOM$3.Component {
                 WorkspaceLoadPrefix: e.target.value
               }),
               value: WorkspaceLoadPrefix
-            })))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Export Paths to Folder"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
-              onClick: () => {
-                const {
-                  WorkspaceLoadPrefix
-                } = this.state;
-                this.Workspace.export(WorkspaceLoadPrefix);
-              },
-              disabled: !WorkspaceLoadPrefix
-            }, "Export"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Working Paths"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => v$1(ListGroup.Item, {
+            })))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Select Paths"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => v$1(ListGroup.Item, {
               key: index
             }, v$1(ButtonGroup, {
               variant: computeListItemVariant(file),
@@ -45470,7 +45343,7 @@ class App extends ReactDOM$3.Component {
             }, v$1(InputGroup.Checkbox, {
               key: index,
               type: "checkbox",
-              id: `WorkspaceRevert/${file}`
+              id: `WorkspaceSelect/${file}`
             }), v$1(Button, {
               variant: computeListItemVariant(file),
               key: index,
@@ -45485,18 +45358,21 @@ class App extends ReactDOM$3.Component {
                   this.Workspace.openWorkingFile(file);
                 }
               }
-            }, file.substring(prefix.length)))))))), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
+            }, file.substring(prefix.length)))))))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Export Selected Paths to Folder"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
+              onClick: () => {
+                const {
+                  WorkspaceLoadPrefix
+                } = this.state;
+                this.Workspace.export(WorkspaceLoadPrefix);
+              },
+              disabled: !WorkspaceLoadPrefix
+            }, "Export"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Revert Selected Paths"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
               onClick: async event => {
-                for (const input of document.querySelectorAll('input:checked')) {
-                  if (!input.id.startsWith('WorkspaceRevert/')) {
-                    continue;
-                  }
-
-                  const file = input.id.substring('WorkspaceRevert/'.length);
-                  this.Workspace.revertWorkingFile(file);
+                for (const path of this.Workspace.getSelectedPaths()) {
+                  this.Workspace.revertWorkingFile(path);
                 }
               }
-            }, "Revert Selected Paths"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Import"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
+            }, "Revert"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Import"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
               controlId: "WorkspaceLoadPathId"
             }, v$1(FormImpl.Control, {
               placeholder: "Path (extending Base Path)",
@@ -45545,6 +45421,7 @@ class App extends ReactDOM$3.Component {
             const path = node.getId().substring('Notebook/'.length);
             const {
               [`NotebookMode/${path}`]: NotebookMode = 'view',
+              [`NotebookState/${path}`]: NotebookState = 'idle',
               [`NotebookText/${path}`]: NotebookText,
               [`NotebookNotes/${path}`]: NotebookNotes = [],
               [`NotebookLine/${path}`]: NotebookLine
@@ -45554,10 +45431,12 @@ class App extends ReactDOM$3.Component {
             switch (NotebookMode) {
               case 'edit':
                 return v$1(SplitPane, null, v$1(Notebook, {
+                  notebookPath: path,
                   notes: NotebookNotes,
                   onClickView: this.Notebook.clickView,
                   selectedLine: NotebookLine,
-                  workspace: workspace
+                  workspace: workspace,
+                  state: NotebookState
                 }), v$1(JsEditorUi, {
                   mode: NotebookMode,
                   onRun: () => this.Notebook.run(path),
@@ -45570,26 +45449,16 @@ class App extends ReactDOM$3.Component {
                   advice: NotebookAdvice
                 }));
 
-              case 'old-view':
-                return v$1(JsViewerUi, {
-                  mode: NotebookMode,
-                  onRun: () => this.Notebook.run(path),
-                  onSave: () => this.Notebook.save(path),
-                  onChange: data => this.Notebook.change(path, data),
-                  onClickLink: path => this.Notebook.clickLink(path),
-                  path: path,
-                  data: NotebookText,
-                  advice: NotebookAdvice
-                });
-
               default:
               case 'view':
                 {
                   return v$1(Notebook, {
+                    notebookPath: path,
                     notes: NotebookNotes,
                     onClickView: this.Notebook.clickView,
                     selectedLine: NotebookLine,
-                    workspace: workspace
+                    workspace: workspace,
+                    state: NotebookState
                   });
                 }
             }
@@ -45857,6 +45726,17 @@ class App extends ReactDOM$3.Component {
         return true;
     }
 
+    const saveControlValues = async (path, then) => {
+      const {
+        workspace
+      } = this.props;
+      const notebookControlData = await getNotebookControlData(path);
+      await write(`control/${path}`, notebookControlData, {
+        workspace
+      });
+      then(path);
+    };
+
     const {
       ctrlKey,
       shiftKey
@@ -45868,7 +45748,8 @@ class App extends ReactDOM$3.Component {
           if (shiftKey) {
             e.preventDefault();
             e.stopPropagation();
-            this.Notebook.run(this.Notebook.getSelectedPath());
+            const path = this.Notebook.getSelectedPath();
+            saveControlValues(path, this.Notebook.run);
             return false;
           }
 
@@ -45880,7 +45761,8 @@ class App extends ReactDOM$3.Component {
           if (ctrlKey) {
             e.preventDefault();
             e.stopPropagation();
-            this.Notebook.save(this.Notebook.getSelectedPath());
+            const path = this.Notebook.getSelectedPath();
+            saveControlValues(path, this.Notebook.save);
             return false;
           }
 
@@ -45892,7 +45774,8 @@ class App extends ReactDOM$3.Component {
           if (ctrlKey) {
             e.preventDefault();
             e.stopPropagation();
-            this.Notebook.cycleMode(this.Notebook.getSelectedPath());
+            const path = this.Notebook.getSelectedPath();
+            saveControlValues(path, this.Notebook.cycleMode);
             return false;
           }
 

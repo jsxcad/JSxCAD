@@ -1,3 +1,7 @@
+/* global FileReader */
+
+import FileReaderForNode from 'filereader-ponyfill';
+import { isNode } from '@jsxcad/sys';
 import { orbitDisplay } from './orbitDisplay.js';
 import { staticDisplay } from './staticDisplay.js';
 
@@ -31,8 +35,22 @@ export const staticView = async (
   return rendererCanvas;
 };
 
+const getFileReader = () =>
+  isNode ? new FileReaderForNode.FileReaderAsync() : new FileReader();
+
 export const dataUrl = async (shape, options) => {
-  const dataUrl = (await staticView(shape, options)).toDataURL('png');
+  const canvas = await staticView(shape, options);
+  const blob = await canvas.convertToBlob();
+  const dataUrl = await new Promise((resolve, reject) => {
+    const fileReader = getFileReader();
+    fileReader.addEventListener('load', () => resolve(fileReader.result));
+    fileReader.addEventListener('error', () =>
+      reject(new Error('readAsDataURL failed'))
+    );
+    fileReader.readAsDataURL(blob);
+  });
+  // const dataUrl = getFileReaderSync().readAsDataURL(blob);
+  // const dataUrl = (await staticView(shape, options)).toDataURL('png');
   return dataUrl;
 };
 

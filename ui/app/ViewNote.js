@@ -2,13 +2,14 @@ import * as PropTypes from 'prop-types';
 
 import React, { createRef } from 'react';
 
-import { MoonLoader } from 'react-spinners';
+import { SpinnerCircularSplit } from 'spinners-react';
 import { useEffect } from 'preact/hooks';
 
 export class ViewNote extends React.PureComponent {
   static get propTypes() {
     return {
       note: PropTypes.object,
+      notebookPath: PropTypes.string,
       onClickView: PropTypes.func,
       selected: PropTypes.boolean,
       workspace: PropTypes.string,
@@ -18,13 +19,15 @@ export class ViewNote extends React.PureComponent {
   showOrbitView() {}
 
   render() {
-    const { note, onClickView, selected, workspace } = this.props;
+    const { notebookPath, note, onClickView, selected, workspace } = this.props;
     const { view, sourceLocation } = note;
     const { height, width } = view;
     const onClick = (event) => {
       if (onClickView) {
         onClickView({
           event,
+          notebookPath,
+          note,
           path: note.path,
           view: note.view,
           workspace,
@@ -34,9 +37,7 @@ export class ViewNote extends React.PureComponent {
     };
     if (!note.url) {
       return (
-        <MoonLoader
-          width={width}
-          height={height}
+        <SpinnerCircularSplit
           color="#36d7b7"
           size={Math.min(width, height) * 0.8}
         />

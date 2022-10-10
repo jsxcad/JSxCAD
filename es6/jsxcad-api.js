@@ -69,7 +69,7 @@ const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
 const $run = async (op, { path, id, text, sha, line }) => {
-  const meta = await read(`meta/def/${path}/${id}`);
+  const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
@@ -99,8 +99,8 @@ const $run = async (op, { path, id, text, sha, line }) => {
       const type = result.constructor.name;
       switch (type) {
         case 'Shape':
-          await saveGeometry(`data/def/${path}/${id}`, result);
-          await write(`meta/def/${path}/${id}`, { sha, type });
+          await saveGeometry(`data/def/${path}/${id}.data`, result);
+          await write(`meta/def/${path}/${id}.meta`, { sha, type });
           await saveRecordedNotes(path, id);
           return result;
       }
@@ -109,7 +109,7 @@ const $run = async (op, { path, id, text, sha, line }) => {
     return result;
   } else if (meta.type === 'Shape') {
     await replayRecordedNotes(path, id);
-    return loadGeometry(`data/def/${path}/${id}`);
+    return loadGeometry(`data/def/${path}/${id}.data`);
   } else {
     throw Error('Unexpected cached result');
   }
@@ -275,9 +275,6 @@ const execute = async (
             updatePromises.length <= 1 &&
             outstandingDependencies.length === 0
           ) {
-            // if (isWebWorker) {
-            //   throw Error('Updates should not happen in worker');
-            // }
             // For now, only do one thing at a time, and block the remaining updates.
             const task = async () => {
               try {
@@ -353,6 +350,7 @@ const importScript = async (
       topLevel,
       parallelUpdateLimit: 1,
       clearUpdateEmits,
+      workspace,
     });
     CACHED_MODULES.set(name, builtModule);
     return builtModule;
@@ -381,14 +379,15 @@ const buildImportModule =
         emitGroup = saveEmitGroup();
         await release();
       }
-      if (readCache && CACHED_MODULES.has(name)) {
+      const qualifiedName = `${workspace}/${name}`;
+      if (readCache && CACHED_MODULES.has(qualifiedName)) {
         // It's ok for a module to evaluate to undefined so we need to check has explicitly.
-        return CACHED_MODULES.get(name);
+        return CACHED_MODULES.get(qualifiedName);
       }
       const internalModule = DYNAMIC_MODULES.get(name);
       if (internalModule !== undefined) {
         const module = await import(internalModule);
-        CACHED_MODULES.set(name, module);
+        CACHED_MODULES.set(qualifiedName, module);
         return module;
       }
       let script;
@@ -415,6 +414,7 @@ const buildImportModule =
         clearUpdateEmits,
         workspace,
       });
+      CACHED_MODULES.set(qualifiedName, builtModule);
       return builtModule;
     } catch (error) {
       throw error;

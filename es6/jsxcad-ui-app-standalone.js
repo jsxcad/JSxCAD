@@ -1,11 +1,30 @@
-import { readOrWatch, read, logInfo, write, decodeFiles, setupWorkspace, boot, addOnEmitHandler, resolvePending, removeOnEmitHandler } from './jsxcad-sys.js';
+import { readOrWatch, read, write, watchFile, unwatchFile, setupWorkspace, boot, decodeFiles, addOnEmitHandler, resolvePending, removeOnEmitHandler } from './jsxcad-sys.js';
+import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import api from './jsxcad-api.js';
-import { dataUrl } from './jsxcad-ui-threejs.js';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
 
-var n,l$1,u$1,t$1,o$1,r$1,f$1,e$1={},c$1=[],s$1=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function a$1(n,l){for(var u in l)n[u]=l[u];return n}function h$1(n){var l=n.parentNode;l&&l.removeChild(n);}function v$1(l,u,i){var t,o,r,f={};for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return y$1(l,f,t,o,null)}function y$1(n,i,t,o,r){var f={type:n,props:i,key:t,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==r?++u$1:r};return null!=l$1.vnode&&l$1.vnode(f),f}function p$1(){return {current:null}}function d$1(n){return n.children}function _$1(n,l){this.props=n,this.context=l;}function k$2(n,l){if(null==l)return n.__?k$2(n.__,n.__.__k.indexOf(n)+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?k$2(n):null}function b$1(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return b$1(n)}}function m$1(n){(!n.__d&&(n.__d=!0)&&t$1.push(n)&&!g$2.__r++||r$1!==l$1.debounceRendering)&&((r$1=l$1.debounceRendering)||o$1)(g$2);}function g$2(){for(var n;g$2.__r=t$1.length;)n=t$1.sort(function(n,l){return n.__v.__b-l.__v.__b}),t$1=[],n.some(function(n){var l,u,i,t,o,r;n.__d&&(o=(t=(l=n).__v).__e,(r=l.__P)&&(u=[],(i=a$1({},t)).__v=t.__v+1,j$2(r,t,i,l.__n,void 0!==r.ownerSVGElement,null!=t.__h?[o]:null,u,null==o?k$2(t):o,t.__h),z$1(u,t),t.__e!=o&&b$1(t)));});}function w$2(n,l,u,i,t,o,r,f,s,a){var h,v,p,_,b,m,g,w=i&&i.__k||c$1,A=w.length;for(u.__k=[],h=0;h<l.length;h++)if(null!=(_=u.__k[h]=null==(_=l[h])||"boolean"==typeof _?null:"string"==typeof _||"number"==typeof _||"bigint"==typeof _?y$1(null,_,null,null,_):Array.isArray(_)?y$1(d$1,{children:_},null,null,null):_.__b>0?y$1(_.type,_.props,_.key,null,_.__v):_)){if(_.__=u,_.__b=u.__b+1,null===(p=w[h])||p&&_.key==p.key&&_.type===p.type)w[h]=void 0;else for(v=0;v<A;v++){if((p=w[v])&&_.key==p.key&&_.type===p.type){w[v]=void 0;break}p=null;}j$2(n,_,p=p||e$1,t,o,r,f,s,a),b=_.__e,(v=_.ref)&&p.ref!=v&&(g||(g=[]),p.ref&&g.push(p.ref,null,_),g.push(v,_.__c||b,_)),null!=b?(null==m&&(m=b),"function"==typeof _.type&&null!=_.__k&&_.__k===p.__k?_.__d=s=x$2(_,s,n):s=P$1(n,_,p,w,b,s),a||"option"!==u.type?"function"==typeof u.type&&(u.__d=s):n.value=""):s&&p.__e==s&&s.parentNode!=n&&(s=k$2(p));}for(u.__e=m,h=A;h--;)null!=w[h]&&("function"==typeof u.type&&null!=w[h].__e&&w[h].__e==u.__d&&(u.__d=k$2(i,h+1)),N$1(w[h],w[h]));if(g)for(h=0;h<g.length;h++)M$1(g[h],g[++h],g[++h]);}function x$2(n,l,u){var i,t;for(i=0;i<n.__k.length;i++)(t=n.__k[i])&&(t.__=n,l="function"==typeof t.type?x$2(t,l,u):P$1(u,t,t,n.__k,t.__e,l));return l}function A$2(n,l){return l=l||[],null==n||"boolean"==typeof n||(Array.isArray(n)?n.some(function(n){A$2(n,l);}):l.push(n)),l}function P$1(n,l,u,i,t,o){var r,f,e;if(void 0!==l.__d)r=l.__d,l.__d=void 0;else if(null==u||t!=o||null==t.parentNode)n:if(null==o||o.parentNode!==n)n.appendChild(t),r=null;else {for(f=o,e=0;(f=f.nextSibling)&&e<i.length;e+=2)if(f==t)break n;n.insertBefore(t,o),r=o;}return void 0!==r?r:t.nextSibling}function C$1(n,l,u,i,t){var o;for(o in u)"children"===o||"key"===o||o in l||H$1(n,o,null,u[o],i);for(o in l)t&&"function"!=typeof l[o]||"children"===o||"key"===o||"value"===o||"checked"===o||u[o]===l[o]||H$1(n,o,l[o],u[o],i);}function $$1(n,l,u){"-"===l[0]?n.setProperty(l,u):n[l]=null==u?"":"number"!=typeof u||s$1.test(l)?u:u+"px";}function H$1(n,l,u,i,t){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof i&&(n.style.cssText=i=""),i)for(l in i)u&&l in u||$$1(n.style,l,"");if(u)for(l in u)i&&u[l]===i[l]||$$1(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/Capture$/,"")),l=l.toLowerCase()in n?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?i||n.addEventListener(l,o?T$2:I$1,o):n.removeEventListener(l,o?T$2:I$1,o);else if("dangerouslySetInnerHTML"!==l){if(t)l=l.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==l&&"list"!==l&&"form"!==l&&"tabIndex"!==l&&"download"!==l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null!=u&&(!1!==u||"a"===l[0]&&"r"===l[1])?n.setAttribute(l,u):n.removeAttribute(l));}}function I$1(n){this.l[n.type+!1](l$1.event?l$1.event(n):n);}function T$2(n){this.l[n.type+!0](l$1.event?l$1.event(n):n);}function j$2(n,u,i,t,o,r,f,e,c){var s,h,v,y,p,k,b,m,g,x,A,P=u.type;if(void 0!==u.constructor)return null;null!=i.__h&&(c=i.__h,e=u.__e=i.__e,u.__h=null,r=[e]),(s=l$1.__b)&&s(u);try{n:if("function"==typeof P){if(m=u.props,g=(s=P.contextType)&&t[s.__c],x=s?g?g.props.value:s.__:t,i.__c?b=(h=u.__c=i.__c).__=h.__E:("prototype"in P&&P.prototype.render?u.__c=h=new P(m,x):(u.__c=h=new _$1(m,x),h.constructor=P,h.render=O$1),g&&g.sub(h),h.props=m,h.state||(h.state={}),h.context=x,h.__n=t,v=h.__d=!0,h.__h=[]),null==h.__s&&(h.__s=h.state),null!=P.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=a$1({},h.__s)),a$1(h.__s,P.getDerivedStateFromProps(m,h.__s))),y=h.props,p=h.state,v)null==P.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(null==P.getDerivedStateFromProps&&m!==y&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,x),!h.__e&&null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,x)||u.__v===i.__v){h.props=m,h.state=h.__s,u.__v!==i.__v&&(h.__d=!1),h.__v=u,u.__e=i.__e,u.__k=i.__k,u.__k.forEach(function(n){n&&(n.__=u);}),h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,x),null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(y,p,k);});}h.context=x,h.props=m,h.state=h.__s,(s=l$1.__r)&&s(u),h.__d=!1,h.__v=u,h.__P=n,s=h.render(h.props,h.state,h.context),h.state=h.__s,null!=h.getChildContext&&(t=a$1(a$1({},t),h.getChildContext())),v||null==h.getSnapshotBeforeUpdate||(k=h.getSnapshotBeforeUpdate(y,p)),A=null!=s&&s.type===d$1&&null==s.key?s.props.children:s,w$2(n,Array.isArray(A)?A:[A],u,i,t,o,r,f,e,c),h.base=u.__e,u.__h=null,h.__h.length&&f.push(h),b&&(h.__E=h.__=null),h.__e=!1;}else null==r&&u.__v===i.__v?(u.__k=i.__k,u.__e=i.__e):u.__e=L$1(i.__e,u,i,t,o,r,f,c);(s=l$1.diffed)&&s(u);}catch(n){u.__v=null,(c||null!=r)&&(u.__e=e,u.__h=!!c,r[r.indexOf(e)]=null),l$1.__e(n,u,i);}}function z$1(n,u){l$1.__c&&l$1.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$1.__e(n,u.__v);}});}function L$1(l,u,i,t,o,r,f,c){var s,a,v,y=i.props,p=u.props,d=u.type,_=0;if("svg"===d&&(o=!0),null!=r)for(;_<r.length;_++)if((s=r[_])&&(s===l||(d?s.localName==d:3==s.nodeType))){l=s,r[_]=null;break}if(null==l){if(null===d)return document.createTextNode(p);l=o?document.createElementNS("http://www.w3.org/2000/svg",d):document.createElement(d,p.is&&p),r=null,c=!1;}if(null===d)y===p||c&&l.data===p||(l.data=p);else {if(r=r&&n.call(l.childNodes),a=(y=i.props||e$1).dangerouslySetInnerHTML,v=p.dangerouslySetInnerHTML,!c){if(null!=r)for(y={},_=0;_<l.attributes.length;_++)y[l.attributes[_].name]=l.attributes[_].value;(v||a)&&(v&&(a&&v.__html==a.__html||v.__html===l.innerHTML)||(l.innerHTML=v&&v.__html||""));}if(C$1(l,p,y,o,c),v)u.__k=[];else if(_=u.props.children,w$2(l,Array.isArray(_)?_:[_],u,i,t,o&&"foreignObject"!==d,r,f,r?r[0]:i.__k&&k$2(i,0),c),null!=r)for(_=r.length;_--;)null!=r[_]&&h$1(r[_]);c||("value"in p&&void 0!==(_=p.value)&&(_!==l.value||"progress"===d&&!_)&&H$1(l,"value",_,y.value,!1),"checked"in p&&void 0!==(_=p.checked)&&_!==l.checked&&H$1(l,"checked",_,y.checked,!1));}return l}function M$1(n,u,i){try{"function"==typeof n?n(u):n.current=u;}catch(n){l$1.__e(n,i);}}function N$1(n,u,i){var t,o;if(l$1.unmount&&l$1.unmount(n),(t=n.ref)&&(t.current&&t.current!==n.__e||M$1(t,null,u)),null!=(t=n.__c)){if(t.componentWillUnmount)try{t.componentWillUnmount();}catch(n){l$1.__e(n,u);}t.base=t.__P=null;}if(t=n.__k)for(o=0;o<t.length;o++)t[o]&&N$1(t[o],u,"function"!=typeof n.type);i||null==n.__e||h$1(n.__e),n.__e=n.__d=void 0;}function O$1(n,l,u){return this.constructor(n,u)}function S$1(u,i,t){var o,r,f;l$1.__&&l$1.__(u,i),r=(o="function"==typeof t)?null:t&&t.__k||i.__k,f=[],j$2(i,u=(!o&&t||i).__k=v$1(d$1,null,[u]),r||e$1,e$1,void 0!==i.ownerSVGElement,!o&&t?[t]:r?null:i.firstChild?n.call(i.childNodes):null,f,!o&&t?t:r?r.__e:i.firstChild,o),z$1(f,u);}function q$1(n,l){S$1(n,l,q$1);}function B$1(l,u,i){var t,o,r,f=a$1({},l.props);for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];return arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),y$1(l.type,f,t||l.key,o||l.ref,null)}function D$1(n,l){var u={__c:l="__cC"+f$1++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,i;return this.getChildContext||(u=[],(i={})[l]=this,this.getChildContext=function(){return i},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.some(m$1);},this.sub=function(n){u.push(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u.splice(u.indexOf(n),1),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=c$1.slice,l$1={__e:function(n,l){for(var u,i,t;l=l.__;)if((u=l.__c)&&!u.__)try{if((i=u.constructor)&&null!=i.getDerivedStateFromError&&(u.setState(i.getDerivedStateFromError(n)),t=u.__d),null!=u.componentDidCatch&&(u.componentDidCatch(n),t=u.__d),t)return u.__E=u}catch(l){n=l;}throw n}},u$1=0,_$1.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=a$1({},this.state),"function"==typeof n&&(n=n(a$1({},u),this.props)),n&&a$1(u,n),null!=n&&this.__v&&(l&&this.__h.push(l),m$1(this));},_$1.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),m$1(this));},_$1.prototype.render=d$1,t$1=[],o$1="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,g$2.__r=0,f$1=0;
+var n,l$1,u$1,t$1,o$1,r$1,f$1,e$1={},c$1=[],s$1=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function a$1(n,l){for(var u in l)n[u]=l[u];return n}function h$1(n){var l=n.parentNode;l&&l.removeChild(n);}function v$1(l,u,i){var t,o,r,f={};for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return y$1(l,f,t,o,null)}function y$1(n,i,t,o,r){var f={type:n,props:i,key:t,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==r?++u$1:r};return null!=l$1.vnode&&l$1.vnode(f),f}function p$1(){return {current:null}}function d$1(n){return n.children}function _$1(n,l){this.props=n,this.context=l;}function k$2(n,l){if(null==l)return n.__?k$2(n.__,n.__.__k.indexOf(n)+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?k$2(n):null}function b$1(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return b$1(n)}}function m$1(n){(!n.__d&&(n.__d=!0)&&t$1.push(n)&&!g$2.__r++||r$1!==l$1.debounceRendering)&&((r$1=l$1.debounceRendering)||o$1)(g$2);}function g$2(){for(var n;g$2.__r=t$1.length;)n=t$1.sort(function(n,l){return n.__v.__b-l.__v.__b}),t$1=[],n.some(function(n){var l,u,i,t,o,r;n.__d&&(o=(t=(l=n).__v).__e,(r=l.__P)&&(u=[],(i=a$1({},t)).__v=t.__v+1,j$2(r,t,i,l.__n,void 0!==r.ownerSVGElement,null!=t.__h?[o]:null,u,null==o?k$2(t):o,t.__h),z$1(u,t),t.__e!=o&&b$1(t)));});}function w$2(n,l,u,i,t,o,r,f,s,a){var h,v,p,_,b,m,g,w=i&&i.__k||c$1,A=w.length;for(u.__k=[],h=0;h<l.length;h++)if(null!=(_=u.__k[h]=null==(_=l[h])||"boolean"==typeof _?null:"string"==typeof _||"number"==typeof _||"bigint"==typeof _?y$1(null,_,null,null,_):Array.isArray(_)?y$1(d$1,{children:_},null,null,null):_.__b>0?y$1(_.type,_.props,_.key,null,_.__v):_)){if(_.__=u,_.__b=u.__b+1,null===(p=w[h])||p&&_.key==p.key&&_.type===p.type)w[h]=void 0;else for(v=0;v<A;v++){if((p=w[v])&&_.key==p.key&&_.type===p.type){w[v]=void 0;break}p=null;}j$2(n,_,p=p||e$1,t,o,r,f,s,a),b=_.__e,(v=_.ref)&&p.ref!=v&&(g||(g=[]),p.ref&&g.push(p.ref,null,_),g.push(v,_.__c||b,_)),null!=b?(null==m&&(m=b),"function"==typeof _.type&&null!=_.__k&&_.__k===p.__k?_.__d=s=x$2(_,s,n):s=P$1(n,_,p,w,b,s),a||"option"!==u.type?"function"==typeof u.type&&(u.__d=s):n.value=""):s&&p.__e==s&&s.parentNode!=n&&(s=k$2(p));}for(u.__e=m,h=A;h--;)null!=w[h]&&("function"==typeof u.type&&null!=w[h].__e&&w[h].__e==u.__d&&(u.__d=k$2(i,h+1)),N$1(w[h],w[h]));if(g)for(h=0;h<g.length;h++)M$1(g[h],g[++h],g[++h]);}function x$2(n,l,u){var i,t;for(i=0;i<n.__k.length;i++)(t=n.__k[i])&&(t.__=n,l="function"==typeof t.type?x$2(t,l,u):P$1(u,t,t,n.__k,t.__e,l));return l}function A$2(n,l){return l=l||[],null==n||"boolean"==typeof n||(Array.isArray(n)?n.some(function(n){A$2(n,l);}):l.push(n)),l}function P$1(n,l,u,i,t,o){var r,f,e;if(void 0!==l.__d)r=l.__d,l.__d=void 0;else if(null==u||t!=o||null==t.parentNode)n:if(null==o||o.parentNode!==n)n.appendChild(t),r=null;else {for(f=o,e=0;(f=f.nextSibling)&&e<i.length;e+=2)if(f==t)break n;n.insertBefore(t,o),r=o;}return void 0!==r?r:t.nextSibling}function C$1(n,l,u,i,t){var o;for(o in u)"children"===o||"key"===o||o in l||H$1(n,o,null,u[o],i);for(o in l)t&&"function"!=typeof l[o]||"children"===o||"key"===o||"value"===o||"checked"===o||u[o]===l[o]||H$1(n,o,l[o],u[o],i);}function $$1(n,l,u){"-"===l[0]?n.setProperty(l,u):n[l]=null==u?"":"number"!=typeof u||s$1.test(l)?u:u+"px";}function H$1(n,l,u,i,t){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof i&&(n.style.cssText=i=""),i)for(l in i)u&&l in u||$$1(n.style,l,"");if(u)for(l in u)i&&u[l]===i[l]||$$1(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/Capture$/,"")),l=l.toLowerCase()in n?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?i||n.addEventListener(l,o?T$2:I$1,o):n.removeEventListener(l,o?T$2:I$1,o);else if("dangerouslySetInnerHTML"!==l){if(t)l=l.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==l&&"list"!==l&&"form"!==l&&"tabIndex"!==l&&"download"!==l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null!=u&&(!1!==u||"a"===l[0]&&"r"===l[1])?n.setAttribute(l,u):n.removeAttribute(l));}}function I$1(n){this.l[n.type+!1](l$1.event?l$1.event(n):n);}function T$2(n){this.l[n.type+!0](l$1.event?l$1.event(n):n);}function j$2(n,u,i,t,o,r,f,e,c){var s,h,v,y,p,k,b,m,g,x,A,P=u.type;if(void 0!==u.constructor)return null;null!=i.__h&&(c=i.__h,e=u.__e=i.__e,u.__h=null,r=[e]),(s=l$1.__b)&&s(u);try{n:if("function"==typeof P){if(m=u.props,g=(s=P.contextType)&&t[s.__c],x=s?g?g.props.value:s.__:t,i.__c?b=(h=u.__c=i.__c).__=h.__E:("prototype"in P&&P.prototype.render?u.__c=h=new P(m,x):(u.__c=h=new _$1(m,x),h.constructor=P,h.render=O$1),g&&g.sub(h),h.props=m,h.state||(h.state={}),h.context=x,h.__n=t,v=h.__d=!0,h.__h=[]),null==h.__s&&(h.__s=h.state),null!=P.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=a$1({},h.__s)),a$1(h.__s,P.getDerivedStateFromProps(m,h.__s))),y=h.props,p=h.state,v)null==P.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(null==P.getDerivedStateFromProps&&m!==y&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,x),!h.__e&&null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,x)||u.__v===i.__v){h.props=m,h.state=h.__s,u.__v!==i.__v&&(h.__d=!1),h.__v=u,u.__e=i.__e,u.__k=i.__k,u.__k.forEach(function(n){n&&(n.__=u);}),h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,x),null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(y,p,k);});}h.context=x,h.props=m,h.state=h.__s,(s=l$1.__r)&&s(u),h.__d=!1,h.__v=u,h.__P=n,s=h.render(h.props,h.state,h.context),h.state=h.__s,null!=h.getChildContext&&(t=a$1(a$1({},t),h.getChildContext())),v||null==h.getSnapshotBeforeUpdate||(k=h.getSnapshotBeforeUpdate(y,p)),A=null!=s&&s.type===d$1&&null==s.key?s.props.children:s,w$2(n,Array.isArray(A)?A:[A],u,i,t,o,r,f,e,c),h.base=u.__e,u.__h=null,h.__h.length&&f.push(h),b&&(h.__E=h.__=null),h.__e=!1;}else null==r&&u.__v===i.__v?(u.__k=i.__k,u.__e=i.__e):u.__e=L$1(i.__e,u,i,t,o,r,f,c);(s=l$1.diffed)&&s(u);}catch(n){u.__v=null,(c||null!=r)&&(u.__e=e,u.__h=!!c,r[r.indexOf(e)]=null),l$1.__e(n,u,i);}}function z$1(n,u){l$1.__c&&l$1.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$1.__e(n,u.__v);}});}function L$1(l,u,i,t,o,r,f,c){var s,a,v,y=i.props,p=u.props,d=u.type,_=0;if("svg"===d&&(o=!0),null!=r)for(;_<r.length;_++)if((s=r[_])&&(s===l||(d?s.localName==d:3==s.nodeType))){l=s,r[_]=null;break}if(null==l){if(null===d)return document.createTextNode(p);l=o?document.createElementNS("http://www.w3.org/2000/svg",d):document.createElement(d,p.is&&p),r=null,c=!1;}if(null===d)y===p||c&&l.data===p||(l.data=p);else {if(r=r&&n.call(l.childNodes),a=(y=i.props||e$1).dangerouslySetInnerHTML,v=p.dangerouslySetInnerHTML,!c){if(null!=r)for(y={},_=0;_<l.attributes.length;_++)y[l.attributes[_].name]=l.attributes[_].value;(v||a)&&(v&&(a&&v.__html==a.__html||v.__html===l.innerHTML)||(l.innerHTML=v&&v.__html||""));}if(C$1(l,p,y,o,c),v)u.__k=[];else if(_=u.props.children,w$2(l,Array.isArray(_)?_:[_],u,i,t,o&&"foreignObject"!==d,r,f,r?r[0]:i.__k&&k$2(i,0),c),null!=r)for(_=r.length;_--;)null!=r[_]&&h$1(r[_]);c||("value"in p&&void 0!==(_=p.value)&&(_!==l.value||"progress"===d&&!_)&&H$1(l,"value",_,y.value,!1),"checked"in p&&void 0!==(_=p.checked)&&_!==l.checked&&H$1(l,"checked",_,y.checked,!1));}return l}function M$1(n,u,i){try{"function"==typeof n?n(u):n.current=u;}catch(n){l$1.__e(n,i);}}function N$1(n,u,i){var t,o;if(l$1.unmount&&l$1.unmount(n),(t=n.ref)&&(t.current&&t.current!==n.__e||M$1(t,null,u)),null!=(t=n.__c)){if(t.componentWillUnmount)try{t.componentWillUnmount();}catch(n){l$1.__e(n,u);}t.base=t.__P=null;}if(t=n.__k)for(o=0;o<t.length;o++)t[o]&&N$1(t[o],u,"function"!=typeof n.type);i||null==n.__e||h$1(n.__e),n.__e=n.__d=void 0;}function O$1(n,l,u){return this.constructor(n,u)}function S$1(u,i,t){var o,r,f;l$1.__&&l$1.__(u,i),r=(o="function"==typeof t)?null:t&&t.__k||i.__k,f=[],j$2(i,u=(!o&&t||i).__k=v$1(d$1,null,[u]),r||e$1,e$1,void 0!==i.ownerSVGElement,!o&&t?[t]:r?null:i.firstChild?n.call(i.childNodes):null,f,!o&&t?t:r?r.__e:i.firstChild,o),z$1(f,u);}function q$2(n,l){S$1(n,l,q$2);}function B$1(l,u,i){var t,o,r,f=a$1({},l.props);for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];return arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),y$1(l.type,f,t||l.key,o||l.ref,null)}function D$1(n,l){var u={__c:l="__cC"+f$1++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,i;return this.getChildContext||(u=[],(i={})[l]=this,this.getChildContext=function(){return i},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.some(m$1);},this.sub=function(n){u.push(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u.splice(u.indexOf(n),1),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=c$1.slice,l$1={__e:function(n,l){for(var u,i,t;l=l.__;)if((u=l.__c)&&!u.__)try{if((i=u.constructor)&&null!=i.getDerivedStateFromError&&(u.setState(i.getDerivedStateFromError(n)),t=u.__d),null!=u.componentDidCatch&&(u.componentDidCatch(n),t=u.__d),t)return u.__E=u}catch(l){n=l;}throw n}},u$1=0,_$1.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=a$1({},this.state),"function"==typeof n&&(n=n(a$1({},u),this.props)),n&&a$1(u,n),null!=n&&this.__v&&(l&&this.__h.push(l),m$1(this));},_$1.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),m$1(this));},_$1.prototype.render=d$1,t$1=[],o$1="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,g$2.__r=0,f$1=0;
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function getAugmentedNamespace(n) {
+	if (n.__esModule) return n;
+	var a = Object.defineProperty({}, '__esModule', {value: true});
+	Object.keys(n).forEach(function (k) {
+		var d = Object.getOwnPropertyDescriptor(n, k);
+		Object.defineProperty(a, k, d.get ? d : {
+			enumerable: true,
+			get: function () {
+				return n[k];
+			}
+		});
+	});
+	return a;
+}
 
 var propTypes$1 = {exports: {}};
 
@@ -1027,9 +1046,50 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
 
 var PropTypes = propTypes$1.exports;
 
-var t,u,r,o=0,i$1=[],c=l$1.__b,f=l$1.__r,e=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o||r),o=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o=5,d(function(){return {current:n}},[])}function _(n,t,u){o=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function x$1(){i$1.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$1=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f&&f(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e&&e(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$1.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
+var t,u,r,o=0,i$1=[],c=l$1.__b,f=l$1.__r,e=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o||r),o=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o=5,d(function(){return {current:n}},[])}function _(n,t,u){o=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function q$1(n){var r=m(t++,10),o=l();return r.__=n,u.componentDidCatch||(u.componentDidCatch=function(n){r.__&&r.__(n),o[1](n);}),[o[0],function(){o[1](void 0);}]}function x$1(){i$1.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$1=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f&&f(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e&&e(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$1.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
 
-function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$1(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}};function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)};var ReactDOM = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
+function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}},X="17.0.2";function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)},fn=d$1;var ReactDOM$1 = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
+
+var compat_module = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	'default': ReactDOM$1,
+	version: X,
+	Children: k,
+	render: z,
+	hydrate: B,
+	unmountComponentAtNode: rn,
+	createPortal: W,
+	createFactory: nn,
+	cloneElement: en,
+	isValidElement: tn,
+	findDOMNode: un,
+	PureComponent: E,
+	memo: g,
+	forwardRef: x,
+	flushSync: ln,
+	unstable_batchedUpdates: on,
+	StrictMode: fn,
+	Suspense: L,
+	SuspenseList: M,
+	lazy: F,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: Q,
+	createElement: v$1,
+	createContext: D$1,
+	createRef: p$1,
+	Fragment: d$1,
+	Component: _$1,
+	useState: l,
+	useReducer: p,
+	useEffect: y,
+	useLayoutEffect: h,
+	useRef: s,
+	useImperativeHandle: _,
+	useMemo: d,
+	useCallback: A$1,
+	useContext: F$1,
+	useDebugValue: T$1,
+	useErrorBoundary: q$1
+});
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -1230,7 +1290,7 @@ var propTypes = {
   tooltip: PropTypes.bool,
   as: PropTypes.elementType
 };
-var Feedback = /*#__PURE__*/ReactDOM.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+var Feedback = /*#__PURE__*/ReactDOM$1.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
   var _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
@@ -1241,7 +1301,7 @@ function (_ref, ref) {
       tooltip = _ref$tooltip === void 0 ? false : _ref$tooltip,
       props = _objectWithoutPropertiesLoose(_ref, _excluded$h);
 
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classNames(className, type + "-" + (tooltip ? 'tooltip' : 'feedback'))
   }));
@@ -1250,12 +1310,12 @@ Feedback.displayName = 'Feedback';
 Feedback.propTypes = propTypes;
 var Feedback$1 = Feedback;
 
-var FormContext = /*#__PURE__*/ReactDOM.createContext({
+var FormContext = /*#__PURE__*/ReactDOM$1.createContext({
   controlId: undefined
 });
 var FormContext$1 = FormContext;
 
-var ThemeContext = /*#__PURE__*/ReactDOM.createContext({});
+var ThemeContext = /*#__PURE__*/ReactDOM$1.createContext({});
 ThemeContext.Consumer;
     ThemeContext.Provider;
 
@@ -1265,7 +1325,7 @@ function useBootstrapPrefix(prefix, defaultPrefix) {
 }
 
 var _excluded$g = ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"];
-var FormCheckInput = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormCheckInput = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
@@ -1290,7 +1350,7 @@ var FormCheckInput = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       defaultPrefix = _ref2[1];
 
   bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     type: type,
     id: id || controlId,
@@ -1301,7 +1361,7 @@ FormCheckInput.displayName = 'FormCheckInput';
 var FormCheckInput$1 = FormCheckInput;
 
 var _excluded$f = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
-var FormCheckLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormCheckLabel = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
@@ -1317,7 +1377,7 @@ var FormCheckLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       defaultPrefix = _ref2[1];
 
   bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM.createElement("label", _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement("label", _extends({}, props, {
     ref: ref,
     htmlFor: htmlFor || controlId,
     className: classNames(className, bsPrefix)
@@ -1327,7 +1387,7 @@ FormCheckLabel.displayName = 'FormCheckLabel';
 var FormCheckLabel$1 = FormCheckLabel;
 
 var _excluded$e = ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"];
-var FormCheck = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormCheck = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
@@ -1373,7 +1433,7 @@ var FormCheck = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
     };
   }, [controlId, custom, id]);
   var hasLabel = custom || label != null && label !== false && !children;
-  var input = /*#__PURE__*/ReactDOM.createElement(FormCheckInput$1, _extends({}, props, {
+  var input = /*#__PURE__*/ReactDOM$1.createElement(FormCheckInput$1, _extends({}, props, {
     type: type === 'switch' ? 'checkbox' : type,
     ref: ref,
     isValid: isValid,
@@ -1382,14 +1442,14 @@ var FormCheck = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
     disabled: disabled,
     as: as
   }));
-  return /*#__PURE__*/ReactDOM.createElement(FormContext$1.Provider, {
+  return /*#__PURE__*/ReactDOM$1.createElement(FormContext$1.Provider, {
     value: innerFormContext
-  }, /*#__PURE__*/ReactDOM.createElement("div", {
+  }, /*#__PURE__*/ReactDOM$1.createElement("div", {
     style: style,
     className: classNames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
-  }, children || /*#__PURE__*/ReactDOM.createElement(ReactDOM.Fragment, null, input, hasLabel && /*#__PURE__*/ReactDOM.createElement(FormCheckLabel$1, {
+  }, children || /*#__PURE__*/ReactDOM$1.createElement(ReactDOM$1.Fragment, null, input, hasLabel && /*#__PURE__*/ReactDOM$1.createElement(FormCheckLabel$1, {
     title: title
-  }, label), (isValid || isInvalid) && /*#__PURE__*/ReactDOM.createElement(Feedback$1, {
+  }, label), (isValid || isInvalid) && /*#__PURE__*/ReactDOM$1.createElement(Feedback$1, {
     type: isValid ? 'valid' : 'invalid',
     tooltip: feedbackTooltip
   }, feedback))));
@@ -1400,7 +1460,7 @@ FormCheck.Label = FormCheckLabel$1;
 var FormCheck$1 = FormCheck;
 
 var _excluded$d = ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"];
-var FormFileInput = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormFileInput = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
@@ -1423,7 +1483,7 @@ var FormFileInput = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       defaultPrefix = _ref2[1];
 
   bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     id: id || controlId,
     type: type,
@@ -1435,7 +1495,7 @@ FormFileInput.displayName = 'FormFileInput';
 var FormFileInput$1 = FormFileInput;
 
 var _excluded$c = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
-var FormFileLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormFileLabel = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       className = _ref.className,
@@ -1451,7 +1511,7 @@ var FormFileLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       defaultPrefix = _ref2[1];
 
   bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM.createElement("label", _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement("label", _extends({}, props, {
     ref: ref,
     htmlFor: htmlFor || controlId,
     className: classNames(className, bsPrefix),
@@ -1462,7 +1522,7 @@ FormFileLabel.displayName = 'FormFileLabel';
 var FormFileLabel$1 = FormFileLabel;
 
 var _excluded$b = ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"];
-var FormFile = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormFile = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var id = _ref.id,
       bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
@@ -1505,7 +1565,7 @@ var FormFile = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
     };
   }, [controlId, custom, id]);
   var hasLabel = label != null && label !== false && !children;
-  var input = /*#__PURE__*/ReactDOM.createElement(FormFileInput$1, _extends({}, props, {
+  var input = /*#__PURE__*/ReactDOM$1.createElement(FormFileInput$1, _extends({}, props, {
     ref: ref,
     isValid: isValid,
     isInvalid: isInvalid,
@@ -1513,14 +1573,14 @@ var FormFile = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
     as: inputAs,
     lang: lang
   }));
-  return /*#__PURE__*/ReactDOM.createElement(FormContext$1.Provider, {
+  return /*#__PURE__*/ReactDOM$1.createElement(FormContext$1.Provider, {
     value: innerFormContext
-  }, /*#__PURE__*/ReactDOM.createElement(Component, {
+  }, /*#__PURE__*/ReactDOM$1.createElement(Component, {
     style: style,
     className: classNames(className, bsPrefix, custom && "custom-" + type)
-  }, children || /*#__PURE__*/ReactDOM.createElement(ReactDOM.Fragment, null, custom ? /*#__PURE__*/ReactDOM.createElement(ReactDOM.Fragment, null, input, hasLabel && /*#__PURE__*/ReactDOM.createElement(FormFileLabel$1, {
+  }, children || /*#__PURE__*/ReactDOM$1.createElement(ReactDOM$1.Fragment, null, custom ? /*#__PURE__*/ReactDOM$1.createElement(ReactDOM$1.Fragment, null, input, hasLabel && /*#__PURE__*/ReactDOM$1.createElement(FormFileLabel$1, {
     "data-browse": dataBrowse
-  }, label)) : /*#__PURE__*/ReactDOM.createElement(ReactDOM.Fragment, null, hasLabel && /*#__PURE__*/ReactDOM.createElement(FormFileLabel$1, null, label), input), (isValid || isInvalid) && /*#__PURE__*/ReactDOM.createElement(Feedback$1, {
+  }, label)) : /*#__PURE__*/ReactDOM$1.createElement(ReactDOM$1.Fragment, null, hasLabel && /*#__PURE__*/ReactDOM$1.createElement(FormFileLabel$1, null, label), input), (isValid || isInvalid) && /*#__PURE__*/ReactDOM$1.createElement(Feedback$1, {
     type: isValid ? 'valid' : 'invalid',
     tooltip: feedbackTooltip
   }, feedback))));
@@ -1583,7 +1643,7 @@ var warning = function() {};
 var warning_1 = warning;
 
 var _excluded$a = ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"];
-var FormControl = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormControl = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       bsCustomPrefix = _ref.bsCustomPrefix,
       type = _ref.type,
@@ -1635,7 +1695,7 @@ var FormControl = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   }
 
   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     type: type,
     size: htmlSize,
     ref: ref,
@@ -1650,7 +1710,7 @@ var FormControl$1 = Object.assign(FormControl, {
 });
 
 var _excluded$9 = ["bsPrefix", "className", "children", "controlId", "as"];
-var FormGroup = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormGroup = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
       children = _ref.children,
@@ -1665,9 +1725,9 @@ var FormGroup = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       controlId: controlId
     };
   }, [controlId]);
-  return /*#__PURE__*/ReactDOM.createElement(FormContext$1.Provider, {
+  return /*#__PURE__*/ReactDOM$1.createElement(FormContext$1.Provider, {
     value: context
-  }, /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  }, /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classNames(className, bsPrefix)
   }), children));
@@ -1677,7 +1737,7 @@ var FormGroup$1 = FormGroup;
 
 var _excluded$8 = ["bsPrefix", "className", "as"];
 var DEVICE_SIZES = ['xl', 'lg', 'md', 'sm', 'xs'];
-var Col = /*#__PURE__*/ReactDOM.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+var Col = /*#__PURE__*/ReactDOM$1.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
@@ -1714,7 +1774,7 @@ function (_ref, ref) {
     spans.push(prefix); // plain 'col'
   }
 
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classNames.apply(void 0, [className].concat(spans, classes))
   }));
@@ -1723,11 +1783,11 @@ Col.displayName = 'Col';
 var Col$1 = Col;
 
 var _excluded$7 = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
-var defaultProps$3 = {
+var defaultProps$5 = {
   column: false,
   srOnly: false
 };
-var FormLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormLabel = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'label' : _ref$as,
       bsPrefix = _ref.bsPrefix,
@@ -1746,7 +1806,7 @@ var FormLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   var classes = classNames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
   htmlFor = htmlFor || controlId;
-  if (column) return /*#__PURE__*/ReactDOM.createElement(Col$1, _extends({
+  if (column) return /*#__PURE__*/ReactDOM$1.createElement(Col$1, _extends({
     ref: ref,
     as: "label",
     className: classes,
@@ -1755,7 +1815,7 @@ var FormLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   return (
     /*#__PURE__*/
     // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    ReactDOM.createElement(Component, _extends({
+    ReactDOM$1.createElement(Component, _extends({
       ref: ref,
       className: classes,
       htmlFor: htmlFor
@@ -1763,11 +1823,11 @@ var FormLabel = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   );
 });
 FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$3;
+FormLabel.defaultProps = defaultProps$5;
 var FormLabel$1 = FormLabel;
 
 var _excluded$6 = ["bsPrefix", "className", "as", "muted"];
-var FormText = /*#__PURE__*/ReactDOM.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+var FormText = /*#__PURE__*/ReactDOM$1.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       className = _ref.className,
@@ -1777,7 +1837,7 @@ function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, _excluded$6);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classNames(className, bsPrefix, muted && 'text-muted')
   }));
@@ -1785,8 +1845,8 @@ function (_ref, ref) {
 FormText.displayName = 'FormText';
 var FormText$1 = FormText;
 
-var Switch = /*#__PURE__*/ReactDOM.forwardRef(function (props, ref) {
-  return /*#__PURE__*/ReactDOM.createElement(FormCheck$1, _extends({}, props, {
+var Switch = /*#__PURE__*/ReactDOM$1.forwardRef(function (props, ref) {
+  return /*#__PURE__*/ReactDOM$1.createElement(FormCheck$1, _extends({}, props, {
     ref: ref,
     type: "switch"
   }));
@@ -1817,7 +1877,7 @@ function createWithBsPrefix(prefix, _temp) {
       Component = _ref.Component,
       defaultProps = _ref.defaultProps;
 
-  var BsComponent = /*#__PURE__*/ReactDOM.forwardRef(function (_ref2, ref) {
+  var BsComponent = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref2, ref) {
     var className = _ref2.className,
         bsPrefix = _ref2.bsPrefix,
         _ref2$as = _ref2.as,
@@ -1825,7 +1885,7 @@ function createWithBsPrefix(prefix, _temp) {
         props = _objectWithoutPropertiesLoose(_ref2, _excluded$5);
 
     var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
-    return /*#__PURE__*/ReactDOM.createElement(Tag, _extends({
+    return /*#__PURE__*/ReactDOM$1.createElement(Tag, _extends({
       ref: ref,
       className: classNames(className, resolvedPrefix)
     }, props));
@@ -1837,10 +1897,10 @@ function createWithBsPrefix(prefix, _temp) {
 
 var _excluded$4 = ["bsPrefix", "inline", "className", "validated", "as"];
 var FormRow = createWithBsPrefix('form-row');
-var defaultProps$2 = {
+var defaultProps$4 = {
   inline: false
 };
-var FormImpl = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var FormImpl = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       inline = _ref.inline,
       className = _ref.className,
@@ -1850,13 +1910,13 @@ var FormImpl = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, _excluded$4);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classNames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
   }));
 });
 FormImpl.displayName = 'Form';
-FormImpl.defaultProps = defaultProps$2;
+FormImpl.defaultProps = defaultProps$4;
 FormImpl.Row = FormRow;
 FormImpl.Group = FormGroup$1;
 FormImpl.Control = FormControl$1;
@@ -1874,13 +1934,13 @@ var InputGroupText = createWithBsPrefix('input-group-text', {
 });
 
 var InputGroupCheckbox = function InputGroupCheckbox(props) {
-  return /*#__PURE__*/ReactDOM.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM.createElement("input", _extends({
+  return /*#__PURE__*/ReactDOM$1.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM$1.createElement("input", _extends({
     type: "checkbox"
   }, props)));
 };
 
 var InputGroupRadio = function InputGroupRadio(props) {
-  return /*#__PURE__*/ReactDOM.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM.createElement("input", _extends({
+  return /*#__PURE__*/ReactDOM$1.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM$1.createElement("input", _extends({
     type: "radio"
   }, props)));
 };
@@ -1893,7 +1953,7 @@ var InputGroupRadio = function InputGroupRadio(props) {
  * @property {InputGroupRadio} Radio
  * @property {InputGroupCheckbox} Checkbox
  */
-var InputGroup = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var InputGroup = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       size = _ref.size,
       hasValidation = _ref.hasValidation,
@@ -1903,7 +1963,7 @@ var InputGroup = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, _excluded$3);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({
     ref: ref
   }, props, {
     className: classNames(className, bsPrefix, size && bsPrefix + "-" + size, hasValidation && 'has-validation')
@@ -1916,7 +1976,7 @@ InputGroup.Checkbox = InputGroupCheckbox;
 InputGroup.Append = InputGroupAppend;
 InputGroup.Prepend = InputGroupPrepend;
 
-class ControlNote extends ReactDOM.PureComponent {
+class ControlNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$1.exports.object,
@@ -2003,7 +2063,7 @@ function isTrivialHref(href) {
  */
 
 
-var SafeAnchor = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var SafeAnchor = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'a' : _ref$as,
       disabled = _ref.disabled,
@@ -2047,7 +2107,7 @@ var SafeAnchor = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
     props['aria-disabled'] = true;
   }
 
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({
     ref: ref
   }, props, {
     onClick: handleClick,
@@ -2058,12 +2118,12 @@ SafeAnchor.displayName = 'SafeAnchor';
 var SafeAnchor$1 = SafeAnchor;
 
 var _excluded$1 = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
-var defaultProps$1 = {
+var defaultProps$3 = {
   variant: 'primary',
   active: false,
   disabled: false
 };
-var Button = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var Button = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       variant = _ref.variant,
       size = _ref.size,
@@ -2078,7 +2138,7 @@ var Button = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   var classes = classNames(className, prefix, active && 'active', variant && prefix + "-" + variant, block && prefix + "-block", size && prefix + "-" + size);
 
   if (props.href) {
-    return /*#__PURE__*/ReactDOM.createElement(SafeAnchor$1, _extends({}, props, {
+    return /*#__PURE__*/ReactDOM$1.createElement(SafeAnchor$1, _extends({}, props, {
       as: as,
       ref: ref,
       className: classNames(classes, props.disabled && 'disabled')
@@ -2096,20 +2156,20 @@ var Button = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   }
 
   var Component = as || 'button';
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, props, {
     className: classes
   }));
 });
 Button.displayName = 'Button';
-Button.defaultProps = defaultProps$1;
+Button.defaultProps = defaultProps$3;
 
 var _excluded = ["bsPrefix", "size", "toggle", "vertical", "className", "as"];
-var defaultProps = {
+var defaultProps$2 = {
   vertical: false,
   toggle: false,
   role: 'group'
 };
-var ButtonGroup = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
+var ButtonGroup = /*#__PURE__*/ReactDOM$1.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       size = _ref.size,
       toggle = _ref.toggle,
@@ -2122,13 +2182,13 @@ var ButtonGroup = /*#__PURE__*/ReactDOM.forwardRef(function (_ref, ref) {
   var prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
   var baseClass = prefix;
   if (vertical) baseClass = prefix + "-vertical";
-  return /*#__PURE__*/ReactDOM.createElement(Component, _extends({}, rest, {
+  return /*#__PURE__*/ReactDOM$1.createElement(Component, _extends({}, rest, {
     ref: ref,
     className: classNames(className, baseClass, size && prefix + "-" + size, toggle && prefix + "-toggle")
   }));
 });
 ButtonGroup.displayName = 'ButtonGroup';
-ButtonGroup.defaultProps = defaultProps;
+ButtonGroup.defaultProps = defaultProps$2;
 
 /*
  * base64-arraybuffer 1.0.2 <https://github.com/niklasvh/base64-arraybuffer>
@@ -2191,7 +2251,7 @@ const downloadFile = async ({
   saveAs(blob, filename);
 };
 
-class DownloadNote extends ReactDOM.PureComponent {
+class DownloadNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$1.exports.object,
@@ -5060,7 +5120,7 @@ marked.use({
 
   }
 });
-class MdNote extends ReactDOM.PureComponent {
+class MdNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$1.exports.object,
@@ -5094,98 +5154,33 @@ class MdNote extends ReactDOM.PureComponent {
 
 }
 
-var cssUnit = {
-    cm: true,
-    mm: true,
-    in: true,
-    px: true,
-    pt: true,
-    pc: true,
-    em: true,
-    ex: true,
-    ch: true,
-    rem: true,
-    vw: true,
-    vh: true,
-    vmin: true,
-    vmax: true,
-    "%": true,
-};
-/**
- * If size is a number, append px to the value as default unit.
- * If size is a string, validate against list of valid units.
- * If unit is valid, return size as is.
- * If unit is invalid, console warn issue, replace with px as the unit.
- *
- * @param {(number | string)} size
- * @return {LengthObject} LengthObject
- */
-function parseLengthAndUnit(size) {
-    if (typeof size === "number") {
-        return {
-            value: size,
-            unit: "px",
-        };
-    }
-    var value;
-    var valueString = (size.match(/^[0-9.]*/) || "").toString();
-    if (valueString.includes(".")) {
-        value = parseFloat(valueString);
-    }
-    else {
-        value = parseInt(valueString, 10);
-    }
-    var unit = (size.match(/[^0-9]*$/) || "").toString();
-    if (cssUnit[unit]) {
-        return {
-            value: value,
-            unit: unit,
-        };
-    }
-    console.warn("React Spinners: ".concat(size, " is not a valid css value. Defaulting to ").concat(value, "px."));
-    return {
-        value: value,
-        unit: "px",
-    };
-}
-/**
- * Take value as an input and return valid css value
- *
- * @param {(number | string)} value
- * @return {string} valid css value
- */
-function cssValue(value) {
-    var lengthWithunit = parseLengthAndUnit(value);
-    return "".concat(lengthWithunit.value).concat(lengthWithunit.unit);
-}
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
 
-var createAnimation = function (loaderName, frames, suffix) {
-    var animationName = "react-spinners-".concat(loaderName, "-").concat(suffix);
-    if (typeof window == "undefined" || !window.document) {
-        return animationName;
-    }
-    var styleEl = document.createElement("style");
-    document.head.appendChild(styleEl);
-    var styleSheet = styleEl.sheet;
-    var keyFrames = "\n    @keyframes ".concat(animationName, " {\n      ").concat(frames, "\n    }\n  ");
-    if (styleSheet) {
-        styleSheet.insertRule(keyFrames, 0);
-    }
-    return animationName;
-};
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
 
-var __assign = (undefined && undefined.__assign) || function () {
-    __assign = Object.assign || function(t) {
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
             s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
         }
         return t;
     };
     return __assign.apply(this, arguments);
 };
-var __rest = (undefined && undefined.__rest) || function (s, e) {
+
+function __rest(s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
         t[p] = s[p];
@@ -5195,34 +5190,84 @@ var __rest = (undefined && undefined.__rest) || function (s, e) {
                 t[p[i]] = s[p[i]];
         }
     return t;
-};
-var moon = createAnimation("MoonLoader", "100% {transform: rotate(360deg)}", "moon");
-function MoonLoader(_a) {
-    var _b = _a.loading, loading = _b === void 0 ? true : _b, _c = _a.color, color = _c === void 0 ? "#000000" : _c, _d = _a.speedMultiplier, speedMultiplier = _d === void 0 ? 1 : _d, _e = _a.cssOverride, cssOverride = _e === void 0 ? {} : _e, _f = _a.size, size = _f === void 0 ? 60 : _f, additionalprops = __rest(_a, ["loading", "color", "speedMultiplier", "cssOverride", "size"]);
-    var _g = parseLengthAndUnit(size), value = _g.value, unit = _g.unit;
-    var moonSize = value / 7;
-    var wrapper = __assign({ display: "inherit", position: "relative", width: "".concat("".concat(value + moonSize * 2).concat(unit)), height: "".concat("".concat(value + moonSize * 2).concat(unit)), animation: "".concat(moon, " ").concat(0.6 / speedMultiplier, "s 0s infinite linear"), animationFillMode: "forwards" }, cssOverride);
-    var ballStyle = function (size) {
-        return {
-            width: cssValue(size),
-            height: cssValue(size),
-            borderRadius: "100%",
-        };
-    };
-    var ball = __assign(__assign({}, ballStyle(moonSize)), { backgroundColor: "".concat(color), opacity: "0.8", position: "absolute", top: "".concat("".concat(value / 2 - moonSize / 2).concat(unit)), animation: "".concat(moon, " ").concat(0.6 / speedMultiplier, "s 0s infinite linear"), animationFillMode: "forwards" });
-    var circle = __assign(__assign({}, ballStyle(value)), { border: "".concat(moonSize, "px solid ").concat(color), opacity: "0.1", boxSizing: "content-box", position: "absolute" });
-    if (!loading) {
-        return null;
-    }
-    return (v$1("span", __assign({ style: wrapper }, additionalprops),
-        v$1("span", { style: ball }),
-        v$1("span", { style: circle })));
 }
 
-class ViewNote extends ReactDOM.PureComponent {
+var defaultProps$1 = {
+    color: '#38ad48',
+    enabled: true,
+    size: 50,
+    style: {},
+};
+var normalizeSize = function (size) { return (parseFloat(size.toString()).toString() === size.toString()
+    ? size + "px"
+    : size.toString()); };
+var withSharedProps = function (Component) {
+    var Wrapper = function (props) {
+        var color = props.color, enabled = props.enabled, size = props.size, style = props.style, otherProps = __rest(props, ["color", "enabled", "size", "style"]);
+        var componentProps = __assign(__assign({}, otherProps), { style: __assign({ color: color, overflow: 'visible', width: normalizeSize(size) }, style) });
+        if (!enabled)
+            return null;
+        return ReactDOM$1.createElement(Component, __assign({}, componentProps));
+    };
+    Wrapper.defaultProps = defaultProps$1;
+    return Wrapper;
+};
+
+var defaultProps = {
+    speed: 100,
+    still: false,
+    thickness: 100,
+};
+var secondaryColorDefaultProps = __assign(__assign({}, defaultProps), { secondaryColor: 'rgba(0,0,0,0.44)' });
+
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css_248z = "@keyframes spinners-react-circular-split{0%{stroke-dashoffset:1;stroke-dasharray:5,170}10%{stroke-dashoffset:13;stroke-dasharray:30,145}13%{stroke-dashoffset:-11;stroke-dasharray:5,145}50%{stroke-dasharray:5,0,5,165;stroke-dashoffset:-82}51%{stroke-dasharray:2,0,2,139;stroke-dashoffset:-85}61%{stroke-dasharray:15,0,15,165;stroke-dashoffset:-72}64%{stroke-dasharray:5,20,5,145;stroke-dashoffset:-72}}";
+styleInject(css_248z);
+
+var Component = function (_a) {
+    var secondaryColor = _a.secondaryColor, speed = _a.speed, still = _a.still, thickness = _a.thickness, svgProps = __rest(_a, ["secondaryColor", "speed", "still", "thickness"]);
+    var strokeWidth = 4 * (thickness / 100);
+    var circleStyle = !still
+        ? { animation: "spinners-react-circular-split " + 140 / speed + "s linear infinite" }
+        : {};
+    return (ReactDOM$1.createElement("svg", __assign({ fill: "none" }, svgProps, { viewBox: "0 0 66 66" }),
+        ReactDOM$1.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: secondaryColor, strokeWidth: strokeWidth }),
+        ReactDOM$1.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: "currentColor", strokeDasharray: "5, 170", strokeDashoffset: "1", strokeLinecap: "round", strokeWidth: strokeWidth, style: circleStyle, transform: "rotate(-90 33 33)" })));
+};
+Component.defaultProps = secondaryColorDefaultProps;
+var SpinnerCircularSplit = withSharedProps(Component);
+
+class ViewNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$1.exports.object,
+      notebookPath: propTypes$1.exports.string,
       onClickView: propTypes$1.exports.func,
       selected: propTypes$1.exports.boolean,
       workspace: propTypes$1.exports.string
@@ -5233,6 +5278,7 @@ class ViewNote extends ReactDOM.PureComponent {
 
   render() {
     const {
+      notebookPath,
       note,
       onClickView,
       selected,
@@ -5251,6 +5297,8 @@ class ViewNote extends ReactDOM.PureComponent {
       if (onClickView) {
         onClickView({
           event,
+          notebookPath,
+          note,
           path: note.path,
           view: note.view,
           workspace,
@@ -5260,9 +5308,7 @@ class ViewNote extends ReactDOM.PureComponent {
     };
 
     if (!note.url) {
-      return v$1(MoonLoader, {
-        width: width,
-        height: height,
+      return v$1(SpinnerCircularSplit, {
         color: "#36d7b7",
         size: Math.min(width, height) * 0.8
       });
@@ -5297,7 +5343,6 @@ const updateNotebookState = async (application, {
   workspace
 }) => {
   const {
-    id,
     path
   } = sourceLocation;
 
@@ -5358,81 +5403,75 @@ const updateNotebookState = async (application, {
 
     if (note.view) {
       if (!note.url) {
-        const cachedUrl = await read(`thumbnail/${note.hash}`, {
-          workspace
-        });
-
-        if (cachedUrl) {
-          updateNote({
-            hash: note.hash,
-            url: cachedUrl
-          });
-          continue;
-        }
-
-        if (note.path && !note.data) {
-          note.data = await read(note.path, {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(`thumbnail/${note.hash}`, {
             workspace
           });
-        }
 
-        const {
-          path,
-          view
-        } = note;
-        const {
-          width,
-          height
-        } = view;
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const offscreenCanvas = canvas.transferControlToOffscreen();
-
-        const render = async () => {
-          try {
-            logInfo('app/App', `Ask render for ${path}/${id}`);
-            const url = await application.ask({
-              op: 'app/staticView',
+          if (!url) {
+            const {
               path,
-              workspace,
-              view,
-              offscreenCanvas
-            }, {
-              path
-            }, [offscreenCanvas]);
-            console.log(`Finished render for ${path}/${id}`); // Cache the thumbnail for next time.
+              view
+            } = note;
+            const {
+              width,
+              height
+            } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
 
-            await write(`thumbnail/${note.hash}`, url, {
-              workspace
-            });
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                url = await application.ask({
+                  op: 'app/staticView',
+                  path,
+                  workspace,
+                  view,
+                  offscreenCanvas
+                }, {
+                  path
+                }, [offscreenCanvas]); // Cache the thumbnail for next time.
+
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace
+                });
+                updateNote({
+                  hash: note.hash,
+                  url
+                });
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
+            }
+          }
+
+          if (url) {
             updateNote({
               hash: note.hash,
               url
             });
-          } catch (error) {
-            if (error.message === 'Terminated') {
-              // Try again.
-              return render();
-            } else {
-              window.alert(error.stack);
-            }
           }
-        }; // Render the image asynchronously -- it won't affect layout.
+        }; // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
 
 
-        console.log(`Schedule render for ${path}/${id}`);
-        render();
+        setTimeout(loadThumbnail, 200);
       }
     }
   }
 };
-class Notebook extends ReactDOM.PureComponent {
+class Notebook extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
-      notes: propTypes$1.exports.array,
+      notes: propTypes$1.exports.object,
       onClickView: propTypes$1.exports.func,
       selectedLine: propTypes$1.exports.number,
+      notebookPath: propTypes$1.exports.string,
+      state: propTypes$1.exports.string,
       workspace: propTypes$1.exports.string
     };
   }
@@ -5440,9 +5479,11 @@ class Notebook extends ReactDOM.PureComponent {
   render() {
     try {
       const {
+        notebookPath,
         notes,
         onClickView,
         selectedLine,
+        state = 'idle',
         workspace
       } = this.props;
       const children = [];
@@ -5537,21 +5578,22 @@ class Notebook extends ReactDOM.PureComponent {
       }
 
       console.log(`render Notebook`);
-
-      if (children.length === 0) {
-        return v$1(MoonLoader, {
-          color: "#36d7b7",
-          size: "128px"
-        });
-      }
-
       y(() => mermaid.init(undefined, '.mermaid'));
       return v$1("div", {
-        classList: "notes",
+        id: notebookPath,
+        classList: "notebook notes",
         style: {
           overflow: 'auto'
         }
-      }, children);
+      }, children, state === 'running' && v$1(SpinnerCircularSplit, {
+        color: "#36d7b7",
+        size: 64,
+        style: {
+          position: 'fixed',
+          right: 32,
+          top: 32
+        }
+      }));
     } catch (e) {
       console.log(e.stack);
       throw e;
@@ -5560,7 +5602,381 @@ class Notebook extends ReactDOM.PureComponent {
 
 }
 
-class Standalone extends ReactDOM.Component {
+class DynamicView extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      path: propTypes$1.exports.string,
+      view: propTypes$1.exports.object,
+      workspace: propTypes$1.exports.string
+    };
+  }
+
+  async buildElement(container) {
+    const {
+      path,
+      view,
+      workspace
+    } = this.props;
+
+    if (!path) {
+      return;
+    }
+
+    const geometry = await readOrWatch(path, {
+      workspace
+    });
+    const {
+      updateGeometry
+    } = await orbitDisplay({
+      path,
+      geometry,
+      view
+    }, container);
+
+    this.watcher = async () => {
+      updateGeometry(await read(path, {
+        workspace
+      }));
+    };
+
+    watchFile(path, workspace, this.watcher);
+  }
+
+  componentWillUnmount() {
+    const {
+      workspace
+    } = this.props;
+
+    if (this.watcher) {
+      unwatchFile(this.path, workspace, this.watcher);
+    }
+
+    while (this.container.firstChild !== this.container.lastChild) {
+      this.container.removeChild(this.container.firstChild);
+    }
+  }
+
+  render() {
+    return v$1("div", {
+      classList: "note orbitView",
+      ref: async container => {
+        if (container) {
+          await this.buildElement(container);
+        }
+      }
+    });
+  }
+
+}
+
+var dist = {};
+
+var SplitPane$1 = {};
+
+var require$$0 = /*@__PURE__*/getAugmentedNamespace(compat_module);
+
+var Pane = {};
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pane = void 0;
+const React = require$$0;
+const baseStyle = {
+    position: 'relative',
+    outline: 'none',
+    border: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    flexBasis: 'auto',
+};
+exports.Pane = React.memo(({ size, minSize, split, className, forwardRef, children }) => {
+    const style = Object.assign(Object.assign({}, baseStyle), { flexGrow: size, flexShrink: size });
+    if (split === 'vertical') {
+        style.width = 0;
+        style.height = '100%';
+        style.minWidth = minSize;
+    }
+    else {
+        style.width = '100%';
+        style.height = 0;
+        style.minHeight = minSize;
+    }
+    const classes = ['Pane', split, className].join(' ');
+    return (React.createElement("div", { className: classes, style: style, ref: forwardRef }, children));
+});
+exports.Pane.displayName = 'Pane';
+
+}(Pane));
+
+var Resizer = {};
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Resizer = void 0;
+const React = require$$0;
+const { useCallback } = React;
+exports.Resizer = React.memo(({ split, className, index, onDragStarted }) => {
+    const handleMouseDown = useCallback((event) => {
+        event.preventDefault();
+        onDragStarted(index, event);
+    }, [index, onDragStarted]);
+    const handleTouchStart = useCallback((event) => {
+        event.preventDefault();
+        onDragStarted(index, event.touches[0]);
+    }, [index, onDragStarted]);
+    const classes = ['Resizer', split, className].join(' ');
+    return (React.createElement("span", { role: 'presentation', className: classes, style: { flex: 'none' }, onMouseDown: handleMouseDown, onTouchStart: handleTouchStart }));
+});
+exports.Resizer.displayName = 'Resizer';
+
+}(Resizer));
+
+var util = {};
+
+Object.defineProperty(util, "__esModule", { value: true });
+util.useDragState = util.useEventListener = void 0;
+const React = require$$0;
+const ReactDOM = require$$0;
+const { useCallback, useMemo, useState, useEffect } = React;
+function useEventListener(type, listener) {
+    useEffect(() => {
+        if (!listener)
+            return;
+        document.addEventListener(type, listener);
+        return () => {
+            document.removeEventListener(type, listener);
+        };
+    }, [type, listener]);
+}
+util.useEventListener = useEventListener;
+function useDragStateHandlers(split, onDragFinished) {
+    const [dragging, setDragging] = useState(null);
+    const [current, setCurrent] = useState(0);
+    const beginDrag = useCallback((event, extraState) => {
+        const pos = split === 'vertical' ? event.clientX : event.clientY;
+        setDragging([extraState, pos]);
+        setCurrent(pos);
+    }, [split]);
+    const [dragState, onMouseUp] = useMemo(() => {
+        if (!dragging) {
+            return [null, undefined];
+        }
+        const [extraState, origin] = dragging;
+        const dragState = { offset: current - origin, extraState };
+        const onMouseUp = () => {
+            ReactDOM.unstable_batchedUpdates(() => {
+                setDragging(null);
+                onDragFinished(dragState);
+            });
+        };
+        return [dragState, onMouseUp];
+    }, [current, dragging, onDragFinished]);
+    const [onMouseMove, onTouchMove] = useMemo(() => {
+        if (!dragging) {
+            return [undefined, undefined];
+        }
+        const onMouseMove = (event) => {
+            const pos = split === 'vertical' ? event.clientX : event.clientY;
+            setCurrent(pos);
+        };
+        const onTouchMove = (event) => {
+            onMouseMove(event.touches[0]);
+        };
+        return [onMouseMove, onTouchMove];
+    }, [dragging, split]);
+    return { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp };
+}
+function useDragState(split, onDragFinished) {
+    const { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp } = useDragStateHandlers(split, onDragFinished);
+    useEventListener('mousemove', onMouseMove);
+    useEventListener('touchmove', onTouchMove);
+    useEventListener('mouseup', onMouseUp);
+    return [dragState, beginDrag];
+}
+util.useDragState = useDragState;
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SplitPane = void 0;
+const React = require$$0;
+const { useCallback, useRef, useState, useMemo, useEffect } = React;
+const Pane_1 = Pane;
+const Resizer_1 = Resizer;
+const util_1 = util;
+const DEFAULT_MIN_SIZE = 50;
+function getNodeKey(node, index) {
+    if (typeof node === 'object' && node && node.key != null) {
+        return 'key.' + node.key;
+    }
+    return 'index.' + index;
+}
+function getMinSize(index, minSizes) {
+    if (typeof minSizes === 'number') {
+        if (minSizes > 0) {
+            return minSizes;
+        }
+    }
+    else if (minSizes instanceof Array) {
+        const value = minSizes[index];
+        if (value > 0) {
+            return value;
+        }
+    }
+    return DEFAULT_MIN_SIZE;
+}
+function getDefaultSize(index, defaultSizes) {
+    if (defaultSizes) {
+        const value = defaultSizes[index];
+        if (value >= 0) {
+            return value;
+        }
+    }
+    return 1;
+}
+function move(sizes, index, offset, minSizes) {
+    if (!offset || index < 0 || index + 1 >= sizes.length) {
+        return 0;
+    }
+    const firstMinSize = getMinSize(index, minSizes);
+    const secondMinSize = getMinSize(index + 1, minSizes);
+    const firstSize = sizes[index] + offset;
+    const secondSize = sizes[index + 1] - offset;
+    if (offset < 0 && firstSize < firstMinSize) {
+        // offset is negative, so missing and pushed are, too
+        const missing = firstSize - firstMinSize;
+        const pushed = move(sizes, index - 1, missing, minSizes);
+        offset -= missing - pushed;
+    }
+    else if (offset > 0 && secondSize < secondMinSize) {
+        const missing = secondMinSize - secondSize;
+        const pushed = move(sizes, index + 1, missing, minSizes);
+        offset -= missing - pushed;
+    }
+    sizes[index] += offset;
+    sizes[index + 1] -= offset;
+    return offset;
+}
+const defaultProps = {
+    split: 'vertical',
+    className: '',
+};
+function useSplitPaneResize(options) {
+    const { children, split, defaultSizes, minSize: minSizes, onDragStarted, onChange, onDragFinished } = options;
+    const [sizes, setSizes] = useState(new Map());
+    const paneRefs = useRef(new Map());
+    const getMovedSizes = useCallback((dragState) => {
+        const collectedSizes = children.map((node, index) => sizes.get(getNodeKey(node, index)) || getDefaultSize(index, defaultSizes));
+        if (dragState) {
+            const { offset, extraState: { index }, } = dragState;
+            move(collectedSizes, index, offset, minSizes);
+        }
+        return collectedSizes;
+    }, [children, defaultSizes, minSizes, sizes]);
+    const handleDragFinished = useCallback((dragState) => {
+        const movedSizes = getMovedSizes(dragState);
+        setSizes(new Map(children.map((node, index) => [
+            getNodeKey(node, index),
+            movedSizes[index],
+        ])));
+        if (onDragFinished) {
+            onDragFinished(movedSizes);
+        }
+    }, [children, getMovedSizes, onDragFinished]);
+    const [dragState, beginDrag] = (0, util_1.useDragState)(split, handleDragFinished);
+    const movedSizes = useMemo(() => getMovedSizes(dragState), [dragState, getMovedSizes]);
+    const resizeState = dragState ? dragState.extraState : null;
+    useEffect(() => {
+        if (onChange && dragState) {
+            onChange(movedSizes);
+        }
+    }, [dragState, movedSizes, onChange]);
+    const childPanes = useMemo(() => {
+        const prevPaneRefs = paneRefs.current;
+        paneRefs.current = new Map();
+        return children.map((node, index) => {
+            const key = getNodeKey(node, index);
+            const ref = prevPaneRefs.get(key) || React.createRef();
+            paneRefs.current.set(key, ref);
+            const minSize = getMinSize(index, minSizes);
+            return { key, node, ref, minSize };
+        });
+    }, [children, minSizes]);
+    const childPanesWithSizes = useMemo(() => childPanes.map((child, index) => {
+        const size = movedSizes[index];
+        return Object.assign(Object.assign({}, child), { size });
+    }), [childPanes, movedSizes]);
+    const handleDragStart = useCallback((index, pos) => {
+        const sizeAttr = split === 'vertical' ? 'width' : 'height';
+        const clientSizes = new Map(childPanes.map(({ key, ref }) => {
+            const size = ref.current ? ref.current.getBoundingClientRect()[sizeAttr] : 0;
+            return [key, size];
+        }));
+        if (onDragStarted) {
+            onDragStarted();
+        }
+        beginDrag(pos, { index });
+        setSizes(clientSizes);
+    }, [beginDrag, childPanes, onDragStarted, split]);
+    return { childPanes: childPanesWithSizes, resizeState, handleDragStart };
+}
+exports.SplitPane = React.memo((props) => {
+    const options = Object.assign(Object.assign({}, defaultProps), props);
+    const { split, className } = options;
+    const { childPanes, resizeState, handleDragStart } = useSplitPaneResize(options);
+    const splitStyleProps = split === 'vertical'
+        ? {
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+        }
+        : {
+            bottom: 0,
+            top: 0,
+            flexDirection: 'column',
+            minHeight: '100%',
+            width: '100%',
+        };
+    const style = Object.assign({ display: 'flex', flex: 1, height: '100%', position: 'absolute', outline: 'none', overflow: 'hidden' }, splitStyleProps);
+    const classes = ['SplitPane', split, className].join(' ');
+    const dragLayerStyle = {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+    };
+    const dragLayerClasses = ['DragLayer', split, resizeState ? 'resizing' : '', className].join(' ');
+    const entries = [];
+    childPanes.forEach(({ key, node, ref, size, minSize }, index) => {
+        if (index !== 0) {
+            const resizing = resizeState && resizeState.index === index - 1;
+            entries.push(React.createElement(Resizer_1.Resizer, { key: 'resizer.' + index, split: split, className: className + (resizing ? ' resizing' : ''), index: index - 1, onDragStarted: handleDragStart }));
+        }
+        entries.push(React.createElement(Pane_1.Pane, { key: 'pane.' + key, forwardRef: ref, size: size, minSize: minSize, split: split, className: className }, node));
+    });
+    return (React.createElement("div", { className: classes, style: style },
+        React.createElement("div", { className: dragLayerClasses, style: dragLayerStyle }),
+        entries));
+});
+exports.SplitPane.displayName = 'SplitPane';
+
+}(SplitPane$1));
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SplitPane = void 0;
+var SplitPane_1 = SplitPane$1;
+Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
+
+}(dist));
+
+var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
+
+const {
+  SplitPane
+} = SplitPaneModule;
+
+class Standalone extends ReactDOM$1.Component {
   static get propTypes() {
     return {
       baseUrl: propTypes$1.exports.string,
@@ -5652,13 +6068,20 @@ class Standalone extends ReactDOM.Component {
       }
 
       const topLevel = new Map();
+      this.setState({
+        [`NotebookState/${module}`]: 'running'
+      });
       await api.importModule(module, {
         clearUpdateEmits: true,
         topLevel,
         readCache: false,
         workspace
-      });
+      }); // We can't emit infinity, so let's use an exceedingly large number.
+
       await resolvePending();
+      this.setState({
+        [`NotebookState/${module}`]: 'idle'
+      });
       removeOnEmitHandler(onEmitHandler);
     };
 
@@ -5717,12 +6140,35 @@ class Standalone extends ReactDOM.Component {
       workspace
     } = this.props;
     const {
-      [`NotebookNotes/${module}`]: NotebookNotes = []
+      [`NotebookNotes/${module}`]: NotebookNotes = {},
+      [`NotebookState/${module}`]: NotebookState = 'idle',
+      [`NotebookDynamicViewPath/${module}`]: NotebookDynamicViewPath,
+      [`NotebookDynamicViewView/${module}`]: NotebookDynamicViewView = {}
     } = this.state;
-    return v$1(Notebook, {
-      notes: NotebookNotes,
+
+    const onClickView = async ({
+      note
+    }) => {
+      const {
+        [`NotebookDynamicViewView/${module}`]: NotebookDynamicViewView
+      } = this.state;
+      this.setState({
+        [`NotebookDynamicViewPath/${module}`]: note.path,
+        [`NotebookDynamicViewView/${module}`]: NotebookDynamicViewView || note.view
+      });
+    };
+
+    return v$1(SplitPane, null, NotebookDynamicViewPath && v$1(DynamicView, {
+      path: NotebookDynamicViewPath,
+      view: NotebookDynamicViewView,
       workspace: workspace
-    });
+    }), v$1(Notebook, {
+      notebookPath: module,
+      notes: NotebookNotes,
+      workspace: workspace,
+      onClickView: onClickView,
+      state: NotebookState
+    }));
   }
 
 }
@@ -5736,7 +6182,7 @@ const run = async ({
 }) => {
   const start = () => {
     const files = decodeFiles(encodedFiles);
-    ReactDOM.render(v$1(Standalone, {
+    ReactDOM$1.render(v$1(Standalone, {
       baseUrl: baseUrl,
       workspace: workspace,
       module: module,

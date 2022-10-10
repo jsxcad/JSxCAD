@@ -1,5 +1,12 @@
 import { Shape, ensurePages } from '@jsxcad/api-shape';
-import { addPending, emit, generateUniqueId, getPendingErrorHandler, getSourceLocation, write } from '@jsxcad/sys';
+import {
+  addPending,
+  emit,
+  generateUniqueId,
+  getPendingErrorHandler,
+  getSourceLocation,
+  write,
+} from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
@@ -12,7 +19,10 @@ export const preparePdf = (shape, name, op = (s) => s, options = {}) => {
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
     const pdfPath = `download/pdf/${path}/${generateUniqueId()}`;
     const render = async () => {
-      await write(pdfPath, toPdf(entry, options).catch(getPendingErrorHandler()));
+      await write(
+        pdfPath,
+        toPdf(entry, options).catch(getPendingErrorHandler())
+      );
     };
     addPending(render());
     const filename = `${name}_${index++}.pdf`;

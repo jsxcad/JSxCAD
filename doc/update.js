@@ -80,7 +80,7 @@ const build = async (...args) => {
         failedExpectations,
         browser,
         baseDirectory,
-        workspace: notebook.replace(/[/]/g, '_')
+        workspace: notebook.replace(/[/]/g, '_'),
       });
       if (
         failedExpectations.length > 0 &&

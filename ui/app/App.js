@@ -36,7 +36,6 @@ import FlexLayout from 'flexlayout-react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
-import JsViewerUi from './JsViewerUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
 import OrbitView from './OrbitView.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
@@ -202,7 +201,8 @@ class App extends React.Component {
 
     this.agent = async ({ ask, message, type }) => {
       // const { op, entry, identifier, notes, options, path, sourceLocation } =
-      const { op, entry, identifier, options, path } = message;
+      const { op, entry, identifier, notes, options, path, sourceLocation } =
+        message;
       switch (op) {
         case 'ask':
           return askSys(identifier, options);
@@ -211,7 +211,11 @@ class App extends React.Component {
         case 'log':
           return log(entry);
         case 'notes':
-          return updateNotebookState(this, message);
+          return updateNotebookState(this, {
+            notes,
+            sourceLocation,
+            workspace,
+          });
         /*
           {
             const { id, path } = sourceLocation;
@@ -233,13 +237,14 @@ class App extends React.Component {
               updateNote(note);
               if (note.view) {
                 if (!note.url) {
-                  const cachedUrl = await read(`thumbnail/${note.hash}`, {
+                  const cachedUrl = await (note.needsThumbnail ? read : readOrWatch)(`thumbnail/${note.hash}`, {
                     workspace,
                   });
                   if (cachedUrl) {
                     console.log(`QQ/cachedUrl: ${note.hash} ${cachedUrl}`);
                     updateNote({ hash: note.hash, url: cachedUrl });
                   } else if (note.view && !note.url) {
+                    console.log('QQ/renderingUrl -- SHOULD NOT HAPPEN -- !!!');
                     const { path, view } = note;
                     const { width, height } = view;
                     const canvas = document.createElement('canvas');
@@ -549,7 +554,9 @@ class App extends React.Component {
         }
       };
       try {
-        await this.updateState({ NotebookState: 'running' });
+        await this.updateState({
+          [`NotebookState/${NotebookPath}`]: 'running',
+        });
         // Terminate any services running for this path, since we're going to restart evaluating it.
         await terminateActiveServices((context) => context.path === path);
         // CHECK: Can we get rid of this?
@@ -562,13 +569,15 @@ class App extends React.Component {
           return;
         }
 
+        /*
         // FIX: This is a bit awkward.
         // The responsibility for updating the control values ought to be with what
         // renders the notebook.
-        const notebookControlData = await getNotebookControlData();
+        const notebookControlData = await getNotebookControlData(NotebookPath);
         await write(`control/${NotebookPath}`, notebookControlData, {
           workspace,
         });
+*/
 
         let script = this.Clipboard.getCode() + NotebookText;
 
@@ -631,7 +640,7 @@ class App extends React.Component {
         // Include any high level notebook errors in the output.
         window.alert(error.stack);
       } finally {
-        await this.updateState({ NotebookState: 'idle' });
+        await this.updateState({ [`NotebookState/${NotebookPath}`]: 'idle' });
         logInfo('app/App', `Completed notebook run ${path}`);
         logProfile();
       }
@@ -1129,6 +1138,18 @@ class App extends React.Component {
 
     this.Workspace = {};
 
+    this.Workspace.getSelectedPaths = (path) => {
+      const selectedPaths = [];
+      for (const input of document.querySelectorAll('input:checked')) {
+        if (!input.id.startsWith('WorkspaceSelect/')) {
+          continue;
+        }
+        const file = input.id.substring('WorkspaceSelect/'.length);
+        selectedPaths.push(file);
+      }
+      return selectedPaths;
+    };
+
     this.Workspace.loadWorkingPath = async (path) => {
       const {
         model,
@@ -1243,8 +1264,11 @@ class App extends React.Component {
           return cwd.getFileHandle(pieces[0], { create: true });
         }
       };
+      const selectedPaths = this.Workspace.getSelectedPaths();
+      const isSelectedPath = (path) =>
+        selectedPaths.length === 0 || selectedPaths.includes(path);
       for (const path of WorkspaceFiles) {
-        if (path.startsWith(sourcePrefix)) {
+        if (path.startsWith(sourcePrefix) && isSelectedPath(path)) {
           const file = await getFile(
             directory,
             path.substring(sourcePrefix.length).split('/')
@@ -1296,25 +1320,7 @@ class App extends React.Component {
               </Card>
               <Card>
                 <Card.Body>
-                  <Card.Title>Export Paths to Folder</Card.Title>
-                  <Card.Text>
-                    <Form>
-                      <Button
-                        onClick={() => {
-                          const { WorkspaceLoadPrefix } = this.state;
-                          this.Workspace.export(WorkspaceLoadPrefix);
-                        }}
-                        disabled={!WorkspaceLoadPrefix}
-                      >
-                        Export
-                      </Button>
-                    </Form>
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Working Paths</Card.Title>
+                  <Card.Title>Select Paths</Card.Title>
                   <Card.Text>
                     <Form>
                       <ListGroup>
@@ -1329,7 +1335,7 @@ class App extends React.Component {
                               <InputGroup.Checkbox
                                 key={index}
                                 type="checkbox"
-                                id={`WorkspaceRevert/${file}`}
+                                id={`WorkspaceSelect/${file}`}
                               />
                               <Button
                                 variant={computeListItemVariant(file)}
@@ -1353,24 +1359,39 @@ class App extends React.Component {
                       </ListGroup>
                     </Form>
                   </Card.Text>
+                </Card.Body>
+              </Card>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Export Selected Paths to Folder</Card.Title>
+                  <Card.Text>
+                    <Form>
+                      <Button
+                        onClick={() => {
+                          const { WorkspaceLoadPrefix } = this.state;
+                          this.Workspace.export(WorkspaceLoadPrefix);
+                        }}
+                        disabled={!WorkspaceLoadPrefix}
+                      >
+                        Export
+                      </Button>
+                    </Form>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Revert Selected Paths</Card.Title>
                   <Card.Text>
                     <Form>
                       <Button
                         onClick={async (event) => {
-                          for (const input of document.querySelectorAll(
-                            'input:checked'
-                          )) {
-                            if (!input.id.startsWith('WorkspaceRevert/')) {
-                              continue;
-                            }
-                            const file = input.id.substring(
-                              'WorkspaceRevert/'.length
-                            );
-                            this.Workspace.revertWorkingFile(file);
+                          for (const path of this.Workspace.getSelectedPaths()) {
+                            this.Workspace.revertWorkingFile(path);
                           }
                         }}
                       >
-                        Revert Selected Paths
+                        Revert
                       </Button>
                     </Form>
                   </Card.Text>
@@ -1453,6 +1474,7 @@ class App extends React.Component {
           const path = node.getId().substring('Notebook/'.length);
           const {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
+            [`NotebookState/${path}`]: NotebookState = 'idle',
             [`NotebookText/${path}`]: NotebookText,
             [`NotebookNotes/${path}`]: NotebookNotes = [],
             [`NotebookLine/${path}`]: NotebookLine,
@@ -1463,10 +1485,12 @@ class App extends React.Component {
               return (
                 <SplitPane>
                   <Notebook
+                    notebookPath={path}
                     notes={NotebookNotes}
                     onClickView={this.Notebook.clickView}
                     selectedLine={NotebookLine}
                     workspace={workspace}
+                    state={NotebookState}
                   />
                   <JsEditorUi
                     mode={NotebookMode}
@@ -1483,27 +1507,16 @@ class App extends React.Component {
                   />
                 </SplitPane>
               );
-            case 'old-view':
-              return (
-                <JsViewerUi
-                  mode={NotebookMode}
-                  onRun={() => this.Notebook.run(path)}
-                  onSave={() => this.Notebook.save(path)}
-                  onChange={(data) => this.Notebook.change(path, data)}
-                  onClickLink={(path) => this.Notebook.clickLink(path)}
-                  path={path}
-                  data={NotebookText}
-                  advice={NotebookAdvice}
-                />
-              );
             default:
             case 'view': {
               return (
                 <Notebook
+                  notebookPath={path}
                   notes={NotebookNotes}
                   onClickView={this.Notebook.clickView}
                   selectedLine={NotebookLine}
                   workspace={workspace}
+                  state={NotebookState}
                 />
               );
             }
@@ -1833,13 +1846,23 @@ class App extends React.Component {
         return true;
     }
 
+    const saveControlValues = async (path, then) => {
+      const { workspace } = this.props;
+      const notebookControlData = await getNotebookControlData(path);
+      await write(`control/${path}`, notebookControlData, {
+        workspace,
+      });
+      then(path);
+    };
+
     const { ctrlKey, shiftKey } = e;
     switch (key) {
       case ENTER: {
         if (shiftKey) {
           e.preventDefault();
           e.stopPropagation();
-          this.Notebook.run(this.Notebook.getSelectedPath());
+          const path = this.Notebook.getSelectedPath();
+          saveControlValues(path, this.Notebook.run);
           return false;
         }
         break;
@@ -1848,7 +1871,8 @@ class App extends React.Component {
         if (ctrlKey) {
           e.preventDefault();
           e.stopPropagation();
-          this.Notebook.save(this.Notebook.getSelectedPath());
+          const path = this.Notebook.getSelectedPath();
+          saveControlValues(path, this.Notebook.save);
           return false;
         }
         break;
@@ -1857,7 +1881,8 @@ class App extends React.Component {
         if (ctrlKey) {
           e.preventDefault();
           e.stopPropagation();
-          this.Notebook.cycleMode(this.Notebook.getSelectedPath());
+          const path = this.Notebook.getSelectedPath();
+          saveControlValues(path, this.Notebook.cycleMode);
           return false;
         }
         break;

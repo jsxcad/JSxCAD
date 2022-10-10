@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { getPendingErrorHandler, addPending, emit } from './jsxcad-sys.js';
+import { getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 
@@ -72,14 +72,21 @@ function sum (o) {
 var hashSum = sum;
 
 const preparePdf = (shape, name, op = (s) => s, options = {}) => {
+  const { path } = getSourceLocation();
   let index = 0;
   const records = [];
   for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
-    const pending = toPdf(entry, options).catch(getPendingErrorHandler());
-    addPending(pending);
+    const pdfPath = `download/pdf/${path}/${generateUniqueId()}`;
+    const render = async () => {
+      await write(
+        pdfPath,
+        toPdf(entry, options).catch(getPendingErrorHandler())
+      );
+    };
+    addPending(render());
     const filename = `${name}_${index++}.pdf`;
     const record = {
-      data: pending,
+      path: pdfPath,
       filename,
       type: 'application/pdf',
     };

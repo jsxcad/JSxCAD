@@ -17,14 +17,13 @@ export const encodeFiles = (unencoded) => {
   for (const key of Object.keys(unencoded)) {
     encoded[key] = encode(unencoded[key]);
   }
-  return encodeURIComponent(JSON.stringify(encoded));
+  return encoded;
 };
 
-export const decodeFiles = (string) => {
-  const encoded = JSON.parse(decodeURIComponent(string));
+export const decodeFiles = (encodedFiles) => {
   const decoded = {};
-  for (const key of Object.keys(encoded)) {
-    decoded[key] = decode(encoded[key]);
+  for (const key of Object.keys(encodedFiles)) {
+    decoded[key] = decode(encodedFiles[key]);
   }
   return decoded;
 };

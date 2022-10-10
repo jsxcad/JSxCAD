@@ -3,13 +3,13 @@ import {
   emit,
   generateUniqueId,
   getSourceLocation,
+  isNode,
   write,
 } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
+import { dataUrl } from '@jsxcad/ui-threejs';
 import { ensurePages } from './Page.js';
-import { tagGeometry } from './tag.js';
-import { untagGeometry } from './untag.js';
 
 const applyModes = (shape, options, modes) => {
   if (modes.includes('wireframe')) {
@@ -56,19 +56,23 @@ export const baseView =
     }
     const { id, path } = sourceLocation;
     for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
-      const geometry = tagGeometry(untagGeometry(entry, ['viewId:*']), [
-        `viewId:${viewId}`,
-      ]);
+      const geometry = entry;
+      const hash = generateUniqueId();
       const viewPath = `view/${path}/${id}/${viewId}.view`;
-      addPending(write(viewPath, geometry));
+      const thumbnailPath = `thumbnail/${hash}`;
       const view = {
         viewId,
         width,
         height,
         position,
         inline,
+        needsThumbnail: isNode,
       };
-      emit({ hash: generateUniqueId(), path: viewPath, view });
+      emit({ hash, path: viewPath, view });
+      addPending(write(viewPath, geometry));
+      if (!isNode) {
+        addPending(write(thumbnailPath, dataUrl(viewShape, view)));
+      }
     }
     return shape;
   };

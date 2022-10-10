@@ -164,7 +164,11 @@ export const updateNotebook = async (
     if (files[path] || !path.startsWith('source/')) {
       return;
     }
-    const data = await read(path, { workspace, ephemeral: true, notifyFileReadEnabled: false });
+    const data = await read(path, {
+      workspace,
+      ephemeral: true,
+      notifyFileReadEnabled: false,
+    });
     files[path] = data;
   };
   let fileReadWatcher = watchFileRead(addFile);

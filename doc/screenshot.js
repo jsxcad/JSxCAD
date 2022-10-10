@@ -1,3 +1,5 @@
+import { writeFileSync } from 'fs';
+
 // const timeout = 120000;
 const timeout = 240000;
 
@@ -17,6 +19,7 @@ export const screenshot = async (html, { browser }) => {
       page.on('console', (msg) => console.log(msg.text()));
       page.on('error', (msg) => console.log(msg.text()));
       try {
+        writeFileSync('/tmp/debug.html', html, { encoding: 'utf-8' });
         await page.setContent(html, { timeout });
       } catch (error) {
         console.log(error.stack);

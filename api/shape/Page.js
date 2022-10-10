@@ -82,11 +82,16 @@ export const Page = (...args) => {
     itemMargin = 1,
     itemsPerPage = Infinity,
   } = options;
-  const pack = modes.includes('pack');
+  let pack = modes.includes('pack');
   const center = modes.includes('center');
 
   if (modes.includes('a4')) {
     size = [210, 297];
+  }
+
+  if (modes.includes('individual')) {
+    pack = true;
+    itemsPerPage = 1;
   }
 
   const margin = itemMargin;
