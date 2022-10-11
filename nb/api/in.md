@@ -25,5 +25,3 @@ Box(5).color('blue').as('item').tags('color') does not count the blue box.
 tags:
 
 in().tags('color') counts the blue box.
-
-tags: blue

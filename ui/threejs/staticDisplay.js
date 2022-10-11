@@ -1,3 +1,5 @@
+/* global OffscreenCanvas */
+
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 
 import { Layers } from '@jsxcad/algorithm-threejs';
@@ -42,6 +44,10 @@ export const staticDisplay = async (
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
+
+  if (!canvas) {
+    canvas = new OffscreenCanvas(width, height);
+  }
 
   const geometryLayers = new Layers();
   geometryLayers.set(GEOMETRY_LAYER);

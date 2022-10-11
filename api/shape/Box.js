@@ -44,10 +44,10 @@ const fs = () => {
   return fundamentalShapes;
 };
 
-const reifyBox = (geometry) => {
+const reifyBox = (plan) => {
   const build = () => {
-    const corner1 = getCorner1(geometry);
-    const corner2 = getCorner2(geometry);
+    const corner1 = getCorner1(plan.toGeometry());
+    const corner2 = getCorner2(plan.toGeometry());
 
     const left = corner2[X];
     const right = corner1[X];
@@ -110,7 +110,7 @@ const reifyBox = (geometry) => {
 
   return build()
     .absolute()
-    .tag(...geometry.tags);
+    .tag(...plan.toGeometry().tags);
 };
 
 Shape.registerReifier('Box', reifyBox);

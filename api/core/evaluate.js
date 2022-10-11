@@ -133,9 +133,6 @@ export const execute = async (
             updatePromises.length <= 1 &&
             outstandingDependencies.length === 0
           ) {
-            // if (isWebWorker) {
-            //   throw Error('Updates should not happen in worker');
-            // }
             // For now, only do one thing at a time, and block the remaining updates.
             const task = async () => {
               try {

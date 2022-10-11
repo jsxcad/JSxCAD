@@ -17,8 +17,12 @@ export const getTagNamespace = (tag, namespace = 'user') => {
 };
 
 export const tagMatcher = (tag, namespace = 'user') => {
-  const qualifiedTag = qualifyTag(tag, namespace);
-  if (qualifiedTag.endsWith(':*')) {
+  let qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith('=*')) {
+    const [base] = qualifiedTag.split('=');
+    const prefix = `${base}=`;
+    return (tag) => tag.startsWith(prefix);
+  } else if (qualifiedTag.endsWith(':*')) {
     const [namespace] = qualifiedTag.split(':');
     const prefix = `${namespace}:`;
     return (tag) => tag.startsWith(prefix);

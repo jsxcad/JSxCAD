@@ -65,8 +65,8 @@ const buildRegularIcosahedron = () => {
   return fromPointsAndPaths(points, paths);
 };
 
-Shape.registerReifier('Icosahedron', (geometry) => {
-  const [scale, middle] = getScale(geometry);
+Shape.registerReifier('Icosahedron', (plan) => {
+  const [scale, middle] = getScale(plan.toGeometry());
   const a = Shape.fromPolygons(buildRegularIcosahedron({}));
   const b = a.scale(...scale);
   const c = b.move(...middle).absolute();

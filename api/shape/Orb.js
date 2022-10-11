@@ -14,14 +14,14 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
   )
 );
 
-Shape.registerReifier('Orb', (geometry) => {
-  const [scale, middle] = getScale(geometry);
+Shape.registerReifier('Orb', (plan) => {
+  const [scale, middle] = getScale(plan.toGeometry());
   const radius = Math.max(...scale);
 
   // const angularBound = 30;
-  // const radiusBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
-  // const distanceBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
-  const tolerance = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
+  // const radiusBound = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
+  // const distanceBound = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
+  const tolerance = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
 
   return makeUnitSphere(tolerance).scale(scale).move(middle).absolute();
 });

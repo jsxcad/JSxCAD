@@ -18,16 +18,16 @@ const Z = 2;
 
 const reifyArc =
   (axis = Z) =>
-  (geometry) => {
-    let { start = 0, end = 1 } = getAngle(geometry);
+  (plan) => {
+    let { start = 0, end = 1 } = getAngle(plan.toGeometry());
 
     while (start > end) {
       start -= 1;
     }
 
-    const [scale, middle] = getScale(geometry);
-    const corner1 = getCorner1(geometry);
-    const corner2 = getCorner2(geometry);
+    const [scale, middle] = getScale(plan.toGeometry());
+    const corner1 = getCorner1(plan.toGeometry());
+    const corner2 = getCorner2(plan.toGeometry());
 
     const left = corner1[X];
     const right = corner2[X];
@@ -38,7 +38,7 @@ const reifyArc =
     const bottom = corner1[Z];
     const top = corner2[Z];
 
-    const step = 1 / getSides(geometry, 32);
+    const step = 1 / getSides(plan.toGeometry(), 32);
     const steps = Math.ceil((end - start) / step);
     const effectiveStep = (end - start) / steps;
 
@@ -100,7 +100,7 @@ const reifyArc =
       }
     }
 
-    return spiral.absolute().tag(...geometry.tags);
+    return spiral.absolute().tag(...plan.toGeometry().tags);
   };
 
 Shape.registerReifier('Arc', reifyArc(Z));

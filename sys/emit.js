@@ -35,7 +35,6 @@ export const emit = (value) => {
   if (value.sourceLocation === undefined) {
     value.sourceLocation = getSourceLocation();
   }
-  // console.log(JSON.stringify(value));
   emitGroup.push(value);
 };
 

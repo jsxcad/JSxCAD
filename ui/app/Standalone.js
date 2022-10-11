@@ -1,3 +1,5 @@
+import './react-multi-split-pane.css';
+
 import * as PropTypes from 'prop-types';
 
 import Notebook, { updateNotebookState } from './Notebook.js';
@@ -13,11 +15,15 @@ import {
   write,
 } from '@jsxcad/sys';
 
+import DynamicView from './DynamicView.js';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import SplitPaneModule from 'react-multi-split-pane';
 import api from '@jsxcad/api';
 import { dataUrl } from '@jsxcad/ui-threejs';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
+
+const { SplitPane } = SplitPaneModule;
 
 class Standalone extends React.Component {
   static get propTypes() {
@@ -98,14 +104,16 @@ class Standalone extends React.Component {
       }
 
       const topLevel = new Map();
+      this.setState({ [`NotebookState/${module}`]: 'running' });
       await api.importModule(module, {
         clearUpdateEmits: true,
         topLevel,
         readCache: false,
         workspace,
       });
-
+      // We can't emit infinity, so let's use an exceedingly large number.
       await resolvePending();
+      this.setState({ [`NotebookState/${module}`]: 'idle' });
 
       removeOnEmitHandler(onEmitHandler);
     };
@@ -154,8 +162,41 @@ class Standalone extends React.Component {
 
   render() {
     const { module, workspace } = this.props;
-    const { [`NotebookNotes/${module}`]: NotebookNotes = [] } = this.state;
-    return <Notebook notes={NotebookNotes} workspace={workspace} />;
+    const {
+      [`NotebookNotes/${module}`]: NotebookNotes = {},
+      [`NotebookState/${module}`]: NotebookState = 'idle',
+      [`NotebookDynamicViewPath/${module}`]: NotebookDynamicViewPath,
+      [`NotebookDynamicViewView/${module}`]: NotebookDynamicViewView = {},
+    } = this.state;
+
+    const onClickView = async ({ note }) => {
+      const { [`NotebookDynamicViewView/${module}`]: NotebookDynamicViewView } =
+        this.state;
+      this.setState({
+        [`NotebookDynamicViewPath/${module}`]: note.path,
+        [`NotebookDynamicViewView/${module}`]:
+          NotebookDynamicViewView || note.view,
+      });
+    };
+
+    return (
+      <SplitPane>
+        {NotebookDynamicViewPath && (
+          <DynamicView
+            path={NotebookDynamicViewPath}
+            view={NotebookDynamicViewView}
+            workspace={workspace}
+          />
+        )}
+        <Notebook
+          notebookPath={module}
+          notes={NotebookNotes}
+          workspace={workspace}
+          onClickView={onClickView}
+          state={NotebookState}
+        />
+      </SplitPane>
+    );
   }
 }
 

@@ -4,13 +4,13 @@ import './Notebook.css';
 
 import * as PropTypes from 'prop-types';
 
-import { logInfo, read, write } from '@jsxcad/sys';
+import { read, readOrWatch, write } from '@jsxcad/sys';
 
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
 import MdNote from './MdNote.js';
-import { MoonLoader } from 'react-spinners';
 import React from 'react';
+import { SpinnerCircularSplit } from 'spinners-react';
 import ViewNote from './ViewNote.js';
 import { useEffect } from 'preact/hooks';
 
@@ -18,7 +18,7 @@ export const updateNotebookState = async (
   application,
   { notes, sourceLocation, workspace }
 ) => {
-  const { id, path } = sourceLocation;
+  const { path } = sourceLocation;
   const updateNote = (note) => {
     if (note.beginSourceLocation) {
       // Remove any existing notes for this line.
@@ -57,54 +57,52 @@ export const updateNotebookState = async (
     updateNote(note);
     if (note.view) {
       if (!note.url) {
-        const cachedUrl = await read(`thumbnail/${note.hash}`, {
-          workspace,
-        });
-        if (cachedUrl) {
-          updateNote({ hash: note.hash, url: cachedUrl });
-          continue;
-        }
-        if (note.path && !note.data) {
-          note.data = await read(note.path, { workspace });
-        }
-        const { path, view } = note;
-        const { width, height } = view;
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const offscreenCanvas = canvas.transferControlToOffscreen();
-        const render = async () => {
-          try {
-            logInfo('app/App', `Ask render for ${path}/${id}`);
-            const url = await application.ask(
-              {
-                op: 'app/staticView',
-                path,
-                workspace,
-                view,
-                offscreenCanvas,
-              },
-              { path },
-              [offscreenCanvas]
-            );
-            console.log(`Finished render for ${path}/${id}`);
-            // Cache the thumbnail for next time.
-            await write(`thumbnail/${note.hash}`, url, {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(
+            `thumbnail/${note.hash}`,
+            {
               workspace,
-            });
-            updateNote({ hash: note.hash, url });
-          } catch (error) {
-            if (error.message === 'Terminated') {
-              // Try again.
-              return render();
-            } else {
-              window.alert(error.stack);
+            }
+          );
+          if (!url) {
+            const { path, view } = note;
+            const { width, height } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                url = await application.ask(
+                  {
+                    op: 'app/staticView',
+                    path,
+                    workspace,
+                    view,
+                    offscreenCanvas,
+                  },
+                  { path },
+                  [offscreenCanvas]
+                );
+                // Cache the thumbnail for next time.
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace,
+                });
+                updateNote({ hash: note.hash, url });
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
             }
           }
+          if (url) {
+            updateNote({ hash: note.hash, url });
+          }
         };
-        // Render the image asynchronously -- it won't affect layout.
-        console.log(`Schedule render for ${path}/${id}`);
-        render();
+        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
+        setTimeout(loadThumbnail, 200);
       }
     }
   }
@@ -113,16 +111,25 @@ export const updateNotebookState = async (
 export class Notebook extends React.PureComponent {
   static get propTypes() {
     return {
-      notes: PropTypes.array,
+      notes: PropTypes.object,
       onClickView: PropTypes.func,
       selectedLine: PropTypes.number,
+      notebookPath: PropTypes.string,
+      state: PropTypes.string,
       workspace: PropTypes.string,
     };
   }
 
   render() {
     try {
-      const { notes, onClickView, selectedLine, workspace } = this.props;
+      const {
+        notebookPath,
+        notes,
+        onClickView,
+        selectedLine,
+        state = 'idle',
+        workspace,
+      } = this.props;
       const children = [];
       const ordered = Object.values(notes);
       const getLine = (note) => {
@@ -210,15 +217,23 @@ export class Notebook extends React.PureComponent {
         }
       }
       console.log(`render Notebook`);
-      if (children.length === 0) {
-        return <MoonLoader color="#36d7b7" size="128px" />;
-      }
 
       useEffect(() => mermaid.init(undefined, '.mermaid'));
 
       return (
-        <div classList="notes" style={{ overflow: 'auto' }}>
+        <div
+          id={notebookPath}
+          classList="notebook notes"
+          style={{ overflow: 'auto' }}
+        >
           {children}
+          {state === 'running' && (
+            <SpinnerCircularSplit
+              color="#36d7b7"
+              size={64}
+              style={{ position: 'fixed', right: 32, top: 32 }}
+            />
+          )}
         </div>
       );
     } catch (e) {

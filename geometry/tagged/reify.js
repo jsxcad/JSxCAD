@@ -49,5 +49,6 @@ export const reify = (geometry) => {
     }
   };
 
-  return rewrite(geometry, op);
+  const result = rewrite(geometry, op);
+  return result;
 };

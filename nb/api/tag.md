@@ -26,7 +26,7 @@ See: [tags](../../nb/api/tags.nb), [get](#https://raw.githubusercontent.com/jsxc
 Box().tag('a', 'b', 'c').tags().note("Box().tag('a', 'b', 'c').tags()");
 ```
 
-tags: a,b,c
+tags: user:a,user:b,user:c
 
 Box().tag('a', 'b', 'c').tags()
 

@@ -17,6 +17,6 @@ Box()
   .note("Box().tag('a').and(Box().tag('b')).tags()");
 ```
 
-tags: a,b
+tags: user:a,user:b
 
 Box().tag('a').and(Box().tag('b')).tags()

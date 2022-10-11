@@ -40,17 +40,10 @@ Shape.registerMethod('updatePlan', updatePlan);
 export const hasAngle = Shape.chainable(
   (start = 0, end = 0) =>
     (shape) =>
-      shape.updatePlan({ angle: { start: start, end: end } })
-);
-export const hasBase = Shape.chainable(
-  (base) => (shape) => shape.updatePlan({ base })
-);
-export const hasAt = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({
-        at: [x, y, z],
-      })
+      shape
+        .updatePlan({ angle: { start: start, end: end } })
+        .setTag('plan:angle/start', start)
+        .setTag('plan:angle/end', end)
 );
 export const hasCorner1 = Shape.chainable(
   (x = 0, y = x, z = 0) =>
@@ -101,50 +94,26 @@ export const hasApothem = Shape.chainable(
         { apothem: [x, y, z] }
       )
 );
-export const hasFrom = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({ from: [x, y, z] })
-);
 export const hasSides = Shape.chainable(
   (sides = 1) =>
     (shape) =>
-      shape.updatePlan({ sides })
-);
-export const hasTo = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({ to: [x, y, z], top: undefined })
-);
-export const hasTop = Shape.chainable(
-  (top) => (shape) => shape.updatePlan({ top })
-);
-export const hasUp = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({ up: [x, y, z], top: undefined })
+      shape.updatePlan({ sides }).setTag('plan:sides', sides)
 );
 export const hasZag = Shape.chainable(
-  (zag) => (shape) => shape.updatePlan({ zag })
+  (zag) => (shape) => shape.updatePlan({ zag }).setTag('plan:zag', zag)
 );
 
 // Let's consider migrating to a 'has' prefix for planning.
 
 Shape.registerMethod('hasApothem', hasApothem);
 Shape.registerMethod('hasAngle', hasAngle);
-Shape.registerMethod('hasAt', hasAt);
-Shape.registerMethod('hasBase', hasBase);
 Shape.registerMethod('hasCorner1', hasCorner1);
 Shape.registerMethod('hasC1', hasCorner1);
 Shape.registerMethod('hasCorner2', hasCorner2);
 Shape.registerMethod('hasC2', hasCorner2);
 Shape.registerMethod('hasDiameter', hasDiameter);
-Shape.registerMethod('hasFrom', hasFrom);
 Shape.registerMethod('hasRadius', hasRadius);
 Shape.registerMethod('hasSides', hasSides);
-Shape.registerMethod('hasTo', hasTo);
-Shape.registerMethod('hasTop', hasTop);
-Shape.registerMethod('hasUp', hasUp);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
@@ -262,7 +231,7 @@ export const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 Shape.registerReifier = (name, op) => {
   const finishedOp = (geometry) => {
     const timer = startTime(`Reify ${name}`);
-    const shape = op(geometry);
+    const shape = op(Shape.fromGeometry(geometry));
     if (!(shape instanceof Shape)) {
       throw Error('Expected Shape');
     }

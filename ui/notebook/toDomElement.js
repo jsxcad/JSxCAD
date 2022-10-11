@@ -277,18 +277,21 @@ export const toDomElement = (
   return container;
 };
 
-export const getNotebookControlData = async () => {
+export const getNotebookControlData = async (notebookPath) => {
   const data = {};
   const notebooks = document.getElementsByClassName('notebook');
   for (let nthNotebook = 0; nthNotebook < notebooks.length; nthNotebook++) {
     const notebook = notebooks[nthNotebook];
+    if (notebook.id !== notebookPath) {
+      continue;
+    }
     const inputs = notebook.getElementsByClassName('note control input');
     for (let nthInput = 0; nthInput < inputs.length; nthInput++) {
       const input = inputs[nthInput];
       const label = input.name;
       if (input.type === 'checkbox') {
         data[label] = input.checked;
-      } else {
+      } else if (input.value.length > 0) {
         data[label] = input.value;
       }
     }
