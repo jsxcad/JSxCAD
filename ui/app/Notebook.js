@@ -14,6 +14,24 @@ import { SpinnerCircularSplit } from 'spinners-react';
 import ViewNote from './ViewNote.js';
 import { useEffect } from 'preact/hooks';
 
+export const clearNotebookState = async (
+  application,
+  { path,
+  workspace,
+  isToBeKept }) => {
+  application.setState((state) => {
+    const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      if (isToBeKept(note)) {
+        newNotebookNotes[key] = note;
+      }
+    }
+    return { [`NotebookNotes/${path}`]: newNotebookNotes };
+  });
+};
+
 export const updateNotebookState = async (
   application,
   { notes, sourceLocation, workspace }
@@ -231,7 +249,7 @@ export class Notebook extends React.PureComponent {
             <SpinnerCircularSplit
               color="#36d7b7"
               size={64}
-              style={{ position: 'fixed', right: 32, top: 32 }}
+              style={{ position: 'fixed', right: 32, top: 64 }}
             />
           )}
         </div>

@@ -5307,6 +5307,27 @@ class ViewNote extends ReactDOM$1.PureComponent {
   }
 }
 
+const clearNotebookState = async (application, {
+  path,
+  workspace,
+  isToBeKept
+}) => {
+  application.setState(state => {
+    const {
+      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
+    } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      if (isToBeKept(note)) {
+        newNotebookNotes[key] = note;
+      }
+    }
+    return {
+      [`NotebookNotes/${path}`]: newNotebookNotes
+    };
+  });
+};
 const updateNotebookState = async (application, {
   notes,
   sourceLocation,
@@ -5535,7 +5556,7 @@ class Notebook extends ReactDOM$1.PureComponent {
         style: {
           position: 'fixed',
           right: 32,
-          top: 32
+          top: 64
         }
       }));
     } catch (e) {
@@ -5924,6 +5945,11 @@ class Standalone extends ReactDOM$1.Component {
       module,
       workspace
     } = this.props;
+    const setVersion = (notes, version) => {
+      for (const note of notes) {
+        note.version = version;
+      }
+    };
     const renderViews = async notes => {
       for (const note of notes) {
         if (!note.view) {
@@ -5963,12 +5989,14 @@ class Standalone extends ReactDOM$1.Component {
     const run = async ({
       isRerun = false
     } = {}) => {
+      const version = new Date().getTime();
       const addNotes = async notes => {
         if (notes.length === 0) {
           return;
         }
         const sourceLocation = notes[0].sourceLocation;
         // TODO: Parallelize these operations.
+        setVersion(notes, version);
         await renderViews(notes);
         await fixLinks(notes);
         await prepareDownloads(notes);
@@ -6001,6 +6029,11 @@ class Standalone extends ReactDOM$1.Component {
         [`NotebookState/${module}`]: 'idle'
       });
       removeOnEmitHandler(onEmitHandler);
+      clearNotebookState(this, {
+        path: module,
+        workspace,
+        isToBeKept: note => note.version === version
+      });
     };
     const onKeyDown = e => {
       const CONTROL = 17;

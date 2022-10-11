@@ -5308,6 +5308,27 @@ class ViewNote extends ReactDOM$3.PureComponent {
   }
 }
 
+const clearNotebookState = async (application, {
+  path,
+  workspace,
+  isToBeKept
+}) => {
+  application.setState(state => {
+    const {
+      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
+    } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      if (isToBeKept(note)) {
+        newNotebookNotes[key] = note;
+      }
+    }
+    return {
+      [`NotebookNotes/${path}`]: newNotebookNotes
+    };
+  });
+};
 const updateNotebookState = async (application, {
   notes,
   sourceLocation,
@@ -5536,7 +5557,7 @@ class Notebook extends ReactDOM$3.PureComponent {
         style: {
           position: 'fixed',
           right: 32,
-          top: 32
+          top: 64
         }
       }));
     } catch (e) {
@@ -44015,18 +44036,8 @@ class App extends ReactDOM$3.Component {
           // We don't know how to run anything else.
           return;
         }
-
-        /*
-        // FIX: This is a bit awkward.
-        // The responsibility for updating the control values ought to be with what
-        // renders the notebook.
-        const notebookControlData = await getNotebookControlData(NotebookPath);
-        await write(`control/${NotebookPath}`, notebookControlData, {
-          workspace,
-        });
-        */
-
         let script = this.Clipboard.getCode() + NotebookText;
+        const version = new Date().getTime();
         const evaluate = async script => {
           try {
             const result = await this.ask({
@@ -44034,7 +44045,8 @@ class App extends ReactDOM$3.Component {
               script,
               workspace,
               path: NotebookPath,
-              sha
+              sha,
+              version
             }, {
               path
             });
@@ -44056,7 +44068,8 @@ class App extends ReactDOM$3.Component {
               script,
               workspace,
               path: NotebookPath,
-              sha
+              sha,
+              version
             }, {
               path
             });
@@ -44080,6 +44093,11 @@ class App extends ReactDOM$3.Component {
           workspace
         });
         await resolvePending();
+        clearNotebookState(this, {
+          path: NotebookPath,
+          workspace,
+          isToBeKept: note => note.version !== version
+        });
       } catch (error) {
         // Include any high level notebook errors in the output.
         window.alert(error.stack);

@@ -5,7 +5,7 @@ import './react-multi-split-pane.css';
 
 import * as PropTypes from 'prop-types';
 
-import Notebook, { updateNotebookState } from './Notebook.js';
+import Notebook, { clearNotebookState, updateNotebookState } from './Notebook.js';
 import {
   askService,
   ask as askSys,
@@ -570,17 +570,9 @@ class App extends React.Component {
           return;
         }
 
-        /*
-        // FIX: This is a bit awkward.
-        // The responsibility for updating the control values ought to be with what
-        // renders the notebook.
-        const notebookControlData = await getNotebookControlData(NotebookPath);
-        await write(`control/${NotebookPath}`, notebookControlData, {
-          workspace,
-        });
-*/
-
         let script = this.Clipboard.getCode() + NotebookText;
+
+        const version = new Date().getTime();
 
         const evaluate = async (script) => {
           try {
@@ -591,6 +583,7 @@ class App extends React.Component {
                 workspace,
                 path: NotebookPath,
                 sha,
+                version,
               },
               { path }
             );
@@ -614,6 +607,7 @@ class App extends React.Component {
                 workspace,
                 path: NotebookPath,
                 sha,
+                version,
               },
               { path }
             );
@@ -637,6 +631,7 @@ class App extends React.Component {
           workspace,
         });
         await resolvePending();
+        clearNotebookState(this, { path: NotebookPath, workspace, isToBeKept: (note) => note.version !== version });
       } catch (error) {
         // Include any high level notebook errors in the output.
         window.alert(error.stack);
