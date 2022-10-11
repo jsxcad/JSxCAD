@@ -52,7 +52,7 @@ Box(5)
   .tags('color', (colors) => note(`Colors are ${colors}`));
 ```
 
-Colors are green
+Colors are undefined
 
 ```JavaScript
 Box(5).color('red').cut(Arc(6).color('blue')).gridView(8);
@@ -219,6 +219,8 @@ Box(1)
   .as('box')
   .tags((tags) => note(`${tags}`));
 ```
+
+undefined
 
 ```JavaScript
 Box(5, 5, 5).gridView(34);

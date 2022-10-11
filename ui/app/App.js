@@ -32,12 +32,13 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
+import DynamicView from './DynamicView.js';
 import FlexLayout from 'flexlayout-react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
-import OrbitView from './OrbitView.js';
+// import OrbitView from './OrbitView.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import React from 'react';
@@ -1537,6 +1538,7 @@ class App extends React.Component {
         case 'View': {
           const { workspace } = this.props;
           const { View = {} } = this.state;
+          /*
           const trackballState = this.View.trackballState.load(View.path);
           return (
             <OrbitView
@@ -1551,6 +1553,14 @@ class App extends React.Component {
               onMove={this.View.move}
               onUpdateGeometry={this.View.updateGeometry}
               trackballState={trackballState}
+            />
+          );
+          */
+          return (
+            <DynamicView
+              path={View.path}
+              view={View.view}
+              workspace={workspace}
             />
           );
         }

@@ -74,9 +74,10 @@ const getInternalFileFetcher = () => {
           return {};
         }
         logError(
-          'sys/getExternalFile/error',
+          'sys/getInternalFile/error',
           `qualifiedPath=${qualifiedPath} error=${e.toString()}`
         );
+        return {};
       }
     };
   } else if (isBrowser || isWebWorker) {
@@ -120,6 +121,9 @@ const fetchPersistent = (qualifiedPath, { workspace }) => {
     logError(
       'sys/fetchPersistent/error',
       `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+    );
+    console.log(
+      `sys/fetchPersistent/error: qualifiedPath=${qualifiedPath} error=${e.toString()}`
     );
   }
 };

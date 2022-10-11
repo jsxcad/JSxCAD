@@ -1752,7 +1752,6 @@ const orbitDisplay = async (
   let isUpdating = false;
 
   let trackballControls;
-
   const update = () => {
     trackballControls.update();
     anchorControls.change();

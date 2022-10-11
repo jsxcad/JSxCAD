@@ -13,7 +13,7 @@ Box(3)
   .asPart('lid')
   .and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base'))
   .view()
-  .bom((list) =>
+  .bom((...list) =>
     note(
       `Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces ${list.join(
         ', '
@@ -24,4 +24,4 @@ Box(3)
 
 ![Image](bom.md.0.png)
 
-Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces lid, lid, base
+Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces

@@ -57,7 +57,7 @@ const build = async (...args) => {
       for (const entry of await fs.promises.readdir(directory, {
         withFileTypes: true,
       })) {
-        if (['node_modules'].includes(entry.name)) {
+        if (['node_modules', 'jsxcad'].includes(entry.name)) {
           continue;
         }
         const filepath = makePosixPath(path.join(directory, entry.name));

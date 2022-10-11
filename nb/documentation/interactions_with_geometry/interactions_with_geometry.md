@@ -341,13 +341,13 @@ A function can be supplied to receive the tags and shape.
 log(aRectangle.tag('tagString').tags());
 ```
 
-tags: tagString
+tags: user:tagString
 
 ```JavaScript
 aRectangle.tag('tagString').tags((tags) => note(`Tags ${tags}`));
 ```
 
-Tags tagString
+Tags user:tagString
 
 Tags can be used to selectively drop parts of geometry.
 

@@ -72,13 +72,12 @@ var hashSum = sum;
 
 /* global postMessage, self */
 
+// Compatibility with threejs.
 self.window = {};
-
 const say = message => {
   // console.log(`QQ/webworker/say: ${JSON.stringify(message)}`);
   postMessage(message);
 };
-
 const reportError = error => {
   const entry = {
     text: error.stack ? error.stack : '' + error,
@@ -95,9 +94,7 @@ const reportError = error => {
     level: 'serious'
   });
 };
-
 sys.setPendingErrorHandler(reportError);
-
 const agent = async ({
   ask,
   message,
@@ -116,20 +113,17 @@ const agent = async ({
     sha = 'master',
     view
   } = message;
-
   if (workspace) {
     sys.setupFilesystem({
       fileBase: workspace
     });
   }
-
   try {
     switch (op) {
       case 'sys/attach':
         self.id = id;
         sys.setConfig(config);
         return;
-
       case 'app/staticView':
         for (;;) {
           const geometry = await sys.readOrWatch(path, {
@@ -153,10 +147,10 @@ const agent = async ({
       case 'app/evaluate':
         sys.clearEmitted();
         sys.clearTimes();
-
         try {
           // console.log({ op: 'text', text: `QQ/script: ${script}` });
-          const api = { ...baseApi,
+          const api = {
+            ...baseApi,
             sha
           };
           await evaluate(script, {
@@ -167,9 +161,9 @@ const agent = async ({
           await sys.log({
             op: 'evaluate',
             status: 'success'
-          }); // Wait for any pending operations.
+          });
+          // Wait for any pending operations.
           // Finally answer the top level question.
-
           return sys.getTimes();
         } catch (error) {
           reportError(error);
@@ -181,7 +175,6 @@ const agent = async ({
         } finally {
           await sys.resolvePending();
         }
-
       default:
         throw Error(`Unknown operation ${op}`);
     }
@@ -189,19 +182,17 @@ const agent = async ({
     console.log(error.stack);
     throw error;
   }
-}; // We need to start receiving messages immediately, but we're not ready to process them yet.
+};
+
+// We need to start receiving messages immediately, but we're not ready to process them yet.
 // Put them in a buffer.
-
-
 if (!self.messageBootQueue) {
   // The buffer wasn't set up in advance (e.g., we aren't being loaded via import())
   self.messageBootQueue = [];
-
   self.onmessage = ({
     data
   }) => self.messageBootQueue.push(data);
 }
-
 const bootstrap = async () => {
   const {
     ask,
@@ -212,14 +203,13 @@ const bootstrap = async () => {
     say
   });
   self.ask = ask;
-  self.tell = tell; // sys/log depends on ask, so set that up before we boot.
-
+  self.tell = tell;
+  // sys/log depends on ask, so set that up before we boot.
   await sys.boot();
   sys.addOnEmitHandler(async notes => {
     if (notes.length === 0) {
       return;
     }
-
     for (const note of notes) {
       if (note.download) {
         for (const entry of note.download.entries) {
@@ -227,26 +217,24 @@ const bootstrap = async () => {
         }
       }
     }
-
     self.tell({
       op: 'notes',
       notes,
       sourceLocation: notes[0].sourceLocation
     });
-  }); // Handle any messages that came in while we were booting up.
+  });
 
+  // Handle any messages that came in while we were booting up.
   if (self.messageBootQueue.length > 0) {
     do {
       hear(self.messageBootQueue.shift());
     } while (self.messageBootQueue.length > 0);
-  } // The boot queue must be empty at this point.
+  }
 
-
+  // The boot queue must be empty at this point.
   self.onmessage = ({
     data
   }) => hear(data);
-
   if (self.onmessage === undefined) throw Error('die');
 };
-
 bootstrap();

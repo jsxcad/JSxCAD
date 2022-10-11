@@ -474,17 +474,10 @@ Shape.registerMethod('updatePlan', updatePlan);
 const hasAngle = Shape.chainable(
   (start = 0, end = 0) =>
     (shape) =>
-      shape.updatePlan({ angle: { start: start, end: end } })
-);
-const hasBase = Shape.chainable(
-  (base) => (shape) => shape.updatePlan({ base })
-);
-const hasAt = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({
-        at: [x, y, z],
-      })
+      shape
+        .updatePlan({ angle: { start: start, end: end } })
+        .setTag('plan:angle/start', start)
+        .setTag('plan:angle/end', end)
 );
 const hasCorner1 = Shape.chainable(
   (x = 0, y = x, z = 0) =>
@@ -533,50 +526,26 @@ const hasApothem = Shape.chainable(
         { apothem: [x, y, z] }
       )
 );
-const hasFrom = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({ from: [x, y, z] })
-);
 const hasSides = Shape.chainable(
   (sides = 1) =>
     (shape) =>
-      shape.updatePlan({ sides })
-);
-const hasTo = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({ to: [x, y, z], top: undefined })
-);
-const hasTop = Shape.chainable(
-  (top) => (shape) => shape.updatePlan({ top })
-);
-const hasUp = Shape.chainable(
-  (x = 0, y = 0, z = 0) =>
-    (shape) =>
-      shape.updatePlan({ up: [x, y, z], top: undefined })
+      shape.updatePlan({ sides }).setTag('plan:sides', sides)
 );
 const hasZag = Shape.chainable(
-  (zag) => (shape) => shape.updatePlan({ zag })
+  (zag) => (shape) => shape.updatePlan({ zag }).setTag('plan:zag', zag)
 );
 
 // Let's consider migrating to a 'has' prefix for planning.
 
 Shape.registerMethod('hasApothem', hasApothem);
 Shape.registerMethod('hasAngle', hasAngle);
-Shape.registerMethod('hasAt', hasAt);
-Shape.registerMethod('hasBase', hasBase);
 Shape.registerMethod('hasCorner1', hasCorner1);
 Shape.registerMethod('hasC1', hasCorner1);
 Shape.registerMethod('hasCorner2', hasCorner2);
 Shape.registerMethod('hasC2', hasCorner2);
 Shape.registerMethod('hasDiameter', hasDiameter);
-Shape.registerMethod('hasFrom', hasFrom);
 Shape.registerMethod('hasRadius', hasRadius);
 Shape.registerMethod('hasSides', hasSides);
-Shape.registerMethod('hasTo', hasTo);
-Shape.registerMethod('hasTop', hasTop);
-Shape.registerMethod('hasUp', hasUp);
 Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
@@ -690,7 +659,7 @@ const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 Shape.registerReifier = (name, op) => {
   const finishedOp = (geometry) => {
     const timer = startTime(`Reify ${name}`);
-    const shape = op(geometry);
+    const shape = op(Shape.fromGeometry(geometry));
     if (!(shape instanceof Shape)) {
       throw Error('Expected Shape');
     }
@@ -1241,10 +1210,10 @@ const fs = () => {
   return fundamentalShapes;
 };
 
-const reifyBox = (geometry) => {
+const reifyBox = (plan) => {
   const build = () => {
-    const corner1 = getCorner1(geometry);
-    const corner2 = getCorner2(geometry);
+    const corner1 = getCorner1(plan.toGeometry());
+    const corner2 = getCorner2(plan.toGeometry());
 
     const left = corner2[X$6];
     const right = corner1[X$6];
@@ -1307,7 +1276,7 @@ const reifyBox = (geometry) => {
 
   return build()
     .absolute()
-    .tag(...geometry.tags);
+    .tag(...plan.toGeometry().tags);
 };
 
 Shape.registerReifier('Box', reifyBox);
@@ -1373,7 +1342,7 @@ Shape.registerMethod('note', note);
 
 // Is this better than s.get('part:*').tags('part')?
 const billOfMaterials = Shape.chainable(
-  (op = (list) => note(`Materials: ${list.join(', ')}`)) =>
+  (op = (...list) => note(`Materials: ${list.join(', ')}`)) =>
     (shape) =>
       shape.get('part:*').tags('part', op)
 );
@@ -3575,8 +3544,12 @@ const qualifyTag = (tag, namespace = 'user') => {
 };
 
 const tagMatcher = (tag, namespace = 'user') => {
-  const qualifiedTag = qualifyTag(tag, namespace);
-  if (qualifiedTag.endsWith(':*')) {
+  let qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith('=*')) {
+    const [base] = qualifiedTag.split('=');
+    const prefix = `${base}=`;
+    return (tag) => tag.startsWith(prefix);
+  } else if (qualifiedTag.endsWith(':*')) {
     const [namespace] = qualifiedTag.split(':');
     const prefix = `${namespace}:`;
     return (tag) => tag.startsWith(prefix);
@@ -3690,6 +3663,55 @@ const getAll = Shape.chainable((...args) => (shape) => {
 });
 
 Shape.registerMethod('getAll', getAll);
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var parseNumber = createCommonjsModule(function (module) {
+/**
+ * More correct array check
+ */
+var parser = module.exports = function(str) {
+  if (Array.isArray(str)) return NaN;
+  return parser.str(str);
+};
+
+/**
+ * Simple check, assumes non-array inputs
+ */
+parser.str = function(str) {
+  if (str == null || str === "") return NaN;
+  return +str;
+};
+});
+
+const getTag = Shape.chainable((...args) => (shape) => {
+  const {
+    strings: tags,
+    func: op = (...values) =>
+      (shape) =>
+        shape,
+  } = destructure(args);
+  const values = [];
+  for (const tag of tags) {
+    const tags = shape.tags(`${tag}=*`, list);
+    if (tags.length === 0) {
+      values.push(undefined);
+      continue;
+    }
+    const [, value] = tags[0].split('=');
+    const number = parseNumber(value);
+    if (isFinite(number)) {
+      values.push(value);
+      continue;
+    }
+    values.push(value);
+  }
+  return op(...values)(shape);
+});
+
+Shape.registerMethod('getTag', getTag);
 
 const getNot = Shape.chainable((...tags) => (shape) => {
   const isMatch = oneOfTagMatcher(tags, 'item');
@@ -4501,6 +4523,12 @@ const serialize = Shape.chainable(
 
 Shape.registerMethod('serialize', serialize);
 
+const setTag = Shape.chainable(
+  (tag, value) => (shape) => shape.untag(`${tag}=*`).tag(`${tag}=${value}`)
+);
+
+Shape.registerMethod('setTag', setTag);
+
 const shadow = Shape.chainable(
   (planeReference = XY(0), sourceReference = XY(1)) =>
     (shape) =>
@@ -4697,20 +4725,18 @@ const table = Shape.chainable((rows, columns, ...cells) => (shape) => {
 Shape.registerMethod('table', table);
 
 const tags = Shape.chainable((...args) => (shape) => {
-  const {
-    string: namespace = 'user',
-    func: op = (tags) => note(`tags: ${tags}`),
-  } = destructure(args);
-  const prefix = `${namespace}:`;
+  const { string: tag = '*', func: op = (...tags) => note(`tags: ${tags}`) } =
+    destructure(args);
+  const isMatchingTag = tagMatcher(tag, 'user');
   const collected = [];
   for (const { tags } of getLeafs(shape.toGeometry())) {
     for (const tag of tags) {
-      if (tag.startsWith(prefix)) {
-        collected.push(tag.substring(prefix.length));
+      if (isMatchingTag(tag)) {
+        collected.push(tag);
       }
     }
   }
-  return op(collected)(shape);
+  return op(...collected)(shape);
 });
 
 Shape.registerMethod('tags', tags);
@@ -5263,16 +5289,16 @@ const Z = 2;
 
 const reifyArc =
   (axis = Z) =>
-  (geometry) => {
-    let { start = 0, end = 1 } = getAngle(geometry);
+  (plan) => {
+    let { start = 0, end = 1 } = getAngle(plan.toGeometry());
 
     while (start > end) {
       start -= 1;
     }
 
-    const [scale, middle] = getScale(geometry);
-    const corner1 = getCorner1(geometry);
-    const corner2 = getCorner2(geometry);
+    const [scale, middle] = getScale(plan.toGeometry());
+    const corner1 = getCorner1(plan.toGeometry());
+    const corner2 = getCorner2(plan.toGeometry());
 
     const left = corner1[X];
     const right = corner2[X];
@@ -5283,7 +5309,7 @@ const reifyArc =
     const bottom = corner1[Z];
     const top = corner2[Z];
 
-    const step = 1 / getSides(geometry, 32);
+    const step = 1 / getSides(plan.toGeometry(), 32);
     const steps = Math.ceil((end - start) / step);
     const effectiveStep = (end - start) / steps;
 
@@ -5345,7 +5371,7 @@ const reifyArc =
       }
     }
 
-    return spiral.absolute().tag(...geometry.tags);
+    return spiral.absolute().tag(...plan.toGeometry().tags);
   };
 
 Shape.registerReifier('Arc', reifyArc(Z));
@@ -5637,15 +5663,14 @@ var adaptiveBezierCurve = _function();
 
 const DEFAULT_CURVE_ZAG = 1;
 
-const reifyCurve = (geometry) => {
-  const { plan } = geometry;
-  const { controlPoints } = plan;
+const reifyCurve = (plan) => {
+  const { controlPoints } = plan.toGeometry().plan;
   const { start, c1, c2, end } = controlPoints;
   const p1 = Shape.toCoordinate(undefined, start);
   const p2 = Shape.toCoordinate(undefined, c1);
   const p3 = Shape.toCoordinate(undefined, c2);
   const p4 = Shape.toCoordinate(undefined, end);
-  const zag = getZag(geometry, DEFAULT_CURVE_ZAG);
+  const zag = getZag(plan.toGeometry(), DEFAULT_CURVE_ZAG);
   const points = adaptiveBezierCurve(p1, p2, p3, p4, 10 / zag);
   return Link(points.map((point) => Point(point)));
 };
@@ -5728,8 +5753,8 @@ const buildRegularIcosahedron = () => {
   return fromPointsAndPaths(points, paths);
 };
 
-Shape.registerReifier('Icosahedron', (geometry) => {
-  const [scale, middle] = getScale(geometry);
+Shape.registerReifier('Icosahedron', (plan) => {
+  const [scale, middle] = getScale(plan.toGeometry());
   const a = Shape.fromPolygons(buildRegularIcosahedron());
   const b = a.scale(...scale);
   const c = b.move(...middle).absolute();
@@ -5801,14 +5826,14 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
   )
 );
 
-Shape.registerReifier('Orb', (geometry) => {
-  const [scale, middle] = getScale(geometry);
+Shape.registerReifier('Orb', (plan) => {
+  const [scale, middle] = getScale(plan.toGeometry());
   const radius = Math.max(...scale);
 
   // const angularBound = 30;
-  // const radiusBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
-  // const distanceBound = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
-  const tolerance = getZag(geometry, DEFAULT_ORB_ZAG) / radius;
+  // const radiusBound = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
+  // const distanceBound = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
+  const tolerance = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
 
   return makeUnitSphere(tolerance).scale(scale).move(middle).absolute();
 });
@@ -5898,4 +5923,4 @@ const Wave = (...args) => {
 
 Shape.prototype.Wave = Shape.shapeMethod(Wave);
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$7 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getAll, getNot, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, twist, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$7 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, disjoint, drop, e, each, eachEdge, eachPoint, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getAll, getNot, getTag, ghost, gn, grow, hull, image, inFn, inset, involute, join, link, list, loadGeometry, loft, log, loop, lowerEnvelope, m, mask, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, points$1 as points, ref, reify, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, separate, seq, serialize, setTag, shadow, simplify, size, sketch, smooth, sort, sx, sy, sz, table, tag, tags, tint, to, tool, toolpath, twist, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
