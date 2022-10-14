@@ -8,6 +8,24 @@ The names may be textual, e.g, 'red', or numeric, e.g., '#fafafe'.
 See: [tint](../../nb/api/tint.md)
 
 ```JavaScript
+Group(
+  Box(3).color('red'),
+  Box(3).color('chartreuse'),
+  Box(3).color('#0000ff'),
+  Box(3).color('cyan')
+)
+  .pack()
+  .view()
+  .md(
+    "Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()"
+  );
+```
+
+![Image](color.md.0.png)
+
+Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()
+
+```JavaScript
 Box(10)
   .color('red')
   .and(
@@ -25,28 +43,10 @@ Box(10)
   .md("Now color('pink') makes them are all pink.");
 ```
 
-![Image](color.md.0.png)
+![Image](color.md.1.png)
 
 These have various colors
 
-![Image](color.md.1.png)
-
-Now color('pink') makes them are all pink.
-
-```JavaScript
-Group(
-  Box(3).color('red'),
-  Box(3).color('chartreuse'),
-  Box(3).color('#0000ff'),
-  Box(3).color('cyan')
-)
-  .pack()
-  .view()
-  .md(
-    "Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()"
-  );
-```
-
 ![Image](color.md.2.png)
 
-Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()
+Now color('pink') makes them are all pink.

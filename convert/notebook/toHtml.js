@@ -138,32 +138,6 @@ export const toHtmlFromNotebook = async (
 
     const notebook = ${JSON.stringify(encodedNotebook, null, 2)};
 
-    const getLine = (note) => {
-      if (note.sourceLocation) {
-        return note.sourceLocation.line;
-      } else {
-        return 0;
-      }
-    };
-    const getNth = (note) => {
-      if (note.sourceLocation) {
-        return note.sourceLocation.nth;
-      } else {
-        return 0;
-      }
-    };
-    const order = (a, b) => {
-      const lineA = getLine(a);
-      const lineB = getLine(b);
-      if (lineA !== lineB) {
-        return lineA - lineB;
-      }
-      const nthA = getNth(a);
-      const nthB = getNth(b);
-      return nthA - nthB;
-    };
-    notebook.sort(order);
-
     const prepareViews = async (notebook) => {
       // Prepare the view urls in the browser.
       for (const note of notebook) {

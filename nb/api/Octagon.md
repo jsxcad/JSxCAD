@@ -10,18 +10,6 @@ See: [Arc](../../nb/api/Arc.md).
 _FIX: The whole Arc should be red._
 
 ```JavaScript
-Octagon(5, 4, 2)
-  .view()
-  .note(
-    'Octagon(5, 4, 2) produces a prism to fill a three dimensional bounding box.'
-  );
-```
-
-![Image](Octagon.md.0.png)
-
-Octagon(5, 4, 2) produces a prism to fill a three dimensional bounding box.
-
-```JavaScript
 Box(10)
   .color('black')
   .fitTo(Arc(10).color('red'), Octagon(10).color('blue'))
@@ -31,6 +19,18 @@ Box(10)
   );
 ```
 
-![Image](Octagon.md.1.png)
+![Image](Octagon.md.0.png)
 
 Box(10).color('black').fitTo(Arc(10).color('red'), Octagon(10).color('blue')) shows the hexagon inscribed within the arc inscribed within the box.
+
+```JavaScript
+Octagon(5, 4, 2)
+  .view()
+  .note(
+    'Octagon(5, 4, 2) produces a prism to fill a three dimensional bounding box.'
+  );
+```
+
+![Image](Octagon.md.1.png)
+
+Octagon(5, 4, 2) produces a prism to fill a three dimensional bounding box.

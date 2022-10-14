@@ -15,6 +15,18 @@ See: [Link](../../nb/api/Link.md)
 _Note: We should rethink Arc and Box being implicitly filled._
 
 ```JavaScript
+Loop(
+  Line(5),
+  Point(0, 8),
+  Arc([4, 5], [4, 5])
+    .hasAngle(0 / 4, 3 / 4)
+    .outline()
+).view();
+```
+
+![Image](Loop.md.0.png)
+
+```JavaScript
 Seq(
   { by: 1 / 8, upto: 1 },
   (t) =>
@@ -23,18 +35,6 @@ Seq(
       .x(5)
       .rz(t),
   Loop
-).view();
-```
-
-![Image](Loop.md.0.png)
-
-```JavaScript
-Loop(
-  Line(5),
-  Point(0, 8),
-  Arc([4, 5], [4, 5])
-    .hasAngle(0 / 4, 3 / 4)
-    .outline()
 ).view();
 ```
 

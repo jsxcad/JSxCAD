@@ -22,6 +22,19 @@ See: [in](../../nb/api/in.md)
 
 ```JavaScript
 Seq({ upto: 10 }, Box, Group)
+  .pack()
+  .view()
+  .note(
+    'Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
+  );
+```
+
+![Image](pack.md.0.png)
+
+Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
+
+```JavaScript
+Seq({ upto: 10 }, Box, Group)
   .pack({ size: [20, 20] })
   .each(and(bb(1, 1, 0).outline().color('red')).as('page'))
   .pack()
@@ -31,19 +44,6 @@ Seq({ upto: 10 }, Box, Group)
   );
 ```
 
-![Image](pack.md.0.png)
-
-pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those.
-
-```JavaScript
-Seq({ upto: 10 }, Box, Group)
-  .pack()
-  .view()
-  .note(
-    'Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
-  );
-```
-
 ![Image](pack.md.1.png)
 
-Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
+pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those.

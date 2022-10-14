@@ -11,20 +11,6 @@ See: [add](../../nb/api/add.md).
 ```JavaScript
 Box(10)
   .color('blue')
-  .add(Triangle(15).color('green'))
-  .view()
-  .note(
-    "Box(10).color('blue').add(Triangle(15).color('green')) produces a blue result."
-  );
-```
-
-![Image](addTo.md.0.png)
-
-Box(10).color('blue').add(Triangle(15).color('green')) produces a blue result.
-
-```JavaScript
-Box(10)
-  .color('blue')
   .addTo(Triangle(15).color('green'))
   .view()
   .note(
@@ -32,6 +18,20 @@ Box(10)
   );
 ```
 
-![Image](addTo.md.1.png)
+![Image](addTo.md.0.png)
 
 Box(10).color('blue').addTo(Triangle(15).color('green')) produces a green result.
+
+```JavaScript
+Box(10)
+  .color('blue')
+  .add(Triangle(15).color('green'))
+  .view()
+  .note(
+    "Box(10).color('blue').add(Triangle(15).color('green')) produces a blue result."
+  );
+```
+
+![Image](addTo.md.1.png)
+
+Box(10).color('blue').add(Triangle(15).color('green')) produces a blue result.

@@ -14,23 +14,23 @@ See: [cut](../../nb/api/cut.md)
 ```JavaScript
 Box(10)
   .color('blue')
-  .cut(Arc(12).color('red'))
-  .view()
-  .md("Box(10).color('blue').cut(Arc(12).color('red'))");
-```
-
-![Image](cutFrom.md.0.png)
-
-Box(10).color('blue').cut(Arc(12).color('red'))
-
-```JavaScript
-Box(10)
-  .color('blue')
   .cutFrom(Arc(12).color('red'))
   .view()
   .md("Box(10).color('blue').cutFrom(Arc(12).color('red'))");
 ```
 
-![Image](cutFrom.md.1.png)
+![Image](cutFrom.md.0.png)
 
 Box(10).color('blue').cutFrom(Arc(12).color('red'))
+
+```JavaScript
+Box(10)
+  .color('blue')
+  .cut(Arc(12).color('red'))
+  .view()
+  .md("Box(10).color('blue').cut(Arc(12).color('red'))");
+```
+
+![Image](cutFrom.md.1.png)
+
+Box(10).color('blue').cut(Arc(12).color('red'))

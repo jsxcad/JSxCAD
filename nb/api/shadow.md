@@ -8,14 +8,14 @@ Box([0, 10], 3, [0, 2])
   .cut(Box(1, 2, [0, 2]).x(0, 2, 4, 6, 8, 10))
   .ry(1 / 16)
   .z(5)
-  .and(shadow(XY(0), XY(1).rx(-1 / 8)))
+  .and(shadow())
   .view(8)
-  .md('shadow(XY(0), XY(1).rx(-1 /8)) casts diagonally onto XY(0).');
+  .md('shadow() casts vertically onto XY(0).');
 ```
 
 ![Image](shadow.md.0.png)
 
-shadow(XY(0), XY(1).rx(-1 /8)) casts diagonally onto XY(0).
+shadow() casts vertically onto XY(0).
 
 ```JavaScript
 Box([0, 10], 3, [0, 2])
@@ -36,11 +36,11 @@ Box([0, 10], 3, [0, 2])
   .cut(Box(1, 2, [0, 2]).x(0, 2, 4, 6, 8, 10))
   .ry(1 / 16)
   .z(5)
-  .and(shadow())
+  .and(shadow(XY(0), XY(1).rx(-1 / 8)))
   .view(8)
-  .md('shadow() casts vertically onto XY(0).');
+  .md('shadow(XY(0), XY(1).rx(-1 /8)) casts diagonally onto XY(0).');
 ```
 
 ![Image](shadow.md.2.png)
 
-shadow() casts vertically onto XY(0).
+shadow(XY(0), XY(1).rx(-1 /8)) casts diagonally onto XY(0).

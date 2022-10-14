@@ -12,17 +12,17 @@ Join attempts to merge geometry of similar types.
 Solids join solids, surfaces join coplanar surfaces, segments join segments, points join points.
 
 ```JavaScript
-Box(1, 2).join(Box(2, 1)).view().note('Box(1, 2).join(Box(2, 1))');
+Box(1, 2, 3).join(Box(3, 2, 1)).view().note('Box(1, 2, 3).join(Box(3, 2, 1))');
 ```
 
 ![Image](join.md.0.png)
 
-Box(1, 2).join(Box(2, 1))
+Box(1, 2, 3).join(Box(3, 2, 1))
 
 ```JavaScript
-Box(1, 2, 3).join(Box(3, 2, 1)).view().note('Box(1, 2, 3).join(Box(3, 2, 1))');
+Box(1, 2).join(Box(2, 1)).view().note('Box(1, 2).join(Box(2, 1))');
 ```
 
 ![Image](join.md.1.png)
 
-Box(1, 2, 3).join(Box(3, 2, 1))
+Box(1, 2).join(Box(2, 1))

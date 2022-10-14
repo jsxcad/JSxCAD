@@ -10,31 +10,6 @@ We use loops of points rather than indexed paths since converting indexed paths 
 
 ```JavaScript
 Polyhedron(
-  Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)),
-  Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]),
-  [
-    [0, 0, 1],
-    [1, 1, 0],
-    [0, 0, 0],
-  ],
-  [
-    [0, 0, 0],
-    [0, 0, 1],
-    [1, 0, 0],
-  ]
-)
-  .view('wireframe')
-  .note(
-    'Polyhedron(Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)), Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]), [[0, 0, 1], [1, 1, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 1], [1, 0, 0]]) also produces that shape.'
-  );
-```
-
-![Image](Polyhedron.md.0.png)
-
-Polyhedron(Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)), Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]), [[0, 0, 1], [1, 1, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 1], [1, 0, 0]]) also produces that shape.
-
-```JavaScript
-Polyhedron(
   [
     [0, 0, 0],
     [1, 1, 0],
@@ -62,6 +37,31 @@ Polyhedron(
   );
 ```
 
-![Image](Polyhedron.md.1.png)
+![Image](Polyhedron.md.0.png)
 
 Polyhedron([[0, 0, 0], [1, 1, 0], [1, 0, 0]], [[0, 0, 1], [1, 0, 0], [1, 1, 0]], [[0, 0, 1], [1, 1, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 1], [1, 0, 0]]) produces this shape.
+
+```JavaScript
+Polyhedron(
+  Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)),
+  Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]),
+  [
+    [0, 0, 1],
+    [1, 1, 0],
+    [0, 0, 0],
+  ],
+  [
+    [0, 0, 0],
+    [0, 0, 1],
+    [1, 0, 0],
+  ]
+)
+  .view('wireframe')
+  .note(
+    'Polyhedron(Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)), Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]), [[0, 0, 1], [1, 1, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 1], [1, 0, 0]]) also produces that shape.'
+  );
+```
+
+![Image](Polyhedron.md.1.png)
+
+Polyhedron(Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)), Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]), [[0, 0, 1], [1, 1, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 1], [1, 0, 0]]) also produces that shape.

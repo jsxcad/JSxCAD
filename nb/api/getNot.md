@@ -43,20 +43,20 @@ design.getNot('color:blue') discards the Arc, but not the Triangle.
 
 ```JavaScript
 design
-  .getNot('*')
-  .view()
-  .note('design.get(' * ') discards all items');
-```
-
-![Image](getNot.md.2.png)
-
-```JavaScript
-design
   .getNot('triangle')
   .view()
   .note("design.get('triangle') discards the triangle");
 ```
 
-![Image](getNot.md.3.png)
+![Image](getNot.md.2.png)
 
 design.get('triangle') discards the triangle
+
+```JavaScript
+design
+  .getNot('*')
+  .view()
+  .note('design.get(' * ') discards all items');
+```
+
+![Image](getNot.md.3.png)
