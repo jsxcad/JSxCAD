@@ -13,20 +13,20 @@ op||Function to transform the incoming shape for viewing.
 'top'|false|Show a top view.
 
 ```JavaScript
-Box(1, 2, 3).view(0, 'noSkin').note("Box(1, 2, 3).view(0, 'noSkin')");
+Box(1, 2, 3).view(0, 'top').note("Box(1, 2, 3).view(0, 'top')");
 ```
 
 ![Image](view.md.0.png)
 
-Box(1, 2, 3).view(0, 'noSkin')
+Box(1, 2, 3).view(0, 'top')
 
 ```JavaScript
-Box(1, 2, 3).view(0, 'noOutline').note("Box(1, 2, 3).view(0, 'noOutline')");
+Box(1, 2, 3).view(0, 'side').note("Box(1, 2, 3).view(0, 'side')");
 ```
 
 ![Image](view.md.1.png)
 
-Box(1, 2, 3).view(0, 'noOutline')
+Box(1, 2, 3).view(0, 'side')
 
 ```JavaScript
 Box(1, 2, 3).view(0, 'wireframe').note("Box(1, 2, 3).view(0, 'wireframe')");
@@ -37,20 +37,20 @@ Box(1, 2, 3).view(0, 'wireframe').note("Box(1, 2, 3).view(0, 'wireframe')");
 Box(1, 2, 3).view(0, 'wireframe')
 
 ```JavaScript
-Box(1, 2, 3).view(0, 'side').note("Box(1, 2, 3).view(0, 'side')");
+Box(1, 2, 3).view(0, 'noOutline').note("Box(1, 2, 3).view(0, 'noOutline')");
 ```
 
 ![Image](view.md.3.png)
 
-Box(1, 2, 3).view(0, 'side')
+Box(1, 2, 3).view(0, 'noOutline')
 
 ```JavaScript
-Box(1, 2, 3).view(0, 'top').note("Box(1, 2, 3).view(0, 'top')");
+Box(1, 2, 3).view(0, 'noSkin').note("Box(1, 2, 3).view(0, 'noSkin')");
 ```
 
 ![Image](view.md.4.png)
 
-Box(1, 2, 3).view(0, 'top')
+Box(1, 2, 3).view(0, 'noSkin')
 
 ```JavaScript
 Box(10)

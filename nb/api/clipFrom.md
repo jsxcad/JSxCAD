@@ -13,23 +13,23 @@ See: [clip](../../nb/api/clip.md)
 ```JavaScript
 Box(10)
   .color('blue')
-  .clipFrom(Arc(12).color('red'))
-  .view()
-  .md("Box(10).color('blue').clipFrom(Arc(12).color('red'))");
-```
-
-![Image](clipFrom.md.0.png)
-
-Box(10).color('blue').clipFrom(Arc(12).color('red'))
-
-```JavaScript
-Box(10)
-  .color('blue')
   .clip(Arc(12).color('red'))
   .view()
   .md("Box(10).color('blue').clip(Arc(12).color('red'))");
 ```
 
-![Image](clipFrom.md.1.png)
+![Image](clipFrom.md.0.png)
 
 Box(10).color('blue').clip(Arc(12).color('red'))
+
+```JavaScript
+Box(10)
+  .color('blue')
+  .clipFrom(Arc(12).color('red'))
+  .view()
+  .md("Box(10).color('blue').clipFrom(Arc(12).color('red'))");
+```
+
+![Image](clipFrom.md.1.png)
+
+Box(10).color('blue').clipFrom(Arc(12).color('red'))

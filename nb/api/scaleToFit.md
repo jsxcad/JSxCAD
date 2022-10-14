@@ -11,13 +11,13 @@ See: [scale](../../nb/api/scale.md).
 _Note: Should support ranged dimensions._
 
 ```JavaScript
-Box(1, 1, 1).scaleToFit(1, 2, 3).view();
+Box(1, 2, 3).scaleToFit(3, 2, 1).view();
 ```
 
 ![Image](scaleToFit.md.0.png)
 
 ```JavaScript
-Box(1, 2, 3).scaleToFit(3, 2, 1).view();
+Box(1, 1, 1).scaleToFit(1, 2, 3).view();
 ```
 
 ![Image](scaleToFit.md.1.png)

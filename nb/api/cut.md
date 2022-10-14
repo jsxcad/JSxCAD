@@ -12,16 +12,15 @@ The results should be watertight manifolds.
 See: [cutFrom](../../nb/api/cutFrom.md)
 
 ```JavaScript
-Box(10)
-  .color('blue')
-  .cut(Arc(12).color('red'))
+Box(10, 10, 10)
+  .cut(Box(12, 12, 8), 'open')
   .view()
-  .md("Box(10).color('blue').clip(Arc(12).color('red'))");
+  .md("Box(10, 10, 10).clip(Box(12, 12, 8), 'open')");
 ```
 
 ![Image](cut.md.0.png)
 
-Box(10).color('blue').clip(Arc(12).color('red'))
+Box(10, 10, 10).clip(Box(12, 12, 8), 'open')
 
 ```JavaScript
 Box(10)
@@ -37,12 +36,13 @@ Box(10)
 Box(10).ez(2).material('copper').clip(Orb(5))
 
 ```JavaScript
-Box(10, 10, 10)
-  .cut(Box(12, 12, 8), 'open')
+Box(10)
+  .color('blue')
+  .cut(Arc(12).color('red'))
   .view()
-  .md("Box(10, 10, 10).clip(Box(12, 12, 8), 'open')");
+  .md("Box(10).color('blue').clip(Arc(12).color('red'))");
 ```
 
 ![Image](cut.md.2.png)
 
-Box(10, 10, 10).clip(Box(12, 12, 8), 'open')
+Box(10).color('blue').clip(Arc(12).color('red'))

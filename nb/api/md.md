@@ -10,10 +10,10 @@ Note is similar, but cannot be used as a template tag operator.
 
 See: [Note](../../nb/api/Note.md)
 
+Hello, this is *markdown*.
+
 ```JavaScript
 Note('md\`Hello, this is *markdown*.\` produces:');
 ```
 
 md\`Hello, this is *markdown*.\` produces:
-
-Hello, this is *markdown*.

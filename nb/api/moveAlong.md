@@ -8,19 +8,6 @@ Parameter|Default|Type
 See: [m](../../nb/api/m.md)
 
 ```JavaScript
-Box()
-  .moveAlong(Point(0, 1), 2, 3, 4, 5)
-  .view()
-  .note(
-    'Box().moveAlong(Point(0, 1), 2, 3, 4, 5) moves the box by 2, 3, 4, and 5 respectively toward y+.'
-  );
-```
-
-![Image](moveAlong.md.0.png)
-
-Box().moveAlong(Point(0, 1), 2, 3, 4, 5) moves the box by 2, 3, 4, and 5 respectively toward y+.
-
-```JavaScript
 Box(5, 5, 5)
   .and(faces().n(2).moveAlong(normal(), 5))
   .view()
@@ -29,6 +16,19 @@ Box(5, 5, 5)
   );
 ```
 
-![Image](moveAlong.md.1.png)
+![Image](moveAlong.md.0.png)
 
 Box(5, 5, 5).and(faces().n(2).moveAlong(normal(), 5)) copies one face of a box and moves it 5 along its normal.
+
+```JavaScript
+Box()
+  .moveAlong(Point(0, 1), 2, 3, 4, 5)
+  .view()
+  .note(
+    'Box().moveAlong(Point(0, 1), 2, 3, 4, 5) moves the box by 2, 3, 4, and 5 respectively toward y+.'
+  );
+```
+
+![Image](moveAlong.md.1.png)
+
+Box().moveAlong(Point(0, 1), 2, 3, 4, 5) moves the box by 2, 3, 4, and 5 respectively toward y+.

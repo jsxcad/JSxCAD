@@ -9,6 +9,25 @@ Parameter|Default|Type
 Separates the disconnected elements of a shape.
 
 ```JavaScript
+Box(10)
+  .cut(Arc(3))
+  .view(1)
+  .note('Box(10).cut(Arc(3)) produces a box with a hole in it')
+  .separate('holesAsShapes')
+  .pack()
+  .note("separate('holesAsShapes').pack() shows the extracted hole.")
+  .view(3);
+```
+
+![Image](separate.md.0.png)
+
+Box(10).cut(Arc(3)) produces a box with a hole in it
+
+separate('holesAsShapes').pack() shows the extracted hole.
+
+![Image](separate.md.1.png)
+
+```JavaScript
 Box(3, 3, 3)
   .cut(Box(1, 3, 3))
   .view(1)
@@ -23,29 +42,10 @@ Box(3, 3, 3)
   );
 ```
 
-![Image](separate.md.0.png)
+![Image](separate.md.2.png)
 
 Box(3, 3, 3).cut(Box(1, 3, 3)) produces a shape with two disconnected elements.
 
-![Image](separate.md.1.png)
+![Image](separate.md.3.png)
 
 separate().on(n(0), color('blue')) turns the first part blue, demonstrating that they are now separate shapes.
-
-```JavaScript
-Box(10)
-  .cut(Arc(3))
-  .view(1)
-  .note('Box(10).cut(Arc(3)) produces a box with a hole in it')
-  .separate('holesAsShapes')
-  .pack()
-  .note("separate('holesAsShapes').pack() shows the extracted hole.")
-  .view(3);
-```
-
-![Image](separate.md.2.png)
-
-Box(10).cut(Arc(3)) produces a box with a hole in it
-
-separate('holesAsShapes').pack() shows the extracted hole.
-
-![Image](separate.md.3.png)

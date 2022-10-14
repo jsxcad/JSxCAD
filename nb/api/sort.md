@@ -10,26 +10,6 @@ e.g., if ordering by 'z>' the leaf with the greatest minimum z value is selected
 
 ```JavaScript
 Box(4, 4, 4)
-  .faces()
-  .op(
-    n(0).view(1).note('Box(4, 4, 4).faces().n(0) selects an arbitrary face'),
-    sort('z>')
-      .n(0)
-      .view(2)
-      .note('Box(4, 4, 4).faces().sort().n(0) selects the top-most face')
-  );
-```
-
-![Image](sort.md.0.png)
-
-Box(4, 4, 4).faces().n(0) selects an arbitrary face
-
-![Image](sort.md.1.png)
-
-Box(4, 4, 4).faces().sort().n(0) selects the top-most face
-
-```JavaScript
-Box(4, 4, 4)
   .cut(
     eachEdge()
       .sort('z>y<x>')
@@ -40,6 +20,26 @@ Box(4, 4, 4)
   .note('_Check this one_.');
 ```
 
-![Image](sort.md.2.png)
+![Image](sort.md.0.png)
 
 _Check this one_.
+
+```JavaScript
+Box(4, 4, 4)
+  .faces()
+  .op(
+    n(0).view(1).note('Box(4, 4, 4).faces().n(0) selects an arbitrary face'),
+    sort('z>')
+      .n(0)
+      .view(2)
+      .note('Box(4, 4, 4).faces().sort().n(0) selects the top-most face')
+  );
+```
+
+![Image](sort.md.1.png)
+
+Box(4, 4, 4).faces().n(0) selects an arbitrary face
+
+![Image](sort.md.2.png)
+
+Box(4, 4, 4).faces().sort().n(0) selects the top-most face

@@ -11,14 +11,6 @@ Extracts edges into a collection of unoriented segments.
 See: [eachEdge](../../nb/api/eachEdge.md)
 
 ```JavaScript
-Box(5, 5, 5).edges().view().md('Box(5, 5, 5).edges()');
-```
-
-![Image](edges.md.0.png)
-
-Box(5, 5, 5).edges()
-
-```JavaScript
 Box(5, 5, 5)
   .remesh()
   .edges({ selections: Box(5, 5, [0, 2.5]) })
@@ -26,6 +18,14 @@ Box(5, 5, 5)
   .md('Box(5, 5, 5).remesh().edges({ selections: Box(5, 5, [0, 2.5]) })');
 ```
 
-![Image](edges.md.1.png)
+![Image](edges.md.0.png)
 
 Box(5, 5, 5).remesh().edges({ selections: Box(5, 5, [0, 2.5]) })
+
+```JavaScript
+Box(5, 5, 5).edges().view().md('Box(5, 5, 5).edges()');
+```
+
+![Image](edges.md.1.png)
+
+Box(5, 5, 5).edges()

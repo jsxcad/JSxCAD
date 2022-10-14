@@ -14,18 +14,6 @@ See: [offset](../../nb/api/offset.md).
 ```JavaScript
 Arc(5)
   .join(Box(10, 2, 2))
-  .cut(inset(0.5))
-  .view()
-  .note('Arc(5).join(Box(10, 2, 2)).cut(inset(0.5))');
-```
-
-![Image](inset.md.0.png)
-
-Arc(5).join(Box(10, 2, 2)).cut(inset(0.5))
-
-```JavaScript
-Arc(5)
-  .join(Box(10, 2, 2))
   .cut(inset(0.5, { step: 0.5 }))
   .view()
   .note(
@@ -33,6 +21,18 @@ Arc(5)
   );
 ```
 
-![Image](inset.md.1.png)
+![Image](inset.md.0.png)
 
 Arc(5).join(Box(10, 2, 2)).cut(inset(0.5, { step: 0.1 })) produces further insets.
+
+```JavaScript
+Arc(5)
+  .join(Box(10, 2, 2))
+  .cut(inset(0.5))
+  .view()
+  .note('Arc(5).join(Box(10, 2, 2)).cut(inset(0.5))');
+```
+
+![Image](inset.md.1.png)
+
+Arc(5).join(Box(10, 2, 2)).cut(inset(0.5))

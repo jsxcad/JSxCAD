@@ -23,12 +23,12 @@ material|Materials.
 See: [tags](../../nb/api/tags.nb), [get](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/get.nb), [color](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/color.nb), [material](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/material.nb), [item](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/item.nb), [part](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/part.md).
 
 ```JavaScript
-Box().tag('a', 'b', 'c').tags().note("Box().tag('a', 'b', 'c').tags()");
+Hexagon().tag('color:orange').view().note("Hexagon().tag('color:orange')");
 ```
 
-tags: user:a,user:b,user:c
+![Image](tag.md.0.png)
 
-Box().tag('a', 'b', 'c').tags()
+Hexagon().tag('color:orange')
 
 ```JavaScript
 Box()
@@ -39,14 +39,14 @@ Box()
   .note("Box().tag('a').and(Triangle().tag('b')).get('user:b')");
 ```
 
-![Image](tag.md.0.png)
+![Image](tag.md.1.png)
 
 Box().tag('a').and(Triangle().tag('b')).get('user:b')
 
 ```JavaScript
-Hexagon().tag('color:orange').view().note("Hexagon().tag('color:orange')");
+Box().tag('a', 'b', 'c').tags().note("Box().tag('a', 'b', 'c').tags()");
 ```
 
-![Image](tag.md.1.png)
+tags: user:a,user:b,user:c
 
-Hexagon().tag('color:orange')
+Box().tag('a', 'b', 'c').tags()
