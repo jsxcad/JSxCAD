@@ -16,9 +16,8 @@ import { useEffect } from 'preact/hooks';
 
 export const clearNotebookState = async (
   application,
-  { path,
-  workspace,
-  isToBeKept }) => {
+  { path, workspace, isToBeKept }
+) => {
   application.setState((state) => {
     const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
     const newNotebookNotes = {};
@@ -244,14 +243,14 @@ export class Notebook extends React.PureComponent {
           classList="notebook notes"
           style={{ overflow: 'auto' }}
         >
-          {children}
           {state === 'running' && (
             <SpinnerCircularSplit
               color="#36d7b7"
               size={64}
-              style={{ position: 'fixed', right: 32, top: 64 }}
+              style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
             />
           )}
+          {children}
         </div>
       );
     } catch (e) {

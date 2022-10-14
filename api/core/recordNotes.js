@@ -1,4 +1,4 @@
-import { Group, Shape, loadGeometry, saveGeometry } from '@jsxcad/api-shape';
+import { Group, Shape, load, save } from '@jsxcad/api-shape';
 import {
   addOnEmitHandler,
   addPending,
@@ -61,13 +61,6 @@ export const replayRecordedNotes = async (path, id) => {
   flushEmitGroup();
 };
 
-/*
-export const emitSourceLocation = ({ path, id }) => {
-  const setContext = { sourceLocation: { path, id } };
-  emit({ hash: computeHash(setContext), setContext });
-};
-*/
-
 export const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
@@ -98,6 +91,17 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     await resolvePending();
     endTime(timer);
     finishEmitGroup({ path, id });
+    try {
+      if (result !== undefined) {
+        await save(`data/def/${path}/${id}.data`, result);
+        await write(`meta/def/${path}/${id}.meta`, { sha });
+        await saveRecordedNotes(path, id);
+        return result;
+      }
+    } catch (error) {}
+    clearRecordedNotes();
+    return result;
+    /*
     if (typeof result === 'object') {
       const type = result.constructor.name;
       switch (type) {
@@ -110,10 +114,18 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     }
     clearRecordedNotes();
     return result;
+    */
+  } else {
+    await replayRecordedNotes(path, id);
+    const result = load(`data/def/${path}/${id}.data`);
+    return result;
+  }
+  /*
   } else if (meta.type === 'Shape') {
     await replayRecordedNotes(path, id);
     return loadGeometry(`data/def/${path}/${id}.data`);
   } else {
     throw Error('Unexpected cached result');
   }
+  */
 };

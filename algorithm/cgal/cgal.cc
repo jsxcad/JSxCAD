@@ -896,18 +896,29 @@ void emitNthPoint(int nth, Point p, emscripten::val emit_point) {
 Vector unitVector(const Vector& vector);
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
 
-void buildManifoldFromSurfaceMesh(const Surface_mesh& surface_mesh,
+void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
                                   manifold::Manifold& manifold) {
+  if (surface_mesh.has_garbage()) {
+    surface_mesh.collect_garbage();
+  }
   manifold::Mesh manifold_mesh;
-  manifold_mesh.vertPos.resize(surface_mesh.number_of_vertices());
+  size_t number_of_vertices = surface_mesh.number_of_vertices();
+  manifold_mesh.vertPos.resize(number_of_vertices);
   for (const auto& vertex : surface_mesh.vertices()) {
+    if (size_t(vertex) >= number_of_vertices) {
+      std::cout << "Vertex beyond count" << std::endl;
+    }
     const Point& point = surface_mesh.point(vertex);
     glm::vec3 p(CGAL::to_double(point.x()), CGAL::to_double(point.y()),
                 CGAL::to_double(point.z()));
     manifold_mesh.vertPos[size_t(vertex)] = std::move(p);
   }
-  manifold_mesh.triVerts.resize(surface_mesh.number_of_faces());
+  size_t number_of_faces = surface_mesh.number_of_faces();
+  manifold_mesh.triVerts.resize(number_of_faces);
   for (const auto& facet : surface_mesh.faces()) {
+    if (facet >= number_of_faces) {
+      std::cout << "Facet beyond count" << std::endl;
+    }
     const auto a = surface_mesh.halfedge(facet);
     const auto b = surface_mesh.next(a);
     glm::ivec3 t(surface_mesh.source(a), surface_mesh.source(b),
@@ -923,12 +934,18 @@ void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
   for (std::size_t nth = 0; nth < mesh.vertPos.size(); nth++) {
     const glm::vec3& p = mesh.vertPos[nth];
     Point point(p[0], p[1], p[2]);
-    assert(size_t(surface_mesh.add_vertex(point)) == nth);
+    if (size_t(surface_mesh.add_vertex(point)) != nth) {
+      std::cout << "buildSurfaceMeshFromManifold: point index misaligned"
+                << std::endl;
+    }
   }
   for (std::size_t nth = 0; nth < mesh.triVerts.size(); nth++) {
     const glm::ivec3& t = mesh.triVerts[nth];
-    assert(size_t(surface_mesh.add_face(Vertex_index(t[0]), Vertex_index(t[1]),
-                                        Vertex_index(t[2]))) == nth);
+    if (size_t(surface_mesh.add_face(Vertex_index(t[0]), Vertex_index(t[1]),
+                                     Vertex_index(t[2]))) != nth) {
+      std::cout << "buildSurfaceMeshFromManifold: face index misaligned"
+                << std::endl;
+    }
   }
 }
 
@@ -4940,6 +4957,7 @@ int Fuse(Geometry* geometry, bool exact) {
         buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
         target_manifold += nth_manifold;
         geometry->mesh(target).clear();
+        geometry->mesh(target).collect_garbage();
         buildSurfaceMeshFromManifold(target_manifold, geometry->mesh(target));
       }
       geometry->updateBounds3(target);

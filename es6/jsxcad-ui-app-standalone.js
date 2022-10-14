@@ -5550,15 +5550,16 @@ class Notebook extends ReactDOM$1.PureComponent {
         style: {
           overflow: 'auto'
         }
-      }, children, state === 'running' && v$1(SpinnerCircularSplit, {
+      }, state === 'running' && v$1(SpinnerCircularSplit, {
         color: "#36d7b7",
         size: 64,
         style: {
           position: 'fixed',
           right: 32,
-          top: 64
+          top: 64,
+          zIndex: 1000
         }
-      }));
+      }), children);
     } catch (e) {
       console.log(e.stack);
       throw e;

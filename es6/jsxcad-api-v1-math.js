@@ -3874,6 +3874,24 @@ const Random = (seed = 0) => {
   return g;
 };
 
+const random = (seed = 0) => {
+  const generator = Random(seed);
+  // CHECK: We could use reset and skip instead of caching.
+  const values = [];
+  const generate = (nth) => {
+    while (values.length <= nth) {
+      values.push(generator());
+    }
+    return values[nth];
+  };
+  generate.in = (from, to) => (nth) => generate(nth) * (to - from) + from;
+  generate.pick =
+    (...choices) =>
+    (nth) =>
+      choices[Math.floor(generate(nth) * choices.length)];
+  return generate;
+};
+
 /**
  *
  * # Arc Cosine
@@ -3987,4 +4005,4 @@ const zag = (diameter, tolerance = 1) => {
   return s;
 };
 
-export { Noise, Random, acos, cos, ease, linear, max, min, sin, sqrt, zag };
+export { Noise, Random, acos, cos, ease, linear, max, min, random, sin, sqrt, zag };

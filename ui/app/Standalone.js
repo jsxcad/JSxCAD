@@ -2,7 +2,10 @@ import './react-multi-split-pane.css';
 
 import * as PropTypes from 'prop-types';
 
-import Notebook, { clearNotebookState, updateNotebookState } from './Notebook.js';
+import Notebook, {
+  clearNotebookState,
+  updateNotebookState,
+} from './Notebook.js';
 
 import {
   addOnEmitHandler,
@@ -124,7 +127,11 @@ class Standalone extends React.Component {
       this.setState({ [`NotebookState/${module}`]: 'idle' });
 
       removeOnEmitHandler(onEmitHandler);
-      clearNotebookState(this, { path: module, workspace, isToBeKept: (note) => note.version === version });
+      clearNotebookState(this, {
+        path: module,
+        workspace,
+        isToBeKept: (note) => note.version === version,
+      });
     };
 
     const onKeyDown = (e) => {

@@ -2488,7 +2488,7 @@ const write = async (path, data, options = {}) => {
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
 
-  if (!file.data) {
+  if (file.data === undefined) {
     await notifyFileCreation(path, workspace);
   }
 
@@ -2729,7 +2729,10 @@ const read = async (path, options = {}) => {
   if (notifyFileReadEnabled) {
     await notifyFileRead(path, workspace);
   }
-  return file.data || otherwise;
+  if (file.data === undefined) {
+    return otherwise;
+  }
+  return file.data;
 };
 
 const readOrWatch = async (path, options = {}) => {

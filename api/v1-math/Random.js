@@ -16,3 +16,21 @@ export const Random = (seed = 0) => {
 };
 
 export default Random;
+
+export const random = (seed = 0) => {
+  const generator = Random(seed);
+  // CHECK: We could use reset and skip instead of caching.
+  const values = [];
+  const generate = (nth) => {
+    while (values.length <= nth) {
+      values.push(generator());
+    }
+    return values[nth];
+  };
+  generate.in = (from, to) => (nth) => generate(nth) * (to - from) + from;
+  generate.pick =
+    (...choices) =>
+    (nth) =>
+      choices[Math.floor(generate(nth) * choices.length)];
+  return generate;
+};

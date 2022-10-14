@@ -34,11 +34,14 @@ const TARGET = 1;
 export const eachEdge = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
-  let [edgeOp = (e, l) => e, faceOp = (e, f) => e, groupOp = Group] =
-    shapesAndFunctions;
+  let [
+    edgeOp = (e, l) => (s) => e,
+    faceOp = (e, f) => (s) => e,
+    groupOp = Group,
+  ] = shapesAndFunctions;
   if (edgeOp instanceof Shape) {
     const edgeShape = edgeOp;
-    edgeOp = (edge) => edgeShape.to(edge);
+    edgeOp = (edge) => (shape) => edgeShape.to(edge);
   }
   const faces = [];
   eachFaceEdges(
@@ -54,6 +57,10 @@ export const eachEdge = Shape.chainable((...args) => (shape) => {
             transformCoordinate(segment[SOURCE], matrix),
             transformCoordinate(segment[TARGET], matrix),
           ];
+          const absoluteOppositeSegment = [
+            transformCoordinate(segment[TARGET], matrix),
+            transformCoordinate(segment[SOURCE], matrix),
+          ];
           const absoluteNormal = normals
             ? subtract(
                 transformCoordinate(normals[nth], matrix),
@@ -64,11 +71,20 @@ export const eachEdge = Shape.chainable((...args) => (shape) => {
             absoluteSegment,
             absoluteNormal
           );
+          const oppositeInverse = fromSegmentToInverseTransform(
+            absoluteOppositeSegment,
+            absoluteNormal
+          );
           const baseSegment = [
             transformCoordinate(absoluteSegment[SOURCE], inverse),
             transformCoordinate(absoluteSegment[TARGET], inverse),
           ];
+          const oppositeSegment = [
+            transformCoordinate(absoluteSegment[TARGET], oppositeInverse),
+            transformCoordinate(absoluteSegment[SOURCE], oppositeInverse),
+          ];
           const inverseMatrix = invertTransform(inverse);
+          const oppositeInverseMatrix = invertTransform(oppositeInverse);
           // We get a pair of absolute coordinates from eachSegment.
           // We need a segment from [0,0,0] to [x,0,0] in its local space.
           edges.push(
@@ -76,12 +92,19 @@ export const eachEdge = Shape.chainable((...args) => (shape) => {
               Shape.fromGeometry(
                 taggedSegments({ matrix: inverseMatrix }, [baseSegment])
               ),
-              length(segment[SOURCE], segment[TARGET])
-            )
+              length(segment[SOURCE], segment[TARGET]),
+              Shape.fromGeometry(
+                taggedSegments({ matrix: oppositeInverseMatrix }, [
+                  oppositeSegment,
+                ])
+              )
+            )(shape)
           );
         }
       }
-      faces.push(faceOp(Group(...edges), Shape.fromGeometry(faceGeometry)));
+      faces.push(
+        faceOp(Group(...edges), Shape.fromGeometry(faceGeometry))(shape)
+      );
     }
   );
   const grouped = groupOp(...faces);
