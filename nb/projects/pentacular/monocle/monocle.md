@@ -2,7 +2,7 @@
 const Rim = (diameter = 37, thickness = 2) =>
   Arc(diameter)
     .hasAngle(1 / 4)
-    .eachPoint((p) => p.Orb(thickness), ChainHull);
+    .eachPoint((p) => (s) => p.Orb(thickness), ChainHull);
 ```
 
 ```JavaScript

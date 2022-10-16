@@ -1987,6 +1987,8 @@ class ControlNote extends ReactDOM$3.PureComponent {
     } = this.props;
     const {
       label,
+      options,
+      type,
       value
     } = note.control;
     const ref = selected && /*#__PURE__*/p$1();
@@ -1994,16 +1996,54 @@ class ControlNote extends ReactDOM$3.PureComponent {
       y(() => ref.current.scrollIntoView(true));
     }
     const border = selected ? '1px dashed dodgerblue' : '0px';
-    return v$1(InputGroup, {
-      ref: ref,
-      style: {
-        border
-      }
-    }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
-      className: "note control input",
-      value: value,
-      name: label
-    }));
+    // TODO: Slider.
+    switch (type) {
+      case 'check':
+        return v$1(InputGroup, {
+          ref: ref,
+          style: {
+            border
+          }
+        }, v$1(FormImpl.Check, {
+          label: label,
+          type: "checkbox",
+          name: label,
+          checked: value,
+          className: "note control check"
+        }));
+      case 'input':
+        return v$1(InputGroup, {
+          ref: ref,
+          style: {
+            border
+          }
+        }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
+          className: "note control input",
+          value: value,
+          name: label
+        }));
+      case 'select':
+        return v$1(InputGroup, {
+          ref: ref,
+          style: {
+            border
+          }
+        }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
+          as: "select",
+          className: "note control select",
+          name: label
+        }, options.map((option, nth) => v$1("option", {
+          key: nth,
+          value: option
+        }, option))));
+      default:
+        return v$1("div", {
+          ref: ref,
+          style: {
+            border
+          }
+        }, "Unsupported control type");
+    }
   }
 }
 

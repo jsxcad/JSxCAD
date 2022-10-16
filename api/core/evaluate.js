@@ -130,7 +130,7 @@ export const execute = async (
               dependency !== id
           );
           if (
-            updatePromises.length <= 5 &&
+            updatePromises.length <= 1 &&
             outstandingDependencies.length === 0
           ) {
             // For now, only do one thing at a time, and block the remaining updates.

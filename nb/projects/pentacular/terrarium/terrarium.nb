@@ -94,8 +94,8 @@ const Terrarium = (
   Box(length, width, [0, height])
     .faces()
     .eachEdge(
-      (e, l) => Hinge(l, thickness, hingeLength).to(e),
-      (e, f) => f.e(-thickness).cut(e)
+      (e, l) => s => Hinge(l, thickness, hingeLength).to(e),
+      (e, f) => s => f.e(-thickness).cut(e)
     )
     .cut(Arc(holeDiameter, holeDiameter, [height - thickness, height]))
     .material('acrylic')

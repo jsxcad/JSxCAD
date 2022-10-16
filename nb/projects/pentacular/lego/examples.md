@@ -109,6 +109,17 @@ export const block16x8x9_6 = Block(2, 1, 3.2 * 3)
 ![Image](examples.md.11.png)
 
 ```JavaScript
+export const block32x8x9_6 = Block(4, 1, 3.2 * 3)
+  .cut(axleHole)
+  .as('block32x8x9_6e')
+  .stl('block32x8x9_6e');
+```
+
+![Image](examples.md.12.png)
+
+[block32x8x9_6e_1.stl](examples.block32x8x9_6e_1.stl)
+
+```JavaScript
 export const AxleProfile = () => {
   const length = 4.8 + 0.1;
   const width = 1.8 + 0.1;
@@ -129,17 +140,6 @@ export const AxleProfile = () => {
 ```
 
 ```JavaScript
-export const block32x8x9_6 = Block(4, 1, 3.2 * 3)
-  .cut(axleHole)
-  .as('block32x8x9_6e')
-  .stl('block32x8x9_6e');
-```
-
-![Image](examples.md.12.png)
-
-[block32x8x9_6e_1.stl](examples.block32x8x9_6e_1.stl)
-
-```JavaScript
 export const axleProfile = AxleProfile().md('Axle Profile').topView();
 ```
 
@@ -148,11 +148,23 @@ Axle Profile
 ![Image](examples.md.13.png)
 
 ```JavaScript
-const box = Box(8, 3.2 * 4).y(3.2 * 2);
+export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez(length);
 ```
 
 ```JavaScript
-export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez(length);
+export const axleJoiner16 = AxleJoiner(16)
+  .md('Axle Joiner 16mm')
+  .stl('AxleJoiner16');
+```
+
+Axle Joiner 16mm
+
+![Image](examples.md.14.png)
+
+[AxleJoiner16_1.stl](examples.AxleJoiner16_1.stl)
+
+```JavaScript
+const box = Box(8, 3.2 * 4).y(3.2 * 2);
 ```
 
 ```JavaScript
@@ -172,21 +184,9 @@ const technic = Group(box, Arc(4.8 + 0.2).y(5.6))
   .stl('technic');
 ```
 
-![Image](examples.md.14.png)
-
-[technic_1.stl](examples.technic_1.stl)
-
-```JavaScript
-export const axleJoiner16 = AxleJoiner(16)
-  .md('Axle Joiner 16mm')
-  .stl('AxleJoiner16');
-```
-
-Axle Joiner 16mm
-
 ![Image](examples.md.15.png)
 
-[AxleJoiner16_1.stl](examples.AxleJoiner16_1.stl)
+[technic_1.stl](examples.technic_1.stl)
 
 ```JavaScript
 const technic_1x6 = Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))

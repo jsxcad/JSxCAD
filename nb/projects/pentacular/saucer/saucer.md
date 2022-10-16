@@ -12,6 +12,15 @@ const profile = Arc(1)
 ![Image](saucer.md.0.png)
 
 ```JavaScript
+const saucer = profile
+  .rx(1 / 4)
+  .seq({ by: 1 / 6 }, rz, Loft)
+  .view(2);
+```
+
+![Image](saucer.md.1.png)
+
+```JavaScript
 const knob = Loft(
   Hexagon(60)
     .rz(1 / 12)
@@ -44,15 +53,6 @@ const knob = Loft(
   .view();
 ```
 
-![Image](saucer.md.1.png)
-
-```JavaScript
-const saucer = profile
-  .rx(1 / 4)
-  .seq({ by: 1 / 6 }, rz, Loft)
-  .view(2);
-```
-
 ![Image](saucer.md.2.png)
 
 ```JavaScript
@@ -63,10 +63,6 @@ const top = saucer
   .fitTo(knob)
   .as('top')
   .stl('knob', get('knob').by(align('>z')));
-```
-
-```JavaScript
-const base = saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
 ```
 
 ```JavaScript
@@ -88,6 +84,10 @@ const topWithPegHoles = top
 ![Image](saucer.md.3.png)
 
 [top2_1.stl](saucer.top2_1.stl)
+
+```JavaScript
+const base = saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
+```
 
 ```JavaScript
 const baseWithPegHoles = base

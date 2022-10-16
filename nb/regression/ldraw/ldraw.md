@@ -1,4 +1,8 @@
 ```JavaScript
+import { LDraw } from '@jsxcad/api-v1-ldraw';
+```
+
+```JavaScript
 const override = {
   'stud2.dat': {},
   'stud3.dat': {},
@@ -7,16 +11,6 @@ const override = {
   'stud.dat': {},
 };
 ```
-
-```JavaScript
-import { LDraw } from '@jsxcad/api-v1-ldraw';
-```
-
-```JavaScript
-const wrapped = Hershey('Disabled', 20).by(align('xy')).topView();
-```
-
-![Image](ldraw.md.0.png)
 
 ```JavaScript
 const train = (
@@ -307,6 +301,12 @@ const train = (
     { override }
   )
 ).view(material('glass'));
+```
+
+![Image](ldraw.md.0.png)
+
+```JavaScript
+const wrapped = Hershey('Disabled', 20).by(align('xy')).topView();
 ```
 
 ![Image](ldraw.md.1.png)

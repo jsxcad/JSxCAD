@@ -33,14 +33,6 @@ Axle Profile
 ![Image](micro_gear_motor.md.2.png)
 
 ```JavaScript
-const rearHubProfile = Arc(4.8).md('Rear Hub Profile').gridView();
-```
-
-Rear Hub Profile
-
-![Image](micro_gear_motor.md.3.png)
-
-```JavaScript
 const axleFlatProfile = axleProfile
   .clip(Box(3.2).x(0.5))
   .md('Flat Axle Profile')
@@ -49,11 +41,15 @@ const axleFlatProfile = axleProfile
 
 Flat Axle Profile
 
-![Image](micro_gear_motor.md.4.png)
+![Image](micro_gear_motor.md.3.png)
 
 ```JavaScript
-const wireThickness = 0.8;
+const rearHubProfile = Arc(4.8).md('Rear Hub Profile').gridView();
 ```
+
+Rear Hub Profile
+
+![Image](micro_gear_motor.md.4.png)
 
 ```JavaScript
 const motor = Group(
@@ -68,6 +64,10 @@ const motor = Group(
 Motor
 
 ![Image](micro_gear_motor.md.5.png)
+
+```JavaScript
+const wireThickness = 0.8;
+```
 
 ```JavaScript
 const wireChannelProfile = Box(wireThickness, wireThickness * 5)
@@ -92,14 +92,6 @@ Cap Profile
 ![Image](micro_gear_motor.md.7.png)
 
 ```JavaScript
-const gearProfile = Gear(20).md('Gear Profile').gridView();
-```
-
-Gear Profile
-
-![Image](micro_gear_motor.md.8.png)
-
-```JavaScript
 const sheath = capProfile
   .cut(motorProfile, wireChannelProfile)
   .ez(0, 5)
@@ -109,9 +101,27 @@ const sheath = capProfile
 
 Sheath
 
-![Image](micro_gear_motor.md.9.png)
+![Image](micro_gear_motor.md.8.png)
 
 [sheath1_1.stl](micro_gear_motor.sheath1_1.stl)
+
+```JavaScript
+const cap = Group(capProfile.ez(-2, -0.0), sheath).md('Cap').stl('cap');
+```
+
+Cap
+
+![Image](micro_gear_motor.md.9.png)
+
+[cap_1.stl](micro_gear_motor.cap_1.stl)
+
+```JavaScript
+const gearProfile = Gear(20).md('Gear Profile').gridView();
+```
+
+Gear Profile
+
+![Image](micro_gear_motor.md.10.png)
 
 ```JavaScript
 const gear = Gear(20)
@@ -125,21 +135,11 @@ const gear = Gear(20)
 
 Gear
 
-![Image](micro_gear_motor.md.10.png)
-
 ![Image](micro_gear_motor.md.11.png)
-
-[gear2_1.stl](micro_gear_motor.gear2_1.stl)
-
-```JavaScript
-const cap = Group(capProfile.ez(-2, -0.0), sheath).md('Cap').stl('cap');
-```
-
-Cap
 
 ![Image](micro_gear_motor.md.12.png)
 
-[cap_1.stl](micro_gear_motor.cap_1.stl)
+[gear2_1.stl](micro_gear_motor.gear2_1.stl)
 
 ```JavaScript
 const gearCutout = Gear(20).fill()

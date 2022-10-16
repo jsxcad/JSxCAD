@@ -327,19 +327,19 @@ const b = Box(5)
 ```
 
 ```JavaScript
-Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
+b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
 ```
 
 ![Image](shape.md.42.png)
 
 ```JavaScript
-b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
+b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
 ```
 
 ![Image](shape.md.43.png)
 
 ```JavaScript
-b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
 ```
 
 ![Image](shape.md.44.png)
@@ -650,7 +650,7 @@ Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```JavaScript
 Orb(5, 5, 5)
   .hasZag(5)
-  .eachEdge((e, l) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to(e))
+  .eachEdge((e, l) => (s) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to(e))
   .view();
 ```
 
@@ -707,7 +707,7 @@ Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 ```JavaScript
 Box(10, 10, 10)
   .and(
-    eachEdge((e, l) =>
+    eachEdge((e, l) => (s) =>
       Box([0, 1.5], 0, [0, l])
         .and(
           Arc([1, 2], 1, [0, l * 0.95])
@@ -726,7 +726,7 @@ Box(10, 10, 10)
 Arc(10, 10, 10)
   .hasSides(7)
   .cut(
-    eachEdge({ selections: [Box(10, [-4, 10], [5, 10])] }, (e, l) =>
+    eachEdge({ selections: [Box(10, [-4, 10], [5, 10])] }, (e, l) => (s) =>
       Box(2, 2, [0, l])
         .clip(
           Arc(2, 2, [0, l])

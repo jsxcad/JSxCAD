@@ -10,14 +10,6 @@ const mm = 160 / 1000;
 const tileWidth = 64 * mm;
 ```
 
-```JavaScript
-const extrudeTile = () => (shape) =>
-  shape
-    .on(getAll('user:road_marking'), ez(1.2 * mm))
-    .on(getAll('user:road_surface'), ez(1 * mm))
-    .on(getAll('user:pavement'), ez(2 * mm));
-```
-
 Each tile is 64mm
 
 ```JavaScript
@@ -76,18 +68,10 @@ const lane = Box(laneWidth, [laneWidth / -2, tileWidth / 2])
 ```
 
 ```JavaScript
-const curvedRoadTile = tile.fitTo(curve).as('curved road');
-```
-
-```JavaScript
 const doubleLane = lane
   .x(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
-```
-
-```JavaScript
-const roadEndTile = tile.fitTo(lane.rz(0 / 4)).as('road end');
 ```
 
 ```JavaScript
@@ -100,15 +84,23 @@ const doubleLaneMarked = doubleLane.fitTo(
 ```
 
 ```JavaScript
-const doubleLaneCurvedRoadTile = tile
-  .fitTo(doubleLaneCurveMarked)
-  .as('2 lane curved road');
+const roadEndTile = tile.fitTo(lane.rz(0 / 4)).as('road end');
 ```
 
 ```JavaScript
 const doubleLaneRoadEndTile = tile
   .fitTo(doubleLaneMarked.rz(0 / 4))
   .as('double lane road end');
+```
+
+```JavaScript
+const curvedRoadTile = tile.fitTo(curve).as('curved road');
+```
+
+```JavaScript
+const doubleLaneCurvedRoadTile = tile
+  .fitTo(doubleLaneCurveMarked)
+  .as('2 lane curved road');
 ```
 
 ```JavaScript
@@ -203,6 +195,14 @@ const doubleToSingleLaneCurvedFourWayIntersectionTile = tile
     doubleLane.rz(1 / 4, 3 / 4)
   )
   .as('2 to 1 lane 4 way curved intersection');
+```
+
+```JavaScript
+const extrudeTile = () => (shape) =>
+  shape
+    .on(getAll('user:road_marking'), ez(1.2 * mm))
+    .on(getAll('user:road_surface'), ez(1 * mm))
+    .on(getAll('user:pavement'), ez(2 * mm));
 ```
 
 ```JavaScript

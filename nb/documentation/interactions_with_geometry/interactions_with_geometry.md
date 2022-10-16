@@ -73,6 +73,12 @@ Arc(10).x(0, 6).fuse().view();
 const a = Arc(20).cut(Box(10));
 ```
 
+```JavaScript
+Group(a.inset(1).z(0.1).color('pink'), a.color('orange')).view();
+```
+
+![Image](interactions_with_geometry.md.6.png)
+
 ---
 ### Item
 Geometry can be formed into an 'item'.
@@ -84,12 +90,6 @@ The interior has its own frame of reference independent of any transformation of
 Since an item appears individual from the outside, tag and path selectors need to explicitly select item to access the interior.
 
 There are a number of item specific operators. .in() will enter an item, .asPart("Bolt") will define an item which is specified as a part. Parts can be listed with the .bom() operation.
-
-```JavaScript
-Group(a.inset(1).z(0.1).color('pink'), a.color('orange')).view();
-```
-
-![Image](interactions_with_geometry.md.6.png)
 
 ```JavaScript
 const aBolt = Arc(8, 8, 2)
@@ -105,21 +105,11 @@ const aBolt = Arc(8, 8, 2)
 const aBox = Box(10, 10, 10).as('box');
 ```
 
----
-### Grow
-Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
-
 ```JavaScript
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 ```
 
 ![Image](interactions_with_geometry.md.8.png)
-
-```JavaScript
-Arc(10, 10, 5).grow(1).view();
-```
-
-![Image](interactions_with_geometry.md.9.png)
 
 ```JavaScript
 aDesign
@@ -131,7 +121,7 @@ aDesign
   );
 ```
 
-![Image](interactions_with_geometry.md.10.png)
+![Image](interactions_with_geometry.md.9.png)
 
 We need to get into the 'design' item in order to get at 'box' and 'bolt'
 
@@ -140,6 +130,16 @@ log(aDesign.bom());
 ```
 
 Materials:
+
+---
+### Grow
+Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
+
+```JavaScript
+Arc(10, 10, 5).grow(1).view();
+```
+
+![Image](interactions_with_geometry.md.10.png)
 
 ---
 ### Loft
@@ -360,6 +360,12 @@ const taggedAssembly = Assembly(
 
 ![Image](interactions_with_geometry.md.26.png)
 
+```JavaScript
+taggedAssembly.drop(get('user:B')).view();
+```
+
+![Image](interactions_with_geometry.md.27.png)
+
 ---
 #### Selection
 We can select parts of geometry based on tags using get(selector), getNot(selector), and nth(number).
@@ -372,12 +378,6 @@ value may also be the wildcard *.
 Selection does not traverse through item, except for the input shape.
 
 This means that s.get('a').get('b') will find b inside a, but otherwise b would not be found.
-
-```JavaScript
-taggedAssembly.drop(get('user:B')).view();
-```
-
-![Image](interactions_with_geometry.md.27.png)
 
 ```JavaScript
 Group(

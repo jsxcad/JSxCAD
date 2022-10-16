@@ -3126,7 +3126,7 @@ const getNotebookControlData = async (notebookPath) => {
     if (notebook.id !== notebookPath) {
       continue;
     }
-    const inputs = notebook.getElementsByClassName('note control input');
+    const inputs = notebook.getElementsByClassName('note control');
     for (let nthInput = 0; nthInput < inputs.length; nthInput++) {
       const input = inputs[nthInput];
       const label = input.name;

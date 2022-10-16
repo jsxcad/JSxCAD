@@ -128,12 +128,6 @@ const axle = Arc(5, 5, 10).color('brown');
 const wheel = Arc(20, 20, 2).color('grey');
 ```
 
----
-### Group
-Similar to Assembly, group joins together a number of shapes, however unlike Assembly, Group does not subtract the shapes which means they are allowed to overlap which makes Group much faster to compute than Assembly.
-
-Group can also be done using the .and() operator.
-
 ```JavaScript
 wheel.fitTo(axle).view();
 ```
@@ -151,6 +145,12 @@ wheel.fitTo(axle).pack().view(); //In both of these cases the axle cuts the whee
 ```
 
 ![Image](interactions_between_geometry.md.11.png)
+
+---
+### Group
+Similar to Assembly, group joins together a number of shapes, however unlike Assembly, Group does not subtract the shapes which means they are allowed to overlap which makes Group much faster to compute than Assembly.
+
+Group can also be done using the .and() operator.
 
 ```JavaScript
 Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
@@ -182,15 +182,15 @@ Mask is used to create a mask around something. This allows the shape to cut a l
 const shaft = Arc(10, 10, 40).color('grey');
 ```
 
----
-### Pack
-Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.
-
 ```JavaScript
 shaft.mask(grow(1)).view();
 ```
 
 ![Image](interactions_between_geometry.md.15.png)
+
+---
+### Pack
+Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.
 
 ```JavaScript
 Group(Arc(10), Box(3), Box(3.5)).pack().view();

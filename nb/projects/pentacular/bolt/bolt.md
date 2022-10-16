@@ -58,6 +58,14 @@ export const ScrewThreadBuilder = Cached(
 ```
 
 ```JavaScript
+export const ScrewThread = (
+  diameter,
+  height,
+  { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
+) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn);
+```
+
+```JavaScript
 export const NutThreadSegmentBuilder = Cached(
   'nb/projects/bolt/bolt.nb/NutThreadSegment',
   (diameter, pitch, thickness, angle, play, turn) => {
@@ -75,14 +83,6 @@ export const NutThreadSegmentBuilder = Cached(
     );
   }
 );
-```
-
-```JavaScript
-export const ScrewThread = (
-  diameter,
-  height,
-  { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn);
 ```
 
 ```JavaScript
