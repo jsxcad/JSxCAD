@@ -27,7 +27,13 @@ export class ControlNote extends React.PureComponent {
       case 'check':
         return (
           <InputGroup ref={ref} style={{ border }}>
-            <Form.Check label={label} type='checkbox' name={label} checked={value} className="note control check"/>
+            <Form.Check
+              label={label}
+              type="checkbox"
+              name={label}
+              checked={value}
+              className="note control check"
+            />
           </InputGroup>
         );
       case 'input':
@@ -45,13 +51,25 @@ export class ControlNote extends React.PureComponent {
         return (
           <InputGroup ref={ref} style={{ border }}>
             <InputGroup.Text>{label}</InputGroup.Text>
-            <Form.Control as="select" className="note control select" name={label}>
-              {options.map((option, nth) => (<option key={nth} value={option}>{option}</option>))}
+            <Form.Control
+              as="select"
+              className="note control select"
+              name={label}
+            >
+              {options.map((option, nth) => (
+                <option key={nth} value={option}>
+                  {option}
+                </option>
+              ))}
             </Form.Control>
           </InputGroup>
         );
       default:
-        return (<div ref={ref} style={{ border }}>Unsupported control type</div>);
+        return (
+          <div ref={ref} style={{ border }}>
+            Unsupported control type
+          </div>
+        );
     }
   }
 }

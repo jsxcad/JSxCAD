@@ -3320,7 +3320,7 @@ const eachEdge = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
   let [
-    edgeOp = (e, l) => (s) => e,
+    edgeOp = (e, l, o) => (s) => e,
     faceOp = (e, f) => (s) => e,
     groupOp = Group,
   ] = shapesAndFunctions;
@@ -3408,7 +3408,7 @@ const eachPoint = Shape.chainable((...args) => (shape) => {
     shapesAndFunctions;
   if (pointOp instanceof Shape) {
     const pointShape = pointOp;
-    pointOp = (point) => pointShape.by(point);
+    pointOp = (point) => (shape) => pointShape.by(point);
   }
   const points = [];
   let nth = 0;
@@ -3481,8 +3481,8 @@ const faces = (...args) => {
     faceOp = (face) => faceShape.to(face);
   }
   return eachEdge(
-    (e, l) => e,
-    (e, f) => faceOp(f),
+    (e, l) => (s) => e,
+    (e, f) => (s) => faceOp(f),
     groupOp
   );
 };
@@ -4050,6 +4050,8 @@ Shape.registerMethod('m', m);
 Shape.registerMethod('moveAlong', moveAlong);
 
 const noOp = Shape.chainable(() => (shape) => shape);
+
+Shape.registerMethod('noOp', noOp);
 
 const noVoid = Shape.chainable(
   () => (shape) => shape.on(get('type:void'), Empty())

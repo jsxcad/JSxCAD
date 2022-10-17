@@ -35,7 +35,7 @@ export const eachEdge = Shape.chainable((...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
   let [
-    edgeOp = (e, l) => (s) => e,
+    edgeOp = (e, l, o) => (s) => e,
     faceOp = (e, f) => (s) => e,
     groupOp = Group,
   ] = shapesAndFunctions;

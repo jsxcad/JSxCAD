@@ -10,7 +10,7 @@ export const eachPoint = Shape.chainable((...args) => (shape) => {
     shapesAndFunctions;
   if (pointOp instanceof Shape) {
     const pointShape = pointOp;
-    pointOp = (point) => shape => pointShape.by(point);
+    pointOp = (point) => (shape) => pointShape.by(point);
   }
   const points = [];
   let nth = 0;

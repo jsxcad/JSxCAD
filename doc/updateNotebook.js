@@ -144,31 +144,31 @@ const writeMarkdown = async (
 };
 
 const sortNotebook = (notebook) => {
-    const getLine = (note) => {
-      if (note.sourceLocation) {
-        return note.sourceLocation.line;
-      } else {
-        return 0;
-      }
-    };
-    const getNth = (note) => {
-      if (note.sourceLocation) {
-        return note.sourceLocation.nth;
-      } else {
-        return 0;
-      }
-    };
-    const order = (a, b) => {
-      const lineA = getLine(a);
-      const lineB = getLine(b);
-      if (lineA !== lineB) {
-        return lineA - lineB;
-      }
-      const nthA = getNth(a);
-      const nthB = getNth(b);
-      return nthA - nthB;
-    };
-    notebook.sort(order);
+  const getLine = (note) => {
+    if (note.sourceLocation) {
+      return note.sourceLocation.line;
+    } else {
+      return 0;
+    }
+  };
+  const getNth = (note) => {
+    if (note.sourceLocation) {
+      return note.sourceLocation.nth;
+    } else {
+      return 0;
+    }
+  };
+  const order = (a, b) => {
+    const lineA = getLine(a);
+    const lineB = getLine(b);
+    if (lineA !== lineB) {
+      return lineA - lineB;
+    }
+    const nthA = getNth(a);
+    const nthB = getNth(b);
+    return nthA - nthB;
+  };
+  notebook.sort(order);
 };
 
 const toSourceFromName = (baseDirectory) => (name) => {
