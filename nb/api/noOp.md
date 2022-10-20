@@ -4,11 +4,11 @@ Just returns the incoming shape.
 
 ```JavaScript
 Box()
-  .eachEdge(noOp())
+  .noOp()
   .view()
-  .note('Box().eachEdge(noOp()) produces each edge as is.');
+  .note('Box().noOp() just produces the box.');
 ```
 
 ![Image](noOp.md.0.png)
 
-Box().eachEdge(noOp()) produces each edge as is.
+Box().noOp() just produces the box.

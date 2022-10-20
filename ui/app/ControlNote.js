@@ -16,22 +16,62 @@ export class ControlNote extends React.PureComponent {
 
   render() {
     const { note, selected } = this.props;
-    const { label, value } = note.control;
+    const { blur, control } = note;
+    const { label, options, type, value } = control;
     const ref = selected && createRef();
     if (selected) {
       useEffect(() => ref.current.scrollIntoView(true));
     }
     const border = selected ? '1px dashed dodgerblue' : '0px';
-    return (
-      <InputGroup ref={ref} style={{ border }}>
-        <InputGroup.Text>{label}</InputGroup.Text>
-        <Form.Control
-          className="note control input"
-          value={value}
-          name={label}
-        />
-      </InputGroup>
-    );
+    // TODO: Slider.
+    switch (type) {
+      case 'check':
+        return (
+          <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
+            <Form.Check
+              label={label}
+              type="checkbox"
+              name={label}
+              checked={value}
+              className="note control check"
+            />
+          </InputGroup>
+        );
+      case 'input':
+        return (
+          <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
+            <InputGroup.Text>{label}</InputGroup.Text>
+            <Form.Control
+              className="note control input"
+              value={value}
+              name={label}
+            />
+          </InputGroup>
+        );
+      case 'select':
+        return (
+          <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
+            <InputGroup.Text>{label}</InputGroup.Text>
+            <Form.Control
+              as="select"
+              className="note control select"
+              name={label}
+            >
+              {options.map((option, nth) => (
+                <option key={nth} value={option} selected={option === value}>
+                  {option}
+                </option>
+              ))}
+            </Form.Control>
+          </InputGroup>
+        );
+      default:
+        return (
+          <div ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
+            Unsupported control type
+          </div>
+        );
+    }
   }
 }
 

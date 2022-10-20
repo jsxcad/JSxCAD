@@ -111,6 +111,7 @@ const agent = async ({
     workspace,
     script,
     sha = 'master',
+    version,
     view
   } = message;
   if (workspace) {
@@ -130,23 +131,12 @@ const agent = async ({
             workspace
           });
           return await dataUrl(baseApi.Shape.fromGeometry(geometry), view);
-          /*
-          const { staticView } = await import('./jsxcad-ui-threejs.js');
-          await staticView(baseApi.Shape.fromGeometry(geometry), {
-            ...view,
-            canvas: offscreenCanvas,
-          });
-          const blob = await offscreenCanvas.convertToBlob({
-            type: 'image/png',
-          });
-          const dataURL = new FileReaderSync().readAsDataURL(blob);
-          return dataURL;
-          */
         }
-
       case 'app/evaluate':
         sys.clearEmitted();
         sys.clearTimes();
+        // Note we assume a consistent version is used for a given session (i.e., for a given id there is one version).
+        self.version = version;
         try {
           // console.log({ op: 'text', text: `QQ/script: ${script}` });
           const api = {
@@ -211,6 +201,7 @@ const bootstrap = async () => {
       return;
     }
     for (const note of notes) {
+      note.version = self.version;
       if (note.download) {
         for (const entry of note.download.entries) {
           entry.data = await entry.data;

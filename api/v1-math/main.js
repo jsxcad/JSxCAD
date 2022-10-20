@@ -1,7 +1,7 @@
 export { ease, linear } from './ease.js';
 
 export { Noise } from './Noise.js';
-export { Random } from './Random.js';
+export { Random, random } from './Random.js';
 export { acos } from './acos.js';
 export { cos } from './cos.js';
 export { max } from './max.js';

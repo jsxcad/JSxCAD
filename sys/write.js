@@ -71,7 +71,7 @@ export const write = async (path, data, options = {}) => {
   const qualifiedPath = qualifyPath(path, workspace);
   const file = ensureQualifiedFile(path, qualifiedPath);
 
-  if (!file.data) {
+  if (file.data === undefined) {
     await notifyFileCreation(path, workspace);
   }
 

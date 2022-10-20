@@ -1,9 +1,9 @@
 ```JavaScript
-const numberOfTeeth = control('number of teeth', 16, 'input');
+import { Gear } from './gear.js';
 ```
 
 ```JavaScript
-import { Gear } from './gear.js';
+const numberOfTeeth = control('number of teeth', 16, 'input');
 ```
 
 ```JavaScript
@@ -36,18 +36,6 @@ const toothResolution = control('toothResolution', 5, 'input');
 
 ```JavaScript
 Gear()
-  .hasTeeth(8)
-  .and((s) => s.hasClearance(0.5).color('red'))
-  .gridView()
-  .md(`Clearance adds play to the gear tips`);
-```
-
-![Image](gear.md.0.png)
-
-Clearance adds play to the gear tips
-
-```JavaScript
-Gear()
   .hasTeeth(numberOfTeeth)
   .hasMmPerTooth(mmPerTooth)
   .hasHiddenTeeth(teethToHide)
@@ -61,9 +49,21 @@ Gear()
   .stl(`gear_${numberOfTeeth}`);
 ```
 
-![Image](gear.md.1.png)
+![Image](gear.md.0.png)
 
 [gear_16_1.stl](gear.gear_16_1.stl)
+
+```JavaScript
+Gear()
+  .hasTeeth(8)
+  .and((s) => s.hasClearance(0.5).color('red'))
+  .gridView()
+  .md(`Clearance adds play to the gear tips`);
+```
+
+![Image](gear.md.1.png)
+
+Clearance adds play to the gear tips
 
 ```JavaScript
 Gear()
@@ -76,8 +76,6 @@ Gear()
 ![Image](gear.md.2.png)
 
 Backlash adds play to the gear sides
-
-### Planetary Gears
 
 ```JavaScript
 Gear()
@@ -95,27 +93,13 @@ Gear()
 
 Pressure Angle makes the tip sharper or blunter
 
-```JavaScript
-const planetaryDesign1 = Arc(44)
-  .ez(-4)
-  .as('hoop')
-  .fitTo(Octagon(42).ez(-2, -4))
-  .clean();
-```
+### Planetary Gears
 
 ```JavaScript
 const planetary = Gear().hasTeeth(8).fill().md(`Our base involute gear.`);
 ```
 
 Our base involute gear.
-
-```JavaScript
-const planetaryDesignAxle = Octagon(12)
-  .fitTo(Arc(8).void())
-  .ez(-4)
-  .color('orange')
-  .as('axle');
-```
 
 ```JavaScript
 const planetaryFootprint = planetary
@@ -204,6 +188,14 @@ const rack = Box(20, Math.PI)
 We can do the same thing to cut a rack.
 
 ```JavaScript
+const planetaryDesign1 = Arc(44)
+  .ez(-4)
+  .as('hoop')
+  .fitTo(Octagon(42).ez(-2, -4))
+  .clean();
+```
+
+```JavaScript
 const planetaryDesign2 = planetaryDesign1
   .cut(Octagon(42).ez(-2))
   .and(ring.clip(Octagon(42)).ez(-2))
@@ -233,6 +225,14 @@ const planetaryDesign4a = solar.ez(-2);
 
 ```JavaScript
 const planetaryDesign4b = planetaryDesign4a.and(Arc(23.5).ez(-2, -4));
+```
+
+```JavaScript
+const planetaryDesignAxle = Octagon(12)
+  .fitTo(Arc(8).void())
+  .ez(-4)
+  .color('orange')
+  .as('axle');
 ```
 
 ```JavaScript

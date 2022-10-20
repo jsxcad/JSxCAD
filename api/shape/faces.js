@@ -11,8 +11,8 @@ export const faces = (...args) => {
     faceOp = (face) => faceShape.to(face);
   }
   return eachEdge(
-    (e, l) => e,
-    (e, f) => faceOp(f),
+    (e, l) => (s) => e,
+    (e, f) => (s) => faceOp(f),
     groupOp
   );
 };

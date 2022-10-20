@@ -3,7 +3,7 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
-import { Group, Shape, saveGeometry, loadGeometry } from './jsxcad-api-shape.js';
+import { Group, Shape, save, load } from './jsxcad-api-shape.js';
 import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation, getControlValue } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
@@ -58,13 +58,6 @@ const replayRecordedNotes = async (path, id) => {
   flushEmitGroup();
 };
 
-/*
-export const emitSourceLocation = ({ path, id }) => {
-  const setContext = { sourceLocation: { path, id } };
-  emit({ hash: computeHash(setContext), setContext });
-};
-*/
-
 const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
@@ -95,6 +88,17 @@ const $run = async (op, { path, id, text, sha, line }) => {
     await resolvePending();
     endTime(timer);
     finishEmitGroup({ path, id });
+    try {
+      if (result !== undefined) {
+        await save(`data/def/${path}/${id}.data`, result);
+        await write(`meta/def/${path}/${id}.meta`, { sha });
+        await saveRecordedNotes(path, id);
+        return result;
+      }
+    } catch (error) {}
+    clearRecordedNotes();
+    return result;
+    /*
     if (typeof result === 'object') {
       const type = result.constructor.name;
       switch (type) {
@@ -107,12 +111,20 @@ const $run = async (op, { path, id, text, sha, line }) => {
     }
     clearRecordedNotes();
     return result;
+    */
+  } else {
+    await replayRecordedNotes(path, id);
+    const result = await load(`data/def/${path}/${id}.data`);
+    return result;
+  }
+  /*
   } else if (meta.type === 'Shape') {
     await replayRecordedNotes(path, id);
     return loadGeometry(`data/def/${path}/${id}.data`);
   } else {
     throw Error('Unexpected cached result');
   }
+  */
 };
 
 var notesApi = /*#__PURE__*/Object.freeze({
@@ -432,12 +444,13 @@ const buildImportModule =
   select: { options }
 */
 
-const control = (label, value, type, options) => {
+const control = (label, defaultValue, type, options) => {
   const { path } = getSourceLocation();
+  const value = getControlValue(path, label, defaultValue);
   const control = {
     type,
     label,
-    value: getControlValue(path, label, value),
+    value,
     options,
     path,
   };

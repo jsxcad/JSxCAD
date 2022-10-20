@@ -13,24 +13,16 @@ const grid = Hexagon(16)
 ![Image](lego_sorter.md.0.png)
 
 ```JavaScript
-const ring = Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
+const base = grid.cutFrom(Arc(100)).ez(1).gridView();
 ```
 
 ![Image](lego_sorter.md.1.png)
 
 ```JavaScript
-const base = grid.cutFrom(Arc(100)).ez(1).gridView();
+const ring = Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
 ```
 
 ![Image](lego_sorter.md.2.png)
-
-```JavaScript
-const wall1 = grid
-  .cutFrom(Box(80, 110))
-  .rz(1 / 4)
-  .ez(2)
-  .rx(1 / 4);
-```
 
 ```JavaScript
 const sorter = ring.and(base).stl('sorter');
@@ -39,6 +31,14 @@ const sorter = ring.and(base).stl('sorter');
 ![Image](lego_sorter.md.3.png)
 
 [sorter_1.stl](lego_sorter.sorter_1.stl)
+
+```JavaScript
+const wall1 = grid
+  .cutFrom(Box(80, 110))
+  .rz(1 / 4)
+  .ez(2)
+  .rx(1 / 4);
+```
 
 ```JavaScript
 const wall = wall1

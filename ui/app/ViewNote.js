@@ -20,7 +20,7 @@ export class ViewNote extends React.PureComponent {
 
   render() {
     const { notebookPath, note, onClickView, selected, workspace } = this.props;
-    const { view, sourceLocation } = note;
+    const { blur = false, view, sourceLocation } = note;
     const { height, width } = view;
     const onClick = (event) => {
       if (onClickView) {
@@ -57,6 +57,7 @@ export class ViewNote extends React.PureComponent {
           height: `${height}px`,
           width: `${width}px`,
           border,
+          opacity: blur ? 0.5 : 1,
         }}
         src={note.url}
         onClick={onClick}

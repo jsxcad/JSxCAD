@@ -11,14 +11,14 @@ Takes each point shape as an individual reference.
 
 ```JavaScript
 Box(5, 5, 5)
-  .cutFrom(eachPoint((p) => Orb(3).to(p)))
+  .cutFrom(eachPoint((p) => s => Orb(3).to(p)))
   .view()
-  .md('Box(5, 5, 5).cutFrom(eachPoint((p) => Orb(3).to(p)))');
+  .md('Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))');
 ```
 
 ![Image](eachPoint.md.0.png)
 
-Box(5, 5, 5).cutFrom(eachPoint((p) => Orb(3).to(p)))
+Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))
 
 ```JavaScript
 Box(5, 5, 5)

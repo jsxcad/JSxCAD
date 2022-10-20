@@ -236,7 +236,10 @@ export const read = async (path, options = {}) => {
   if (notifyFileReadEnabled) {
     await notifyFileRead(path, workspace);
   }
-  return file.data || otherwise;
+  if (file.data === undefined) {
+    return otherwise;
+  }
+  return file.data;
 };
 
 export const readOrWatch = async (path, options = {}) => {

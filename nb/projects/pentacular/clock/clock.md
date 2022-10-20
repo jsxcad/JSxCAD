@@ -57,18 +57,10 @@ const Hand = ({ reach, tipRadius, thickness }) =>
 ```
 
 ```JavaScript
-Hand(hourHand).topView();
-```
-
-![Image](clock.md.0.png)
-
-```JavaScript
 const aladinRegular = await readFont(
   'https://jsxcad.js.org/ttf/Aladin-Regular.ttf'
 );
 ```
-
-The hour hand.
 
 ```JavaScript
 const Face = ({ axleRadius, faceRadius, fontSize }) =>
@@ -88,16 +80,24 @@ const Face = ({ axleRadius, faceRadius, fontSize }) =>
 ```
 
 ```JavaScript
-Hand(minuteHand).topView();
-```
-
-![Image](clock.md.1.png)
-
-```JavaScript
 Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
 ```
 
 The clock face
+
+![Image](clock.md.0.png)
+
+```JavaScript
+Hand(hourHand).topView();
+```
+
+![Image](clock.md.1.png)
+
+The hour hand.
+
+```JavaScript
+Hand(minuteHand).topView();
+```
 
 ![Image](clock.md.2.png)
 

@@ -114,20 +114,20 @@ const torusFn = (x, y, z) => {
 ```
 
 ```JavaScript
-Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
+Implicit(torusFn, 2).view({ withGrid: false }).md('Implicit(torusFn, 2');
 ```
 
 ![Image](shapes.md.9.png)
 
-Line(5, -1)
+Implicit(torusFn, 2
 
 ```JavaScript
-Implicit(torusFn, 2).view({ withGrid: false }).md('Implicit(torusFn, 2');
+Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 ```
 
 ![Image](shapes.md.10.png)
 
-Implicit(torusFn, 2
+Line(5, -1)
 
 ```JavaScript
 Octagon(5).gridView().md(`Octagon(5)`);
@@ -296,15 +296,6 @@ const extentsC = [
 ```
 
 ```JavaScript
-Line(15, -15)
-  .seq({ from: -10, to: 11 }, y, Group)
-  .clip(Arc(20).cut(Arc(10)))
-  .view();
-```
-
-![Image](shapes.md.24.png)
-
-```JavaScript
 const q = Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
@@ -312,9 +303,18 @@ const q = Group(
 ).view().md`Boxes and Arcs from extents`;
 ```
 
-![Image](shapes.md.25.png)
+![Image](shapes.md.24.png)
 
 Boxes and Arcs from extents
+
+```JavaScript
+Line(15, -15)
+  .seq({ from: -10, to: 11 }, y, Group)
+  .clip(Arc(20).cut(Arc(10)))
+  .view();
+```
+
+![Image](shapes.md.25.png)
 
 ```JavaScript
 Line(15, -15)

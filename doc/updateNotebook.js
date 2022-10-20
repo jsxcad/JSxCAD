@@ -25,6 +25,7 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
+  'nb/regression/shapes/shapes.md.9.observed.png',
   'nb/regression/shapes/shapes.md.10.observed.png',
   'nb/regression/shapes/shapes.md.56.observed.png',
   'nb/regression/shapes/shapes.md.57.observed.png',
@@ -143,6 +144,34 @@ const writeMarkdown = async (
   }
 };
 
+const sortNotebook = (notebook) => {
+  const getLine = (note) => {
+    if (note.sourceLocation) {
+      return note.sourceLocation.line;
+    } else {
+      return 0;
+    }
+  };
+  const getNth = (note) => {
+    if (note.sourceLocation) {
+      return note.sourceLocation.nth;
+    } else {
+      return 0;
+    }
+  };
+  const order = (a, b) => {
+    const lineA = getLine(a);
+    const lineB = getLine(b);
+    if (lineA !== lineB) {
+      return lineA - lineB;
+    }
+    const nthA = getNth(a);
+    const nthB = getNth(b);
+    return nthA - nthB;
+  };
+  notebook.sort(order);
+};
+
 const toSourceFromName = (baseDirectory) => (name) => {
   const prefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/';
   if (name.startsWith(prefix)) {
@@ -188,6 +217,7 @@ export const updateNotebook = async (
       workspace,
     });
     await resolvePending();
+    sortNotebook(notebook);
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',

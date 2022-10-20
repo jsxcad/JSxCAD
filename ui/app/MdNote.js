@@ -27,7 +27,8 @@ export class MdNote extends React.PureComponent {
 
   render() {
     const { note, selected } = this.props;
-    const html = marked(note.md);
+    const { blur = false, md } = note;
+    const html = marked(md);
     const ref = selected && createRef();
     if (selected) {
       useEffect(() => ref.current.scrollIntoView(true));
@@ -37,7 +38,7 @@ export class MdNote extends React.PureComponent {
       <div
         ref={ref}
         dangerouslySetInnerHTML={{ __html: html }}
-        style={{ border }}
+        style={{ border, opacity: blur ? 0.5 : 1 }}
       />
     );
   }

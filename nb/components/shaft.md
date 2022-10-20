@@ -1,6 +1,35 @@
 ### Shaft, Flat, and FlatShaft
 
 ```JavaScript
+export const Flat = ({ diameter = 10, length = 10, thickness = 5 } = {}) =>
+  Arc(diameter).clip(Box(diameter, thickness)).ez(length).clean().as('flat');
+```
+
+```JavaScript
+export const Shaft = ({ diameter = 10, length = 10, play = 0.2 } = {}) =>
+  Arc(diameter).ez(length).clean().mask(grow(play)).as('shaft');
+```
+
+```JavaScript
+export const FlatShaft = ({
+  diameter = 10,
+  length = 10,
+  flatLength = 10,
+  flatThickness = 5,
+  play = 0.2,
+} = {}) =>
+  Group(
+    Arc(diameter).ez(length - flatLength),
+    Flat({ diameter, length: flatLength, thickness: flatThickness }).z(
+      length - flatLength
+    )
+  )
+    .clean()
+    .mask(grow(play))
+    .as('shaft');
+```
+
+```JavaScript
 const diameter = control('diameter', 5, 'input');
 ```
 
@@ -10,11 +39,6 @@ const length = control('length', 10, 'input');
 
 ```JavaScript
 const flatLength = control('flat length', 5, 'input');
-```
-
-```JavaScript
-export const Flat = ({ diameter = 10, length = 10, thickness = 5 } = {}) =>
-  Arc(diameter).clip(Box(diameter, thickness)).ez(length).clean().as('flat');
 ```
 
 ```JavaScript
@@ -46,30 +70,6 @@ Flat({ diameter: 5, length: 5, thickness: 3 })
 ```mermaid
 graph LR;
   0[item<br>item:flat]
-```
-
-```JavaScript
-export const Shaft = ({ diameter = 10, length = 10, play = 0.2 } = {}) =>
-  Arc(diameter).ez(length).clean().mask(grow(play)).as('shaft');
-```
-
-```JavaScript
-export const FlatShaft = ({
-  diameter = 10,
-  length = 10,
-  flatLength = 10,
-  flatThickness = 5,
-  play = 0.2,
-} = {}) =>
-  Group(
-    Arc(diameter).ez(length - flatLength),
-    Flat({ diameter, length: flatLength, thickness: flatThickness }).z(
-      length - flatLength
-    )
-  )
-    .clean()
-    .mask(grow(play))
-    .as('shaft');
 ```
 
 ```JavaScript

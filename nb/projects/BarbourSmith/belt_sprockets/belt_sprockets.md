@@ -23,41 +23,6 @@ const ToothProfileToFace = (...points) =>
 ```
 
 ```JavaScript
-export const Pulley = (profile, teeth) => {
-  const pulley_OD = profile.diameter(teeth);
-  const tooth_depth = profile.toothDepth;
-  const tooth_width = profile.toothWidth;
-  const toothDistanceFromCentre = Math.sqrt(
-    Math.pow(pulley_OD / 2, 2) -
-      Math.pow((tooth_width + additionalToothWidth) / 2, 2)
-  );
-  const toothWidthScale = (tooth_width + additionalToothWidth) / tooth_width;
-  const toothDepthScale = (tooth_depth + additionalToothDepth) / tooth_depth;
-  var toothProfile = profile.profile;
-
-  console.log('pulley_OD: %f', pulley_OD);
-  console.log(profile);
-
-  const center = Arc(pulley_OD, pulley_OD);
-
-  //teeth - cut out of shaft
-
-  //Scale tooth up
-  toothProfile = toothProfile.scale(toothWidthScale, toothDepthScale);
-  //Translate it out to where it should be
-  toothProfile = toothProfile.move(0, -toothDistanceFromCentre, 0);
-
-  var teethArray = [];
-  for (let i = 0; i < teeth; i++) {
-    teethArray.push(toothProfile.rz(i / teeth));
-  }
-  const teethToCut = Group(...teethArray);
-
-  return center.cut(teethToCut).clean();
-};
-```
-
-```JavaScript
 export const MXL = {
   profile: ToothProfileToFace(
     [-0.660421, -0.5, 0],
@@ -95,6 +60,8 @@ MXL profile
 
 ![Image](belt_sprockets.md.0.png)
 
+![Image](belt_sprockets.md.1.png)
+
 ```JavaScript
 export const DP40 = {
   profile: ToothProfileToFace(
@@ -127,7 +94,9 @@ export const DP40 = {
 
 DP40 profile
 
-![Image](belt_sprockets.md.1.png)
+![Image](belt_sprockets.md.2.png)
+
+![Image](belt_sprockets.md.3.png)
 
 ```JavaScript
 export const XL = {
@@ -165,7 +134,9 @@ export const XL = {
 
 XL profile
 
-![Image](belt_sprockets.md.2.png)
+![Image](belt_sprockets.md.4.png)
+
+![Image](belt_sprockets.md.5.png)
 
 ```JavaScript
 export const H = {
@@ -219,7 +190,9 @@ export const H = {
 
 H profile
 
-![Image](belt_sprockets.md.3.png)
+![Image](belt_sprockets.md.6.png)
+
+![Image](belt_sprockets.md.7.png)
 
 ```JavaScript
 export const T2_5 = {
@@ -249,7 +222,9 @@ export const T2_5 = {
 
 T2_5 profile
 
-![Image](belt_sprockets.md.4.png)
+![Image](belt_sprockets.md.8.png)
+
+![Image](belt_sprockets.md.9.png)
 
 ```JavaScript
 export const T5 = {
@@ -303,7 +278,9 @@ export const T5 = {
 
 T5 profile
 
-![Image](belt_sprockets.md.5.png)
+![Image](belt_sprockets.md.10.png)
+
+![Image](belt_sprockets.md.11.png)
 
 ```JavaScript
 export const T10 = {
@@ -357,7 +334,9 @@ export const T10 = {
 
 T10 profile
 
-![Image](belt_sprockets.md.6.png)
+![Image](belt_sprockets.md.12.png)
+
+![Image](belt_sprockets.md.13.png)
 
 ```JavaScript
 export const AT5 = {
@@ -403,7 +382,9 @@ export const AT5 = {
 
 AT5 profile
 
-![Image](belt_sprockets.md.7.png)
+![Image](belt_sprockets.md.14.png)
+
+![Image](belt_sprockets.md.15.png)
 
 ```JavaScript
 export const HTD_3mm = {
@@ -464,7 +445,9 @@ export const HTD_3mm = {
 
 HTD_3mm profile
 
-![Image](belt_sprockets.md.8.png)
+![Image](belt_sprockets.md.16.png)
+
+![Image](belt_sprockets.md.17.png)
 
 ```JavaScript
 export const HTD_5mm = {
@@ -525,7 +508,9 @@ export const HTD_5mm = {
 
 HTD_5mm profile
 
-![Image](belt_sprockets.md.9.png)
+![Image](belt_sprockets.md.18.png)
+
+![Image](belt_sprockets.md.19.png)
 
 ```JavaScript
 export const HTD_8mm = {
@@ -594,7 +579,9 @@ export const HTD_8mm = {
 
 HTD_8mm profile
 
-![Image](belt_sprockets.md.10.png)
+![Image](belt_sprockets.md.20.png)
+
+![Image](belt_sprockets.md.21.png)
 
 ```JavaScript
 export const GT2_2mm = {
@@ -633,7 +620,9 @@ export const GT2_2mm = {
 
 GT2_2mm profile
 
-![Image](belt_sprockets.md.11.png)
+![Image](belt_sprockets.md.22.png)
+
+![Image](belt_sprockets.md.23.png)
 
 ```JavaScript
 export const GT2_3mm = {
@@ -676,7 +665,9 @@ export const GT2_3mm = {
 
 GT2_3mm profile
 
-![Image](belt_sprockets.md.12.png)
+![Image](belt_sprockets.md.24.png)
+
+![Image](belt_sprockets.md.25.png)
 
 ```JavaScript
 export const GT2_5mm = {
@@ -735,7 +726,44 @@ export const GT2_5mm = {
 
 GT2_5mm profile
 
-![Image](belt_sprockets.md.13.png)
+![Image](belt_sprockets.md.26.png)
+
+![Image](belt_sprockets.md.27.png)
+
+```JavaScript
+export const Pulley = (profile, teeth) => {
+  const pulley_OD = profile.diameter(teeth);
+  const tooth_depth = profile.toothDepth;
+  const tooth_width = profile.toothWidth;
+  const toothDistanceFromCentre = Math.sqrt(
+    Math.pow(pulley_OD / 2, 2) -
+      Math.pow((tooth_width + additionalToothWidth) / 2, 2)
+  );
+  const toothWidthScale = (tooth_width + additionalToothWidth) / tooth_width;
+  const toothDepthScale = (tooth_depth + additionalToothDepth) / tooth_depth;
+  var toothProfile = profile.profile;
+
+  console.log('pulley_OD: %f', pulley_OD);
+  console.log(profile);
+
+  const center = Arc(pulley_OD, pulley_OD);
+
+  //teeth - cut out of shaft
+
+  //Scale tooth up
+  toothProfile = toothProfile.scale(toothWidthScale, toothDepthScale);
+  //Translate it out to where it should be
+  toothProfile = toothProfile.move(0, -toothDistanceFromCentre, 0);
+
+  var teethArray = [];
+  for (let i = 0; i < teeth; i++) {
+    teethArray.push(toothProfile.rz(i / teeth));
+  }
+  const teethToCut = Group(...teethArray);
+
+  return center.cut(teethToCut).clean();
+};
+```
 
 # Supported belt profiles:
 
@@ -772,31 +800,3 @@ Pulley(GT2_3mm, 20).md('GT2 3mm').view();
 
 Pulley(GT2_5mm, 20).md('GT2 5mm').view();
 '''
-
-![Image](belt_sprockets.md.14.png)
-
-![Image](belt_sprockets.md.15.png)
-
-![Image](belt_sprockets.md.16.png)
-
-![Image](belt_sprockets.md.17.png)
-
-![Image](belt_sprockets.md.18.png)
-
-![Image](belt_sprockets.md.19.png)
-
-![Image](belt_sprockets.md.20.png)
-
-![Image](belt_sprockets.md.21.png)
-
-![Image](belt_sprockets.md.22.png)
-
-![Image](belt_sprockets.md.23.png)
-
-![Image](belt_sprockets.md.24.png)
-
-![Image](belt_sprockets.md.25.png)
-
-![Image](belt_sprockets.md.26.png)
-
-![Image](belt_sprockets.md.27.png)

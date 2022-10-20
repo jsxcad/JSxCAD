@@ -29887,36 +29887,40 @@ const declareVariable = async (
     sideEffectors.push(id);
   }
 
-  const code = parse(
-    `
-      ${generate({
-        type: 'VariableDeclaration',
-        kind: declaration.kind,
-        declarations: [strip(declarator)],
-      })}
-    `,
-    parseOptions
-  ).body;
+  const declarationSource = generate({
+    type: 'VariableDeclaration',
+    kind: declaration.kind,
+    declarations: [strip(declarator)],
+  });
+
+  const code = parse(declarationSource, parseOptions).body;
 
   const dependencies = collectDependencies(declarator, sideEffectors);
   const dependencyShas = dependencies.map((dependency) =>
     fromIdToSha(dependency, { topLevel })
   );
-  const definition = { code, dependencies, dependencyShas };
-  const sha = object_hash(definition);
+  // const definition = { code, dependencies, dependencyShas };
+
+  // const declarationSource = generate({ type: 'Program', body: declarator });
+
+  if (id === 'peaks') {
+    console.log(`QQ/peaks/source: ${declarationSource}`);
+    console.log(`QQ/peaks/sha: ${object_hash(declarationSource)}`);
+    console.log('--');
+  }
 
   const entry = {
     path,
     id,
     code,
-    definition,
+    // definition,
     dependencies,
-    sha,
     hasSideEffects,
     sourceLocation: sourceLocation || declaration.loc,
     emitSourceLocation,
     importSource,
     imports: [],
+    sha: object_hash({ declarationSource, dependencyShas }),
   };
 
   if (lines) {

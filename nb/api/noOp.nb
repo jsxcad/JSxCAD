@@ -5,6 +5,6 @@ Just returns the incoming shape.
 `;
 
 Box()
-  .eachEdge(noOp())
+  .noOp()
   .view()
-  .note('Box().eachEdge(noOp()) produces each edge as is.');
+  .note('Box().noOp() just produces the box.');

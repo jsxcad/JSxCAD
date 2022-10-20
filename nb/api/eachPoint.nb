@@ -12,9 +12,9 @@ Takes each point shape as an individual reference.
 `;
 
 Box(5, 5, 5)
-  .cutFrom(eachPoint((p) => Orb(3).to(p)))
+  .cutFrom(eachPoint((p) => s => Orb(3).to(p)))
   .view()
-  .md('Box(5, 5, 5).cutFrom(eachPoint((p) => Orb(3).to(p)))');
+  .md('Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))');
 
 Box(5, 5, 5)
   .outline()

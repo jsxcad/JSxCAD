@@ -2,7 +2,10 @@ import './react-multi-split-pane.css';
 
 import * as PropTypes from 'prop-types';
 
-import Notebook, { updateNotebookState } from './Notebook.js';
+import Notebook, {
+  clearNotebookState,
+  updateNotebookState,
+} from './Notebook.js';
 
 import {
   addOnEmitHandler,
@@ -37,6 +40,12 @@ class Standalone extends React.Component {
 
   async componentDidMount() {
     const { baseUrl, files, module, workspace } = this.props;
+
+    const setVersion = (notes, version) => {
+      for (const note of notes) {
+        note.version = version;
+      }
+    };
 
     const renderViews = async (notes) => {
       for (const note of notes) {
@@ -82,12 +91,14 @@ class Standalone extends React.Component {
     };
 
     const run = async ({ isRerun = false } = {}) => {
+      const version = new Date().getTime();
       const addNotes = async (notes) => {
         if (notes.length === 0) {
           return;
         }
         const sourceLocation = notes[0].sourceLocation;
         // TODO: Parallelize these operations.
+        setVersion(notes, version);
         await renderViews(notes);
         await fixLinks(notes);
         await prepareDownloads(notes);
@@ -116,6 +127,11 @@ class Standalone extends React.Component {
       this.setState({ [`NotebookState/${module}`]: 'idle' });
 
       removeOnEmitHandler(onEmitHandler);
+      clearNotebookState(this, {
+        path: module,
+        workspace,
+        isToBeKept: (note) => note.version === version,
+      });
     };
 
     const onKeyDown = (e) => {

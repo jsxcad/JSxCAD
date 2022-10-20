@@ -14,12 +14,46 @@ import { SpinnerCircularSplit } from 'spinners-react';
 import ViewNote from './ViewNote.js';
 import { useEffect } from 'preact/hooks';
 
+export const blurNotebookState = async (application, { path, workspace }) => {
+  application.setState((state) => {
+    const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      newNotebookNotes[key] = { ...note, blur: true };
+    }
+    return { [`NotebookNotes/${path}`]: newNotebookNotes };
+  });
+};
+
+export const clearNotebookState = async (
+  application,
+  { path, workspace, isToBeKept }
+) => {
+  application.setState((state) => {
+    const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      if (isToBeKept(note)) {
+        newNotebookNotes[key] = note;
+      }
+    }
+    return { [`NotebookNotes/${path}`]: newNotebookNotes };
+  });
+};
+
 export const updateNotebookState = async (
   application,
   { notes, sourceLocation, workspace }
 ) => {
-  const { path } = sourceLocation;
   const updateNote = (note) => {
+    const { sourceLocation } = note;
+    if (!sourceLocation) {
+      return;
+    }
+    const { path } = sourceLocation;
+    /*
     if (note.beginSourceLocation) {
       // Remove any existing notes for this line.
       const { line } = note.beginSourceLocation;
@@ -38,6 +72,7 @@ export const updateNotebookState = async (
       };
       application.setState(op);
     }
+    */
     if (!note.hash) {
       return;
     }
@@ -46,7 +81,7 @@ export const updateNotebookState = async (
       const oldNote = oldNotebookNotes[note.hash] || {};
       const newNotebookNotes = {
         ...oldNotebookNotes,
-        [note.hash]: { ...oldNote, ...note },
+        [note.hash]: { ...oldNote, blur: false, ...note },
       };
       return { [`NotebookNotes/${path}`]: newNotebookNotes };
     };
@@ -65,7 +100,7 @@ export const updateNotebookState = async (
             }
           );
           if (!url) {
-            const { path, view } = note;
+            const { path, view, sourceLocation } = note;
             const { width, height } = view;
             const canvas = document.createElement('canvas');
             canvas.width = width;
@@ -88,7 +123,7 @@ export const updateNotebookState = async (
                 await write(`thumbnail/${note.hash}`, url, {
                   workspace,
                 });
-                updateNote({ hash: note.hash, url });
+                updateNote({ hash: note.hash, url, sourceLocation });
               } catch (error) {
                 if (error.message === 'Terminated') {
                   // Try again.
@@ -98,7 +133,7 @@ export const updateNotebookState = async (
             }
           }
           if (url) {
-            updateNote({ hash: note.hash, url });
+            updateNote({ hash: note.hash, url, sourceLocation });
           }
         };
         // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
@@ -216,7 +251,6 @@ export class Notebook extends React.PureComponent {
           children.push(child);
         }
       }
-      console.log(`render Notebook`);
 
       useEffect(() => mermaid.init(undefined, '.mermaid'));
 
@@ -226,14 +260,14 @@ export class Notebook extends React.PureComponent {
           classList="notebook notes"
           style={{ overflow: 'auto' }}
         >
-          {children}
           {state === 'running' && (
             <SpinnerCircularSplit
               color="#36d7b7"
               size={64}
-              style={{ position: 'fixed', right: 32, top: 32 }}
+              style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
             />
           )}
+          {children}
         </div>
       );
     } catch (e) {

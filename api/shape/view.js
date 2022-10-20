@@ -35,7 +35,7 @@ const applyModes = (shape, options, modes) => {
 
 // FIX: Avoid the extra read-write cycle.
 export const baseView =
-  (viewId = '', op = (x) => x, options = {}) =>
+  (viewId, op = (x) => x, options = {}) =>
   (shape) => {
     let {
       size,
@@ -54,11 +54,14 @@ export const baseView =
     if (!sourceLocation) {
       console.log('No sourceLocation');
     }
-    const { id, path } = sourceLocation;
+    const { id, path, nth } = sourceLocation;
+    if (viewId === undefined) {
+      viewId = nth;
+    }
     for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
       const geometry = entry;
-      const hash = generateUniqueId();
       const viewPath = `view/${path}/${id}/${viewId}.view`;
+      const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;
       const view = {
         viewId,
