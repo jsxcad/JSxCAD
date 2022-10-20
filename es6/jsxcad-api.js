@@ -114,7 +114,7 @@ const $run = async (op, { path, id, text, sha, line }) => {
     */
   } else {
     await replayRecordedNotes(path, id);
-    const result = load(`data/def/${path}/${id}.data`);
+    const result = await load(`data/def/${path}/${id}.data`);
     return result;
   }
   /*
@@ -444,12 +444,13 @@ const buildImportModule =
   select: { options }
 */
 
-const control = (label, value, type, options) => {
+const control = (label, defaultValue, type, options) => {
   const { path } = getSourceLocation();
+  const value = getControlValue(path, label, defaultValue);
   const control = {
     type,
     label,
-    value: getControlValue(path, label, value),
+    value,
     options,
     path,
   };

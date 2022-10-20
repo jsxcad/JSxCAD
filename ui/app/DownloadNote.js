@@ -30,9 +30,9 @@ export class DownloadNote extends React.PureComponent {
 
   render() {
     const { note, selected, workspace } = this.props;
+    const { blur, download } = note;
     const buttons = [];
-    for (let { path, base64Data, data, filename, type } of note.download
-      .entries) {
+    for (let { path, base64Data, data, filename, type } of download.entries) {
       if (base64Data) {
         data = decode(base64Data);
       }
@@ -52,7 +52,7 @@ export class DownloadNote extends React.PureComponent {
     }
     const border = selected ? '1px dashed dodgerblue' : '0px';
     return (
-      <ButtonGroup ref={ref} style={{ border }}>
+      <ButtonGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
         {buttons}
       </ButtonGroup>
     );

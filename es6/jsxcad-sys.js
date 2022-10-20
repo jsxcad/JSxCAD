@@ -1034,13 +1034,14 @@ const createService = (spec, worker) => {
 
 const controlValue = new Map();
 
-const setControlValue = (module, label, value) =>
-  controlValue.set(`${module}/${label}`, value);
+const setControlValue = (module, label, value) => {
+  return controlValue.set(`${module}/${label}`, value);
+};
 
-const getControlValue = (module, label, value) => {
+const getControlValue = (module, label, defaultValue) => {
   const result = controlValue.get(`${module}/${label}`);
   if (result === undefined) {
-    return value;
+    return defaultValue;
   } else {
     return result;
   }

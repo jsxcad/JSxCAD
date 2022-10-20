@@ -761,9 +761,16 @@ const GEOMETRY_EMPTY = 5;
 const GEOMETRY_REFERENCE = 6;
 const GEOMETRY_EDGES = 7;
 
+let testMode = false;
+
+const setTestMode = (mode) => { testMode = mode; };
+
 const fillCgalGeometry = (geometry, inputs) => {
   const g = getCgal();
   geometry.setSize(inputs.length);
+  if (testMode) {
+    geometry.setTestMode(testMode);
+  }
   for (let nth = 0; nth < inputs.length; nth++) {
     const { tags = [] } = inputs[nth];
     geometry.setTransform(
@@ -2054,4 +2061,4 @@ const wrap = (inputs, alpha, offset) =>
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demesh, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fill, fitPlaneToPoints, fix, fromExactToCgalTransform, fromIdentityToCgalTransform, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, offset, outline, pushSurfaceMesh, remesh, seam, section, separate, serialize, simplify, smooth, smoothSurfaceMesh, surfaceMeshSymbol, toCgalTransformFromJsTransform, twist, withAabbTreeQuery, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demesh, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fill, fitPlaneToPoints, fix, fromExactToCgalTransform, fromIdentityToCgalTransform, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, offset, outline, pushSurfaceMesh, remesh, seam, section, separate, serialize, setTestMode, simplify, smooth, smoothSurfaceMesh, surfaceMeshSymbol, toCgalTransformFromJsTransform, twist, withAabbTreeQuery, wrap };

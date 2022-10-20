@@ -54,35 +54,24 @@ const hexTile = hex
   )
 */
   .fuse()
-  .clean()
-  .stl('hex_tile');
+  .clean();
 ```
-
-![Image](hex.md.1.png)
-
-[hex_tile_1.stl](hex.hex_tile_1.stl)
 
 ```JavaScript
 const square = Box(32);
 ```
 
 ```JavaScript
-const squareTile = square
-  .eachEdge(placeTab(tab), (e, f) => (s) => f.inset(0.1).e(-1).fitTo(e.void()))
-  .join(square.ez(2))
-  .cut(
-    Box(32).eachEdge(
-      (e, l, o) => (s) => s.at(e.origin(), s.by(o.origin()).get('tab'))
-    )
-  )
-  .fuse()
-  .clean()
-  .stl('square_tile');
+const place = (turn) => {
+  if (turn === 0) {
+    return Point();
+  } else {
+    return Point()
+      .x(13 / 2)
+      .rz(turn);
+  }
+};
 ```
-
-![Image](hex.md.2.png)
-
-[square_tile_1.stl](hex.square_tile_1.stl)
 
 ```JavaScript
 const Tree = Cached('Tree', (seed = 0) => {
@@ -96,6 +85,29 @@ const Tree = Cached('Tree', (seed = 0) => {
     .smooth(Box(8, 8, [3, 20]))
     .clean();
 });
+```
+
+```JavaScript
+const Peaks = (seed = 0, turns = [0], nth = 0) => {
+  const peaks = [];
+  for (const turn of turns) {
+    nth += 1;
+    const da = random(seed + nth + 1).in(0, 1);
+    const dd = random(seed + nth + 2).in(0, 6);
+    const dz = random(seed + nth + 3).in(2, 20);
+    peaks.push(
+      Seq({ upto: 3 }, (t) =>
+        Hull(Hexagon(16), Point(dd(t), 0, dz(t)).rz(da(t)))
+      ).to(place(turn))
+    );
+  }
+  return Group(...peaks)
+    .and(hex.ez(0.1))
+    .fuse()
+    .remesh(1)
+    .smooth(hex.ez(0.2, 21))
+    .clean();
+};
 ```
 
 ```JavaScript
@@ -130,7 +142,11 @@ const Meadow = Cached('Meadow', Mountainous(2, 0));
 ```
 
 ```JavaScript
-const Forest = Cached('Forest', (seed = 0, turn = 0, count = 40) => {
+const Flat = Cached('Flat', Mountainous(0, 0));
+```
+
+```JavaScript
+const Forest = Cached('Forest', (seed = 0, turn = 0, nth, count = 40) => {
   console.log(`Forest: seed=${seed}, turn=${turn}, count=${count}`);
   const getAngle = random(seed + 1).in(0, 1);
   const getDistance = random(seed + 2).in(0, 13);
@@ -157,6 +173,57 @@ const Forest = Cached('Forest', (seed = 0, turn = 0, count = 40) => {
   }
   return Group(...trees).z(2);
 });
+```
+
+```JavaScript
+const Swamp = (seed = 0, turn = 0, nth = 0, count = 5) => {
+  seed += nth;
+  console.log(`Swamp${nth}: seed=${seed}, turn=${turn}, count=${count}`);
+  const getAngle = random(seed * 234).in(0, 1);
+  const getDistance = random(seed * 543).in(0, 8);
+  const getDiameter = random(seed * 645).in(1, 5);
+
+  const holes = [];
+  for (let nth = 0; nth < count; nth++) {
+    holes.push(
+      Arc(getDiameter(nth), getDiameter(nth), [-0.5, 10])
+        .x(getDistance(nth))
+        .rz(getAngle(nth))
+    );
+  }
+  console.log(`holes: ${holes.length}`);
+  return Group(...holes)
+    .to(place(turn))
+    .z(2);
+};
+```
+
+```JavaScript
+const Island = (seed = 0, nth = 0) => {
+  const dx = random(seed).in(3, 9);
+  const dy = random(seed + 1).in(3, 9);
+  const dz = random(seed + 2).in(2, 6);
+  return Orb(dx(nth), dy(nth), dz(nth) * 2).clip(
+    Box(dx(nth), dy(nth), [1.5, dz(nth)])
+  );
+};
+```
+
+```JavaScript
+const wave = (low = 1.5, high = 4.5) =>
+  cut(ArcX(32, 2, [low, high]).seq({ from: -20, to: 20, by: 1.75 }, y));
+```
+
+```JavaScript
+const Waves = (seed = 0, nth = 0) => hex.ez(1.5, 3).join(hexTile).op(wave);
+```
+
+```JavaScript
+const Dunes = (seed = 0, nth = 0) =>
+  hex
+    .ez(1.5, 3.5)
+    .join(hexTile)
+    .cut(ArcX(32, 3, [2, 5.5]).seq({ from: -20, to: 20, by: 3 }, y));
 ```
 
 ```JavaScript
@@ -209,172 +276,371 @@ const Path = Cached('Path', (seed = 0, to = 3 / 6, from = 0 / 6) => {
 ```
 
 ```JavaScript
-const Wall = Cached('Wall', (seed = 0, to = 3 / 6, from = 0 / 6) => {
-  const dy1 = random(seed * 13).in(-10, 10);
-  const dy2 = random(seed * 49).in(-10, 10);
-  return Curve(
-    Point(16 - 2, 0, 0).rz(from),
-    Point(6, dy1(0)).rz(from),
-    Point(6, dy2(0)).rz(to),
-    Point(16 - 2, 0, 0).rz(to)
-  )
-    .eachPoint((p, n) => (s) => Arc(1.5, 1.5, [1, 10]).to(p), ChainHull)
-    .clip(hex.ez(10))
+const Road = (seed = 0, to = 3 / 6, from = 0 / 6) => {
+  const dy1 = random(seed * 87).in(-20, 20);
+  const dy2 = random(seed * 31).in(-20, 20);
+  const curve =
+    to === 0
+      ? Curve(
+          Point(16 - 2, 0, 0).rz(from),
+          Point(11, dy1(0)).rz(from),
+          Point(5, dy2(1)).rz(from),
+          Point(0, 0, 0)
+        )
+      : Curve(
+          Point(16 - 2, 0, 0).rz(from),
+          Point(6, dy1(0)).rz(from),
+          Point(6, dy2(1)).rz(to),
+          Point(16 - 2, 0, 0).rz(to)
+        );
+  return curve
+    .op((s) =>
+      s
+        .eachPoint(
+          (p, n) => (s) =>
+            Arc(6, 6, [-0.5, 4])
+              .and(Orb(6, 6, [3, 5]).hasZag(1))
+              .to(p),
+          ChainHull
+        )
+        .cut(
+          s.eachPoint((p, n) => (s) => Arc(3, 3, [-0.5, 0]).to(p), ChainHull)
+        )
+    )
+    .clean()
+    .fuse()
+    .z(2);
+};
+```
+
+```JavaScript
+const Tunnel = Cached('Tunnel', (seed = 0, to = 3 / 6, from = 0 / 6) => {
+  const dy1 = random(seed * 87).in(-20, 20);
+  const dy2 = random(seed * 31).in(-20, 20);
+  const curve =
+    to === 0
+      ? Curve(
+          Point(16 - 2, 0, 0).rz(from),
+          Point(11, dy1(0)).rz(from),
+          Point(5, dy2(1)).rz(from),
+          Point(0, 0, 0)
+        )
+      : Curve(
+          Point(16 - 2, 0, 0).rz(from),
+          Point(6, dy1(0)).rz(from),
+          Point(6, dy2(1)).rz(to),
+          Point(16 - 2, 0, 0).rz(to)
+        );
+  return curve
+    .eachPoint(
+      (p, n) => (s) =>
+        Arc(2, 2, [1.5, 4])
+          .and(Orb(2, 2, [3, 5]).hasZag(1))
+          .to(p),
+      ChainHull
+    )
     .clean()
     .fuse();
 });
 ```
 
 ```JavaScript
-const place = (turn) => {
+const Field = (seed = 0, turn = 0, nth = 0) => {
+  const dl = random(seed * 872).in(8, 14);
+  const dw = random(seed * 313).in(8, 14);
+  const dr = random(seed * 398).in(-1 / 6, 1 / 6);
   if (turn === 0) {
-    return Point();
+    return Hexagon(10).ez(2, 5).op(wave(3.5, 5));
   } else {
-    return Point()
-      .x(13 / 2)
-      .rz(turn);
-  }
-};
-```
-
-```JavaScript
-const CityWall = (seed = 0, turn = 0) =>
-  Arc(13).cut(inset(2)).ez(2, 5).to(place(turn));
-```
-
-```JavaScript
-const City = (
-  seed = 0,
-  turn = 0,
-  rd = random(seed * 27).in(2, 8),
-  ra = random(seed * 54).in(0, 1),
-  rl = random(seed * 71).in(1, 2),
-  rw = random(seed * 81).in(1, 4),
-  rh = random(seed * 59).in(2, 4)
-) =>
-  Arc(11)
-    .op(ez(1, 2), ez(2, 10).void())
-    .and(
-      Seq({ to: 20 }, (n) =>
-        Box(rl(n), rw(n), [1, rh(n)])
-          .x(rd(n))
-          .rz(ra(n))
-      )
-    )
-    .to(place(turn));
-```
-
-```JavaScript
-const Tile = (...args) => {
-  console.log(`QQ/Tile: ${JSON.stringify(args)}`);
-  const [seed = 0, { terrain, trees, river, path, wall, city }] = args;
-  const tileTerrain = { meadow: Meadow, hill: Hill, mountain: Mountain }[
-    terrain
-  ](seed);
-  let tile = tileTerrain;
-
-  for (const turn of trees.split(',').map((value) => parseInt(value))) {
-    if (!isFinite(turn)) {
-      continue;
-    }
-    tile = tile.and(Forest(seed, turn / 6));
-  }
-
-  /*
-  const wallTurns = wall
-    .split(',')
-    .map((value) => parseInt(value))
-    .filter(isFinite);
-
-  const walls = [];
-  for (let nth = 1; nth < wallTurns.length; nth += 2) {
-    walls.push(Wall(seed, wallTurns[nth] / 6, wallTurns[nth - 1] / 6));
-  }
-
-  if (walls.length > 0) {
-    tile = tile.join(...walls);
-  }
-*/
-
-  const riverTurns = river
-    .split(',')
-    .map((value) => parseInt(value))
-    .filter(isFinite);
-
-  for (let nth = 1; nth < riverTurns.length; nth += 2) {
-    tile = tile.cut(River(seed, riverTurns[nth] / 6, riverTurns[nth - 1] / 6));
-  }
-
-  const cityTurns = city
-    .split(',')
-    .map((value) => parseInt(value))
-    .filter(isFinite);
-
-  for (const turn of cityTurns) {
-    tile = tile.join(CityWall(seed, turn / 6));
-  }
-
-  const paths = [];
-  const pathTurns = path
-    .split(',')
-    .map((value) => parseInt(value))
-    .filter(isFinite);
-  console.log(`QQQ/pathTurns: ${JSON.stringify(pathTurns)}`);
-  for (let nth = 1; nth < pathTurns.length; nth += 2) {
-    console.log(`QQQ/path: ${nth}`);
-    paths.push(Path(seed, pathTurns[nth] / 6, pathTurns[nth - 1] / 6));
-  }
-
-  if (paths.length > 0) {
-    tile = tile.cut(
-      Join(...paths)
-        .cut(tileTerrain)
-        .z(-0.5)
+    return (
+      Triangle(14)
+        .clip(Box(20, 6))
+        .ez(2, 4)
+        //.op(wave(2.5, 4.5))
+        //.rz(dr(nth))
+        .to(place(turn))
+        .on(
+          noOp(),
+          rz(-3 / 12)
+            .x(2.5)
+            .op(wave(3.5, 5))
+        )
     );
   }
-
-  for (const turn of cityTurns) {
-    tile = tile.fitTo(City(seed, turn / 6));
-  }
-
-  return tile.clean().fuse();
 };
+```
+
+```JavaScript
+const Wall = (seed = 0, turn = 0, nth = 0) =>
+  Triangle(18)
+    .clip(Box(20, [-5, -3]))
+    .ez(2, 8)
+    .to(place(turn))
+    .on(noOp(), rz(-3 / 12).x(2.5));
+```
+
+```JavaScript
+const Buildings = (
+  seed = 0,
+  turn = 0,
+  nth = 0,
+  rd = random((nth + seed) * 27).in(0, 6),
+  ra = random((nth + seed) * 54).in(0, 1),
+  rs = random((nth + seed) * 59).in(3, 12),
+  rl = random((nth + seed) * 71).in(2, 6),
+  rw = random((nth + seed) * 81).in(2, 6),
+  rh = random((nth + seed) * 59).in(2, 5)
+) =>
+  Seq({ to: 3 }, (n) =>
+    (rs(n) > 8 ? Box : Arc)(rl(n), rw(n), [0, rh(n)])
+      .hasSides(rs(n))
+      .x(rd(n))
+      .rz(ra(n))
+  )
+    .and(Arc(12).ez(-0.5))
+    .to(place(turn))
+    .z(2);
+```
+
+```JavaScript
+const turnList = (config) =>
+  config
+    .split(',')
+    .map((value) => parseInt(value))
+    .filter(isFinite);
+```
+
+```JavaScript
+const turnSingles = (config) => {
+  const turns = turnList(config);
+  const singles = [];
+  for (let nth = 0; nth < turns.length; nth += 1) {
+    singles.push([turns[nth] / 6, nth]);
+  }
+  return singles;
+};
+```
+
+```JavaScript
+const turnPairs = (config) => {
+  const turns = turnList(config);
+  const pairs = [];
+  for (let nth = 1; nth < turns.length; nth += 2) {
+    pairs.push([turns[nth] / 6, turns[nth - 1] / 6, nth]);
+  }
+  return pairs;
+};
+```
+
+```JavaScript
+const Tile = (...args) =>
+  testMode(false, () => {
+    console.log(`QQ/Tile: ${JSON.stringify(args)}`);
+    const [
+      seed = 0,
+      {
+        terrain,
+        trees,
+        islands,
+        peaks,
+        river,
+        path,
+        road,
+        tunnel,
+        wall,
+        buildings,
+        field,
+        swamp,
+      },
+    ] = args;
+    console.log(`QQ/1`);
+    const tileTerrain = {
+      meadow: Meadow,
+      hill: Hill,
+      mountain: Mountain,
+      dunes: Dunes,
+      waves: Waves,
+      flat: Flat,
+    }[terrain](seed);
+    let tile = tileTerrain;
+
+    for (const [turn, nth] of turnSingles(trees)) {
+      tile = tile.and(Forest(seed, turn, nth));
+    }
+    console.log(`QQ/2`);
+
+    const peakTurns = turnList(peaks);
+    if (peakTurns.length > 0) {
+      tile = tile.and(
+        Peaks(
+          seed,
+          peakTurns.map((turn) => turn / 6)
+        )
+      );
+    }
+
+    const islandTurns = turnList(islands);
+    if (islandTurns.length > 0) {
+      tile = tile.and(
+        Peaks(
+          seed,
+          islandTurns.map((turn) => turn / 6)
+        )
+          .z(-8)
+          .clip(hex.ez(20))
+      );
+    }
+    console.log(`QQ/3`);
+
+    const swampTurns = turnList(swamp);
+    const swamps = [];
+    for (const turn of swampTurns) {
+      swamps.push(Swamp(seed, turn / 6, swamps.length));
+    }
+    if (swamps.length > 0) {
+      console.log(`QQ/Swamps: ${swamps.length}`);
+      tile = tile.cut(...swamps);
+    }
+
+    const wallTurns = turnList(wall);
+    const walls = [];
+    for (const turn of wallTurns) {
+      walls.push(Wall(seed, turn / 6, walls.length));
+    }
+    if (walls.length > 0) {
+      tile = tile.and(...walls);
+    }
+
+    for (const [to, from, nth] of turnPairs(river)) {
+      tile = tile.cut(River(seed, to, from, nth));
+    }
+
+    const paths = [];
+    for (const [from, to, nth] of turnPairs(path)) {
+      paths.push(Path(seed, from, to, nth));
+    }
+    if (paths.length > 0) {
+      tile = tile.cut(
+        Join(...paths)
+          .cut(tileTerrain)
+          .z(-0.5)
+      );
+    }
+    console.log(`QQ/4`);
+
+    const roads = [];
+    for (const [from, to, nth] of turnPairs(road)) {
+      roads.push(Road(seed, from, to, nth));
+    }
+    if (roads.length > 0) {
+      tile = tile.cut(...roads);
+      //.cut(tileTerrain)
+      //.z(-0.5)
+    }
+
+    for (const [turn, nth] of turnSingles(field)) {
+      tile = tile.and(Field(seed, turn, nth));
+    }
+
+    console.log(`QQ/4a`);
+
+    for (const [turn, nth] of turnSingles(buildings)) {
+      tile = tile.and(Buildings(seed, turn, nth));
+    }
+    console.log(`QQ/5`);
+
+    const tunnels = [];
+    for (const [from, to, nth] of turnPairs(tunnel)) {
+      tunnels.push(Tunnel(seed, from, to, nth));
+    }
+
+    if (tunnels.length > 0) {
+      tile = tile.cut(...tunnels);
+    }
+    console.log(`QQ/6`);
+
+    return tile.clean().fuse();
+  })();
 ```
 
 ### Tile Generator
 
 ```JavaScript
-const seed2 = control('seed', '0', 'input');
+const seed4 = control('seed', '1', 'input');
 ```
 
 ```JavaScript
-const terrain = control('terrain', 'meadow', 'select', [
+const terrain2 = control('terrain', 'meadow', 'select', [
   'meadow',
   'hill',
   'mountain',
+  'dunes',
+  'waves',
+  'flat',
 ]);
 ```
 
 ```JavaScript
-const trees2 = control('trees', '1', 'input');
+const trees2 = control('trees', '', 'input');
 ```
 
 ```JavaScript
-const river = control('river', '', 'input');
+const islands3 = control('islands', '', 'input');
 ```
 
 ```JavaScript
-const path = control('path', '', 'input');
+const peaks = control('peaks', '', 'input');
 ```
 
 ```JavaScript
-const city = control('city', '', 'input');
+const river3 = control('river', '', 'input');
 ```
 
 ```JavaScript
-Tile(seed2, { terrain, trees: trees2, river, path, city }).stl('tile');
+const swamp2 = control('swamp', '', 'input');
 ```
 
-![Image](hex.md.3.png)
+```JavaScript
+const path2 = control('path', '', 'input');
+```
+
+```JavaScript
+const road = control('road', '', 'input');
+```
+
+```JavaScript
+const tunnel2 = control('tunnel', '', 'input');
+```
+
+```JavaScript
+const field2 = control('field', '', 'input');
+```
+
+```JavaScript
+const buildings = control('buildings', '', 'input');
+```
+
+```JavaScript
+const wall = control('wall', '', 'input');
+```
+
+```JavaScript
+Tile(seed4, {
+  terrain: terrain2,
+  trees: trees2,
+  islands: islands3,
+  peaks: peaks,
+  river: river3,
+  swamp: swamp2,
+  path: path2,
+  road: road,
+  tunnel: tunnel2,
+  buildings: buildings,
+  wall: wall,
+  field: field2,
+}).stl('tile');
+```
+
+![Image](hex.md.1.png)
 
 [tile_1.stl](hex.tile_1.stl)

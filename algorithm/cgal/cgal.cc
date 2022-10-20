@@ -926,6 +926,9 @@ void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
     manifold_mesh.triVerts[facet] = std::move(t);
   }
   manifold = manifold::Manifold(manifold_mesh);
+  if (!manifold.IsManifold()) {
+    std::cout << "Not manifold" << std::endl;
+  }
 }
 
 void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
@@ -2757,9 +2760,27 @@ std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
   return s.str();
 }
 
+class DN {
+ public:
+  DN(int key) : key_(key){};
+  // ~DN() { std::cout << "DN: " << key_ << std::endl; }
+  int key_;
+};
+
 class Geometry {
  public:
-  Geometry() : size_(0), is_absolute_frame_(false) {}
+  Geometry()
+      : test_mode_(false),
+        size_(0),
+        is_absolute_frame_(false),
+        dn1(1),
+        dn2(2),
+        dn3(3),
+        dn4(4),
+        dn5(5),
+        dn6(6),
+        dn7(7),
+        dn8(8) {}
 
   void setSize(int size) {
     types_.clear();
@@ -2985,7 +3006,13 @@ class Geometry {
 
   void setInputMesh(int nth, const std::shared_ptr<const Surface_mesh>& mesh) {
     input_meshes_[nth] = mesh;
+    if (test_mode_) {
+      assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
+          *input_meshes_[nth], CGAL::parameters::all_default()));
+    }
   }
+
+  void setTestMode(bool mode) { test_mode_ = mode; }
 
   const std::shared_ptr<const Surface_mesh> getInputMesh(int nth) {
     return input_meshes_[nth];
@@ -3012,6 +3039,10 @@ class Geometry {
   void setMesh(int nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
 
   const std::shared_ptr<const Surface_mesh> getMesh(int nth) {
+    if (test_mode_) {
+      assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
+          *meshes_[nth], CGAL::parameters::all_default()));
+    }
     return meshes_[nth];
   }
 
@@ -3335,26 +3366,35 @@ class Geometry {
   void set_absolute_frame() { is_absolute_frame_ = true; }
   void set_local_frame() { is_absolute_frame_ = false; }
 
+  bool test_mode_;
+  DN dn1;
   int size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
   std::vector<std::shared_ptr<const Transformation>> transforms_;
+  DN dn2;
   std::vector<Plane> planes_;
   std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
+  DN dn3;
   std::vector<std::shared_ptr<const Surface_mesh>> input_meshes_;
   std::vector<std::shared_ptr<Surface_mesh>> meshes_;
+  DN dn4;
   std::vector<std::shared_ptr<Epick_surface_mesh>> epick_meshes_;
   std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
+  DN dn5;
   std::vector<std::unique_ptr<Segments>> input_segments_;
   std::vector<std::unique_ptr<Segments>> segments_;
+  DN dn6;
   std::vector<std::unique_ptr<Edges>> edges_;
   std::vector<std::unique_ptr<Points>> input_points_;
   std::vector<std::unique_ptr<Points>> points_;
+  DN dn7;
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
+  DN dn8;
 };
 
 class AabbTreeQuery {
@@ -4470,6 +4510,11 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
+
+  if (size < 2) {
+    // Already disjoint.
+    return STATUS_OK;
+  }
 
   for (int start = size - 2; start >= 0; start--) {
     switch (geometry->type(start)) {
@@ -7531,6 +7576,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("getSize", &Geometry::getSize)
       .function("getTransform", &Geometry::getTransform)
       .function("getType", &Geometry::getType)
+      .function("setTestMode", &Geometry::setTestMode)
       .function("setInputMesh", &Geometry::setInputMesh)
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform)

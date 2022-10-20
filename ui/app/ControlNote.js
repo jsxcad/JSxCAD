@@ -16,7 +16,8 @@ export class ControlNote extends React.PureComponent {
 
   render() {
     const { note, selected } = this.props;
-    const { label, options, type, value } = note.control;
+    const { blur, control } = note;
+    const { label, options, type, value } = control;
     const ref = selected && createRef();
     if (selected) {
       useEffect(() => ref.current.scrollIntoView(true));
@@ -26,7 +27,7 @@ export class ControlNote extends React.PureComponent {
     switch (type) {
       case 'check':
         return (
-          <InputGroup ref={ref} style={{ border }}>
+          <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
             <Form.Check
               label={label}
               type="checkbox"
@@ -38,7 +39,7 @@ export class ControlNote extends React.PureComponent {
         );
       case 'input':
         return (
-          <InputGroup ref={ref} style={{ border }}>
+          <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
             <InputGroup.Text>{label}</InputGroup.Text>
             <Form.Control
               className="note control input"
@@ -49,7 +50,7 @@ export class ControlNote extends React.PureComponent {
         );
       case 'select':
         return (
-          <InputGroup ref={ref} style={{ border }}>
+          <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
             <InputGroup.Text>{label}</InputGroup.Text>
             <Form.Control
               as="select"
@@ -57,7 +58,7 @@ export class ControlNote extends React.PureComponent {
               name={label}
             >
               {options.map((option, nth) => (
-                <option key={nth} value={option}>
+                <option key={nth} value={option} selected={option === value}>
                   {option}
                 </option>
               ))}
@@ -66,7 +67,7 @@ export class ControlNote extends React.PureComponent {
         );
       default:
         return (
-          <div ref={ref} style={{ border }}>
+          <div ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
             Unsupported control type
           </div>
         );

@@ -117,7 +117,7 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     */
   } else {
     await replayRecordedNotes(path, id);
-    const result = load(`data/def/${path}/${id}.data`);
+    const result = await load(`data/def/${path}/${id}.data`);
     return result;
   }
   /*

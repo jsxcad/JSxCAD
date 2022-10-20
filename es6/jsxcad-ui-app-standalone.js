@@ -1985,11 +1985,15 @@ class ControlNote extends ReactDOM$1.PureComponent {
       selected
     } = this.props;
     const {
+      blur,
+      control
+    } = note;
+    const {
       label,
       options,
       type,
       value
-    } = note.control;
+    } = control;
     const ref = selected && /*#__PURE__*/p$1();
     if (selected) {
       y(() => ref.current.scrollIntoView(true));
@@ -2001,7 +2005,8 @@ class ControlNote extends ReactDOM$1.PureComponent {
         return v$1(InputGroup, {
           ref: ref,
           style: {
-            border
+            border,
+            opacity: blur ? 0.5 : 1
           }
         }, v$1(FormImpl.Check, {
           label: label,
@@ -2014,7 +2019,8 @@ class ControlNote extends ReactDOM$1.PureComponent {
         return v$1(InputGroup, {
           ref: ref,
           style: {
-            border
+            border,
+            opacity: blur ? 0.5 : 1
           }
         }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
           className: "note control input",
@@ -2025,7 +2031,8 @@ class ControlNote extends ReactDOM$1.PureComponent {
         return v$1(InputGroup, {
           ref: ref,
           style: {
-            border
+            border,
+            opacity: blur ? 0.5 : 1
           }
         }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
           as: "select",
@@ -2033,13 +2040,15 @@ class ControlNote extends ReactDOM$1.PureComponent {
           name: label
         }, options.map((option, nth) => v$1("option", {
           key: nth,
-          value: option
+          value: option,
+          selected: option === value
         }, option))));
       default:
         return v$1("div", {
           ref: ref,
           style: {
-            border
+            border,
+            opacity: blur ? 0.5 : 1
           }
         }, "Unsupported control type");
     }
@@ -2295,6 +2304,10 @@ class DownloadNote extends ReactDOM$1.PureComponent {
       selected,
       workspace
     } = this.props;
+    const {
+      blur,
+      download
+    } = note;
     const buttons = [];
     for (let {
       path,
@@ -2302,7 +2315,7 @@ class DownloadNote extends ReactDOM$1.PureComponent {
       data,
       filename,
       type
-    } of note.download.entries) {
+    } of download.entries) {
       if (base64Data) {
         data = decode(base64Data);
       }
@@ -2325,7 +2338,8 @@ class DownloadNote extends ReactDOM$1.PureComponent {
     return v$1(ButtonGroup, {
       ref: ref,
       style: {
-        border
+        border,
+        opacity: blur ? 0.5 : 1
       }
     }, buttons);
   }
@@ -5154,7 +5168,11 @@ class MdNote extends ReactDOM$1.PureComponent {
       note,
       selected
     } = this.props;
-    const html = marked(note.md);
+    const {
+      blur = false,
+      md
+    } = note;
+    const html = marked(md);
     const ref = selected && /*#__PURE__*/p$1();
     if (selected) {
       y(() => ref.current.scrollIntoView(true));
@@ -5166,7 +5184,8 @@ class MdNote extends ReactDOM$1.PureComponent {
         __html: html
       },
       style: {
-        border
+        border,
+        opacity: blur ? 0.5 : 1
       }
     });
   }
@@ -5301,6 +5320,7 @@ class ViewNote extends ReactDOM$1.PureComponent {
       workspace
     } = this.props;
     const {
+      blur = false,
       view,
       sourceLocation
     } = note;
@@ -5339,7 +5359,8 @@ class ViewNote extends ReactDOM$1.PureComponent {
         display: 'block',
         height: `${height}px`,
         width: `${width}px`,
-        border
+        border,
+        opacity: blur ? 0.5 : 1
       },
       src: note.url,
       onClick: onClick
@@ -5373,21 +5394,24 @@ const updateNotebookState = async (application, {
   sourceLocation,
   workspace
 }) => {
-  const {
-    path
-  } = sourceLocation;
   const updateNote = note => {
+    const {
+      sourceLocation
+    } = note;
+    if (!sourceLocation) {
+      return;
+    }
+    const {
+      path
+    } = sourceLocation;
+    /*
     if (note.beginSourceLocation) {
       // Remove any existing notes for this line.
-      const {
-        line
-      } = note.beginSourceLocation;
-      const op = state => {
-        const {
-          [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-        } = state;
+      const { line } = note.beginSourceLocation;
+      const op = (state) => {
+        const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
         const newNotebookNotes = {
-          ...oldNotebookNotes
+          ...oldNotebookNotes,
         };
         for (const key of Object.keys(newNotebookNotes)) {
           const note = newNotebookNotes[key];
@@ -5395,12 +5419,11 @@ const updateNotebookState = async (application, {
             delete newNotebookNotes[key];
           }
         }
-        return {
-          [`NotebookNotes/${path}`]: newNotebookNotes
-        };
+        return { [`NotebookNotes/${path}`]: newNotebookNotes };
       };
       application.setState(op);
     }
+    */
     if (!note.hash) {
       return;
     }
@@ -5413,6 +5436,7 @@ const updateNotebookState = async (application, {
         ...oldNotebookNotes,
         [note.hash]: {
           ...oldNote,
+          blur: false,
           ...note
         }
       };
@@ -5433,7 +5457,8 @@ const updateNotebookState = async (application, {
           if (!url) {
             const {
               path,
-              view
+              view,
+              sourceLocation
             } = note;
             const {
               width,
@@ -5460,7 +5485,8 @@ const updateNotebookState = async (application, {
                 });
                 updateNote({
                   hash: note.hash,
-                  url
+                  url,
+                  sourceLocation
                 });
               } catch (error) {
                 if (error.message === 'Terminated') {
@@ -5473,7 +5499,8 @@ const updateNotebookState = async (application, {
           if (url) {
             updateNote({
               hash: note.hash,
-              url
+              url,
+              sourceLocation
             });
           }
         };
@@ -5582,7 +5609,6 @@ class Notebook extends ReactDOM$1.PureComponent {
           children.push(child);
         }
       }
-      console.log(`render Notebook`);
       y(() => mermaid.init(undefined, '.mermaid'));
       return v$1("div", {
         id: notebookPath,

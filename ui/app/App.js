@@ -6,6 +6,7 @@ import './react-multi-split-pane.css';
 import * as PropTypes from 'prop-types';
 
 import Notebook, {
+  blurNotebookState,
   clearNotebookState,
   updateNotebookState,
 } from './Notebook.js';
@@ -215,6 +216,10 @@ class App extends React.Component {
         case 'log':
           return log(entry);
         case 'notes':
+          // console.log(`QQ/id: ${sourceLocation.id}`);
+          if (sourceLocation.id === 'seed4') {
+            console.log('here');
+          }
           return updateNotebookState(this, {
             notes,
             sourceLocation,
@@ -463,6 +468,7 @@ class App extends React.Component {
       const { sha, workspace } = this.props;
       const NotebookAdvice = this.Notebook.ensureAdvice(path);
       const NotebookPath = path;
+      await blurNotebookState(this, { path, workspace });
       const topLevel = new Map();
       const profile = new Map();
       const updateProfile = (times) => {
@@ -504,6 +510,7 @@ class App extends React.Component {
 
         const evaluate = async (script) => {
           try {
+            console.log(`QQ/evaluate: ${script}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -563,7 +570,7 @@ class App extends React.Component {
         clearNotebookState(this, {
           path: NotebookPath,
           workspace,
-          isToBeKept: (note) => note.version === version,
+          isToBeKept: (note) => !note.blur,
         });
       } catch (error) {
         // Include any high level notebook errors in the output.
@@ -1413,7 +1420,7 @@ class App extends React.Component {
           );
         }
         case 'Log': {
-          const { LogMessages = [], LogFilter = '^app/Profile' } = this.state;
+          const { LogMessages = [], LogFilter = '' } = this.state;
           return (
             <div>
               <Card>
