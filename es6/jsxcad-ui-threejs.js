@@ -1633,7 +1633,7 @@ const moveToFit = ({
   // Back the camera off by 1mm at a time until the bounding box is contained by
   // the frustrum.
   // CHECK: Use a binary search if this becomes a latency problem.
-  for (let distance = 1; ; distance += 1) {
+  for (let distance = 1; distance < 100000; distance += 1) {
     const direction = target
       .clone()
       .sub(camera.position)

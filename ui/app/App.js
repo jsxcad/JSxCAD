@@ -217,9 +217,6 @@ class App extends React.Component {
           return log(entry);
         case 'notes':
           // console.log(`QQ/id: ${sourceLocation.id}`);
-          if (sourceLocation.id === 'seed4') {
-            console.log('here');
-          }
           return updateNotebookState(this, {
             notes,
             sourceLocation,
@@ -510,7 +507,7 @@ class App extends React.Component {
 
         const evaluate = async (script) => {
           try {
-            console.log(`QQ/evaluate: ${script}`);
+            // console.log(`QQ/evaluate: ${script}`);
             const result = await this.ask(
               {
                 op: 'app/evaluate',
@@ -656,7 +653,7 @@ class App extends React.Component {
     };
 
     this.Notebook.change = (path, data) => {
-      console.log(`QQ/Notebook.change: ${path} ${data}`);
+      // console.log(`QQ/Notebook.change: ${path} ${data}`);
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
@@ -1621,6 +1618,7 @@ class App extends React.Component {
       await write(`control/${path}`, notebookControlData, {
         workspace,
       });
+      // console.log(`QQ/saveControlValues: ${JSON.stringify(notebookControlData)}`);
       then(path);
     };
 

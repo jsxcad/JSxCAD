@@ -4579,9 +4579,11 @@ const seq = Shape.chainable((...args) => (shape) => {
   const results = [];
   const index = indexes.map(() => 0);
   for (;;) {
-    results.push(
-      maybeApply(op(...index.map((nth, index) => indexes[index][nth])), shape)
-    );
+    const args = index.map((nth, index) => indexes[index][nth]);
+    if (args.some((value) => value === undefined)) {
+      break;
+    }
+    results.push(maybeApply(op(...args), shape));
     let nth;
     for (nth = 0; nth < index.length; nth++) {
       if (++index[nth] < indexes[nth].length) {

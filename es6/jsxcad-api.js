@@ -4,7 +4,7 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, addPending, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation, getControlValue } from './jsxcad-sys.js';
+import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readStl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
@@ -40,11 +40,11 @@ const saveRecordedNotes = (path, id) => {
   let notesToSave = recordedNotes;
   recordedNotes = undefined;
   recording = false;
-  addPending(write(`data/note/${path}/${id}`, notesToSave));
+  return write(`data/note/${path}/${id}.note`, notesToSave);
 };
 
 const replayRecordedNotes = async (path, id) => {
-  const notes = await read(`data/note/${path}/${id}`);
+  const notes = await read(`data/note/${path}/${id}.note`);
 
   if (notes === undefined) {
     return;
@@ -64,6 +64,7 @@ const emitSourceText = (sourceText) =>
 const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
+    // console.log(`QQ/recompute: ${id} ${sha}`);
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
     beginRecordingNotes();
@@ -90,41 +91,21 @@ const $run = async (op, { path, id, text, sha, line }) => {
     finishEmitGroup({ path, id });
     try {
       if (result !== undefined) {
+        // These may introduce a race -- let's see if we can make it transactional.
+        await saveRecordedNotes(path, id);
         await save(`data/def/${path}/${id}.data`, result);
         await write(`meta/def/${path}/${id}.meta`, { sha });
-        await saveRecordedNotes(path, id);
         return result;
       }
     } catch (error) {}
     clearRecordedNotes();
     return result;
-    /*
-    if (typeof result === 'object') {
-      const type = result.constructor.name;
-      switch (type) {
-        case 'Shape':
-          await saveGeometry(`data/def/${path}/${id}.data`, result);
-          await write(`meta/def/${path}/${id}.meta`, { sha, type });
-          await saveRecordedNotes(path, id);
-          return result;
-      }
-    }
-    clearRecordedNotes();
-    return result;
-    */
   } else {
+    // console.log(`QQ/replay: ${id} ${sha}`);
     await replayRecordedNotes(path, id);
     const result = await load(`data/def/${path}/${id}.data`);
     return result;
   }
-  /*
-  } else if (meta.type === 'Shape') {
-    await replayRecordedNotes(path, id);
-    return loadGeometry(`data/def/${path}/${id}.data`);
-  } else {
-    throw Error('Unexpected cached result');
-  }
-  */
 };
 
 var notesApi = /*#__PURE__*/Object.freeze({
@@ -189,6 +170,7 @@ const evaluate = async (ecmascript, { api, path }) => {
       } catch (error) {
         if (error instanceof ErrorWouldBlock) {
           logInfo('api/core/evaluate/error', error.message);
+          console.log(error.message);
           await resolvePending();
           restoreEmitGroup(emitGroup);
           continue;
@@ -446,7 +428,8 @@ const buildImportModule =
 
 const control = (label, defaultValue, type, options) => {
   const { path } = getSourceLocation();
-  const value = getControlValue(path, label, defaultValue);
+  // const value = getControlValue(path, label, defaultValue);
+  const value = defaultValue;
   const control = {
     type,
     label,
@@ -454,6 +437,7 @@ const control = (label, defaultValue, type, options) => {
     options,
     path,
   };
+  // console.log(`QQ/control: label=${label} get=${value} def=${defaultValue}`);
   emit({ control, hash: computeHash(control) });
   return value;
 };

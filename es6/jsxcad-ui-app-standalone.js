@@ -2013,7 +2013,7 @@ class ControlNote extends ReactDOM$1.PureComponent {
           type: "checkbox",
           name: label,
           checked: value,
-          className: "note control check"
+          className: `note control check ${blur ? 'disabled' : 'enabled'}`
         }));
       case 'input':
         return v$1(InputGroup, {
@@ -2023,7 +2023,7 @@ class ControlNote extends ReactDOM$1.PureComponent {
             opacity: blur ? 0.5 : 1
           }
         }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
-          className: "note control input",
+          className: `note control input ${blur ? 'disabled' : 'enabled'}`,
           value: value,
           name: label
         }));
@@ -2036,7 +2036,7 @@ class ControlNote extends ReactDOM$1.PureComponent {
           }
         }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
           as: "select",
-          className: "note control select",
+          className: `note control select ${blur ? 'disabled' : 'enabled'}`,
           name: label
         }, options.map((option, nth) => v$1("option", {
           key: nth,

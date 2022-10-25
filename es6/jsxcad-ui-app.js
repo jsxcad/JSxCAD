@@ -2014,7 +2014,7 @@ class ControlNote extends ReactDOM$3.PureComponent {
           type: "checkbox",
           name: label,
           checked: value,
-          className: "note control check"
+          className: `note control check ${blur ? 'disabled' : 'enabled'}`
         }));
       case 'input':
         return v$1(InputGroup, {
@@ -2024,7 +2024,7 @@ class ControlNote extends ReactDOM$3.PureComponent {
             opacity: blur ? 0.5 : 1
           }
         }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
-          className: "note control input",
+          className: `note control input ${blur ? 'disabled' : 'enabled'}`,
           value: value,
           name: label
         }));
@@ -2037,7 +2037,7 @@ class ControlNote extends ReactDOM$3.PureComponent {
           }
         }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
           as: "select",
-          className: "note control select",
+          className: `note control select ${blur ? 'disabled' : 'enabled'}`,
           name: label
         }, options.map((option, nth) => v$1("option", {
           key: nth,
@@ -43726,9 +43726,6 @@ class App extends ReactDOM$3.Component {
           return log(entry);
         case 'notes':
           // console.log(`QQ/id: ${sourceLocation.id}`);
-          if (sourceLocation.id === 'seed4') {
-            console.log('here');
-          }
           return updateNotebookState(this, {
             notes,
             sourceLocation,
@@ -44062,7 +44059,7 @@ class App extends ReactDOM$3.Component {
         const version = new Date().getTime();
         const evaluate = async script => {
           try {
-            console.log(`QQ/evaluate: ${script}`);
+            // console.log(`QQ/evaluate: ${script}`);
             const result = await this.ask({
               op: 'app/evaluate',
               script,
@@ -44218,7 +44215,7 @@ class App extends ReactDOM$3.Component {
       this.Notebook.store();
     };
     this.Notebook.change = (path, data) => {
-      console.log(`QQ/Notebook.change: ${path} ${data}`);
+      // console.log(`QQ/Notebook.change: ${path} ${data}`);
       this.setState({
         [`NotebookText/${path}`]: data
       });
@@ -45065,6 +45062,7 @@ class App extends ReactDOM$3.Component {
       await write(`control/${path}`, notebookControlData, {
         workspace
       });
+      // console.log(`QQ/saveControlValues: ${JSON.stringify(notebookControlData)}`);
       then(path);
     };
     const {
