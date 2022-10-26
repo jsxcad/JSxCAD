@@ -33,7 +33,7 @@ export class ControlNote extends React.PureComponent {
               type="checkbox"
               name={label}
               checked={value}
-              className="note control check"
+              className={`note control check ${blur ? 'disabled' : 'enabled'}`}
             />
           </InputGroup>
         );
@@ -42,7 +42,7 @@ export class ControlNote extends React.PureComponent {
           <InputGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
             <InputGroup.Text>{label}</InputGroup.Text>
             <Form.Control
-              className="note control input"
+              className={`note control input ${blur ? 'disabled' : 'enabled'}`}
               value={value}
               name={label}
             />
@@ -54,7 +54,7 @@ export class ControlNote extends React.PureComponent {
             <InputGroup.Text>{label}</InputGroup.Text>
             <Form.Control
               as="select"
-              className="note control select"
+              className={`note control select ${blur ? 'disabled' : 'enabled'}`}
               name={label}
             >
               {options.map((option, nth) => (

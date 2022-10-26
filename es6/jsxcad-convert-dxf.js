@@ -2710,6 +2710,7 @@ class DimStyleTable extends Table_1 {
 var DimStyleTable_1 = DimStyleTable;
 
 class TextStyle extends DatabaseObject_1 {
+    fontFileName = 'txt';
     constructor(name) {
         super(["AcDbSymbolTableRecord", "AcDbTextStyleTableRecord"]);
         this.name = name;
@@ -2726,7 +2727,7 @@ class TextStyle extends DatabaseObject_1 {
         manager.push(50, 0);
         manager.push(71, 0);
         manager.push(42, 1);
-        manager.push(3, this.name);
+        manager.push(3, this.fontFileName);
         manager.push(4, "");
     }
 }

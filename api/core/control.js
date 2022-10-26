@@ -1,9 +1,4 @@
-import {
-  computeHash,
-  emit,
-  getControlValue,
-  getSourceLocation,
-} from '@jsxcad/sys';
+import { computeHash, emit, getSourceLocation } from '@jsxcad/sys';
 
 /*
   Options
@@ -13,7 +8,8 @@ import {
 
 export const control = (label, defaultValue, type, options) => {
   const { path } = getSourceLocation();
-  const value = getControlValue(path, label, defaultValue);
+  // const value = getControlValue(path, label, defaultValue);
+  const value = defaultValue;
   const control = {
     type,
     label,
@@ -21,6 +17,7 @@ export const control = (label, defaultValue, type, options) => {
     options,
     path,
   };
+  // console.log(`QQ/control: label=${label} get=${value} def=${defaultValue}`);
   emit({ control, hash: computeHash(control) });
   return value;
 };

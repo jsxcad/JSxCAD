@@ -35,6 +35,7 @@ export const evaluate = async (ecmascript, { api, path }) => {
       } catch (error) {
         if (error instanceof ErrorWouldBlock) {
           logInfo('api/core/evaluate/error', error.message);
+          console.log(error.message);
           await resolvePending();
           restoreEmitGroup(emitGroup);
           continue;

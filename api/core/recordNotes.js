@@ -1,7 +1,6 @@
 import { Group, Shape, load, save } from '@jsxcad/api-shape';
 import {
   addOnEmitHandler,
-  addPending,
   beginEmitGroup,
   computeHash,
   emit,
@@ -43,11 +42,11 @@ export const saveRecordedNotes = (path, id) => {
   let notesToSave = recordedNotes;
   recordedNotes = undefined;
   recording = false;
-  addPending(write(`data/note/${path}/${id}`, notesToSave));
+  return write(`data/note/${path}/${id}.note`, notesToSave);
 };
 
 export const replayRecordedNotes = async (path, id) => {
-  const notes = await read(`data/note/${path}/${id}`);
+  const notes = await read(`data/note/${path}/${id}.note`);
 
   if (notes === undefined) {
     return;
@@ -67,6 +66,7 @@ export const emitSourceText = (sourceText) =>
 export const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
+    // console.log(`QQ/recompute: ${id} ${sha}`);
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
     beginRecordingNotes(path, id);
@@ -93,39 +93,19 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     finishEmitGroup({ path, id });
     try {
       if (result !== undefined) {
+        // These may introduce a race -- let's see if we can make it transactional.
+        await saveRecordedNotes(path, id);
         await save(`data/def/${path}/${id}.data`, result);
         await write(`meta/def/${path}/${id}.meta`, { sha });
-        await saveRecordedNotes(path, id);
         return result;
       }
     } catch (error) {}
     clearRecordedNotes();
     return result;
-    /*
-    if (typeof result === 'object') {
-      const type = result.constructor.name;
-      switch (type) {
-        case 'Shape':
-          await saveGeometry(`data/def/${path}/${id}.data`, result);
-          await write(`meta/def/${path}/${id}.meta`, { sha, type });
-          await saveRecordedNotes(path, id);
-          return result;
-      }
-    }
-    clearRecordedNotes();
-    return result;
-    */
   } else {
+    // console.log(`QQ/replay: ${id} ${sha}`);
     await replayRecordedNotes(path, id);
     const result = await load(`data/def/${path}/${id}.data`);
     return result;
   }
-  /*
-  } else if (meta.type === 'Shape') {
-    await replayRecordedNotes(path, id);
-    return loadGeometry(`data/def/${path}/${id}.data`);
-  } else {
-    throw Error('Unexpected cached result');
-  }
-  */
 };
