@@ -1,5 +1,7 @@
 import test from 'ava';
 
+const clean = (v) => JSON.parse(JSON.stringify(v));
+
 const chainable = (op) => {
   let free, bound;
 
@@ -19,7 +21,7 @@ const chainable = (op) => {
         (...args) =>
           async (s) => {
             const op = s[prop];
-            return op(...args)(target(s));
+            return op(...args)(await target(s));
           },
         free(context)
       );
@@ -38,19 +40,18 @@ const chainable = (op) => {
 };
 
 const log = chainable((a) => async (s) => {
-  console.log(`LOG ${a}`);
-  return s;
+  return { ...s, a };
 });
 
 test('chainable', async (t) => {
   const ap = log(1).log(2).log(3).log(4).log(5);
-  const { name } = await ap({ log, name: 'v' });
-  t.is(name, 'v');
+  const r = await ap({ log, name: 'v' });
+  t.deepEqual(clean(r), { name: 'v', a: 5 });
 });
 
 test('fluent', async (t) => {
   const o = { log };
   const ap = o.log(1).log(2).log(3).log(4).log(5);
-  const { name } = await ap({ log, name: 'v' });
-  t.is(name, 'v');
+  const r = await ap({ log, name: 'v' });
+  t.deepEqual(clean(r), { name: 'v', a: 5 });
 });
