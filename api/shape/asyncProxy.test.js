@@ -16,10 +16,11 @@ const chainable = (op) => {
         return (resolve, reject) => resolve(result);
       }
       return new Proxy(
-        (...args) => async (s) => {
-          const op = s[prop];
-          return op(...args)(target(s))
-        },
+        (...args) =>
+          async (s) => {
+            const op = s[prop];
+            return op(...args)(target(s));
+          },
         free(context)
       );
     },
