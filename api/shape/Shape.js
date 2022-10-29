@@ -342,6 +342,7 @@ Shape.toCoordinates = (shape, ...args) => {
   return coordinates;
 };
 
+/*
 Shape.chainable = (op) => {
   let free, bound;
 
@@ -368,6 +369,39 @@ Shape.chainable = (op) => {
   // This is waiting for arguments.
   free = {
     apply(target, obj, args) {
+      return new Proxy(target(...args), bound);
+    },
+  };
+
+  return new Proxy(op, free);
+};
+*/
+
+Shape.chainable = (op) => {
+  let free, bound;
+
+  // This is waiting for a shape or a chain.
+  bound = {
+    apply: async (target, obj, args) => {
+      console.log(`bound/apply: ${JSON.stringify(args)}`);
+      // Received a shape.
+      return target(...args);
+    },
+    get(target, prop, receiver) {
+      console.log(`bound/get: ${prop}`);
+      return new Proxy(
+        (...args) =>
+          async (s) =>
+            (await s[prop](...args))((await target)(s)),
+        free
+      );
+    },
+  };
+
+  // This is waiting for arguments.
+  free = {
+    apply(target, obj, args) {
+      console.log('free/apply');
       return new Proxy(target(...args), bound);
     },
   };
