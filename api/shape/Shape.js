@@ -116,6 +116,9 @@ export const registerShapeMethod = (name, op) => {
   // Make the operation constructor available e.g., Shape.grow(1)(s)
   Shape[name] = op;
 
+  Shape.prototype[name] = op;
+
+  /*
   // Make the operation application available e.g., s.grow(1)
   const { [name]: method } = {
     [name]: function (...args) {
@@ -128,6 +131,7 @@ export const registerShapeMethod = (name, op) => {
   method.origin = path;
   Shape.prototype[name] = method;
   return method;
+  */
 };
 
 export const shapeMethod = (build) => {
@@ -342,6 +346,7 @@ Shape.toCoordinates = (shape, ...args) => {
   return coordinates;
 };
 
+/*
 Shape.chainable = (op) => {
   let free, bound;
 
@@ -373,6 +378,79 @@ Shape.chainable = (op) => {
   };
 
   return new Proxy(op, free);
+};
+*/
+
+Shape.chainable = (op) => {
+  let free, bound;
+
+  // This is waiting for a shape or a chain.
+  bound = (context) => {
+    const ctx = context;
+    if (typeof ctx === 'function') {
+      throw Error('die/promise');
+    }
+    if (!ctx) {
+      throw Error('die/null');
+    }
+    return {
+    apply(target, obj, args) {
+      console.log(`QQ/bound/apply`);
+      // Received a shape.
+      // Now we supply the ...args for the chain below.
+      const result = target(...args);
+      // Result should be a simple function.
+      console.log(`QQ/bound/apply/result: ${result}`);
+      // Wrap the result in a proxy carrying the context along.
+      return new Proxy(result, bound(ctx));
+    },
+    get(target, prop, receiver) {
+      console.log(`QQ/bound/get: ${prop.toString()}`);
+      if (typeof prop === 'symbol') {
+        return Reflect.get(target, prop);
+      }
+      if (prop === 'then') {
+        console.log(`QQ/bound/then: target=${'' + target} ctx=${JSON.stringify(ctx)} type=${typeof ctx}`);
+        // target should be the async (sp) => function below.
+        const result = target(ctx, 'then');
+        return Promise.resolve(result);
+      }
+      console.log(`QQ/bound/chain: type=${typeof ctx}`);
+      return new Proxy(
+        (...args) =>
+          async (sp, caller) => {
+            console.log(`QQ/caller: ${caller}`);
+            // ctx is passed into here as sp from the 'then' case above.
+            if (typeof sp === 'function') {
+              throw Error('QQ/bound/get/exec/fun');
+            }
+            console.log(`QQ/chainable/bound/get/sp: sp=${typeof sp}`);
+            const s = sp;
+            console.log(`QQ/chainable/bound/get/s: s=${typeof s}`);
+            console.log(`QQ/chainable/bound/get/exec: args=${JSON.stringify(args)} prop=${prop}`);
+            const op = Reflect.get(s, prop);
+            console.log(`QQ/chainable/bound/get/op: op=${typeof op}`);
+            const parent = await target(s);
+            console.log(`QQ/chainable/bound/get/parent: op=${typeof parent}`);
+            console.log(`QQ/chainable/bound/get/result: op=${typeof result}`);
+            return op(...args)(parent);
+          },
+        free(ctx)
+      );
+    },
+  };
+  };
+
+  // This is waiting for arguments.
+  free = (context) => ({
+    apply(target, obj, args) {
+      console.log(`QQ/free/apply: type=${typeof obj}`);
+      return new Proxy(target(...args), bound(context !== undefined ? context : obj));
+    },
+  });
+
+  const result = new Proxy(op, free());
+  return result;
 };
 
 export const fromGeometry = Shape.fromGeometry;

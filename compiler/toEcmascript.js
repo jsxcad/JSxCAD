@@ -178,12 +178,6 @@ const declareVariable = async (
 
   // const declarationSource = generate({ type: 'Program', body: declarator });
 
-  if (id === 'peaks') {
-    console.log(`QQ/peaks/source: ${declarationSource}`);
-    console.log(`QQ/peaks/sha: ${hash(declarationSource)}`);
-    console.log('--');
-  }
-
   const entry = {
     path,
     id,
@@ -359,7 +353,7 @@ const processStatement = async (entry, options) => {
     const { nextTopLevelExpressionId } = options;
     // This is an ugly way of turning top level expressions into declarations.
     const declaration = parse(
-      `const $${nextTopLevelExpressionId()} = ${generate(entry)}`,
+      `const $${nextTopLevelExpressionId()} = await ${generate(entry)}`,
       parseOptions
     ).body[0];
     const declarator = declaration.declarations[0];

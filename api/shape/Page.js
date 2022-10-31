@@ -96,11 +96,14 @@ export const Page = (...args) => {
 
   const margin = itemMargin;
   const layers = [];
+  console.log(`QQ/shapes.length: ${shapes.length}`);
+  console.log(`QQ/shapes.then: ${shapes.then}`);
   for (const shape of shapes) {
     for (const leaf of getLeafs(shape.toDisjointGeometry())) {
       layers.push(leaf);
     }
   }
+  console.log(`QQ/layers.length: ${layers.length}`);
   if (!pack && size) {
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     const [width, height] = size;
@@ -215,6 +218,7 @@ export const Page = (...args) => {
       packSize,
     });
     if (packSize.length === 0) {
+      console.log(`QQ/layers.length/2: ${layers.length}`);
       throw Error('Packing failed');
     }
     // FIX: Using content.size() loses the margin, which is a problem for repacking.

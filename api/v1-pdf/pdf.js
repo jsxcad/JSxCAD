@@ -12,11 +12,14 @@ import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
 import { toPdf } from '@jsxcad/convert-pdf';
 
-export const preparePdf = (shape, name, op = (s) => s, options = {}) => {
+export const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  console.log(`QQ/preparePdf/shape: ${shape.then}`);
+  console.log(`QQ/preparePdf/op: ${op.then}`);
+  const processedShape = await op(shape);
+  for (const entry of ensurePages(processedShape.toDisjointGeometry())) {
     const pdfPath = `download/pdf/${path}/${generateUniqueId()}`;
     const render = async () => {
       await write(
