@@ -4,7 +4,7 @@ import { destructure } from './destructure.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
-export const get = Shape.chainable((...args) => (shape) => {
+export const get = Shape.registerMethod(['get', 'g'], (...args) => (shape) => {
   const { strings: tags, func: groupOp = Group } = destructure(args);
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
@@ -33,8 +33,5 @@ export const get = Shape.chainable((...args) => (shape) => {
 });
 
 export const g = get;
-
-Shape.registerMethod('get', get);
-Shape.registerMethod('g', get);
 
 export default get;

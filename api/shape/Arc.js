@@ -103,12 +103,17 @@ const reifyArc =
     return spiral.absolute().tag(...plan.toGeometry().tags);
   };
 
-Shape.registerReifier('Arc', reifyArc(Z));
-Shape.registerReifier('ArcX', reifyArc(X));
-Shape.registerReifier('ArcY', reifyArc(Y));
-Shape.registerReifier('ArcZ', reifyArc(Z));
+// Shape.registerReifier('Arc', reifyArc(Z));
+// Shape.registerReifier('ArcX', reifyArc(X));
+// Shape.registerReifier('ArcY', reifyArc(Y));
+// Shape.registerReifier('ArcZ', reifyArc(Z));
+
+const reifyArcZ = reifyArc(Z);
+const reifyArcX = reifyArc(X);
+const reifyArcY = reifyArc(Y);
 
 const ArcOp = (type) => (x, y, z) => {
+  let reify;
   switch (type) {
     case 'Arc':
     case 'ArcZ':
@@ -121,6 +126,7 @@ const ArcOp = (type) => (x, y, z) => {
       if (z === undefined) {
         z = 0;
       }
+      reify = reifyArcZ;
       break;
     case 'ArcX':
       if (y === undefined) {
@@ -132,6 +138,7 @@ const ArcOp = (type) => (x, y, z) => {
       if (x === undefined) {
         x = 0;
       }
+      reify = reifyArcX;
       break;
     case 'ArcY':
       if (x === undefined) {
@@ -143,22 +150,18 @@ const ArcOp = (type) => (x, y, z) => {
       if (y === undefined) {
         y = 0;
       }
+      reify = reifyArcY;
       break;
   }
   const [c1, c2] = buildCorners(x, y, z);
-  return Shape.fromGeometry(taggedPlan({}, { type }))
+  return reify(Shape.fromGeometry(taggedPlan({}, { type }))
     .hasC1(...c1)
-    .hasC2(...c2);
+    .hasC2(...c2));
 };
 
-export const Arc = ArcOp('Arc');
-export const ArcX = ArcOp('ArcX');
-export const ArcY = ArcOp('ArcY');
-export const ArcZ = ArcOp('ArcZ');
-
-Shape.prototype.Arc = Shape.shapeMethod(Arc);
-Shape.prototype.ArcX = Shape.shapeMethod(ArcX);
-Shape.prototype.ArcY = Shape.shapeMethod(ArcY);
-Shape.prototype.ArcZ = Shape.shapeMethod(ArcZ);
+export const Arc = Shape.registerShapeMethod('Arc', ArcOp('Arc'));
+export const ArcX = Shape.registerShapeMethod('ArcX', ArcOp('ArcX'));
+export const ArcY = Shape.registerShapeMethod('ArcY', ArcOp('ArcY'));
+export const ArcZ = Shape.registerShapeMethod('ArcZ', ArcOp('ArcZ'));
 
 export default Arc;

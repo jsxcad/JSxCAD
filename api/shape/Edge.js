@@ -6,7 +6,7 @@ import { taggedSegments, transformCoordinate } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-export const Edge = (source = 0, target = [0, 0, 1], normal = [1, 0, 0]) => {
+export const Edge = Shape.registerShapeMethod('Edge', (source = 0, target = [0, 0, 1], normal = [1, 0, 0]) => {
   const s = Shape.toCoordinate(undefined, source);
   const t = Shape.toCoordinate(undefined, target);
   const n = Shape.toCoordinate(undefined, normal);
@@ -17,8 +17,6 @@ export const Edge = (source = 0, target = [0, 0, 1], normal = [1, 0, 0]) => {
   ];
   const matrix = invertTransform(inverse);
   return Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]));
-};
+});
 
 export default Edge;
-
-Shape.prototype.Edge = Shape.shapeMethod(Edge);

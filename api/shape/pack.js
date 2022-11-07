@@ -2,14 +2,13 @@ import {
   getLeafs,
   taggedGroup,
   taggedItem,
-  toTransformedGeometry,
 } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { align } from './align.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
-export const pack = Shape.chainable(
+export const pack = Shape.registerMethod('pack',
   ({
       size,
       pageMargin = 5,
@@ -20,11 +19,12 @@ export const pack = Shape.chainable(
     (shape) => {
       if (perLayout === 0) {
         // Packing was disabled -- do nothing.
+        console.log(`QQ/packed/early: ${JSON.stringify(shape)}`);
         return shape;
       }
 
       let todo = [];
-      for (const leaf of getLeafs(shape.toTransformedGeometry())) {
+      for (const leaf of getLeafs(shape.toGeometry())) {
         todo.push(leaf);
       }
       const packedLayers = [];
@@ -44,10 +44,11 @@ export const pack = Shape.chainable(
           if (packed.length === 0) {
             break;
           } else {
+            console.log(`QQ/packed: ${JSON.stringify(packed)}`);
             packedLayers.push(
               taggedItem(
                 { tags: ['pack:layout'] },
-                taggedGroup({}, ...packed.map(toTransformedGeometry))
+                taggedGroup({}, ...packed) // .map(shape => shape.toGeometry())
               )
             );
           }
@@ -60,10 +61,9 @@ export const pack = Shape.chainable(
       if (size === undefined) {
         packedShape = packedShape.by(align('xy'));
       }
+      console.log(`QQ/packed: ${JSON.stringify(packedShape)} ${packedShape.isChain}`);
       return packedShape;
     }
 );
-
-Shape.registerMethod('pack', pack);
 
 export default pack;

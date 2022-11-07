@@ -7,12 +7,12 @@ import { normal } from './normal.js';
 const isNotString = (value) => typeof value !== 'string';
 
 // This interface is a bit awkward.
-export const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
+export const extrudeAlong = Shape.registerMethod(['extrudeAlong'], (direction, ...args) => async (shape) => {
   const { strings: modes, values: extents } = destructure(args);
   let vector;
   try {
     // This will fail on ghost geometry.
-    vector = shape.toCoordinate(direction);
+    vector = await shape.toCoordinate(direction);
   } catch (e) {
     // TODO: Be more selective.
     return Shape.Group();
@@ -30,15 +30,15 @@ export const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
     const depth = heights.pop();
     if (height === depth) {
       // Return unextruded geometry at this height, instead.
-      extrusions.push(shape.moveAlong(vector, height));
+      extrusions.push(await shape.moveAlong(vector, height));
       continue;
     }
     extrusions.push(
       Shape.fromGeometry(
         extrudeGeometry(
           shape.toGeometry(),
-          Point().moveAlong(vector, height).toGeometry(),
-          Point().moveAlong(vector, depth).toGeometry(),
+          (await Point().moveAlong(vector, height)).toGeometry(),
+          (await Point().moveAlong(vector, depth)).toGeometry(),
           modes.includes('noVoid')
         )
       )
@@ -48,9 +48,6 @@ export const extrudeAlong = Shape.chainable((direction, ...args) => (shape) => {
 });
 
 // Note that the operator is applied to each leaf geometry by default.
-export const e = (...extents) => extrudeAlong(normal(), ...extents);
-
-Shape.registerMethod('extrudeAlong', extrudeAlong);
-Shape.registerMethod('e', e);
+export const e = (...extents) => Shape.registerMethod('e', extrudeAlong(normal(), ...extents));
 
 export default extrudeAlong;

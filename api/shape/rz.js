@@ -2,7 +2,7 @@ import { Shape } from './Shape.js';
 import { fromRotateZToTransform } from '@jsxcad/algorithm-cgal';
 
 // rz is in terms of turns -- 1/2 is a half turn.
-export const rz = Shape.chainable(
+export const rz = Shape.registerMethod(['rotateZ', 'rz'],
   (...turns) =>
     (shape) =>
       Shape.Group(
@@ -12,7 +12,4 @@ export const rz = Shape.chainable(
       )
 );
 
-Shape.registerMethod('rz', rz);
-
 export const rotateZ = rz;
-Shape.registerMethod('rotateZ', rz);

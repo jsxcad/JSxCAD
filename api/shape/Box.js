@@ -2,6 +2,8 @@ import './extrude.js';
 import './rx.js';
 import './ry.js';
 
+import { onBoot } from '@jsxcad/sys';
+
 import { buildCorners, getCorner1, getCorner2 } from './Plan.js';
 
 import Edge from './Edge.js';
@@ -16,14 +18,21 @@ const Z = 2;
 
 let fundamentalShapes;
 
-const fs = () => {
+const fs = () => fundamentalShapes;
+
+const buildFs = async () => {
   if (fundamentalShapes === undefined) {
-    const f = Loop(
+    // console.log(`QQ/fs/Loop.isChain: ${Loop.isChain}`);
+    const fq = Loop(
       Point(1, 0, 0),
       Point(1, 1, 0),
       Point(0, 1, 0),
       Point(0, 0, 0)
-    ).fill();
+    ).fill;
+    // console.log(`QQ/fs/fq: ${'' + fq}`);
+    // console.log(`QQ/fs/fq.isChain: ${fq.isChain}`);
+    const f = await fq();
+    // console.log(`QQ/f: ${JSON.stringify(f)} isChain: ${f.isChain}`);
     fundamentalShapes = {
       tlfBox: Point(),
       tlBox: Edge(Point(0, 1, 0), Point(0, 0, 0)),
@@ -43,6 +52,8 @@ const fs = () => {
   }
   return fundamentalShapes;
 };
+
+onBoot(buildFs);
 
 const reifyBox = (plan) => {
   const build = () => {
@@ -113,15 +124,14 @@ const reifyBox = (plan) => {
     .tag(...plan.toGeometry().tags);
 };
 
-Shape.registerReifier('Box', reifyBox);
+// Shape.registerReifier('Box', reifyBox);
 
-export const Box = (x = 1, y = x, z = 0) => {
+export const Box = Shape.registerShapeMethod('Box', (x = 1, y = x, z = 0) => {
   const [c1, c2] = buildCorners(x, y, z);
-  return Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
+  return reifyBox(Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
     .hasC1(...c1)
-    .hasC2(...c2);
-};
+    .hasC2(...c2));
+});
 
-Shape.prototype.Box = Shape.shapeMethod(Box);
 
 export default Box;

@@ -78,10 +78,12 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
     return offset;
   });
 
-export const align = Shape.chainable(
+export const align = Shape.registerMethod('align',
   (spec = 'xyz', origin = [0, 0, 0]) =>
     (shape) => {
+      console.log(`QQ/align: ${spec} ${origin} ${JSON.stringify(shape)}`);
       const offset = computeOffset(spec, origin, shape);
+      console.log(`QQ/align/offset: ${offset}`);
       const reference = Point().move(...subtract(offset, origin));
       return reference;
     }

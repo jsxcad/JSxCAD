@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { computeImplicitVolume } from '@jsxcad/geometry';
 import { destructure } from './destructure.js';
 
-export const Implicit = (...args) => {
+export const Implicit = Shape.registerShapeMethod('Implicit', (...args) => {
   const {
     func: op,
     object: options = {},
@@ -25,8 +25,6 @@ export const Implicit = (...args) => {
       errorBound
     )
   );
-};
-
-Shape.prototype.Implicit = Shape.shapeMethod(Implicit);
+});
 
 export default Implicit;

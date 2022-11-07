@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { getLeafs } from '@jsxcad/geometry';
 
-export const each = Shape.chainable((...args) => async (shape) => {
+export const each = Shape.registerMethod('each', (...args) => async (shape) => {
   console.log(`QQ/each`);
   const { shapesAndFunctions } = destructure(args);
   let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
@@ -14,7 +14,6 @@ export const each = Shape.chainable((...args) => async (shape) => {
   console.log(`QQ/each/2`);
   const leafShapes = getLeafs(shape.toGeometry()).map((leaf) => leafOp(Shape.fromGeometry(leaf)));
   console.log(`QQ/each/3a: ${JSON.stringify(leafShapes)}`);
-  console.log(`QQ/each/3a: ${'' + groupOp}`);
   const grouped = groupOp(...leafShapes);
   console.log(`QQ/each/3b`);
   if (grouped instanceof Function) {
@@ -25,5 +24,3 @@ export const each = Shape.chainable((...args) => async (shape) => {
     return grouped;
   }
 });
-
-Shape.registerMethod('each', each);

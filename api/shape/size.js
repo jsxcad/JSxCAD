@@ -24,7 +24,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const size = Shape.chainable(
+export const size = Shape.registerMethod('size',
   (op = (size) => (shape) => size) =>
     (shape) => {
       const geometry = shape.toConcreteGeometry();
@@ -57,5 +57,3 @@ export const size = Shape.chainable(
       })(Shape.fromGeometry(geometry));
     }
 );
-
-Shape.registerMethod('size', size);

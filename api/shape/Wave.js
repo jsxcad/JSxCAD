@@ -3,7 +3,7 @@ import Point from './Point.js';
 import Shape from './Shape.js';
 import { seq } from './seq.js';
 
-export const Wave = (...args) => {
+export const Wave = Shape.registerShapeMethod('Wave', (...args) => {
   const { func: particle = Point, object: options } = Shape.destructure(args);
   let particles = [];
   for (const xDistance of seq(
@@ -14,8 +14,6 @@ export const Wave = (...args) => {
     particles.push(particle(xDistance).x(xDistance));
   }
   return Link(particles);
-};
+});
 
 export default Wave;
-
-Shape.prototype.Wave = Shape.shapeMethod(Wave);

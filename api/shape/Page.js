@@ -6,6 +6,7 @@ import {
   measureBoundingBox,
   taggedGroup,
   taggedLayout,
+  toConcreteGeometry,
 } from '@jsxcad/geometry';
 
 import Box from './Box.js';
@@ -20,16 +21,17 @@ const MAX = 1;
 const X = 0;
 const Y = 1;
 
-const buildLayoutGeometry = ({
+const buildLayoutGeometry = async ({
   layer,
   pageWidth,
   pageLength,
   margin,
   center = false,
 }) => {
-  const itemNames = layer
+  console.log(`QQ/buildLayoutGeometry: ${JSON.stringify(layer)}`);
+  const itemNames = (await layer
     .getNot('type:ghost')
-    .tags('item', list)
+    .tags('item', list))
     .filter((name) => name !== '')
     .flatMap((name) => name)
     .sort();
@@ -42,10 +44,10 @@ const buildLayoutGeometry = ({
     // CHECK: Even when this is only called once we're getting a duplication of the
     // 'x' at the start. If we replace it with 'abc', we get the 'b' at the start.
     const text = `${r(pageWidth)} x ${r(pageLength)}`;
-    title.push(Hershey(text, fontHeight));
+    title.push(await Hershey(text, fontHeight));
   }
   for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
+    title.push(await Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
   }
   const visualization = Box(
     Math.max(pageWidth, margin),
@@ -57,11 +59,12 @@ const buildLayoutGeometry = ({
     )
     .color('red')
     .ghost();
+  console.log(`QQ/buildLayoutGeometry/layer.toGeometry(): ${JSON.stringify(layer.toGeometry())}`);
   let layout = Shape.fromGeometry(
     taggedLayout(
       { size, margin, title },
-      layer.toGeometry(),
-      visualization.toGeometry()
+      (await layer).toGeometry(),
+      (await visualization).toGeometry()
     )
   );
   if (center) {
@@ -70,7 +73,7 @@ const buildLayoutGeometry = ({
   return layout;
 };
 
-export const Page = (...args) => {
+export const Page = Shape.registerShapeMethod('Page', async (...args) => {
   const {
     object: options,
     strings: modes,
@@ -99,7 +102,7 @@ export const Page = (...args) => {
   console.log(`QQ/shapes.length: ${shapes.length}`);
   console.log(`QQ/shapes.then: ${shapes.then}`);
   for (const shape of shapes) {
-    for (const leaf of getLeafs(shape.toDisjointGeometry())) {
+    for (const leaf of getLeafs(shape.toConcreteGeometry())) {
       layers.push(leaf);
     }
   }
@@ -188,7 +191,7 @@ export const Page = (...args) => {
       const plans = [];
       for (const layer of content.get('pack:layout', List)) {
         plans.push(
-          buildLayoutGeometry({
+          await buildLayoutGeometry({
             layer,
             pageWidth,
             pageLength,
@@ -211,7 +214,7 @@ export const Page = (...args) => {
   } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
-    const contents = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
+    const contents = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,
@@ -227,8 +230,9 @@ export const Page = (...args) => {
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
+      console.log(`QQ/contents: ${contents}`);
       for (const layer of contents.get('pack:layout', List)) {
-        const layout = buildLayoutGeometry({
+        const layout = await buildLayoutGeometry({
           layer,
           packSize,
           pageWidth,
@@ -250,22 +254,21 @@ export const Page = (...args) => {
       });
     }
   }
-};
+});
 
-export const page =
+export const page = Shape.registerMethod('page',
   (...args) =>
   (shape) =>
-    Page(shape, ...args);
-
-Shape.registerMethod('page', page);
+    Page(shape, ...args));
 
 export default Page;
 
 export const ensurePages = (geometry, depth = 0) => {
+  // console.log(`QQ/ensurePages: ${geometry.isChain}`);
   const pages = getLayouts(geometry);
   if (pages.length === 0 && depth === 0) {
     return ensurePages(
-      Page({ pack: false }, Shape.fromGeometry(geometry)).toDisjointGeometry(),
+      Page({ pack: false }, toConcreteGeometry(geometry)),
       depth + 1
     );
   } else {

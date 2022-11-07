@@ -24,10 +24,8 @@ export const untagGeometry = (geometry, tags) => {
   return rewrite(geometry, op);
 };
 
-export const untag = Shape.chainable(
+export const untag = Shape.registerMethod('untag',
   (...tags) =>
     (shape) =>
       Shape.fromGeometry(untagGeometry(shape.toGeometry(), tags))
 );
-
-Shape.registerMethod('untag', untag);

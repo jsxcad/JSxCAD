@@ -142,7 +142,7 @@ export { offset } from './offset.js';
 export { op } from './tagged/op.js';
 export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
-export { registerReifier } from './tagged/registerReifier.js';
+// export { registerReifier } from './tagged/registerReifier.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
 export { rewriteTags } from './tagged/rewriteTags.js';

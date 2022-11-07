@@ -36,7 +36,7 @@ const applyModes = (shape, options, modes) => {
 // FIX: Avoid the extra read-write cycle.
 export const baseView =
   (viewId, op = (x) => x, options = {}) =>
-  (shape) => {
+  async (shape) => {
     let {
       size,
       inline,
@@ -49,7 +49,7 @@ export const baseView =
       width = size;
       height = size / 2;
     }
-    const viewShape = op(shape);
+    const viewShape = await op(shape);
     const sourceLocation = getSourceLocation();
     if (!sourceLocation) {
       console.log('No sourceLocation');
@@ -59,7 +59,7 @@ export const baseView =
       viewId = nth;
     }
     for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
-      const geometry = entry;
+      const geometry = await entry;
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;
@@ -72,15 +72,16 @@ export const baseView =
         needsThumbnail: isNode,
       };
       emit({ hash, path: viewPath, view });
-      addPending(write(viewPath, geometry));
+      console.log(`QQ/geometry: ${JSON.stringify(geometry)}`);
+      await write(viewPath, geometry);
       if (!isNode) {
-        addPending(write(thumbnailPath, dataUrl(viewShape, view)));
+        await write(thumbnailPath, dataUrl(viewShape, view));
       }
     }
     return shape;
   };
 
-export const topView = Shape.chainable((...args) => (shape) => {
+export const topView = Shape.registerMethod('topView', (...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -101,9 +102,7 @@ export const topView = Shape.chainable((...args) => (shape) => {
   return baseView(viewId, op, options)(shape);
 });
 
-Shape.registerMethod('topView', topView);
-
-export const gridView = Shape.chainable((...args) => (shape) => {
+export const gridView = Shape.registerMethod('gridView', (...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -124,9 +123,7 @@ export const gridView = Shape.chainable((...args) => (shape) => {
   return baseView(viewId, op, options)(shape);
 });
 
-Shape.registerMethod('gridView', gridView);
-
-export const frontView = Shape.chainable((...args) => (shape) => {
+export const frontView = Shape.registerMethod('frontView', (...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -147,9 +144,7 @@ export const frontView = Shape.chainable((...args) => (shape) => {
   return baseView(viewId, op, options)(shape);
 });
 
-Shape.registerMethod('frontView', frontView);
-
-export const sideView = Shape.chainable((...args) => (shape) => {
+export const sideView = Shape.registerMethod('sideView', (...args) => (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -170,9 +165,7 @@ export const sideView = Shape.chainable((...args) => (shape) => {
   return baseView(viewId, op, options)(shape);
 });
 
-Shape.registerMethod('sideView', sideView);
-
-export const view = Shape.chainable((...args) => (shape) => {
+export const view = Shape.registerMethod('view', (...args) => async (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -205,5 +198,3 @@ export const view = Shape.chainable((...args) => (shape) => {
       return baseView(viewId, op, options)(shape);
   }
 });
-
-Shape.registerMethod('view', view);

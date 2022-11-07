@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 import { fromScaleToTransform } from '@jsxcad/geometry';
 
-export const scale = Shape.chainable((x = 1, y = x, z = y) => (shape) => {
-  [x = 1, y = x, z] = shape.toCoordinate(x, y, z);
+export const scale = Shape.registerMethod('scale', (x = 1, y = x, z = y) => async (shape) => {
+  [x = 1, y = x, z] = await shape.toCoordinate(x, y, z);
   if (x === 0) {
     x = 1;
   }
@@ -20,5 +20,3 @@ export const scale = Shape.chainable((x = 1, y = x, z = y) => (shape) => {
     return shape.eagerTransform(fromScaleToTransform(x, y, z));
   }
 });
-
-Shape.registerMethod('scale', scale);

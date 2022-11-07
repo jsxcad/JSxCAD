@@ -13,7 +13,7 @@ const maybeApply = (value, shape) => {
 };
 
 // This is getting a bit excessively magical.
-export const seq = Shape.chainable((...args) => (shape) => {
+export const seq = Shape.registerMethod('seq', (...args) => (shape) => {
   let op;
   let groupOp;
   let specs = [];
@@ -90,8 +90,4 @@ export const seq = Shape.chainable((...args) => (shape) => {
   return groupOp(...results);
 });
 
-Shape.registerMethod('seq', seq);
-
-export const Seq = (...args) => Empty().seq(...args);
-
-Shape.prototype.Seq = Shape.shapeMethod(Seq);
+export const Seq = Shape.registerShapeMethod('Seq', (...args) => Empty().seq(...args));

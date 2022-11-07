@@ -1,2 +1,1 @@
-// Box(1).each().page('pack');
-Box(1).ez(1).view();
+Box(10).ez(5).view();

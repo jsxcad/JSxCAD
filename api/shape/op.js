@@ -1,7 +1,7 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
 
-export const op = Shape.chainable(
+export const op = Shape.registerMethod('op',
   (...fns) =>
     (shape) =>
       Group(
@@ -10,5 +10,3 @@ export const op = Shape.chainable(
           .map((fn) => (fn instanceof Function ? fn(shape) : fn))
       )
 );
-
-Shape.registerMethod('op', op);

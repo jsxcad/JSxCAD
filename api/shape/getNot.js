@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
-export const getNot = Shape.chainable((...tags) => (shape) => {
+export const getNot = Shape.registerMethod(['getNot', 'gn'], (...tags) => (shape) => {
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
   const walk = (geometry, descend) => {
@@ -41,6 +41,3 @@ export const getNot = Shape.chainable((...tags) => (shape) => {
 });
 
 export const gn = getNot;
-
-Shape.registerMethod('getNot', getNot);
-Shape.registerMethod('gn', gn);

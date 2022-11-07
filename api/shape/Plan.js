@@ -1,5 +1,6 @@
 import { endTime, startTime } from '@jsxcad/sys';
-import { identity, registerReifier, taggedPlan } from '@jsxcad/geometry';
+// import { identity, registerReifier, taggedPlan } from '@jsxcad/geometry';
+import { identity, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
 import { zag } from '@jsxcad/api-v1-math';
@@ -17,13 +18,14 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
 ];
 const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
-const updatePlan =
+const updatePlan = Shape.registerMethod('updatePlan', 
   (...updates) =>
   (shape) => {
-    const geometry = shape.toTransformedGeometry();
+    const geometry = shape.toGeometry();
     if (geometry.type !== 'plan') {
-      throw Error(`Shape is not a plan`);
+      throw Error(`Shape is not a plan: ${JSON.stringify(geometry)}`);
     }
+    // console.log(`QQ/updatePlan/shape.chain: ${shape.chain}`);
     return Shape.fromGeometry(
       taggedPlan(
         { tags: geometry.tags },
@@ -33,11 +35,9 @@ const updatePlan =
         }
       )
     );
-  };
+  });
 
-Shape.registerMethod('updatePlan', updatePlan);
-
-export const hasAngle = Shape.chainable(
+export const hasAngle = Shape.registerMethod('hasAngle',
   (start = 0, end = 0) =>
     (shape) =>
       shape
@@ -45,15 +45,15 @@ export const hasAngle = Shape.chainable(
         .setTag('plan:angle/start', start)
         .setTag('plan:angle/end', end)
 );
-export const hasCorner1 = Shape.chainable(
+export const hasCorner1 = Shape.registerMethod(['hasC1', 'hasCorner1'],
   (x = 0, y = x, z = 0) =>
-    (shape) =>
-      shape.updatePlan({
-        corner1: [x, y, z],
-      })
+    (shape) => {
+      // console.log(`QQ/hasCorner1/shape: ${JSON.stringify(shape)}`);
+      return shape.updatePlan({ corner1: [x, y, z] });
+    }
 );
 export const hasC1 = hasCorner1;
-export const hasCorner2 = Shape.chainable(
+export const hasCorner2 = Shape.registerMethod(['hasC2', 'hasCorner2'],
   (x = 0, y = x, z = 0) =>
     (shape) =>
       shape.updatePlan({
@@ -61,7 +61,7 @@ export const hasCorner2 = Shape.chainable(
       })
 );
 export const hasC2 = hasCorner2;
-export const hasDiameter = Shape.chainable(
+export const hasDiameter = Shape.registerMethod('hasDiameter',
   (x = 1, y = x, z = 0) =>
     (shape) =>
       shape.updatePlan(
@@ -69,7 +69,7 @@ export const hasDiameter = Shape.chainable(
         { corner2: [x / -2, y / -2, z / -2] }
       )
 );
-export const hasRadius = Shape.chainable(
+export const hasRadius = Shape.registerMethod('hasRadius',
   (x = 1, y = x, z = 0) =>
     (shape) =>
       shape.updatePlan(
@@ -81,7 +81,7 @@ export const hasRadius = Shape.chainable(
         }
       )
 );
-export const hasApothem = Shape.chainable(
+export const hasApothem = Shape.registerMethod('hasApothem',
   (x = 1, y = x, z = 0) =>
     (shape) =>
       shape.updatePlan(
@@ -94,27 +94,14 @@ export const hasApothem = Shape.chainable(
         { apothem: [x, y, z] }
       )
 );
-export const hasSides = Shape.chainable(
+export const hasSides = Shape.registerMethod('hasSides',
   (sides = 1) =>
     (shape) =>
       shape.updatePlan({ sides }).setTag('plan:sides', sides)
 );
-export const hasZag = Shape.chainable(
+export const hasZag = Shape.registerMethod('hasZag',
   (zag) => (shape) => shape.updatePlan({ zag }).setTag('plan:zag', zag)
 );
-
-// Let's consider migrating to a 'has' prefix for planning.
-
-Shape.registerMethod('hasApothem', hasApothem);
-Shape.registerMethod('hasAngle', hasAngle);
-Shape.registerMethod('hasCorner1', hasCorner1);
-Shape.registerMethod('hasC1', hasCorner1);
-Shape.registerMethod('hasCorner2', hasCorner2);
-Shape.registerMethod('hasC2', hasCorner2);
-Shape.registerMethod('hasDiameter', hasDiameter);
-Shape.registerMethod('hasRadius', hasRadius);
-Shape.registerMethod('hasSides', hasSides);
-Shape.registerMethod('hasZag', hasZag);
 
 const eachEntry = (geometry, op, otherwise) => {
   if (geometry.plan.history) {
@@ -228,14 +215,15 @@ export const buildCorners = (x, y, z) => {
 
 export const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
+/*
 Shape.registerReifier = (name, op) => {
-  const finishedOp = (geometry) => {
+  const finishedOp = async (geometry) => {
     const timer = startTime(`Reify ${name}`);
     const shape = op(Shape.fromGeometry(geometry));
-    if (!(shape instanceof Shape)) {
-      throw Error('Expected Shape');
+    if (!(shape instanceof Shape) && !shape.isChain) {
+      throw Error(`Expected Shape or chain`);
     }
-    const result = shape
+    const result = await shape
       .transform(getMatrix(geometry))
       .setTags(geometry.tags)
       .toGeometry();
@@ -245,5 +233,6 @@ Shape.registerReifier = (name, op) => {
   registerReifier(name, finishedOp);
   return finishedOp;
 };
+*/
 
 export default Plan;

@@ -1,7 +1,7 @@
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
 
-export const move = Shape.chainable(
+export const move = Shape.registerMethod(['move', 'xyz'],
   (...args) =>
     (shape) =>
       Shape.Group(
@@ -12,9 +12,5 @@ export const move = Shape.chainable(
 );
 
 export const xyz = move;
-
-Shape.registerMethod('xyz', xyz);
-
-Shape.registerMethod('move', move);
 
 export default move;

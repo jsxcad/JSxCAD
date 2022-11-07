@@ -31,7 +31,7 @@ complete = {
     if (prop === 'then') {
       return async (resolve, reject) => {
         resolve(target());
-      }
+      };
     }
     return new Proxy(
       (...args) =>
@@ -41,7 +41,7 @@ complete = {
           if (typeof op !== 'function') {
             throw Error(`${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`);
           }
-          return await op(...args)(s);
+          return op(...args)(s);
         },
       incomplete);
   }
@@ -57,7 +57,9 @@ chain = (shape) => {
         return 'chain';
       }
       if (prop === 'then') {
-        return target;
+        return async (resolve, reject) => {
+          resolve(target);
+        };
       }
       return new Proxy(
         (...args) =>
@@ -103,11 +105,12 @@ test('fluent class', async (t) => {
   class Fluent {
     constructor() {
       this.name = 'v';
+      return chain(this);
     }
   };
   Fluent.prototype.alog = alog;
   Fluent.prototype.slog = slog;
-  const o = chain(new Fluent());
+  const o = new Fluent();
   const r = await o.alog(1).slog(2).alog(3).slog(4).alog(5);
   t.deepEqual(clean(r), { name: 'v', a: 5 });
 });

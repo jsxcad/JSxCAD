@@ -19,9 +19,10 @@ export const reifyCurve = (plan) => {
   return Link(points.map((point) => Point(point)));
 };
 
-Shape.registerReifier('Curve', reifyCurve);
+// Shape.registerReifier('Curve', reifyCurve);
 
 export const Curve = (start, c1, c2, end) =>
+  reifyCurve(
   Shape.fromGeometry(
     taggedPlan({}, { type: 'Curve', controlPoints: { start, c1, c2, end } })
-  );
+  ));

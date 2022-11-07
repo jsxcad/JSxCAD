@@ -2,15 +2,12 @@ import Shape from './Shape.js';
 
 import { taggedGroup } from '@jsxcad/geometry';
 
-export const Group = (...shapes) =>
+export const Group = Shape.registerShapeMethod('Group', async (...shapes) =>
   Shape.fromGeometry(
     taggedGroup(
       {},
-      ...Shape.toShapes(shapes).map((shape) => shape.toGeometry())
+      ...await Shape.toShapesGeometries(shapes)
     )
-  );
-
-Shape.prototype.Group = Shape.shapeMethod(Group);
-Shape.Group = Group;
+  ));
 
 export default Group;

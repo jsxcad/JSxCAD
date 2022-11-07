@@ -65,21 +65,19 @@ const buildRegularIcosahedron = () => {
   return fromPointsAndPaths(points, paths);
 };
 
-Shape.registerReifier('Icosahedron', (plan) => {
+const reifyIcosahedron = (plan) => {
   const [scale, middle] = getScale(plan.toGeometry());
   const a = Shape.fromPolygons(buildRegularIcosahedron({}));
   const b = a.scale(...scale);
   const c = b.move(...middle).absolute();
   return c;
-});
-
-export const Icosahedron = (x = 1, y = x, z = x) => {
-  const [c1, c2] = buildCorners(x, y, z);
-  return Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' }))
-    .hasC1(...c1)
-    .hasC2(...c2);
 };
 
-export default Icosahedron;
+export const Icosahedron = Shape.registerShapeMethod('Icosahedron', (x = 1, y = x, z = x) => {
+  const [c1, c2] = buildCorners(x, y, z);
+  return reifyIcosahedron(Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' }))
+    .hasC1(...c1)
+    .hasC2(...c2));
+});
 
-Shape.prototype.Icosahedron = Shape.shapeMethod(Icosahedron);
+export default Icosahedron;

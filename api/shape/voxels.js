@@ -25,7 +25,7 @@ const ceilPoint = ([x, y, z], resolution) => [
   ceil(z, resolution),
 ];
 
-export const voxels = Shape.chainable((resolution = 1) => (shape) => {
+export const voxels = Shape.registerMethod('voxels', (resolution = 1) => (shape) => {
   const offset = resolution / 2;
   const geometry = shape.toGeometry();
   const [boxMin, boxMax] = measureBoundingBox(geometry);
@@ -78,9 +78,7 @@ export const voxels = Shape.chainable((resolution = 1) => (shape) => {
   return Shape.fromPolygons(polygons);
 });
 
-Shape.registerMethod('voxels', voxels);
-
-export const Voxels = (...points) => {
+export const Voxels = Shape.registerShapeMethod('Voxels', (...points) => {
   const offset = 0.5;
   const index = new Set();
   const key = (x, y, z) => `${x},${y},${z}`;
@@ -134,6 +132,4 @@ export const Voxels = (...points) => {
     }
   }
   return Shape.fromPolygons(polygons).tag('editType:Voxels');
-};
-
-Shape.prototype.Voxels = Shape.shapeMethod(Voxels);
+});

@@ -4,7 +4,7 @@ import { getLeafs } from '@jsxcad/geometry';
 import { note } from './note.js';
 import { tagMatcher } from './tag.js';
 
-export const tags = Shape.chainable((...args) => (shape) => {
+export const tags = Shape.registerMethod('tags', (...args) => (shape) => {
   const { string: tag = '*', func: op = (...tags) => note(`tags: ${tags}`) } =
     destructure(args);
   const isMatchingTag = tagMatcher(tag, 'user');
@@ -16,7 +16,7 @@ export const tags = Shape.chainable((...args) => (shape) => {
       }
     }
   }
-  return op(...collected)(shape);
+  const result = op(...collected)(shape);
+  console.log(`QQ/tags/result: ${JSON.stringify(result)}`);
+  return result;
 });
-
-Shape.registerMethod('tags', tags);

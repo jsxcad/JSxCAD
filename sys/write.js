@@ -57,6 +57,7 @@ export const writeNonblocking = (path, data, options = {}) => {
 };
 
 export const write = async (path, data, options = {}) => {
+  console.log(`QQ/write/path: ${path}`);
   while (data.then) {
     data = await data;
   }

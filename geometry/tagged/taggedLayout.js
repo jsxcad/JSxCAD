@@ -8,6 +8,9 @@ export const taggedLayout = (
   if (content.some((value) => value.length)) {
     throw Error(`Layout content is an array`);
   }
+  if (content.some((value) => value.then)) {
+    throw Error(`Layout content is a promise`);
+  }
   if (content.some((value) => value.geometry)) {
     throw Error(`Likely Shape in Layout`);
   }
