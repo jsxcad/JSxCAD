@@ -28,9 +28,11 @@ const reifyOrb = (plan) => {
 
 export const Orb = Shape.registerShapeMethod('Orb', (x = 1, y = x, z = x) => {
   const [c1, c2] = buildCorners(x, y, z);
-  return reifyOrb(Shape.fromGeometry(taggedPlan({}, { type: 'Orb' }))
-    .hasC1(...c1)
-    .hasC2(...c2));
+  return reifyOrb(
+    Shape.fromGeometry(taggedPlan({}, { type: 'Orb' }))
+      .hasC1(...c1)
+      .hasC2(...c2)
+  );
 });
 
 export default Orb;

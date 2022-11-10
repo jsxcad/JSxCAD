@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 
-export const inFn = Shape.chainable(() => (shape) => {
+export const inFn = Shape.registerMethod('in', () => (shape) => {
   const geometry = shape.toGeometry();
   if (geometry.type === 'item') {
     return Shape.fromGeometry(geometry.content[0]);
@@ -8,5 +8,3 @@ export const inFn = Shape.chainable(() => (shape) => {
     return shape;
   }
 });
-
-Shape.registerMethod('in', inFn);

@@ -1,14 +1,11 @@
-import {
-  getLeafs,
-  taggedGroup,
-  taggedItem,
-} from '@jsxcad/geometry';
+import { getLeafs, taggedGroup, taggedItem } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { align } from './align.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
-export const pack = Shape.registerMethod('pack',
+export const pack = Shape.registerMethod(
+  'pack',
   ({
       size,
       pageMargin = 5,
@@ -61,7 +58,9 @@ export const pack = Shape.registerMethod('pack',
       if (size === undefined) {
         packedShape = packedShape.by(align('xy'));
       }
-      console.log(`QQ/packed: ${JSON.stringify(packedShape)} ${packedShape.isChain}`);
+      console.log(
+        `QQ/packed: ${JSON.stringify(packedShape)} ${packedShape.isChain}`
+      );
       return packedShape;
     }
 );

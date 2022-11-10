@@ -1,10 +1,9 @@
 import Shape from './Shape.js';
 import { computeNormal } from '@jsxcad/geometry';
 
-export const normal = Shape.chainable(
-  () => (shape) => Shape.fromGeometry(computeNormal(shape.toGeometry()))
+export const normal = Shape.registerMethod(
+  'normal',
+  () => async (shape) => Shape.fromGeometry(computeNormal((await shape).toGeometry()))
 );
-
-Shape.registerMethod('normal', normal);
 
 export default normal;

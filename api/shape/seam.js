@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { seam as seamGeometry } from '@jsxcad/geometry';
 
-export const seam = Shape.chainable((...args) => (shape) => {
+export const seam = Shape.registerMethod('seam', (...args) => (shape) => {
   const { shapesAndFunctions: selections } = destructure(args);
   return Shape.fromGeometry(
     seamGeometry(
@@ -11,5 +11,3 @@ export const seam = Shape.chainable((...args) => (shape) => {
     )
   );
 });
-
-Shape.registerMethod('seam', seam);

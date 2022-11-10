@@ -1,7 +1,7 @@
 import Shape from './Shape.js';
 import { remesh as remeshGeometry } from '@jsxcad/geometry';
 
-export const remesh = Shape.chainable((...args) => (shape) => {
+export const remesh = Shape.registerMethod('remesh', (...args) => (shape) => {
   const {
     number: resolution = 1,
     shapesAndFunctions: selections,
@@ -22,5 +22,3 @@ export const remesh = Shape.chainable((...args) => (shape) => {
     )
   );
 });
-
-Shape.registerMethod('remesh', remesh);

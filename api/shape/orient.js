@@ -37,7 +37,8 @@ const Z = 2;
 // to is where the object's axis should point at.
 // up rotates around the axis to point a dorsal position toward.
 
-export const orient = Shape.chainable(
+export const orient = Shape.registerMethod(
+  'orient',
   ({ at = [0, 0, 0], to = [0, 0, 1], up = [1, 0, 0] } = {}) =>
     (shape) => {
       const { local } = getInverseMatrices(shape.toGeometry());
@@ -91,7 +92,5 @@ export const orient = Shape.chainable(
         .move(...at);
     }
 );
-
-Shape.registerMethod('orient', orient);
 
 export default orient;

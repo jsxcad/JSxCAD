@@ -1,5 +1,4 @@
 import {
-  addPending,
   emit,
   generateUniqueId,
   getSourceLocation,
@@ -37,6 +36,7 @@ const applyModes = (shape, options, modes) => {
 export const baseView =
   (viewId, op = (x) => x, options = {}) =>
   async (shape) => {
+    console.log(`QQ/baseView`);
     let {
       size,
       inline,
@@ -58,7 +58,13 @@ export const baseView =
     if (viewId === undefined) {
       viewId = nth;
     }
-    for (const entry of ensurePages(viewShape.toDisplayGeometry())) {
+    const displayGeometry = viewShape.toDisplayGeometry();
+    console.log(
+      `QQ/baseView/displayGeometry: ${JSON.stringify(displayGeometry)}`
+    );
+    const pages = await ensurePages(Shape.fromGeometry(displayGeometry));
+    console.log(`QQ/baseView/pages: ${JSON.stringify(pages)}`);
+    for (const entry of pages) {
       const geometry = await entry;
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
@@ -72,7 +78,7 @@ export const baseView =
         needsThumbnail: isNode,
       };
       emit({ hash, path: viewPath, view });
-      console.log(`QQ/geometry: ${JSON.stringify(geometry)}`);
+      console.log(`QQ/baseView/write: ${viewPath}`);
       await write(viewPath, geometry);
       if (!isNode) {
         await write(thumbnailPath, dataUrl(viewShape, view));
@@ -102,76 +108,90 @@ export const topView = Shape.registerMethod('topView', (...args) => (shape) => {
   return baseView(viewId, op, options)(shape);
 });
 
-export const gridView = Shape.registerMethod('gridView', (...args) => (shape) => {
-  const {
-    value: viewId,
-    func: op = (x) => x,
-    object: options,
-    strings: modes,
-  } = Shape.destructure(args, {
-    object: {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 512,
-      height: 512,
-      position: [0, 0, 100],
-    },
-  });
-  shape = applyModes(shape, options, modes);
-  return baseView(viewId, op, options)(shape);
-});
+export const gridView = Shape.registerMethod(
+  'gridView',
+  (...args) =>
+    (shape) => {
+      const {
+        value: viewId,
+        func: op = (x) => x,
+        object: options,
+        strings: modes,
+      } = Shape.destructure(args, {
+        object: {
+          size: 512,
+          skin: true,
+          outline: true,
+          wireframe: false,
+          width: 512,
+          height: 512,
+          position: [0, 0, 100],
+        },
+      });
+      shape = applyModes(shape, options, modes);
+      return baseView(viewId, op, options)(shape);
+    }
+);
 
-export const frontView = Shape.registerMethod('frontView', (...args) => (shape) => {
-  const {
-    value: viewId,
-    func: op = (x) => x,
-    object: options,
-    strings: modes,
-  } = Shape.destructure(args, {
-    object: {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 512,
-      height: 512,
-      position: [0, -100, 0],
-    },
-  });
-  shape = applyModes(shape, options, modes);
-  return baseView(viewId, op, options)(shape);
-});
+export const frontView = Shape.registerMethod(
+  'frontView',
+  (...args) =>
+    (shape) => {
+      const {
+        value: viewId,
+        func: op = (x) => x,
+        object: options,
+        strings: modes,
+      } = Shape.destructure(args, {
+        object: {
+          size: 512,
+          skin: true,
+          outline: true,
+          wireframe: false,
+          width: 512,
+          height: 512,
+          position: [0, -100, 0],
+        },
+      });
+      shape = applyModes(shape, options, modes);
+      return baseView(viewId, op, options)(shape);
+    }
+);
 
-export const sideView = Shape.registerMethod('sideView', (...args) => (shape) => {
-  const {
-    value: viewId,
-    func: op = (x) => x,
-    object: options,
-    strings: modes,
-  } = Shape.destructure(args, {
-    object: {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 512,
-      height: 512,
-      position: [100, 0, 0],
-    },
-  });
-  shape = applyModes(shape, options, modes);
-  return baseView(viewId, op, options)(shape);
-});
+export const sideView = Shape.registerMethod(
+  'sideView',
+  (...args) =>
+    (shape) => {
+      const {
+        value: viewId,
+        func: op = (x) => x,
+        object: options,
+        strings: modes,
+      } = Shape.destructure(args, {
+        object: {
+          size: 512,
+          skin: true,
+          outline: true,
+          wireframe: false,
+          width: 512,
+          height: 512,
+          position: [100, 0, 0],
+        },
+      });
+      shape = applyModes(shape, options, modes);
+      return baseView(viewId, op, options)(shape);
+    }
+);
 
 export const view = Shape.registerMethod('view', (...args) => async (shape) => {
+  console.log(`QQ/view: ${JSON.stringify(shape)}`);
   const {
     value: viewId,
     func: op = (x) => x,
     object: options,
     strings: modes,
   } = Shape.destructure(args);
+  console.log(`QQ/view/shape: ${JSON.stringify(shape)}`);
   shape = applyModes(shape, options, modes);
   if (modes.includes('grid')) {
     options.style = 'grid';

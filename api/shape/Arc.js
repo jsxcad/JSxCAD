@@ -1,44 +1,67 @@
-import {
-  buildCorners,
-  getAngle,
-  getCorner1,
-  getCorner2,
-  getScale,
-  getSides,
-} from './Plan.js';
-
 import Point from './Point.js';
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
-import { taggedPlan } from '@jsxcad/geometry';
+import {
+  buildCorners,
+  // getAngle,
+  // getCorner1,
+  // getCorner2,
+  // getScale,
+  // getSides,
+} from './Plan.js';
+import { destructure } from './destructure.js';
+
+// import { taggedPlan } from '@jsxcad/geometry';
+import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
+const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
+const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax + bx,
+  ay + by,
+  az + bz,
+];
+const subtract = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [ax - bx, ay - by, az - bz];
+const computeScale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+
+const computeSides = (c1, c2, sides, zag = 0.01) => {
+  if (sides) {
+    return sides;
+  }
+  if (zag) {
+    const diameter = Math.max(...abs(subtract(c1, c2)));
+    return toSidesFromZag(diameter, zag);
+  }
+  return 32;
+};
+
 const reifyArc =
   (axis = Z) =>
-  (plan) => {
-    let { start = 0, end = 1 } = getAngle(plan.toGeometry());
-
+  ({ c1, c2, start = 0, end = 1, zag, sides }) => {
     while (start > end) {
       start -= 1;
     }
 
-    const [scale, middle] = getScale(plan.toGeometry());
-    const corner1 = getCorner1(plan.toGeometry());
-    const corner2 = getCorner2(plan.toGeometry());
+    const scale = subtract(c1, c2);
+    const middle = computeScale(0.5, add(c1, c2));
 
-    const left = corner1[X];
-    const right = corner2[X];
+    const left = c1[X];
+    const right = c2[X];
 
-    const front = corner1[Y];
-    const back = corner2[Y];
+    const front = c1[Y];
+    const back = c2[Y];
 
-    const bottom = corner1[Z];
-    const top = corner2[Z];
+    const bottom = c1[Z];
+    const top = c2[Z];
 
-    const step = 1 / getSides(plan.toGeometry(), 32);
+    const step = 1 / computeSides(c1, c2, sides, zag);
     const steps = Math.ceil((end - start) / step);
     const effectiveStep = (end - start) / steps;
 
@@ -100,19 +123,17 @@ const reifyArc =
       }
     }
 
-    return spiral.absolute().tag(...plan.toGeometry().tags);
+    return spiral.absolute();
   };
-
-// Shape.registerReifier('Arc', reifyArc(Z));
-// Shape.registerReifier('ArcX', reifyArc(X));
-// Shape.registerReifier('ArcY', reifyArc(Y));
-// Shape.registerReifier('ArcZ', reifyArc(Z));
 
 const reifyArcZ = reifyArc(Z);
 const reifyArcX = reifyArc(X);
 const reifyArcY = reifyArc(Y);
 
-const ArcOp = (type) => (x, y, z) => {
+const ArcOp = (type) => (...args) => {
+  const { values, object: options } = destructure(args);
+  let [x, y, z] = values;
+  const { start, end, sides, zag } = options;
   let reify;
   switch (type) {
     case 'Arc':
@@ -154,9 +175,7 @@ const ArcOp = (type) => (x, y, z) => {
       break;
   }
   const [c1, c2] = buildCorners(x, y, z);
-  return reify(Shape.fromGeometry(taggedPlan({}, { type }))
-    .hasC1(...c1)
-    .hasC2(...c2));
+  return reify({ c1, c2, start, end, sides, zag });
 };
 
 export const Arc = Shape.registerShapeMethod('Arc', ArcOp('Arc'));

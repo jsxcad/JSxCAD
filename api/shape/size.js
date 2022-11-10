@@ -24,10 +24,11 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const size = Shape.registerMethod('size',
+export const size = Shape.registerMethod(
+  'size',
   (op = (size) => (shape) => size) =>
     (shape) => {
-      const geometry = shape.toConcreteGeometry();
+      const geometry = shape.toGeometry();
       const bounds = measureBoundingBox(geometry);
       if (bounds === undefined) {
         return op({

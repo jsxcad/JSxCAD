@@ -1,7 +1,8 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
 
-export const op = Shape.registerMethod('op',
+export const op = Shape.registerMethod(
+  'op',
   (...fns) =>
     (shape) =>
       Group(

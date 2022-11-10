@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import { deform as deformGeometry } from '@jsxcad/geometry';
 import { destructure } from './destructure.js';
 
-export const deform = Shape.chainable((...args) => (shape) => {
+export const deform = Shape.registerMethod('deform', (...args) => (shape) => {
   const { shapesAndFunctions: selections, object: options } = destructure(args);
   const { iterations, tolerance, alpha } = options;
   return Shape.fromGeometry(
@@ -15,5 +15,3 @@ export const deform = Shape.chainable((...args) => (shape) => {
     )
   );
 });
-
-Shape.registerMethod('deform', deform);

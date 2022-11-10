@@ -73,11 +73,16 @@ const reifyIcosahedron = (plan) => {
   return c;
 };
 
-export const Icosahedron = Shape.registerShapeMethod('Icosahedron', (x = 1, y = x, z = x) => {
-  const [c1, c2] = buildCorners(x, y, z);
-  return reifyIcosahedron(Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' }))
-    .hasC1(...c1)
-    .hasC2(...c2));
-});
+export const Icosahedron = Shape.registerShapeMethod(
+  'Icosahedron',
+  (x = 1, y = x, z = x) => {
+    const [c1, c2] = buildCorners(x, y, z);
+    return reifyIcosahedron(
+      Shape.fromGeometry(taggedPlan({}, { type: 'Icosahedron' }))
+        .hasC1(...c1)
+        .hasC2(...c2)
+    );
+  }
+);
 
 export default Icosahedron;

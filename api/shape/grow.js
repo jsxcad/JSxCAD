@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { grow as growGeometry } from '@jsxcad/geometry';
 
-export const grow = Shape.chainable((...args) => (shape) => {
+export const grow = Shape.registerMethod('grow', (...args) => (shape) => {
   const {
     number: amount,
     string: axes = 'xyz',
@@ -22,5 +22,3 @@ export const grow = Shape.chainable((...args) => (shape) => {
     )
   );
 });
-
-Shape.registerMethod('grow', grow);

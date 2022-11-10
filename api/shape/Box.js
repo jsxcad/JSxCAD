@@ -2,14 +2,13 @@ import './extrude.js';
 import './rx.js';
 import './ry.js';
 
-import { onBoot } from '@jsxcad/sys';
-
 import { buildCorners, getCorner1, getCorner2 } from './Plan.js';
 
 import Edge from './Edge.js';
 import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
+import { onBoot } from '@jsxcad/sys';
 import { taggedPlan } from '@jsxcad/geometry';
 
 const X = 0;
@@ -23,31 +22,30 @@ const fs = () => fundamentalShapes;
 const buildFs = async () => {
   if (fundamentalShapes === undefined) {
     // console.log(`QQ/fs/Loop.isChain: ${Loop.isChain}`);
-    const fq = Loop(
+    const f = await Loop(
       Point(1, 0, 0),
       Point(1, 1, 0),
       Point(0, 1, 0),
       Point(0, 0, 0)
-    ).fill;
+    ).fill();
     // console.log(`QQ/fs/fq: ${'' + fq}`);
     // console.log(`QQ/fs/fq.isChain: ${fq.isChain}`);
-    const f = await fq();
     // console.log(`QQ/f: ${JSON.stringify(f)} isChain: ${f.isChain}`);
     fundamentalShapes = {
-      tlfBox: Point(),
-      tlBox: Edge(Point(0, 1, 0), Point(0, 0, 0)),
-      tfBox: Edge(Point(0, 0, 0), Point(1, 0, 0)),
-      tBox: f,
-      lfBox: Edge(Point(0, 0, 0), Point(0, 0, 1)),
-      lBox: f
+      tlfBox: await Point(),
+      tlBox: await Edge(Point(0, 1, 0), Point(0, 0, 0)),
+      tfBox: await Edge(Point(0, 0, 0), Point(1, 0, 0)),
+      tBox: await f,
+      lfBox: await Edge(Point(0, 0, 0), Point(0, 0, 1)),
+      lBox: await f
         .ry(1 / 4)
         .rz(1 / 2)
         .rx(-1 / 4),
-      fBox: f
+      fBox: await f
         .rx(1 / 4)
         .rz(1 / 2)
         .ry(-1 / 4),
-      box: f.ez(1),
+      box: await f.ez(1),
     };
   }
   return fundamentalShapes;
@@ -109,6 +107,7 @@ const reifyBox = (plan) => {
             .sx(right - left)
             .move(left, front, bottom);
         } else {
+        console.log(`QQ/box: ${fs().box}`);
           return fs()
             .box.sz(top - bottom)
             .sx(right - left)
@@ -128,10 +127,11 @@ const reifyBox = (plan) => {
 
 export const Box = Shape.registerShapeMethod('Box', (x = 1, y = x, z = 0) => {
   const [c1, c2] = buildCorners(x, y, z);
-  return reifyBox(Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
-    .hasC1(...c1)
-    .hasC2(...c2));
+  return reifyBox(
+    Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
+      .hasC1(...c1)
+      .hasC2(...c2)
+  );
 });
-
 
 export default Box;

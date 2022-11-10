@@ -1,17 +1,17 @@
 import Link from './Link.js';
 import Point from './Point.js';
+import Seq from './seq.js';
 import Shape from './Shape.js';
-import { seq } from './seq.js';
 
-export const Spiral = Shape.registerShapeMethod('Spiral', (...args) => {
+export const Spiral = Shape.registerShapeMethod('Spiral', async (...args) => {
   const { func: particle = Point, object: options } = Shape.destructure(args);
   let particles = [];
-  for (const turn of seq(
+  for (const turn of await Seq(
     options,
     (distance) => distance,
     (...numbers) => numbers
-  )()) {
-    particles.push(particle(turn).rz(turn));
+  )) {
+    particles.push(await particle(turn).rz(turn));
   }
   return Link(particles);
 });

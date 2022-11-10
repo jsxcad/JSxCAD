@@ -2,14 +2,12 @@ import Shape from './Shape.js';
 import assemble from './assemble.js';
 import { destructure } from './destructure.js';
 
-export const fitTo = Shape.chainable((...args) => {
+export const fitTo = Shape.registerMethod('fitTo', (...args) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return (shape) =>
+  return async (shape) =>
     assemble(
       modes,
       shape,
-      ...shapes.map((other) => Shape.toShape(other, shape))
+      ...await shape.toShapes(shapes)
     );
 });
-
-Shape.registerMethod('fitTo', fitTo);

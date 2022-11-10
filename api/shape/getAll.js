@@ -6,7 +6,7 @@ import { visit } from '@jsxcad/geometry';
 
 // get, ignoring item boundaries.
 
-export const getAll = Shape.chainable((...args) => (shape) => {
+export const getAll = Shape.registerMethod('getAll', (...args) => (shape) => {
   const { strings: tags, func: groupOp = Group } = destructure(args);
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
@@ -31,7 +31,5 @@ export const getAll = Shape.chainable((...args) => (shape) => {
   visit(geometry, walk);
   return groupOp(...picks);
 });
-
-Shape.registerMethod('getAll', getAll);
 
 export default getAll;

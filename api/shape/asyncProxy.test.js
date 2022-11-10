@@ -8,7 +8,11 @@ incomplete = {
   apply(target, obj, args) {
     const result = target(...args);
     if (typeof result !== 'function') {
-      throw Error(`Incomplete op must evaluate to function, not ${typeof result}: ${'' + target}`);
+      throw Error(
+        `Incomplete op must evaluate to function, not ${typeof result}: ${
+          '' + target
+        }`
+      );
     }
     return new Proxy(result, complete);
   },
@@ -16,7 +20,7 @@ incomplete = {
     if (prop === 'chain') {
       return 'incomplete';
     }
-  }
+  },
 };
 
 // This is a complete chain.
@@ -39,12 +43,15 @@ complete = {
           const s = await target(terminal);
           const op = Reflect.get(s, prop);
           if (typeof op !== 'function') {
-            throw Error(`${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`);
+            throw Error(
+              `${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`
+            );
           }
           return op(...args)(s);
         },
-      incomplete);
-  }
+      incomplete
+    );
+  },
 };
 
 chain = (shape) => {
@@ -67,8 +74,9 @@ chain = (shape) => {
             const op = Reflect.get(target, prop);
             return op(...args)(target);
           },
-        incomplete);
-    }
+        incomplete
+      );
+    },
   };
   const result = new Proxy(shape, root);
   return result;
@@ -77,10 +85,11 @@ chain = (shape) => {
 const chainable = (op) => {
   return new Proxy(
     (...args) =>
-       async (terminal) => {
-         return op(...args)(terminal);
-       },
-     incomplete);
+      async (terminal) => {
+        return op(...args)(terminal);
+      },
+    incomplete
+  );
 };
 
 const alog = (a) => async (s) => {
@@ -107,7 +116,7 @@ test('fluent class', async (t) => {
       this.name = 'v';
       return chain(this);
     }
-  };
+  }
   Fluent.prototype.alog = alog;
   Fluent.prototype.slog = slog;
   const o = new Fluent();

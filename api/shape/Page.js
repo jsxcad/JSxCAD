@@ -6,7 +6,6 @@ import {
   measureBoundingBox,
   taggedGroup,
   taggedLayout,
-  toConcreteGeometry,
 } from '@jsxcad/geometry';
 
 import Box from './Box.js';
@@ -21,17 +20,15 @@ const MAX = 1;
 const X = 0;
 const Y = 1;
 
-const buildLayoutGeometry = async ({
+const buildLayout = async ({
   layer,
   pageWidth,
   pageLength,
   margin,
   center = false,
 }) => {
-  console.log(`QQ/buildLayoutGeometry: ${JSON.stringify(layer)}`);
-  const itemNames = (await layer
-    .getNot('type:ghost')
-    .tags('item', list))
+  console.log(`QQ/buildLayout: ${JSON.stringify(layer)}`);
+  const itemNames = (await layer.getNot('type:ghost').tags('item', list))
     .filter((name) => name !== '')
     .flatMap((name) => name)
     .sort();
@@ -47,7 +44,9 @@ const buildLayoutGeometry = async ({
     title.push(await Hershey(text, fontHeight));
   }
   for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(await Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight));
+    title.push(
+      await Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight)
+    );
   }
   const visualization = Box(
     Math.max(pageWidth, margin),
@@ -59,7 +58,11 @@ const buildLayoutGeometry = async ({
     )
     .color('red')
     .ghost();
-  console.log(`QQ/buildLayoutGeometry/layer.toGeometry(): ${JSON.stringify(layer.toGeometry())}`);
+  console.log(
+    `QQ/buildLayoutGeometry/layer.toGeometry(): ${JSON.stringify(
+      layer.toGeometry()
+    )}`
+  );
   let layout = Shape.fromGeometry(
     taggedLayout(
       { size, margin, title },
@@ -100,14 +103,17 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
   const margin = itemMargin;
   const layers = [];
   console.log(`QQ/shapes.length: ${shapes.length}`);
+  console.log(`QQ/shapes: ${JSON.stringify(shapes)}`);
   console.log(`QQ/shapes.then: ${shapes.then}`);
   for (const shape of shapes) {
-    for (const leaf of getLeafs(shape.toConcreteGeometry())) {
+    console.log(`QQ/shapes/shape: ${JSON.stringify(shape)}`);
+    for (const leaf of getLeafs((await shape).toGeometry())) {
       layers.push(leaf);
     }
   }
   console.log(`QQ/layers.length: ${layers.length}`);
   if (!pack && size) {
+    console.log(`QQ/Page/00`);
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     const [width, height] = size;
     const packSize = [
@@ -128,7 +134,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
         Math.abs(packSize[MIN][Y] * 2)
       ) +
       pageMargin * 2;
-    return buildLayoutGeometry({
+    return buildLayout({
       layer,
       pageWidth,
       pageLength,
@@ -136,9 +142,12 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       center,
     });
   } else if (!pack && !size) {
+    console.log(`QQ/Page/01`);
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+    console.log(`QQ/Page/layer: ${JSON.stringify(layer)}`);
     const packSize = measureBoundingBox(layer.toGeometry());
     if (packSize === undefined) {
+      console.log(`QQ/Page/01/a`);
       return Group();
     }
     const pageWidth =
@@ -156,7 +165,8 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
-      return buildLayoutGeometry({
+      console.log(`QQ/Page/01/b`);
+      return buildLayout({
         layer,
         pageWidth,
         pageLength,
@@ -164,7 +174,8 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
         center,
       });
     } else {
-      return buildLayoutGeometry({
+      console.log(`QQ/Page/01/c`);
+      return buildLayout({
         layer,
         pageWidth: 0,
         pageLength: 0,
@@ -173,6 +184,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       });
     }
   } else if (pack && size) {
+    console.log(`QQ/Page/02`);
     // Content fits to page size.
     const packSize = [];
     const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
@@ -191,7 +203,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       const plans = [];
       for (const layer of content.get('pack:layout', List)) {
         plans.push(
-          await buildLayoutGeometry({
+          await buildLayout({
             layer,
             pageWidth,
             pageLength,
@@ -203,7 +215,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       return Group(...plans);
     } else {
       const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-      return buildLayoutGeometry({
+      return buildLayout({
         layer,
         pageWidth: 0,
         pageLength: 0,
@@ -212,6 +224,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       });
     }
   } else if (pack && !size) {
+    console.log(`QQ/Page/03`);
     const packSize = [];
     // Page fits to content size.
     const contents = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
@@ -232,7 +245,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       const plans = [];
       console.log(`QQ/contents: ${contents}`);
       for (const layer of contents.get('pack:layout', List)) {
-        const layout = await buildLayoutGeometry({
+        const layout = await buildLayout({
           layer,
           packSize,
           pageWidth,
@@ -245,7 +258,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       return Group(...plans);
     } else {
       const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-      return buildLayoutGeometry({
+      return buildLayout({
         layer,
         pageWidth: 0,
         pageLength: 0,
@@ -256,22 +269,23 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
   }
 });
 
-export const page = Shape.registerMethod('page',
+export const page = Shape.registerMethod(
+  'page',
   (...args) =>
-  (shape) =>
-    Page(shape, ...args));
+    (shape) =>
+      Page(shape, ...args)
+);
 
 export default Page;
 
-export const ensurePages = (geometry, depth = 0) => {
-  // console.log(`QQ/ensurePages: ${geometry.isChain}`);
-  const pages = getLayouts(geometry);
+export const ensurePages = async (shape, depth = 0) => {
+  console.log(`QQ/ensurePages: ${JSON.stringify(shape)}`);
+  const pages = getLayouts((await shape).toGeometry());
   if (pages.length === 0 && depth === 0) {
-    return ensurePages(
-      Page({ pack: false }, toConcreteGeometry(geometry)),
-      depth + 1
-    );
+    console.log(`QQ/ensurePages/0`);
+    return ensurePages(await Page({ pack: false }, shape), depth + 1);
   } else {
+    console.log(`QQ/ensurePages/1: ${pages.length} ${depth}`);
     return pages;
   }
 };

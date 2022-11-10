@@ -1,4 +1,6 @@
 import Shape from './Shape.js';
 
-export const addTo = Shape.chainable((other) => (shape) => other.add(shape));
-Shape.registerMethod('addTo', addTo);
+export const addTo = Shape.registerMethod(
+  'addTo',
+  (other) => (shape) => other.add(shape)
+);

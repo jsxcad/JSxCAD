@@ -2,10 +2,12 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { fitTo } from './fitTo.js';
 
-export const Assembly = Shape.registerShapeMethod('Assembly', (...args) => {
+const toShapes = Shape.ops.get('toShapes');
+
+export const Assembly = Shape.registerShapeMethod('Assembly', async (...args) => {
   const { strings: modes, shapesAndFunctions: unresolvedShapes } =
     destructure(args);
-  const [shape, ...shapes] = Shape.toShapes(unresolvedShapes);
+  const [shape, ...shapes] = await toShapes(unresolvedShapes)();
   return fitTo(...modes, ...shapes)(shape);
 });
 

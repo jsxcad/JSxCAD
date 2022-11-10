@@ -1,22 +1,25 @@
+import './toShapes.js';
+
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { getInverseMatrices } from '@jsxcad/geometry';
+import { transform } from './transform.js';
 
-export const at = Shape.chainable((...args) => (shape) => {
+const toShapesOp = Shape.ops.get('toShapes');
+
+export const at = Shape.registerMethod('at', (...args) => async (shape) => {
   const { shapesAndFunctions: ops } = destructure(args);
   const { local, global } = getInverseMatrices(shape.toGeometry());
-  const selections = shape.toShapes(ops.shift());
+  const selections = await toShapesOp(ops.shift())(shape);
   for (const selection of selections) {
     const { local: selectionLocal, global: selectionGlobal } =
       getInverseMatrices(selection.toGeometry());
-    shape = shape
-      .transform(local)
+    shape = 
+      await transform(local)
       .transform(selectionGlobal)
       .op(...ops)
       .transform(selectionLocal)
-      .transform(global);
+      .transform(global)(shape);
   }
   return shape;
 });
-
-Shape.registerMethod('at', at);

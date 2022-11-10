@@ -1,8 +1,7 @@
 import Shape from './Shape.js';
 import { hasTypeGhost } from '@jsxcad/geometry';
 
-export const ghost = Shape.chainable(
+export const ghost = Shape.registerMethod(
+  'ghost',
   () => (shape) => Shape.fromGeometry(hasTypeGhost(shape.toGeometry()))
 );
-
-Shape.registerMethod('ghost', ghost);

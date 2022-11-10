@@ -23,6 +23,7 @@ export const reifyCurve = (plan) => {
 
 export const Curve = (start, c1, c2, end) =>
   reifyCurve(
-  Shape.fromGeometry(
-    taggedPlan({}, { type: 'Curve', controlPoints: { start, c1, c2, end } })
-  ));
+    Shape.fromGeometry(
+      taggedPlan({}, { type: 'Curve', controlPoints: { start, c1, c2, end } })
+    )
+  );

@@ -1,5 +1,3 @@
 import Shape from './Shape.js';
 
-export const self = Shape.chainable(() => (shape) => shape);
-
-Shape.registerMethod('self', self);
+export const self = Shape.registerMethod('self', () => (shape) => shape);

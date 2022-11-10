@@ -1,7 +1,8 @@
 import Shape from './Shape.js';
 import { scale } from './scale.js';
 
-export const scaleX = Shape.registerMethod(['scaleX', 'sx'],
+export const scaleX = Shape.registerMethod(
+  ['scaleX', 'sx'],
   (...x) =>
     (shape) =>
       Shape.Group(...shape.toFlatValues(x).map((x) => scale(x, 1, 1)(shape)))

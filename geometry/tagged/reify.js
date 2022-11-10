@@ -5,7 +5,7 @@
 export const reify = (geometry) => {
   // We'll return to an early reification model, avoiding re-entrance to the async user api.
   return geometry;
-/*
+  /*
   if (!geometry) {
     console.log(`Reifying undefined geometry`);
   }

@@ -19,7 +19,7 @@ export const translate = (vector, geometry) =>
 export const scale = (vector, geometry) =>
   transform(fromScaleToTransform(...vector), geometry);
 
-export { rewrite, visit } from './tagged/visit.js';
+export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';

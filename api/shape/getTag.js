@@ -3,7 +3,7 @@ import { destructure } from './destructure.js';
 import { list } from './List.js';
 import parseNumber from 'parse-number';
 
-export const getTag = Shape.chainable((...args) => (shape) => {
+export const getTag = Shape.registerMethod('getTag', (...args) => (shape) => {
   const {
     strings: tags,
     func: op = (...values) =>
@@ -29,5 +29,3 @@ export const getTag = Shape.chainable((...args) => (shape) => {
 });
 
 export default getTag;
-
-Shape.registerMethod('getTag', getTag);

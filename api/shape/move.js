@@ -1,14 +1,24 @@
+import './toCoordinates.js';
+
+import Group from './Group.js';
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
+import { toCoordinates } from './toCoordinates.js';
+import { transform } from './transform.js';
 
-export const move = Shape.registerMethod(['move', 'xyz'],
+const toCoordinatesOp = Shape.ops.get('toCoordinates');
+
+// TODO: Fix toCoordinates.
+export const move = Shape.registerMethod(
+  ['move', 'xyz'],
   (...args) =>
-    (shape) =>
-      Shape.Group(
-        ...Shape.toCoordinates(shape, ...args).map((coordinate) =>
-          shape.transform(fromTranslateToTransform(...coordinate))
-        )
-      )
+    async (shape) => {
+      const results = [];
+      for (const coordinate of await toCoordinatesOp(...args)(shape)) {
+        results.push(await transform(fromTranslateToTransform(...coordinate))(shape));
+      }
+      return Group(...results);
+    }
 );
 
 export const xyz = move;

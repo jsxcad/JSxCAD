@@ -2,7 +2,7 @@ import Group from './Group.js';
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 
-export const cutOut = Shape.chainable((...args) => (shape) => {
+export const cutOut = Shape.registerMethod('cutOut', (...args) => (shape) => {
   const {
     shapesAndFunctions: others,
     functions,
@@ -16,4 +16,3 @@ export const cutOut = Shape.chainable((...args) => (shape) => {
     shape.clip(other, ...modes).op(clipOp)
   );
 });
-Shape.registerMethod('cutOut', cutOut);

@@ -32,7 +32,8 @@ const render = (abstract, shape) => {
   return shape.md(graph.join('\n'));
 };
 
-export const abstract = Shape.chainable(
+export const abstract = Shape.registerMethod(
+  'abstract',
   (types = ['item'], op = render) =>
     (shape) => {
       const walk = ({ type, tags, plan, content }) => {
@@ -53,5 +54,3 @@ export const abstract = Shape.chainable(
       return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
     }
 );
-
-Shape.registerMethod('abstract', abstract);

@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import assemble from './assemble.js';
 import { destructure } from './destructure.js';
 
-export const fit = Shape.chainable((...args) => {
+export const fit = Shape.registerMethod('fit', (...args) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
   return (shape) =>
     assemble(
@@ -11,5 +11,3 @@ export const fit = Shape.chainable((...args) => {
       shape
     );
 });
-
-Shape.registerMethod('fit', fit);

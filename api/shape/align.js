@@ -78,7 +78,8 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
     return offset;
   });
 
-export const align = Shape.registerMethod('align',
+export const align = Shape.registerMethod(
+  'align',
   (spec = 'xyz', origin = [0, 0, 0]) =>
     (shape) => {
       console.log(`QQ/align: ${spec} ${origin} ${JSON.stringify(shape)}`);

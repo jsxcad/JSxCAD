@@ -2,7 +2,7 @@ import { eachPoint, taggedPoints } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-export const points = Shape.chainable(() => (shape) => {
+export const points = Shape.registerMethod('points', () => (shape) => {
   const points = [];
   eachPoint(
     Shape.toShape(shape, shape).toGeometry(),
@@ -10,5 +10,3 @@ export const points = Shape.chainable(() => (shape) => {
   );
   return Shape.fromGeometry(taggedPoints({}, points));
 });
-
-Shape.registerMethod('points', points);

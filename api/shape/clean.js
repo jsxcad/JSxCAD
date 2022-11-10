@@ -1,8 +1,7 @@
 import Shape from './Shape.js';
 import { noGhost } from '@jsxcad/geometry';
 
-export const clean = Shape.chainable(
+export const clean = Shape.registerMethod(
+  'clean',
   () => (shape) => Shape.fromGeometry(noGhost(shape.toGeometry()))
 );
-
-Shape.registerMethod('clean', clean);

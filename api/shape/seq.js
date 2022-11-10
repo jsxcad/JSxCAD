@@ -90,4 +90,8 @@ export const seq = Shape.registerMethod('seq', (...args) => (shape) => {
   return groupOp(...results);
 });
 
-export const Seq = Shape.registerShapeMethod('Seq', (...args) => Empty().seq(...args));
+export const Seq = Shape.registerShapeMethod('Seq', (...args) =>
+  Empty().seq(...args)
+);
+
+export default Seq;

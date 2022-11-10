@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { smooth as smoothGeometry } from '@jsxcad/geometry';
 
-export const smooth = Shape.chainable((...args) => (shape) => {
+export const smooth = Shape.registerMethod('smooth', (...args) => (shape) => {
   const {
     number: resolution = 1,
     object: options = {},
@@ -26,5 +26,3 @@ export const smooth = Shape.chainable((...args) => (shape) => {
     )
   );
 });
-
-Shape.registerMethod('smooth', smooth);

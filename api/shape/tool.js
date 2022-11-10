@@ -2,11 +2,10 @@ import Shape from './Shape.js';
 import { rewriteTags } from '@jsxcad/geometry';
 import { toTagsFromName } from '@jsxcad/algorithm-tool';
 
-export const tool = Shape.chainable(
+export const tool = Shape.registerMethod(
+  'tool',
   (name) => (shape) =>
     Shape.fromGeometry(
       rewriteTags(toTagsFromName(name), [], shape.toGeometry())
     )
 );
-
-Shape.registerMethod('tool', tool);

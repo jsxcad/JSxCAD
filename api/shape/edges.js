@@ -1,17 +1,3 @@
-/*
-import { eachSegment, taggedSegments } from '@jsxcad/geometry';
-
-import Shape from './Shape.js';
-
-export const edges = Shape.chainable(() => (shape) => {
-  const segments = [];
-  eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) =>
-    segments.push(segment)
-  );
-  return Shape.fromGeometry(taggedSegments({}, segments));
-});
-*/
-
 import Group from './Group.js';
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
@@ -33,7 +19,7 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
-export const edges = Shape.chainable((...args) => (shape) => {
+export const edges = Shape.registerMethod('edges', (...args) => (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
   let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
@@ -58,5 +44,3 @@ export const edges = Shape.chainable((...args) => (shape) => {
     return grouped;
   }
 });
-
-Shape.registerMethod('edges', edges);

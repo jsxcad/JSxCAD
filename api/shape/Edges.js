@@ -1,11 +1,17 @@
+import './toCoordinate.js';
+import './toNestedValues.js';
+
 import Shape from './Shape.js';
 
-export const Edges = Shape.registerShapeMethod('Edges', (segments) =>
-  Shape.fromSegments(
-    Shape.toNestedValues(segments).map(([source, target]) => [
-      Shape.toCoordinate(undefined, source),
-      Shape.toCoordinate(undefined, target),
-    ])
-  ));
+const toNestedValuesOp = Shape.ops.get('toNestedValues');
+const toCoordinateOp = Shape.ops.get('toCoordinate');
+
+export const Edges = Shape.registerShapeMethod('Edges', async (arg) => {
+  const segments = [];
+  for (const [source, target] of await toNestedValuesOp(arg)(null)) {
+    segments.push([await toCoordinateOp(source)(null), await toCoordinateOp(target)(null)]);
+  }
+  return Shape.fromSegments(segments);
+});
 
 export default Edges;

@@ -2,7 +2,8 @@ import Group from './Group.js';
 import Shape from './Shape.js';
 import { hasTypeMasked } from '@jsxcad/geometry';
 
-export const masking = Shape.chainable(
+export const masking = Shape.registerMethod(
+  'masking',
   (masked) => (shape) =>
     Group(
       shape.void(),
@@ -11,7 +12,5 @@ export const masking = Shape.chainable(
       )
     )
 );
-
-Shape.registerMethod('masking', masking);
 
 export default masking;

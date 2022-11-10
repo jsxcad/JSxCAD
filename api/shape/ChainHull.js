@@ -10,7 +10,8 @@ export const ChainHull = Shape.registerShapeMethod('ChainHull', (...shapes) => {
   return Join(...chain);
 });
 
-export const chainHull = Shape.registerMethod('chainHull',
+export const chainHull = Shape.registerMethod(
+  'chainHull',
   (...shapes) =>
     (shape) =>
       ChainHull(...Shape.toShapes(shapes, shape))

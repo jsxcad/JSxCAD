@@ -2,7 +2,8 @@ import Shape from './Shape.js';
 import { taggedItem } from '@jsxcad/geometry';
 
 // Constructs an item from the designator.
-export const as = Shape.chainable(
+export const as = Shape.registerMethod(
+  'as',
   (...names) =>
     (shape) =>
       Shape.fromGeometry(
@@ -12,7 +13,5 @@ export const as = Shape.chainable(
         )
       )
 );
-
-Shape.registerMethod('as', as);
 
 export default as;

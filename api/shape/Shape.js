@@ -2,20 +2,15 @@ import {
   assemble,
   eagerTransform,
   fromPolygons,
-  rewriteTags,
   taggedGraph,
   taggedPoints,
   taggedSegments,
-  toConcreteGeometry as toConcreteTaggedGeometry,
-  // toDisplayGeometry,
   toPoints,
-  // toTransformedGeometry as toTransformedTaggedGeometry,
-  // transform,
 } from '@jsxcad/geometry';
 
 import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 
-const shapeMethods = new Map();
+export const ops = new Map();
 
 // Asynchronous proxy chaining for operators.
 let complete, incomplete, chain;
@@ -24,7 +19,11 @@ incomplete = {
   apply(target, obj, args) {
     const result = target.apply(obj, args);
     if (typeof result !== 'function') {
-      throw Error(`Incomplete op must evaluate to function, not ${typeof result}: ${'' + target}`);
+      throw Error(
+        `Incomplete op must evaluate to function, not ${typeof result}: ${
+          '' + target
+        }`
+      );
     }
     return new Proxy(result, complete);
   },
@@ -36,12 +35,12 @@ incomplete = {
     if (prop === 'isChain') {
       return 'incomplete';
     }
-    if (!shapeMethods.has(prop)) {
+    if (!ops.has(prop)) {
       // console.log(`QQ/incomplete/get[${prop.toString()}]: no method`);
       return Reflect.get(target, prop);
     }
     // console.log(`QQ/incomplete/get[${prop}]`);
-  }
+  },
 };
 
 // This is a complete chain.
@@ -62,7 +61,7 @@ complete = {
         resolve(target());
       };
     }
-    if (!shapeMethods.has(prop)) {
+    if (!ops.has(prop)) {
       return Reflect.get(target, prop);
     }
     // console.log(`QQ/complete/get[${prop}]`);
@@ -76,18 +75,21 @@ complete = {
             throw Error(`Expected Shape but received ${'' + s}`);
           }
           // console.log(`QQ/complete/exec[${prop}]/s: ${'' + s}`);
-          // const op = s.shapeMethods.get(prop);
+          // const op = s.ops.get(prop);
           // const op = s[prop];
-          const op = shapeMethods.get(prop);
+          const op = ops.get(prop);
           if (typeof op !== 'function') {
-            throw Error(`${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`);
+            throw Error(
+              `${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`
+            );
           }
           // Note that the op runs over the unchained context.
           // console.log(`QQ/op: ${'' + op}`);
           return op(...args)(s);
         },
-      incomplete);
-  }
+      incomplete
+    );
+  },
 };
 
 // This builds a chain from an existing shape value.
@@ -113,7 +115,7 @@ chain = (shape) => {
           resolve(target);
         };
       }
-      if (!shapeMethodNames.has(prop)) {
+      if (!ops.has(prop)) {
         console.log(`QQ/root/get[${prop}]: not method`);
         return Reflect.get(target, prop);
       }
@@ -127,9 +129,9 @@ chain = (shape) => {
               throw Error(`Expected Shape but received ${'' + target}`);
             }
             // console.log(`QQ/root/exec[${prop}]: target=${JSON.stringify(target)}`);
-            // const op = target.shapeMethods.get(prop);
+            // const op = target.ops.get(prop);
             // const op = target[prop];
-            const op = shapeMethods.get(prop);
+            const op = ops.get(prop);
             if (typeof op !== 'function') {
               throw Error(`QQ/Op ${op} [${prop}] is not a function.`);
             }
@@ -139,15 +141,18 @@ chain = (shape) => {
             if (target.isChain) {
               throw Error(`Target should not be chain`);
             }
-            console.log(`QQ/root/exec[${prop}]: target=${JSON.stringify(target)}`);
+            console.log(
+              `QQ/root/exec[${prop}]: target=${JSON.stringify(target)}`
+            );
             const result = await pop(target);
             // console.log(`QQ/root/exec[${prop}]/target.chain: ${target.isChain}`);
             // console.log(`QQ/root/exec[${prop}]/result.chain: ${result.isChain}`);
             console.log(`QQ/root/exec/result: ${result}`);
             return result;
           },
-        incomplete);
-    }
+        incomplete
+      );
+    },
   };
 
   const result = new Proxy(shape, root);
@@ -166,12 +171,10 @@ const chainConstructor = (op) => {
     },
     apply(target, obj, args) {
       // console.log(`QQ/chainConstructor/apply`);
-      return new Proxy(
-          async () => {
-            return op.apply(null, args);
-          },
-        complete);
-    }
+      return new Proxy(async () => {
+        return op.apply(null, args);
+      }, complete);
+    },
   };
 
   return new Proxy(op, constructor);
@@ -180,14 +183,19 @@ const chainConstructor = (op) => {
 const chainable = (op) => {
   return new Proxy(
     (...args) =>
-       async (terminal) => {
-         // console.log(`QQ/chainable/terminal`);
-         if (!(terminal instanceof Shape)) {
-           throw Error(`Expected Shape but received ${JSON.stringify(terminal)} of type ${typeof terminal} isChain ${terminal.isChain}`);
-         }
-         return op(...args)(terminal);
-       },
-     incomplete);
+      async (terminal) => {
+        // console.log(`QQ/chainable/terminal`);
+        if (!(terminal instanceof Shape) && terminal !== null) {
+          throw Error(
+            `Expected Shape but received ${JSON.stringify(
+              terminal
+            )} of type ${typeof terminal} or null (isChain=${terminal.isChain})`
+          );
+        }
+        return op(...args)(terminal);
+      },
+    incomplete
+  );
 };
 
 export class Shape {
@@ -200,51 +208,13 @@ export class Shape {
     return this;
   }
 
-/*
-  toDisplayGeometry(options) {
-    return toDisplayGeometry(toGeometry(this), options);
-  }
-*/
-
-  toKeptGeometry(options = {}) {
-    return this.toConcreteGeometry();
-  }
-
-  toConcreteGeometry(options = {}) {
-    return toConcreteTaggedGeometry(toGeometry(this));
-  }
-
-/*
-  toDisjointGeometry(options = {}) {
-    return toConcreteTaggedGeometry(toGeometry(this));
-  }
-*/
-
-/*
-  toTransformedGeometry(options = {}) {
-    return toTransformedTaggedGeometry(toGeometry(this));
-  }
-*/
-
   getContext(symbol) {
     return this.context[symbol];
   }
 
-/*
-  toGeometry() {
-    return this.geometry;
-  }
-*/
-
   toPoints() {
-    return toPoints(this.toConcreteGeometry()).points;
+    return toPoints(this.toGeometry()).points;
   }
-
-/*
-  transform(matrix) {
-    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
-  }
-*/
 
   eagerTransform(matrix) {
     return fromGeometry(
@@ -258,26 +228,12 @@ export class Shape {
     return this.toGeometry().tags || [];
   }
 
-/*
-  setTags(tags = []) {
-    return Shape.fromGeometry(rewriteTags(tags, [], this.toGeometry()));
-  }
-*/
-
   toCoordinate(x, y, z) {
     return Shape.toCoordinate(this, x, y, z);
   }
 
-  toShape(value) {
-    return Shape.toShape(value, this);
-  }
-
-  toShapes(values) {
-    return Shape.toShapes(values, this);
-  }
-
-  toShapesGeometries(values) {
-    return Shape.toShapesGeometries(values, this);
+  toCoordinates(...args) {
+    return Shape.toCoordinates(this, ...args);
   }
 
   toValue(value) {
@@ -288,16 +244,22 @@ export class Shape {
     return Shape.toFlatValues(values, this);
   }
 
+/*
   toNestedValues(values) {
     return Shape.toNestedValues(values, this);
   }
+*/
 }
 
-export const isShape = (value) => (value instanceof Shape) || value.isChain;
+export const isShape = (value) => value instanceof Shape || value.isChain;
 Shape.isShape = isShape;
 
-export const isFunction = (value) => !isShape(value) && value instanceof Function;
+export const isFunction = (value) => value instanceof Function;
 Shape.isFunction = isFunction;
+
+export const isArray = (value) =>
+  value instanceof Array;
+Shape.isArray = isArray;
 
 Shape.chain = chain;
 
@@ -329,7 +291,7 @@ export const registerMethod = (names, op) => {
     method.origin = path;
     Shape.prototype[name] = method;
 
-    shapeMethods.set(name, op);
+    ops.set(name, op);
   }
   return chainable(op);
 };
@@ -344,7 +306,7 @@ export const registerShapeMethod = (names, op) => {
     Shape[name] = chainOp;
   }
   return chainOp;
-}
+};
 
 /*
 export const shapeMethod = (build) => {
@@ -404,59 +366,6 @@ Shape.fromPolygons = (polygons, context) =>
 
 Shape.registerMethod = registerMethod;
 
-Shape.toShape = async (to, from) => {
-  to = await to;
-  if (to instanceof Function) {
-    to = to(from);
-  }
-  if (isShape(to)) {
-    return to;
-  } else {
-    throw Error(`Expected Function or Shape. Received: ${to.constructor.name}`);
-  }
-};
-
-Shape.toShapes = async (to, from) => {
-  to = await to;
-  // console.log(`QQ/toShapes: ${'' + to}`);
-  if (to instanceof Function) {
-    // console.log(`QQ/toShapes/0: ${'' + to}`);
-    to = await to(from);
-  }
-  if (isShape(to)) {
-    if (to.toGeometry().type === 'group') {
-      const out = [];
-      for (const geometry of to.toGeometry().content) {
-        out.push(Shape.fromGeometry(geometry));
-      }
-      return out;
-    }
-  }
-  if (to instanceof Array) {
-    const out = [];
-    for (const item of to) {
-      if (item === undefined) {
-        continue;
-      }
-      out.push(...await Shape.toShapes(item, from));
-    }
-    return out;
-  } else {
-    return [await Shape.toShape(to, from)];
-  }
-};
-
-Shape.toShapesGeometries = async (to, from) => {
-  const shapes = await Shape.toShapes(to, from);
-  // console.log(`QQ/shapes: ${shapes}`);
-  const settledShapes = await Promise.allSettled(shapes);
-  return settledShapes.map((shape) => {
-    // console.log(`QQ/result: ${JSON.stringify(shape)}`);
-    // console.log(`QQ/shape.isChain: ${shape.value.isChain}`);
-    return shape.value.toGeometry();
-  });
-};
-
 Shape.toValue = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
@@ -480,6 +389,7 @@ Shape.toFlatValues = (to, from) => {
   }
 };
 
+/*
 Shape.toNestedValues = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
@@ -498,7 +408,9 @@ Shape.toNestedValues = (to, from) => {
     return to;
   }
 };
+*/
 
+/*
 Shape.toCoordinate = async (shape, x = 0, y = 0, z = 0) => {
   if (x instanceof Function) {
     x = await x(shape);
@@ -527,18 +439,17 @@ Shape.toCoordinate = async (shape, x = 0, y = 0, z = 0) => {
     throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
   }
 };
+*/
 
-Shape.toCoordinates = (shape, ...args) => {
+/*
+Shape.toCoordinates = async (shape, ...args) => {
   const coordinates = [];
   while (args.length > 0) {
     let x = args.shift();
-    if (x instanceof Function) {
-      x = x(shape);
+    if (Shape.isFunction(x)) {
+      x = await x(shape);
     }
-    if (typeof x === 'string') {
-      x = shape.get(x);
-    }
-    if (isShape(x)) {
+    if (Shape.isShape(x)) {
       if (x.toGeometry().type === 'group') {
         coordinates.push(
           ...Shape.toCoordinates(
@@ -551,7 +462,7 @@ Shape.toCoordinates = (shape, ...args) => {
       } else {
         coordinates.push(Shape.toCoordinate(shape, x));
       }
-    } else if (x instanceof Array) {
+    } else if (Shape.isArray(x)) {
       if (isNaN(x[0]) || isNaN(x[1]) || isNaN(x[2])) {
         for (const element of x) {
           coordinates.push(...Shape.toCoordinates(shape, element));
@@ -581,13 +492,12 @@ Shape.toCoordinates = (shape, ...args) => {
   }
   return coordinates;
 };
+*/
 
 Shape.chainable = chainable;
+Shape.ops = ops;
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
-export const toConcreteGeometry = (shape) => shape.toConcreteGeometry();
-// export const toDisjointGeometry = (shape) => shape.toConcreteGeometry();
-export const toKeptGeometry = (shape) => shape.toConcreteGeometry();
 
 export default Shape;

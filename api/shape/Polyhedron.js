@@ -22,6 +22,8 @@ export const ofPolygons = (...polygons) => {
   return Shape.fromPolygons(out);
 };
 
-export const Polyhedron = Shape.registerShapeMethod('Polyhedron', (...args) => ofPolygons(...args));
+export const Polyhedron = Shape.registerShapeMethod('Polyhedron', (...args) =>
+  ofPolygons(...args)
+);
 
 export default Polyhedron;

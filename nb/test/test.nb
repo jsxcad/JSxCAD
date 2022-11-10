@@ -1,1 +1,12 @@
-Box(10).ez(5).view();
+/*
+await Box(10)
+  .ez(10)
+  .color('green')
+  .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .view(43);
+*/
+await Box(10)
+  .ez(10)
+  .color('green')
+  .faces().n(4).extrudeAlong(normal(), 1).tint('red')
+  .view(43);
