@@ -4,12 +4,12 @@ import { getLeafs } from '@jsxcad/geometry';
 import { note } from './note.js';
 import { tagMatcher } from './tag.js';
 
-export const tags = Shape.registerMethod('tags', (...args) => (shape) => {
+export const tags = Shape.registerMethod('tags', (...args) => async (shape) => {
   const { string: tag = '*', func: op = (...tags) => note(`tags: ${tags}`) } =
     destructure(args);
   const isMatchingTag = tagMatcher(tag, 'user');
   const collected = [];
-  for (const { tags } of getLeafs(shape.toGeometry())) {
+  for (const { tags } of getLeafs(await shape.toGeometry())) {
     for (const tag of tags) {
       if (isMatchingTag(tag)) {
         collected.push(tag);

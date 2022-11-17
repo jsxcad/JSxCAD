@@ -53,8 +53,6 @@ await Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
   .gridView(23);
 
-// Box(5).rotate(45).gridView(24);
-
 await Box(1, 2, 3)
   .rx(1 / 8)
   .gridView(25);
@@ -66,6 +64,7 @@ await Box(1, 2, 3)
   .gridView(27);
 
 await Box(5).scale(1, 2).gridView(28);
+// Box(5).rotate(45).gridView(24);
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(1, 1)
@@ -134,8 +133,10 @@ const b = await Box(5)
   .material('glass')
   .y(10);
 
+///
 await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
 
+/*
 await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
 
 await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
@@ -190,44 +191,6 @@ await Box(20, 20, 20)
   .material('glass')
   .and(upperEnvelope().color('red'))
   .view(60);
-
-/*
-Box(20, 20, 20)
-  .join(Box(10, 10, 40))
-  .join(Orb(4, { sides: 4 }).z(24))
-  .rx(1 / 16)
-  .by(align('z>'))
-  .upperEnvelope()
-  .extrudeToPlane({ low: [0, 0, 1, 0], direction: [0, 0, -1, 0] })
-  .view(5);
-*/
-
-/*
-Box(10, 3, 3)
-  .remesh(1)
-  .deform(
-    [
-      {
-        selection: Box([4.8, 5], 3, 3),
-        deformation: Point().rx(1 / 4),
-      },
-      {
-        selection: Box([-5, -4.8], 3, 3),
-        deformation: Point().rx(-1 / 4),
-      },
-      {
-        selection: Box([-0.1, 0.1], 3, 3),
-        deformation: Point().z(3),
-      },
-    ],
-    {
-      iterations: 1000,
-      tolerance: 0.001,
-      alpha: 0.05,
-    }
-  )
-  .view(62);
-*/
 
 md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area().toFixed(2)}`;
 
@@ -408,3 +371,4 @@ await Arc(10, 10, 10, { sides: 7 })
   )
   .clean()
   .view();
+  */

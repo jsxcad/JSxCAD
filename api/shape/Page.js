@@ -48,28 +48,21 @@ const buildLayout = async ({
       await Hershey(itemNames[nth], fontHeight).y((nth + 1) * fontHeight)
     );
   }
-  const visualization = Box(
+  const visualization = await Box(
     Math.max(pageWidth, margin),
     Math.max(pageLength, margin)
   )
     .outline()
-    .and(
-      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
-    )
+    .and(Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2))
     .color('red')
     .ghost();
-  console.log(
-    `QQ/buildLayoutGeometry/layer.toGeometry(): ${JSON.stringify(
-      layer.toGeometry()
-    )}`
-  );
-  let layout = Shape.fromGeometry(
+  let layout = Shape.chain(Shape.fromGeometry(
     taggedLayout(
-      { size, margin, title },
-      (await layer).toGeometry(),
-      (await visualization).toGeometry()
+      { size, margin },
+      await layer.toDisplayGeometry(),
+      await visualization.toDisplayGeometry()
     )
-  );
+  ));
   if (center) {
     layout = layout.by(align());
   }
@@ -107,7 +100,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
   console.log(`QQ/shapes.then: ${shapes.then}`);
   for (const shape of shapes) {
     console.log(`QQ/shapes/shape: ${JSON.stringify(shape)}`);
-    for (const leaf of getLeafs((await shape).toGeometry())) {
+    for (const leaf of getLeafs(await shape.toGeometry())) {
       layers.push(leaf);
     }
   }
@@ -145,7 +138,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
     console.log(`QQ/Page/01`);
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     console.log(`QQ/Page/layer: ${JSON.stringify(layer)}`);
-    const packSize = measureBoundingBox(layer.toGeometry());
+    const packSize = measureBoundingBox(await layer.toGeometry());
     if (packSize === undefined) {
       console.log(`QQ/Page/01/a`);
       return Group();
@@ -280,7 +273,7 @@ export default Page;
 
 export const ensurePages = async (shape, depth = 0) => {
   console.log(`QQ/ensurePages: ${JSON.stringify(shape)}`);
-  const pages = getLayouts((await shape).toGeometry());
+  const pages = getLayouts(await shape.toDisplayGeometry());
   if (pages.length === 0 && depth === 0) {
     console.log(`QQ/ensurePages/0`);
     return ensurePages(await Page({ pack: false }, shape), depth + 1);

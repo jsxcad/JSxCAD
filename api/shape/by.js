@@ -13,7 +13,7 @@ export const by = Shape.registerMethod(
       ops = ops.map((op) => (op instanceof Function ? op : () => op));
       // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
       if (Shape.isFunction(selection)) {
-        selection = selection(shape);
+        selection = await selection(shape);
       }
       const placed = [];
       console.log(`QQ/by/selection: ${JSON.stringify(selection)}`);

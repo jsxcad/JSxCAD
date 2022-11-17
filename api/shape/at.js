@@ -9,12 +9,12 @@ const toShapesOp = Shape.ops.get('toShapes');
 
 export const at = Shape.registerMethod('at', (...args) => async (shape) => {
   const { shapesAndFunctions: ops } = destructure(args);
-  const { local, global } = getInverseMatrices(shape.toGeometry());
+  const { local, global } = getInverseMatrices(await shape.toGeometry());
   const selections = await toShapesOp(ops.shift())(shape);
   for (const selection of selections) {
     const { local: selectionLocal, global: selectionGlobal } =
-      getInverseMatrices(selection.toGeometry());
-    shape = 
+      getInverseMatrices(await selection.toGeometry());
+    shape =
       await transform(local)
       .transform(selectionGlobal)
       .op(...ops)

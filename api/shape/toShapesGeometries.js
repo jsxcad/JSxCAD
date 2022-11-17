@@ -6,8 +6,9 @@ const toShapesOp = Shape.ops.get('toShapes');
 
 export const toShapesGeometries = Shape.registerMethod('toShapesGeometries', (value) => async (shape) => {
   const shapes = await toShapesOp(value)(shape);
-  const settledShapes = await Promise.allSettled(shapes);
-  return settledShapes.map((shape) => {
-    return shape.value.toGeometry();
-  });
+  const geometries = [];
+  for (const shape of shapes) {
+    geometries.push(await shape.toGeometry());
+  }
+  return geometries;
 });

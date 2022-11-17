@@ -4,8 +4,8 @@ import { toTagsFromName } from '@jsxcad/algorithm-tool';
 
 export const tool = Shape.registerMethod(
   'tool',
-  (name) => (shape) =>
+  (name) => async (shape) =>
     Shape.fromGeometry(
-      rewriteTags(toTagsFromName(name), [], shape.toGeometry())
+      rewriteTags(toTagsFromName(name), [], await shape.toGeometry())
     )
 );

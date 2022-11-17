@@ -3,5 +3,5 @@ import { taggedSketch } from '@jsxcad/geometry';
 
 export const sketch = Shape.registerMethod(
   'sketch',
-  () => (shape) => Shape.fromGeometry(taggedSketch({}, shape.toGeometry()))
+  () => async (shape) => Shape.fromGeometry(taggedSketch({}, await shape.toGeometry()))
 );

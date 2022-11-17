@@ -3,7 +3,7 @@ import { makeAbsolute } from '@jsxcad/geometry';
 
 export const absolute = Shape.registerMethod(
   'absolute',
-  () => (shape) => Shape.fromGeometry(makeAbsolute(shape.toGeometry()))
+  () => async (shape) => Shape.fromGeometry(makeAbsolute(await shape.toGeometry()))
 );
 
 export default absolute;

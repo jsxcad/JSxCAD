@@ -84,6 +84,7 @@ const $run = async (op, { path, id, text, sha, line }) => {
         await resolvePending();
         finishEmitGroup({ path, id, line });
       }
+      console.log(`QQ/$run/text: ${text}`);
       throw error;
     }
     await resolvePending();

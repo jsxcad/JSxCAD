@@ -165,8 +165,6 @@ class Standalone extends React.Component {
     };
 
     setupWorkspace(workspace);
-    await boot();
-
     // Construct a local ephemeral filesystem.
     for (const path of Object.keys(files)) {
       await write(path, files[path], { ephemeral: true });
@@ -223,8 +221,9 @@ export const run = async ({
   workspace,
   container,
 }) => {
-  const start = () => {
+  const start = async () => {
     const files = decodeFiles(encodedFiles);
+    await boot();
     ReactDOM.render(
       <Standalone
         baseUrl={baseUrl}

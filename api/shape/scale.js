@@ -18,9 +18,9 @@ export const scale = Shape.registerMethod(
       const negatives = (x < 0) + (y < 0) + (z < 0);
       if (negatives % 2) {
         // Compensate for inversion.
-        return shape.eagerTransform(fromScaleToTransform(x, y, z)).involute();
+        return (await shape).eagerTransform(fromScaleToTransform(x, y, z)).involute();
       } else {
-        return shape.eagerTransform(fromScaleToTransform(x, y, z));
+        return (await shape).eagerTransform(fromScaleToTransform(x, y, z));
       }
     }
 );

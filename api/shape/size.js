@@ -27,8 +27,8 @@ const Z = 2;
 export const size = Shape.registerMethod(
   'size',
   (op = (size) => (shape) => size) =>
-    (shape) => {
-      const geometry = shape.toGeometry();
+    async (shape) => {
+      const geometry = await shape.toGeometry();
       const bounds = measureBoundingBox(geometry);
       if (bounds === undefined) {
         return op({

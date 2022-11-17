@@ -1,5 +1,6 @@
 import Point from './Point.js';
 import Shape from './Shape.js';
+import { size } from './size.js';
 
 const X = 0;
 const Y = 1;
@@ -13,8 +14,8 @@ const round = (v) => Math.round(v * 1000) / 1000;
 
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
-const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
-  shape.size(({ max, min, center }) => (shape) => {
+const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) =>
+  size(({ max, min, center }) => (shape) => {
     // This is producing very small deviations.
     // FIX: Try a more principled approach.
     max = roundCoordinate(max);
@@ -76,16 +77,16 @@ const computeOffset = (spec = 'xyz', origin = [0, 0, 0], shape) =>
       throw Error(`Non-finite/offset: ${offset}`);
     }
     return offset;
-  });
+  })(shape);
 
 export const align = Shape.registerMethod(
   'align',
   (spec = 'xyz', origin = [0, 0, 0]) =>
-    (shape) => {
+    async (shape) => {
       console.log(`QQ/align: ${spec} ${origin} ${JSON.stringify(shape)}`);
-      const offset = computeOffset(spec, origin, shape);
-      console.log(`QQ/align/offset: ${offset}`);
-      const reference = Point().move(...subtract(offset, origin));
+      const offset = await computeOffset(spec, origin, shape);
+      console.log(`QQ/align/offset: ${offset} ${origin}`);
+      const reference = await Point().move(...subtract(offset, origin));
       return reference;
     }
 );

@@ -27,6 +27,6 @@ export const untagGeometry = (geometry, tags) => {
 export const untag = Shape.registerMethod(
   'untag',
   (...tags) =>
-    (shape) =>
-      Shape.fromGeometry(untagGeometry(shape.toGeometry(), tags))
+    async (shape) =>
+      Shape.fromGeometry(untagGeometry(await shape.toGeometry(), tags))
 );

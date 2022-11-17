@@ -6,7 +6,7 @@ export const cut = Shape.registerMethod('cut', (...args) => async (shape) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
   return Shape.fromGeometry(
     cutGeometry(
-      shape.toGeometry(),
+      await shape.toGeometry(),
       await shape.toShapesGeometries(shapes),
       modes.includes('open'),
       modes.includes('exact'),

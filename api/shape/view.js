@@ -10,24 +10,25 @@ import Shape from './Shape.js';
 import { dataUrl } from '@jsxcad/ui-threejs';
 import { ensurePages } from './Page.js';
 
-const applyModes = (shape, options, modes) => {
+const applyModes = async (shape, options, modes) => {
   if (modes.includes('wireframe')) {
-    shape = shape.tag('show:wireframe');
+    shape = await shape.tag('show:wireframe');
   }
   if (modes.includes('noWireframe')) {
-    shape = shape.tag('show:noWireframe');
+    shape = await shape.tag('show:noWireframe');
   }
   if (modes.includes('skin')) {
-    shape = shape.tag('show:skin');
+    shape = await shape.tag('show:skin');
   }
   if (modes.includes('noSkin')) {
-    shape = shape.tag('show:noSkin');
+    console.log(shape);
+    shape = await shape.tag('show:noSkin');
   }
   if (modes.includes('Outline')) {
-    shape = shape.tag('show:outline');
+    shape = await shape.tag('show:outline');
   }
   if (modes.includes('noOutline')) {
-    shape = shape.tag('show:noOutline');
+    shape = await shape.tag('show:noOutline');
   }
   return shape;
 };
@@ -58,7 +59,7 @@ export const baseView =
     if (viewId === undefined) {
       viewId = nth;
     }
-    const displayGeometry = viewShape.toDisplayGeometry();
+    const displayGeometry = await viewShape.toDisplayGeometry();
     console.log(
       `QQ/baseView/displayGeometry: ${JSON.stringify(displayGeometry)}`
     );
@@ -79,7 +80,9 @@ export const baseView =
       };
       emit({ hash, path: viewPath, view });
       console.log(`QQ/baseView/write: ${viewPath}`);
-      await write(viewPath, geometry);
+      console.log(`QQ/baseView/geometry: ${geometry}`);
+      console.log(`QQ/baseView/geometry.isChain: ${geometry.isChain}`);
+      await write(viewPath, displayGeometry);
       if (!isNode) {
         await write(thumbnailPath, dataUrl(viewShape, view));
       }
@@ -87,7 +90,7 @@ export const baseView =
     return shape;
   };
 
-export const topView = Shape.registerMethod('topView', (...args) => (shape) => {
+export const topView = Shape.registerMethod('topView', (...args) => async (shape) => {
   const {
     value: viewId,
     func: op = (x) => x,
@@ -104,14 +107,14 @@ export const topView = Shape.registerMethod('topView', (...args) => (shape) => {
       position: [0, 0, 100],
     },
   });
-  shape = applyModes(shape, options, modes);
+  shape = await applyModes(shape, options, modes);
   return baseView(viewId, op, options)(shape);
 });
 
 export const gridView = Shape.registerMethod(
   'gridView',
   (...args) =>
-    (shape) => {
+    async (shape) => {
       const {
         value: viewId,
         func: op = (x) => x,
@@ -128,7 +131,7 @@ export const gridView = Shape.registerMethod(
           position: [0, 0, 100],
         },
       });
-      shape = applyModes(shape, options, modes);
+      shape = await applyModes(shape, options, modes);
       return baseView(viewId, op, options)(shape);
     }
 );
@@ -136,7 +139,7 @@ export const gridView = Shape.registerMethod(
 export const frontView = Shape.registerMethod(
   'frontView',
   (...args) =>
-    (shape) => {
+    async (shape) => {
       const {
         value: viewId,
         func: op = (x) => x,
@@ -153,7 +156,7 @@ export const frontView = Shape.registerMethod(
           position: [0, -100, 0],
         },
       });
-      shape = applyModes(shape, options, modes);
+      shape = await applyModes(shape, options, modes);
       return baseView(viewId, op, options)(shape);
     }
 );
@@ -161,7 +164,7 @@ export const frontView = Shape.registerMethod(
 export const sideView = Shape.registerMethod(
   'sideView',
   (...args) =>
-    (shape) => {
+    async (shape) => {
       const {
         value: viewId,
         func: op = (x) => x,
@@ -178,7 +181,7 @@ export const sideView = Shape.registerMethod(
           position: [100, 0, 0],
         },
       });
-      shape = applyModes(shape, options, modes);
+      shape = await applyModes(shape, options, modes);
       return baseView(viewId, op, options)(shape);
     }
 );
@@ -192,7 +195,7 @@ export const view = Shape.registerMethod('view', (...args) => async (shape) => {
     strings: modes,
   } = Shape.destructure(args);
   console.log(`QQ/view/shape: ${JSON.stringify(shape)}`);
-  shape = applyModes(shape, options, modes);
+  shape = await applyModes(shape, options, modes);
   if (modes.includes('grid')) {
     options.style = 'grid';
   }

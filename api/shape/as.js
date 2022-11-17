@@ -5,11 +5,11 @@ import { taggedItem } from '@jsxcad/geometry';
 export const as = Shape.registerMethod(
   'as',
   (...names) =>
-    (shape) =>
+    async (shape) =>
       Shape.fromGeometry(
         taggedItem(
           { tags: names.map((name) => `item:${name}`) },
-          shape.toGeometry()
+          await shape.toGeometry()
         )
       )
 );

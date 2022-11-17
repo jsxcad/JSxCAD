@@ -8,7 +8,7 @@ export const and = Shape.registerMethod(
       Shape.fromGeometry(
         taggedGroup(
           {},
-          shape.toGeometry(),
+          await shape.toGeometry(),
           ...(await shape.toShapesGeometries(args))
         )
       )

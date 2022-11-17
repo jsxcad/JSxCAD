@@ -15,6 +15,7 @@ export const toDisplayGeometry = (
   if (skin === undefined) {
     skin = true;
   }
+  console.log(`QQ/toDisplayGeometry: ${'' + geometry}`);
   return soup(toConcreteGeometry(geometry), {
     doTriangles: skin,
     doOutline: outline,

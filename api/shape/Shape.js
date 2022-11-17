@@ -29,7 +29,7 @@ incomplete = {
   },
   get(target, prop, receiver) {
     if (prop === 'sync') {
-      console.log(`QQ/incomplete/sync`);
+      // console.log(`QQ/incomplete/sync`);
       return target;
     }
     if (prop === 'isChain') {
@@ -50,7 +50,7 @@ complete = {
   },
   get(target, prop, receiver) {
     if (prop === 'sync') {
-      console.log(`QQ/complete/sync`);
+      // console.log(`QQ/complete/sync`);
       return target;
     }
     if (prop === 'isChain') {
@@ -58,7 +58,18 @@ complete = {
     }
     if (prop === 'then') {
       return async (resolve, reject) => {
-        resolve(target());
+        // This should only happen at the end of a chain.
+        // But since target() is async, it returns it as a promise, which will end up getting then'd by the await, and so on.
+        // But that won't be this when.
+        const link = async () => {
+          const result = await target();
+          if (isShape(result)) {
+            return chain(result);
+          } else {
+            return result;
+          }
+        };
+        resolve(link());
       };
     }
     if (!ops.has(prop)) {
@@ -70,14 +81,20 @@ complete = {
         async (terminal) => {
           // console.log(`<<< QQ/complete/exec[${prop}]: target=${'' + target} chain=${target.isChain}`);
           const s = await target(terminal);
-          // console.log(`>>> QQ/complete/exec[${prop}]: s=${'' + s} chain=${s.isChain}`);
-          if (!(s instanceof Shape) || s.isChain) {
-            throw Error(`Expected Shape but received ${'' + s}`);
+          // console.log(`>>> QQ/complete/exec[${prop}]: s=${'' + s} ${JSON.stringify(s)} chain=${s.isChain}`);
+          if (!(s instanceof Shape) && !s.isChain) {
+            throw Error(`Expected Shape but received ${JSON.stringify(s)} constructor ${s.constructor.name}`);
           }
           // console.log(`QQ/complete/exec[${prop}]/s: ${'' + s}`);
           // const op = s.ops.get(prop);
           // const op = s[prop];
-          const op = ops.get(prop);
+          let op;
+          try {
+            op = ops.get(prop);
+          } catch (e) {
+            console.log(e.stack);
+            throw e;
+          }
           if (typeof op !== 'function') {
             throw Error(
               `${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`
@@ -85,7 +102,8 @@ complete = {
           }
           // Note that the op runs over the unchained context.
           // console.log(`QQ/op: ${'' + op}`);
-          return op(...args)(s);
+          const result = await op(...args)(s);
+          return result;
         },
       incomplete
     );
@@ -97,57 +115,65 @@ chain = (shape) => {
   const root = {
     apply(target, obj, args) {
       // This is wrong -- the chain root should be the constructor, which requires application.
-      console.log(`QQ/root/terminal: ${JSON.stringify(target)}`);
+      // console.log(`QQ/root/terminal: ${JSON.stringify(target)}`);
       return this;
     },
     get(target, prop, receiver) {
-      console.log(`QQ/root/get: ${prop.toString()}`);
+      // console.log(`QQ/root/get: ${prop.toString()}`);
       if (prop === 'sync') {
-        console.log(`QQ/root/sync: ${JSON.stringify(target)}`);
+        // console.log(`QQ/root/sync: ${JSON.stringify(target)}`);
         return target;
       }
       if (prop === 'isChain') {
         return 'root';
       }
+      // This should be the same as just returning the proxy.
       if (prop === 'then') {
+        /*
         return async (resolve, reject) => {
-          // console.log(`QQ/chain/terminal: ${JSON.stringify(target)}`);
           resolve(target);
         };
+        */
+        return undefined;
       }
       if (!ops.has(prop)) {
-        console.log(`QQ/root/get[${prop}]: not method`);
+        // console.log(`QQ/root/get[${prop.toString()}]: not method`);
         return Reflect.get(target, prop);
       }
-      console.log(`QQ/root/get[${prop}]: target=${JSON.stringify(target)}`);
+      // console.log(`QQ/root/get[${prop}]: target=${JSON.stringify(target)}`);
       return new Proxy(
         (...args) =>
           async () => {
-            console.log(`QQ/root/exec`);
+            // console.log(`QQ/root/exec`);
             // We don't care about the terminal -- we're the root of the chain.
-            if (!(target instanceof Shape) || target.isChain) {
-              throw Error(`Expected Shape but received ${'' + target}`);
+            if (!(target instanceof Shape)) {
+              throw Error(`Expected Shape but received ${'' + target}: isChain ${target.isChain} ${JSON.stringify(target)}`);
             }
-            // console.log(`QQ/root/exec[${prop}]: target=${JSON.stringify(target)}`);
-            // const op = target.ops.get(prop);
-            // const op = target[prop];
+            const root = await target;
+            // console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
+            // const op = root.ops.get(prop);
+            // const op = root[prop];
             const op = ops.get(prop);
             if (typeof op !== 'function') {
               throw Error(`QQ/Op ${op} [${prop}] is not a function.`);
             }
-            console.log(`QQ/root/exec[${prop}]: op=${'' + op}`);
+            // console.log(`QQ/root/exec[${prop}]: op=${'' + op}`);
             const pop = await op(...args);
-            console.log(`QQ/root/exec[${prop}]: pop=${'' + pop}`);
-            if (target.isChain) {
-              throw Error(`Target should not be chain`);
+            // console.log(`QQ/root/exec[${prop}]: pop=${'' + pop}`);
+            // if (root.isChain) {
+            //   throw Error(`Target should not be chain`);
+            // }
+            console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
+            let result;
+            try {
+              result = await pop(root);
+            } catch (e) {
+              console.log(e.stack);
+              throw e;
             }
-            console.log(
-              `QQ/root/exec[${prop}]: target=${JSON.stringify(target)}`
-            );
-            const result = await pop(target);
-            // console.log(`QQ/root/exec[${prop}]/target.chain: ${target.isChain}`);
+            // console.log(`QQ/root/exec[${prop}]/root.chain: ${root.isChain}`);
             // console.log(`QQ/root/exec[${prop}]/result.chain: ${result.isChain}`);
-            console.log(`QQ/root/exec/result: ${result}`);
+            // console.log(`QQ/root/exec/result: ${result}`);
             return result;
           },
         incomplete
@@ -164,7 +190,7 @@ const chainConstructor = (op) => {
   // This chain is a constructor that hasn't been applied yet.
   const constructor = {
     get(target, prop, receiver) {
-      console.log(`QQ/chainConstructor[${prop.toString()}]`);
+      // console.log(`QQ/chainConstructor[${prop.toString()}]`);
       if (prop === 'isChain') {
         return 'constructor';
       }
@@ -172,7 +198,8 @@ const chainConstructor = (op) => {
     apply(target, obj, args) {
       // console.log(`QQ/chainConstructor/apply`);
       return new Proxy(async () => {
-        return op.apply(null, args);
+        const result = await op.apply(null, args);
+        return result;
       }, complete);
     },
   };
@@ -185,17 +212,23 @@ const chainable = (op) => {
     (...args) =>
       async (terminal) => {
         // console.log(`QQ/chainable/terminal`);
-        if (!(terminal instanceof Shape) && terminal !== null) {
+        if (!(terminal instanceof Shape) && terminal !== null && terminal !== undefined) {
           throw Error(
             `Expected Shape but received ${JSON.stringify(
               terminal
             )} of type ${typeof terminal} or null (isChain=${terminal.isChain})`
           );
         }
-        return op(...args)(terminal);
+        const result = await op(...args)(terminal);
+        return result;
       },
     incomplete
   );
+};
+
+// For testing.
+export {
+  chain, chainable, incomplete, complete
 };
 
 export class Shape {
@@ -212,11 +245,15 @@ export class Shape {
     return this.context[symbol];
   }
 
+/*
   toPoints() {
     return toPoints(this.toGeometry()).points;
   }
+  */
 
   eagerTransform(matrix) {
+    console.log(`QQ/eagerTransform: ${JSON.stringify(this)} ${this.isChain}`);
+    console.log(`QQ/geometry: ${JSON.stringify(this.toGeometry())}`);
     return fromGeometry(
       eagerTransform(matrix, this.toGeometry()),
       this.context
@@ -307,14 +344,6 @@ export const registerShapeMethod = (names, op) => {
   }
   return chainOp;
 };
-
-/*
-export const shapeMethod = (build) => {
-  return function (...args) {
-    return chain(build(...args).to(this));
-  };
-};
-*/
 
 Shape.registerShapeMethod = registerShapeMethod;
 

@@ -5,7 +5,7 @@ export const toCoordinate = Shape.registerMethod('toCoordinate', (x = 0, y = 0, 
     x = await x(shape);
   }
   if (Shape.isShape(x)) {
-    const points = x.toPoints();
+    const points = await x.toPoints();
     if (points.length >= 1) {
       return points[0];
     } else {

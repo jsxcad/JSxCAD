@@ -185,7 +185,9 @@ export const updateNotebook = async (
   { failedExpectations = [], browser, baseDirectory, workspace } = {}
 ) => {
   clearEmitted();
+  console.log(`QQQ/updateNotebook/boot/before`);
   await boot();
+  console.log(`QQQ/updateNotebook/boot/after`);
   const notebook = [];
   const onEmitHandler = addOnEmitHandler((notes) => notebook.push(...notes));
   const files = {};
@@ -218,6 +220,7 @@ export const updateNotebook = async (
     });
     await resolvePending();
     sortNotebook(notebook);
+    console.log(`QQQQ/notebook: ${JSON.stringify(notebook)}`);
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',

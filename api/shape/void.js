@@ -4,6 +4,6 @@ import Shape from './Shape.js';
 
 export const voidFn = Shape.registerMethod(
   'void',
-  () => (shape) =>
-    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(shape.toGeometry())))
+  () => async (shape) =>
+    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
 );

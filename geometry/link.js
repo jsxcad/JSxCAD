@@ -12,6 +12,7 @@ export const link = (geometries, close = false) => {
   for (const geometry of geometries) {
     linearize(toConcreteGeometry(geometry), filter, inputs);
   }
+  console.log(`QQQ/geometry/link/geometries: ${JSON.stringify(geometries)}`);
   const outputs = linkWithCgal(inputs, close);
   return taggedGroup({}, ...outputs);
 };

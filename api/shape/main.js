@@ -152,6 +152,7 @@ export { to } from './to.js';
 export { toCoordinate } from './toCoordinate.js';
 export { toCoordinates } from './toCoordinates.js';
 export { toDisplayGeometry } from './toDisplayGeometry.js';
+export { toPoints } from './toPoints.js';
 export { toShape } from './toShape.js';
 export { toShapeGeometry } from './toShapeGeometry.js';
 export { toShapes } from './toShapes.js';

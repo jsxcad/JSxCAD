@@ -15,35 +15,17 @@ import { serialize } from '@jsxcad/geometry';
  *
  **/
 
-const toText = (value) => {
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  } else {
-    return String(value);
+export const log = Shape.registerMethod('log', (text) => async (shape) => {
+  if (!text) {
+    text = JSON.stringify(await shape.toGeometry());
   }
-};
-
-export const log = (value, level) => {
-  const text = toText(value);
-  const log = { text, level };
-  const hash = computeHash(log);
-  emit({ log, hash });
-  return sysLog({ op: 'text', text, level });
-};
-
-export const logOp = (shape, op) => {
-  const text = String(op(shape));
   const level = 'serious';
   const log = { text, level };
   const hash = computeHash(log);
+  console.log(`QQQQ/log: ${text}`);
   emit({ log, hash });
-  return sysLog({ op: 'text', text });
-};
-
-const logMethod = function (op = (shape) => JSON.stringify(shape)) {
-  logOp(Shape.fromGeometry(serialize(this.toGeometry())), op);
-  return this;
-};
-Shape.prototype.log = logMethod;
+  sysLog({ op: 'text', text });
+  return shape;
+});
 
 export default log;

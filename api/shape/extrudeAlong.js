@@ -12,7 +12,7 @@ const toCoordinateOp = Shape.ops.get('toCoordinate');
 
 // This interface is a bit awkward.
 export const extrudeAlong = Shape.registerMethod(
-  ['extrudeAlong'],
+  'extrudeAlong',
   (direction, ...args) =>
     async (shape) => {
       console.log(`QQ/extrudeAlong/shape: ${JSON.stringify(shape)}`);
@@ -44,12 +44,16 @@ export const extrudeAlong = Shape.registerMethod(
           extrusions.push(await shape.moveAlong(vector, height));
           continue;
         }
+        console.log(`QQ/shape: ${shape}`);
+        console.log(`QQ/shape.isChain: ${shape.isChain}`);
+        const g1 = await Point().moveAlong(vector, height).toGeometry();
+        console.log(`QQ/g1.isChain: ${g1.isChain}`);
         extrusions.push(
           Shape.fromGeometry(
             extrudeGeometry(
-              shape.toGeometry(),
-              (await Point().moveAlong(vector, height)).toGeometry(),
-              (await Point().moveAlong(vector, depth)).toGeometry(),
+              await shape.toGeometry(),
+              await Point().moveAlong(vector, height).toGeometry(),
+              await Point().moveAlong(vector, depth).toGeometry(),
               modes.includes('noVoid')
             )
           )

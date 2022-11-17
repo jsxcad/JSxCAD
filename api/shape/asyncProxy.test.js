@@ -1,125 +1,28 @@
+import { Shape, chain } from './Shape.js';
+
 import test from 'ava';
 
-const clean = (v) => JSON.parse(JSON.stringify(v));
+const syncFn = Shape.registerMethod('syncFn', (to, value) => (s) => { to.push(value); return s; });
+Shape.registerMethod('asyncFn', (to, value) => async (s) => { to.push(value); return s; });
 
-let complete, incomplete, chain;
-
-incomplete = {
-  apply(target, obj, args) {
-    const result = target(...args);
-    if (typeof result !== 'function') {
-      throw Error(
-        `Incomplete op must evaluate to function, not ${typeof result}: ${
-          '' + target
-        }`
-      );
-    }
-    return new Proxy(result, complete);
-  },
-  get(target, prop, receiver) {
-    if (prop === 'chain') {
-      return 'incomplete';
-    }
-  },
-};
-
-// This is a complete chain.
-complete = {
-  apply(target, obj, args) {
-    return target(...args);
-  },
-  get(target, prop, receiver) {
-    if (prop === 'chain') {
-      return 'complete';
-    }
-    if (prop === 'then') {
-      return async (resolve, reject) => {
-        resolve(target());
-      };
-    }
-    return new Proxy(
-      (...args) =>
-        async (terminal) => {
-          const s = await target(terminal);
-          const op = Reflect.get(s, prop);
-          if (typeof op !== 'function') {
-            throw Error(
-              `${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`
-            );
-          }
-          return op(...args)(s);
-        },
-      incomplete
-    );
-  },
-};
-
-chain = (shape) => {
-  const root = {
-    apply(target, obj, args) {
-      return target;
-    },
-    get(target, prop, receiver) {
-      if (prop === 'chain') {
-        return 'chain';
-      }
-      if (prop === 'then') {
-        return async (resolve, reject) => {
-          resolve(target);
-        };
-      }
-      return new Proxy(
-        (...args) =>
-          async (terminal) => {
-            const op = Reflect.get(target, prop);
-            return op(...args)(target);
-          },
-        incomplete
-      );
-    },
-  };
-  const result = new Proxy(shape, root);
-  return result;
-};
-
-const chainable = (op) => {
-  return new Proxy(
-    (...args) =>
-      async (terminal) => {
-        return op(...args)(terminal);
-      },
-    incomplete
-  );
-};
-
-const alog = (a) => async (s) => {
-  console.log(`#################### QQ/alog: ${a}`);
-  s.a = a;
-  return s;
-};
-
-const slog = (a) => (s) => {
-  console.log(`#################### QQ/slog: ${a}`);
-  s.a = a;
-  return s;
-};
-
-test('chainable', async (t) => {
-  const ap = chainable(slog)(1).slog(2).alog(3).slog(4).alog(5);
-  const r = await ap({ alog, slog, name: 'v' });
-  t.deepEqual(clean(r), { name: 'v', a: 5 });
+test('application of mixed chain', async (t) => {
+  const log = [];
+  const ap = syncFn(log, 'a').asyncFn(log, 'b').syncFn(log, 'c').asyncFn(log, 'd').syncFn(log, 'e');
+  await ap(Shape.fromGeometry({ type: 'test' }));
+  t.deepEqual(log, ['a', 'b', 'c', 'd', 'e']);
 });
 
-test('fluent class', async (t) => {
-  class Fluent {
-    constructor() {
-      this.name = 'v';
-      return chain(this);
-    }
-  }
-  Fluent.prototype.alog = alog;
-  Fluent.prototype.slog = slog;
-  const o = new Fluent();
-  const r = await o.alog(1).slog(2).alog(3).slog(4).alog(5);
-  t.deepEqual(clean(r), { name: 'v', a: 5 });
+test('fluent', async (t) => {
+  const log = [];
+  const s = chain(Shape.fromGeometry({ type: 'test' }));
+  await s.syncFn(log, 'a').asyncFn(log, 'b').syncFn(log, 'c').asyncFn(log, 'd').syncFn(log, 'e');
+  t.deepEqual(log, ['a', 'b', 'c', 'd', 'e']);
+});
+
+test('separated', async (t) => {
+  const log = [];
+  const s1 = Shape.fromGeometry({ type: 'test' });
+  const s2 = await chain(s1).syncFn(log, 'a').asyncFn(log, 'b').syncFn(log, 'c').asyncFn(log, 'd').syncFn(log, 'e');
+  await s2.syncFn(log, 'f').asyncFn(log, 'g').syncFn(log, 'h').asyncFn(log, 'i').syncFn(log, 'j');
+  t.deepEqual(log, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
 });

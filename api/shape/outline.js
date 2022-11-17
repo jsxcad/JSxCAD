@@ -9,7 +9,7 @@ export const outline = Shape.registerMethod(
       const { shapesAndFunctions: selections } = destructure(args);
       return Shape.fromGeometry(
         outlineGeometry(
-          shape.toGeometry(),
+          await shape.toGeometry(),
           await shape.toShapesGeometries(selections)
         )
       );

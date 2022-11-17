@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 
-export const toNestedValues = Shape.registerMethod('toNestedValues', (to) => async (shape) =>{
+export const toNestedValues = Shape.registerMethod('toNestedValues', (to) => async (shape) => {
   if (Shape.isFunction(to)) {
     to = await to(shape);
   }

@@ -1,4 +1,4 @@
-import { readOrWatch, read, write, watchFile, unwatchFile, setupWorkspace, boot, decodeFiles, addOnEmitHandler, resolvePending, removeOnEmitHandler } from './jsxcad-sys.js';
+import { readOrWatch, read, write, watchFile, unwatchFile, setupWorkspace, decodeFiles, boot, addOnEmitHandler, resolvePending, removeOnEmitHandler } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import api from './jsxcad-api.js';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
@@ -6135,8 +6135,6 @@ class Standalone extends ReactDOM$1.Component {
       }
     };
     setupWorkspace(workspace);
-    await boot();
-
     // Construct a local ephemeral filesystem.
     for (const path of Object.keys(files)) {
       await write(path, files[path], {
@@ -6188,8 +6186,9 @@ const run = async ({
   workspace,
   container
 }) => {
-  const start = () => {
+  const start = async () => {
     const files = decodeFiles(encodedFiles);
+    await boot();
     ReactDOM$1.render(v$1(Standalone, {
       baseUrl: baseUrl,
       workspace: workspace,

@@ -72,6 +72,6 @@ export const tagGeometry = (geometry, tags) => {
 export const tag = Shape.registerMethod(
   'tag',
   (...tags) =>
-    (shape) =>
-      Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags))
+    async (shape) =>
+      Shape.fromGeometry(tagGeometry(await shape.toGeometry(), tags))
 );

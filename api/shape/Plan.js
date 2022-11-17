@@ -1,7 +1,11 @@
 import { identity, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
-import { zag } from '@jsxcad/api-v1-math';
+import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
+
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
 const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
@@ -15,6 +19,21 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
   z * amount,
 ];
 const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
+
+export const computeScale = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [ax - bx, ay - by, az - bz];
+
+export const computeMiddle = (c1, c2) => [(c1[X] + c2[X]) * 0.5, (c1[Y] + c2[Y]) * 0.5, (c1[Z] + c2[Z]) * 0.5];
+
+export const computeSides = (c1, c2, sides, zag = 0.01) => {
+  if (sides) {
+    return sides;
+  }
+  if (zag) {
+    const diameter = Math.max(...abs(subtract(c1, c2)));
+    return toSidesFromZag(diameter, zag);
+  }
+  return 32;
+};
 
 export const updatePlan = Shape.registerMethod(
   'updatePlan',
@@ -151,7 +170,7 @@ export const getSides = (geometry, otherwise = 32) => {
   const [scale] = getScale(geometry);
   let [length, width] = abs(scale);
   if (defaultZag !== undefined) {
-    otherwise = zag(Math.max(length, width) * 2, defaultZag);
+    otherwise = toSidesFromZag(Math.max(length, width) * 2, defaultZag);
   }
   return eachEntry(
     geometry,
@@ -159,7 +178,7 @@ export const getSides = (geometry, otherwise = 32) => {
       if (entry.sides !== undefined) {
         return entry.sides;
       } else if (entry.zag !== undefined) {
-        return zag(Math.max(length, width), entry.zag);
+        return toSidesFromZag(Math.max(length, width), entry.zag);
       }
     },
     otherwise
@@ -174,10 +193,6 @@ export const getScale = (geometry) => {
     scale(0.5, add(corner1, corner2)),
   ];
 };
-
-const X = 0;
-const Y = 1;
-const Z = 2;
 
 export const buildCorners = (x, y, z) => {
   const c1 = [0, 0, 0];

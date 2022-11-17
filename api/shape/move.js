@@ -3,7 +3,6 @@ import './toCoordinates.js';
 import Group from './Group.js';
 import Shape from './Shape.js';
 import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
-import { toCoordinates } from './toCoordinates.js';
 import { transform } from './transform.js';
 
 const toCoordinatesOp = Shape.ops.get('toCoordinates');

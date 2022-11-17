@@ -4,7 +4,7 @@ import { hasMaterial } from '@jsxcad/geometry';
 
 export const material = Shape.registerMethod(
   'material',
-  (name) => (shape) => Shape.fromGeometry(hasMaterial(shape.toGeometry(), name))
+  (name) => async (shape) => Shape.fromGeometry(hasMaterial(await shape.toGeometry(), name))
 );
 
 export default material;
