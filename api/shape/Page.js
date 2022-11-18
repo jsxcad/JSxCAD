@@ -14,6 +14,7 @@ import Hershey from './Hershey.js';
 import Shape from './Shape.js';
 import { align } from './align.js';
 import { destructure } from './destructure.js';
+import { getNot } from './getNot.js';
 
 const MIN = 0;
 const MAX = 1;
@@ -27,8 +28,7 @@ const buildLayout = async ({
   margin,
   center = false,
 }) => {
-  console.log(`QQ/buildLayout: ${JSON.stringify(layer)}`);
-  const itemNames = (await layer.getNot('type:ghost').tags('item', list))
+  const itemNames = (await getNot('type:ghost').tags('item', list)(layer))
     .filter((name) => name !== '')
     .flatMap((name) => name)
     .sort();
@@ -95,18 +95,12 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
 
   const margin = itemMargin;
   const layers = [];
-  console.log(`QQ/shapes.length: ${shapes.length}`);
-  console.log(`QQ/shapes: ${JSON.stringify(shapes)}`);
-  console.log(`QQ/shapes.then: ${shapes.then}`);
   for (const shape of shapes) {
-    console.log(`QQ/shapes/shape: ${JSON.stringify(shape)}`);
     for (const leaf of getLeafs(await shape.toGeometry())) {
       layers.push(leaf);
     }
   }
-  console.log(`QQ/layers.length: ${layers.length}`);
   if (!pack && size) {
-    console.log(`QQ/Page/00`);
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
     const [width, height] = size;
     const packSize = [
@@ -135,12 +129,9 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       center,
     });
   } else if (!pack && !size) {
-    console.log(`QQ/Page/01`);
     const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-    console.log(`QQ/Page/layer: ${JSON.stringify(layer)}`);
     const packSize = measureBoundingBox(await layer.toGeometry());
     if (packSize === undefined) {
-      console.log(`QQ/Page/01/a`);
       return Group();
     }
     const pageWidth =
@@ -158,7 +149,6 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
-      console.log(`QQ/Page/01/b`);
       return buildLayout({
         layer,
         pageWidth,
@@ -167,7 +157,6 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
         center,
       });
     } else {
-      console.log(`QQ/Page/01/c`);
       return buildLayout({
         layer,
         pageWidth: 0,
@@ -177,7 +166,6 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       });
     }
   } else if (pack && size) {
-    console.log(`QQ/Page/02`);
     // Content fits to page size.
     const packSize = [];
     const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
@@ -217,7 +205,6 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       });
     }
   } else if (pack && !size) {
-    console.log(`QQ/Page/03`);
     const packSize = [];
     // Page fits to content size.
     const contents = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
@@ -227,7 +214,6 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
       packSize,
     });
     if (packSize.length === 0) {
-      console.log(`QQ/layers.length/2: ${layers.length}`);
       throw Error('Packing failed');
     }
     // FIX: Using content.size() loses the margin, which is a problem for repacking.
@@ -236,7 +222,6 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      console.log(`QQ/contents: ${contents}`);
       for (const layer of contents.get('pack:layout', List)) {
         const layout = await buildLayout({
           layer,
@@ -272,13 +257,10 @@ export const page = Shape.registerMethod(
 export default Page;
 
 export const ensurePages = async (shape, depth = 0) => {
-  console.log(`QQ/ensurePages: ${JSON.stringify(shape)}`);
   const pages = getLayouts(await shape.toDisplayGeometry());
   if (pages.length === 0 && depth === 0) {
-    console.log(`QQ/ensurePages/0`);
     return ensurePages(await Page({ pack: false }, shape), depth + 1);
   } else {
-    console.log(`QQ/ensurePages/1: ${pages.length} ${depth}`);
     return pages;
   }
 };

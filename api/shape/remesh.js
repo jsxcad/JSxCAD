@@ -1,7 +1,7 @@
 import Shape from './Shape.js';
 import { remesh as remeshGeometry } from '@jsxcad/geometry';
 
-export const remesh = Shape.registerMethod('remesh', (...args) => (shape) => {
+export const remesh = Shape.registerMethod('remesh', (...args) => async (shape) => {
   const {
     number: resolution = 1,
     shapesAndFunctions: selections,
@@ -14,8 +14,8 @@ export const remesh = Shape.registerMethod('remesh', (...args) => (shape) => {
   } = options;
   return Shape.fromGeometry(
     remeshGeometry(
-      shape.toGeometry(),
-      shape.toShapes(selections).map((selection) => selection.toGeometry()),
+      await shape.toGeometry(),
+      await shape.toShapesGeometries(selections),
       iterations,
       relaxationSteps,
       targetEdgeLength

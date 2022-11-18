@@ -365,7 +365,6 @@ const toPathnameFromUrl = (url) => {
 let cgal;
 
 const initCgal = async () => {
-  console.log(`QQQ/initCgal`);
   if (cgal === undefined) {
     const Cgal = isNode ? CgalNode : CgalBrowser;
     cgal = await Cgal({
@@ -421,7 +420,6 @@ const initCgal = async () => {
 };
 
 const getCgal = () => {
-  console.log(`QQQ/getCgal: ${cgal}`);
   if (!cgal) {
     throw Error('CGAL not initialized');
   }
@@ -1056,9 +1054,7 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, c
 };
 
 const withCgalGeometry = (inputs, op) => {
-  console.log(`QQQ/withCgalGeometry/before`);
   const g = getCgal();
-  console.log(`QQQ/withCgalGeometry/g: ${g}`);
   const cgalGeometry = toCgalGeometry(inputs, g);
   try {
     return op(cgalGeometry, g);

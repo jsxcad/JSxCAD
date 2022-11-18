@@ -5,7 +5,6 @@ import { taggedGroup } from './taggedGroup.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 
 export const soup = (geometry) => {
-  console.log(`QQQ/soup: ${JSON.stringify(geometry)}`);
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {

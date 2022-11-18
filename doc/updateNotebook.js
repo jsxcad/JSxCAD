@@ -185,9 +185,7 @@ export const updateNotebook = async (
   { failedExpectations = [], browser, baseDirectory, workspace } = {}
 ) => {
   clearEmitted();
-  console.log(`QQQ/updateNotebook/boot/before`);
   await boot();
-  console.log(`QQQ/updateNotebook/boot/after`);
   const notebook = [];
   const onEmitHandler = addOnEmitHandler((notes) => notebook.push(...notes));
   const files = {};

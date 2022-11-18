@@ -1,13 +1,9 @@
 import Shape from './Shape.js';
 import assemble from './assemble.js';
 import { destructure } from './destructure.js';
+import { disjoint } from '@jsxcad/geometry';
 
 export const fit = Shape.registerMethod('fit', (...args) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return (shape) =>
-    assemble(
-      modes,
-      ...shapes.map((other) => Shape.toShape(other, shape)),
-      shape
-    );
+  return async (shape) => Shape.fromGeometry(disjoint([...await shape.toShapesGeometries(shapes), await shape.toGeometry()], undefined, modes.includes('exact')));
 });

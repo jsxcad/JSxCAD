@@ -1,4 +1,5 @@
 import Shape from './Shape.js';
+import { eagerTransform } from './eagerTransform.js';
 import { fromScaleToTransform } from '@jsxcad/geometry';
 
 export const scale = Shape.registerMethod(
@@ -18,9 +19,9 @@ export const scale = Shape.registerMethod(
       const negatives = (x < 0) + (y < 0) + (z < 0);
       if (negatives % 2) {
         // Compensate for inversion.
-        return (await shape).eagerTransform(fromScaleToTransform(x, y, z)).involute();
+        return eagerTransform(fromScaleToTransform(x, y, z)).involute()(shape);
       } else {
-        return (await shape).eagerTransform(fromScaleToTransform(x, y, z));
+        return eagerTransform(fromScaleToTransform(x, y, z))(shape);
       }
     }
 );

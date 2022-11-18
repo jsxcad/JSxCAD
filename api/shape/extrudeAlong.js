@@ -15,7 +15,6 @@ export const extrudeAlong = Shape.registerMethod(
   'extrudeAlong',
   (direction, ...args) =>
     async (shape) => {
-      console.log(`QQ/extrudeAlong/shape: ${JSON.stringify(shape)}`);
       const { strings: modes, values: extents } = destructure(args);
       let vector;
       try {
@@ -34,7 +33,6 @@ export const extrudeAlong = Shape.registerMethod(
         heights.push(0);
       }
       heights.sort((a, b) => a - b);
-      console.log(`QQ/extrudeAlong/heights: ${JSON.stringify(heights)}`);
       const extrusions = [];
       while (heights.length > 0) {
         const height = heights.pop();
@@ -44,10 +42,7 @@ export const extrudeAlong = Shape.registerMethod(
           extrusions.push(await shape.moveAlong(vector, height));
           continue;
         }
-        console.log(`QQ/shape: ${shape}`);
-        console.log(`QQ/shape.isChain: ${shape.isChain}`);
         const g1 = await Point().moveAlong(vector, height).toGeometry();
-        console.log(`QQ/g1.isChain: ${g1.isChain}`);
         extrusions.push(
           Shape.fromGeometry(
             extrudeGeometry(

@@ -14,7 +14,6 @@ export const Spiral = Shape.registerShapeMethod('Spiral', async (...args) => {
     particles.push(await particle(turn).rz(turn));
   }
   const result = await Link(particles);
-  console.log(`QQQ/Spiral: ${JSON.stringify(result)}`);
   return result;
 });
 

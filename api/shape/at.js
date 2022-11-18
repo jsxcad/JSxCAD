@@ -11,11 +11,13 @@ export const at = Shape.registerMethod('at', (...args) => async (shape) => {
   const { shapesAndFunctions: ops } = destructure(args);
   const { local, global } = getInverseMatrices(await shape.toGeometry());
   const selections = await toShapesOp(ops.shift())(shape);
+  let iteration = 0;
   for (const selection of selections) {
+    console.log(`QQQ/at/shape: ${JSON.stringify(shape)}`);
     const { local: selectionLocal, global: selectionGlobal } =
       getInverseMatrices(await selection.toGeometry());
     shape =
-      await transform(local)
+      transform(local)
       .transform(selectionGlobal)
       .op(...ops)
       .transform(selectionLocal)

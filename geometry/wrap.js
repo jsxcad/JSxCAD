@@ -13,11 +13,11 @@ const filter = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-export const wrap = (geometry, tags = [], offset, alpha) => {
+export const wrap = (geometry, offset, alpha) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = wrapWithCgal(inputs, offset, alpha);
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
+  return taggedGroup({}, ...outputs);
 };

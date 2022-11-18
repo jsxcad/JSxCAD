@@ -12,10 +12,10 @@ export const Wrap = Shape.registerShapeMethod(
 export const wrap = Shape.registerMethod(
   'wrap',
   (offset = 1, alpha = 0.1) =>
-    (shape) =>
+    async (shape) =>
       Shape.fromGeometry(
-        wrapGeometry(shape.toGeometry(), shape.getTags(), offset, alpha)
-      )
+        wrapGeometry(await shape.toGeometry(), offset, alpha)
+      ).setTags(...await shape.getTags())
 );
 
 export default wrap;

@@ -15,10 +15,8 @@ import { serialize } from '@jsxcad/geometry';
  *
  **/
 
-export const log = Shape.registerMethod('log', (text) => async (shape) => {
-  if (!text) {
-    text = JSON.stringify(await shape.toGeometry());
-  }
+export const log = Shape.registerMethod('log', (prefix = '') => async (shape) => {
+  const text = prefix + JSON.stringify(await shape.toGeometry());
   const level = 'serious';
   const log = { text, level };
   const hash = computeHash(log);

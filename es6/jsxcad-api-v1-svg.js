@@ -1,6 +1,6 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
 /**
@@ -120,20 +120,15 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
+const prepareSvg = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  const pages = await ensurePages(op(shape));
+  console.log(`QQ/prepareSvg/ensurePages: ${JSON.stringify(pages)}`);
+  for (const entry of pages) {
     const svgPath = `download/svg/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      try {
-        await write(svgPath, await toSvg(entry, options));
-      } catch (error) {
-        getPendingErrorHandler()(error);
-      }
-    };
-    addPending(render());
+    await write(svgPath, await toSvg(entry, options));
     const filename = `${name}_${index++}.svg`;
     const record = {
       path: svgPath,
@@ -142,7 +137,7 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
     };
     records.push(record);
     const hash$1 =
-      hashSum({ filename, options }) + hash(shape.toGeometry());
+      hashSum({ filename, options }) + hash(await shape.toGeometry());
     Shape.fromGeometry(entry).gridView(hash$1, options.view);
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
@@ -151,8 +146,8 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
 
 const svg =
   (name, op, options = {}) =>
-  (shape) => {
-    prepareSvg(shape, name, op, options);
+  async (shape) => {
+    await prepareSvg(shape, name, op, options);
     return shape;
   };
 

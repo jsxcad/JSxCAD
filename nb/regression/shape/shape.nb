@@ -133,10 +133,8 @@ const b = await Box(5)
   .material('glass')
   .y(10);
 
-///
 await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
 
-/*
 await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
 
 await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
@@ -192,15 +190,15 @@ await Box(20, 20, 20)
   .and(upperEnvelope().color('red'))
   .view(60);
 
-md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area().toFixed(2)}`;
+md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area((v) => (s) => v.toFixed(2))}`;
 
 await Box(2)
   .cut(Box(1))
   .area((v) => (s) => s.md(`Area is ${v.toFixed(2)}`));
 
-md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area().toFixed(2)}`;
+md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area((v) => (s) => v.toFixed(2))}`;
 
-md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume().toFixed(2)}`;
+md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume((v) => (s) => v.toFixed(2))}`;
 
 const c = await Box(10)
   .rx(1 / 8)
@@ -357,6 +355,7 @@ await Box(10, 10, 10)
     )
   )
   .view();
+///
 
 await Arc(10, 10, 10, { sides: 7 })
   .cut(
@@ -371,4 +370,3 @@ await Arc(10, 10, 10, { sides: 7 })
   )
   .clean()
   .view();
-  */

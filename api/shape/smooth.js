@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { smooth as smoothGeometry } from '@jsxcad/geometry';
 
-export const smooth = Shape.registerMethod('smooth', (...args) => (shape) => {
+export const smooth = Shape.registerMethod('smooth', (...args) => async (shape) => {
   const {
     number: resolution = 1,
     object: options = {},
@@ -16,8 +16,8 @@ export const smooth = Shape.registerMethod('smooth', (...args) => (shape) => {
   } = options;
   return Shape.fromGeometry(
     smoothGeometry(
-      shape.toGeometry(),
-      shape.toShapes(selections).map((selection) => selection.toGeometry()),
+      await shape.toGeometry(),
+      await shape.toShapesGeometries(selections),
       resolution,
       iterations,
       time,

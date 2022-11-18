@@ -21,7 +21,6 @@ const applyModes = async (shape, options, modes) => {
     shape = await shape.tag('show:skin');
   }
   if (modes.includes('noSkin')) {
-    console.log(shape);
     shape = await shape.tag('show:noSkin');
   }
   if (modes.includes('Outline')) {
@@ -37,7 +36,6 @@ const applyModes = async (shape, options, modes) => {
 export const baseView =
   (viewId, op = (x) => x, options = {}) =>
   async (shape) => {
-    console.log(`QQ/baseView`);
     let {
       size,
       inline,
@@ -60,11 +58,7 @@ export const baseView =
       viewId = nth;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
-    console.log(
-      `QQ/baseView/displayGeometry: ${JSON.stringify(displayGeometry)}`
-    );
     const pages = await ensurePages(Shape.fromGeometry(displayGeometry));
-    console.log(`QQ/baseView/pages: ${JSON.stringify(pages)}`);
     for (const entry of pages) {
       const geometry = await entry;
       const viewPath = `view/${path}/${id}/${viewId}.view`;
@@ -79,9 +73,6 @@ export const baseView =
         needsThumbnail: isNode,
       };
       emit({ hash, path: viewPath, view });
-      console.log(`QQ/baseView/write: ${viewPath}`);
-      console.log(`QQ/baseView/geometry: ${geometry}`);
-      console.log(`QQ/baseView/geometry.isChain: ${geometry.isChain}`);
       await write(viewPath, displayGeometry);
       if (!isNode) {
         await write(thumbnailPath, dataUrl(viewShape, view));
@@ -187,14 +178,12 @@ export const sideView = Shape.registerMethod(
 );
 
 export const view = Shape.registerMethod('view', (...args) => async (shape) => {
-  console.log(`QQ/view: ${JSON.stringify(shape)}`);
   const {
     value: viewId,
     func: op = (x) => x,
     object: options,
     strings: modes,
   } = Shape.destructure(args);
-  console.log(`QQ/view/shape: ${JSON.stringify(shape)}`);
   shape = await applyModes(shape, options, modes);
   if (modes.includes('grid')) {
     options.style = 'grid';

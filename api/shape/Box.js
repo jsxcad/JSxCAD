@@ -19,16 +19,12 @@ let fundamentalShapes;
 
 const buildFs = async () => {
   if (fundamentalShapes === undefined) {
-    // console.log(`QQ/fs/Loop.isChain: ${Loop.isChain}`);
     const f = await Loop(
       Point(1, 0, 0),
       Point(1, 1, 0),
       Point(0, 1, 0),
       Point(0, 0, 0)
     ).fill();
-    // console.log(`QQ/fs/fq: ${'' + fq}`);
-    // console.log(`QQ/fs/fq.isChain: ${fq.isChain}`);
-    // console.log(`QQ/f: ${JSON.stringify(f)} isChain: ${f.isChain}`);
     fundamentalShapes = {
       tlfBox: await Point(),
       tlBox: await Edge(Point(0, 1, 0), Point(0, 0, 0)),
@@ -64,22 +60,18 @@ const reifyBox = async (corner1, corner2) => {
     if (top === bottom) {
       if (left === right) {
         if (front === back) {
-          console.log(`QQQQ/tlf`);
           return fs.tlfBox.move(left, front, bottom);
         } else {
-          console.log(`QQQQ/tl`);
           return fs
             .tlBox.sy(back - front)
             .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          console.log(`QQQQ/tf`);
           return fs
             .tfBox.sx(right - left)
             .move(left, front, bottom);
         } else {
-          console.log(`QQQQ/t`);
           const v1 = fs
           const v2 = v1.tBox;
           const v3 = v2.sx(right - left);
@@ -91,7 +83,6 @@ const reifyBox = async (corner1, corner2) => {
     } else {
       if (left === right) {
         if (front === back) {
-          console.log(`QQQQ/lf`);
           return fs
             .lfBox.sz(top - bottom)
             .move(left, front, bottom);
@@ -103,13 +94,11 @@ const reifyBox = async (corner1, corner2) => {
         }
       } else {
         if (front === back) {
-          console.log(`QQQQ/f`);
           return fs
             .fBox.sz(top - bottom)
             .sx(right - left)
             .move(left, front, bottom);
         } else {
-          console.log(`QQQQ/x`);
           return fs
             .box.sz(top - bottom)
             .sx(right - left)

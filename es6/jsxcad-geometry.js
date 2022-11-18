@@ -1673,7 +1673,6 @@ const eagerTransform = (matrix, geometry, noVoid) => {
   const inputs = [];
   linearize(concreteGeometry, filterTargets(), inputs);
   const count = inputs.length;
-  console.log(`QQ/eagerTransform/count: ${count}`);
   inputs.push(hasTypeReference(taggedGroup({ matrix })));
   const outputs = eagerTransform$1(inputs);
   deletePendingSurfaceMeshes();
@@ -2252,7 +2251,6 @@ const separate = (
 };
 
 const soup = (geometry) => {
-  console.log(`QQQ/soup: ${JSON.stringify(geometry)}`);
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
@@ -2427,7 +2425,6 @@ const toDisplayGeometry = (
   geometry,
   { triangles, outline = true, skin, wireframe = false } = {}
 ) => {
-  // console.log(`QQ/toDisplayGeometry: ${JSON.stringify(geometry)} ${geometry.isChain}`);
   if (!geometry) {
     throw Error('die');
   }
@@ -2437,7 +2434,6 @@ const toDisplayGeometry = (
   if (skin === undefined) {
     skin = true;
   }
-  console.log(`QQ/toDisplayGeometry: ${'' + geometry}`);
   return soup(toConcreteGeometry(geometry));
 };
 

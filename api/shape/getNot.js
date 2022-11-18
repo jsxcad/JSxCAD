@@ -6,7 +6,7 @@ import { visit } from '@jsxcad/geometry';
 export const getNot = Shape.registerMethod(
   ['getNot', 'gn'],
   (...tags) =>
-    (shape) => {
+    async (shape) => {
       const isMatch = oneOfTagMatcher(tags, 'item');
       const picks = [];
       const walk = (geometry, descend) => {
@@ -32,9 +32,7 @@ export const getNot = Shape.registerMethod(
           return descend();
         }
       };
-      console.log(`QQ/getNot/1`);
-      const geometry = shape.toGeometry();
-      console.log(`QQ/getNot/2`);
+      const geometry = await shape.toGeometry();
       if (geometry.type === 'item') {
         // FIX: Can we make this less magical?
         // This allows constructions like s.get('a').get('b')
@@ -42,7 +40,6 @@ export const getNot = Shape.registerMethod(
       } else {
         visit(geometry, walk);
       }
-      console.log(`QQ/getNot/3`);
       return Group(...picks);
     }
 );

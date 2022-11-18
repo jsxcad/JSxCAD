@@ -163,7 +163,7 @@ chain = (shape) => {
             // if (root.isChain) {
             //   throw Error(`Target should not be chain`);
             // }
-            console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
+            // console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
             let result;
             try {
               result = await pop(root);
@@ -232,7 +232,7 @@ export {
 };
 
 export class Shape {
-  constructor(geometry = assemble(), context) {
+  constructor(geometry = { type: 'Group', tags: [], content: [] }, context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }
@@ -251,19 +251,21 @@ export class Shape {
   }
   */
 
+/*
   eagerTransform(matrix) {
-    console.log(`QQ/eagerTransform: ${JSON.stringify(this)} ${this.isChain}`);
-    console.log(`QQ/geometry: ${JSON.stringify(this.toGeometry())}`);
     return fromGeometry(
-      eagerTransform(matrix, this.toGeometry()),
+      eagerTransform(matrix, await this.toGeometry()),
       this.context
     );
   }
+  */
 
+/*
   // Low level setter for reifiers.
   getTags() {
     return this.toGeometry().tags || [];
   }
+*/
 
   toCoordinate(x, y, z) {
     return Shape.toCoordinate(this, x, y, z);

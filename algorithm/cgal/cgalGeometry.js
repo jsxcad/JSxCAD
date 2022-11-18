@@ -106,6 +106,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
       }
       case 'segments': {
         const { segments } = inputs[nth];
+        console.log(`QQ/inputs[nth]: ${JSON.stringify(inputs[nth])}`);
         geometry.setType(nth, GEOMETRY_SEGMENTS);
         for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0], exact] of segments) {
           try {

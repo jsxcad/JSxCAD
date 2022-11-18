@@ -107,6 +107,6 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     // console.log(`QQ/replay: ${id} ${sha}`);
     await replayRecordedNotes(path, id);
     const result = await load(`data/def/${path}/${id}.data`);
-    return result;
+    return Shape.chain(result);
   }
 };

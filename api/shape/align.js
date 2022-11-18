@@ -83,9 +83,7 @@ export const align = Shape.registerMethod(
   'align',
   (spec = 'xyz', origin = [0, 0, 0]) =>
     async (shape) => {
-      console.log(`QQ/align: ${spec} ${origin} ${JSON.stringify(shape)}`);
       const offset = await computeOffset(spec, origin, shape);
-      console.log(`QQ/align/offset: ${offset} ${origin}`);
       const reference = await Point().move(...subtract(offset, origin));
       return reference;
     }

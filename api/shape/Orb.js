@@ -1,8 +1,10 @@
-import { buildCorners, getScale, getZag } from './Plan.js';
+import { computeMiddle, computeScale, buildCorners, getScale, getZag } from './Plan.js';
 
 import Cached from './Cached.js';
 import Shape from './Shape.js';
+import { destructure } from './destructure.js';
 import { makeUnitSphere as makeUnitSphereWithCgal } from '@jsxcad/algorithm-cgal';
+import { scale as scaleOp } from './scale.js';
 import { taggedPlan } from '@jsxcad/geometry';
 
 // 1mm seems reasonable for spheres.
@@ -14,25 +16,21 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
   )
 );
 
-const reifyOrb = (plan) => {
-  const [scale, middle] = getScale(plan.toGeometry());
+const reifyOrb = async ({ c1, c2, zag = DEFAULT_ORB_ZAG }) => {
+  const scale = computeScale(c1, c2);
+  const middle = computeMiddle(c1, c2);
   const radius = Math.max(...scale);
-
-  // const angularBound = 30;
-  // const radiusBound = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
-  // const distanceBound = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
-  const tolerance = getZag(plan.toGeometry(), DEFAULT_ORB_ZAG) / radius;
-
-  return makeUnitSphere(tolerance).scale(scale).move(middle).absolute();
+  const tolerance = zag / radius;
+  const unitSphere = (await makeUnitSphere(tolerance))
+  return await scaleOp(scale).move(middle).absolute()(unitSphere);
 };
 
-export const Orb = Shape.registerShapeMethod('Orb', (x = 1, y = x, z = x) => {
+export const Orb = Shape.registerShapeMethod('Orb', async (...args) => {
+  const { values, object: options } = destructure(args);
+  let [x, y, z] = values;
+  const { zag } = options;
   const [c1, c2] = buildCorners(x, y, z);
-  return reifyOrb(
-    Shape.fromGeometry(taggedPlan({}, { type: 'Orb' }))
-      .hasC1(...c1)
-      .hasC2(...c2)
-  );
+  return reifyOrb({ c1, c2, zag });
 });
 
 export default Orb;

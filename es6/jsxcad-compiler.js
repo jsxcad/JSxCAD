@@ -30078,7 +30078,7 @@ const processStatement = async (entry, options) => {
     const { nextTopLevelExpressionId } = options;
     // This is an ugly way of turning top level expressions into declarations.
     const declaration = parse(
-      `const $${nextTopLevelExpressionId()} = await ${generate(entry)}`,
+      `const $${nextTopLevelExpressionId()} = ${generate(entry)}`,
       parseOptions
     ).body[0];
     const declarator = declaration.declarations[0];

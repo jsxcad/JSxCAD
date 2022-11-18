@@ -142,7 +142,6 @@ const toHtmlFromNotebook = async (
       // Prepare the view urls in the browser.
       for (const note of notebook) {
         if (note.view && !note.url) {
-          console.log('QQQ/prepareViews/note.data: ' + JSON.stringify(note.data));
           note.url = await dataUrl(Shape.fromGeometry(note.data), note.view);
         }
       }
@@ -150,7 +149,6 @@ const toHtmlFromNotebook = async (
     }
 
     const run = async () => {
-      console.log('QQQ/toHtmlFromNotebook/run');
       const body = document.getElementsByTagName('body')[0];
       const bookElement = document.createElement('div');
       const notebookElement = await toDomElement(await prepareViews(notebook), { useControls: ${
@@ -393,9 +391,7 @@ const toHtmlFromScript = async ({
 
     const start = async () => {
       setupWorkspace(workspace);
-      console.log('QQQ/start/boot/before');
       await boot();
-      console.log('QQQ/start/boot/after');
 
       // Construct a local ephemeral filesystem.
       const files = decodeFiles("${encodedFiles}");

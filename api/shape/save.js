@@ -19,7 +19,7 @@ export const save = async (path, data) => {
       return walked;
     }
     if (data instanceof Shape) {
-      return { geometry: await store(data.toGeometry()) };
+      return { geometry: await store(await data.toGeometry()) };
     }
     const walked = {};
     for (const key of Object.keys(data)) {

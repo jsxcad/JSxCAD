@@ -18,7 +18,6 @@ export const eagerTransform = (matrix, geometry, noVoid) => {
   const inputs = [];
   linearize(concreteGeometry, filterTargets(noVoid), inputs);
   const count = inputs.length;
-  console.log(`QQ/eagerTransform/count: ${count}`);
   inputs.push(hasTypeReference(taggedGroup({ matrix })));
   const outputs = eagerTransformWithCgal(inputs);
   deletePendingSurfaceMeshes();
