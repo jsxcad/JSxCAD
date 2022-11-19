@@ -1,11 +1,13 @@
 import Empty from './Empty.js';
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { toValue } from './toValue.js';
 
 const EPSILON = 1e-5;
 
 const maybeApply = (value, shape) => {
-  if (value instanceof Function) {
+  console.log(`QQ/maybeApply`);
+  if (Shape.isFunction(value)) {
     return value(shape);
   } else {
     return value;
@@ -13,37 +15,41 @@ const maybeApply = (value, shape) => {
 };
 
 // This is getting a bit excessively magical.
-export const seq = Shape.registerMethod('seq', (...args) => (shape) => {
+export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
+  console.log(`QQ/seq/1`);
   let op;
   let groupOp;
   let specs = [];
   for (const arg of args) {
-    if (arg instanceof Function) {
+    if (Shape.isFunction(arg)) {
       if (!op) {
         op = arg;
+        console.log(`QQ/op1`);
       } else if (!groupOp) {
         groupOp = arg;
       }
-    } else if (arg instanceof Object) {
+    } else if (Shape.isObject(arg)) {
       specs.push(arg);
     }
   }
   if (!op) {
-    op = (n) => n;
+    console.log(`QQ/op2`);
+    op = (n) => (s) => n;
   }
   if (!groupOp) {
     groupOp = Group;
   }
 
+  console.log(`QQ/seq/2`);
   const indexes = [];
   for (const spec of specs) {
     let { from = 0, to = 1, upto, downto, by = 1 } = spec;
 
-    from = Shape.toValue(from, shape);
-    to = Shape.toValue(to, shape);
-    upto = Shape.toValue(upto, shape);
-    downto = Shape.toValue(downto, shape);
-    by = Shape.toValue(by, shape);
+    from = await toValue(from)(shape);
+    to = await toValue(to)(shape);
+    upto = await toValue(upto)(shape);
+    downto = await toValue(downto)(shape);
+    by = await toValue(by)(shape);
 
     let consider;
 
@@ -68,14 +74,21 @@ export const seq = Shape.registerMethod('seq', (...args) => (shape) => {
     }
     indexes.push(numbers);
   }
+  console.log(`QQ/seq/3`);
   const results = [];
   const index = indexes.map(() => 0);
   for (;;) {
+    console.log(`QQ/seq/3.1`);
     const args = index.map((nth, index) => indexes[index][nth]);
     if (args.some((value) => value === undefined)) {
       break;
     }
-    results.push(maybeApply(op(...args), shape));
+    console.log(`QQ/seq/3.2/args: ${JSON.stringify(args)}`);
+    const pop = op(...args);
+    console.log(`QQ/seq/3.2/pop: ${pop}`);
+    const result = await op(...args)(shape);
+    results.push(maybeApply(result, shape));
+    console.log(`QQ/seq/3.3`);
     let nth;
     for (nth = 0; nth < index.length; nth++) {
       if (++index[nth] < indexes[nth].length) {
@@ -83,10 +96,12 @@ export const seq = Shape.registerMethod('seq', (...args) => (shape) => {
       }
       index[nth] = 0;
     }
+    console.log(`QQ/seq/3.4`);
     if (nth === index.length) {
       break;
     }
   }
+  console.log(`QQ/seq/4`);
   return groupOp(...results);
 });
 

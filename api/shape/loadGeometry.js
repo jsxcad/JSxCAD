@@ -3,7 +3,7 @@ import { read, readNonblocking } from '@jsxcad/geometry';
 import Shape from './Shape.js';
 import { logInfo } from '@jsxcad/sys';
 
-const fromUndefined = () => Shape.fromGeometry();
+const fromUndefined = () => undefined;
 
 export const loadGeometry = async (
   path,

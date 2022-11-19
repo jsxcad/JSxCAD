@@ -1,5 +1,4 @@
-Arc(5)
-  .hasAngle(45 / 360, 270 / 360)
+Arc(5, { start: 45 / 360, end: 270 / 360 })
   .gridView()
   .md(`Arc(5).angle(45/360, 270/360)`);
 
@@ -104,7 +103,7 @@ Polyhedron(
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])`
   );
 
-Arc(5).hasSides(7).gridView().md(`Septagon(5)`);
+Arc(5, { sides: 7 }).gridView().md(`Septagon(5)`);
 
 Spiral().gridView().md(`Spiral()`);
 
@@ -247,16 +246,15 @@ Triangle(10)
 
 Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
-  .eachEdge(ArcX(0, 10).hasSides(6), Loft)
+  .eachEdge(ArcX(0, 10, { sides: 6 }), Loft)
   .view();
 
 Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
-  .eachPoint(ArcX(0, 10).hasSides(6), Loft)
+  .eachPoint(ArcX(0, 10, { sides: 6 }), Loft)
   .view();
 
-Orb(6)
-  .hasZag(2)
+Orb(6, { zag: 2 })
   .faces(cut(inset(0.2)))
   .view();
 

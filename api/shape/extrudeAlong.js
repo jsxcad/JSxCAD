@@ -5,8 +5,9 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
 import { normal } from './normal.js';
+import { toValue } from './toValue.js';
 
-const isNotString = (value) => typeof value !== 'string';
+const isString = (value) => typeof value === 'string';
 
 const toCoordinateOp = Shape.ops.get('toCoordinate');
 
@@ -26,9 +27,13 @@ export const extrudeAlong = Shape.registerMethod(
         // TODO: Be more selective.
         // return Shape.Group();
       }
-      const heights = extents
-        .filter(isNotString)
-        .map((extent) => Shape.toValue(extent, shape));
+      const heights = [];
+      for (const extent of extents) {
+        if (isString(extent)) {
+          continue;
+        }
+        heights.push(await toValue(extent)(shape));
+      }
       if (heights.length % 2 === 1) {
         heights.push(0);
       }
@@ -42,7 +47,6 @@ export const extrudeAlong = Shape.registerMethod(
           extrusions.push(await shape.moveAlong(vector, height));
           continue;
         }
-        const g1 = await Point().moveAlong(vector, height).toGeometry();
         extrusions.push(
           Shape.fromGeometry(
             extrudeGeometry(

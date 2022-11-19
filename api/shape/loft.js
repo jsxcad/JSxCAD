@@ -1,7 +1,7 @@
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
-import { toShapesGeometries } from './toShapesGeometries.js';
 import { loft as loftGeometry } from '@jsxcad/geometry';
+import { toShapesGeometries } from './toShapesGeometries.js';
 
 export const Loft = Shape.registerShapeMethod('Loft', async (...args) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);

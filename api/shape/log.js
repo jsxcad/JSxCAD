@@ -1,7 +1,6 @@
 import { computeHash, emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import { serialize } from '@jsxcad/geometry';
 
 /**
  *

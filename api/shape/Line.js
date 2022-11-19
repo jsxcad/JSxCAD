@@ -2,9 +2,10 @@ import Edge from './Edge.js';
 import Group from './Group.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
+import { toFlatValues } from './toFlatValues.js';
 
-export const Line = Shape.registerShapeMethod('Line', (...extents) => {
-  const offsets = Shape.toFlatValues(extents);
+export const Line = Shape.registerShapeMethod('Line', async (...extents) => {
+  const offsets = await toFlatValues(extents)(null);
   if (offsets.length % 2 === 1) {
     offsets.push(0);
   }

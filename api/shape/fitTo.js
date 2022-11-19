@@ -1,5 +1,4 @@
 import Shape from './Shape.js';
-import assemble from './assemble.js';
 import { destructure } from './destructure.js';
 import { disjoint } from '@jsxcad/geometry';
 

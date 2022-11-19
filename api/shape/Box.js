@@ -2,14 +2,11 @@ import './extrude.js';
 import './rx.js';
 import './ry.js';
 
-import { buildCorners, getCorner1, getCorner2 } from './Plan.js';
-
 import Edge from './Edge.js';
 import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
-// import { onBoot } from '@jsxcad/sys';
-import { taggedPlan } from '@jsxcad/geometry';
+import { buildCorners } from './Plan.js';
 
 const X = 0;
 const Y = 1;
@@ -72,7 +69,7 @@ const reifyBox = async (corner1, corner2) => {
             .tfBox.sx(right - left)
             .move(left, front, bottom);
         } else {
-          const v1 = fs
+          const v1 = fs;
           const v2 = v1.tBox;
           const v3 = v2.sx(right - left);
           const v4 = v3.sy(back - front);
@@ -112,9 +109,8 @@ const reifyBox = async (corner1, corner2) => {
   return (await build()).absolute();
 };
 
-// Shape.registerReifier('Box', reifyBox);
-
 export const Box = Shape.registerShapeMethod('Box', async (x = 1, y = x, z = 0) => {
+  console.log(`QQ/box: ${[x, y, z]}`);
   const [c1, c2] = buildCorners(x, y, z);
   return reifyBox(c1, c2);
 });

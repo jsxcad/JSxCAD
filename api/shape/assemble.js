@@ -1,6 +1,5 @@
-import { fromGeometry, toGeometry } from './Shape.js';
-
 import { disjoint } from '@jsxcad/geometry';
+import { fromGeometry } from './Shape.js';
 
 export const assemble = async (modes, ...shapes) => {
   const geometries = [];

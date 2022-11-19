@@ -1,14 +1,10 @@
+import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 import {
-  assemble,
-  eagerTransform,
   fromPolygons,
   taggedGraph,
   taggedPoints,
   taggedSegments,
-  toPoints,
 } from '@jsxcad/geometry';
-
-import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 
 export const ops = new Map();
 
@@ -275,13 +271,17 @@ export class Shape {
     return Shape.toCoordinates(this, ...args);
   }
 
+/*
   toValue(value) {
     return Shape.toValue(value, this);
   }
+  */
 
+/*
   toFlatValues(values) {
     return Shape.toFlatValues(values, this);
   }
+  */
 
 /*
   toNestedValues(values) {
@@ -290,7 +290,7 @@ export class Shape {
 */
 }
 
-export const isShape = (value) => value instanceof Shape || value.isChain;
+export const isShape = (value) => value !== undefined && (value instanceof Shape || value.isChain);
 Shape.isShape = isShape;
 
 export const isFunction = (value) => value instanceof Function;
@@ -299,6 +299,10 @@ Shape.isFunction = isFunction;
 export const isArray = (value) =>
   value instanceof Array;
 Shape.isArray = isArray;
+
+export const isObject = (value) =>
+  value instanceof Object;
+Shape.isObject = isObject;
 
 Shape.chain = chain;
 
@@ -397,13 +401,16 @@ Shape.fromPolygons = (polygons, context) =>
 
 Shape.registerMethod = registerMethod;
 
+/*
 Shape.toValue = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
   }
   return to;
 };
+*/
 
+/*
 Shape.toFlatValues = (to, from) => {
   if (to instanceof Function) {
     to = to(from);
@@ -419,6 +426,7 @@ Shape.toFlatValues = (to, from) => {
     return [Shape.toValue(to, from)];
   }
 };
+*/
 
 /*
 Shape.toNestedValues = (to, from) => {

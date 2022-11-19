@@ -1,14 +1,9 @@
-import './toShape.js';
+import { toShape } from './toShape.js';
 
 import Shape from './Shape.js';
 
-const toShapeOp = Shape.ops.get('toShape');
-let toShapesOp;
-
 export const toShapes = Shape.registerMethod('toShapes', (value) => async (shape) => {
-  // console.log(`QQ/toShapes: ${'' + value}`);
   if (Shape.isFunction(value)) {
-    // console.log(`QQ/toShapes/0: ${'' + value}`);
     value = await value(shape);
   }
   if (Shape.isShape(value)) {
@@ -26,12 +21,10 @@ export const toShapes = Shape.registerMethod('toShapes', (value) => async (shape
       if (item === undefined) {
         continue;
       }
-      out.push(...(await toShapesOp(item)(shape)));
+      out.push(...await toShapes(item)(shape));
     }
     return out;
   } else {
-    return [await toShapeOp(value)(shape)];
+    return [await toShape(value)(shape)];
   }
 });
-
-toShapesOp = Shape.ops.get('toShapes');

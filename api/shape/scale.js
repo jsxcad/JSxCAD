@@ -6,7 +6,7 @@ export const scale = Shape.registerMethod(
   'scale',
   (x = 1, y = x, z = y) =>
     async (shape) => {
-      [x = 1, y = x, z] = await shape.toCoordinate(x, y, z);
+      [x = 1, y = x, z = y] = await shape.toCoordinate(x, y, z);
       if (x === 0) {
         x = 1;
       }

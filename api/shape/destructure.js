@@ -18,16 +18,16 @@ export const destructure = (
   } = {}
 ) => {
   for (const arg of args) {
-    if (arg instanceof Shape) {
+    if (Shape.isShape(arg)) {
       shapes.push(arg);
       shapesAndFunctions.push(arg);
-    } else if (arg instanceof Function) {
+    } else if (Shape.isFunction(arg)) {
       functions.push(arg);
       shapesAndFunctions.push(arg);
       func = arg;
-    } else if (arg instanceof Array) {
+    } else if (Shape.isArray(arg)) {
       arrays.push(arg);
-    } else if (arg instanceof Object) {
+    } else if (Shape.isObject(arg)) {
       objects.push(arg);
       object = Object.assign(object, arg);
     }

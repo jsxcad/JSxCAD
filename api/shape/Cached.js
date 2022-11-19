@@ -8,7 +8,7 @@ export const Cached = (name, thunk, enable = true) => {
     }
     const path = `cached/${name}/${JSON.stringify(args)}`;
     // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.
-    const cached = await loadGeometry(path, { errorOnMissing: true });
+    const cached = await loadGeometry(path);
     if (cached) {
       return cached;
     }

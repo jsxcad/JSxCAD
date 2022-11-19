@@ -106,7 +106,6 @@ export const fillCgalGeometry = (geometry, inputs) => {
       }
       case 'segments': {
         const { segments } = inputs[nth];
-        console.log(`QQ/inputs[nth]: ${JSON.stringify(inputs[nth])}`);
         geometry.setType(nth, GEOMETRY_SEGMENTS);
         for (const [[sX = 0, sY = 0, sZ = 0], [eX = 0, eY = 0, eZ = 0], exact] of segments) {
           try {
@@ -306,7 +305,9 @@ export const withCgalGeometry = (inputs, op) => {
   try {
     return op(cgalGeometry, g);
   } catch (error) {
-    // throw Error(error);
+    console.log(`QQ/withCgalGeometry/inputs: ${JSON.stringify(inputs)}`);
+    console.log(`QQ/withCgalGeometry/op: ${'' + op}`);
+    throw Error(error);
     throw error;
   } finally {
     cgalGeometry.delete();
