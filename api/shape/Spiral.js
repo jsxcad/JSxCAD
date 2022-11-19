@@ -8,7 +8,7 @@ export const Spiral = Shape.registerShapeMethod('Spiral', async (...args) => {
   let particles = [];
   for (const turn of await Seq(
     options,
-    (distance) => distance,
+    (distance) => (shape) => distance,
     (...numbers) => numbers
   )) {
     particles.push(await particle(turn).rz(turn));

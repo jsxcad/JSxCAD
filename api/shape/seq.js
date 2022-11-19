@@ -6,7 +6,6 @@ import { toValue } from './toValue.js';
 const EPSILON = 1e-5;
 
 const maybeApply = (value, shape) => {
-  console.log(`QQ/maybeApply`);
   if (Shape.isFunction(value)) {
     return value(shape);
   } else {
@@ -16,7 +15,6 @@ const maybeApply = (value, shape) => {
 
 // This is getting a bit excessively magical.
 export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
-  console.log(`QQ/seq/1`);
   let op;
   let groupOp;
   let specs = [];
@@ -24,7 +22,6 @@ export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
     if (Shape.isFunction(arg)) {
       if (!op) {
         op = arg;
-        console.log(`QQ/op1`);
       } else if (!groupOp) {
         groupOp = arg;
       }
@@ -33,14 +30,12 @@ export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
     }
   }
   if (!op) {
-    console.log(`QQ/op2`);
     op = (n) => (s) => n;
   }
   if (!groupOp) {
     groupOp = Group;
   }
 
-  console.log(`QQ/seq/2`);
   const indexes = [];
   for (const spec of specs) {
     let { from = 0, to = 1, upto, downto, by = 1 } = spec;
@@ -74,21 +69,15 @@ export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
     }
     indexes.push(numbers);
   }
-  console.log(`QQ/seq/3`);
   const results = [];
   const index = indexes.map(() => 0);
   for (;;) {
-    console.log(`QQ/seq/3.1`);
     const args = index.map((nth, index) => indexes[index][nth]);
     if (args.some((value) => value === undefined)) {
       break;
     }
-    console.log(`QQ/seq/3.2/args: ${JSON.stringify(args)}`);
-    const pop = op(...args);
-    console.log(`QQ/seq/3.2/pop: ${pop}`);
     const result = await op(...args)(shape);
     results.push(maybeApply(result, shape));
-    console.log(`QQ/seq/3.3`);
     let nth;
     for (nth = 0; nth < index.length; nth++) {
       if (++index[nth] < indexes[nth].length) {
@@ -96,12 +85,10 @@ export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
       }
       index[nth] = 0;
     }
-    console.log(`QQ/seq/3.4`);
     if (nth === index.length) {
       break;
     }
   }
-  console.log(`QQ/seq/4`);
   return groupOp(...results);
 });
 

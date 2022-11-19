@@ -110,7 +110,7 @@ await Arc(10).color('blue').tint('red').view(45);
 
 await Edges(
   seq(
-    (y) => [Point(-10, y, 0), Point(10, y, 0)],
+    (y) => (s) => [Point(-10, y, 0), Point(10, y, 0)],
     {
       from: -6,
       to: 6,
