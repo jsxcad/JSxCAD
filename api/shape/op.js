@@ -4,10 +4,18 @@ import Shape from './Shape.js';
 export const op = Shape.registerMethod(
   'op',
   (...fns) =>
-    (shape) =>
-      Group(
-        ...fns
-          .filter((fn) => fn)
-          .map((fn) => (fn instanceof Function ? fn(shape) : fn))
-      )
+    async (shape) => {
+      const results = [];
+      for (const fn of fns) {
+        if (fn === undefined) {
+          continue;
+        }
+        if (Shape.isFunction(fn)) {
+          results.push(fn(shape));
+        } else {
+          results.push(fn);
+        }
+      }
+      return Group(...results);
+    }
 );

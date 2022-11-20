@@ -8,13 +8,15 @@ export const each = Shape.registerMethod('each', (...args) => async (shape) => {
   let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
   if (leafOp instanceof Shape) {
     const leafShape = leafOp;
-    leafOp = (edge) => leafShape.to(edge);
+    leafOp = (edge) => (shape) => leafShape.to(edge);
   }
-  const leafShapes = getLeafs(shape.toGeometry()).map((leaf) =>
-    leafOp(Shape.fromGeometry(leaf))
-  );
-  const grouped = groupOp(...leafShapes);
-  if (grouped instanceof Function) {
+  const leafShapes = [];
+  const leafGeometries = getLeafs(await shape.toGeometry());
+  for (const leafGeometry of leafGeometries) {
+    leafShapes.push(await leafOp(Shape.fromGeometry(leafGeometry)));
+  }
+  const grouped = await groupOp(...leafShapes);
+  if (Shape.isFunction(grouped)) {
     return grouped(shape);
   } else {
     return grouped;

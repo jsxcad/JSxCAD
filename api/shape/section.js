@@ -4,17 +4,15 @@ import { section as sectionGeometry } from '@jsxcad/geometry';
 
 const baseSection =
   ({ profile = false } = {}, orientations) =>
-  (shape) => {
-    orientations = orientations
-      .flatMap((orientation) => Shape.toShapes(orientation, shape))
-      .flatMap((orientation) => Shape.toShapes(orientation, shape));
+  async (shape) => {
+    orientations = await shape.toShapesGeometries(orientations);
     if (orientations.length === 0) {
-      orientations.push(Point());
+      orientations.push(await Point().toGeometry());
     }
     return Shape.fromGeometry(
       sectionGeometry(
-        shape.toGeometry(),
-        orientations.map((orientation) => orientation.toGeometry()),
+        await shape.toGeometry(),
+        orientations,
         { profile }
       )
     );

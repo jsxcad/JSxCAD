@@ -63,7 +63,6 @@ export const extrudeAlong = Shape.registerMethod(
 );
 
 // Note that the operator is applied to each leaf geometry by default.
-export const e = (...extents) =>
-  Shape.registerMethod('e', extrudeAlong(normal(), ...extents));
+export const e = Shape.registerMethod('e', (...extents) => async (shape) => extrudeAlong(normal(), ...extents)(shape));
 
 export default extrudeAlong;

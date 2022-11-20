@@ -3,5 +3,5 @@ import { generateUpperEnvelope } from '@jsxcad/geometry';
 
 export const upperEnvelope = Shape.registerMethod(
   'upperEnvelope',
-  () => (shape) => Shape.fromGeometry(generateUpperEnvelope(shape.toGeometry()))
+  () => async (shape) => Shape.fromGeometry(generateUpperEnvelope(await shape.toGeometry()))
 );

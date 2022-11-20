@@ -1,14 +1,3 @@
-await Edges(
-  seq(
-    (y) => (s) => [Point(-10, y, 0), Point(10, y, 0)],
-    {
-      from: -6,
-      to: 6,
-      by: 1 / 4,
-    },
-    List
-  )
-)
-  .rz(1 / 8)
-  .clip(Arc(5).cut(Arc(2)).ez(1, -1))
-  .gridView(46);
+await Group(Box(1), Box(1).rx(1 / 4))
+  .each(e(2))
+  .view();

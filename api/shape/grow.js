@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { grow as growGeometry } from '@jsxcad/geometry';
 
-export const grow = Shape.registerMethod('grow', (...args) => (shape) => {
+export const grow = Shape.registerMethod('grow', (...args) => async (shape) => {
   const {
     number: amount,
     string: axes = 'xyz',
@@ -11,9 +11,9 @@ export const grow = Shape.registerMethod('grow', (...args) => (shape) => {
   } = destructure(args);
   return Shape.fromGeometry(
     growGeometry(
-      shape.toGeometry(),
-      Point().z(amount).toGeometry(),
-      shape.toShapes(selections).map((shape) => shape.toGeometry()),
+      await shape.toGeometry(),
+      await Point().z(amount).toGeometry(),
+      await shape.toShapesGeometries(selections),
       {
         x: axes.includes('x'),
         y: axes.includes('y'),

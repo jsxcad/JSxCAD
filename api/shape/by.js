@@ -2,6 +2,7 @@ import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
 
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { op } from './op.js';
 
 export const by = Shape.registerMethod(
   'by',
@@ -21,7 +22,7 @@ export const by = Shape.registerMethod(
         const { global } = getInverseMatrices(leaf);
         // Perform the operation then place the
         // result in the global frame of the reference.
-        placed.push(await shape.op(...ops).transform(global));
+        placed.push(await op(...ops).transform(global)(shape));
       }
       return Group(...placed);
     }
