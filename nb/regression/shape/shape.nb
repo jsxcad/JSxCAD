@@ -1,115 +1,117 @@
-await Triangle(10).color('red').add(Box(5).color('blue')).gridView(1);
+await Triangle(10).color('red').add(Box(5).color('blue')).gridView();
 
-await Box(5).and(Arc(5)).view(2, 'top', 'noSkin', 'noWireframe', { size: 800 });
+await Box(5).and(Arc(5)).view( 'top', 'noSkin', 'noWireframe', { size: 800 });
 
-await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView(3);
+await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 
-await Box(5).by(align('x>y>')).gridView(4);
+await Box(5).by(align('x>y>')).gridView();
 
-await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView(5);
+await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
 
-await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView(6);
+await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView();
 
-await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView(7);
+await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView();
 
-await Box(5).color('green').gridView(8);
+await Box(5).color('green').gridView();
 
 await Box(5)
   .color('green')
   .tags('color', (colors) => note(`Colors are ${colors}`));
 
-await Box(5).color('red').cut(Arc(6).color('blue')).gridView(9);
+await Box(5).color('red').cut(Arc(6).color('blue')).gridView();
 
-await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView(10);
+await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView();
 
 await Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
-  .gridView(11);
+  .gridView();
 
-await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView(12);
+await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView();
 
-await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
+await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView();
 
-await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(14);
+await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView();
 
-await Box(10).material('copper').gridView(15);
+await Box(10).material('copper').gridView();
 
-await Box(10).move(1, 2, 3).gridView(16);
-await Box(10).to(Point(1, 2, 3)).gridView(17);
-await Box(10).move(1, 2, 3).to(center()).gridView(18);
-await Box(10, 10, 10).move(faces().sort('z>').n(0)).view(19);
+await Box(10).move(1, 2, 3).gridView();
+await Box(10).to(Point(1, 2, 3)).gridView();
+await Box(10).move(1, 2, 3).to(center()).gridView();
+await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
 
-await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(20);
+await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 
-await Box(5).offset(1).gridView(21);
+await Box(5).offset(1).gridView();
 
-await Box(5).op(color('green')).gridView(22);
+await Box(5).op(color('green')).gridView();
 
 await Line(10)
   .orient({ at: [40, 50, 0] })
-  .gridView(23);
+  .gridView();
 
 await Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
-  .gridView(24);
+  .gridView();
 
 await Box(1, 2, 3)
   .rx(1 / 8)
-  .gridView(25);
+  .gridView();
+
 await Box(1, 2, 3)
   .ry(1 / 8)
-  .gridView(26);
+  .gridView();
+
 await Box(1, 2, 3)
   .rz(1 / 8)
-  .gridView(27);
+  .gridView();
 
-await Box(5).scale(1, 2).gridView(28);
+await Box(5).scale(1, 2).gridView();
 // Box(5).rotate(45).gridView(24);
 
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(1, 1)
-  .gridView(29);
+  .gridView();
 
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(-1, 1)
-  .gridView(30);
+  .gridView();
 
 await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`));
 
-await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(31);
+await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 
 await Box(1)
   .as('box')
   .tags((tags) => note(`${tags}`));
 
-await Box(5, 5, 5).gridView(32);
+await Box(5, 5, 5).gridView();
 
-await Box(5).tool('laser').gridView(33);
+await Box(5).tool('laser').gridView();
 
-await Assembly(Box(5), Arc(6).void()).gridView(34);
+await Assembly(Box(5), Arc(6).void()).gridView();
 
-await Box(5).fitTo(Arc(6)).gridView(35);
+await Box(5).fitTo(Arc(6)).gridView();
 
-await Box(5).x(1).gridView(36);
-await Box(5).y(1).gridView(37);
-await Box(5).z(1).gridView(38);
+await Box(5).x(1).gridView();
+await Box(5).y(1).gridView();
+await Box(5).z(1).gridView();
 
 await Arc(10)
   .op((s) => s.offset(1).fitTo(s.void()))
   .ez(5)
-  .view(39);
+  .view();
 
 await Box(10)
   .ez(10)
   .color('green')
   .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
-  .view(40);
+  .view();
 
-await Arc(10).color('blue').color('red').view(41);
+await Arc(10).color('blue').color('red').view();
 
-await Arc(10).color('blue').tint('red').view(42);
+await Arc(10).color('blue').tint('red').view();
 
 await Edges(
   seq(
@@ -124,7 +126,7 @@ await Edges(
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))
-  .gridView(43);
+  .gridView();
 
 const b = await Box(5)
   .ez(5)
@@ -136,11 +138,11 @@ const b = await Box(5)
   .material('glass')
   .y(10);
 
-await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(44);
+await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 
-await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(45);
+await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
 
-await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(46);
+await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
 await Arc(2)
   .ez(5)
@@ -151,7 +153,7 @@ await Arc(2)
       .z(3)
   )
   .simplify({ ratio: 0.1, eps: 0.01 })
-  .view(47);
+  .view();
 
 await Triangle(14).svg('triangle');
 
@@ -162,19 +164,19 @@ await Box(10)
   .view(0)
   .remesh(1, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
-  .view(48);
+  .view();
 
 await Box(20, 20, 20)
-  .view(49, 'wireframe')
+  .view(1, 'wireframe')
   .md('Original mesh')
   .remesh()
-  .view(50, 'wireframe')
+  .view(2, 'wireframe')
   .md('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
-  .view(51, 'wireframe')
+  .view(3, 'wireframe')
   .md('Cut')
   .demesh()
-  .view(52, 'wireframe')
+  .view(4, 'wireframe')
   .md('Cleaned mesh');
 
 await Arc(4)
@@ -183,7 +185,7 @@ await Arc(4)
   .material('glass')
   .color('orange')
   .and(toolpath())
-  .view(53);
+  .view();
 
 await Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(54);
 
@@ -206,27 +208,27 @@ md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume((v) => (s) => v.toFixed(2))}`
 
 const c = await Box(10)
   .rx(1 / 8)
-  .view(67);
+  .view();
 
-await c.by(origin()).view(68);
-await c.by(origin(), and(Box(5, 5, 5))).view(69);
-await c.by(origin(), cut(Box(5, 5, 5))).view(70);
+await c.by(origin()).view();
+await c.by(origin(), and(Box(5, 5, 5))).view();
+await c.by(origin(), cut(Box(5, 5, 5))).view();
 
 await Triangle(4)
   .x(5)
   .at(origin(), rz(1 / 16))
-  .view(71);
+  .view();
 
-await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
+await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
 
-await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
+await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
 
 await Box(5, 5, 20)
   .rx(1 / 4, 1 / 32)
   .wrap(1, 0.1)
-  .view(74);
+  .view();
 
-await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView(1);
+await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView();
 
 await Segments([
   [
@@ -359,7 +361,6 @@ await Box(10, 10, 10)
     )
   )
   .view();
-///
 
 await Arc(10, 10, 10, { sides: 7 })
   .cut(

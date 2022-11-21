@@ -1,48 +1,48 @@
 ```JavaScript
-await Triangle(10).color('red').add(Box(5).color('blue')).gridView(1);
+await Triangle(10).color('red').add(Box(5).color('blue')).gridView();
 ```
 
-![Image](shape.md.$1_1.png)
+![Image](shape.md.$1.png)
 
 ```JavaScript
-await Box(5).and(Arc(5)).view(2, 'top', 'noSkin', 'noWireframe', { size: 800 });
+await Box(5).and(Arc(5)).view( 'top', 'noSkin', 'noWireframe', { size: 800 });
 ```
 
-![Image](shape.md.$2_2.png)
+![Image](shape.md.$2_top.png)
 
 ```JavaScript
-await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView(3);
+await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 ```
 
-![Image](shape.md.$3_3.png)
+![Image](shape.md.$3.png)
 
 ```JavaScript
-await Box(5).by(align('x>y>')).gridView(4);
+await Box(5).by(align('x>y>')).gridView();
 ```
 
-![Image](shape.md.$4_4.png)
+![Image](shape.md.$4.png)
 
 ```JavaScript
-await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView(5);
+await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
 ```
 
 ```JavaScript
-await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView(6);
+await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView();
 ```
 
-![Image](shape.md.$6_6.png)
+![Image](shape.md.$6.png)
 
 ```JavaScript
-await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView(7);
+await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView();
 ```
 
-![Image](shape.md.$7_7.png)
+![Image](shape.md.$7.png)
 
 ```JavaScript
-await Box(5).color('green').gridView(8);
+await Box(5).color('green').gridView();
 ```
 
-![Image](shape.md.$8_8.png)
+![Image](shape.md.$8.png)
 
 ```JavaScript
 await Box(5)
@@ -53,146 +53,146 @@ await Box(5)
 Colors are undefined
 
 ```JavaScript
-await Box(5).color('red').cut(Arc(6).color('blue')).gridView(9);
+await Box(5).color('red').cut(Arc(6).color('blue')).gridView();
 ```
 
-![Image](shape.md.$10_9.png)
+![Image](shape.md.$10.png)
 
 ```JavaScript
-await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView(10);
+await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView();
 ```
 
-![Image](shape.md.$11_10.png)
+![Image](shape.md.$11.png)
 
 ```JavaScript
 await Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
-  .gridView(11);
+  .gridView();
 ```
 
 ```JavaScript
-await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView(12);
+await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView();
 ```
 
-![Image](shape.md.$13_12.png)
+![Image](shape.md.$13.png)
 
 ```JavaScript
-await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
+await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView();
 ```
 
-![Image](shape.md.$14_13.png)
+![Image](shape.md.$14.png)
 
 ```JavaScript
-await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(14);
-```
-
-```JavaScript
-await Box(10).material('copper').gridView(15);
-```
-
-![Image](shape.md.$16_15.png)
-
-```JavaScript
-await Box(10).move(1, 2, 3).gridView(16);
-```
-
-![Image](shape.md.$17_16.png)
-
-```JavaScript
-await Box(10).to(Point(1, 2, 3)).gridView(17);
-```
-
-![Image](shape.md.$18_17.png)
-
-```JavaScript
-await Box(10).move(1, 2, 3).to(center()).gridView(18);
-```
-
-![Image](shape.md.$19_18.png)
-
-```JavaScript
-await Box(10, 10, 10).move(faces().sort('z>').n(0)).view(19);
-```
-
-![Image](shape.md.$20_19.png)
-
-```JavaScript
-await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(20);
+await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView();
 ```
 
 ```JavaScript
-await Box(5).offset(1).gridView(21);
+await Box(10).material('copper').gridView();
+```
+
+![Image](shape.md.$16.png)
+
+```JavaScript
+await Box(10).move(1, 2, 3).gridView();
+```
+
+![Image](shape.md.$17.png)
+
+```JavaScript
+await Box(10).to(Point(1, 2, 3)).gridView();
+```
+
+![Image](shape.md.$18.png)
+
+```JavaScript
+await Box(10).move(1, 2, 3).to(center()).gridView();
+```
+
+![Image](shape.md.$19.png)
+
+```JavaScript
+await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
+```
+
+![Image](shape.md.$20.png)
+
+```JavaScript
+await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 ```
 
 ```JavaScript
-await Box(5).op(color('green')).gridView(22);
+await Box(5).offset(1).gridView();
 ```
 
-![Image](shape.md.$23_22.png)
+```JavaScript
+await Box(5).op(color('green')).gridView();
+```
+
+![Image](shape.md.$23.png)
 
 ```JavaScript
 await Line(10)
   .orient({ at: [40, 50, 0] })
-  .gridView(23);
+  .gridView();
 ```
 
-![Image](shape.md.$24_23.png)
+![Image](shape.md.$24.png)
 
 ```JavaScript
 await Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
-  .gridView(24);
+  .gridView();
 ```
 
-![Image](shape.md.$25_24.png)
+![Image](shape.md.$25.png)
 
 ```JavaScript
 await Box(1, 2, 3)
   .rx(1 / 8)
-  .gridView(25);
+  .gridView();
 ```
 
-![Image](shape.md.$26_25.png)
+![Image](shape.md.$26.png)
 
 ```JavaScript
 await Box(1, 2, 3)
   .ry(1 / 8)
-  .gridView(26);
+  .gridView();
 ```
 
-![Image](shape.md.$27_26.png)
+![Image](shape.md.$27.png)
 
 ```JavaScript
 await Box(1, 2, 3)
   .rz(1 / 8)
-  .gridView(27);
+  .gridView();
 ```
 
-![Image](shape.md.$28_27.png)
+![Image](shape.md.$28.png)
 
 ```JavaScript
-await Box(5).scale(1, 2).gridView(28);
+await Box(5).scale(1, 2).gridView();
 ```
 
-![Image](shape.md.$29_28.png)
+![Image](shape.md.$29.png)
 
 ```JavaScript
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(1, 1)
-  .gridView(29);
+  .gridView();
 ```
 
-![Image](shape.md.$30_29.png)
+![Image](shape.md.$30.png)
 
 ```JavaScript
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(-1, 1)
-  .gridView(30);
+  .gridView();
 ```
 
-![Image](shape.md.$31_30.png)
+![Image](shape.md.$31.png)
 
 ```JavaScript
 await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`));
@@ -201,10 +201,10 @@ await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`)
 {"length":1.0000000000000009,"width":2.0000000000000018,"height":3.0000000000000013,"max":[0.5000000000000004,1.0000000000000009,1.5000000000000007],"min":[-0.5000000000000004,-1.0000000000000009,-1.5000000000000007],"center":[0,0,0],"radius":1.8708286933869718}
 
 ```JavaScript
-await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(31);
+await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 ```
 
-![Image](shape.md.$33_31.png)
+![Image](shape.md.$33.png)
 
 ```JavaScript
 await Box(1)
@@ -215,77 +215,77 @@ await Box(1)
 undefined
 
 ```JavaScript
-await Box(5, 5, 5).gridView(32);
+await Box(5, 5, 5).gridView();
 ```
 
-![Image](shape.md.$35_32.png)
+![Image](shape.md.$35.png)
 
 ```JavaScript
-await Box(5).tool('laser').gridView(33);
+await Box(5).tool('laser').gridView();
 ```
 
-![Image](shape.md.$36_33.png)
+![Image](shape.md.$36.png)
 
 ```JavaScript
-await Assembly(Box(5), Arc(6).void()).gridView(34);
+await Assembly(Box(5), Arc(6).void()).gridView();
 ```
 
-![Image](shape.md.$37_34.png)
+![Image](shape.md.$37.png)
 
 ```JavaScript
-await Box(5).fitTo(Arc(6)).gridView(35);
+await Box(5).fitTo(Arc(6)).gridView();
 ```
 
-![Image](shape.md.$38_35.png)
+![Image](shape.md.$38.png)
 
 ```JavaScript
-await Box(5).x(1).gridView(36);
+await Box(5).x(1).gridView();
 ```
 
-![Image](shape.md.$39_36.png)
+![Image](shape.md.$39.png)
 
 ```JavaScript
-await Box(5).y(1).gridView(37);
+await Box(5).y(1).gridView();
 ```
 
-![Image](shape.md.$40_37.png)
+![Image](shape.md.$40.png)
 
 ```JavaScript
-await Box(5).z(1).gridView(38);
+await Box(5).z(1).gridView();
 ```
 
-![Image](shape.md.$41_38.png)
+![Image](shape.md.$41.png)
 
 ```JavaScript
 await Arc(10)
   .op((s) => s.offset(1).fitTo(s.void()))
   .ez(5)
-  .view(39);
+  .view();
 ```
 
-![Image](shape.md.$42_39.png)
+![Image](shape.md.$42.png)
 
 ```JavaScript
 await Box(10)
   .ez(10)
   .color('green')
   .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
-  .view(40);
+  .view();
 ```
 
-![Image](shape.md.$43_40.png)
+![Image](shape.md.$43.png)
 
 ```JavaScript
-await Arc(10).color('blue').color('red').view(41);
+await Arc(10).color('blue').color('red').view();
 ```
 
-![Image](shape.md.$44_41.png)
+![Image](shape.md.$44.png)
 
 ```JavaScript
-await Arc(10).color('blue').tint('red').view(42);
+await Arc(10).color('blue').tint('red').view();
 ```
 
-![Image](shape.md.$45_42.png)
+![Image](shape.md.$45.png)
 
 ```JavaScript
 await Edges(
@@ -301,10 +301,10 @@ await Edges(
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))
-  .gridView(43);
+  .gridView();
 ```
 
-![Image](shape.md.$46_43.png)
+![Image](shape.md.$46.png)
 
 ```JavaScript
 const b = await Box(5)
@@ -319,22 +319,22 @@ const b = await Box(5)
 ```
 
 ```JavaScript
-await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(44);
+await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 ```
 
-![Image](shape.md.$47_44.png)
+![Image](shape.md.$47.png)
 
 ```JavaScript
-await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(45);
+await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
 ```
 
-![Image](shape.md.$48_45.png)
+![Image](shape.md.$48.png)
 
 ```JavaScript
-await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(46);
+await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 ```
 
-![Image](shape.md.$49_46.png)
+![Image](shape.md.$49.png)
 
 ```JavaScript
 await Arc(2)
@@ -346,10 +346,10 @@ await Arc(2)
       .z(3)
   )
   .simplify({ ratio: 0.1, eps: 0.01 })
-  .view(47);
+  .view();
 ```
 
-![Image](shape.md.$50_47.png)
+![Image](shape.md.$50.png)
 
 ```JavaScript
 await Triangle(14).svg('triangle');
@@ -367,41 +367,41 @@ await Box(10)
   .view(0)
   .remesh(1, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
-  .view(48);
+  .view();
 ```
 
 ![Image](shape.md.$52.png)
 
-![Image](shape.md.$52_48.png)
+![Image](shape.md.$52.png)
 
 ```JavaScript
 await Box(20, 20, 20)
-  .view(49, 'wireframe')
+  .view(1, 'wireframe')
   .md('Original mesh')
   .remesh()
-  .view(50, 'wireframe')
+  .view(2, 'wireframe')
   .md('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
-  .view(51, 'wireframe')
+  .view(3, 'wireframe')
   .md('Cut')
   .demesh()
-  .view(52, 'wireframe')
+  .view(4, 'wireframe')
   .md('Cleaned mesh');
 ```
 
-![Image](shape.md.$53_49.png)
+![Image](shape.md.$53_1.png)
 
 Original mesh
 
-![Image](shape.md.$53_50.png)
+![Image](shape.md.$53_2.png)
 
 Isotropic remeshing
 
-![Image](shape.md.$53_51.png)
+![Image](shape.md.$53_3.png)
 
 Cut
 
-![Image](shape.md.$53_52.png)
+![Image](shape.md.$53_4.png)
 
 Cleaned mesh
 
@@ -412,7 +412,7 @@ await Arc(4)
   .material('glass')
   .color('orange')
   .and(toolpath())
-  .view(53);
+  .view();
 ```
 
 ```JavaScript
@@ -449,64 +449,64 @@ Volume of Box(2, 3, 4) is function () { [native code] }
 ```JavaScript
 const c = await Box(10)
   .rx(1 / 8)
-  .view(67);
+  .view();
 ```
 
-![Image](shape.md.c_67.png)
+![Image](shape.md.c.png)
 
 ```JavaScript
-await c.by(origin()).view(68);
+await c.by(origin()).view();
 ```
 
-![Image](shape.md.$61_68.png)
+![Image](shape.md.$61.png)
 
 ```JavaScript
-await c.by(origin(), and(Box(5, 5, 5))).view(69);
+await c.by(origin(), and(Box(5, 5, 5))).view();
 ```
 
-![Image](shape.md.$62_69.png)
+![Image](shape.md.$62.png)
 
 ```JavaScript
-await c.by(origin(), cut(Box(5, 5, 5))).view(70);
+await c.by(origin(), cut(Box(5, 5, 5))).view();
 ```
 
-![Image](shape.md.$63_70.png)
+![Image](shape.md.$63.png)
 
 ```JavaScript
 await Triangle(4)
   .x(5)
   .at(origin(), rz(1 / 16))
-  .view(71);
+  .view();
 ```
 
-![Image](shape.md.$64_71.png)
+![Image](shape.md.$64.png)
 
 ```JavaScript
-await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view(72);
+await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
 ```
 
-![Image](shape.md.$65_72.png)
+![Image](shape.md.$65.png)
 
 ```JavaScript
-await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view(73);
+await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
 ```
 
-![Image](shape.md.$66_73.png)
+![Image](shape.md.$66.png)
 
 ```JavaScript
 await Box(5, 5, 20)
   .rx(1 / 4, 1 / 32)
   .wrap(1, 0.1)
-  .view(74);
+  .view();
 ```
 
-![Image](shape.md.$67_74.png)
+![Image](shape.md.$67.png)
 
 ```JavaScript
-await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView(1);
+await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView();
 ```
 
-![Image](shape.md.$68_1.png)
+![Image](shape.md.$68.png)
 
 ```JavaScript
 await Segments([
