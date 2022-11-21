@@ -4,7 +4,7 @@ await Arc(5, { start: 45 / 360, end: 270 / 360 })
   .md(`Arc(5).angle(45/360, 270/360)`);
 ```
 
-![Image](shapes.md.0.png)
+![Image](shapes.md.$1.png)
 
 Arc(5).angle(45/360, 270/360)
 
@@ -15,7 +15,7 @@ await Assembly(Box(10), Arc(8), Triangle(5))
   .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
 ```
 
-![Image](shapes.md.1.png)
+![Image](shapes.md.$2.png)
 
 Assembly(Box(10), Arc(8), Triangle(5))
 
@@ -23,7 +23,7 @@ Assembly(Box(10), Arc(8), Triangle(5))
 await Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
 ```
 
-![Image](shapes.md.2.png)
+![Image](shapes.md.$3.png)
 
 Box(5, 7, 8)
 
@@ -48,7 +48,7 @@ await Group(Box(10), Arc(8), Triangle(5))
   .md(`Group(Box(10), Arc(8), Triangle(5))`);
 ```
 
-![Image](shapes.md.3.png)
+![Image](shapes.md.$6.png)
 
 Group(Box(10), Arc(8), Triangle(5))
 
@@ -59,7 +59,7 @@ await Hershey('Hershey', 10)
   .md(`Hershey(10)('Hershey').by(align('xy'))`);
 ```
 
-![Image](shapes.md.4.png)
+![Image](shapes.md.$7.png)
 
 Hershey(10)('Hershey').by(align('xy'))
 
@@ -67,7 +67,7 @@ Hershey(10)('Hershey').by(align('xy'))
 await Hexagon(10).gridView().md(`Hexagon(10)`);
 ```
 
-![Image](shapes.md.5.png)
+![Image](shapes.md.$8.png)
 
 Hexagon(10)
 
@@ -75,7 +75,7 @@ Hexagon(10)
 await Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
-![Image](shapes.md.6.png)
+![Image](shapes.md.$9.png)
 
 Hull(Arc(5), Box(5).z(5))
 
@@ -83,7 +83,7 @@ Hull(Arc(5), Box(5).z(5))
 await Icosahedron(5).view().md(`Icosahedron(5)`);
 ```
 
-![Image](shapes.md.7.png)
+![Image](shapes.md.$10.png)
 
 Icosahedron(5)
 
@@ -114,7 +114,7 @@ const torusFn = (x, y, z) => {
 await Implicit(torusFn, 2).view({ withGrid: false }).md('Implicit(torusFn, 2');
 ```
 
-![Image](shapes.md.8.png)
+![Image](shapes.md.$11.png)
 
 Implicit(torusFn, 2
 
@@ -122,7 +122,7 @@ Implicit(torusFn, 2
 await Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 ```
 
-![Image](shapes.md.9.png)
+![Image](shapes.md.$12.png)
 
 Line(5, -1)
 
@@ -130,7 +130,7 @@ Line(5, -1)
 await Octagon(5).gridView().md(`Octagon(5)`);
 ```
 
-![Image](shapes.md.10.png)
+![Image](shapes.md.$13.png)
 
 Octagon(5)
 
@@ -138,7 +138,7 @@ Octagon(5)
 await Orb(1).view().md(`Orb(1)`);
 ```
 
-![Image](shapes.md.11.png)
+![Image](shapes.md.$14.png)
 
 Orb(1)
 
@@ -149,7 +149,7 @@ await Link(Point(0), Point(5), Point(5, 5), Point(0))
   .md(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 ```
 
-![Image](shapes.md.12.png)
+![Image](shapes.md.$15.png)
 
 Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
@@ -157,7 +157,7 @@ Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 await Pentagon(5).gridView().md(`Pentagon(5)`);
 ```
 
-![Image](shapes.md.13.png)
+![Image](shapes.md.$16.png)
 
 Pentagon(5)
 
@@ -165,7 +165,7 @@ Pentagon(5)
 await Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
 ```
 
-![Image](shapes.md.14.png)
+![Image](shapes.md.$17.png)
 
 Point(0.5, 0.5)
 
@@ -175,7 +175,7 @@ await Points([0.5, 0.5], [-0.5, -0.5])
   .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
 ```
 
-![Image](shapes.md.15.png)
+![Image](shapes.md.$18.png)
 
 Points([0.5, 0.5], [-0.5, -0.5])
 
@@ -186,7 +186,7 @@ await Polygon(Point(0), Point(5), Point(5, 5))
   .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
 ```
 
-![Image](shapes.md.16.png)
+![Image](shapes.md.$19.png)
 
 Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
 
@@ -216,7 +216,7 @@ await Polyhedron(
   );
 ```
 
-![Image](shapes.md.17.png)
+![Image](shapes.md.$20.png)
 
 Polyhedron(  
       [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],  
@@ -226,7 +226,7 @@ Polyhedron(
 await Arc(5, { sides: 7 }).gridView().md(`Septagon(5)`);
 ```
 
-![Image](shapes.md.18.png)
+![Image](shapes.md.$21.png)
 
 Septagon(5)
 
@@ -234,7 +234,7 @@ Septagon(5)
 await Spiral().gridView().md(`Spiral()`);
 ```
 
-![Image](shapes.md.19.png)
+![Image](shapes.md.$22.png)
 
 Spiral()
 
@@ -242,7 +242,7 @@ Spiral()
 await Triangle(5).gridView().md(`Triangle(5)`);
 ```
 
-![Image](shapes.md.20.png)
+![Image](shapes.md.$23.png)
 
 Triangle(5)
 
@@ -253,7 +253,7 @@ await Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
   .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 ```
 
-![Image](shapes.md.21.png)
+![Image](shapes.md.$24.png)
 
 Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 
@@ -264,7 +264,7 @@ await Group(Arc(4).x(-1), Box(5).x(1))
   .md(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
 ```
 
-![Image](shapes.md.22.png)
+![Image](shapes.md.$25.png)
 
 Group(Arc(5).x(-1), Box(5).x(1)).fill()
 
@@ -300,7 +300,7 @@ const q = await Group(
 ).view().md`Boxes and Arcs from extents`;
 ```
 
-![Image](shapes.md.23.png)
+![Image](shapes.md.q.png)
 
 Boxes and Arcs from extents
 
@@ -311,7 +311,7 @@ await Line(15, -15)
   .view();
 ```
 
-![Image](shapes.md.24.png)
+![Image](shapes.md.$26.png)
 
 ```JavaScript
 await Line(15, -15)
@@ -320,7 +320,7 @@ await Line(15, -15)
   .view();
 ```
 
-![Image](shapes.md.25.png)
+![Image](shapes.md.$27.png)
 
 ```JavaScript
 await Line(-15, 15)
@@ -329,7 +329,7 @@ await Line(-15, 15)
   .view();
 ```
 
-![Image](shapes.md.26.png)
+![Image](shapes.md.$28.png)
 
 ```JavaScript
 await Line(-15, 15)
@@ -338,7 +338,7 @@ await Line(-15, 15)
   .view();
 ```
 
-![Image](shapes.md.27.png)
+![Image](shapes.md.$29.png)
 
 ```JavaScript
 await Box(12)
@@ -352,7 +352,7 @@ await Box(12)
   .view();
 ```
 
-![Image](shapes.md.28.png)
+![Image](shapes.md.$30.png)
 
 ```JavaScript
 await Box(12)
@@ -366,7 +366,7 @@ await Box(12)
   .view();
 ```
 
-![Image](shapes.md.29.png)
+![Image](shapes.md.$31.png)
 
 ```JavaScript
 await Group(Box(1), Box(1).rx(1 / 4))
@@ -374,7 +374,7 @@ await Group(Box(1), Box(1).rx(1 / 4))
   .view();
 ```
 
-![Image](shapes.md.30.png)
+![Image](shapes.md.$32.png)
 
 ```JavaScript
 await Orb(10)
@@ -383,13 +383,13 @@ await Orb(10)
   .view(1);
 ```
 
-![Image](shapes.md.31.png)
+![Image](shapes.md.$33_1.png)
 
 ```JavaScript
 await Box(10).cut(Box(5)).ez(1, -1).section().view();
 ```
 
-![Image](shapes.md.32.png)
+![Image](shapes.md.$34.png)
 
 ```JavaScript
 await Box(10, 10, 20)
@@ -397,7 +397,7 @@ await Box(10, 10, 20)
   .view();
 ```
 
-![Image](shapes.md.33.png)
+![Image](shapes.md.$35.png)
 
 ```JavaScript
 await Box(10, 10, 20)
@@ -405,7 +405,7 @@ await Box(10, 10, 20)
   .view(3);
 ```
 
-![Image](shapes.md.34.png)
+![Image](shapes.md.$36_3.png)
 
 ```JavaScript
 await Box(10, 10, 20)
@@ -414,7 +414,7 @@ await Box(10, 10, 20)
   .view(3, rx(1 / 2).by(align('z>')));
 ```
 
-![Image](shapes.md.35.png)
+![Image](shapes.md.$37_3.png)
 
 ```JavaScript
 const red = await Arc(2).color('red');
@@ -428,19 +428,19 @@ const blue = await Box(10).x(10).color('blue');
 await blue.fitTo(red.to(blue)).view();
 ```
 
-![Image](shapes.md.36.png)
+![Image](shapes.md.$38.png)
 
 ```JavaScript
 await red.at(blue, cut(Box([10, 20], 20))).view();
 ```
 
-![Image](shapes.md.37.png)
+![Image](shapes.md.$39.png)
 
 ```JavaScript
 await red.by(blue).view();
 ```
 
-![Image](shapes.md.38.png)
+![Image](shapes.md.$40.png)
 
 ```JavaScript
 await Box(5)
@@ -450,31 +450,31 @@ await Box(5)
   .view();
 ```
 
-![Image](shapes.md.39.png)
+![Image](shapes.md.$41.png)
 
 ```JavaScript
 await Box(10).cut(Box(5, 50, 5)).view();
 ```
 
-![Image](shapes.md.40.png)
+![Image](shapes.md.$42.png)
 
 ```JavaScript
 await Box(10).clip(Box(5, 50, 5)).view();
 ```
 
-![Image](shapes.md.41.png)
+![Image](shapes.md.$43.png)
 
 ```JavaScript
 await Box(10).join(Box(5, 50, 5)).view();
 ```
 
-![Image](shapes.md.42.png)
+![Image](shapes.md.$44.png)
 
 ```JavaScript
 await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```
 
-![Image](shapes.md.43.png)
+![Image](shapes.md.$45.png)
 
 ```JavaScript
 await Box(10)
@@ -483,7 +483,7 @@ await Box(10)
   .view();
 ```
 
-![Image](shapes.md.44.png)
+![Image](shapes.md.$46.png)
 
 ```JavaScript
 await Triangle(10)
@@ -492,7 +492,7 @@ await Triangle(10)
   .view();
 ```
 
-![Image](shapes.md.45.png)
+![Image](shapes.md.$47.png)
 
 ```JavaScript
 await Triangle(10)
@@ -502,7 +502,7 @@ await Triangle(10)
   .view();
 ```
 
-![Image](shapes.md.46.png)
+![Image](shapes.md.$48.png)
 
 ```JavaScript
 await Orb(6, { zag: 2 })
@@ -510,7 +510,7 @@ await Orb(6, { zag: 2 })
   .view();
 ```
 
-![Image](shapes.md.47.png)
+![Image](shapes.md.$49.png)
 
 ```JavaScript
 await Box(10, 10, 10)
@@ -519,25 +519,25 @@ await Box(10, 10, 10)
   .view();
 ```
 
-![Image](shapes.md.48.png)
+![Image](shapes.md.$50.png)
 
 ```JavaScript
 await Box(10).cut(Triangle(11)).view(1);
 ```
 
-![Image](shapes.md.49.png)
+![Image](shapes.md.$51_1.png)
 
 ```JavaScript
 await Box(10).cut(Triangle(11)).clean().view(2);
 ```
 
-![Image](shapes.md.50.png)
+![Image](shapes.md.$52_2.png)
 
 ```JavaScript
 await Triangle(11).eachPoint(Arc(5), cut).view(5);
 ```
 
-![Image](shapes.md.51.png)
+![Image](shapes.md.$53_5.png)
 
 ```JavaScript
 await Box(10)
@@ -548,7 +548,7 @@ await Box(10)
   .view();
 ```
 
-![Image](shapes.md.52.png)
+![Image](shapes.md.$54.png)
 
 ```JavaScript
 await Box(10, 10, [0, 3])
@@ -556,7 +556,7 @@ await Box(10, 10, [0, 3])
   .view();
 ```
 
-![Image](shapes.md.53.png)
+![Image](shapes.md.$55.png)
 
 ```JavaScript
 await Box(5, 5, 20)
@@ -566,7 +566,7 @@ await Box(5, 5, 20)
   .view();
 ```
 
-![Image](shapes.md.54.png)
+![Image](shapes.md.$56.png)
 
 ```JavaScript
 await Box(10)
@@ -576,4 +576,4 @@ await Box(10)
   .view();
 ```
 
-![Image](shapes.md.55.png)
+![Image](shapes.md.$57.png)
