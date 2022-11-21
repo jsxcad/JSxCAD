@@ -62,9 +62,9 @@ const writeMarkdown = async (
       }
     }
     if (view) {
-      const imageUrl = imageUrlList[viewCount++];
+      const { imageUrl, viewId = imageCount++ } = imageUrlList[viewCount++];
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
-        const imagePath = `${modulePath}.md.${imageCount++}.png`;
+        const imagePath = `${modulePath}.md.${viewId}.png`;
         output.push(`![Image](${pathModule.basename(imagePath)})`);
         output.push('');
       }
@@ -86,13 +86,13 @@ const writeMarkdown = async (
             const observed = new TextDecoder('utf8').decode(data);
             const expected = readFileSync(expectedPath, 'utf8');
             if (observed !== expected) {
-              failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+              failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
             }
           } catch (error) {
             console.log(`EE/3: ${JSON.stringify(error)}`);
             if (error.code === 'ENOENT') {
-              failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
-              failedExpectations.push(`git add "${expectedPath}"`);
+              failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
+              failedExpectations.push(`git add '${expectedPath}'`);
             } else {
               throw error;
             }
@@ -131,13 +131,13 @@ const writeMarkdown = async (
   writeFileSync(observedPath, markdown);
   try {
     if (markdown !== readFileSync(expectedPath, 'utf8')) {
-      failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+      failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
     }
   } catch (error) {
     console.log(`EE/0: ${JSON.stringify(error)}`);
     if (error.code === 'ENOENT') {
-      failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
-      failedExpectations.push(`git add "${expectedPath}"`);
+      failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
+      failedExpectations.push(`git add '${expectedPath}'`);
     } else {
       throw error;
     }
@@ -246,9 +246,10 @@ export const updateNotebook = async (
       workspace
     );
     for (let nth = 0; nth < imageUrlList.length; nth++) {
-      const observedPath = `${target}.md.${nth}.observed.png`;
-      const expectedPath = `${target}.md.${nth}.png`;
-      const { dataBuffer } = imageDataUri.decode(imageUrlList[nth]);
+      const { imageUrl, viewId = nth } = imageUrlList[nth];
+      const observedPath = `${target}.md.${viewId}.observed.png`;
+      const expectedPath = `${target}.md.${viewId}.png`;
+      const { dataBuffer } = imageDataUri.decode(imageUrl);
       writeFileSync(observedPath, dataBuffer);
       const observedPng = pngjs.PNG.sync.read(dataBuffer);
       let expectedPng;
@@ -258,8 +259,8 @@ export const updateNotebook = async (
         console.log(`EE/1: ${JSON.stringify(error)}`);
         if (error.code === 'ENOENT') {
           // We couldn't find a matching expectation.
-          failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
-          failedExpectations.push(`git add "${expectedPath}"`);
+          failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
+          failedExpectations.push(`git add '${expectedPath}'`);
           continue;
         } else {
           throw error;
@@ -269,7 +270,7 @@ export const updateNotebook = async (
       if (width !== observedPng.width || height !== observedPng.height) {
         // Can't diff when the dimensions don't match.
         failedExpectations.push('# dimensions differ');
-        failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+        failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
         continue;
       }
       const differencePng = new pngjs.PNG({ width, height });
@@ -291,14 +292,14 @@ export const updateNotebook = async (
         numFailedPixels > PIXEL_THRESHOLD &&
         !IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS.has(observedPath)
       ) {
-        const differencePath = `${target}.md.${nth}.difference.png`;
+        const differencePath = `${target}.md.${viewId}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
         failedExpectations.push(
           `# numFailedPixels ${numFailedPixels} > PIXEL_THRESHOLD ${PIXEL_THRESHOLD}`
         );
-        failedExpectations.push(`display "${differencePath}"`);
-        failedExpectations.push(`cp "${observedPath}" "${expectedPath}"`);
+        failedExpectations.push(`display '${differencePath}'`);
+        failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
       }
     }
   } catch (error) {

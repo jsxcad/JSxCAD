@@ -21,7 +21,7 @@ export class ViewNote extends React.PureComponent {
   render() {
     const { notebookPath, note, onClickView, selected, workspace } = this.props;
     const { blur = false, view, sourceLocation } = note;
-    const { height, width } = view;
+    const { height, width, viewId } = view;
     const onClick = (event) => {
       if (onClickView) {
         onClickView({
@@ -35,6 +35,7 @@ export class ViewNote extends React.PureComponent {
         });
       }
     };
+    const viewIdClass = viewId ? `viewId_${viewId}` : '';
     if (!note.url) {
       return (
         <SpinnerCircularSplit
@@ -51,7 +52,7 @@ export class ViewNote extends React.PureComponent {
     return (
       <img
         ref={ref}
-        class="note view"
+        class={`note view ${viewIdClass}`}
         style={{
           display: 'block',
           height: `${height}px`,

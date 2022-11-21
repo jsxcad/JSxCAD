@@ -3797,13 +3797,13 @@ const eachEdge = Shape.registerMethod(
       const { shapesAndFunctions, object: options = {} } = destructure(args);
       const { selections = [] } = options;
       let [
-        edgeOp = (e, l, o) => (s) => e,
-        faceOp = (e, f) => (s) => e,
+        edgeOp = (e, l, o) => e,
+        faceOp = (es, f) => es,
         groupOp = Group,
       ] = shapesAndFunctions;
       if (Shape.isShape(edgeOp)) {
         const edgeShape = edgeOp;
-        edgeOp = (edge) => (shape) => edgeShape.to(edge);
+        edgeOp = (edge) => edgeShape.to(edge);
       }
       const faces = [];
       const faceEdges = [];
@@ -3865,7 +3865,7 @@ const eachEdge = Shape.registerMethod(
                     oppositeSegment,
                   ])
                 )
-              )(shape)
+              )
             );
           }
         }
@@ -3873,7 +3873,7 @@ const eachEdge = Shape.registerMethod(
           await faceOp(
             await Group(...edges),
             Shape.fromGeometry(faceGeometry)
-          )(shape)
+          )
         );
       }
       const grouped = groupOp(...faces);
@@ -3955,13 +3955,9 @@ const faces = Shape.registerMethod(
       const { shapesAndFunctions } = destructure(args);
       let [faceOp = (face) => (s) => face, groupOp = Group] =
         shapesAndFunctions;
-      if (Shape.isShape(faceOp)) {
-        const faceShape = faceOp;
-        faceOp = (face) => (s) => faceShape.to(face);
-      }
       return eachEdge(
-        (e, l, o) => (s) => e,
-        (e, f) => (s) => faceOp(f)(s),
+        (e, l, o) => e,
+        async (e, f) => faceOp(f),
         groupOp
       )(shape);
     }
@@ -5369,7 +5365,7 @@ const baseView =
       viewId = nth;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
-    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry))) {
+    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry), 0)) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;

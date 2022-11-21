@@ -2955,7 +2955,7 @@ const toDomElement = (
     }
     if (note.view) {
       const { url, view, sourceLocation } = note;
-      const { height, width } = view;
+      const { height, width, viewId } = view;
       const image = document.createElement('img');
       image.style.display = 'block';
       image.style.height = `${height}px`;
@@ -2963,6 +2963,9 @@ const toDomElement = (
       image.style.background =
         'url(https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif) no-repeat center;';
       image.classList.add('note', 'view');
+      if (viewId !== undefined) {
+        image.classList.add(`viewId_${viewId}`);
+      }
 
       if (url) {
         image.src = url;

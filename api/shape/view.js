@@ -54,11 +54,15 @@ export const baseView =
       console.log('No sourceLocation');
     }
     const { id, path, nth } = sourceLocation;
-    if (viewId === undefined) {
-      viewId = nth;
+    if (viewId) {
+      viewId = `${id}_${viewId}`;
+    } else if (nth) {
+      viewId = `${id}_${nth}`;
+    } else {
+      viewId = `${id}`;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
-    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry))) {
+    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry), 0, viewId)) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;

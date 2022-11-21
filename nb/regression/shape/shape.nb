@@ -4,54 +4,54 @@ await Box(5).and(Arc(5)).view(2, 'top', 'noSkin', 'noWireframe', { size: 800 });
 
 await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView(3);
 
-await Box(5).by(align('x>y>')).gridView();
+await Box(5).by(align('x>y>')).gridView(4);
 
-await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView(4);
+await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView(5);
 
-await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView(5);
+await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView(6);
 
-await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView(6);
+await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView(7);
 
-await Box(5).color('green').gridView();
+await Box(5).color('green').gridView(8);
 
 await Box(5)
   .color('green')
   .tags('color', (colors) => note(`Colors are ${colors}`));
 
-await Box(5).color('red').cut(Arc(6).color('blue')).gridView(8);
+await Box(5).color('red').cut(Arc(6).color('blue')).gridView(9);
 
-await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView(9);
+await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView(10);
 
 await Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
-  .gridView(10);
+  .gridView(11);
 
-await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView(11);
+await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView(12);
 
 await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView(13);
 
-await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(13);
+await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView(14);
 
-await Box(10).material('copper').gridView(14);
+await Box(10).material('copper').gridView(15);
 
-await Box(10).move(1, 2, 3).gridView(15);
-await Box(10).to(Point(1, 2, 3)).gridView(16);
-await Box(10).move(1, 2, 3).to(center()).gridView(17);
-await Box(10, 10, 10).move(faces().sort('z>').n(0)).view(18);
+await Box(10).move(1, 2, 3).gridView(16);
+await Box(10).to(Point(1, 2, 3)).gridView(17);
+await Box(10).move(1, 2, 3).to(center()).gridView(18);
+await Box(10, 10, 10).move(faces().sort('z>').n(0)).view(19);
 
-await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(19);
+await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView(20);
 
-await Box(5).offset(1).gridView(20);
+await Box(5).offset(1).gridView(21);
 
-await Box(5).op(color('green')).gridView(21);
+await Box(5).op(color('green')).gridView(22);
 
 await Line(10)
   .orient({ at: [40, 50, 0] })
-  .gridView(22);
+  .gridView(23);
 
 await Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
-  .gridView(23);
+  .gridView(24);
 
 await Box(1, 2, 3)
   .rx(1 / 8)
@@ -65,10 +65,12 @@ await Box(1, 2, 3)
 
 await Box(5).scale(1, 2).gridView(28);
 // Box(5).rotate(45).gridView(24);
+
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(1, 1)
   .gridView(29);
+
 await Box(5)
   .cut(Arc(4.9).by(align('x>')))
   .scale(-1, 1)
@@ -76,37 +78,38 @@ await Box(5)
 
 await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`));
 
-await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(32);
+await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view(31);
 
 await Box(1)
   .as('box')
   .tags((tags) => note(`${tags}`));
-await Box(5, 5, 5).gridView(34);
 
-await Box(5).tool('laser').gridView(35);
+await Box(5, 5, 5).gridView(32);
 
-await Assembly(Box(5), Arc(6).void()).gridView(36);
+await Box(5).tool('laser').gridView(33);
 
-await Box(5).fitTo(Arc(6)).gridView(38);
+await Assembly(Box(5), Arc(6).void()).gridView(34);
 
-await Box(5).x(1).gridView(39);
-await Box(5).y(1).gridView(40);
-await Box(5).z(1).gridView(41);
+await Box(5).fitTo(Arc(6)).gridView(35);
+
+await Box(5).x(1).gridView(36);
+await Box(5).y(1).gridView(37);
+await Box(5).z(1).gridView(38);
 
 await Arc(10)
   .op((s) => s.offset(1).fitTo(s.void()))
   .ez(5)
-  .view(42);
+  .view(39);
 
 await Box(10)
   .ez(10)
   .color('green')
   .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
-  .view(43);
+  .view(40);
 
-await Arc(10).color('blue').color('red').view(44);
+await Arc(10).color('blue').color('red').view(41);
 
-await Arc(10).color('blue').tint('red').view(45);
+await Arc(10).color('blue').tint('red').view(42);
 
 await Edges(
   seq(
@@ -121,7 +124,7 @@ await Edges(
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez(1, -1))
-  .gridView(46);
+  .gridView(43);
 
 const b = await Box(5)
   .ez(5)
@@ -133,11 +136,11 @@ const b = await Box(5)
   .material('glass')
   .y(10);
 
-await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(48);
+await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view(44);
 
-await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(49);
+await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view(45);
 
-await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(50);
+await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view(46);
 
 await Arc(2)
   .ez(5)
@@ -148,7 +151,7 @@ await Arc(2)
       .z(3)
   )
   .simplify({ ratio: 0.1, eps: 0.01 })
-  .view(51);
+  .view(47);
 
 await Triangle(14).svg('triangle');
 
@@ -159,29 +162,30 @@ await Box(10)
   .view(0)
   .remesh(1, Box(20, 20, 20))
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
-  .view(53);
+  .view(48);
 
 await Box(20, 20, 20)
-  .view(1, 'wireframe')
+  .view(49, 'wireframe')
   .md('Original mesh')
   .remesh()
-  .view(54, 'wireframe')
+  .view(50, 'wireframe')
   .md('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
-  .view(55, 'wireframe')
+  .view(51, 'wireframe')
   .md('Cut')
   .demesh()
-  .view(56, 'wireframe')
+  .view(52, 'wireframe')
   .md('Cleaned mesh');
+
 await Arc(4)
   .x(5)
   .seq({ by: 1 / 8 }, rz, Join)
   .material('glass')
   .color('orange')
   .and(toolpath())
-  .view(57);
+  .view(53);
 
-await Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(58);
+await Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(54);
 
 await Box(20, 20, 20)
   .join(Box(10, 10, 40))
