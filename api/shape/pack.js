@@ -13,7 +13,7 @@ export const pack = Shape.registerMethod(
       perLayout = Infinity,
       packSize = [],
     } = {}) =>
-    (shape) => {
+    async (shape) => {
       if (perLayout === 0) {
         // Packing was disabled -- do nothing.
         console.log(`QQ/packed/early: ${JSON.stringify(shape)}`);
@@ -21,7 +21,7 @@ export const pack = Shape.registerMethod(
       }
 
       let todo = [];
-      for (const leaf of getLeafs(shape.toGeometry())) {
+      for (const leaf of getLeafs(await shape.toGeometry())) {
         todo.push(leaf);
       }
       const packedLayers = [];

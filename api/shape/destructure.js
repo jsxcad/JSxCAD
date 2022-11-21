@@ -31,7 +31,7 @@ export const destructure = (
       objects.push(arg);
       object = Object.assign(object, arg);
     }
-    if (typeof arg !== 'object' && typeof arg !== 'function') {
+    if (Shape.isValue(arg)) {
       values.push(arg);
       if (value === undefined) {
         value = arg;

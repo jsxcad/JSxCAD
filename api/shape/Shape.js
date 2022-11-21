@@ -313,6 +313,9 @@ Shape.isArray = isArray;
 export const isObject = (value) => value instanceof Object;
 Shape.isObject = isObject;
 
+export const isValue = (value) => (!isObject(value) && !isFunction(value)) || isArray(value);
+Shape.isValue = isValue;
+
 Shape.chain = chain;
 
 export const registerMethod = (names, op) => {

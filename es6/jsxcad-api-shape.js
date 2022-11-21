@@ -312,6 +312,9 @@ Shape.isArray = isArray;
 const isObject = (value) => value instanceof Object;
 Shape.isObject = isObject;
 
+const isValue = (value) => (!isObject(value) && !isFunction(value)) || isArray(value);
+Shape.isValue = isValue;
+
 Shape.chain = chain;
 
 const registerMethod = (names, op) => {
@@ -577,7 +580,7 @@ const destructure = (
       objects.push(arg);
       object = Object.assign(object, arg);
     }
-    if (typeof arg !== 'object' && typeof arg !== 'function') {
+    if (Shape.isValue(arg)) {
       values.push(arg);
       if (value === undefined) {
         value = arg;
@@ -4519,8 +4522,8 @@ const Z$3 = 2;
 const orient = Shape.registerMethod(
   'orient',
   ({ at = [0, 0, 0], to = [0, 0, 1], up = [1, 0, 0] } = {}) =>
-    (shape) => {
-      const { local } = getInverseMatrices(shape.toGeometry());
+    async (shape) => {
+      const { local } = getInverseMatrices(await shape.toGeometry());
       // Algorithm from threejs Matrix4
       let u = subtract(up, at);
       if (squaredLength(u) === 0) {
@@ -4581,7 +4584,7 @@ const pack = Shape.registerMethod(
       perLayout = Infinity,
       packSize = [],
     } = {}) =>
-    (shape) => {
+    async (shape) => {
       if (perLayout === 0) {
         // Packing was disabled -- do nothing.
         console.log(`QQ/packed/early: ${JSON.stringify(shape)}`);
@@ -4589,7 +4592,7 @@ const pack = Shape.registerMethod(
       }
 
       let todo = [];
-      for (const leaf of getLeafs(shape.toGeometry())) {
+      for (const leaf of getLeafs(await shape.toGeometry())) {
         todo.push(leaf);
       }
       const packedLayers = [];
@@ -5361,8 +5364,12 @@ const baseView =
       console.log('No sourceLocation');
     }
     const { id, path, nth } = sourceLocation;
-    if (viewId === undefined) {
-      viewId = nth;
+    if (viewId) {
+      viewId = `${id}_${viewId}`;
+    } else if (nth) {
+      viewId = `${id}_${nth}`;
+    } else {
+      viewId = `${id}`;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
     for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry), 0)) {

@@ -40,8 +40,8 @@ const Z = 2;
 export const orient = Shape.registerMethod(
   'orient',
   ({ at = [0, 0, 0], to = [0, 0, 1], up = [1, 0, 0] } = {}) =>
-    (shape) => {
-      const { local } = getInverseMatrices(shape.toGeometry());
+    async (shape) => {
+      const { local } = getInverseMatrices(await shape.toGeometry());
       // Algorithm from threejs Matrix4
       let u = subtract(up, at);
       if (squaredLength(u) === 0) {
