@@ -186,13 +186,10 @@ await Group(Box(1), Box(1).rx(1 / 4))
   .each(e(2))
   .view();
 
-/*
-FIX: Temporarily disabled for speed.
 await Orb(10)
   .op(lowerEnvelope().ez(-1).z(-5), upperEnvelope().ez(1).z(5))
   .by(align('z>'))
   .view(1);
-*/
 
 // Show a section with a hole in it.
 await Box(10).cut(Box(5)).ez(1, -1).section().view();
@@ -241,13 +238,14 @@ await Triangle(10)
   .cut(eachPoint(Arc(1)))
   .view();
 
-//
 await Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
   .cut(eachPoint(Arc(5)))
   .view();
 
+/*
+FIX: Getting empty results from Loft.
 await Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
   .eachEdge(ArcX(0, 10, { sides: 6 }), Loft)
@@ -257,8 +255,8 @@ await Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
   .eachPoint(ArcX(0, 10, { sides: 6 }), Loft)
   .view();
+*/
 
-/*
 await Orb(6, { zag: 2 })
   .faces(cut(inset(0.2)))
   .view();
@@ -296,4 +294,3 @@ await Box(10)
   .ez(3)
   .section()
   .view();
-  */

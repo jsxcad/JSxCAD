@@ -3,19 +3,20 @@ import './eachEdge.js';
 import { Group } from './Group.js';
 import { Shape } from './Shape.js';
 import { destructure } from './destructure.js';
+import { eachEdge } from './eachEdge.js';
 
-const eachEdgeOp = Shape.ops.get('eachEdge');
+// const eachEdge = Shape.ops.get('eachEdge');
 
 export const faces = Shape.registerMethod('faces', (...args) => async (shape) => {
   const { shapesAndFunctions } = destructure(args);
-  let [faceOp = (face) => face, groupOp = Group] = shapesAndFunctions;
+  let [faceOp = (face) => (s) => face, groupOp = Group] = shapesAndFunctions;
   if (Shape.isShape(faceOp)) {
     const faceShape = faceOp;
-    faceOp = (face) => faceShape.to(face);
+    faceOp = (face) => (s) => faceShape.to(face);
   }
-  return eachEdgeOp(
-    (e, l) => (s) => e,
-    (e, f) => (s) => faceOp(f),
+  return eachEdge(
+    (e, l, o) => (s) => e,
+    (e, f) => (s) => faceOp(f)(s),
     groupOp
   )(shape);
 });

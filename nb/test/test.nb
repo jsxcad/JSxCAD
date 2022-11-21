@@ -1,3 +1,2 @@
-await Group(Box(1), Box(1).rx(1 / 4))
-  .each(e(2))
-  .view();
+// await Orb(6, { zag: 2 }).faces(cut(inset(0.2))).view();
+await Orb(6, { zag: 2 }).faces(cut(inset(0.2))).view();
