@@ -7,6 +7,9 @@ import { fuse as fuseGeometry } from '@jsxcad/geometry';
 export const fuse = Shape.registerMethod('fuse', (...args) => async (shape) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
   return fromGeometry(
-    fuseGeometry(await Group(shape, ...shapes).toGeometry(), modes.includes('exact'))
+    fuseGeometry(
+      await Group(shape, ...shapes).toGeometry(),
+      modes.includes('exact')
+    )
   );
 });

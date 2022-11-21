@@ -15,7 +15,7 @@ export const wrap = Shape.registerMethod(
     async (shape) =>
       Shape.fromGeometry(
         wrapGeometry(await shape.toGeometry(), offset, alpha)
-      ).setTags(...await shape.getTags())
+      ).setTags(...(await shape.getTags()))
 );
 
 export default wrap;

@@ -20,7 +20,7 @@ const reifyOrb = async ({ c1, c2, zag = DEFAULT_ORB_ZAG }) => {
   const middle = computeMiddle(c1, c2);
   const radius = Math.max(...scale);
   const tolerance = zag / radius;
-  const unitSphere = (await makeUnitSphere(tolerance));
+  const unitSphere = await makeUnitSphere(tolerance);
   return scaleOp(scale).move(middle).absolute()(unitSphere);
 };
 

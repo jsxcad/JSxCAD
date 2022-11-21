@@ -9,9 +9,7 @@ export const assemble = async (modes, ...shapes) => {
     }
     geometries.push(await shape.toGeometry());
   }
-  return fromGeometry(
-    disjoint(geometries, undefined, modes.includes('exact'))
-  );
+  return fromGeometry(disjoint(geometries, undefined, modes.includes('exact')));
 };
 
 export default assemble;

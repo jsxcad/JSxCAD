@@ -4,5 +4,6 @@ import { untag } from './untag.js';
 
 export const color = Shape.registerMethod(
   'color',
-  (name) => async (shape) => untag('color:*').tag(...toTagsFromName(name))(shape)
+  (name) => async (shape) =>
+    untag('color:*').tag(...toTagsFromName(name))(shape)
 );

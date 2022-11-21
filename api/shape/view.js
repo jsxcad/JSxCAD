@@ -58,9 +58,7 @@ export const baseView =
       viewId = nth;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
-    const pages = await ensurePages(Shape.fromGeometry(displayGeometry));
-    for (const entry of pages) {
-      const geometry = await entry;
+    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry))) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;
@@ -73,7 +71,7 @@ export const baseView =
         needsThumbnail: isNode,
       };
       emit({ hash, path: viewPath, view });
-      await write(viewPath, displayGeometry);
+      await write(viewPath, pageGeometry);
       if (!isNode) {
         await write(thumbnailPath, dataUrl(viewShape, view));
       }
@@ -81,26 +79,30 @@ export const baseView =
     return shape;
   };
 
-export const topView = Shape.registerMethod('topView', (...args) => async (shape) => {
-  const {
-    value: viewId,
-    func: op = (x) => x,
-    object: options,
-    strings: modes,
-  } = Shape.destructure(args, {
-    object: {
-      size: 512,
-      skin: true,
-      outline: true,
-      wireframe: false,
-      width: 512,
-      height: 512,
-      position: [0, 0, 100],
-    },
-  });
-  shape = await applyModes(shape, options, modes);
-  return baseView(viewId, op, options)(shape);
-});
+export const topView = Shape.registerMethod(
+  'topView',
+  (...args) =>
+    async (shape) => {
+      const {
+        value: viewId,
+        func: op = (x) => x,
+        object: options,
+        strings: modes,
+      } = Shape.destructure(args, {
+        object: {
+          size: 512,
+          skin: true,
+          outline: true,
+          wireframe: false,
+          width: 512,
+          height: 512,
+          position: [0, 0, 100],
+        },
+      });
+      shape = await applyModes(shape, options, modes);
+      return baseView(viewId, op, options)(shape);
+    }
+);
 
 export const gridView = Shape.registerMethod(
   'gridView',

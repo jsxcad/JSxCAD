@@ -14,7 +14,9 @@ export const move = Shape.registerMethod(
     async (shape) => {
       const results = [];
       for (const coordinate of await toCoordinatesOp(...args)(shape)) {
-        results.push(await transform(fromTranslateToTransform(...coordinate))(shape));
+        results.push(
+          await transform(fromTranslateToTransform(...coordinate))(shape)
+        );
       }
       return Group(...results);
     }

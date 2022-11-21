@@ -1,9 +1,7 @@
 import { Shape, ensurePages } from '@jsxcad/api-shape';
 import {
-  addPending,
   emit,
   generateUniqueId,
-  getPendingErrorHandler,
   getSourceLocation,
   write,
 } from '@jsxcad/sys';

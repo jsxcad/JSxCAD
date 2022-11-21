@@ -67,6 +67,6 @@ export const getCgal = () => {
     throw Error('CGAL not initialized');
   }
   return cgal;
-}
+};
 
 onBoot(initCgal);

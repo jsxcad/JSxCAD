@@ -67,7 +67,10 @@ const buildRegularIcosahedron = () => {
 const reifyIcosahedron = async (c1, c2) => {
   const scale = computeScale(c1, c2);
   const middle = computeMiddle(c1, c2);
-  return Shape.chain(Shape.fromPolygons(buildRegularIcosahedron({}))).scale(...scale).move(...middle).absolute();
+  return Shape.chain(Shape.fromPolygons(buildRegularIcosahedron({})))
+    .scale(...scale)
+    .move(...middle)
+    .absolute();
 };
 
 export const Icosahedron = Shape.registerShapeMethod(

@@ -312,6 +312,7 @@ const disjoint = (geometries, mode, exact) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$B, inputs);
   }
+  console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
   const outputs = disjoint$1(inputs, mode, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
@@ -2521,13 +2522,13 @@ const filter = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-const wrap = (geometry, tags = [], offset, alpha) => {
+const wrap = (geometry, offset, alpha) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = wrap$1(inputs, offset, alpha);
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
+  return taggedGroup({}, ...outputs);
 };
 
 const rotateX = (turn, geometry) =>

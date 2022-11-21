@@ -4,5 +4,12 @@ import { disjoint } from '@jsxcad/geometry';
 
 export const fitTo = Shape.registerMethod('fitTo', (...args) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return async (shape) => Shape.fromGeometry(disjoint([await shape.toGeometry(), ...await shape.toShapesGeometries(shapes)], undefined, modes.includes('exact')));
+  return async (shape) =>
+    Shape.fromGeometry(
+      disjoint(
+        [await shape.toGeometry(), ...(await shape.toShapesGeometries(shapes))],
+        undefined,
+        modes.includes('exact')
+      )
+    );
 });

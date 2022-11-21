@@ -20,9 +20,16 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
 ];
 const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
-export const computeScale = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [ax - bx, ay - by, az - bz];
+export const computeScale = (
+  [ax = 0, ay = 0, az = 0],
+  [bx = 0, by = 0, bz = 0]
+) => [ax - bx, ay - by, az - bz];
 
-export const computeMiddle = (c1, c2) => [(c1[X] + c2[X]) * 0.5, (c1[Y] + c2[Y]) * 0.5, (c1[Z] + c2[Z]) * 0.5];
+export const computeMiddle = (c1, c2) => [
+  (c1[X] + c2[X]) * 0.5,
+  (c1[Y] + c2[Y]) * 0.5,
+  (c1[Z] + c2[Z]) * 0.5,
+];
 
 export const computeSides = (c1, c2, sides, zag = 0.01) => {
   if (sides) {

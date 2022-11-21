@@ -1,4 +1,9 @@
-import { buildCorners, computeMiddle, computeScale, computeSides } from './Plan.js';
+import {
+  buildCorners,
+  computeMiddle,
+  computeScale,
+  computeSides,
+} from './Plan.js';
 
 import Point from './Point.js';
 import Shape from './Shape.js';
@@ -35,7 +40,7 @@ const reifyArc =
     let spiral;
 
     if (end - start === 1) {
-      spiral = Spiral((t) => Point(1), {
+      spiral = Spiral((t) => Point(0.5), {
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
@@ -43,7 +48,7 @@ const reifyArc =
         .loop()
         .fill();
     } else {
-      spiral = Spiral((t) => Point(1), {
+      spiral = Spiral((t) => Point(0.5), {
         from: start - 1 / 4,
         to: end - 1 / 4,
         by: effectiveStep,
@@ -97,54 +102,56 @@ const reifyArcZ = reifyArc(Z);
 const reifyArcX = reifyArc(X);
 const reifyArcY = reifyArc(Y);
 
-const ArcOp = (type) => async (...args) => {
-  const { values, object: options } = destructure(args);
-  let [x, y, z] = values;
-  const { start, end, sides, zag } = options;
-  let reify;
-  switch (type) {
-    case 'Arc':
-    case 'ArcZ':
-      if (x === undefined) {
-        x = 1;
-      }
-      if (y === undefined) {
-        y = x;
-      }
-      if (z === undefined) {
-        z = 0;
-      }
-      reify = reifyArcZ;
-      break;
-    case 'ArcX':
-      if (y === undefined) {
-        y = 1;
-      }
-      if (z === undefined) {
-        z = y;
-      }
-      if (x === undefined) {
-        x = 0;
-      }
-      reify = reifyArcX;
-      break;
-    case 'ArcY':
-      if (x === undefined) {
-        x = 1;
-      }
-      if (z === undefined) {
-        z = x;
-      }
-      if (y === undefined) {
-        y = 0;
-      }
-      reify = reifyArcY;
-      break;
-  }
-  const [c1, c2] = buildCorners(x, y, z);
-  const result = reify({ c1, c2, start, end, sides, zag });
-  return result;
-};
+const ArcOp =
+  (type) =>
+  async (...args) => {
+    const { values, object: options } = destructure(args);
+    let [x, y, z] = values;
+    const { start, end, sides, zag } = options;
+    let reify;
+    switch (type) {
+      case 'Arc':
+      case 'ArcZ':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (y === undefined) {
+          y = x;
+        }
+        if (z === undefined) {
+          z = 0;
+        }
+        reify = reifyArcZ;
+        break;
+      case 'ArcX':
+        if (y === undefined) {
+          y = 1;
+        }
+        if (z === undefined) {
+          z = y;
+        }
+        if (x === undefined) {
+          x = 0;
+        }
+        reify = reifyArcX;
+        break;
+      case 'ArcY':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (z === undefined) {
+          z = x;
+        }
+        if (y === undefined) {
+          y = 0;
+        }
+        reify = reifyArcY;
+        break;
+    }
+    const [c1, c2] = buildCorners(x, y, z);
+    const result = reify({ c1, c2, start, end, sides, zag });
+    return result;
+  };
 
 export const Arc = Shape.registerShapeMethod('Arc', ArcOp('Arc'));
 export const ArcX = Shape.registerShapeMethod('ArcX', ArcOp('ArcX'));

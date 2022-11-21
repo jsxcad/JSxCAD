@@ -3,7 +3,6 @@ import Point from './Point.js';
 import Shape from './Shape.js';
 import bezier from 'adaptive-bezier-curve';
 import { destructure } from './destructure.js';
-import { getZag } from './Plan.js';
 import { toCoordinate } from './toCoordinate.js';
 
 const DEFAULT_CURVE_ZAG = 1;
@@ -20,7 +19,7 @@ export const reifyCurve = async (start, c1, c2, end, zag) => {
 // Shape.registerReifier('Curve', reifyCurve);
 
 export const Curve = Shape.registerShapeMethod('Curve', async (...args) => {
-  const { values, objects: options } = destructure(args)
+  const { values, objects: options } = destructure(args);
   const [start, c1, c2, end] = values;
   const { zag = DEFAULT_CURVE_ZAG } = options;
   return reifyCurve(start, c1, c2, end, zag);

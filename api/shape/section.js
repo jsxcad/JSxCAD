@@ -10,11 +10,7 @@ const baseSection =
       orientations.push(await Point().toGeometry());
     }
     return Shape.fromGeometry(
-      sectionGeometry(
-        await shape.toGeometry(),
-        orientations,
-        { profile }
-      )
+      sectionGeometry(await shape.toGeometry(), orientations, { profile })
     );
   };
 

@@ -7,7 +7,7 @@ import { toShapesGeometries } from './toShapesGeometries.js';
 
 export const Group = Shape.registerShapeMethod('Group', async (...shapes) =>
   Shape.fromGeometry(
-    taggedGroup({}, ...await toShapesGeometries(shapes)(null))
+    taggedGroup({}, ...(await toShapesGeometries(shapes)(null)))
   )
 );
 

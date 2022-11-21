@@ -79,7 +79,11 @@ complete = {
           const s = await target(terminal);
           // console.log(`>>> QQ/complete/exec[${prop}]: s=${'' + s} ${JSON.stringify(s)} chain=${s.isChain}`);
           if (!(s instanceof Shape) && !s.isChain) {
-            throw Error(`Expected Shape but received ${JSON.stringify(s)} constructor ${s.constructor.name}`);
+            throw Error(
+              `Expected Shape but received ${JSON.stringify(s)} constructor ${
+                s.constructor.name
+              }`
+            );
           }
           // console.log(`QQ/complete/exec[${prop}]/s: ${'' + s}`);
           // const op = s.ops.get(prop);
@@ -143,7 +147,11 @@ chain = (shape) => {
             // console.log(`QQ/root/exec`);
             // We don't care about the terminal -- we're the root of the chain.
             if (!(target instanceof Shape)) {
-              throw Error(`Expected Shape but received ${'' + target}: isChain ${target.isChain} ${JSON.stringify(target)}`);
+              throw Error(
+                `Expected Shape but received ${'' + target}: isChain ${
+                  target.isChain
+                } ${JSON.stringify(target)}`
+              );
             }
             const root = await target;
             // console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
@@ -208,7 +216,11 @@ const chainable = (op) => {
     (...args) =>
       async (terminal) => {
         // console.log(`QQ/chainable/terminal`);
-        if (!(terminal instanceof Shape) && terminal !== null && terminal !== undefined) {
+        if (
+          !(terminal instanceof Shape) &&
+          terminal !== null &&
+          terminal !== undefined
+        ) {
           throw Error(
             `Expected Shape but received ${JSON.stringify(
               terminal
@@ -223,9 +235,7 @@ const chainable = (op) => {
 };
 
 // For testing.
-export {
-  chain, chainable, incomplete, complete
-};
+export { chain, chainable, incomplete, complete };
 
 export class Shape {
   constructor(geometry = { type: 'Group', tags: [], content: [] }, context) {
@@ -241,13 +251,13 @@ export class Shape {
     return this.context[symbol];
   }
 
-/*
+  /*
   toPoints() {
     return toPoints(this.toGeometry()).points;
   }
   */
 
-/*
+  /*
   eagerTransform(matrix) {
     return fromGeometry(
       eagerTransform(matrix, await this.toGeometry()),
@@ -256,7 +266,7 @@ export class Shape {
   }
   */
 
-/*
+  /*
   // Low level setter for reifiers.
   getTags() {
     return this.toGeometry().tags || [];
@@ -271,37 +281,36 @@ export class Shape {
     return Shape.toCoordinates(this, ...args);
   }
 
-/*
+  /*
   toValue(value) {
     return Shape.toValue(value, this);
   }
   */
 
-/*
+  /*
   toFlatValues(values) {
     return Shape.toFlatValues(values, this);
   }
   */
 
-/*
+  /*
   toNestedValues(values) {
     return Shape.toNestedValues(values, this);
   }
 */
 }
 
-export const isShape = (value) => value !== undefined && (value instanceof Shape || value.isChain);
+export const isShape = (value) =>
+  value !== undefined && (value instanceof Shape || value.isChain);
 Shape.isShape = isShape;
 
 export const isFunction = (value) => value instanceof Function;
 Shape.isFunction = isFunction;
 
-export const isArray = (value) =>
-  value instanceof Array;
+export const isArray = (value) => value instanceof Array;
 Shape.isArray = isArray;
 
-export const isObject = (value) =>
-  value instanceof Object;
+export const isObject = (value) => value instanceof Object;
 Shape.isObject = isObject;
 
 Shape.chain = chain;

@@ -59,15 +59,11 @@ const reifyBox = async (corner1, corner2) => {
         if (front === back) {
           return fs.tlfBox.move(left, front, bottom);
         } else {
-          return fs
-            .tlBox.sy(back - front)
-            .move(left, front, bottom);
+          return fs.tlBox.sy(back - front).move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          return fs
-            .tfBox.sx(right - left)
-            .move(left, front, bottom);
+          return fs.tfBox.sx(right - left).move(left, front, bottom);
         } else {
           const v1 = fs;
           const v2 = v1.tBox;
@@ -80,24 +76,22 @@ const reifyBox = async (corner1, corner2) => {
     } else {
       if (left === right) {
         if (front === back) {
-          return fs
-            .lfBox.sz(top - bottom)
-            .move(left, front, bottom);
+          return fs.lfBox.sz(top - bottom).move(left, front, bottom);
         } else {
-          return fs
-            .lBox.sz(top - bottom)
+          return fs.lBox
+            .sz(top - bottom)
             .sy(back - front)
             .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          return fs
-            .fBox.sz(top - bottom)
+          return fs.fBox
+            .sz(top - bottom)
             .sx(right - left)
             .move(left, front, bottom);
         } else {
-          return fs
-            .box.sz(top - bottom)
+          return fs.box
+            .sz(top - bottom)
             .sx(right - left)
             .sy(back - front)
             .move(left, front, bottom);
@@ -109,10 +103,13 @@ const reifyBox = async (corner1, corner2) => {
   return (await build()).absolute();
 };
 
-export const Box = Shape.registerShapeMethod('Box', async (x = 1, y = x, z = 0) => {
-  console.log(`QQ/box: ${[x, y, z]}`);
-  const [c1, c2] = buildCorners(x, y, z);
-  return reifyBox(c1, c2);
-});
+export const Box = Shape.registerShapeMethod(
+  'Box',
+  async (x = 1, y = x, z = 0) => {
+    console.log(`QQ/box: ${[x, y, z]}`);
+    const [c1, c2] = buildCorners(x, y, z);
+    return reifyBox(c1, c2);
+  }
+);
 
 export default Box;

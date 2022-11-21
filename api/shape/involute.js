@@ -3,5 +3,6 @@ import { involute as involuteGeometry } from '@jsxcad/geometry';
 
 export const involute = Shape.registerMethod(
   'involute',
-  () => async (shape) => Shape.fromGeometry(involuteGeometry(await shape.toGeometry()))
+  () => async (shape) =>
+    Shape.fromGeometry(involuteGeometry(await shape.toGeometry()))
 );

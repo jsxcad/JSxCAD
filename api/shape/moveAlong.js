@@ -1,5 +1,4 @@
 import Shape from './Shape.js';
-import { move } from './move.js';
 import { normal } from './normal.js';
 
 const scale = (amount, [x = 0, y = 0, z = 0]) => [

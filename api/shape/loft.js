@@ -15,7 +15,7 @@ export const Loft = Shape.registerShapeMethod('Loft', async (...args) => {
 
 export const loft = Shape.registerMethod('loft', (...args) => async (shape) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return Loft(...await shape.toShapes(shapes), ...modes);
+  return Loft(...(await shape.toShapes(shapes)), ...modes);
 });
 
 export default Loft;
