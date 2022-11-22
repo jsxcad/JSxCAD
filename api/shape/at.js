@@ -12,7 +12,6 @@ export const at = Shape.registerMethod('at', (...args) => async (shape) => {
   const { local, global } = getInverseMatrices(await shape.toGeometry());
   const selections = await toShapesOp(ops.shift())(shape);
   for (const selection of selections) {
-    console.log(`QQQ/at/shape: ${JSON.stringify(shape)}`);
     const { local: selectionLocal, global: selectionGlobal } =
       getInverseMatrices(await selection.toGeometry());
     shape = transform(local)

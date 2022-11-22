@@ -1,8 +1,10 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { clip } from './clip.js';
+import { cut } from './cut.js';
 import { destructure } from './destructure.js';
 
-export const cutOut = Shape.registerMethod('cutOut', (...args) => (shape) => {
+export const cutOut = Shape.registerMethod('cutOut', (...args) => async (shape) => {
   const {
     shapesAndFunctions: others,
     functions,
@@ -12,7 +14,7 @@ export const cutOut = Shape.registerMethod('cutOut', (...args) => (shape) => {
     functions;
   const other = shape.toShape(others[0]);
   return groupOp(
-    shape.cut(other, ...modes).op(cutOp),
-    shape.clip(other, ...modes).op(clipOp)
+    await cut(other, ...modes).op(cutOp)(shape),
+    await clip(other, ...modes).op(clipOp)(shape)
   );
 });

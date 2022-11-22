@@ -1,2 +1,2 @@
-// await Orb(6, { zag: 2 }).faces(cut(inset(0.2))).view();
 await Orb(6, { zag: 2 }).faces(cut(inset(0.2))).view();
+

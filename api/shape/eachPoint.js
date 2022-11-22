@@ -11,15 +11,19 @@ export const eachPoint = Shape.registerMethod(
       const { shapesAndFunctions } = destructure(args);
       let [pointOp = (point) => (shape) => point, groupOp = Group] =
         shapesAndFunctions;
-      if (Shape.isShape(pointOp)) {
+      if (!Shape.isFunction(pointOp)) {
         const pointShape = pointOp;
-        pointOp = (point) => (shape) => pointShape.by(point);
+        pointOp = (point) => pointShape.to(point);
       }
-      const points = [];
+      const coordinates = [];
       let nth = 0;
       eachPointOfGeometry(await shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>
-        points.push(pointOp(Point().move(x, y, z), nth++)(shape))
+        coordinates.push([x, y, z])
       );
+      const points = [];
+      for (const [x, y, z] of coordinates) {
+        points.push(await pointOp(Point().move(x, y, z), nth++))
+      }
       const grouped = groupOp(...points);
       if (Shape.isFunction(grouped)) {
         return grouped(shape);

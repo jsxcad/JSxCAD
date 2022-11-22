@@ -1682,14 +1682,13 @@ const by = Shape.registerMethod(
       if (ops.length === 0) {
         ops.push((local) => local);
       }
-      ops = ops.map((op) => (op instanceof Function ? op : () => op));
+      ops = ops.map((op) => (Shape.isFunction(op) ? op : () => op));
       // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
       if (Shape.isFunction(selection)) {
         selection = await selection(shape);
       }
       const placed = [];
-      console.log(`QQ/by/selection: ${JSON.stringify(selection)}`);
-      for (const leaf of getLeafs((await selection).toGeometry())) {
+      for (const leaf of getLeafs(await selection.toGeometry())) {
         const { global } = getInverseMatrices(leaf);
         // Perform the operation then place the
         // result in the global frame of the reference.
@@ -3899,11 +3898,15 @@ const eachPoint = Shape.registerMethod(
         const pointShape = pointOp;
         pointOp = (point) => (shape) => pointShape.by(point);
       }
-      const points = [];
+      const coordinates = [];
       let nth = 0;
       eachPoint$1(await shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>
-        points.push(pointOp(Point().move(x, y, z), nth++)(shape))
+        coordinates.push([x, y, z])
       );
+      const points = [];
+      for (const [x, y, z] of coordinates) {
+        points.push(await pointOp(Point().move(x, y, z), nth++)(shape));
+      }
       const grouped = groupOp(...points);
       if (Shape.isFunction(grouped)) {
         return grouped(shape);
@@ -4009,8 +4012,8 @@ const flat = Shape.registerMethod(
   () => (shape) => shape.to(XY())
 );
 
-const origin = Shape.registerMethod(['origin', 'o'], () => (shape) => {
-  const { local } = getInverseMatrices(shape.toGeometry());
+const origin = Shape.registerMethod(['origin', 'o'], () => async (shape) => {
+  const { local } = getInverseMatrices(await shape.toGeometry());
   return Point().transform(local);
 });
 
@@ -5136,11 +5139,8 @@ const to = Shape.registerMethod(
   (...references) =>
     async (shape) => {
       const arranged = [];
-      console.log(`QQ/to/0`);
       for (const reference of await shape.toShapes(references)) {
-        console.log(`QQ/to/1`);
         arranged.push(await by(origin()).by(reference)(shape));
-        console.log(`QQ/to/2`);
       }
       return Group(...arranged);
     }

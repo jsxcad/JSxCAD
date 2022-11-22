@@ -8,8 +8,13 @@ export const faces = Shape.registerMethod(
   (...args) =>
     async (shape) => {
       const { shapesAndFunctions } = destructure(args);
-      let [faceOp = (face) => (s) => face, groupOp = Group] =
+      let [faceOp = (face) => (shape) => face, groupOp = Group] =
         shapesAndFunctions;
+      if (Shape.isShape(faceOp)) {
+        console.log(`QQ/faces/faceOp/isChain: ${faceOp.isChain}`);
+        const faceShape = faceOp;
+        faceOp = (face) => (shape) => faceShape.to(face);
+      }
       return eachEdge(
         (e, l, o) => e,
         async (e, f) => faceOp(f),

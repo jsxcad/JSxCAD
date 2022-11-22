@@ -22,7 +22,6 @@ export const log = Shape.registerMethod(
       const level = 'serious';
       const log = { text, level };
       const hash = computeHash(log);
-      console.log(`QQQQ/log: ${text}`);
       emit({ log, hash });
       sysLog({ op: 'text', text });
       return shape;

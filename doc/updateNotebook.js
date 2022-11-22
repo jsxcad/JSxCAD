@@ -218,7 +218,6 @@ export const updateNotebook = async (
     });
     await resolvePending();
     sortNotebook(notebook);
-    console.log(`QQQQ/notebook: ${JSON.stringify(notebook)}`);
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',

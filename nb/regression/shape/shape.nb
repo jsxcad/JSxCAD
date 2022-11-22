@@ -354,7 +354,7 @@ await Box(10, 10, 10)
     eachEdge((e, l) => (s) =>
       Box([0, 1.5], 0, [0, l])
         .and(
-          Arc([1, 2], 1, [0, l * 0.95], { startTurn: 1 / 4, endTurn: 3 / 4 })
+          Arc([1, 2], 1, [0, l * 0.95], { start: 1 / 4, end: 3 / 4 })
             .y(1)
         )
         .to(e)
