@@ -17,34 +17,34 @@ import {
   GT2_5mm,
 } from './belt_sprockets.nb';
 
-Pulley(MXL, 20).md('MXL').view();
+await Pulley(MXL, 20).md('MXL').view('example');
 
-Pulley(DP40, 20).md('DP40').view();
+await Pulley(DP40, 20).md('DP40').view('example');
 
-Pulley(XL, 20).md('XL').view();
+await Pulley(XL, 20).md('XL').view('example');
 
-Pulley(H, 20).md('H').view();
+await Pulley(H, 20).md('H').view('example');
 
-Pulley(T2_5, 20).md('T2 5mm').view();
+await Pulley(T2_5, 20).md('T2 5mm').view('example');
 
-Pulley(T5, 20).md('T5').view();
+await Pulley(T5, 20).md('T5').view('example');
 
-Pulley(T10, 20).md('T10').view();
+await Pulley(T10, 20).md('T10').view('example');
 
-Pulley(AT5, 20).md('AT 5mm').view();
+await Pulley(AT5, 20).md('AT 5mm').view('example');
 
-Pulley(HTD_3mm, 20).md('HTD 3mm').view();
+await Pulley(HTD_3mm, 20).md('HTD 3mm').view('example');
 
-Pulley(HTD_5mm, 20).md('HTD 5mm').view();
+await Pulley(HTD_5mm, 20).md('HTD 5mm').view('example');
 
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+await Pulley(GT2_5mm, 20).md('GT2 5mm').view('example');
 
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+await Pulley(GT2_5mm, 20).md('GT2 5mm').view('example');
 
-Pulley(HTD_8mm, 20).md('HTD 8mm').view();
+await Pulley(HTD_8mm, 20).md('HTD 8mm').view('example');
 
-Pulley(GT2_2mm, 20).md('GT2 2mm').view();
+await Pulley(GT2_2mm, 20).md('GT2 2mm').view('example');
 
-Pulley(GT2_3mm, 20).md('GT2 3mm').view();
+await Pulley(GT2_3mm, 20).md('GT2 3mm').view('example');
 
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+await Pulley(GT2_5mm, 20).md('GT2 5mm').view('example');

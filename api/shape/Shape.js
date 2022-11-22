@@ -111,7 +111,12 @@ complete = {
 };
 
 // This builds a chain from an existing shape value.
-chain = (shape) => {
+chain = (value) => {
+  if (!(value instanceof Object)) {
+    return value;
+  }
+  const shape = value;
+
   const root = {
     apply(target, obj, args) {
       // This is wrong -- the chain root should be the constructor, which requires application.

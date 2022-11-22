@@ -1,10 +1,10 @@
 import Shape from './Shape.js';
 import { loft as loftGeometry } from '@jsxcad/geometry';
 
-export const Loop = Shape.registerShapeMethod('Loop', (...shapes) =>
+export const Loop = Shape.registerShapeMethod('Loop', async (...shapes) =>
   Shape.fromGeometry(
     loftGeometry(
-      shapes.map((shape) => shape.toGeometry()),
+      await Shape.toShapesGeometries(shapes),
       /* closed= */ false
     )
   )
@@ -15,6 +15,6 @@ export default Loop;
 export const loop = Shape.registerMethod(
   'loop',
   (...shapes) =>
-    (shape) =>
-      Loop(shape, ...shape.toShapes(shapes))
+    async (shape) =>
+      Loop(shape, ...await shape.toShapes(shapes))
 );

@@ -1,10 +1,9 @@
 import Shape from './Shape.js';
 import { link as linkGeometry } from '@jsxcad/geometry';
-
-const toShapesGeometriesOp = Shape.ops.get('toShapesGeometries');
+import { toShapesGeometries } from './toShapesGeometries.js';
 
 export const Link = Shape.registerShapeMethod('Link', async (...shapes) =>
-  Shape.fromGeometry(linkGeometry(await toShapesGeometriesOp(shapes)(null)))
+  Shape.fromGeometry(linkGeometry(await toShapesGeometries(shapes)(null)))
 );
 
 export default Link;

@@ -2,12 +2,11 @@ import './toShapesGeometries.js';
 
 import Shape from './Shape.js';
 import { link as linkGeometry } from '@jsxcad/geometry';
-
-const toShapesGeometriesOp = Shape.ops.get('toShapesGeometries');
+import { toShapesGeometries } from './toShapesGeometries.js';
 
 export const Loop = Shape.registerShapeMethod('Loop', async (...shapes) =>
   Shape.fromGeometry(
-    linkGeometry(await toShapesGeometriesOp(shapes)(null), /* close= */ true)
+    linkGeometry(await toShapesGeometries(shapes)(null), /* close= */ true)
   )
 );
 
