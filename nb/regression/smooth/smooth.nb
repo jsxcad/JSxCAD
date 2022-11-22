@@ -1,12 +1,12 @@
-const fused = Box(20, 20, 20)
+const fused = await Box(20, 20, 20)
   .move([0, 0], [3, 4, 6])
   .cut(Box(10, 10, 100))
   .fuse()
   .view(1)
   .note('fused');
 
-const remeshed = fused.remesh().view(1, 'wireframe').note('remeshed');
+const remeshed = await fused.remesh().view(1, 'wireframe').note('remeshed');
 
-const smoothed = remeshed.smooth().view(1).note('smoothed');
+const smoothed = await remeshed.smooth().view(1).note('smoothed');
 
-const simplified = smoothed.simplify().view(1).note('simplified');
+const simplified = await smoothed.simplify().view(1).note('simplified');

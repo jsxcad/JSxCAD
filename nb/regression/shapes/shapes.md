@@ -479,7 +479,7 @@ await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```JavaScript
 await Box(10)
   .rz(1 / 8)
-  .cut(eachPoint(Arc(5)))
+  .cut(eachPoint(Arc(5).to))
   .view();
 ```
 
@@ -488,7 +488,7 @@ await Box(10)
 ```JavaScript
 await Triangle(10)
   .cut(inset(2))
-  .cut(eachPoint(Arc(1)))
+  .cut(eachPoint(Arc(1).to))
   .view();
 ```
 
@@ -498,7 +498,7 @@ await Triangle(10)
 await Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
-  .cut(eachPoint(Arc(5)))
+  .cut(eachPoint(Arc(5).to))
   .view();
 ```
 
@@ -514,7 +514,7 @@ await Orb(6, { zag: 2 })
 
 ```JavaScript
 await Box(10, 10, 10)
-  .cut(faces(Box(4, 4, 4)))
+  .cut(faces(Box(4, 4, 4).to))
   .faces(cut(inset(1)))
   .view();
 ```
@@ -534,7 +534,7 @@ await Box(10).cut(Triangle(11)).clean().view(2);
 ![Image](shapes.md.$52_2.png)
 
 ```JavaScript
-await Triangle(11).eachPoint(Arc(5), cut).view(5);
+await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 ```
 
 ![Image](shapes.md.$53_5.png)

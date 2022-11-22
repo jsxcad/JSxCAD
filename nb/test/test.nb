@@ -1,2 +1,4 @@
+// await Triangle(10).eachPoint(Arc(1).to).view();
+
 await Orb(6, { zag: 2 }).faces(cut(inset(0.2))).view();
 

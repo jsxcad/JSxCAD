@@ -169,13 +169,7 @@ const evaluate = async (ecmascript, { api, path }) => {
         const result = await op();
         return result;
       } catch (error) {
-        if (error instanceof ErrorWouldBlock) {
-          logInfo('api/core/evaluate/error', error.message);
-          console.log(error.message);
-          await resolvePending();
-          restoreEmitGroup(emitGroup);
-          continue;
-        }
+        if (false && error instanceof ErrorWouldBlock) ;
         throw error;
       }
     }

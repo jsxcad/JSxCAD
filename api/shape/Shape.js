@@ -301,7 +301,7 @@ export class Shape {
 }
 
 export const isShape = (value) =>
-  value instanceof Shape || (value !== undefined && value.isChain === 'root');
+  value instanceof Shape || (value !== undefined && value !== null && value.isChain === 'root');
 Shape.isShape = isShape;
 
 export const isFunction = (value) => value instanceof Function;

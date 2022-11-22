@@ -639,7 +639,7 @@ await Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 
 ```JavaScript
 await Orb(5, 5, 5, { zag: 5 })
-  .eachEdge((e, l) => (s) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to(e))
+  .eachEdge((e, l) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to)
   .view();
 ```
 
@@ -696,8 +696,8 @@ await Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 ```JavaScript
 await Box(10, 10, 10)
   .and(
-    eachEdge((e, l) => (s) =>
-      Box([0, 1.5], 0, [0, l])
+    eachEdge(
+      (e, l) => (s) => Box([0, 1.5], 0, [0, l])
         .and(
           Arc([1, 2], 1, [0, l * 0.95], { start: 1 / 4, end: 3 / 4 })
             .y(1)

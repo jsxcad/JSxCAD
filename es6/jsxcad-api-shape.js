@@ -300,7 +300,7 @@ class Shape {
 }
 
 const isShape = (value) =>
-  value !== undefined && (value instanceof Shape || value.isChain);
+  value instanceof Shape || (value !== undefined && value.isChain === 'root');
 Shape.isShape = isShape;
 
 const isFunction = (value) => value instanceof Function;
@@ -1298,7 +1298,6 @@ const at = Shape.registerMethod('at', (...args) => async (shape) => {
   const { local, global } = getInverseMatrices(await shape.toGeometry());
   const selections = await toShapesOp$1(ops.shift())(shape);
   for (const selection of selections) {
-    console.log(`QQQ/at/shape: ${JSON.stringify(shape)}`);
     const { local: selectionLocal, global: selectionGlobal } =
       getInverseMatrices(await selection.toGeometry());
     shape = transform(local)
@@ -1894,7 +1893,7 @@ const cutFrom = Shape.registerMethod(
     }
 );
 
-const cutOut = Shape.registerMethod('cutOut', (...args) => (shape) => {
+const cutOut = Shape.registerMethod('cutOut', (...args) => async (shape) => {
   const {
     shapesAndFunctions: others,
     functions,
@@ -1904,8 +1903,8 @@ const cutOut = Shape.registerMethod('cutOut', (...args) => (shape) => {
     functions;
   const other = shape.toShape(others[0]);
   return groupOp(
-    shape.cut(other, ...modes).op(cutOp),
-    shape.clip(other, ...modes).op(clipOp)
+    await cut(other, ...modes).op(cutOp)(shape),
+    await clip(other, ...modes).op(clipOp)(shape)
   );
 });
 
@@ -3803,6 +3802,7 @@ const eachEdge = Shape.registerMethod(
         faceOp = (es, f) => es,
         groupOp = Group,
       ] = shapesAndFunctions;
+      edgeOp = await edgeOp;
       if (Shape.isShape(edgeOp)) {
         const edgeShape = edgeOp;
         edgeOp = (edge) => edgeShape.to(edge);
@@ -3894,10 +3894,6 @@ const eachPoint = Shape.registerMethod(
       const { shapesAndFunctions } = destructure(args);
       let [pointOp = (point) => (shape) => point, groupOp = Group] =
         shapesAndFunctions;
-      if (Shape.isShape(pointOp)) {
-        const pointShape = pointOp;
-        pointOp = (point) => (shape) => pointShape.by(point);
-      }
       const coordinates = [];
       let nth = 0;
       eachPoint$1(await shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>
@@ -3905,7 +3901,7 @@ const eachPoint = Shape.registerMethod(
       );
       const points = [];
       for (const [x, y, z] of coordinates) {
-        points.push(await pointOp(Point().move(x, y, z), nth++)(shape));
+        points.push(await pointOp(Point().move(x, y, z), nth++));
       }
       const grouped = groupOp(...points);
       if (Shape.isFunction(grouped)) {
@@ -3959,8 +3955,14 @@ const faces = Shape.registerMethod(
   (...args) =>
     async (shape) => {
       const { shapesAndFunctions } = destructure(args);
-      let [faceOp = (face) => (s) => face, groupOp = Group] =
+      let [faceOp = (face) => (shape) => face, groupOp = Group] =
         shapesAndFunctions;
+      faceOp = await faceOp;
+      if (Shape.isShape(faceOp)) {
+        console.log(`QQ/faces/faceOp/isChain: ${faceOp.isChain}`);
+        const faceShape = faceOp;
+        faceOp = (face) => (shape) => faceShape.to(face);
+      }
       return eachEdge(
         (e, l, o) => e,
         async (e, f) => faceOp(f),
@@ -4283,7 +4285,6 @@ const log = Shape.registerMethod(
       const level = 'serious';
       const log = { text, level };
       const hash = computeHash(log);
-      console.log(`QQQQ/log: ${text}`);
       emit({ log, hash });
       log$1({ op: 'text', text });
       return shape;
@@ -5136,8 +5137,9 @@ const tint = Shape.registerMethod(
 
 const to = Shape.registerMethod(
   'to',
-  (...references) =>
+  (...args) =>
     async (shape) => {
+      const { strings: modes, shapesAndFunctions: references } = destructure(args);
       const arranged = [];
       for (const reference of await shape.toShapes(references)) {
         arranged.push(await by(origin()).by(reference)(shape));

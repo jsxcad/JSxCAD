@@ -11,10 +11,6 @@ export const eachPoint = Shape.registerMethod(
       const { shapesAndFunctions } = destructure(args);
       let [pointOp = (point) => (shape) => point, groupOp = Group] =
         shapesAndFunctions;
-      if (!Shape.isFunction(pointOp)) {
-        const pointShape = pointOp;
-        pointOp = (point) => pointShape.to(point);
-      }
       const coordinates = [];
       let nth = 0;
       eachPointOfGeometry(await shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>

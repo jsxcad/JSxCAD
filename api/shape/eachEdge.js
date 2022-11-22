@@ -38,14 +38,16 @@ export const eachEdge = Shape.registerMethod(
       const { shapesAndFunctions, object: options = {} } = destructure(args);
       const { selections = [] } = options;
       let [
-        edgeOp = (e, l, o) => e,
-        faceOp = (es, f) => es,
+        edgeOp = (e, l, o) => (s) => e,
+        faceOp = (es, f) => (s) => es,
         groupOp = Group,
       ] = shapesAndFunctions;
+      /*
       if (Shape.isShape(edgeOp)) {
         const edgeShape = edgeOp;
         edgeOp = (edge) => edgeShape.to(edge);
       }
+      */
       const faces = [];
       const faceEdges = [];
       eachFaceEdges(
@@ -106,7 +108,7 @@ export const eachEdge = Shape.registerMethod(
                     oppositeSegment,
                   ])
                 )
-              )
+              )(shape)
             );
           }
         }
