@@ -9,7 +9,6 @@ export const ry = Shape.registerMethod(
   (...turns) =>
     async (shape) => {
       const rotated = [];
-      console.log(`QQ/ry`);
       for (const turn of await shape.toFlatValues(turns)) {
         rotated.push(await transform(fromRotateYToTransform(turn))(shape));
       }

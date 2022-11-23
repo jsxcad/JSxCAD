@@ -1,5 +1,3 @@
-import './toShapesGeometries.js';
-
 import Shape from './Shape.js';
 import { link as linkGeometry } from '@jsxcad/geometry';
 import { toShapesGeometries } from './toShapesGeometries.js';

@@ -17,6 +17,5 @@ export const tags = Shape.registerMethod('tags', (...args) => async (shape) => {
     }
   }
   const result = op(...collected)(shape);
-  console.log(`QQ/tags/result: ${JSON.stringify(result)}`);
   return result;
 });

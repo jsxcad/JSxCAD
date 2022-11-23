@@ -3,5 +3,5 @@ import { noGhost } from '@jsxcad/geometry';
 
 export const clean = Shape.registerMethod(
   'clean',
-  () => (shape) => Shape.fromGeometry(noGhost(shape.toGeometry()))
+  () => async (shape) => Shape.fromGeometry(noGhost(await shape.toGeometry()))
 );

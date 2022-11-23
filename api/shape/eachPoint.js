@@ -18,7 +18,7 @@ export const eachPoint = Shape.registerMethod(
       );
       const points = [];
       for (const [x, y, z] of coordinates) {
-        points.push(await pointOp(Point().move(x, y, z), nth++))
+        points.push(await pointOp(Point().move(x, y, z), nth++));
       }
       const grouped = groupOp(...points);
       if (Shape.isFunction(grouped)) {

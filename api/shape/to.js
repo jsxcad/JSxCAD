@@ -8,7 +8,7 @@ export const to = Shape.registerMethod(
   'to',
   (...args) =>
     async (shape) => {
-      const { strings: modes, shapesAndFunctions: references } = destructure(args);
+      const { shapesAndFunctions: references } = destructure(args);
       const arranged = [];
       for (const reference of await shape.toShapes(references)) {
         arranged.push(await by(origin()).by(reference)(shape));

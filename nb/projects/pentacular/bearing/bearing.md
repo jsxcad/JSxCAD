@@ -22,7 +22,7 @@ const Bearing = (diameter) =>
 ```
 
 ```JavaScript
-const bearing_10_7 = Bearing(10.7)
+const bearing_10_7 = await Bearing(10.7)
   .view(material('glass'))
   .md(`You'll need to print two of these`)
   .stl('bearing_10_7_top', get('top'))
@@ -30,16 +30,14 @@ const bearing_10_7 = Bearing(10.7)
   .stl('bearing_10_7_pin', get('pin'));
 ```
 
-![Image](bearing.md.0.png)
+![Image](bearing.md.bearing_10_7.png)
 
 You'll need to print two of these
-
-![Image](bearing.md.1.png)
 
 [bearing_10_7_top_1.stl](bearing.bearing_10_7_top_1.stl)
 
 And one of these
 
-![Image](bearing.md.2.png)
+![Image](bearing.md.bearing_10_7_bearing_10_7_top.png)
 
 [bearing_10_7_pin_1.stl](bearing.bearing_10_7_pin_1.stl)

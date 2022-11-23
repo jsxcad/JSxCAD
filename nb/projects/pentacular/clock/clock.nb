@@ -30,20 +30,18 @@ const clock = { hourHand, minuteHand };
 
 const Hand = ({ reach, tipRadius, thickness }) =>
   Hull(
-    Arc().hasRadius(axleRadius + 2.5),
-    Arc()
-      .hasRadius(tipRadius)
+    Arc({ radius: axleRadius + 2.5 }),
+    Arc({ radius: tipRadius })
       .move(reach * faceRadius)
-  ).cut(Arc().hasRadius(axleRadius));
+  ).cut(Arc({ radius: axleRadius }));
 
 const aladinRegular = await readFont(
   'https://jsxcad.js.org/ttf/Aladin-Regular.ttf'
 );
 
 const Face = ({ axleRadius, faceRadius, fontSize }) =>
-  Arc()
-    .hasRadius(faceRadius)
-    .cut(Arc().hasRadius(axleRadius))
+  Arc({ radius: faceRadius })
+    .cut(Arc({ radius: axleRadius }))
     .and(
       seq(
         (n) =>

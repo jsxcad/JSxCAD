@@ -16,7 +16,6 @@ export const pack = Shape.registerMethod(
     async (shape) => {
       if (perLayout === 0) {
         // Packing was disabled -- do nothing.
-        console.log(`QQ/packed/early: ${JSON.stringify(shape)}`);
         return shape;
       }
 
@@ -41,7 +40,6 @@ export const pack = Shape.registerMethod(
           if (packed.length === 0) {
             break;
           } else {
-            console.log(`QQ/packed: ${JSON.stringify(packed)}`);
             packedLayers.push(
               taggedItem(
                 { tags: ['pack:layout'] },
@@ -58,9 +56,6 @@ export const pack = Shape.registerMethod(
       if (size === undefined) {
         packedShape = packedShape.by(align('xy'));
       }
-      console.log(
-        `QQ/packed: ${JSON.stringify(packedShape)} ${packedShape.isChain}`
-      );
       return packedShape;
     }
 );

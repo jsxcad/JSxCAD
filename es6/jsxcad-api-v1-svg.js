@@ -24,7 +24,7 @@ const SvgPath = (svgPath, options = {}) =>
     fromSvgPath(new TextEncoder('utf8').encode(svgPath), options)
   );
 
-const readSvg = async (path, { fill = true, stroke = true } = {}) => {
+const Svg = Shape.registerShapeMethod('Svg', async (path, { fill = true, stroke = true } = {}) => {
   const data = await read(`source/${path}`, { sources: [path] });
   if (data === undefined) {
     throw Error(`Cannot read svg from ${path}`);
@@ -32,25 +32,7 @@ const readSvg = async (path, { fill = true, stroke = true } = {}) => {
   return Shape.fromGeometry(
     await fromSvg(data, { doFill: fill, doStroke: stroke })
   );
-};
-
-/**
- *
- * # Read SVG path data
- *
- **/
-
-const readSvgPath = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  let data = await read(`source/${path}`);
-  if (data === undefined) {
-    data = await read(`cache/${path}`, { sources: [path] });
-  }
-  return Shape.fromGeometry(await fromSvgPath(options, data));
-};
+});
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -153,6 +135,6 @@ const svg =
 
 Shape.registerMethod('svg', svg);
 
-const api = { SvgPath, readSvg, readSvgPath, svg };
+const api = { SvgPath, Svg, svg };
 
-export { SvgPath, api as default, readSvg, readSvgPath, svg };
+export { Svg, SvgPath, api as default, svg };

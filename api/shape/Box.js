@@ -106,7 +106,6 @@ const reifyBox = async (corner1, corner2) => {
 export const Box = Shape.registerShapeMethod(
   'Box',
   async (x = 1, y = x, z = 0) => {
-    console.log(`QQ/box: ${[x, y, z]}`);
     const [c1, c2] = buildCorners(x, y, z);
     return reifyBox(c1, c2);
   }

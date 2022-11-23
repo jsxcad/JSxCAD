@@ -5,11 +5,17 @@ import { hasTypeMasked } from '@jsxcad/geometry';
 export const mask = Shape.registerMethod(
   'mask',
   (...args) =>
-    (shape) =>
-      Group(
-        ...args.map((arg) => Shape.toShape(arg, shape).void()),
-        Shape.fromGeometry(hasTypeMasked(shape.toGeometry()))
-      )
+    async (shape) => {
+      const shapes = [];
+      for (const arg of args) {
+        const s = await shape.toShape(arg);
+        shapes.push(s.void());
+      }
+      return Group(
+        ...shapes,
+        Shape.fromGeometry(hasTypeMasked(await shape.toGeometry()))
+      );
+    }
 );
 
 export default mask;

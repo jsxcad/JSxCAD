@@ -15,6 +15,7 @@ import Shape from './Shape.js';
 import { align } from './align.js';
 import { destructure } from './destructure.js';
 import { getNot } from './getNot.js';
+import { toDisplayGeometry } from './toDisplayGeometry.js';
 
 const MIN = 0;
 const MAX = 1;
@@ -226,7 +227,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of contents.get('pack:layout', List)) {
+      for (const layer of await contents.get('pack:layout', List)) {
         const layout = await buildLayout({
           layer,
           packSize,
@@ -261,7 +262,8 @@ export const page = Shape.registerMethod(
 export default Page;
 
 export const ensurePages = async (shape, depth = 0) => {
-  const pages = getLayouts(await shape.toDisplayGeometry());
+console.log(`QQ/ensurePages: ${JSON.stringify(shape)}`);
+  const pages = getLayouts(await toDisplayGeometry()(shape));
   if (pages.length === 0 && depth === 0) {
     return ensurePages(await Page({ pack: false }, shape), depth + 1);
   } else {

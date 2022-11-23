@@ -6,10 +6,10 @@ import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
 import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
-import { readStl, stl } from './jsxcad-api-v1-stl.js';
+import { Stl, stl } from './jsxcad-api-v1-stl.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
-import { readSvg } from './jsxcad-api-v1-svg.js';
+import { Svg } from './jsxcad-api-v1-svg.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
 let recordedNotes;
@@ -105,6 +105,7 @@ const $run = async (op, { path, id, text, sha, line }) => {
     // console.log(`QQ/replay: ${id} ${sha}`);
     await replayRecordedNotes(path, id);
     const result = await load(`data/def/${path}/${id}.data`);
+    console.log(`QQ/result: ${JSON.stringify(result)}`);
     return Shape.chain(result);
   }
 };
@@ -443,8 +444,8 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
-  readSvg,
-  readStl,
+  Svg,
+  Stl,
   readObj,
   readOff,
   setToSourceFromNameFunction,

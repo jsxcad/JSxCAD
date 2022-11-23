@@ -3,10 +3,10 @@ import Shape from './Shape.js';
 export const toShape = Shape.registerMethod(
   'toShape',
   (value) => async (shape) => {
-    value = await value;
     if (Shape.isFunction(value)) {
       value = await value(shape);
     }
+    value = await value;
     if (Shape.isShape(value)) {
       return value;
     } else {

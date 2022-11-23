@@ -107,7 +107,10 @@ const ArcOp =
   async (...args) => {
     const { values, object: options } = destructure(args);
     let [x, y, z] = values;
-    const { start, end, sides, zag } = options;
+    const { radius, start, end, sides, zag } = options;
+    if (radius !== undefined) {
+      x = radius * 2;
+    }
     let reify;
     switch (type) {
       case 'Arc':

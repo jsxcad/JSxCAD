@@ -1,9 +1,7 @@
 import { Shape, ensurePages } from '@jsxcad/api-shape';
 import {
-  addPending,
   emit,
   generateUniqueId,
-  getPendingErrorHandler,
   getSourceLocation,
   write,
 } from '@jsxcad/sys';
@@ -16,18 +14,12 @@ export const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  console.log(`QQ/preparePdf/shape: ${shape.then}`);
-  console.log(`QQ/preparePdf/op: ${op.then}`);
-  const processedShape = await op(shape);
-  for (const entry of ensurePages(processedShape.toDisjointGeometry())) {
+  for (const entry of await ensurePages(await op(shape))) {
     const pdfPath = `download/pdf/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      await write(
-        pdfPath,
-        toPdf(entry, options).catch(getPendingErrorHandler())
-      );
-    };
-    addPending(render());
+    await write(
+      pdfPath,
+      await toPdf(entry, options)
+    );
     const filename = `${name}_${index++}.pdf`;
     const record = {
       path: pdfPath,
@@ -35,21 +27,19 @@ export const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
       type: 'application/pdf',
     };
     records.push(record);
-    const shape = Shape.fromGeometry(entry);
     const hash =
-      hashSum({ filename, options }) + hashGeometry(shape.toGeometry());
-    shape.gridView(filename, options.view);
+      hashSum({ filename, options }) + hashGeometry(entry);
+    await Shape.fromGeometry(entry).gridView(filename, options.view);
     emit({ download: { entries: [record] }, hash });
   }
   return records;
 };
 
-const pdf =
+const pdf = Shape.registerMethod('pdf',
   (...args) =>
-  (shape) => {
+  async (shape) => {
+    console.log(`QQ/pdf/shape: ${JSON.stringify(shape)}`);
     const { value: name, func: op, object: options } = Shape.destructure(args);
-    preparePdf(shape, name, op, options);
+    await preparePdf(shape, name, op, options);
     return shape;
-  };
-
-Shape.registerMethod('pdf', pdf);
+  });

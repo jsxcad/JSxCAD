@@ -99,15 +99,15 @@ export const eachEdge = Shape.registerMethod(
             // We need a segment from [0,0,0] to [x,0,0] in its local space.
             edges.push(
               await edgeOp(
-                Shape.fromGeometry(
+                Shape.chain(Shape.fromGeometry(
                   taggedSegments({ matrix: inverseMatrix }, [baseSegment])
-                ),
+                )),
                 length(segment[SOURCE], segment[TARGET]),
-                Shape.fromGeometry(
+                Shape.chain(Shape.fromGeometry(
                   taggedSegments({ matrix: oppositeInverseMatrix }, [
                     oppositeSegment,
                   ])
-                )
+                ))
               )(shape)
             );
           }
@@ -115,7 +115,7 @@ export const eachEdge = Shape.registerMethod(
         faces.push(
           await faceOp(
             await Group(...edges),
-            Shape.fromGeometry(faceGeometry)
+            Shape.chain(Shape.fromGeometry(faceGeometry))
           )
         );
       }

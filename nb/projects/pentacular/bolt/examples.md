@@ -8,39 +8,39 @@ import {
 ```
 
 ```JavaScript
-ScrewThreadSegment(20).material('steel').view().md(`ScrewThreadSegment(20)`);
+await ScrewThreadSegment(20).material('steel').view().md(`ScrewThreadSegment(20)`);
 ```
 
-![Image](examples.md.0.png)
+![Image](examples.md.$1.png)
 
 ScrewThreadSegment(20)
 
 ```JavaScript
-ScrewThread(20, 10).material('steel').view().md(`ScrewThread(20, 10)`);
+await ScrewThread(20, 10).material('steel').view().md(`ScrewThread(20, 10)`);
 ```
 
-![Image](examples.md.1.png)
+![Image](examples.md.$2.png)
 
 ScrewThread(20, 10)
 
 ```JavaScript
-NutThreadSegment(20).material('steel').view().md(`NutThreadSegment(20)`);
+await NutThreadSegment(20).material('steel').view().md(`NutThreadSegment(20)`);
 ```
 
-![Image](examples.md.2.png)
+![Image](examples.md.$3.png)
 
 NutThreadSegment(20)
 
 ```JavaScript
-NutThread(20, 10).material('steel').view().md(`NutThread(20, 10)`);
+await NutThread(20, 10).material('steel').view().md(`NutThread(20, 10)`);
 ```
 
-![Image](examples.md.3.png)
+![Image](examples.md.$4.png)
 
 NutThread(20, 10)
 
 ```JavaScript
-NutThreadSegment(20, { play: 0.1 })
+await NutThreadSegment(20, { play: 0.1 })
   .color('orange')
   .and(ScrewThreadSegment(20, { play: 0.1 }).color('blue'))
   .clip(Box([0, 10], [0, 10], [0, 10]))
@@ -48,6 +48,6 @@ NutThreadSegment(20, { play: 0.1 })
   .md(`NutThread(20, 10).and(ScrewThread(20, 10))`);
 ```
 
-![Image](examples.md.4.png)
+![Image](examples.md.$5.png)
 
 NutThread(20, 10).and(ScrewThread(20, 10))
