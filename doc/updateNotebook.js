@@ -25,11 +25,10 @@ import pngjs from 'pngjs';
 import { screenshot } from './screenshot.js';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
-  'nb/regression/shapes/shapes.md.9.observed.png',
-  'nb/regression/shapes/shapes.md.10.observed.png',
-  'nb/regression/shapes/shapes.md.56.observed.png',
-  'nb/regression/shapes/shapes.md.57.observed.png',
-  'nb/regression/smooth/smooth.md.3.observed.png',
+  'nb/api/Orb.md.$5_2.observed.png',
+  'nb/api/image.md.$2.observed.png',
+  'nb/regression/shapes/shapes.md.$11.observed.png',
+  'nb/regression/shapes/shapes.md.$56.observed.png'
 ]);
 const PIXEL_THRESHOLD = 3000;
 
