@@ -20,7 +20,7 @@ Box()
   );
 ```
 
-![Image](void.md.0.png)
+![Image](void.md.$2.png)
 
 Box().fitTo(Triangle().void()).fit(Arc(2)) fits a void triangle into the box.
 

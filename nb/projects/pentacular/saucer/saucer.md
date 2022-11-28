@@ -1,6 +1,5 @@
 ```JavaScript
-const profile = Arc(1)
-  .hasAngle(0 / 4, 2 / 4)
+const profile = await Arc(1, { start: 0 / 4, end: 2 / 4 })
   .x(10)
   .and(Point(5, -2), Point(0.001, -2), Point(0.001, -1), Point(5, -1))
   .loop()
@@ -9,19 +8,19 @@ const profile = Arc(1)
   .view();
 ```
 
-![Image](saucer.md.0.png)
+![Image](saucer.md.profile.png)
 
 ```JavaScript
-const saucer = profile
+const saucer = await profile
   .rx(1 / 4)
   .seq({ by: 1 / 6 }, rz, Loft)
   .view(2);
 ```
 
-![Image](saucer.md.1.png)
+![Image](saucer.md.saucer_2.png)
 
 ```JavaScript
-const knob = Loft(
+const knob = await Loft(
   Hexagon(60)
     .rz(1 / 12)
     .z(-6.05),
@@ -53,10 +52,10 @@ const knob = Loft(
   .view();
 ```
 
-![Image](saucer.md.2.png)
+![Image](saucer.md.knob.png)
 
 ```JavaScript
-const top = saucer
+const top = await saucer
   .upperEnvelope()
   .involute()
   .loft(noOp(), Box(150).z(5))
@@ -66,7 +65,7 @@ const top = saucer
 ```
 
 ```JavaScript
-const topWithPegHoles = top
+const topWithPegHoles = await top
   .cut(Arc(8.2).ez(-12, 5).x(50, -50).y(35, -35))
   .clip(
     Hexagon(155)
@@ -81,16 +80,14 @@ const topWithPegHoles = top
   );
 ```
 
-![Image](saucer.md.3.png)
-
 [top2_1.stl](saucer.top2_1.stl)
 
 ```JavaScript
-const base = saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
+const base = await saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
 ```
 
 ```JavaScript
-const baseWithPegHoles = base
+const baseWithPegHoles = await base
   .cut(Arc(8.2).ez(-12, 5).x(50, -50).y(35, -35))
   .clip(
     Hexagon(155)
@@ -99,7 +96,5 @@ const baseWithPegHoles = base
   )
   .stl('base');
 ```
-
-![Image](saucer.md.4.png)
 
 [base_1.stl](saucer.base_1.stl)

@@ -10,7 +10,7 @@ Produces an triangle or triangular prism that fits into the bounding box.
 Triangle(5).view().note('Triangle(5)');
 ```
 
-![Image](Triangle.md.0.png)
+![Image](Triangle.md.$2.png)
 
 Triangle(5)
 
@@ -18,7 +18,7 @@ Triangle(5)
 Triangle(2, 4).view().note('Triangle(2, 4)');
 ```
 
-![Image](Triangle.md.1.png)
+![Image](Triangle.md.$3.png)
 
 Triangle(2, 4)
 
@@ -26,6 +26,6 @@ Triangle(2, 4)
 Triangle(2, 4, 1).view().note('Triangle(2, 4, 1)');
 ```
 
-![Image](Triangle.md.2.png)
+![Image](Triangle.md.$4.png)
 
 Triangle(2, 4, 1)

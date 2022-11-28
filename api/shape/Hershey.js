@@ -1442,15 +1442,15 @@ export const toSegments = (letters) => {
     const code = letter.charCodeAt(0);
     const segments = hersheySegments[code];
     if (segments) {
-      rendered.push(Shape.fromSegments(segments).x(xOffset));
+      rendered.push(Shape.chain(Shape.fromSegments(segments)).x(xOffset));
     }
     xOffset += hersheyWidth[code] || 0;
   }
   return Group(...rendered).scale(1 / 28);
 };
 
-export const ofSize = (text, size) => toSegments(text).scale(size);
-
-export const Hershey = ofSize;
+export const Hershey = Shape.registerShapeMethod('Hershey', (text, size) =>
+  toSegments(text).scale(size)
+);
 
 export default Hershey;

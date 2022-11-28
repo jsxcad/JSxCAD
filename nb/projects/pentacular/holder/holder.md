@@ -11,7 +11,7 @@ const magnetHeight = 2.5;
 ```
 
 ```JavaScript
-const magneticPenHolder = Arc(magnetDiameter)
+const magneticPenHolder = await Arc(magnetDiameter)
   .material('steel')
   .ez(magnetHeight)
   .fit(
@@ -35,8 +35,6 @@ const magneticPenHolder = Arc(magnetDiameter)
   .stl('holder', drop(get('material:steel')));
 ```
 
-![Image](holder.md.0.png)
-
-![Image](holder.md.1.png)
+![Image](holder.md.magneticPenHolder.png)
 
 [holder_1.stl](holder.holder_1.stl)

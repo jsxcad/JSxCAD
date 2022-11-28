@@ -187,7 +187,7 @@ export const fromRotateZToTransform = (turn) => {
 export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
   try {
     if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
-      throw Error('Non-finite');
+      throw Error(`Non-finite ${[x, y, z]}`);
     }
     return toJsTransformFromCgalTransform(
       getCgal().Transformation__translate(x, y, z)

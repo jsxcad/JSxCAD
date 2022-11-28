@@ -18,6 +18,6 @@ Box(10)
   );
 ```
 
-![Image](ey.md.0.png)
+![Image](ey.md.$2.png)
 
 Box(10).rx(1 / 4).ey(1, -1, 4, 3) extrudes along the y axis by two extents

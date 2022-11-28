@@ -202,16 +202,21 @@ const isNotTypeVoid = isNotType(typeVoid);
 const isTypeVoid = isType(typeVoid);
 const isSegments = ({ type }) => type === 'segments';
 
-const registry = new Map();
+// import { asyncRewrite } from './visit.js';
+
+// export const registry = new Map();
 
 const reify = (geometry) => {
+  // We'll return to an early reification model, avoiding re-entrance to the async user api.
+  return geometry;
+  /*
   if (!geometry) {
     console.log(`Reifying undefined geometry`);
   }
   if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
   }
-  const op = (geometry, descend) => {
+  const op = async (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
       case 'toolpath':
@@ -231,7 +236,7 @@ const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          const reified = reifier(geometry);
+          const reified = await reifier(geometry);
           // We can't share the reification since things like tags applied to the plan need to propagate separately.
           return descend({ content: [reified] });
         }
@@ -251,14 +256,12 @@ const reify = (geometry) => {
     }
   };
 
-  const result = rewrite(geometry, op);
+  const result = await asyncRewrite(geometry, op);
   return result;
+*/
 };
 
-const toTransformedGeometry = (geometry) => geometry;
-
-const toConcreteGeometry = (geometry) =>
-  toTransformedGeometry(reify(geometry));
+const toConcreteGeometry = (geometry) => reify(geometry);
 
 const linearize = (
   geometry,
@@ -286,6 +289,9 @@ const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   if (content.some((value) => value.length)) {
     throw Error(`Group content is an array`);
   }
+  if (content.some((value) => value.then)) {
+    throw Error(`Group content is a promise`);
+  }
   if (content.length === 1) {
     return content[0];
   }
@@ -306,6 +312,7 @@ const disjoint = (geometries, mode, exact) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$B, inputs);
   }
+  // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
   const outputs = disjoint$1(inputs, mode, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
@@ -2105,7 +2112,6 @@ const op =
         case 'triangles':
           return accumulate(triangles(geometry, ...args));
         case 'plan':
-          reify(geometry);
         // fall through
         case 'layout':
         // return accumulate(layout(geometry, ...args));
@@ -2125,9 +2131,6 @@ const op =
 
     return method(toConcreteGeometry(geometry), walk);
   };
-
-// We expect the type to be uniquely qualified.
-const registerReifier = (type, reifier) => registry.set(type, reifier);
 
 const filter$6 = (geometry) => ['graph'].includes(geometry.type);
 
@@ -2344,6 +2347,9 @@ const taggedLayout = (
   if (content.some((value) => value.length)) {
     throw Error(`Layout content is an array`);
   }
+  if (content.some((value) => value.then)) {
+    throw Error(`Layout content is a promise`);
+  }
   if (content.some((value) => value.geometry)) {
     throw Error(`Likely Shape in Layout`);
   }
@@ -2432,6 +2438,8 @@ const toDisplayGeometry = (
   return soup(toConcreteGeometry(geometry));
 };
 
+const toTransformedGeometry = (geometry) => geometry;
+
 const toPoints = (geometry) => {
   const points = [];
   eachPoint(geometry, (point) => points.push(point));
@@ -2514,13 +2522,13 @@ const filter = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-const wrap = (geometry, tags = [], offset, alpha) => {
+const wrap = (geometry, offset, alpha) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = wrap$1(inputs, offset, alpha);
   deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
+  return taggedGroup({}, ...outputs);
 };
 
 const rotateX = (turn, geometry) =>
@@ -2534,4 +2542,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$1(fromScaleToTransform(...vector), geometry);
 
-export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convertPolygonsToMeshes, convexHull, cut, deform, demesh, disjoint, drop, eachFaceEdges, eachItem, eachPoint, eachSegment, eachTriangle, eagerTransform, extrude, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, keep, linearize, link, load, loadNonblocking, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, registerReifier, reify, remesh, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, update, visit, wrap, write, writeNonblocking };
+export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convertPolygonsToMeshes, convexHull, cut, deform, demesh, disjoint, drop, eachFaceEdges, eachItem, eachPoint, eachSegment, eachTriangle, eagerTransform, extrude, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, keep, linearize, link, load, loadNonblocking, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, reify, remesh, replacer, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, update, visit, wrap, write, writeNonblocking };

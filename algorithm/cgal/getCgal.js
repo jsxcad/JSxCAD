@@ -62,6 +62,11 @@ export const initCgal = async () => {
   }
 };
 
-export const getCgal = () => cgal;
+export const getCgal = () => {
+  if (!cgal) {
+    throw Error('CGAL not initialized');
+  }
+  return cgal;
+};
 
 onBoot(initCgal);

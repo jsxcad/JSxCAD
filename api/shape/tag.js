@@ -69,10 +69,9 @@ export const tagGeometry = (geometry, tags) => {
   return rewrite(geometry, op);
 };
 
-export const tag = Shape.chainable(
+export const tag = Shape.registerMethod(
+  'tag',
   (...tags) =>
-    (shape) =>
-      Shape.fromGeometry(tagGeometry(shape.toGeometry(), tags))
+    async (shape) =>
+      Shape.fromGeometry(tagGeometry(await shape.toGeometry(), tags))
 );
-
-Shape.registerMethod('tag', tag);

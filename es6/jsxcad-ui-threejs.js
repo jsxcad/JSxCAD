@@ -1880,13 +1880,18 @@ const orbitDisplay = async (
 
     view = { ...view, fit };
 
-    await buildMeshes({
-      geometry,
-      scene,
-      render,
-      definitions,
-      pageSize,
-    });
+    try {
+      await buildMeshes({
+        geometry,
+        scene,
+        render,
+        definitions,
+        pageSize,
+      });
+    } catch (e) {
+      console.log(e.stack);
+      throw e;
+    }
 
     if (!moveToFitDone) {
       moveToFitDone = true;
@@ -1996,7 +2001,13 @@ const staticDisplay = async (
 
   const pageSize = [];
 
-  await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
+  try {
+    await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
+  } catch (e) {
+    console.log(e.stack);
+    console.log(`QQQ/staticDisplay/geometry: ${JSON.stringify(geometry)}`);
+    throw e;
+  }
 
   moveToFit({ datasets, view, camera, scene, withGrid, pageSize });
 
@@ -2029,7 +2040,7 @@ const staticView = async (
     {
       view: { target, position, up },
       canvas,
-      geometry: shape.toDisplayGeometry(),
+      geometry: await shape.toDisplayGeometry(),
       withAxes,
       withGrid,
       definitions,
@@ -2072,7 +2083,7 @@ const orbitView = async (
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
 
-  const geometry = shape.toKeptGeometry();
+  const geometry = await shape.toDisplayGeometry();
   const view = { target, position, up };
 
   await orbitDisplay({ geometry, view, definitions }, container);

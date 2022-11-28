@@ -1,12 +1,10 @@
+import { acquire, release } from './evaluateLock.js';
 import {
-  ErrorWouldBlock,
   isWebWorker,
   logInfo,
-  resolvePending,
   restoreEmitGroup,
   saveEmitGroup,
 } from '@jsxcad/sys';
-import { acquire, release } from './evaluateLock.js';
 
 import { getApi } from './api.js';
 import { toEcmascript } from '@jsxcad/compiler';
@@ -29,19 +27,8 @@ export const evaluate = async (ecmascript, { api, path }) => {
     const op = await builder({ ...api, import: { meta: { url: path } } });
     // Retry until none of the operations block.
     for (;;) {
-      try {
-        const result = await op();
-        return result;
-      } catch (error) {
-        if (error instanceof ErrorWouldBlock) {
-          logInfo('api/core/evaluate/error', error.message);
-          console.log(error.message);
-          await resolvePending();
-          restoreEmitGroup(emitGroup);
-          continue;
-        }
-        throw error;
-      }
+      const result = await op();
+      return result;
     }
   } catch (error) {
     throw error;

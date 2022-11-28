@@ -1,10 +1,10 @@
 import Shape from './Shape.js';
 import { makeAbsolute } from '@jsxcad/geometry';
 
-export const absolute = Shape.chainable(
-  () => (shape) => Shape.fromGeometry(makeAbsolute(shape.toGeometry()))
+export const absolute = Shape.registerMethod(
+  'absolute',
+  () => async (shape) =>
+    Shape.fromGeometry(makeAbsolute(await shape.toGeometry()))
 );
-
-Shape.registerMethod('absolute', absolute);
 
 export default absolute;

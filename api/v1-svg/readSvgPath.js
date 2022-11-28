@@ -8,7 +8,7 @@ import { read } from '@jsxcad/sys';
  *
  **/
 
-export const readSvgPath = async (options) => {
+export const SvgPath = Shape.registerShapeMethod('SvgPath', async (options) => {
   if (typeof options === 'string') {
     options = { path: options };
   }
@@ -18,6 +18,6 @@ export const readSvgPath = async (options) => {
     data = await read(`cache/${path}`, { sources: [path] });
   }
   return Shape.fromGeometry(await fromSvgPath(options, data));
-};
+});
 
-export default readSvgPath;
+export default SvgPath;

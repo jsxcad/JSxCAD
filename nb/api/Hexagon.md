@@ -19,7 +19,7 @@ Box(10)
   );
 ```
 
-![Image](Hexagon.md.0.png)
+![Image](Hexagon.md.$2.png)
 
 Box(10).color('black').fitTo(Arc(10).color('red'), Hexagon(10).color('blue')) shows the hexagon inscribed within the arc inscribed within the box.
 
@@ -31,6 +31,6 @@ Hexagon(5, 4, 2)
   );
 ```
 
-![Image](Hexagon.md.1.png)
+![Image](Hexagon.md.$3.png)
 
 Hexagon(5, 4, 2) produces a prism to fill a three dimensional bounding box.

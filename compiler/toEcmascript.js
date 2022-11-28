@@ -178,12 +178,6 @@ const declareVariable = async (
 
   // const declarationSource = generate({ type: 'Program', body: declarator });
 
-  if (id === 'peaks') {
-    console.log(`QQ/peaks/source: ${declarationSource}`);
-    console.log(`QQ/peaks/sha: ${hash(declarationSource)}`);
-    console.log('--');
-  }
-
   const entry = {
     path,
     id,

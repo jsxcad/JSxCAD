@@ -1,23 +1,18 @@
 import Shape from './Shape.js';
 import { link as linkGeometry } from '@jsxcad/geometry';
+import { toShapesGeometries } from './toShapesGeometries.js';
 
-export const Loop = (...shapes) =>
+export const Loop = Shape.registerShapeMethod('Loop', async (...shapes) =>
   Shape.fromGeometry(
-    linkGeometry(
-      Shape.toShapes(shapes).map((shape) => shape.toGeometry()),
-      /* close= */ true
-    )
-  );
-
-Shape.prototype.Loop = Shape.shapeMethod(Loop);
-Shape.Loop = Loop;
+    linkGeometry(await toShapesGeometries(shapes)(null), /* close= */ true)
+  )
+);
 
 export default Loop;
 
-export const loop = Shape.chainable(
+export const loop = Shape.registerMethod(
+  'loop',
   (...shapes) =>
-    (shape) =>
-      Loop(shape, ...shape.toShapes(shapes, shape))
+    async (shape) =>
+      Loop(shape, ...(await shape.toShapes(shapes)))
 );
-
-Shape.registerMethod('loop', loop);

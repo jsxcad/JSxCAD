@@ -1,11 +1,12 @@
 import Empty from './Empty.js';
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { toValue } from './toValue.js';
 
 const EPSILON = 1e-5;
 
 const maybeApply = (value, shape) => {
-  if (value instanceof Function) {
+  if (Shape.isFunction(value)) {
     return value(shape);
   } else {
     return value;
@@ -13,23 +14,23 @@ const maybeApply = (value, shape) => {
 };
 
 // This is getting a bit excessively magical.
-export const seq = Shape.chainable((...args) => (shape) => {
+export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
   let op;
   let groupOp;
   let specs = [];
   for (const arg of args) {
-    if (arg instanceof Function) {
+    if (Shape.isFunction(arg)) {
       if (!op) {
         op = arg;
       } else if (!groupOp) {
         groupOp = arg;
       }
-    } else if (arg instanceof Object) {
+    } else if (Shape.isObject(arg)) {
       specs.push(arg);
     }
   }
   if (!op) {
-    op = (n) => n;
+    op = (n) => (s) => n;
   }
   if (!groupOp) {
     groupOp = Group;
@@ -39,11 +40,11 @@ export const seq = Shape.chainable((...args) => (shape) => {
   for (const spec of specs) {
     let { from = 0, to = 1, upto, downto, by = 1 } = spec;
 
-    from = Shape.toValue(from, shape);
-    to = Shape.toValue(to, shape);
-    upto = Shape.toValue(upto, shape);
-    downto = Shape.toValue(downto, shape);
-    by = Shape.toValue(by, shape);
+    from = await toValue(from)(shape);
+    to = await toValue(to)(shape);
+    upto = await toValue(upto)(shape);
+    downto = await toValue(downto)(shape);
+    by = await toValue(by)(shape);
 
     let consider;
 
@@ -75,7 +76,8 @@ export const seq = Shape.chainable((...args) => (shape) => {
     if (args.some((value) => value === undefined)) {
       break;
     }
-    results.push(maybeApply(op(...args), shape));
+    const result = await op(...args)(shape);
+    results.push(maybeApply(result, shape));
     let nth;
     for (nth = 0; nth < index.length; nth++) {
       if (++index[nth] < indexes[nth].length) {
@@ -90,8 +92,8 @@ export const seq = Shape.chainable((...args) => (shape) => {
   return groupOp(...results);
 });
 
-Shape.registerMethod('seq', seq);
+export const Seq = Shape.registerShapeMethod('Seq', (...args) =>
+  Empty().seq(...args)
+);
 
-export const Seq = (...args) => Empty().seq(...args);
-
-Shape.prototype.Seq = Shape.shapeMethod(Seq);
+export default Seq;

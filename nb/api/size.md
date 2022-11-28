@@ -23,7 +23,7 @@ Box(3)
 ')}`));
 ```
 
-![Image](size.md.0.png)
+![Image](size.md.$2.png)
 
 {
 

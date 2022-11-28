@@ -33,4 +33,4 @@ Box(10, 3, 3)
   .view(1);
 ```
 
-![Image](deform.md.0.png)
+![Image](deform.md.$2_1.png)

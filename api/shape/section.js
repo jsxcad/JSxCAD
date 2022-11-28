@@ -4,34 +4,26 @@ import { section as sectionGeometry } from '@jsxcad/geometry';
 
 const baseSection =
   ({ profile = false } = {}, orientations) =>
-  (shape) => {
-    orientations = orientations
-      .flatMap((orientation) => Shape.toShapes(orientation, shape))
-      .flatMap((orientation) => Shape.toShapes(orientation, shape));
+  async (shape) => {
+    orientations = await shape.toShapesGeometries(orientations);
     if (orientations.length === 0) {
-      orientations.push(Point());
+      orientations.push(await Point().toGeometry());
     }
     return Shape.fromGeometry(
-      sectionGeometry(
-        shape.toGeometry(),
-        orientations.map((orientation) => orientation.toGeometry()),
-        { profile }
-      )
+      sectionGeometry(await shape.toGeometry(), orientations, { profile })
     );
   };
 
-export const section = Shape.chainable(
+export const section = Shape.registerMethod(
+  'section',
   (...orientations) =>
     (shape) =>
       baseSection({ profile: false }, orientations)(shape)
 );
 
-Shape.registerMethod('section', section);
-
-export const sectionProfile = Shape.chainable(
+export const sectionProfile = Shape.registerMethod(
+  'sectionProfile',
   (...orientations) =>
     (shape) =>
       baseSection({ profile: true }, orientations)(shape)
 );
-
-Shape.registerMethod('sectionProfile', sectionProfile);

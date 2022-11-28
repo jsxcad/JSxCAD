@@ -43,8 +43,16 @@ export const screenshot = async (html, { browser }) => {
         }
       }
       for (const element of await page.$$('.note.view')) {
+        let viewId;
+        const classNameProperty = await element.getProperty('className');
+        const classNameValue = await classNameProperty.jsonValue();
+        for (const className of classNameValue.split(' ')) {
+          if (className.startsWith('viewId_')) {
+            viewId = className.substring('viewId_'.length);
+          }
+        }
         const property = await element.getProperty('src');
-        imageUrlList.push(await property.jsonValue());
+        imageUrlList.push({ imageUrl: await property.jsonValue(), viewId });
       }
       return { imageUrlList };
     } finally {

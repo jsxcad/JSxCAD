@@ -19,10 +19,8 @@ Box(5)
   );
 ```
 
-![Image](each.md.0.png)
+![Image](each.md.$2_1.png)
 
 Box(5).seq({ by: 1 / 8, upto: 1 }, rx) produces eight sheets
-
-![Image](each.md.1.png)
 
 each(offset(0.5).cut(inset(0.5))) has transformed each sheet individually

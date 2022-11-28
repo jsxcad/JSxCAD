@@ -1,1 +1,1 @@
-import './pdf.js';
+export { pdf } from './pdf.js';

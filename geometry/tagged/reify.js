@@ -1,15 +1,18 @@
-import { rewrite } from './visit.js';
+// import { asyncRewrite } from './visit.js';
 
-export const registry = new Map();
+// export const registry = new Map();
 
 export const reify = (geometry) => {
+  // We'll return to an early reification model, avoiding re-entrance to the async user api.
+  return geometry;
+  /*
   if (!geometry) {
     console.log(`Reifying undefined geometry`);
   }
   if (geometry.type === 'plan' && geometry.content.length > 0) {
     return geometry;
   }
-  const op = (geometry, descend) => {
+  const op = async (geometry, descend) => {
     switch (geometry.type) {
       case 'graph':
       case 'toolpath':
@@ -29,7 +32,7 @@ export const reify = (geometry) => {
               `Do not know how to reify plan: ${JSON.stringify(geometry.plan)}`
             );
           }
-          const reified = reifier(geometry);
+          const reified = await reifier(geometry);
           // We can't share the reification since things like tags applied to the plan need to propagate separately.
           return descend({ content: [reified] });
         }
@@ -49,6 +52,7 @@ export const reify = (geometry) => {
     }
   };
 
-  const result = rewrite(geometry, op);
+  const result = await asyncRewrite(geometry, op);
   return result;
+*/
 };

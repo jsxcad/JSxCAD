@@ -19,7 +19,7 @@ export const translate = (vector, geometry) =>
 export const scale = (vector, geometry) =>
   transform(fromScaleToTransform(...vector), geometry);
 
-export { rewrite, visit } from './tagged/visit.js';
+export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
@@ -142,7 +142,7 @@ export { offset } from './offset.js';
 export { op } from './tagged/op.js';
 export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
-export { registerReifier } from './tagged/registerReifier.js';
+// export { registerReifier } from './tagged/registerReifier.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
 export { rewriteTags } from './tagged/rewriteTags.js';

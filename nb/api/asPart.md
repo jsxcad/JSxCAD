@@ -22,6 +22,6 @@ Box(3)
   );
 ```
 
-![Image](asPart.md.0.png)
+![Image](asPart.md.$2.png)
 
 Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')) produces these parts:

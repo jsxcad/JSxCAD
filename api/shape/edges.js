@@ -1,17 +1,3 @@
-/*
-import { eachSegment, taggedSegments } from '@jsxcad/geometry';
-
-import Shape from './Shape.js';
-
-export const edges = Shape.chainable(() => (shape) => {
-  const segments = [];
-  eachSegment(Shape.toShape(shape, shape).toGeometry(), (segment) =>
-    segments.push(segment)
-  );
-  return Shape.fromGeometry(taggedSegments({}, segments));
-});
-*/
-
 import Group from './Group.js';
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
@@ -33,30 +19,32 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
-export const edges = Shape.chainable((...args) => (shape) => {
-  const { shapesAndFunctions, object: options = {} } = destructure(args);
-  const { selections = [] } = options;
-  let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
-  if (edgesOp instanceof Shape) {
-    const edgesShape = edgesOp;
-    edgesOp = (edges) => edgesShape.to(edges);
-  }
-  const edges = [];
-  eachFaceEdges(
-    Shape.toShape(shape, shape).toGeometry(),
-    shape.toShapes(selections).map((selection) => selection.toGeometry()),
-    (faceGeometry, edgeGeometry) => {
-      if (edgeGeometry) {
-        edges.push(edgesOp(Shape.fromGeometry(edgeGeometry)));
+export const edges = Shape.registerMethod(
+  'edges',
+  (...args) =>
+    async (shape) => {
+      const { shapesAndFunctions, object: options = {} } = destructure(args);
+      const { selections = [] } = options;
+      let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
+      if (edgesOp instanceof Shape) {
+        const edgesShape = edgesOp;
+        edgesOp = (edges) => edgesShape.to(edges);
+      }
+      const edges = [];
+      eachFaceEdges(
+        await shape.toGeometry(),
+        await shape.toShapesGeometries(selections),
+        (faceGeometry, edgeGeometry) => {
+          if (edgeGeometry) {
+            edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
+          }
+        }
+      );
+      const grouped = groupOp(...edges);
+      if (grouped instanceof Function) {
+        return grouped(shape);
+      } else {
+        return grouped;
       }
     }
-  );
-  const grouped = groupOp(...edges);
-  if (grouped instanceof Function) {
-    return grouped(shape);
-  } else {
-    return grouped;
-  }
-});
-
-Shape.registerMethod('edges', edges);
+);

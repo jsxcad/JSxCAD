@@ -1,13 +1,17 @@
+import Group from './Group.js';
 import Shape from './Shape.js';
 import { scale } from './scale.js';
 
-export const scaleX = Shape.chainable(
+export const scaleX = Shape.registerMethod(
+  ['scaleX', 'sx'],
   (...x) =>
-    (shape) =>
-      Shape.Group(...shape.toFlatValues(x).map((x) => scale(x, 1, 1)(shape)))
+    async (shape) => {
+      const scaled = [];
+      for (const value of await shape.toFlatValues(x)) {
+        scaled.push(await scale(value, 1, 1)(shape));
+      }
+      return Group(...scaled);
+    }
 );
 
 export const sx = scaleX;
-
-Shape.registerMethod('scaleX', scaleX);
-Shape.registerMethod('sx', sx);

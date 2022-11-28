@@ -17,6 +17,6 @@ Box(5)
   .note('Box(5).and(rx(1 / 4), ArcX(1))');
 ```
 
-![Image](and.md.0.png)
+![Image](and.md.$2.png)
 
 Box(5).and(rx(1 / 4), ArcX(1))

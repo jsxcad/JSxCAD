@@ -22,10 +22,10 @@ Line(0.1, 5)
   );
 ```
 
-![Image](nth.md.0.png)
+![Image](nth.md.$2_1.png)
 
 All of the lines are included.
 
-![Image](nth.md.1.png)
+![Image](nth.md.$2_2.png)
 
 Line(0.1, 5).seq({ by: 1 / 8 }, rz).nth(0, 3, 6) extracts lines 0, 3, and 6.

@@ -84,7 +84,13 @@ export const staticDisplay = async (
 
   const pageSize = [];
 
-  await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
+  try {
+    await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
+  } catch (e) {
+    console.log(e.stack);
+    console.log(`QQQ/staticDisplay/geometry: ${JSON.stringify(geometry)}`);
+    throw e;
+  }
 
   moveToFit({ datasets, view, camera, scene, withGrid, pageSize });
 

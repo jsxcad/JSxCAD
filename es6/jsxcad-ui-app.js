@@ -5327,7 +5327,8 @@ class ViewNote extends ReactDOM$3.PureComponent {
     } = note;
     const {
       height,
-      width
+      width,
+      viewId
     } = view;
     const onClick = event => {
       if (onClickView) {
@@ -5342,6 +5343,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
         });
       }
     };
+    const viewIdClass = viewId ? `viewId_${viewId}` : '';
     if (!note.url) {
       return v$1(SpinnerCircularSplit, {
         color: "#36d7b7",
@@ -5355,7 +5357,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
     const border = selected ? '1px dashed dodgerblue' : '0px';
     return v$1("img", {
       ref: ref,
-      class: "note view",
+      class: `note view ${viewIdClass}`,
       style: {
         display: 'block',
         height: `${height}px`,

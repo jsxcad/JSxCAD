@@ -1,7 +1,6 @@
-export const toGeometry = (to, from) => {
-  if (to instanceof Function) {
-    return to(from).toGeometry();
-  } else {
-    return to.toGeometry();
-  }
-};
+import Shape from './Shape.js';
+
+export const toGeometry = Shape.registerMethod(
+  'toGeometry',
+  () => (shape) => shape.geometry
+);

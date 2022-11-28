@@ -2,9 +2,8 @@ import { hasTypeGhost, hasTypeVoid } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-export const voidFn = Shape.chainable(
-  () => (shape) =>
-    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(shape.toGeometry())))
+export const voidFn = Shape.registerMethod(
+  'void',
+  () => async (shape) =>
+    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
 );
-
-Shape.registerMethod('void', voidFn);

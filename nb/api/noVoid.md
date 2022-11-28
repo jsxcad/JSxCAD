@@ -14,10 +14,10 @@ Group(Box(), Triangle(1.5).void())
   .note('noVoid() removes the void triangle.');
 ```
 
-![Image](noVoid.md.0.png)
+![Image](noVoid.md.$2_1.png)
 
 With void
 
-![Image](noVoid.md.1.png)
+![Image](noVoid.md.$2_2.png)
 
 noVoid() removes the void triangle.

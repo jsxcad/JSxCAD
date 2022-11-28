@@ -50,7 +50,7 @@ const play = control('play', 0.2, 'input');
 ```
 
 ```JavaScript
-Flat({ diameter, length: flatLength, thickness: flatThickness })
+await Flat({ diameter, length: flatLength, thickness: flatThickness })
   .view()
   .note(
     "import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
@@ -61,7 +61,7 @@ Flat({ diameter, length: flatLength, thickness: flatThickness })
   .abstract();
 ```
 
-![Image](shaft.md.0.png)
+![Image](shaft.md.$2.png)
 
 import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 
@@ -73,16 +73,14 @@ graph LR;
 ```
 
 ```JavaScript
-Shaft({ diameter, length, play })
+await Shaft({ diameter, length, play })
   .view()
-  .note(
-    "import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
-  )
+  .note("import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';")
   .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
   .abstract();
 ```
 
-![Image](shaft.md.1.png)
+![Image](shaft.md.$3.png)
 
 import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 
@@ -94,7 +92,7 @@ graph LR;
 ```
 
 ```JavaScript
-FlatShaft({
+await FlatShaft({
   diameter,
   length,
   flatLength,
@@ -113,7 +111,7 @@ FlatShaft({
   .abstract();
 ```
 
-![Image](shaft.md.2.png)
+![Image](shaft.md.$4.png)
 
 import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 

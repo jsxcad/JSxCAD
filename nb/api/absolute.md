@@ -23,18 +23,18 @@ Box(10)
   .note('But now flat() will restore it to that orientation.');
 ```
 
-![Image](absolute.md.0.png)
+![Image](absolute.md.$2_1.png)
 
 Box(10).ez(1).rx(1 / 8) rotates a box
 
-![Image](absolute.md.1.png)
+![Image](absolute.md.$2_2.png)
 
 flat() will restore it to its local orientation.
 
-![Image](absolute.md.2.png)
+![Image](absolute.md.$2_3.png)
 
 absolute() will not affect its global orientation.
 
-![Image](absolute.md.3.png)
+![Image](absolute.md.$2_4.png)
 
 But now flat() will restore it to that orientation.

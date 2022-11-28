@@ -224,13 +224,18 @@ export const orbitDisplay = async (
 
     view = { ...view, fit };
 
-    await buildMeshes({
-      geometry,
-      scene,
-      render,
-      definitions,
-      pageSize,
-    });
+    try {
+      await buildMeshes({
+        geometry,
+        scene,
+        render,
+        definitions,
+        pageSize,
+      });
+    } catch (e) {
+      console.log(e.stack);
+      throw e;
+    }
 
     if (!moveToFitDone) {
       moveToFitDone = true;

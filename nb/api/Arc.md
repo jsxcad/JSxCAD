@@ -13,42 +13,53 @@ See: [ArcX](../../nb/api/ArcX.nb), [ArcY](#https://raw.githubusercontent.com/jsx
 ```JavaScript
 Group(Arc(4), Arc(4, [3, 4]))
   .view(1)
-  .md('Dimensions may be ranges.');
+  .note('Dimensions may be ranges.');
 ```
 
-![Image](Arc.md.0.png)
+![Image](Arc.md.$2_1.png)
 
 Dimensions may be ranges.
 
 ```JavaScript
-Arc(4, 5, 6).view().md('Three dimensions are supported.');
+Arc(4, 5, 6).view().note('Three dimensions are supported.');
 ```
 
-![Image](Arc.md.1.png)
+![Image](Arc.md.$3.png)
 
 Three dimensions are supported.
 
 ```JavaScript
-Arc(4)
-  .hasAngle(1 / 16, 15 / 16)
+Arc(4, { start: 1 / 16, end: 15 / 16 })
   .view()
-  .md('Angle constraints can be supplied to produce open arcs.');
+  .note('Angle constraints can be supplied to produce open arcs.');
 ```
 
-![Image](Arc.md.2.png)
+![Image](Arc.md.$4.png)
 
 Angle constraints can be supplied to produce open arcs.
 
 ```JavaScript
-Arc(4)
-  .hasAngle(1 / 16, 15 / 16)
+Arc(4, { start: 1 / 16, end: 15 / 16 })
   .and(Point())
   .loop()
   .fill()
   .view()
-  .md('Points are ordered to allow loops.');
+  .note('Points are ordered to allow loops.');
 ```
 
-![Image](Arc.md.3.png)
+![Image](Arc.md.$5.png)
 
 Points are ordered to allow loops.
+
+```JavaScript
+await Arc(10)
+  .and(Arc(10, { sides: 5 }))
+  .and(Arc({ apothem: 10, sides: 5 }))
+  .outline()
+  .topView(1)
+  .note('We can also specify arcs in terms of apothem.');
+```
+
+![Image](Arc.md.$6_1.png)
+
+We can also specify arcs in terms of apothem.

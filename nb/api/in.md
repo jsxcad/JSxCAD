@@ -18,7 +18,7 @@ Box(5)
   .tags('color');
 ```
 
-![Image](in.md.0.png)
+![Image](in.md.$2.png)
 
 Box(5).color('blue').as('item').tags('color') does not count the blue box.
 

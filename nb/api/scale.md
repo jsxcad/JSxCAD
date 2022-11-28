@@ -12,7 +12,7 @@ See: [scaleToFit](../../nb/api/scaleToFit.nb), [sx](#https://raw.githubuserconte
 Box(1, 1).scale(1, 1).topView().note('Box(1, 1).scale(1, 1)');
 ```
 
-![Image](scale.md.0.png)
+![Image](scale.md.$2.png)
 
 Box(1, 1).scale(1, 1)
 
@@ -23,7 +23,7 @@ Box([0, 1], 1)
   .note('Box([0, 1], 1).scale(-2, 1)');
 ```
 
-![Image](scale.md.1.png)
+![Image](scale.md.$3.png)
 
 Box([0, 1], 1).scale(-2, 1)
 
@@ -34,7 +34,7 @@ Box([0, 1], [0, 1])
   .note('Box([0, 1], [0, 1]).scale(-2, -3, 1)');
 ```
 
-![Image](scale.md.2.png)
+![Image](scale.md.$4.png)
 
 Box([0, 1], [0, 1]).scale(-2, -3, 1)
 
@@ -45,7 +45,7 @@ Box(1, 1)
   .note('Box(1, 1).scale(1, 1, -1) the surface is now upside down.');
 ```
 
-![Image](scale.md.3.png)
+![Image](scale.md.$5.png)
 
 Box(1, 1).scale(1, 1, -1) the surface is now upside down.
 
@@ -56,7 +56,7 @@ Box([0, 1], 1, 1)
   .note('Box([0, 1], 1, 1).scale(-1, 1, 1)');
 ```
 
-![Image](scale.md.4.png)
+![Image](scale.md.$6.png)
 
 Box([0, 1], 1, 1).scale(-1, 1, 1)
 
@@ -67,6 +67,6 @@ Box([0, 1], [0, 1], 1)
   .note('Box([0, 1], [0, 1], 1).scale(-1, -1, 1)');
 ```
 
-![Image](scale.md.5.png)
+![Image](scale.md.$7.png)
 
 Box([0, 1], [0, 1], 1).scale(-1, -1, 1)

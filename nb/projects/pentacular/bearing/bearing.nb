@@ -19,7 +19,7 @@ const Bearing = (diameter) =>
         .as('pin')
     );
 
-const bearing_10_7 = Bearing(10.7)
+const bearing_10_7 = await Bearing(10.7)
   .view(material('glass'))
   .md(`You'll need to print two of these`)
   .stl('bearing_10_7_top', get('top'))

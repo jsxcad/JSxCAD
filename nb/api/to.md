@@ -22,6 +22,6 @@ Box(1, 2, 3)
   );
 ```
 
-![Image](to.md.0.png)
+![Image](to.md.$2.png)
 
 Box(1, 2, 3).to(Ref().rz(1 / 4).x(5).seq({ by: 1 / 12 }, rz)) arranges the box at 12 reference points around a circle.

@@ -21,10 +21,10 @@ Box(3)
   .note('Repacked to show the pieces.');
 ```
 
-![Image](fit.md.0.png)
+![Image](fit.md.$2_1.png)
 
 Box(3).color('red').fit(Arc(12), Arc(8), Arc(4)) fitted in place.
 
-![Image](fit.md.1.png)
+![Image](fit.md.$2_2.png)
 
 Repacked to show the pieces.

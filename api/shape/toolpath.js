@@ -10,7 +10,8 @@ const lerp = (t, [ax, ay, az], [bx, by, bz]) => [
   az + t * (bz - az),
 ];
 
-export const toolpath = Shape.chainable(
+export const toolpath = Shape.registerMethod(
+  'toolpath',
   ({
       diameter = 1,
       jumpHeight = 1,
@@ -63,5 +64,3 @@ export const toolpath = Shape.chainable(
       );
     }
 );
-
-Shape.registerMethod('toolpath', toolpath);

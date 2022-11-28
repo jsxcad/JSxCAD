@@ -16,10 +16,10 @@ Box(10)
   .note("by(align('x>')) moves both by the reference.");
 ```
 
-![Image](by.md.0.png)
+![Image](by.md.$2_1.png)
 
 Box(10).and(align('x>')) produces a box and a reference point
 
-![Image](by.md.1.png)
+![Image](by.md.$2_2.png)
 
 by(align('x>')) moves both by the reference.

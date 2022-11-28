@@ -22,6 +22,6 @@ Box(10)
   .md("Box(10).cutOut(Arc(12), color('red'), color('blue'))");
 ```
 
-![Image](cutOut.md.0.png)
+![Image](cutOut.md.$2.png)
 
 Box(10).cutOut(Arc(12), color('red'), color('blue'))

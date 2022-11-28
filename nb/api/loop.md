@@ -16,13 +16,13 @@ _Note: We should rethink Arc and Box being implicitly filled._
 
 ```JavaScript
 Line(5)
-  .loop(Point(0, 8), Arc([4, 5], [4, 5]).hasAngle(0 / 4, 3 / 4))
+  .loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))
   .view()
   .note(
-    'Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5]).hasAngle(0 / 4, 3 / 4))'
+    'Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))'
   );
 ```
 
-![Image](loop.md.0.png)
+![Image](loop.md.$2.png)
 
-Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5]).hasAngle(0 / 4, 3 / 4))
+Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))

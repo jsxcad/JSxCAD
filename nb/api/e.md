@@ -19,6 +19,6 @@ Box(10)
   );
 ```
 
-![Image](e.md.0.png)
+![Image](e.md.$2.png)
 
 Box(10).rx(1 / 8).e(1, -1, 4, 3) extrudes along the normal by two extents

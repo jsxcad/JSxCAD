@@ -1,7 +1,20 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { read, getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { fromSvg, fromSvgPath, toSvg } from './jsxcad-convert-svg.js';
+import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
+
+const Svg = Shape.registerShapeMethod(
+  'Svg',
+  async (path, { fill = true, stroke = true } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    if (data === undefined) {
+      throw Error(`Cannot read svg from ${path}`);
+    }
+    return Shape.fromGeometry(
+      await fromSvg(data, { doFill: fill, doStroke: stroke })
+    );
+  }
+);
 
 /**
  *
@@ -23,34 +36,6 @@ const SvgPath = (svgPath, options = {}) =>
   Shape.fromGeometry(
     fromSvgPath(new TextEncoder('utf8').encode(svgPath), options)
   );
-
-const readSvg = async (path, { fill = true, stroke = true } = {}) => {
-  const data = await read(`source/${path}`, { sources: [path] });
-  if (data === undefined) {
-    throw Error(`Cannot read svg from ${path}`);
-  }
-  return Shape.fromGeometry(
-    await fromSvg(data, { doFill: fill, doStroke: stroke })
-  );
-};
-
-/**
- *
- * # Read SVG path data
- *
- **/
-
-const readSvgPath = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  let data = await read(`source/${path}`);
-  if (data === undefined) {
-    data = await read(`cache/${path}`, { sources: [path] });
-  }
-  return Shape.fromGeometry(await fromSvgPath(options, data));
-};
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -120,20 +105,13 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
+const prepareSvg = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  for (const entry of await ensurePages(op(shape))) {
     const svgPath = `download/svg/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      try {
-        await write(svgPath, await toSvg(entry, options));
-      } catch (error) {
-        getPendingErrorHandler()(error);
-      }
-    };
-    addPending(render());
+    await write(svgPath, await toSvg(entry, options));
     const filename = `${name}_${index++}.svg`;
     const record = {
       path: svgPath,
@@ -142,22 +120,22 @@ const prepareSvg = (shape, name, op = (s) => s, options = {}) => {
     };
     records.push(record);
     const hash$1 =
-      hashSum({ filename, options }) + hash(shape.toGeometry());
+      hashSum({ filename, options }) + hash(await shape.toGeometry());
     Shape.fromGeometry(entry).gridView(hash$1, options.view);
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return records;
 };
 
-const svg =
+const svg = Shape.registerMethod(
+  'svg',
   (name, op, options = {}) =>
-  (shape) => {
-    prepareSvg(shape, name, op, options);
-    return shape;
-  };
+    async (shape) => {
+      await prepareSvg(shape, name, op, options);
+      return shape;
+    }
+);
 
-Shape.registerMethod('svg', svg);
+const api = { SvgPath, Svg, svg };
 
-const api = { SvgPath, readSvg, readSvgPath, svg };
-
-export { SvgPath, api as default, readSvg, readSvgPath, svg };
+export { Svg, SvgPath, api as default, svg };

@@ -14,6 +14,6 @@ Arc(5)
   .note("op(color('red'), material('blue'), cutFrom(offset(1)), e(1))");
 ```
 
-![Image](op.md.0.png)
+![Image](op.md.$2.png)
 
 op(color('red'), material('blue'), cutFrom(offset(1)), e(1))

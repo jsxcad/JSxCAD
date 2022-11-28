@@ -19,6 +19,6 @@ Points([
   );
 ```
 
-![Image](Points.md.0.png)
+![Image](Points.md.$2.png)
 
 Points([[1, 2, 3], [3, 2, 1], [0, 0, 0]]).and(loop()) shows three points linked together.

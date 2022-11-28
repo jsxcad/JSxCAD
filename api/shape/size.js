@@ -24,10 +24,11 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const size = Shape.chainable(
+export const size = Shape.registerMethod(
+  'size',
   (op = (size) => (shape) => size) =>
-    (shape) => {
-      const geometry = shape.toConcreteGeometry();
+    async (shape) => {
+      const geometry = await shape.toGeometry();
       const bounds = measureBoundingBox(geometry);
       if (bounds === undefined) {
         return op({
@@ -38,7 +39,7 @@ export const size = Shape.chainable(
           min: [0, 0, 0],
           center: [0, 0, 0],
           radius: 0,
-        })(Shape.fromGeometry(geometry));
+        })(Shape.chain(Shape.fromGeometry(geometry)));
       }
       const [min, max] = bounds;
       const length = max[X] - min[X];
@@ -54,8 +55,6 @@ export const size = Shape.chainable(
         min,
         center,
         radius,
-      })(Shape.fromGeometry(geometry));
+      })(Shape.chain(Shape.fromGeometry(geometry)));
     }
 );
-
-Shape.registerMethod('size', size);

@@ -17,4 +17,4 @@ _Check: the description seems off._
 Box(10, 10, 10).wrap(0.5, 2).view();
 ```
 
-![Image](wrap.md.0.png)
+![Image](wrap.md.$2.png)

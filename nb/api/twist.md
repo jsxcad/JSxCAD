@@ -18,6 +18,6 @@ Box(2, 3, 10)
   .note('Box(2, 3, 10).remesh(1).twist(1 / 40)');
 ```
 
-![Image](twist.md.0.png)
+![Image](twist.md.$2.png)
 
 Box(2, 3, 10).remesh(1).twist(1 / 40)

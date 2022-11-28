@@ -1,19 +1,16 @@
 import Shape from './Shape.js';
 import { convexHull } from '@jsxcad/geometry';
+import { toShapesGeometries } from './toShapesGeometries.js';
 
-export const Hull = (...shapes) =>
-  Shape.fromGeometry(
-    convexHull(shapes.map((other) => Shape.toShape(other).toGeometry()))
-  );
-
-Shape.prototype.Hull = Shape.shapeMethod(Hull);
-
-export const hull = Shape.chainable(
-  (...shapes) =>
-    (shape) =>
-      Hull(...shape.toShapes(shapes))
+export const Hull = Shape.registerShapeMethod('Hull', async (...shapes) =>
+  Shape.fromGeometry(convexHull(await toShapesGeometries(shapes)(null)))
 );
 
-Shape.registerMethod('hull', hull);
+export const hull = Shape.registerMethod(
+  'hull',
+  (...shapes) =>
+    async (shape) =>
+      Hull(...(await shape.toShapes(shapes)))
+);
 
 export default Hull;

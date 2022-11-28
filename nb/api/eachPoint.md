@@ -16,7 +16,7 @@ Box(5, 5, 5)
   .md('Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))');
 ```
 
-![Image](eachPoint.md.0.png)
+![Image](eachPoint.md.$2.png)
 
 Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))
 
@@ -28,6 +28,6 @@ Box(5, 5, 5)
   .md('Box(5, 5, 5).outline().and(eachPoint(Arc(4)))');
 ```
 
-![Image](eachPoint.md.1.png)
+![Image](eachPoint.md.$3.png)
 
 Box(5, 5, 5).outline().and(eachPoint(Arc(4)))

@@ -6,28 +6,28 @@ One of the core functions of JSxCAD is creating geometry and a number of primiti
 Create a circle or a section of a an arc. The number of sides can be computed automatically to limit maximum deviation from the ideal circle using .hasZag(deviation).
 
 ```JavaScript
-const aCircle = Arc(10).view();
+const aCircle = await Arc(10).view();
 ```
 
-![Image](creating_geometry.md.0.png)
+![Image](creating_geometry.md.aCircle.png)
 
 ```JavaScript
-const anElipseExtruded = Arc(10, 5, 2).view();
+const anElipseExtruded = await Arc(10, 5, 2).view();
 ```
 
-![Image](creating_geometry.md.1.png)
+![Image](creating_geometry.md.anElipseExtruded.png)
 
 ```JavaScript
-const aCircleWithSides = Arc(10).hasSides(8).view();
+const aCircleWithSides = await Arc(10, { sides: 8 }).view();
 ```
 
-![Image](creating_geometry.md.2.png)
+![Image](creating_geometry.md.aCircleWithSides.png)
 
 ```JavaScript
-const aCircleWithZag = Arc(20).hasZag(0.1).view();
+const aCircleWithZag = await Arc(20, { zag: 0.1 }).view();
 ```
 
-![Image](creating_geometry.md.3.png)
+![Image](creating_geometry.md.aCircleWithZag.png)
 
 ---
 ### Box
@@ -37,28 +37,28 @@ Creates a 2D or 3D box
 Box(10, 10).view();
 ```
 
-![Image](creating_geometry.md.4.png)
+![Image](creating_geometry.md.$3.png)
 
 ```JavaScript
 Box(10, 10, 2).view();
 ```
 
-![Image](creating_geometry.md.5.png)
+![Image](creating_geometry.md.$4.png)
 
 ---
 ### Curve
 Create a bezier curve. The number of segments is scaled automatically to match the curvature.
 
 ```JavaScript
-Curve(Point(0, 0), Point(10, 10), Point(20, 30), Point(40, 0)).view();
+await Curve(Point(0, 0), Point(10, 10), Point(20, 30), Point(40, 0)).view();
 ```
 
-![Image](creating_geometry.md.6.png)
+![Image](creating_geometry.md.$6.png)
 
 ```JavaScript
-Curve([0, 0], [10, 0], [10, 10], [20, 10])
+await Curve([0, 0], [10, 0], [10, 10], [20, 10])
   .rx(1 / 4)
-  .eachEdge(ArcX(0, 4, 4).hasSides(6), Loft)
+  .eachEdge(ArcX(0, 4, 4, { sides: 6 }), Loft)
   .view();
 ```
 
@@ -75,16 +75,16 @@ Empty().view();
 Creates a new hexagon
 
 ```JavaScript
-Hexagon(4).view();
+await Hexagon(4).view();
 ```
 
-![Image](creating_geometry.md.7.png)
+![Image](creating_geometry.md.$11.png)
 
 ```JavaScript
-Hexagon(6, 3, 2).view();
+await Hexagon(6, 3, 2).view();
 ```
 
-![Image](creating_geometry.md.8.png)
+![Image](creating_geometry.md.$12.png)
 
 ---
 ### Hershy
@@ -94,126 +94,125 @@ A built in single line font useful for adding text
 Hershey('Some Example Text', 20).by(align('xy')).view();
 ```
 
-![Image](creating_geometry.md.9.png)
+![Image](creating_geometry.md.$14.png)
 
 ---
 ### Icosahedron
 Creates a new Icosahedron
 
 ```JavaScript
-Icosahedron(10).view();
+await Icosahedron(10).view();
 ```
 
-![Image](creating_geometry.md.10.png)
+![Image](creating_geometry.md.$16.png)
 
 ---
 ### Line
 Creates a new line
 
 ```JavaScript
-Line(10).view();
+await Line(10).view();
 ```
 
-![Image](creating_geometry.md.11.png)
+![Image](creating_geometry.md.$18.png)
 
 ---
 ### Link
 Links a set of ordered points together into ordered segments.
 
 ```JavaScript
-Group(Point(0, 0), Point(10, 10), Point(20, 10)).link().view();
+await Group(Point(0, 0), Point(10, 10), Point(20, 10)).link().view();
 ```
 
-![Image](creating_geometry.md.12.png)
+![Image](creating_geometry.md.$20.png)
 
 ```JavaScript
-Arc(10)
-  .hasAngle(-1 / 3, 1 / 3)
+await Arc(10, { start: -1 / 3, end: 1 / 3 })
   .x(-3, 3)
   .link()
   .view();
 ```
 
-![Image](creating_geometry.md.13.png)
+![Image](creating_geometry.md.$21.png)
 
 ---
 ### Loop
 Loop is very similar to link, except that the last point is connected back to the first point.
 
 ```JavaScript
-Group(Point(0, 0), Point(10, 10), Point(20, 10)).loop().view();
+await Group(Point(0, 0), Point(10, 10), Point(20, 10)).loop().view();
 ```
 
-![Image](creating_geometry.md.14.png)
+![Image](creating_geometry.md.$23.png)
 
 ---
 ### Octagon
 Creates a new Octagon
 
 ```JavaScript
-Octagon(20).view();
+await Octagon(20).view();
 ```
 
-![Image](creating_geometry.md.15.png)
+![Image](creating_geometry.md.$25.png)
 
 ---
 ### Orb
 Creates a new spheroid
 
 ```JavaScript
-Orb(10).view();
+await Orb(10).view();
 ```
 
-![Image](creating_geometry.md.16.png)
+![Image](creating_geometry.md.$27.png)
 
 ```JavaScript
-Orb(10, 5, 2).view();
+await Orb(10, 5, 2).view();
 ```
 
-![Image](creating_geometry.md.17.png)
+![Image](creating_geometry.md.$28.png)
 
 ---
 ### Pentagon
 Generates a pentagon
 
 ```JavaScript
-Pentagon(10).view();
+await Pentagon(10).view();
 ```
 
-![Image](creating_geometry.md.18.png)
+![Image](creating_geometry.md.$30.png)
 
 ---
 ### Point
 A point in 3D space
 
 ```JavaScript
-Point(0, 0, 0).view();
+await Point(0, 0, 0).view();
 ```
 
-![Image](creating_geometry.md.19.png)
+![Image](creating_geometry.md.$32.png)
 
 ---
 ### Polygon
 Creates a new polygon from the input points
 
 ```JavaScript
-Polygon(Point(0, 0, 0), Point(10, 0, 0), Point(10, 10, 0)).view();
+await Polygon(Point(0, 0, 0), Point(10, 0, 0), Point(10, 10, 0)).view();
 ```
 
-![Image](creating_geometry.md.20.png)
+![Image](creating_geometry.md.$34.png)
 
 ```JavaScript
-Polygon([0, 0, 0], [10, 0, 0], [10, 10, 0]).view();
+await Polygon([0, 0, 0], [10, 0, 0], [10, 10, 0]).view();
 ```
 
-![Image](creating_geometry.md.21.png)
+![Image](creating_geometry.md.$35.png)
 
 ---
 ### Triangle
 Triangle creates a new triangle.
 
 ```JavaScript
-Triangle(4, 9).view();
+await Triangle(4, 9).view();
 ```
 
-![Image](creating_geometry.md.22.png)
+![Image](creating_geometry.md.$37.png)

@@ -1,7 +1,6 @@
 ```JavaScript
 const Tile = (sides, offset = 0) =>
-  Arc(20)
-    .hasSides(sides)
+  Arc(20, { sides })
     .op(ez(3, 2), cut(inset(1)).ez(2, 1), cut(inset(2)).ez(1, 0))
     .fuse()
     .cut(
@@ -12,21 +11,19 @@ const Tile = (sides, offset = 0) =>
 ```
 
 ```JavaScript
-const squareTile = Tile(4, 1 / 8).view();
+const squareTile = await Tile(4, 1 / 8).view();
 ```
 
-![Image](map.md.0.png)
+![Image](map.md.squareTile.png)
 
 ```JavaScript
-const fiveTile = Tile(5).view();
+const fiveTile = await Tile(5).view();
 ```
 
-![Image](map.md.1.png)
+![Image](map.md.fiveTile.png)
 
 ```JavaScript
-const hexagonalTile = Tile(6).stl('hex');
+const hexagonalTile = await Tile(6).stl('hex');
 ```
-
-![Image](map.md.2.png)
 
 [hex_1.stl](map.hex_1.stl)

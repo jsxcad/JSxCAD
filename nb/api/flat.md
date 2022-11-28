@@ -25,14 +25,14 @@ Box(6, 4, 2)
   );
 ```
 
-![Image](flat.md.0.png)
+![Image](flat.md.$2_1.png)
 
 Box(6, 4, 2) is our starting shape in its preferred orientation
 
-![Image](flat.md.1.png)
+![Image](flat.md.$2_2.png)
 
 We arrange the boxes and perform a cut
 
-![Image](flat.md.2.png)
+![Image](flat.md.$2_3.png)
 
 each(flat()).pack() arranges each box separately in its preferred orientation

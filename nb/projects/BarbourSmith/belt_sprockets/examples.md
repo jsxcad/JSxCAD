@@ -20,117 +20,117 @@ import {
 ```
 
 ```JavaScript
-Pulley(MXL, 20).md('MXL').view();
+await Pulley(MXL, 20).md('MXL').view('example');
 ```
 
 MXL
 
-![Image](examples.md.0.png)
+![Image](examples.md.$1_example.png)
 
 ```JavaScript
-Pulley(DP40, 20).md('DP40').view();
+await Pulley(DP40, 20).md('DP40').view('example');
 ```
 
 DP40
 
-![Image](examples.md.1.png)
+![Image](examples.md.$2_example.png)
 
 ```JavaScript
-Pulley(XL, 20).md('XL').view();
+await Pulley(XL, 20).md('XL').view('example');
 ```
 
 XL
 
-![Image](examples.md.2.png)
+![Image](examples.md.$3_example.png)
 
 ```JavaScript
-Pulley(H, 20).md('H').view();
+await Pulley(H, 20).md('H').view('example');
 ```
 
 H
 
-![Image](examples.md.3.png)
+![Image](examples.md.$4_example.png)
 
 ```JavaScript
-Pulley(T2_5, 20).md('T2 5mm').view();
+await Pulley(T2_5, 20).md('T2 5mm').view('example');
 ```
 
 T2 5mm
 
-![Image](examples.md.4.png)
+![Image](examples.md.$5_example.png)
 
 ```JavaScript
-Pulley(T5, 20).md('T5').view();
+await Pulley(T5, 20).md('T5').view('example');
 ```
 
 T5
 
-![Image](examples.md.5.png)
+![Image](examples.md.$6_example.png)
 
 ```JavaScript
-Pulley(T10, 20).md('T10').view();
+await Pulley(T10, 20).md('T10').view('example');
 ```
 
 T10
 
-![Image](examples.md.6.png)
+![Image](examples.md.$7_example.png)
 
 ```JavaScript
-Pulley(AT5, 20).md('AT 5mm').view();
+await Pulley(AT5, 20).md('AT 5mm').view('example');
 ```
 
 AT 5mm
 
-![Image](examples.md.7.png)
+![Image](examples.md.$8_example.png)
 
 ```JavaScript
-Pulley(HTD_3mm, 20).md('HTD 3mm').view();
+await Pulley(HTD_3mm, 20).md('HTD 3mm').view('example');
 ```
 
 HTD 3mm
 
-![Image](examples.md.8.png)
+![Image](examples.md.$9_example.png)
 
 ```JavaScript
-Pulley(HTD_5mm, 20).md('HTD 5mm').view();
+await Pulley(HTD_5mm, 20).md('HTD 5mm').view('example');
 ```
 
 HTD 5mm
 
-![Image](examples.md.9.png)
+![Image](examples.md.$10_example.png)
 
 ```JavaScript
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+await Pulley(GT2_5mm, 20).md('GT2 5mm').view('example');
 ```
 
 GT2 5mm
 
-![Image](examples.md.10.png)
+![Image](examples.md.$11_example.png)
 
-![Image](examples.md.11.png)
+![Image](examples.md.$12_example.png)
 
 ```JavaScript
-Pulley(HTD_8mm, 20).md('HTD 8mm').view();
+await Pulley(HTD_8mm, 20).md('HTD 8mm').view('example');
 ```
 
 HTD 8mm
 
-![Image](examples.md.12.png)
+![Image](examples.md.$13_example.png)
 
 ```JavaScript
-Pulley(GT2_2mm, 20).md('GT2 2mm').view();
+await Pulley(GT2_2mm, 20).md('GT2 2mm').view('example');
 ```
 
 GT2 2mm
 
-![Image](examples.md.13.png)
+![Image](examples.md.$14_example.png)
 
 ```JavaScript
-Pulley(GT2_3mm, 20).md('GT2 3mm').view();
+await Pulley(GT2_3mm, 20).md('GT2 3mm').view('example');
 ```
 
 GT2 3mm
 
-![Image](examples.md.14.png)
+![Image](examples.md.$15_example.png)
 
-![Image](examples.md.15.png)
+![Image](examples.md.$16_example.png)

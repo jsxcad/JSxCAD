@@ -7,7 +7,7 @@ Produces an icosahedron that fits the bounding dimensions.
 Icosahedron(3).and(Box(3, 3, 3).material('glass')).view().md('Icosahedron(3)');
 ```
 
-![Image](Icosahedron.md.0.png)
+![Image](Icosahedron.md.$2.png)
 
 Icosahedron(3)
 
@@ -18,6 +18,6 @@ Icosahedron(1, 2, [0, 3])
   .md('Icosahedron(1, 2, [0, 3])');
 ```
 
-![Image](Icosahedron.md.1.png)
+![Image](Icosahedron.md.$3.png)
 
 Icosahedron(1, 2, [0, 3])

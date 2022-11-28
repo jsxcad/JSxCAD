@@ -10,7 +10,7 @@ Face([0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0])
   .note('Face([0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0])');
 ```
 
-![Image](Face.md.0.png)
+![Image](Face.md.$2.png)
 
 Face([0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0])
 
@@ -22,7 +22,7 @@ Face([0, 0, 0], [1, 0, 0], [1, 1, 0.5], [0, 1, 0])
   );
 ```
 
-![Image](Face.md.1.png)
+![Image](Face.md.$3.png)
 
 Face([0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0.5]) will produce a non-flat face of two facets
 
@@ -35,6 +35,6 @@ Face([0, 0, 0], [1, 0, 0], [1, 1, 0.5], [0, 1, 0])
   );
 ```
 
-![Image](Face.md.2.png)
+![Image](Face.md.$4.png)
 
 Face([0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0.5]).e(0.1) extrudes a non-flat face along the overall face normal

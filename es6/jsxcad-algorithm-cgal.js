@@ -419,7 +419,12 @@ const initCgal = async () => {
   }
 };
 
-const getCgal = () => cgal;
+const getCgal = () => {
+  if (!cgal) {
+    throw Error('CGAL not initialized');
+  }
+  return cgal;
+};
 
 onBoot(initCgal);
 
@@ -610,7 +615,7 @@ const fromRotateZToTransform = (turn) => {
 const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
   try {
     if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
-      throw Error('Non-finite');
+      throw Error(`Non-finite ${[x, y, z]}`);
     }
     return toJsTransformFromCgalTransform(
       getCgal().Transformation__translate(x, y, z)
@@ -1054,6 +1059,8 @@ const withCgalGeometry = (inputs, op) => {
   try {
     return op(cgalGeometry, g);
   } catch (error) {
+    // console.log(`QQ/withCgalGeometry/inputs: ${JSON.stringify(inputs)}`);
+    // console.log(`QQ/withCgalGeometry/op: ${'' + op}`);
     // throw Error(error);
     throw error;
   } finally {

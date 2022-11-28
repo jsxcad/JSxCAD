@@ -1,17 +1,15 @@
 Parts regression tests.
 
 ```JavaScript
-const disk = Arc(4).ez(1).asPart('disk');
+const disk = await Arc(4).ez(1).asPart('disk');
 ```
 
 ```JavaScript
-const beam = Box(2, 2).ez(10).asPart('beam');
+const beam = await Box(2, 2).ez(10).asPart('beam');
 ```
 
 ```JavaScript
-const diskBeam = disk.and(beam).asPart('diskBeam');
+const diskBeam = await disk.and(beam).asPart('diskBeam');
 ```
 
-Materials:
-
-The bill of materials is [object Object]
+The bill of materials is function () { [native code] }

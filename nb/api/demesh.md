@@ -17,10 +17,10 @@ Box(5, 5, 5)
   .md('Box(5, 5, 5).remesh(1).demesh() produces the required facets.');
 ```
 
-![Image](demesh.md.0.png)
+![Image](demesh.md.$2_1.png)
 
 Box(5, 5, 5).remesh(1) produces these facets.
 
-![Image](demesh.md.1.png)
+![Image](demesh.md.$2_2.png)
 
 Box(5, 5, 5).remesh(1).demesh() produces the required facets.

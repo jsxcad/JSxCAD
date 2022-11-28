@@ -12,8 +12,7 @@ The texture does not affect the geometry.
 See: [material](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/material.nb)
 `;
 
-Orb(4)
-  .hasZag(0.1)
+Orb(4, { zag: 0.1 })
   .image('https://jsxcad.js.org/png/bathymetry.png')
   .view()
   .note("Orb(4).image('https://jsxcad.js.org/png/bathymetry.png')");

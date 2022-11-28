@@ -1,15 +1,15 @@
 import { Shape, destructure, ensurePages } from './jsxcad-api-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { read, getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
-const readStl = async (
-  path,
-  { src, format = 'ascii', geometry = 'graph' } = {}
-) => {
-  const data = await read(`source/${path}`, { sources: [path] });
-  return Shape.fromGeometry(await fromStl(data, { format, geometry }));
-};
+const Stl = Shape.registerShapeMethod(
+  'Stl',
+  async (path, { src, format = 'ascii', geometry = 'graph' } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    return Shape.fromGeometry(await fromStl(data, { format, geometry }));
+  }
+);
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -79,20 +79,13 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareStl = (shape, name, op = (s) => s, options = {}) => {
+const prepareStl = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  for (const entry of await ensurePages(await op(Shape.chain(shape)))) {
     const stlPath = `download/stl/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      try {
-        await write(stlPath, await toStl(entry, options));
-      } catch (error) {
-        getPendingErrorHandler()(error);
-      }
-    };
-    addPending(render());
+    await write(stlPath, await toStl(entry, options));
     const filename = `${name}_${index++}.stl`;
     const record = {
       path: stlPath,
@@ -103,25 +96,21 @@ const prepareStl = (shape, name, op = (s) => s, options = {}) => {
     // Produce a view of what will be downloaded.
     const hash$1 =
       hashSum({ filename, options }) + hash(shape.toGeometry());
-    Shape.fromGeometry(entry).view(hash$1, options.view);
+    Shape.fromGeometry(entry).view(name, options.view);
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return records;
 };
 
-const stl =
-  (...args) =>
-  (shape) => {
-    const { value: name, func: op, object: options } = destructure(args);
-    prepareStl(shape, name, op, options);
-    return shape;
-  };
-
-Shape.registerMethod('stl', stl);
+const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
+  const { value: name, func: op, object: options } = destructure(args);
+  await prepareStl(shape, name, op, options);
+  return shape;
+});
 
 const api = {
-  readStl,
+  Stl,
   stl,
 };
 
-export { api as default, readStl, stl };
+export { Stl, api as default, stl };

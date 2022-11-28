@@ -1,18 +1,19 @@
-import { Shape } from './Shape.js';
+import Group from './Group.js';
+import Shape from './Shape.js';
 import { fromRotateZToTransform } from '@jsxcad/algorithm-cgal';
+import { transform } from './transform.js';
 
 // rz is in terms of turns -- 1/2 is a half turn.
-export const rz = Shape.chainable(
+export const rz = Shape.registerMethod(
+  ['rotateZ', 'rz'],
   (...turns) =>
-    (shape) =>
-      Shape.Group(
-        ...shape
-          .toFlatValues(turns)
-          .map((turn) => shape.transform(fromRotateZToTransform(turn)))
-      )
+    async (shape) => {
+      const rotated = [];
+      for (const turn of await shape.toFlatValues(turns)) {
+        rotated.push(await transform(fromRotateZToTransform(turn))(shape));
+      }
+      return Group(...rotated);
+    }
 );
 
-Shape.registerMethod('rz', rz);
-
 export const rotateZ = rz;
-Shape.registerMethod('rotateZ', rz);

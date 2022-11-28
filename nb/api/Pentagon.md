@@ -17,7 +17,7 @@ Box(10)
   );
 ```
 
-![Image](Pentagon.md.0.png)
+![Image](Pentagon.md.$2.png)
 
 Box(10).color('black').fitTo(Arc(10).color('red'), Pentagon(10).color('blue')) shows the hexagon inscribed within the arc inscribed within the box.
 
@@ -29,6 +29,6 @@ Pentagon(5, 4, 2)
   );
 ```
 
-![Image](Pentagon.md.1.png)
+![Image](Pentagon.md.$3.png)
 
 Pentagon(5, 4, 2) produces a prism to fill a three dimensional bounding box.

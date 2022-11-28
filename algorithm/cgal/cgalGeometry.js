@@ -305,7 +305,6 @@ export const withCgalGeometry = (inputs, op) => {
   try {
     return op(cgalGeometry, g);
   } catch (error) {
-    // throw Error(error);
     throw error;
   } finally {
     cgalGeometry.delete();

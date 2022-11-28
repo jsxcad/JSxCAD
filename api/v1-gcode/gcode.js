@@ -1,18 +1,11 @@
 import { Shape, ensurePages } from '@jsxcad/api-shape';
-import {
-  addPending,
-  emit,
-  generateUniqueId,
-  getPendingErrorHandler,
-  getSourceLocation,
-  write,
-} from '@jsxcad/sys';
+import { emit, generateUniqueId, getSourceLocation, write } from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
 import { toGcode } from '@jsxcad/convert-gcode';
 
-export const prepareGcode = (
+export const prepareGcode = async (
   shape,
   name,
   tool,
@@ -22,16 +15,9 @@ export const prepareGcode = (
   const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  for (const entry of await ensurePages(await op(shape))) {
     const gcodePath = `gcode/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      try {
-        await write(gcodePath, await toGcode(entry, tool, options));
-      } catch (error) {
-        getPendingErrorHandler()(error);
-      }
-    };
-    addPending(render());
+    await write(gcodePath, await toGcode(entry, tool, options));
     entries.push({
       path: gcodePath,
       filename: `${name}_${index++}.gcode`,
@@ -43,17 +29,17 @@ export const prepareGcode = (
   return entries;
 };
 
-const gcode =
+const gcode = Shape.registerMethod(
+  'gcode',
   (name, tool, op, options = {}) =>
-  (shape) => {
-    const entries = prepareGcode(shape, name, tool, op, options);
-    const download = { entries };
-    const hash =
-      hashSum({ name, tool, options }) + hashGeometry(shape.toGeometry());
-    emit({ download, hash });
-    return shape;
-  };
-
-Shape.registerMethod('gcode', gcode);
+    async (shape) => {
+      const entries = await prepareGcode(shape, name, tool, op, options);
+      const download = { entries };
+      const hash =
+        hashSum({ name, tool, options }) + hashGeometry(shape.toGeometry());
+      emit({ download, hash });
+      return shape;
+    }
+);
 
 export default gcode;

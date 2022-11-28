@@ -19,7 +19,7 @@ const Profile = (pitch = 1, depth = 4 / 3) =>
 Profile().topView();
 ```
 
-![Image](bolt.md.0.png)
+![Image](bolt.md.$2.png)
 
 ```JavaScript
 export const ScrewThreadSegmentBuilder = Cached(
@@ -40,10 +40,10 @@ export const ScrewThreadSegmentBuilder = Cached(
 ```
 
 ```JavaScript
-export const ScrewThreadSegment = (
+export const ScrewThreadSegment = Shape.registerShapeMethod('ScrewThreadSegment', (
   diameter,
   { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => ScrewThreadSegmentBuilder(diameter, pitch, angle, play, turn);
+) => ScrewThreadSegmentBuilder(diameter, pitch, angle, play, turn));
 ```
 
 ```JavaScript
@@ -58,11 +58,11 @@ export const ScrewThreadBuilder = Cached(
 ```
 
 ```JavaScript
-export const ScrewThread = (
+export const ScrewThread = Shape.registerShapeMethod('ScrewThread', (
   diameter,
   height,
   { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn);
+) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn));
 ```
 
 ```JavaScript
@@ -86,7 +86,7 @@ export const NutThreadSegmentBuilder = Cached(
 ```
 
 ```JavaScript
-export const NutThreadSegment = (
+export const NutThreadSegment = Shape.registerShapeMethod('NutThreadSegment', (
   diameter,
   {
     pitch = 1,
@@ -95,7 +95,7 @@ export const NutThreadSegment = (
     play = 0.1,
     turn = 'right',
   } = {}
-) => NutThreadSegmentBuilder(diameter, pitch, thickness, angle, play, turn);
+) => NutThreadSegmentBuilder(diameter, pitch, thickness, angle, play, turn));
 ```
 
 ```JavaScript
@@ -109,9 +109,9 @@ export const NutThreadBuilder = Cached(
 ```
 
 ```JavaScript
-export const NutThread = (
+export const NutThread = Shape.registerShapeMethod('NutThread', (
   diameter,
   height,
   { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => NutThreadBuilder(diameter, height, pitch, angle, play, turn);
+) => NutThreadBuilder(diameter, height, pitch, angle, play, turn));
 ```

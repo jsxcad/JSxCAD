@@ -18,7 +18,7 @@ const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
 Text takes a font, the text to render, and an optional size defaulting to 10.
 
 ```JavaScript
-Text(unYetGul, '字').by(align('xy')).gridView();
+await Text(unYetGul, '字').by(align('xy')).gridView();
 ```
 
-![Image](font.md.0.png)
+![Image](font.md.$5.png)

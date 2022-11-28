@@ -119,7 +119,7 @@ const makeTerrarium = () => (shape) =>
 md`### Preview`;
 md`This is a preview of the assembled ${length}x${width}x${height}mm terrarium formed from ${thickness}mm acrylic with a ${hingeLength}mm hinge length and a ${holeDiameter}mm diameter hole in the top with matching plug, cut with a ${kerf}mm laser beam.`;
 
-const terrarium = Terrarium(
+const terrarium = await Terrarium(
   length,
   width,
   height,
@@ -160,7 +160,7 @@ The panels should have a snug fit, so that the assembly is solid without requiri
 The lid should have a snug fit internally, but a loose connection to the top panel so that it can be easily removed.
 `;
 
-terrarium
+await terrarium
   .z(-height)
   .note('### Laser cut profiles')
   .op(makeTerrarium(), makeLid());

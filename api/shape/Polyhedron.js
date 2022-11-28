@@ -1,5 +1,6 @@
 import Shape from './Shape.js';
 
+/*
 export const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
@@ -7,6 +8,7 @@ export const ofPointPaths = (points = [], paths = []) => {
   }
   return Shape.fromPolygons(polygons);
 };
+*/
 
 export const ofPolygons = (...polygons) => {
   const out = [];
@@ -20,10 +22,8 @@ export const ofPolygons = (...polygons) => {
   return Shape.fromPolygons(out);
 };
 
-export const Polyhedron = (...args) => ofPolygons(...args);
-
-Polyhedron.ofPointPaths = ofPointPaths;
+export const Polyhedron = Shape.registerShapeMethod('Polyhedron', (...args) =>
+  ofPolygons(...args)
+);
 
 export default Polyhedron;
-
-Shape.prototype.Polyhedron = Shape.shapeMethod(Polyhedron);

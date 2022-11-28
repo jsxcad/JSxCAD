@@ -1,21 +1,21 @@
 ```JavaScript
-const core = Group(
+const core = await Group(
   Arc(11).ez(15.5).z(4),
   Arc(7.85).ez(23.5),
   Arc(30).ez(7).z(4.5)
 ).view();
 ```
 
-![Image](thing.md.0.png)
+![Image](thing.md.core.png)
 
 ```JavaScript
-const center = Arc(6.26).ez(28.5).cut(Box(10, 10).ez(31.5).x(7.3)).view();
+const center = await Arc(6.26).ez(28.5).cut(Box(10, 10).ez(31.5).x(7.3)).view();
 ```
 
-![Image](thing.md.1.png)
+![Image](thing.md.center.png)
 
 ```JavaScript
-const base = core
+const base = await core
   .cut(center)
   .ry(1 / 2)
   .color('olive')
@@ -24,18 +24,16 @@ const base = core
   .view();
 ```
 
-![Image](thing.md.2.png)
+![Image](thing.md.base.png)
 
 ```JavaScript
-const grabber = Arc(12).ez(10).z(-2).view();
+const grabber = await Arc(12).ez(10).z(-2).view();
 ```
 
-![Image](thing.md.3.png)
+![Image](thing.md.grabber.png)
 
 ```JavaScript
-const final = base.cut(grabber).stl('test shape.stl');
+const final = await base.cut(grabber).stl('test shape.stl');
 ```
-
-![Image](thing.md.4.png)
 
 [test shape.stl_1.stl](thing.test%20shape.stl_1.stl)

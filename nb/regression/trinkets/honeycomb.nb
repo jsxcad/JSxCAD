@@ -1,4 +1,4 @@
-Hexagon(4)
+await Hexagon(4)
   .seq(
     { to: 10 },
     { to: 10 },

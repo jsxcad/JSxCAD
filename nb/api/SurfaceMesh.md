@@ -37,4 +37,4 @@ SurfaceMesh(
 ).view();
 ```
 
-![Image](SurfaceMesh.md.0.png)
+![Image](SurfaceMesh.md.$2.png)

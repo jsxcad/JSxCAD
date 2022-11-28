@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { getSourceLocation, generateUniqueId, addPending, emit, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 
@@ -71,19 +71,13 @@ function sum (o) {
 
 var hashSum = sum;
 
-const preparePdf = (shape, name, op = (s) => s, options = {}) => {
+const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  for (const entry of await ensurePages(await op(shape))) {
     const pdfPath = `download/pdf/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      await write(
-        pdfPath,
-        toPdf(entry, options).catch(getPendingErrorHandler())
-      );
-    };
-    addPending(render());
+    await write(pdfPath, await toPdf(entry, options));
     const filename = `${name}_${index++}.pdf`;
     const record = {
       path: pdfPath,
@@ -91,21 +85,17 @@ const preparePdf = (shape, name, op = (s) => s, options = {}) => {
       type: 'application/pdf',
     };
     records.push(record);
-    const shape = Shape.fromGeometry(entry);
-    const hash$1 =
-      hashSum({ filename, options }) + hash(shape.toGeometry());
-    shape.gridView(filename, options.view);
+    const hash$1 = hashSum({ filename, options }) + hash(entry);
+    await Shape.fromGeometry(entry).gridView(filename, options.view);
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return records;
 };
 
-const pdf =
-  (...args) =>
-  (shape) => {
-    const { value: name, func: op, object: options } = Shape.destructure(args);
-    preparePdf(shape, name, op, options);
-    return shape;
-  };
+const pdf = Shape.registerMethod('pdf', (...args) => async (shape) => {
+  const { value: name, func: op, object: options } = Shape.destructure(args);
+  await preparePdf(shape, name, op, options);
+  return shape;
+});
 
-Shape.registerMethod('pdf', pdf);
+export { pdf };

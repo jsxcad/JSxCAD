@@ -1,15 +1,11 @@
-import {
-  getLeafs,
-  taggedGroup,
-  taggedItem,
-  toTransformedGeometry,
-} from '@jsxcad/geometry';
+import { getLeafs, taggedGroup, taggedItem } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { align } from './align.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
-export const pack = Shape.chainable(
+export const pack = Shape.registerMethod(
+  'pack',
   ({
       size,
       pageMargin = 5,
@@ -17,14 +13,14 @@ export const pack = Shape.chainable(
       perLayout = Infinity,
       packSize = [],
     } = {}) =>
-    (shape) => {
+    async (shape) => {
       if (perLayout === 0) {
         // Packing was disabled -- do nothing.
         return shape;
       }
 
       let todo = [];
-      for (const leaf of getLeafs(shape.toTransformedGeometry())) {
+      for (const leaf of getLeafs(await shape.toGeometry())) {
         todo.push(leaf);
       }
       const packedLayers = [];
@@ -47,7 +43,7 @@ export const pack = Shape.chainable(
             packedLayers.push(
               taggedItem(
                 { tags: ['pack:layout'] },
-                taggedGroup({}, ...packed.map(toTransformedGeometry))
+                taggedGroup({}, ...packed) // .map(shape => shape.toGeometry())
               )
             );
           }
@@ -63,7 +59,5 @@ export const pack = Shape.chainable(
       return packedShape;
     }
 );
-
-Shape.registerMethod('pack', pack);
 
 export default pack;

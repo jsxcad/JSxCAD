@@ -18,7 +18,7 @@ See: [demesh](../../nb/api/demesh.md)
 Box(5, 5, 5).remesh(2.5).view('wireframe').note('Box(5, 5, 5).remesh(2.5)');
 ```
 
-![Image](remesh.md.0.png)
+![Image](remesh.md.$2_wireframe.png)
 
 Box(5, 5, 5).remesh(2.5)
 
@@ -26,7 +26,7 @@ Box(5, 5, 5).remesh(2.5)
 Box(5, 5, 5).remesh(1).view('wireframe').note('Box(5, 5, 5).remesh(1)');
 ```
 
-![Image](remesh.md.1.png)
+![Image](remesh.md.$3_wireframe.png)
 
 Box(5, 5, 5).remesh(1)
 
@@ -40,6 +40,6 @@ Box(5, 5, 5)
   );
 ```
 
-![Image](remesh.md.2.png)
+![Image](remesh.md.$4_wireframe.png)
 
 Box(5, 5, 5).remesh(0.5, Box([0, 5], [0, 5], [0, 5])) shows remeshing a part of a shape.

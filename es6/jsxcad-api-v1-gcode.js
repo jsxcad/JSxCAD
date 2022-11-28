@@ -1,5 +1,5 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { emit, getSourceLocation, generateUniqueId, addPending, write, getPendingErrorHandler } from './jsxcad-sys.js';
+import { emit, getSourceLocation, generateUniqueId, write } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 
@@ -71,7 +71,7 @@ function sum (o) {
 
 var hashSum = sum;
 
-const prepareGcode = (
+const prepareGcode = async (
   shape,
   name,
   tool,
@@ -81,16 +81,9 @@ const prepareGcode = (
   const { path } = getSourceLocation();
   let index = 0;
   const entries = [];
-  for (const entry of ensurePages(op(shape).toDisjointGeometry())) {
+  for (const entry of await ensurePages(await op(shape))) {
     const gcodePath = `gcode/${path}/${generateUniqueId()}`;
-    const render = async () => {
-      try {
-        await write(gcodePath, await toGcode(entry, tool, options));
-      } catch (error) {
-        getPendingErrorHandler()(error);
-      }
-    };
-    addPending(render());
+    await write(gcodePath, await toGcode(entry, tool, options));
     entries.push({
       path: gcodePath,
       filename: `${name}_${index++}.gcode`,
@@ -102,18 +95,18 @@ const prepareGcode = (
   return entries;
 };
 
-const gcode =
+const gcode = Shape.registerMethod(
+  'gcode',
   (name, tool, op, options = {}) =>
-  (shape) => {
-    const entries = prepareGcode(shape, name, tool, op, options);
-    const download = { entries };
-    const hash$1 =
-      hashSum({ name, tool, options }) + hash(shape.toGeometry());
-    emit({ download, hash: hash$1 });
-    return shape;
-  };
-
-Shape.registerMethod('gcode', gcode);
+    async (shape) => {
+      const entries = await prepareGcode(shape, name, tool, op, options);
+      const download = { entries };
+      const hash$1 =
+        hashSum({ name, tool, options }) + hash(shape.toGeometry());
+      emit({ download, hash: hash$1 });
+      return shape;
+    }
+);
 
 const api = { gcode };
 

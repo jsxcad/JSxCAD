@@ -1,8 +1,8 @@
 import { Arc } from './Arc.js';
 import Shape from './Shape.js';
 
-export const Octagon = (x, y, z) => Arc(x, y, z).hasSides(8);
-
-Shape.prototype.Octagon = Shape.shapeMethod(Octagon);
+export const Octagon = Shape.registerShapeMethod('Octagon', (x, y, z) =>
+  Arc(x, y, z, { sides: 8 })
+);
 
 export default Octagon;

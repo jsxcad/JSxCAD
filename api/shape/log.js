@@ -1,7 +1,6 @@
 import { computeHash, emit, log as sysLog } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import { serialize } from '@jsxcad/geometry';
 
 /**
  *
@@ -15,35 +14,18 @@ import { serialize } from '@jsxcad/geometry';
  *
  **/
 
-const toText = (value) => {
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  } else {
-    return String(value);
-  }
-};
-
-export const log = (value, level) => {
-  const text = toText(value);
-  const log = { text, level };
-  const hash = computeHash(log);
-  emit({ log, hash });
-  return sysLog({ op: 'text', text, level });
-};
-
-export const logOp = (shape, op) => {
-  const text = String(op(shape));
-  const level = 'serious';
-  const log = { text, level };
-  const hash = computeHash(log);
-  emit({ log, hash });
-  return sysLog({ op: 'text', text });
-};
-
-const logMethod = function (op = (shape) => JSON.stringify(shape)) {
-  logOp(Shape.fromGeometry(serialize(this.toGeometry())), op);
-  return this;
-};
-Shape.prototype.log = logMethod;
+export const log = Shape.registerMethod(
+  'log',
+  (prefix = '') =>
+    async (shape) => {
+      const text = prefix + JSON.stringify(await shape.toGeometry());
+      const level = 'serious';
+      const log = { text, level };
+      const hash = computeHash(log);
+      emit({ log, hash });
+      sysLog({ op: 'text', text });
+      return shape;
+    }
+);
 
 export default log;

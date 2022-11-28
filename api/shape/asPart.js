@@ -2,13 +2,12 @@ import Shape from './Shape.js';
 import { taggedItem } from '@jsxcad/geometry';
 
 // Constructs an item, as a part, from the designator.
-export const asPart = Shape.chainable(
-  (partName) => (shape) =>
+export const asPart = Shape.registerMethod(
+  'asPart',
+  (partName) => async (shape) =>
     Shape.fromGeometry(
-      taggedItem({ tags: [`part:${partName}`] }, shape.toGeometry())
+      taggedItem({ tags: [`part:${partName}`] }, await shape.toGeometry())
     )
 );
-
-Shape.registerMethod('asPart', asPart);
 
 export default asPart;

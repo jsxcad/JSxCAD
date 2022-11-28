@@ -16,10 +16,10 @@ Box(10)
   .note("on(get('b'), ghost()) turns one into a ghost.");
 ```
 
-![Image](ghost.md.0.png)
+![Image](ghost.md.$2_1.png)
 
 Box(10).op(x(5).as('a'), x(-5).as('b')) produces normal geometry.
 
-![Image](ghost.md.1.png)
+![Image](ghost.md.$2_2.png)
 
 on(get('b'), ghost()) turns one into a ghost.

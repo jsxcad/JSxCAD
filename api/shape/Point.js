@@ -1,8 +1,10 @@
+import './toCoordinate.js';
 import Shape from './Shape.js';
 
-export const Point = (...args) =>
-  Shape.fromPoint(Shape.toCoordinate(undefined, ...args));
+const toCoordinateOp = Shape.ops.get('toCoordinate');
 
-Shape.prototype.Point = Shape.shapeMethod(Point);
+export const Point = Shape.registerShapeMethod('Point', async (...args) =>
+  Shape.fromPoint(await toCoordinateOp(...args)())
+);
 
 export default Point;

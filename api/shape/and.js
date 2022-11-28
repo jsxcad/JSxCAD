@@ -1,18 +1,17 @@
 import Shape from './Shape.js';
 import { taggedGroup } from '@jsxcad/geometry';
 
-export const and = Shape.chainable(
+export const and = Shape.registerMethod(
+  'and',
   (...args) =>
-    (shape) =>
+    async (shape) =>
       Shape.fromGeometry(
         taggedGroup(
           {},
-          shape.toGeometry(),
-          ...shape.toShapes(args).map((shape) => shape.toGeometry())
+          await shape.toGeometry(),
+          ...(await shape.toShapesGeometries(args))
         )
       )
 );
-
-Shape.registerMethod('and', and);
 
 export default and;

@@ -12,9 +12,9 @@ Box(2)
   .area((a) => note(`Box(2).area() gives ${a}`));
 ```
 
-![Image](area.md.0.png)
+![Image](area.md.$2.png)
 
-Box(2).area() gives 4.000000000000002
+Box(2).area() gives 0
 
 ```JavaScript
 Box(2, 2, 2)
@@ -22,6 +22,6 @@ Box(2, 2, 2)
   .area((a) => note(`Box(2, 2, 2).area() gives ${a}`));
 ```
 
-![Image](area.md.1.png)
+![Image](area.md.$3.png)
 
-Box(2, 2, 2).area() gives 24.000000000000014
+Box(2, 2, 2).area() gives 0

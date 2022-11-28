@@ -13,11 +13,11 @@ Box(10)
   .note('clean() removes the ghost.');
 ```
 
-![Image](clean.md.0.png)
+![Image](clean.md.$2_1.png)
 
 Box(10).cut(Arc(8)) shows the ghost of the cut.
 
-![Image](clean.md.1.png)
+![Image](clean.md.$2_2.png)
 
 clean() removes the ghost.
 
@@ -31,10 +31,10 @@ Box(10)
   .note('clean() shows the void arc remains.');
 ```
 
-![Image](clean.md.2.png)
+![Image](clean.md.$3_1.png)
 
 Box(10).fitTo(Arc(8).void()) shows the void arc.
 
-![Image](clean.md.3.png)
+![Image](clean.md.$3_2.png)
 
 clean() shows the void arc remains.

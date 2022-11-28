@@ -4,12 +4,12 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
+import { Stl, stl } from './jsxcad-api-v1-stl.js';
 import { toEcmascript } from './jsxcad-compiler.js';
-import { readStl, stl } from './jsxcad-api-v1-stl.js';
+import { Svg } from './jsxcad-api-v1-svg.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
-import { readSvg } from './jsxcad-api-v1-svg.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
 let recordedNotes;
@@ -84,6 +84,7 @@ const $run = async (op, { path, id, text, sha, line }) => {
         await resolvePending();
         finishEmitGroup({ path, id, line });
       }
+      console.log(`QQ/$run/text: ${text}`);
       throw error;
     }
     await resolvePending();
@@ -104,7 +105,8 @@ const $run = async (op, { path, id, text, sha, line }) => {
     // console.log(`QQ/replay: ${id} ${sha}`);
     await replayRecordedNotes(path, id);
     const result = await load(`data/def/${path}/${id}.data`);
-    return result;
+    // console.log(`QQ/result: ${JSON.stringify(result)}`);
+    return Shape.chain(result);
   }
 };
 
@@ -164,19 +166,8 @@ const evaluate = async (ecmascript, { api, path }) => {
     const op = await builder({ ...api, import: { meta: { url: path } } });
     // Retry until none of the operations block.
     for (;;) {
-      try {
-        const result = await op();
-        return result;
-      } catch (error) {
-        if (error instanceof ErrorWouldBlock) {
-          logInfo('api/core/evaluate/error', error.message);
-          console.log(error.message);
-          await resolvePending();
-          restoreEmitGroup(emitGroup);
-          continue;
-        }
-        throw error;
-      }
+      const result = await op();
+      return result;
     }
   } catch (error) {
     throw error;
@@ -448,8 +439,8 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
-  readSvg,
-  readStl,
+  Svg,
+  Stl,
   readObj,
   readOff,
   setToSourceFromNameFunction,

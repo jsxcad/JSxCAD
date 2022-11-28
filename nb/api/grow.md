@@ -19,7 +19,7 @@ Box(5, 5, 5)
   .note('The ghost is grown by 5 mm in all directions.');
 ```
 
-![Image](grow.md.0.png)
+![Image](grow.md.$2.png)
 
 The ghost is grown by 5 mm in all directions.
 
@@ -30,7 +30,7 @@ Box(5, 5, 5)
   .note('The ghost is grown by 5 mm in only x and z directions.');
 ```
 
-![Image](grow.md.1.png)
+![Image](grow.md.$3.png)
 
 The ghost is grown by 5 mm in only x and z directions.
 
@@ -43,7 +43,7 @@ Box(5, 5, 5)
   );
 ```
 
-![Image](grow.md.2.png)
+![Image](grow.md.$4.png)
 
 Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.
 
@@ -56,6 +56,6 @@ Box(5, 5, 20)
   );
 ```
 
-![Image](grow.md.3.png)
+![Image](grow.md.$5.png)
 
 Box(5, 5, 20).grow(4, 'xy', Box(5, 5, 5)) grows the middle of the pillar outward by 5 mm.

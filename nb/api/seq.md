@@ -24,8 +24,6 @@ Box()
   );
 ```
 
-![Image](seq.md.0.png)
-
 Box().seq({ from: 1, to: 3 }, offset) produces a group of three offsets from Box.
 
 ```JavaScript
@@ -37,6 +35,6 @@ Box([0, 1], [0, 1])
   .note('Box([0, 1], [0, 1]).seq({ by: 1 / 8 }, rz).outline().fill()');
 ```
 
-![Image](seq.md.1.png)
+![Image](seq.md.$3.png)
 
 Box([0, 1], [0, 1]).seq({ by: 1 / 8 }, rz).outline().fill()

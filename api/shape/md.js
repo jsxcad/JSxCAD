@@ -10,7 +10,7 @@ export const md = (strings, ...placeholders) => {
   return md;
 };
 
-const mdMethod = Shape.chainable((...chunks) => (shape) => {
+export const mdMethod = Shape.registerMethod('md', (...chunks) => (shape) => {
   const strings = [];
   for (const chunk of chunks) {
     if (chunk instanceof Function) {
@@ -23,5 +23,3 @@ const mdMethod = Shape.chainable((...chunks) => (shape) => {
   emit({ md, hash: computeHash(md) });
   return shape;
 });
-
-Shape.registerMethod('md', mdMethod);

@@ -1,57 +1,53 @@
+import { Shape, chain } from './Shape.js';
+
 import test from 'ava';
 
-const clean = (v) => JSON.parse(JSON.stringify(v));
-
-const chainable = (op) => {
-  let free, bound;
-
-  // This is waiting for a shape or a chain.
-  bound = (context) => ({
-    apply(target, obj, args) {
-      // Received a shape.
-      const result = target(...args);
-      return result;
-    },
-    get(target, prop, receiver) {
-      if (prop === 'then') {
-        const result = target(context);
-        return (resolve, reject) => resolve(result);
-      }
-      return new Proxy(
-        (...args) =>
-          async (s) => {
-            const op = s[prop];
-            return op(...args)(await target(s));
-          },
-        free(context)
-      );
-    },
-  });
-
-  // This is waiting for arguments.
-  free = (context) => ({
-    apply(target, obj, args) {
-      return new Proxy(target(...args), bound(obj));
-    },
-  });
-
-  const result = new Proxy(op, free());
-  return result;
-};
-
-const log = chainable((a) => async (s) => {
-  return { ...s, a };
+const syncFn = Shape.registerMethod('syncFn', (to, value) => (s) => {
+  to.push(value);
+  return s;
+});
+Shape.registerMethod('asyncFn', (to, value) => async (s) => {
+  to.push(value);
+  return s;
 });
 
-test('chainable', async (t) => {
-  const ap = log(1).log(2).log(3).log(4).log(5);
-  const r = await ap({ log, name: 'v' });
-  t.deepEqual(clean(r), { name: 'v', a: 5 });
+test('application of mixed chain', async (t) => {
+  const log = [];
+  const ap = syncFn(log, 'a')
+    .asyncFn(log, 'b')
+    .syncFn(log, 'c')
+    .asyncFn(log, 'd')
+    .syncFn(log, 'e');
+  await ap(Shape.fromGeometry({ type: 'test' }));
+  t.deepEqual(log, ['a', 'b', 'c', 'd', 'e']);
 });
 
 test('fluent', async (t) => {
-  const o = { log };
-  const ap = o.log(1).log(2).log(3).log(4).log(5);
-  const r = await ap({ log, name: 'v' });
-  t.deepEqual(clean(r), { name: 'v', a: 5 });
+  const log = [];
+  const s = chain(Shape.fromGeometry({ type: 'test' }));
+  await s
+    .syncFn(log, 'a')
+    .asyncFn(log, 'b')
+    .syncFn(log, 'c')
+    .asyncFn(log, 'd')
+    .syncFn(log, 'e');
+  t.deepEqual(log, ['a', 'b', 'c', 'd', 'e']);
+});
+
+test('separated', async (t) => {
+  const log = [];
+  const s1 = Shape.fromGeometry({ type: 'test' });
+  const s2 = await chain(s1)
+    .syncFn(log, 'a')
+    .asyncFn(log, 'b')
+    .syncFn(log, 'c')
+    .asyncFn(log, 'd')
+    .syncFn(log, 'e');
+  await s2
+    .syncFn(log, 'f')
+    .asyncFn(log, 'g')
+    .syncFn(log, 'h')
+    .asyncFn(log, 'i')
+    .syncFn(log, 'j');
+  t.deepEqual(log, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
 });

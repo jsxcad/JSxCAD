@@ -15,38 +15,36 @@ Each edge is independently oriented.
 ```JavaScript
 Box(5, 5, 5)
   .eachEdge((edge, length) => s =>
-    Arc(0.5, [0.2, 0.7], [length])
-      .hasAngle(0 / 4, 2 / 4)
+    Arc(0.5, [0.2, 0.7], [length], { end: 2/ 4 })
       .to(edge)
   )
   .view()
   .note(
-    'Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length]).hasAngle(0 / 4, 2 / 4).to(edge))'
+    'Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge))'
   );
 ```
 
-![Image](eachEdge.md.0.png)
+![Image](eachEdge.md.$2.png)
 
-Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length]).hasAngle(0 / 4, 2 / 4).to(edge))
+Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge))
 
 ```JavaScript
 Box(5, 5, 5)
   .eachEdge(
     (edge, length) => s =>
-      Arc(0.5, [0.2, 0.7], [length])
-        .hasAngle(0 / 4, 2 / 4)
+      Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 })
         .to(edge),
     (edges, face) => s => edges.and(face.cut(inset(1)).e(0.2))
   )
   .view()
   .note(
-    'Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length]).hasAngle(0 / 4, 2 / 4).to(edge), (edges, face) => s => edges.and(face.cut(inset(1)).e(0.2)))'
+    'Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge), (edges, face) => s => edges.and(face.cut(inset(1)).e(0.2)))'
   );
 ```
 
-![Image](eachEdge.md.1.png)
+![Image](eachEdge.md.$3.png)
 
-Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length]).hasAngle(0 / 4, 2 / 4).to(edge), (edges, face) => s => edges.and(face.cut(inset(1)).e(0.2)))
+Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge), (edges, face) => s => edges.and(face.cut(inset(1)).e(0.2)))
 
 ```JavaScript
 Box(50, 50, 50)
@@ -61,4 +59,4 @@ Box(50, 50, 50)
   .view();
 ```
 
-![Image](eachEdge.md.2.png)
+![Image](eachEdge.md.$4.png)

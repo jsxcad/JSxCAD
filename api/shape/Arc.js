@@ -1,16 +1,17 @@
 import {
   buildCorners,
-  getAngle,
-  getCorner1,
-  getCorner2,
-  getScale,
-  getSides,
+  computeMiddle,
+  computeScale,
+  computeSides,
 } from './Plan.js';
 
 import Point from './Point.js';
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
-import { taggedPlan } from '@jsxcad/geometry';
+import { destructure } from './destructure.js';
+
+const toRadiusFromApothem = (apothem, sides = 32) =>
+  apothem / Math.cos(Math.PI / sides);
 
 const X = 0;
 const Y = 1;
@@ -18,34 +19,31 @@ const Z = 2;
 
 const reifyArc =
   (axis = Z) =>
-  (plan) => {
-    let { start = 0, end = 1 } = getAngle(plan.toGeometry());
-
+  async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
     while (start > end) {
       start -= 1;
     }
 
-    const [scale, middle] = getScale(plan.toGeometry());
-    const corner1 = getCorner1(plan.toGeometry());
-    const corner2 = getCorner2(plan.toGeometry());
+    const scale = computeScale(c1, c2);
+    const middle = computeMiddle(c1, c2);
 
-    const left = corner1[X];
-    const right = corner2[X];
+    const left = c1[X];
+    const right = c2[X];
 
-    const front = corner1[Y];
-    const back = corner2[Y];
+    const front = c1[Y];
+    const back = c2[Y];
 
-    const bottom = corner1[Z];
-    const top = corner2[Z];
+    const bottom = c1[Z];
+    const top = c2[Z];
 
-    const step = 1 / getSides(plan.toGeometry(), 32);
+    const step = 1 / computeSides(c1, c2, sides, zag);
     const steps = Math.ceil((end - start) / step);
     const effectiveStep = (end - start) / steps;
 
     let spiral;
 
     if (end - start === 1) {
-      spiral = Spiral((t) => Point(1), {
+      spiral = Spiral((t) => Point(0.5), {
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
@@ -53,7 +51,7 @@ const reifyArc =
         .loop()
         .fill();
     } else {
-      spiral = Spiral((t) => Point(1), {
+      spiral = Spiral((t) => Point(0.5), {
         from: start - 1 / 4,
         to: end - 1 / 4,
         by: effectiveStep,
@@ -100,65 +98,76 @@ const reifyArc =
       }
     }
 
-    return spiral.absolute().tag(...plan.toGeometry().tags);
+    return spiral.absolute();
   };
 
-Shape.registerReifier('Arc', reifyArc(Z));
-Shape.registerReifier('ArcX', reifyArc(X));
-Shape.registerReifier('ArcY', reifyArc(Y));
-Shape.registerReifier('ArcZ', reifyArc(Z));
+const reifyArcZ = reifyArc(Z);
+const reifyArcX = reifyArc(X);
+const reifyArcY = reifyArc(Y);
 
-const ArcOp = (type) => (x, y, z) => {
-  switch (type) {
-    case 'Arc':
-    case 'ArcZ':
-      if (x === undefined) {
-        x = 1;
-      }
-      if (y === undefined) {
-        y = x;
-      }
-      if (z === undefined) {
-        z = 0;
-      }
-      break;
-    case 'ArcX':
-      if (y === undefined) {
-        y = 1;
-      }
-      if (z === undefined) {
-        z = y;
-      }
-      if (x === undefined) {
-        x = 0;
-      }
-      break;
-    case 'ArcY':
-      if (x === undefined) {
-        x = 1;
-      }
-      if (z === undefined) {
-        z = x;
-      }
-      if (y === undefined) {
-        y = 0;
-      }
-      break;
-  }
-  const [c1, c2] = buildCorners(x, y, z);
-  return Shape.fromGeometry(taggedPlan({}, { type }))
-    .hasC1(...c1)
-    .hasC2(...c2);
-};
+const ArcOp =
+  (type) =>
+  async (...args) => {
+    const { values, object: options } = destructure(args);
+    let [x, y, z] = values;
+    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
+    if (apothem !== undefined) {
+      radius = toRadiusFromApothem(apothem, sides) / 2;
+    }
+    if (diameter !== undefined) {
+      x = diameter;
+    }
+    if (radius !== undefined) {
+      x = radius * 2;
+    }
+    let reify;
+    switch (type) {
+      case 'Arc':
+      case 'ArcZ':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (y === undefined) {
+          y = x;
+        }
+        if (z === undefined) {
+          z = 0;
+        }
+        reify = reifyArcZ;
+        break;
+      case 'ArcX':
+        if (y === undefined) {
+          y = 1;
+        }
+        if (z === undefined) {
+          z = y;
+        }
+        if (x === undefined) {
+          x = 0;
+        }
+        reify = reifyArcX;
+        break;
+      case 'ArcY':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (z === undefined) {
+          z = x;
+        }
+        if (y === undefined) {
+          y = 0;
+        }
+        reify = reifyArcY;
+        break;
+    }
+    const [c1, c2] = buildCorners(x, y, z);
+    const result = reify({ c1, c2, start, end, sides, zag });
+    return result;
+  };
 
-export const Arc = ArcOp('Arc');
-export const ArcX = ArcOp('ArcX');
-export const ArcY = ArcOp('ArcY');
-export const ArcZ = ArcOp('ArcZ');
-
-Shape.prototype.Arc = Shape.shapeMethod(Arc);
-Shape.prototype.ArcX = Shape.shapeMethod(ArcX);
-Shape.prototype.ArcY = Shape.shapeMethod(ArcY);
-Shape.prototype.ArcZ = Shape.shapeMethod(ArcZ);
+export const Arc = Shape.registerShapeMethod('Arc', ArcOp('Arc'));
+export const ArcX = Shape.registerShapeMethod('ArcX', ArcOp('ArcX'));
+export const ArcY = Shape.registerShapeMethod('ArcY', ArcOp('ArcY'));
+export const ArcZ = Shape.registerShapeMethod('ArcZ', ArcOp('ArcZ'));
 
 export default Arc;

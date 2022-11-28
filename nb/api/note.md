@@ -16,6 +16,6 @@ Triangle(5)
   );
 ```
 
-![Image](note.md.0.png)
+![Image](note.md.$2.png)
 
 note('This is a \_nice\_ triangle.') displays 'This is a _nice_ triangle.'

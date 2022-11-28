@@ -9,7 +9,7 @@ Geometry can be given a color
 Box(10, 10, 10).color('pink').view();
 ```
 
-![Image](interactions_with_geometry.md.0.png)
+![Image](interactions_with_geometry.md.$3.png)
 
 ---
 ### Extrude
@@ -23,19 +23,19 @@ e.g., s.ez(1, 2, 3, 4) will produce two extrusions -- one from 1z to 2z, and one
 Arc(10).view();
 ```
 
-![Image](interactions_with_geometry.md.1.png)
+![Image](interactions_with_geometry.md.$5.png)
 
 ```JavaScript
 Arc(10).ez(5).view();
 ```
 
-![Image](interactions_with_geometry.md.2.png)
+![Image](interactions_with_geometry.md.$6.png)
 
 ```JavaScript
 Arc(10).ez(1, 2, -1, -2).view();
 ```
 
-![Image](interactions_with_geometry.md.3.png)
+![Image](interactions_with_geometry.md.$7.png)
 
 ---
 ### Cast
@@ -52,7 +52,7 @@ Arc(4)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.4.png)
+![Image](interactions_with_geometry.md.$9.png)
 
 ---
 ### Fuse
@@ -63,7 +63,7 @@ Shapes which are grouped, assembled, or otherwise associated can be fused togeth
 Arc(10).x(0, 6).fuse().view();
 ```
 
-![Image](interactions_with_geometry.md.5.png)
+![Image](interactions_with_geometry.md.$11.png)
 
 ---
 ### Inset
@@ -77,7 +77,7 @@ const a = Arc(20).cut(Box(10));
 Group(a.inset(1).z(0.1).color('pink'), a.color('orange')).view();
 ```
 
-![Image](interactions_with_geometry.md.6.png)
+![Image](interactions_with_geometry.md.$13.png)
 
 ---
 ### Item
@@ -99,7 +99,7 @@ const aBolt = Arc(8, 8, 2)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.7.png)
+![Image](interactions_with_geometry.md.aBolt.png)
 
 ```JavaScript
 const aBox = Box(10, 10, 10).as('box');
@@ -109,7 +109,7 @@ const aBox = Box(10, 10, 10).as('box');
 const aDesign = aBox.fit(aBolt.z(10)).as('design').view();
 ```
 
-![Image](interactions_with_geometry.md.8.png)
+![Image](interactions_with_geometry.md.aDesign.png)
 
 ```JavaScript
 aDesign
@@ -121,15 +121,9 @@ aDesign
   );
 ```
 
-![Image](interactions_with_geometry.md.9.png)
+![Image](interactions_with_geometry.md.$15.png)
 
 We need to get into the 'design' item in order to get at 'box' and 'bolt'
-
-```JavaScript
-log(aDesign.bom());
-```
-
-Materials:
 
 ---
 ### Grow
@@ -139,7 +133,7 @@ Expands the shape outwards by the input distance. May result in self intersectio
 Arc(10, 10, 5).grow(1).view();
 ```
 
-![Image](interactions_with_geometry.md.10.png)
+![Image](interactions_with_geometry.md.$17.png)
 
 ---
 ### Loft
@@ -156,7 +150,7 @@ Box(10)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.11.png)
+![Image](interactions_with_geometry.md.$19.png)
 
 ---
 2D shapes can be 'looped' to create 3D shapes. In this example two circles are looped to create a hollow doughnut.
@@ -172,7 +166,7 @@ Arc(6)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.12.png)
+![Image](interactions_with_geometry.md.$21.png)
 
 ---
 ### Move
@@ -186,19 +180,19 @@ Multiple offsets can be provided, which will produce one result per offset.
 Box(5, 5, 5).move(10, 2, 12).view();
 ```
 
-![Image](interactions_with_geometry.md.13.png)
+![Image](interactions_with_geometry.md.$23.png)
 
 ```JavaScript
 Box(5, 5, 5).x(10).y(2).z(12).view();
 ```
 
-![Image](interactions_with_geometry.md.14.png)
+![Image](interactions_with_geometry.md.$24.png)
 
 ```JavaScript
 Box(5).x(0, 10, 20).view();
 ```
 
-![Image](interactions_with_geometry.md.15.png)
+![Image](interactions_with_geometry.md.$25.png)
 
 ---
 ### Offset 
@@ -212,7 +206,7 @@ const b = Arc(20).cut(Box(10)).fitTo(Box(5).x(10));
 Group(b.offset(1).z(-0.1).color('pink'), b.color('orange')).view();
 ```
 
-![Image](interactions_with_geometry.md.16.png)
+![Image](interactions_with_geometry.md.$27.png)
 
 ---
 ### Remesh
@@ -232,7 +226,7 @@ Box(157, 20)
   .md('A rectangle bent into a ring with a central radius of 25');
 ```
 
-![Image](interactions_with_geometry.md.17.png)
+![Image](interactions_with_geometry.md.$30.png)
 
 A rectangle bent into a ring with a central radius of 25
 
@@ -246,19 +240,19 @@ Multiple turns can be provided, which will produce one result per turn.
 const aRectangle = Box(5, 5, 15).view();
 ```
 
-![Image](interactions_with_geometry.md.18.png)
+![Image](interactions_with_geometry.md.aRectangle.png)
 
 ```JavaScript
 aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view('wireframe');
 ```
 
-![Image](interactions_with_geometry.md.19.png)
+![Image](interactions_with_geometry.md.$32_wireframe.png)
 
 ```JavaScript
 aRectangle.rz(1 / 8).view();
 ```
 
-![Image](interactions_with_geometry.md.20.png)
+![Image](interactions_with_geometry.md.$33.png)
 
 ```JavaScript
 aRectangle
@@ -268,7 +262,7 @@ aRectangle
   .view();
 ```
 
-![Image](interactions_with_geometry.md.21.png)
+![Image](interactions_with_geometry.md.$34.png)
 
 ```JavaScript
 Box(5)
@@ -277,7 +271,7 @@ Box(5)
   .view();
 ```
 
-![Image](interactions_with_geometry.md.22.png)
+![Image](interactions_with_geometry.md.$35.png)
 
 ---
 ### Scale
@@ -287,7 +281,7 @@ Scale enlarges a shape by the entered multiple. .scale(x,y,z) can be used to sca
 aRectangle.scale(2).view();
 ```
 
-![Image](interactions_with_geometry.md.23.png)
+![Image](interactions_with_geometry.md.$37.png)
 
 ---
 ### Section
@@ -301,23 +295,19 @@ Section takes shapes as arguments, and will use the plane of orientation of the 
 Orb(4).section().view();
 ```
 
-![Image](interactions_with_geometry.md.24.png)
+![Image](interactions_with_geometry.md.$39.png)
 
 ```JavaScript
 Orb(4).section(Point().z(0), Point().z(1), Point().z(2)).view();
 ```
 
-![Image](interactions_with_geometry.md.25.png)
+![Image](interactions_with_geometry.md.$40.png)
 
 ---
 ### Size
 Size returns the size of the shape along with it's bounding box corners.
 
 A function can be provided to receive the dimensions along with the shape.
-
-```JavaScript
-log(aRectangle.size());
-```
 
 ```JavaScript
 aRectangle
@@ -338,12 +328,6 @@ Tags lists all of the tags associated with a shape.
 A function can be supplied to receive the tags and shape.
 
 ```JavaScript
-log(aRectangle.tag('tagString').tags());
-```
-
-tags: user:tagString
-
-```JavaScript
 aRectangle.tag('tagString').tags((tags) => note(`Tags ${tags}`));
 ```
 
@@ -358,13 +342,13 @@ const taggedAssembly = Assembly(
 ).view();
 ```
 
-![Image](interactions_with_geometry.md.26.png)
+![Image](interactions_with_geometry.md.taggedAssembly.png)
 
 ```JavaScript
 taggedAssembly.drop(get('user:B')).view();
 ```
 
-![Image](interactions_with_geometry.md.27.png)
+![Image](interactions_with_geometry.md.$46.png)
 
 ---
 #### Selection
@@ -384,7 +368,7 @@ Group(
   Box(10).as('box').color('green').material('copper'),
   Arc(10).as('arc').color('red').material('brick')
 )
-  .view(1, (s) => s.get('*').pack())
+  .view(1, get('*').pack())
   .md('All items.')
   .view(2, get('color:green'))
   .md('All green things.')
@@ -392,15 +376,15 @@ Group(
   .md('All non-copper things.');
 ```
 
-![Image](interactions_with_geometry.md.28.png)
+![Image](interactions_with_geometry.md.$48_1.png)
 
 All items.
 
-![Image](interactions_with_geometry.md.29.png)
+![Image](interactions_with_geometry.md.$48_2.png)
 
 All green things.
 
-![Image](interactions_with_geometry.md.30.png)
+![Image](interactions_with_geometry.md.$48_3.png)
 
 All non-copper things.
 
@@ -434,6 +418,6 @@ Box(11)
   .md('Produce a voxel representation with a 1mm resolution');
 ```
 
-![Image](interactions_with_geometry.md.31.png)
+![Image](interactions_with_geometry.md.$52.png)
 
 Produce a voxel representation with a 1mm resolution

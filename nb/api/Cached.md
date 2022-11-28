@@ -11,6 +11,6 @@ Checks for a cached construction. If not present it computes and saves it for re
 Cached('box', Box)(1, 2, 4).view().note("Cached('box', Box)(1, 2, 4)");
 ```
 
-![Image](Cached.md.0.png)
+![Image](Cached.md.$2.png)
 
 Cached('box', Box)(1, 2, 4)

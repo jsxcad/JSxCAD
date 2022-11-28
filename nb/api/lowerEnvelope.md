@@ -13,6 +13,6 @@ See: [upperEnvelope](../../nb/api/upperEnvelope.md)
 Orb(5).lowerEnvelope().view().note('The lower envelope of a rough sphere.');
 ```
 
-![Image](lowerEnvelope.md.0.png)
+![Image](lowerEnvelope.md.$2.png)
 
 The lower envelope of a rough sphere.

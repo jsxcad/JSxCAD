@@ -49,11 +49,10 @@ const clock = { hourHand, minuteHand };
 ```JavaScript
 const Hand = ({ reach, tipRadius, thickness }) =>
   Hull(
-    Arc().hasRadius(axleRadius + 2.5),
-    Arc()
-      .hasRadius(tipRadius)
+    Arc({ radius: axleRadius + 2.5 }),
+    Arc({ radius: tipRadius })
       .move(reach * faceRadius)
-  ).cut(Arc().hasRadius(axleRadius));
+  ).cut(Arc({ radius: axleRadius }));
 ```
 
 ```JavaScript
@@ -64,9 +63,8 @@ const aladinRegular = await readFont(
 
 ```JavaScript
 const Face = ({ axleRadius, faceRadius, fontSize }) =>
-  Arc()
-    .hasRadius(faceRadius)
-    .cut(Arc().hasRadius(axleRadius))
+  Arc({ radius: faceRadius })
+    .cut(Arc({ radius: axleRadius }))
     .and(
       seq(
         (n) =>
@@ -85,13 +83,13 @@ Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
 
 The clock face
 
-![Image](clock.md.0.png)
+![Image](clock.md.$5.png)
 
 ```JavaScript
 Hand(hourHand).topView();
 ```
 
-![Image](clock.md.1.png)
+![Image](clock.md.$6.png)
 
 The hour hand.
 
@@ -99,7 +97,7 @@ The hour hand.
 Hand(minuteHand).topView();
 ```
 
-![Image](clock.md.2.png)
+![Image](clock.md.$8.png)
 
 The minute hand.
 
@@ -120,6 +118,6 @@ const Clock = ({ hourHand, minuteHand }) =>
 Clock(clock).topView();
 ```
 
-![Image](clock.md.3.png)
+![Image](clock.md.$11.png)
 
 A complete clock.

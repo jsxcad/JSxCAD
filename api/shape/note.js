@@ -9,11 +9,9 @@ export const Note = (md) => {
   emit({ md, hash: computeHash(md) });
 };
 
-export const note = Shape.chainable((md) => (shape) => {
+export const note = Shape.registerMethod('note', (md) => (shape) => {
   Note(md);
   return shape;
 });
-
-Shape.registerMethod('note', note);
 
 export default note;

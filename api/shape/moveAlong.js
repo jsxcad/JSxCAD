@@ -7,25 +7,30 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
   z * amount,
 ];
 
-export const moveAlong = Shape.chainable((direction, ...offsets) => (shape) => {
-  direction = shape.toCoordinate(direction);
-  offsets = offsets.map((extent) => Shape.toValue(extent, shape));
-  offsets.sort((a, b) => a - b);
-  const moves = [];
-  while (offsets.length > 0) {
-    const offset = offsets.pop();
-    moves.push(shape.move(scale(offset, direction)));
-  }
-  return Shape.Group(...moves);
-});
+export const moveAlong = Shape.registerMethod(
+  'moveAlong',
+  (direction, ...offsets) =>
+    async (shape) => {
+      direction = await shape.toCoordinate(direction);
+      const deltas = [];
+      for (const offset of offsets) {
+        deltas.push(await shape.toValue(offset));
+      }
+      deltas.sort((a, b) => a - b);
+      const moves = [];
+      while (deltas.length > 0) {
+        const delta = deltas.pop();
+        moves.push(await shape.move(scale(delta, direction)));
+      }
+      return Shape.Group(...moves);
+    }
+);
 
-export const m = Shape.chainable(
+export const m = Shape.registerMethod(
+  'm',
   (...offsets) =>
     (shape) =>
       shape.moveAlong(normal(), ...offsets)
 );
-
-Shape.registerMethod('m', m);
-Shape.registerMethod('moveAlong', moveAlong);
 
 export default moveAlong;

@@ -2,13 +2,12 @@ import './extrude.js';
 import './rx.js';
 import './ry.js';
 
-import { buildCorners, getCorner1, getCorner2 } from './Plan.js';
-
 import Edge from './Edge.js';
 import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
-import { taggedPlan } from '@jsxcad/geometry';
+import { buildCorners } from './Plan.js';
+import { destructure } from './destructure.js';
 
 const X = 0;
 const Y = 1;
@@ -16,39 +15,37 @@ const Z = 2;
 
 let fundamentalShapes;
 
-const fs = () => {
+const buildFs = async () => {
   if (fundamentalShapes === undefined) {
-    const f = Loop(
+    const f = await Loop(
       Point(1, 0, 0),
       Point(1, 1, 0),
       Point(0, 1, 0),
       Point(0, 0, 0)
     ).fill();
     fundamentalShapes = {
-      tlfBox: Point(),
-      tlBox: Edge(Point(0, 1, 0), Point(0, 0, 0)),
-      tfBox: Edge(Point(0, 0, 0), Point(1, 0, 0)),
-      tBox: f,
-      lfBox: Edge(Point(0, 0, 0), Point(0, 0, 1)),
-      lBox: f
+      tlfBox: await Point(),
+      tlBox: await Edge(Point(0, 1, 0), Point(0, 0, 0)),
+      tfBox: await Edge(Point(0, 0, 0), Point(1, 0, 0)),
+      tBox: await f,
+      lfBox: await Edge(Point(0, 0, 0), Point(0, 0, 1)),
+      lBox: await f
         .ry(1 / 4)
         .rz(1 / 2)
         .rx(-1 / 4),
-      fBox: f
+      fBox: await f
         .rx(1 / 4)
         .rz(1 / 2)
         .ry(-1 / 4),
-      box: f.ez(1),
+      box: await f.ez(1),
     };
   }
   return fundamentalShapes;
 };
 
-const reifyBox = (plan) => {
-  const build = () => {
-    const corner1 = getCorner1(plan.toGeometry());
-    const corner2 = getCorner2(plan.toGeometry());
-
+const reifyBox = async (corner1, corner2) => {
+  const build = async () => {
+    const fs = await buildFs();
     const left = corner2[X];
     const right = corner1[X];
 
@@ -61,45 +58,41 @@ const reifyBox = (plan) => {
     if (top === bottom) {
       if (left === right) {
         if (front === back) {
-          return fs().tlfBox.move(left, front, bottom);
+          return fs.tlfBox.move(left, front, bottom);
         } else {
-          return fs()
-            .tlBox.sy(back - front)
-            .move(left, front, bottom);
+          return fs.tlBox.sy(back - front).move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          return fs()
-            .tfBox.sx(right - left)
-            .move(left, front, bottom);
+          return fs.tfBox.sx(right - left).move(left, front, bottom);
         } else {
-          return fs()
-            .tBox.sx(right - left)
-            .sy(back - front)
-            .move(left, front, bottom);
+          const v1 = fs;
+          const v2 = v1.tBox;
+          const v3 = v2.sx(right - left);
+          const v4 = v3.sy(back - front);
+          const v5 = v4.move(left, front, bottom);
+          return v5;
         }
       }
     } else {
       if (left === right) {
         if (front === back) {
-          return fs()
-            .lfBox.sz(top - bottom)
-            .move(left, front, bottom);
+          return fs.lfBox.sz(top - bottom).move(left, front, bottom);
         } else {
-          return fs()
-            .lBox.sz(top - bottom)
+          return fs.lBox
+            .sz(top - bottom)
             .sy(back - front)
             .move(left, front, bottom);
         }
       } else {
         if (front === back) {
-          return fs()
-            .fBox.sz(top - bottom)
+          return fs.fBox
+            .sz(top - bottom)
             .sx(right - left)
             .move(left, front, bottom);
         } else {
-          return fs()
-            .box.sz(top - bottom)
+          return fs.box
+            .sz(top - bottom)
             .sx(right - left)
             .sy(back - front)
             .move(left, front, bottom);
@@ -108,20 +101,15 @@ const reifyBox = (plan) => {
     }
   };
 
-  return build()
-    .absolute()
-    .tag(...plan.toGeometry().tags);
+  return (await build()).absolute();
 };
 
-Shape.registerReifier('Box', reifyBox);
-
-export const Box = (x = 1, y = x, z = 0) => {
-  const [c1, c2] = buildCorners(x, y, z);
-  return Shape.fromGeometry(taggedPlan({}, { type: 'Box' }))
-    .hasC1(...c1)
-    .hasC2(...c2);
-};
-
-Shape.prototype.Box = Shape.shapeMethod(Box);
+export const Box = Shape.registerShapeMethod('Box', async (...args) => {
+  const { values, object: options } = destructure(args);
+  const [x = 1, y = x, z = 0] = values;
+  const [computedC1, computedC2] = buildCorners(x, y, z);
+  let { c1 = computedC1, c2 = computedC2 } = options;
+  return reifyBox(c1, c2);
+});
 
 export default Box;

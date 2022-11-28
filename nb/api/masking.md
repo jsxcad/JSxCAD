@@ -23,6 +23,6 @@ Hexagon(6)
   );
 ```
 
-![Image](masking.md.0.png)
+![Image](masking.md.$2.png)
 
 Hexagon(6).ez(10).masking(Arc(5).ez(10)) produces a hexagonal mask for the cylindrical volume.

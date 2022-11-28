@@ -14,18 +14,17 @@ Zag limits can be specified.
 _Todo: Check zag correctness._
 
 ```JavaScript
-Curve([0, 0], [0, 1], [3, 1], [3, 2])
+Curve([0, 0], [0, 1], [3, 1], [3, 2], { zag: 0.1 })
   .view(1)
   .note('Curve([0, 0], [0, 1], [3, 1], [3, 2])')
-  .hasZag(0.1)
   .view(2)
   .note('hasZag(0.1) increases the resolution.');
 ```
 
-![Image](Curve.md.0.png)
+![Image](Curve.md.$2_1.png)
 
 Curve([0, 0], [0, 1], [3, 1], [3, 2])
 
-![Image](Curve.md.1.png)
+![Image](Curve.md.$2_2.png)
 
 hasZag(0.1) increases the resolution.

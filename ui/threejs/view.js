@@ -25,7 +25,7 @@ export const staticView = async (
     {
       view: { target, position, up },
       canvas,
-      geometry: shape.toDisplayGeometry(),
+      geometry: await shape.toDisplayGeometry(),
       withAxes,
       withGrid,
       definitions,
@@ -68,7 +68,7 @@ export const orbitView = async (
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
 
-  const geometry = shape.toKeptGeometry();
+  const geometry = await shape.toDisplayGeometry();
   const view = { target, position, up };
 
   await orbitDisplay({ geometry, view, definitions }, container);

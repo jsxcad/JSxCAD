@@ -14,7 +14,7 @@ Arc(10, 10, 5)
   .note(`The result is blue since the blue shape was added to`);
 ```
 
-![Image](interactions_between_geometry.md.0.png)
+![Image](interactions_between_geometry.md.$3.png)
 
 The result is blue since the blue shape was added to
 
@@ -35,7 +35,7 @@ const twoCylindersAssembled = Assembly(
 ).view();
 ```
 
-![Image](interactions_between_geometry.md.1.png)
+![Image](interactions_between_geometry.md.twoCylindersAssembled.png)
 
 This can also be achieved with a.fit(b) and a.fitTo(b).
 
@@ -43,13 +43,13 @@ This can also be achieved with a.fit(b) and a.fitTo(b).
 Arc(10).fit(Box(5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.2.png)
+![Image](interactions_between_geometry.md.$6.png)
 
 ```JavaScript
 Arc(10).fitTo(Box(5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.3.png)
+![Image](interactions_between_geometry.md.$7.png)
 
 ---
 ### ChainHull
@@ -58,8 +58,6 @@ Performs the hull operation sequentially on the input shapes.
 ```JavaScript
 ChainHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
-
-![Image](interactions_between_geometry.md.4.png)
 
 ---
 ### Clip
@@ -73,7 +71,7 @@ Arc(10, 10, 5)
   .md(`The result is blue since the blue shape was clipped`);
 ```
 
-![Image](interactions_between_geometry.md.5.png)
+![Image](interactions_between_geometry.md.$11.png)
 
 The result is blue since the blue shape was clipped
 
@@ -85,7 +83,7 @@ Arc(10, 10, 5)
   .md(`The result is red since the red shape was clipped from.`);
 ```
 
-![Image](interactions_between_geometry.md.6.png)
+![Image](interactions_between_geometry.md.$12.png)
 
 The result is red since the red shape was clipped from.
 
@@ -101,7 +99,7 @@ Arc(10, 10, 5)
   .md(`The result is blue since the blue shape was cut.`);
 ```
 
-![Image](interactions_between_geometry.md.7.png)
+![Image](interactions_between_geometry.md.$14.png)
 
 The result is blue since the blue shape was cut.
 
@@ -112,7 +110,7 @@ Arc(10, 10, 5)
   .md(`The result is red since the red shape was cut from.`);
 ```
 
-![Image](interactions_between_geometry.md.8.png)
+![Image](interactions_between_geometry.md.$15.png)
 
 The result is red since the red shape was cut from.
 
@@ -132,19 +130,19 @@ const wheel = Arc(20, 20, 2).color('grey');
 wheel.fitTo(axle).view();
 ```
 
-![Image](interactions_between_geometry.md.9.png)
+![Image](interactions_between_geometry.md.$17.png)
 
 ```JavaScript
 axle.fit(wheel).view();
 ```
 
-![Image](interactions_between_geometry.md.10.png)
+![Image](interactions_between_geometry.md.$18.png)
 
 ```JavaScript
 wheel.fitTo(axle).pack().view(); //In both of these cases the axle cuts the wheel.
 ```
 
-![Image](interactions_between_geometry.md.11.png)
+![Image](interactions_between_geometry.md.$19.png)
 
 ---
 ### Group
@@ -156,13 +154,13 @@ Group can also be done using the .and() operator.
 Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
 ```
 
-![Image](interactions_between_geometry.md.12.png)
+![Image](interactions_between_geometry.md.$21.png)
 
 ```JavaScript
 Arc(10, 10, 3).and(Arc(10, 10, 3).x(4)).view(); //Does a group
 ```
 
-![Image](interactions_between_geometry.md.13.png)
+![Image](interactions_between_geometry.md.$22.png)
 
 ---
 ### Hull
@@ -172,7 +170,7 @@ Performs the hull operation on the input shapes.
 Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
 
-![Image](interactions_between_geometry.md.14.png)
+![Image](interactions_between_geometry.md.$24.png)
 
 ---
 ### Mask
@@ -186,7 +184,7 @@ const shaft = Arc(10, 10, 40).color('grey');
 shaft.mask(grow(1)).view();
 ```
 
-![Image](interactions_between_geometry.md.15.png)
+![Image](interactions_between_geometry.md.$26.png)
 
 ---
 ### Pack
@@ -196,10 +194,10 @@ Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are 
 Group(Arc(10), Box(3), Box(3.5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.16.png)
+![Image](interactions_between_geometry.md.$28.png)
 
 ```JavaScript
 Group(Arc(10), Box(3), Box(3.5)).as('anItem').pack().view();
 ```
 
-![Image](interactions_between_geometry.md.17.png)
+![Image](interactions_between_geometry.md.$29.png)
