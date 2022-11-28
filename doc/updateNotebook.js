@@ -209,9 +209,9 @@ export const updateNotebook = async (
     api.setToSourceFromNameFunction(toSourceFromName(baseDirectory));
     setupFilesystem({ fileBase: workspace });
     setNotifyFileReadEnabled(true);
-    console.log('')
-    console.log('---')
-    console.log('')
+    console.log('');
+    console.log('---');
+    console.log('');
     console.log(`QQ/updateNotebook: module=${module}`);
     await api.importModule(module, {
       clearUpdateEmits: false,

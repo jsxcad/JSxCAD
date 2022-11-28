@@ -77,10 +77,7 @@ const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
   const records = [];
   for (const entry of await ensurePages(await op(shape))) {
     const pdfPath = `download/pdf/${path}/${generateUniqueId()}`;
-    await write(
-      pdfPath,
-      await toPdf(entry, options)
-    );
+    await write(pdfPath, await toPdf(entry, options));
     const filename = `${name}_${index++}.pdf`;
     const record = {
       path: pdfPath,
@@ -88,18 +85,17 @@ const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
       type: 'application/pdf',
     };
     records.push(record);
-    const hash$1 =
-      hashSum({ filename, options }) + hash(entry);
+    const hash$1 = hashSum({ filename, options }) + hash(entry);
     await Shape.fromGeometry(entry).gridView(filename, options.view);
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return records;
 };
 
-Shape.registerMethod('pdf',
-  (...args) =>
-  async (shape) => {
-    const { value: name, func: op, object: options } = Shape.destructure(args);
-    await preparePdf(shape, name, op, options);
-    return shape;
-  });
+const pdf = Shape.registerMethod('pdf', (...args) => async (shape) => {
+  const { value: name, func: op, object: options } = Shape.destructure(args);
+  await preparePdf(shape, name, op, options);
+  return shape;
+});
+
+export { pdf };

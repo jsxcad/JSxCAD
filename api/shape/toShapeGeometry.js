@@ -1,13 +1,10 @@
-import './toShapes.js';
-
 import Shape from './Shape.js';
-
-const toShapeOp = Shape.ops.get('toShape');
+import { toShape } from './toShape.js';
 
 export const toShapeGeometry = Shape.registerMethod(
   'toShapeGeometry',
   (value) => async (shape) => {
-    const valueShape = await toShapeOp(value)(shape);
+    const valueShape = await toShape(value)(shape);
     return valueShape.toGeometry();
   }
 );

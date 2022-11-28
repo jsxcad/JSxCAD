@@ -2,23 +2,29 @@ import { fromThreejsToGeometry, fromColladaToThreejs, fromSvgToThreejs } from '.
 import { Shape } from './jsxcad-api-shape.js';
 import { read } from './jsxcad-sys.js';
 
-const readCollada = async (path, { src, invert = false } = {}) => {
-  const data = await read(`source/${path}`, { sources: [path] });
-  return Shape.fromGeometry(
-    await fromThreejsToGeometry(await fromColladaToThreejs(data))
-  );
-};
+const ThreejsCollada = Shape.registerShapeMethod(
+  'ThreejsCollada',
+  async (path, { src, invert = false } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    return Shape.fromGeometry(
+      await fromThreejsToGeometry(await fromColladaToThreejs(data))
+    );
+  }
+);
 
-const readSvg = async (path, { src, invert = false } = {}) => {
-  const data = await read(`source/${path}`, { sources: [path] });
-  return Shape.fromGeometry(
-    await fromThreejsToGeometry(await fromSvgToThreejs(data))
-  );
-};
+const ThreejsSvg = Shape.registerShapeMethod(
+  'ThreejsSvg',
+  async (path, { src, invert = false } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    return Shape.fromGeometry(
+      await fromThreejsToGeometry(await fromSvgToThreejs(data))
+    );
+  }
+);
 
 const api = {
-  readCollada,
-  readSvg,
+  ThreejsCollada,
+  ThreejsSvg,
 };
 
-export { api as default, readCollada, readSvg };
+export { ThreejsCollada, ThreejsSvg, api as default };

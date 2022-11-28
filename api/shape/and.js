@@ -9,7 +9,7 @@ export const and = Shape.registerMethod(
         taggedGroup(
           {},
           await shape.toGeometry(),
-          ...await shape.toShapesGeometries(args)
+          ...(await shape.toShapesGeometries(args))
         )
       )
 );

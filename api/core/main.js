@@ -6,17 +6,17 @@ import * as mathApi from '@jsxcad/api-v1-math';
 import * as notesApi from './recordNotes.js';
 import * as shapeApi from '@jsxcad/api-shape';
 
+import { Stl, stl } from '@jsxcad/api-v1-stl';
 import {
   buildImportModule,
   registerDynamicModule,
   setToSourceFromNameFunction,
 } from './importModule.js';
-import { Stl, stl } from '@jsxcad/api-v1-stl';
 
+import { Svg } from '@jsxcad/api-v1-svg';
 import { control } from './control.js';
 import { readObj } from '@jsxcad/api-v1-obj';
 import { readOff } from '@jsxcad/api-v1-off';
-import { Svg } from '@jsxcad/api-v1-svg';
 import { setApi } from './api.js';
 import { toSvg } from '@jsxcad/convert-svg';
 

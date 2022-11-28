@@ -1,7 +1,20 @@
 import { Shape, ensurePages } from './jsxcad-api-shape.js';
-import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
+import { fromSvg, fromSvgPath, toSvg } from './jsxcad-convert-svg.js';
 import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
+
+const Svg = Shape.registerShapeMethod(
+  'Svg',
+  async (path, { fill = true, stroke = true } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    if (data === undefined) {
+      throw Error(`Cannot read svg from ${path}`);
+    }
+    return Shape.fromGeometry(
+      await fromSvg(data, { doFill: fill, doStroke: stroke })
+    );
+  }
+);
 
 /**
  *
@@ -23,16 +36,6 @@ const SvgPath = (svgPath, options = {}) =>
   Shape.fromGeometry(
     fromSvgPath(new TextEncoder('utf8').encode(svgPath), options)
   );
-
-const Svg = Shape.registerShapeMethod('Svg', async (path, { fill = true, stroke = true } = {}) => {
-  const data = await read(`source/${path}`, { sources: [path] });
-  if (data === undefined) {
-    throw Error(`Cannot read svg from ${path}`);
-  }
-  return Shape.fromGeometry(
-    await fromSvg(data, { doFill: fill, doStroke: stroke })
-  );
-});
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -124,14 +127,14 @@ const prepareSvg = async (shape, name, op = (s) => s, options = {}) => {
   return records;
 };
 
-const svg =
+const svg = Shape.registerMethod(
+  'svg',
   (name, op, options = {}) =>
-  async (shape) => {
-    await prepareSvg(shape, name, op, options);
-    return shape;
-  };
-
-Shape.registerMethod('svg', svg);
+    async (shape) => {
+      await prepareSvg(shape, name, op, options);
+      return shape;
+    }
+);
 
 const api = { SvgPath, Svg, svg };
 

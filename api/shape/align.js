@@ -77,7 +77,7 @@ const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
     }
     return offset;
   })(shape);
-}
+};
 
 export const align = Shape.registerMethod(
   'align',

@@ -4,12 +4,12 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, ErrorWouldBlock, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
-import { toEcmascript } from './jsxcad-compiler.js';
+import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
 import { Stl, stl } from './jsxcad-api-v1-stl.js';
+import { toEcmascript } from './jsxcad-compiler.js';
+import { Svg } from './jsxcad-api-v1-svg.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
-import { Svg } from './jsxcad-api-v1-svg.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
 let recordedNotes;
@@ -166,13 +166,8 @@ const evaluate = async (ecmascript, { api, path }) => {
     const op = await builder({ ...api, import: { meta: { url: path } } });
     // Retry until none of the operations block.
     for (;;) {
-      try {
-        const result = await op();
-        return result;
-      } catch (error) {
-        if (false && error instanceof ErrorWouldBlock) ;
-        throw error;
-      }
+      const result = await op();
+      return result;
     }
   } catch (error) {
     throw error;

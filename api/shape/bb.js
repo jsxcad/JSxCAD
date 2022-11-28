@@ -19,7 +19,10 @@ export const bb = Shape.registerMethod(
         return Empty();
       } else {
         const [min, max] = bounds;
-        return Box({ c2: add(min, [-xOffset, -yOffset, -zOffset]), c1: add(max, [xOffset, yOffset, zOffset]) });
+        return Box({
+          c2: add(min, [-xOffset, -yOffset, -zOffset]),
+          c1: add(max, [xOffset, yOffset, zOffset]),
+        });
       }
     }
 );

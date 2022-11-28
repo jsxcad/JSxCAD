@@ -8,7 +8,8 @@ export const Ref = Shape.registerShapeMethod('Ref', (...args) =>
 
 export const ref = Shape.registerMethod(
   'ref',
-  () => async (shape) => Shape.fromGeometry(hasTypeReference(await shape.toGeometry()))
+  () => async (shape) =>
+    Shape.fromGeometry(hasTypeReference(await shape.toGeometry()))
 );
 
 export default Ref;

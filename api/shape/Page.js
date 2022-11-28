@@ -54,7 +54,9 @@ const buildLayout = async ({
     Math.max(pageLength, margin)
   )
     .outline()
-    //.and(Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2))
+    .and(
+      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
+    )
     .color('red')
     .ghost();
   let layout = Shape.chain(

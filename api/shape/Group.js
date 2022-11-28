@@ -12,9 +12,8 @@ export const Group = Shape.registerShapeMethod('Group', async (...shapes) => {
     }
   }
   return Shape.fromGeometry(
-    taggedGroup({}, ...await toShapesGeometries(shapes)(null))
-  )
-  }
-);
+    taggedGroup({}, ...(await toShapesGeometries(shapes)(null)))
+  );
+});
 
 export default Group;

@@ -63,7 +63,11 @@ export const baseView =
       viewId = `${id}`;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
-    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry), 0, viewId)) {
+    for (const pageGeometry of await ensurePages(
+      Shape.fromGeometry(displayGeometry),
+      0,
+      viewId
+    )) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;

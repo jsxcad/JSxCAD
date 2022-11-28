@@ -1,5 +1,3 @@
-import './toCoordinate.js';
-
 import {
   fromSegmentToInverseTransform,
   invertTransform,
@@ -9,10 +7,14 @@ import { taggedSegments, transformCoordinate } from '@jsxcad/geometry';
 import Shape from './Shape.js';
 import { toCoordinate } from './toCoordinate.js';
 
-
 export const Edge = Shape.registerShapeMethod(
   'Edge',
-  async (source = [0, 0, 0], target = [0, 0, 1], normal = [1, 0, 0], rubbish) => {
+  async (
+    source = [0, 0, 0],
+    target = [0, 0, 1],
+    normal = [1, 0, 0],
+    rubbish
+  ) => {
     const s = await toCoordinate(source)(null);
     const t = await toCoordinate(target)(null);
     const n = await toCoordinate(normal)(null);

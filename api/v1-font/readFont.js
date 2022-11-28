@@ -52,6 +52,7 @@ export const readFont = async (path) => {
 };
 
 export const Text = Shape.registerShapeMethod('Text', (font, text, size = 10) =>
-  Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text)));
+  Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text))
+);
 
 export default readFont;

@@ -13,7 +13,9 @@ export const each = Shape.registerMethod('each', (...args) => async (shape) => {
   const leafShapes = [];
   const leafGeometries = getLeafs(await shape.toGeometry());
   for (const leafGeometry of leafGeometries) {
-    leafShapes.push(await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry))));
+    leafShapes.push(
+      await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry)))
+    );
   }
   const grouped = await groupOp(...leafShapes);
   if (Shape.isFunction(grouped)) {

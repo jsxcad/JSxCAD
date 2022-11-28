@@ -1,9 +1,6 @@
-import './toShapes.js';
-
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { getInverseMatrices } from '@jsxcad/geometry';
-import { toShapeGeometry } from './toShapeGeometry.js';
 import { toShapes } from './toShapes.js';
 import { transform } from './transform.js';
 

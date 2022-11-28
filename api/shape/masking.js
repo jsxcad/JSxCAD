@@ -7,9 +7,7 @@ export const masking = Shape.registerMethod(
   (masked) => async (shape) =>
     Group(
       shape.void(),
-      Shape.fromGeometry(
-        hasTypeMasked(await shape.toShapeGeometry(masked))
-      )
+      Shape.fromGeometry(hasTypeMasked(await shape.toShapeGeometry(masked)))
     )
 );
 

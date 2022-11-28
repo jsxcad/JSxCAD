@@ -1,10 +1,5 @@
 import { Shape, destructure, ensurePages } from '@jsxcad/api-shape';
-import {
-  emit,
-  generateUniqueId,
-  getSourceLocation,
-  write,
-} from '@jsxcad/sys';
+import { emit, generateUniqueId, getSourceLocation, write } from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
@@ -33,10 +28,8 @@ export const prepareStl = async (shape, name, op = (s) => s, options = {}) => {
   return records;
 };
 
-export const stl = Shape.registerMethod('stl',
-  (...args) =>
-  async (shape) => {
-    const { value: name, func: op, object: options } = destructure(args);
-    await prepareStl(shape, name, op, options);
-    return shape;
-  });
+export const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
+  const { value: name, func: op, object: options } = destructure(args);
+  await prepareStl(shape, name, op, options);
+  return shape;
+});

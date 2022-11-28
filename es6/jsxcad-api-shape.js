@@ -77,9 +77,7 @@ complete = {
     return new Proxy(
       (...args) =>
         async (terminal) => {
-          // console.log(`<<< QQ/complete/exec[${prop}]: target=${'' + target} chain=${target.isChain}`);
           const s = await target(terminal);
-          // console.log(`>>> QQ/complete/exec[${prop}]: s=${'' + s} ${JSON.stringify(s)} chain=${s.isChain}`);
           if (!(s instanceof Shape) && !s.isChain) {
             throw Error(
               `Expected Shape but received ${JSON.stringify(s)} constructor ${
@@ -87,9 +85,6 @@ complete = {
               }`
             );
           }
-          // console.log(`QQ/complete/exec[${prop}]/s: ${'' + s}`);
-          // const op = s.ops.get(prop);
-          // const op = s[prop];
           let op;
           try {
             op = ops.get(prop);
@@ -102,8 +97,6 @@ complete = {
               `${s}[${prop}] must be function, not ${typeof op}: ${'' + op}`
             );
           }
-          // Note that the op runs over the unchained context.
-          // console.log(`QQ/op: ${'' + op}`);
           const result = await op(...args)(s);
           return result;
         },
@@ -136,22 +129,14 @@ chain = (value) => {
       }
       // This should be the same as just returning the proxy.
       if (prop === 'then') {
-        /*
-        return async (resolve, reject) => {
-          resolve(target);
-        };
-        */
         return undefined;
       }
       if (!ops.has(prop)) {
-        // console.log(`QQ/root/get[${prop.toString()}]: not method`);
         return Reflect.get(target, prop);
       }
-      // console.log(`QQ/root/get[${prop}]: target=${JSON.stringify(target)}`);
       return new Proxy(
         (...args) =>
           async () => {
-            // console.log(`QQ/root/exec`);
             // We don't care about the terminal -- we're the root of the chain.
             if (!(target instanceof Shape)) {
               throw Error(
@@ -160,31 +145,12 @@ chain = (value) => {
                 } ${JSON.stringify(target)}`
               );
             }
-            const root = await target;
-            // console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
-            // const op = root.ops.get(prop);
-            // const op = root[prop];
+            const root = target;
             const op = ops.get(prop);
             if (typeof op !== 'function') {
               throw Error(`QQ/Op ${op} [${prop}] is not a function.`);
             }
-            // console.log(`QQ/root/exec[${prop}]: op=${'' + op}`);
-            const pop = await op(...args);
-            // console.log(`QQ/root/exec[${prop}]: pop=${'' + pop}`);
-            // if (root.isChain) {
-            //   throw Error(`Target should not be chain`);
-            // }
-            // console.log(`QQ/root/exec[${prop}]: root=${JSON.stringify(root)}`);
-            let result;
-            try {
-              result = await pop(root);
-            } catch (e) {
-              console.log(e.stack);
-              throw e;
-            }
-            // console.log(`QQ/root/exec[${prop}]/root.chain: ${root.isChain}`);
-            // console.log(`QQ/root/exec[${prop}]/result.chain: ${result.isChain}`);
-            // console.log(`QQ/root/exec/result: ${result}`);
+            const result = await op(...args)(root);
             return result;
           },
         incomplete
@@ -201,13 +167,11 @@ const chainConstructor = (op) => {
   // This chain is a constructor that hasn't been applied yet.
   const constructor = {
     get(target, prop, receiver) {
-      // console.log(`QQ/chainConstructor[${prop.toString()}]`);
       if (prop === 'isChain') {
         return 'constructor';
       }
     },
     apply(target, obj, args) {
-      // console.log(`QQ/chainConstructor/apply`);
       return new Proxy(async () => {
         const result = await op.apply(null, args);
         return result;
@@ -218,11 +182,11 @@ const chainConstructor = (op) => {
   return new Proxy(op, constructor);
 };
 
+// This is the root of an untethered chain.
 const chainable = (op) => {
   return new Proxy(
     (...args) =>
       async (terminal) => {
-        // console.log(`QQ/chainable/terminal`);
         if (
           !(terminal instanceof Shape) &&
           terminal !== null &&
@@ -234,6 +198,7 @@ const chainable = (op) => {
             )} of type ${typeof terminal} or null (isChain=${terminal.isChain})`
           );
         }
+        // console.log(`QQQ/chainable/terminal: ${JSON.stringify(terminal)}`);
         const result = await op(...args)(terminal);
         return result;
       },
@@ -305,7 +270,8 @@ class Shape {
 }
 
 const isShape = (value) =>
-  value instanceof Shape || (value !== undefined && value !== null && value.isChain === 'root');
+  value instanceof Shape ||
+  (value !== undefined && value !== null && value.isChain === 'root');
 Shape.isShape = isShape;
 
 const isFunction = (value) => value instanceof Function;
@@ -317,7 +283,8 @@ Shape.isArray = isArray;
 const isObject = (value) => value instanceof Object;
 Shape.isObject = isObject;
 
-const isValue = (value) => (!isObject(value) && !isFunction(value)) || isArray(value);
+const isValue = (value) =>
+  (!isObject(value) && !isFunction(value)) || isArray(value);
 Shape.isValue = isValue;
 
 Shape.chain = chain;
@@ -658,7 +625,6 @@ Shape.registerMethod(
       if (geometry.type !== 'plan') {
         throw Error(`Shape is not a plan: ${JSON.stringify(geometry)}`);
       }
-      // console.log(`QQ/updatePlan/shape.chain: ${shape.chain}`);
       return Shape.fromGeometry(
         taggedPlan(
           { tags: geometry.tags },
@@ -684,7 +650,6 @@ Shape.registerMethod(
   ['hasC1', 'hasCorner1'],
   (x = 0, y = x, z = 0) =>
     (shape) => {
-      // console.log(`QQ/hasCorner1/shape: ${JSON.stringify(shape)}`);
       return shape.updatePlan({ corner1: [x, y, z] });
     }
 );
@@ -770,6 +735,9 @@ const buildCorners = (x, y, z) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {
+    while (x.length < 2) {
+      x.push(0);
+    }
     if (x[0] < x[1]) {
       c1[X$9] = x[1];
       c2[X$9] = x[0];
@@ -782,6 +750,9 @@ const buildCorners = (x, y, z) => {
     c2[X$9] = x / -2;
   }
   if (y instanceof Array) {
+    while (y.length < 2) {
+      y.push(0);
+    }
     if (y[0] < y[1]) {
       c1[Y$9] = y[1];
       c2[Y$9] = y[0];
@@ -794,6 +765,9 @@ const buildCorners = (x, y, z) => {
     c2[Y$9] = y / -2;
   }
   if (z instanceof Array) {
+    while (z.length < 2) {
+      z.push(0);
+    }
     if (z[0] < z[1]) {
       c1[Z$8] = z[1];
       c2[Z$8] = z[0];
@@ -922,7 +896,8 @@ const toCoordinate = Shape.registerMethod(
       if (Shape.isShape(x)) {
         const points = await x.toPoints();
         if (points.length >= 1) {
-          return points[0];
+          const point = points[0];
+          return point;
         } else {
           throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
         }
@@ -942,10 +917,10 @@ const toCoordinate = Shape.registerMethod(
     }
 );
 
-const toCoordinateOp$5 = Shape.ops.get('toCoordinate');
+const toCoordinateOp$4 = Shape.ops.get('toCoordinate');
 
 const Point = Shape.registerShapeMethod('Point', async (...args) =>
-  Shape.fromPoint(await toCoordinateOp$5(...args)())
+  Shape.fromPoint(await toCoordinateOp$4(...args)())
 );
 
 const Ref = Shape.registerShapeMethod('Ref', (...args) =>
@@ -954,7 +929,8 @@ const Ref = Shape.registerShapeMethod('Ref', (...args) =>
 
 const ref = Shape.registerMethod(
   'ref',
-  () => (shape) => Shape.fromGeometry(hasTypeReference(shape.toGeometry()))
+  () => async (shape) =>
+    Shape.fromGeometry(hasTypeReference(await shape.toGeometry()))
 );
 
 const X$8 = (x = 0) => Ref().x(x);
@@ -1105,7 +1081,7 @@ const size = Shape.registerMethod(
           min: [0, 0, 0],
           center: [0, 0, 0],
           radius: 0,
-        })(Shape.fromGeometry(geometry));
+        })(Shape.chain(Shape.fromGeometry(geometry)));
       }
       const [min, max] = bounds;
       const length = max[X$7] - min[X$7];
@@ -1121,7 +1097,7 @@ const size = Shape.registerMethod(
         min,
         center,
         radius,
-      })(Shape.fromGeometry(geometry));
+      })(Shape.chain(Shape.fromGeometry(geometry)));
     }
 );
 
@@ -1137,8 +1113,8 @@ const round = (v) => Math.round(v * 1000) / 1000;
 
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
-const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) =>
-  size(({ max, min, center }) => (shape) => {
+const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
+  return size(({ max, min, center }) => (shape) => {
     // This is producing very small deviations.
     // FIX: Try a more principled approach.
     max = roundCoordinate(max);
@@ -1196,11 +1172,11 @@ const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) =>
       }
     }
     if (!offset.every(isFinite)) {
-      console.log(JSON.stringify(shape.toGeometry));
       throw Error(`Non-finite/offset: ${offset}`);
     }
     return offset;
   })(shape);
+};
 
 const align = Shape.registerMethod(
   'align',
@@ -1247,9 +1223,10 @@ const toShape = Shape.registerMethod(
   'toShape',
   (value) => async (shape) => {
     if (Shape.isFunction(value)) {
-      value = await value(shape);
+      value = await value(Shape.chain(shape));
+    } else {
+      value = await value;
     }
-    value = await value;
     if (Shape.isShape(value)) {
       return value;
     } else {
@@ -1263,17 +1240,28 @@ const toShape = Shape.registerMethod(
 const toShapes = Shape.registerMethod(
   'toShapes',
   (value) => async (shape) => {
-    if (Shape.isFunction(value)) {
-      value = await value(shape);
+    if (value instanceof Promise) {
+      throw Error('toShapes/promise/1');
     }
-    if (Shape.isShape(value)) {
-      if (value.toGeometry().type === 'group') {
-        const out = [];
-        for (const geometry of value.toGeometry().content) {
-          out.push(Shape.fromGeometry(geometry));
+    if (Shape.isFunction(value)) {
+      value = await value(Shape.chain(shape));
+    }
+    if (value instanceof Promise) {
+      throw Error('toShapes/promise/2');
+    }
+    if (Shape.isShape(value) && value.toGeometry().type === 'group') {
+      const out = [];
+      for (const geometry of (await value.toGeometry()).content) {
+        const item = Shape.fromGeometry(geometry);
+        out.push(item);
+        if (item instanceof Promise) {
+          throw Error('toShapes/promise/2a');
         }
-        return out;
       }
+      value = out;
+    }
+    if (value instanceof Promise) {
+      throw Error('toShapes/promise/3');
     }
     if (Shape.isArray(value)) {
       const out = [];
@@ -1281,10 +1269,16 @@ const toShapes = Shape.registerMethod(
         if (item === undefined) {
           continue;
         }
+        if (item instanceof Promise) {
+          throw Error('toShapes/promise/4');
+        }
         out.push(...(await toShapes(item)(shape)));
       }
       return out;
     } else {
+      if (value instanceof Promise) {
+        throw Error('toShapes/promise/5');
+      }
       return [await toShape(value)(shape)];
     }
   }
@@ -1296,12 +1290,10 @@ const transform = Shape.registerMethod(
     Shape.fromGeometry(transform$1(matrix, await shape.toGeometry()))
 );
 
-const toShapesOp$1 = Shape.ops.get('toShapes');
-
 const at = Shape.registerMethod('at', (...args) => async (shape) => {
   const { shapesAndFunctions: ops } = destructure(args);
   const { local, global } = getInverseMatrices(await shape.toGeometry());
-  const selections = await toShapesOp$1(ops.shift())(shape);
+  const selections = await toShapes(ops.shift())(shape);
   for (const selection of selections) {
     const { local: selectionLocal, global: selectionGlobal } =
       getInverseMatrices(await selection.toGeometry());
@@ -1314,11 +1306,10 @@ const at = Shape.registerMethod('at', (...args) => async (shape) => {
   return shape;
 });
 
-const normal = Shape.registerMethod(
-  'normal',
-  () => async (shape) =>
-    Shape.fromGeometry(computeNormal(await shape.toGeometry()))
-);
+const normal = Shape.registerMethod('normal', () => async (shape) => {
+  const result = Shape.fromGeometry(computeNormal(await shape.toGeometry()));
+  return result;
+});
 
 const toValue = Shape.registerMethod(
   'toValue',
@@ -1332,7 +1323,7 @@ const toValue = Shape.registerMethod(
 
 const isString = (value) => typeof value === 'string';
 
-const toCoordinateOp$4 = Shape.ops.get('toCoordinate');
+const toCoordinateOp$3 = Shape.ops.get('toCoordinate');
 
 // This interface is a bit awkward.
 const extrudeAlong = Shape.registerMethod(
@@ -1343,7 +1334,7 @@ const extrudeAlong = Shape.registerMethod(
       let vector;
       try {
         // This will fail on ghost geometry.
-        vector = await toCoordinateOp$4(direction)(shape);
+        vector = await toCoordinateOp$3(direction)(shape);
       } catch (e) {
         console.log(`QQ/extrudeAlong/error: ${e.stack}`);
         throw e;
@@ -1420,14 +1411,15 @@ const extrudeZ = Shape.registerMethod(
 
 const ez = extrudeZ;
 
-const toShapesOp = Shape.ops.get('toShapes');
-
 const toShapesGeometries = Shape.registerMethod(
   'toShapesGeometries',
   (value) => async (shape) => {
-    const shapes = await toShapesOp(value)(shape);
+    const shapes = await toShapes(value)(shape);
     const geometries = [];
     for (const shape of shapes) {
+      if (shape instanceof Promise) {
+        throw Error('promise');
+      }
       geometries.push(await shape.toGeometry());
     }
     return geometries;
@@ -1436,11 +1428,16 @@ const toShapesGeometries = Shape.registerMethod(
 
 // const toShapesGeometriesOp = Shape.ops.get('toShapesGeometries');
 
-const Group = Shape.registerShapeMethod('Group', async (...shapes) =>
-  Shape.fromGeometry(
+const Group = Shape.registerShapeMethod('Group', async (...shapes) => {
+  for (const item of shapes) {
+    if (item instanceof Promise) {
+      throw Error(`Group/promise: ${JSON.stringify(await item)}`);
+    }
+  }
+  return Shape.fromGeometry(
     taggedGroup({}, ...(await toShapesGeometries(shapes)(null)))
-  )
-);
+  );
+});
 
 // rx is in terms of turns -- 1/2 is a half turn.
 const rx = Shape.registerMethod(
@@ -1472,14 +1469,17 @@ const ry = Shape.registerMethod(
 
 const rotateY = ry;
 
-const toCoordinateOp$3 = Shape.ops.get('toCoordinate');
-
 const Edge = Shape.registerShapeMethod(
   'Edge',
-  async (source = 0, target = [0, 0, 1], normal = [1, 0, 0]) => {
-    const s = await toCoordinateOp$3(source)();
-    const t = await toCoordinateOp$3(target)();
-    const n = await toCoordinateOp$3(normal)();
+  async (
+    source = [0, 0, 0],
+    target = [0, 0, 1],
+    normal = [1, 0, 0],
+    rubbish
+  ) => {
+    const s = await toCoordinate(source)(null);
+    const t = await toCoordinate(target)(null);
+    const n = await toCoordinate(normal)(null);
     const inverse = fromSegmentToInverseTransform([s, t], n);
     const baseSegment = [
       transformCoordinate(s, inverse),
@@ -1598,16 +1598,13 @@ const reifyBox = async (corner1, corner2) => {
   return (await build()).absolute();
 };
 
-const Box = Shape.registerShapeMethod(
-  'Box',
-  async (...args) => {
-    const { values, object: options } = destructure(args);
-    const [x = 1, y = x, z = 0] = values;
-    const [computedC1, computedC2] = buildCorners(x, y, z);
-    let { c1 = computedC1, c2 = computedC2 } = options;
-    return reifyBox(c1, c2);
-  }
-);
+const Box = Shape.registerShapeMethod('Box', async (...args) => {
+  const { values, object: options } = destructure(args);
+  const [x = 1, y = x, z = 0] = values;
+  const [computedC1, computedC2] = buildCorners(x, y, z);
+  let { c1 = computedC1, c2 = computedC2 } = options;
+  return reifyBox(c1, c2);
+});
 
 const Empty = Shape.registerShapeMethod('Empty', (...shapes) =>
   Shape.fromGeometry(taggedGroup({}))
@@ -1629,7 +1626,10 @@ const bb = Shape.registerMethod(
         return Empty();
       } else {
         const [min, max] = bounds;
-        return Box({ c2: add(min, [-xOffset, -yOffset, -zOffset]), c1: add(max, [xOffset, yOffset, zOffset]) });
+        return Box({
+          c2: add(min, [-xOffset, -yOffset, -zOffset]),
+          c1: add(max, [xOffset, yOffset, zOffset]),
+        });
       }
     }
 );
@@ -1705,33 +1705,37 @@ const tag = Shape.registerMethod(
       Shape.fromGeometry(tagGeometry(await shape.toGeometry(), tags))
 );
 
-const get = Shape.registerMethod(['get', 'g'], (...args) => async (shape) => {
-  const { strings: tags, func: groupOp = Group } = destructure(args);
-  const isMatch = oneOfTagMatcher(tags, 'item');
-  const picks = [];
-  const walk = (geometry, descend) => {
-    const { tags, type } = geometry;
-    if (type === 'group') {
-      return descend();
-    }
-    if (isMatch(`type:${geometry.type}`)) {
-      picks.push(Shape.fromGeometry(geometry));
-    } else {
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
-          break;
+const get = Shape.registerMethod(
+  ['get', 'g'],
+  (...args) =>
+    async (shape) => {
+      const { strings: tags, func: groupOp = Group } = destructure(args);
+      const isMatch = oneOfTagMatcher(tags, 'item');
+      const picks = [];
+      const walk = (geometry, descend) => {
+        const { tags, type } = geometry;
+        if (type === 'group') {
+          return descend();
         }
-      }
+        if (isMatch(`type:${geometry.type}`)) {
+          picks.push(Shape.fromGeometry(geometry));
+        } else {
+          for (const tag of tags) {
+            if (isMatch(tag)) {
+              picks.push(Shape.fromGeometry(geometry));
+              break;
+            }
+          }
+        }
+        if (type !== 'item') {
+          return descend();
+        }
+      };
+      const geometry = await shape.toGeometry();
+      visit(geometry, walk);
+      return groupOp(...picks);
     }
-    if (type !== 'item') {
-      return descend();
-    }
-  };
-  const geometry = await shape.toGeometry();
-  visit(geometry, walk);
-  return groupOp(...picks);
-});
+);
 
 const g = get;
 
@@ -1761,10 +1765,14 @@ const op = Shape.registerMethod('op', (...fns) => async (shape) => {
     if (fn === undefined) {
       continue;
     }
-    if (Shape.isFunction(fn)) {
-      results.push(fn(Shape.chain(shape)));
-    } else {
+    if (Shape.isShape(fn)) {
+      // console.log(`QQ/op/value: ${fn} ${JSON.stringify(fn)} ${fn.isChain}`);
       results.push(fn);
+    } else {
+      // console.log(`QQ/op/apply: ${fn} ${JSON.stringify(fn)} ${fn.isChain}`);
+      const result = await fn(Shape.chain(shape));
+      // console.log(`QQ/op/apply/result: ${result}`);
+      results.push(result);
     }
   }
   return Group(...results);
@@ -1925,34 +1933,46 @@ const cutFrom = Shape.registerMethod(
     }
 );
 
-const cutOut = Shape.registerMethod('cutOut', (...args) => async (shape) => {
-  const {
-    shapesAndFunctions: others,
-    functions,
-    strings: modes,
-  } = destructure(args);
-  const [cutOp = (shape) => shape, clipOp = (shape) => shape, groupOp = Group] =
-    functions;
-  const other = shape.toShape(others[0]);
-  return groupOp(
-    await cut(other, ...modes).op(cutOp)(shape),
-    await clip(other, ...modes).op(clipOp)(shape)
-  );
-});
+const cutOut = Shape.registerMethod(
+  'cutOut',
+  (...args) =>
+    async (shape) => {
+      const {
+        shapesAndFunctions: others,
+        functions,
+        strings: modes,
+      } = destructure(args);
+      const [
+        cutOp = (shape) => shape,
+        clipOp = (shape) => shape,
+        groupOp = Group,
+      ] = functions;
+      const other = shape.toShape(others[0]);
+      return groupOp(
+        await cut(other, ...modes).op(cutOp)(shape),
+        await clip(other, ...modes).op(clipOp)(shape)
+      );
+    }
+);
 
-const deform = Shape.registerMethod('deform', (...args) => async (shape) => {
-  const { shapesAndFunctions: selections, object: options } = destructure(args);
-  const { iterations, tolerance, alpha } = options;
-  return Shape.fromGeometry(
-    deform$1(
-      await shape.toGeometry(),
-      await shape.toShapesGeometries(selections),
-      iterations,
-      tolerance,
-      alpha
-    )
-  );
-});
+const deform = Shape.registerMethod(
+  'deform',
+  (...args) =>
+    async (shape) => {
+      const { shapesAndFunctions: selections, object: options } =
+        destructure(args);
+      const { iterations, tolerance, alpha } = options;
+      return Shape.fromGeometry(
+        deform$1(
+          await shape.toGeometry(),
+          await shape.toShapesGeometries(selections),
+          iterations,
+          tolerance,
+          alpha
+        )
+      );
+    }
+);
 
 // TODO: Rename clean at the lower levels.
 const demesh = Shape.registerMethod(
@@ -1964,11 +1984,11 @@ const demesh = Shape.registerMethod(
 const disjoint = Shape.registerMethod(
   'disjoint',
   (...args) =>
-    (shape) => {
+    async (shape) => {
       const { strings: modes } = destructure(args);
       return fromGeometry(
         disjoint$1(
-          [shape.toGeometry()],
+          [await shape.toGeometry()],
           modes.includes('backward') ? 0 : 1,
           modes.includes('exact')
         )
@@ -2005,7 +2025,6 @@ const on = Shape.registerMethod(
         const r = await c(target);
         outputLeafs.push(await r.toGeometry());
       }
-      console.log(`QQ/inputLeafs: ${JSON.stringify(inputLeafs)}`);
       const result = Shape.fromGeometry(
         replacer(inputLeafs, outputLeafs)(await shape.toGeometry())
       );
@@ -3470,7 +3489,7 @@ const toSegments = (letters) => {
     const code = letter.charCodeAt(0);
     const segments = hersheySegments[code];
     if (segments) {
-      rendered.push(Shape.fromSegments(segments).x(xOffset));
+      rendered.push(Shape.chain(Shape.fromSegments(segments)).x(xOffset));
     }
     xOffset += hersheyWidth[code] || 0;
   }
@@ -3774,6 +3793,9 @@ const page = Shape.registerMethod(
 );
 
 const ensurePages = async (shape, depth = 0) => {
+  if (shape instanceof Promise) {
+    throw Error(`ensurePages/shape/promise`);
+  }
   const pages = getLayouts(await toDisplayGeometry()(shape));
   if (pages.length === 0 && depth === 0) {
     return ensurePages(await Page({ pack: false }, shape), depth + 1);
@@ -3792,7 +3814,9 @@ const each = Shape.registerMethod('each', (...args) => async (shape) => {
   const leafShapes = [];
   const leafGeometries = getLeafs(await shape.toGeometry());
   for (const leafGeometry of leafGeometries) {
-    leafShapes.push(await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry))));
+    leafShapes.push(
+      await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry)))
+    );
   }
   const grouped = await groupOp(...leafShapes);
   if (Shape.isFunction(grouped)) {
@@ -3889,15 +3913,19 @@ const eachEdge = Shape.registerMethod(
             // We need a segment from [0,0,0] to [x,0,0] in its local space.
             edges.push(
               await edgeOp(
-                Shape.chain(Shape.fromGeometry(
-                  taggedSegments({ matrix: inverseMatrix }, [baseSegment])
-                )),
+                Shape.chain(
+                  Shape.fromGeometry(
+                    taggedSegments({ matrix: inverseMatrix }, [baseSegment])
+                  )
+                ),
                 length(segment[SOURCE], segment[TARGET]),
-                Shape.chain(Shape.fromGeometry(
-                  taggedSegments({ matrix: oppositeInverseMatrix }, [
-                    oppositeSegment,
-                  ])
-                ))
+                Shape.chain(
+                  Shape.fromGeometry(
+                    taggedSegments({ matrix: oppositeInverseMatrix }, [
+                      oppositeSegment,
+                    ])
+                  )
+                )
               )(shape)
             );
           }
@@ -3955,31 +3983,35 @@ const edit = Shape.registerMethod(
   (editId) => (shape) => shape.untag('editId:*').tag(`editId:${editId}`)
 );
 
-const edges = Shape.registerMethod('edges', (...args) => (shape) => {
-  const { shapesAndFunctions, object: options = {} } = destructure(args);
-  const { selections = [] } = options;
-  let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
-  if (edgesOp instanceof Shape) {
-    const edgesShape = edgesOp;
-    edgesOp = (edges) => edgesShape.to(edges);
-  }
-  const edges = [];
-  eachFaceEdges(
-    Shape.toShape(shape, shape).toGeometry(),
-    shape.toShapes(selections).map((selection) => selection.toGeometry()),
-    (faceGeometry, edgeGeometry) => {
-      if (edgeGeometry) {
-        edges.push(edgesOp(Shape.fromGeometry(edgeGeometry)));
+const edges = Shape.registerMethod(
+  'edges',
+  (...args) =>
+    async (shape) => {
+      const { shapesAndFunctions, object: options = {} } = destructure(args);
+      const { selections = [] } = options;
+      let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
+      if (edgesOp instanceof Shape) {
+        const edgesShape = edgesOp;
+        edgesOp = (edges) => edgesShape.to(edges);
+      }
+      const edges = [];
+      eachFaceEdges(
+        await shape.toGeometry(),
+        await shape.toShapesGeometries(selections),
+        (faceGeometry, edgeGeometry) => {
+          if (edgeGeometry) {
+            edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
+          }
+        }
+      );
+      const grouped = groupOp(...edges);
+      if (grouped instanceof Function) {
+        return grouped(shape);
+      } else {
+        return grouped;
       }
     }
-  );
-  const grouped = groupOp(...edges);
-  if (grouped instanceof Function) {
-    return grouped(shape);
-  } else {
-    return grouped;
-  }
-});
+);
 
 const faces = Shape.registerMethod(
   'faces',
@@ -4034,25 +4066,24 @@ const fix = Shape.registerMethod(
     )
 );
 
-const origin = Shape.registerMethod(['origin', 'o'], () => async (shape) => {
-  const { local } = getInverseMatrices(await shape.toGeometry());
-  return Point().transform(local);
-});
+const origin = Shape.registerMethod(
+  ['origin', 'o'],
+  () => async (shape) => {
+    const { local } = getInverseMatrices(await shape.toGeometry());
+    return Point().transform(local);
+  }
+);
 
 const o = origin;
 
-const to = Shape.registerMethod(
-  'to',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions: references } = destructure(args);
-      const arranged = [];
-      for (const reference of await shape.toShapes(references)) {
-        arranged.push(await by(origin()).by(reference)(shape));
-      }
-      return Group(...arranged);
-    }
-);
+const to = Shape.registerMethod('to', (...args) => async (shape) => {
+  const { shapesAndFunctions: references } = destructure(args);
+  const arranged = [];
+  for (const reference of await shape.toShapes(references)) {
+    arranged.push(await by(origin()).by(reference)(shape));
+  }
+  return Group(...arranged);
+});
 
 const flat = Shape.registerMethod(
   'flat',
@@ -4071,31 +4102,35 @@ const fuse = Shape.registerMethod('fuse', (...args) => async (shape) => {
 
 // get, ignoring item boundaries.
 
-const getAll = Shape.registerMethod('getAll', (...args) => async (shape) => {
-  const { strings: tags, func: groupOp = Group } = destructure(args);
-  const isMatch = oneOfTagMatcher(tags, 'item');
-  const picks = [];
-  const walk = (geometry, descend) => {
-    const { tags, type } = geometry;
-    if (type === 'group') {
-      return descend();
-    }
-    if (isMatch(`type:${geometry.type}`)) {
-      picks.push(Shape.fromGeometry(geometry));
-    } else {
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          picks.push(Shape.fromGeometry(geometry));
-          break;
+const getAll = Shape.registerMethod(
+  'getAll',
+  (...args) =>
+    async (shape) => {
+      const { strings: tags, func: groupOp = Group } = destructure(args);
+      const isMatch = oneOfTagMatcher(tags, 'item');
+      const picks = [];
+      const walk = (geometry, descend) => {
+        const { tags, type } = geometry;
+        if (type === 'group') {
+          return descend();
         }
-      }
+        if (isMatch(`type:${geometry.type}`)) {
+          picks.push(Shape.fromGeometry(geometry));
+        } else {
+          for (const tag of tags) {
+            if (isMatch(tag)) {
+              picks.push(Shape.fromGeometry(geometry));
+              break;
+            }
+          }
+        }
+        return descend();
+      };
+      const geometry = await shape.toGeometry();
+      visit(geometry, walk);
+      return groupOp(...picks);
     }
-    return descend();
-  };
-  const geometry = await shape.toGeometry();
-  visit(geometry, walk);
-  return groupOp(...picks);
-});
+);
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -4175,7 +4210,7 @@ const grow = Shape.registerMethod('grow', (...args) => async (shape) => {
 
 const image = Shape.registerMethod(
   'image',
-  (url) => (shape) => shape.untag('image:*').tag(`image:${url}`)
+  (url) => (shape) => untag('image:*').tag(`image:${url}`)(shape)
 );
 
 const inFn = Shape.registerMethod('in', () => (shape) => {
@@ -4202,15 +4237,17 @@ const involute = Shape.registerMethod(
     Shape.fromGeometry(involute$1(await shape.toGeometry()))
 );
 
-const Link = Shape.registerShapeMethod('Link', async (...shapes) =>
-  Shape.fromGeometry(link$1(await toShapesGeometries(shapes)(null)))
-);
+const Link = Shape.registerShapeMethod('Link', async (...shapes) => {
+  return Shape.fromGeometry(
+    link$1(await toShapesGeometries(shapes)(null))
+  );
+});
 
 const link = Shape.registerMethod(
   'link',
   (...shapes) =>
     async (shape) =>
-      Link([shape, ...await shape.toShapes(shapes)])
+      Link([shape, ...(await shape.toShapes(shapes))])
 );
 
 const load = async (path) => {
@@ -4308,30 +4345,24 @@ const overlay = Shape.registerMethod(
   () => (shape) => Shape.fromGeometry(hasShowOverlay(shape.toGeometry()))
 );
 
-const mask = Shape.registerMethod(
-  'mask',
-  (...args) =>
-    async (shape) => {
-      const shapes = [];
-      for (const arg of args) {
-        const s = await shape.toShape(arg);
-        shapes.push(s.void());
-      }
-      return Group(
-        ...shapes,
-        Shape.fromGeometry(hasTypeMasked(await shape.toGeometry()))
-      );
-    }
-);
+const mask = Shape.registerMethod('mask', (...args) => async (shape) => {
+  const shapes = [];
+  for (const arg of args) {
+    const s = await shape.toShape(arg);
+    shapes.push(await s.void());
+  }
+  return Group(
+    ...shapes,
+    Shape.fromGeometry(hasTypeMasked(await shape.toGeometry()))
+  );
+});
 
 const masking = Shape.registerMethod(
   'masking',
-  (masked) => (shape) =>
+  (masked) => async (shape) =>
     Group(
       shape.void(),
-      Shape.fromGeometry(
-        hasTypeMasked(Shape.toShape(masked, shape).toGeometry())
-      )
+      Shape.fromGeometry(hasTypeMasked(await shape.toShapeGeometry(masked)))
     )
 );
 
@@ -4649,9 +4680,8 @@ const pack = Shape.registerMethod(
 
 const points$1 = Shape.registerMethod('points', () => async (shape) => {
   const points = [];
-  eachPoint$1(
-    await shape.toGeometry(),
-    ([x = 0, y = 0, z = 0, exact]) => points.push([x, y, z, exact])
+  eachPoint$1(await shape.toGeometry(), ([x = 0, y = 0, z = 0, exact]) =>
+    points.push([x, y, z, exact])
   );
   return Shape.fromGeometry(taggedPoints({}, points));
 });
@@ -4806,14 +4836,15 @@ const sz = scaleZ;
 const scaleToFit = Shape.registerMethod(
   'scaleToFit',
   (x = 1, y = x, z = y) =>
-    (shape) => {
-      const { length, width, height } = shape.size();
-      const xFactor = x / length;
-      const yFactor = y / width;
-      const zFactor = z / height;
-      // Surfaces may get non-finite factors -- use the unit instead.
-      const finite = (factor) => (isFinite(factor) ? factor : 1);
-      return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+    async (shape) => {
+      return size(({ length, width, height }) => (shape) => {
+        const xFactor = x / length;
+        const yFactor = y / width;
+        const zFactor = z / height;
+        // Surfaces may get non-finite factors -- use the unit instead.
+        const finite = (factor) => (isFinite(factor) ? factor : 1);
+        return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+      })(shape);
     }
 );
 
@@ -4983,15 +5014,23 @@ const setTags = Shape.registerMethod(
       Shape.fromGeometry(rewriteTags(tags, [], await shape.toGeometry()))
 );
 
+const toShapeGeometry = Shape.registerMethod(
+  'toShapeGeometry',
+  (value) => async (shape) => {
+    const valueShape = await toShape(value)(shape);
+    return valueShape.toGeometry();
+  }
+);
+
 const shadow = Shape.registerMethod(
   'shadow',
   (planeReference = XY(0), sourceReference = XY(1)) =>
-    (shape) =>
+    async (shape) =>
       Shape.fromGeometry(
         cast(
-          Shape.toShape(planeReference, shape).toGeometry(),
-          Shape.toShape(sourceReference, shape).toGeometry(),
-          shape.toGeometry()
+          await toShapeGeometry(planeReference)(shape),
+          await toShapeGeometry(sourceReference)(shape),
+          await shape.toGeometry()
         )
       )
 );
@@ -5050,12 +5089,13 @@ const Z$2 = 2;
 const sort = Shape.registerMethod(
   'sort',
   (spec = 'z<y<x<') =>
-    (shape) => {
-      let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
+    async (shape) => {
+      let leafs = [];
+      for (const leaf of getLeafs(await shape.toGeometry())) {
         const [min, max] = measureBoundingBox(leaf);
-        const shape = Shape.fromGeometry(leaf);
-        return { min, max, shape };
-      });
+        const shape = await Shape.fromGeometry(leaf);
+        leafs.push({ min, max, shape });
+      }
       const ops = [];
       while (spec) {
         const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
@@ -5200,16 +5240,6 @@ const toPoints = Shape.registerMethod(
   () => async (shape) => {
     const points = toPoints$1(await shape.toGeometry()).points;
     return points;
-  }
-);
-
-const toShapeOp = Shape.ops.get('toShape');
-
-const toShapeGeometry = Shape.registerMethod(
-  'toShapeGeometry',
-  (value) => async (shape) => {
-    const valueShape = await toShapeOp(value)(shape);
-    return valueShape.toGeometry();
   }
 );
 
@@ -5370,7 +5400,9 @@ const baseView =
       viewId = `${id}`;
     }
     const displayGeometry = await viewShape.toDisplayGeometry();
-    for (const pageGeometry of await ensurePages(Shape.fromGeometry(displayGeometry), 0)) {
+    for (const pageGeometry of await ensurePages(
+      Shape.fromGeometry(displayGeometry),
+      0)) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${hash}`;
@@ -5917,9 +5949,7 @@ const Assembly = Shape.registerShapeMethod(
   async (...args) => {
     const { strings: modes, shapesAndFunctions: unresolvedShapes } =
       destructure(args);
-    console.log(`QQ/Assembly/1`);
     const [shape, ...shapes] = await toShapes(unresolvedShapes)();
-    console.log(`QQ/Assembly/2`);
     return fitTo(...modes, ...shapes)(shape);
   }
 );

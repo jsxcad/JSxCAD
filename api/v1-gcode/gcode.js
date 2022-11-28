@@ -1,10 +1,5 @@
 import { Shape, ensurePages } from '@jsxcad/api-shape';
-import {
-  emit,
-  generateUniqueId,
-  getSourceLocation,
-  write,
-} from '@jsxcad/sys';
+import { emit, generateUniqueId, getSourceLocation, write } from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
@@ -34,15 +29,17 @@ export const prepareGcode = async (
   return entries;
 };
 
-const gcode = Shape.registerMethod('gcode',
+const gcode = Shape.registerMethod(
+  'gcode',
   (name, tool, op, options = {}) =>
-  async (shape) => {
-    const entries = await prepareGcode(shape, name, tool, op, options);
-    const download = { entries };
-    const hash =
-      hashSum({ name, tool, options }) + hashGeometry(shape.toGeometry());
-    emit({ download, hash });
-    return shape;
-  });
+    async (shape) => {
+      const entries = await prepareGcode(shape, name, tool, op, options);
+      const download = { entries };
+      const hash =
+        hashSum({ name, tool, options }) + hashGeometry(shape.toGeometry());
+      emit({ download, hash });
+      return shape;
+    }
+);
 
 export default gcode;

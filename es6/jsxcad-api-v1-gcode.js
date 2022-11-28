@@ -95,16 +95,18 @@ const prepareGcode = async (
   return entries;
 };
 
-const gcode = Shape.registerMethod('gcode',
+const gcode = Shape.registerMethod(
+  'gcode',
   (name, tool, op, options = {}) =>
-  async (shape) => {
-    const entries = await prepareGcode(shape, name, tool, op, options);
-    const download = { entries };
-    const hash$1 =
-      hashSum({ name, tool, options }) + hash(shape.toGeometry());
-    emit({ download, hash: hash$1 });
-    return shape;
-  });
+    async (shape) => {
+      const entries = await prepareGcode(shape, name, tool, op, options);
+      const download = { entries };
+      const hash$1 =
+        hashSum({ name, tool, options }) + hash(shape.toGeometry());
+      emit({ download, hash: hash$1 });
+      return shape;
+    }
+);
 
 const api = { gcode };
 

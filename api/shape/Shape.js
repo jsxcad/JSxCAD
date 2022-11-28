@@ -271,7 +271,8 @@ export class Shape {
 }
 
 export const isShape = (value) =>
-  value instanceof Shape || (value !== undefined && value !== null && value.isChain === 'root');
+  value instanceof Shape ||
+  (value !== undefined && value !== null && value.isChain === 'root');
 Shape.isShape = isShape;
 
 export const isFunction = (value) => value instanceof Function;
@@ -283,7 +284,8 @@ Shape.isArray = isArray;
 export const isObject = (value) => value instanceof Object;
 Shape.isObject = isObject;
 
-export const isValue = (value) => (!isObject(value) && !isFunction(value)) || isArray(value);
+export const isValue = (value) =>
+  (!isObject(value) && !isFunction(value)) || isArray(value);
 Shape.isValue = isValue;
 
 Shape.chain = chain;

@@ -1,10 +1,5 @@
 import { Shape, ensurePages } from '@jsxcad/api-shape';
-import {
-  emit,
-  generateUniqueId,
-  getSourceLocation,
-  write,
-} from '@jsxcad/sys';
+import { emit, generateUniqueId, getSourceLocation, write } from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import hashSum from 'hash-sum';
@@ -32,13 +27,13 @@ export const prepareSvg = async (shape, name, op = (s) => s, options = {}) => {
   return records;
 };
 
-export const svg =
+export const svg = Shape.registerMethod(
+  'svg',
   (name, op, options = {}) =>
-  async (shape) => {
-    await prepareSvg(shape, name, op, options);
-    return shape;
-  };
-
-Shape.registerMethod('svg', svg);
+    async (shape) => {
+      await prepareSvg(shape, name, op, options);
+      return shape;
+    }
+);
 
 export default svg;

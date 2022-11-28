@@ -3,13 +3,13 @@ import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
-const Stl = Shape.registerShapeMethod('Stl', async (
-  path,
-  { src, format = 'ascii', geometry = 'graph' } = {}
-) => {
-  const data = await read(`source/${path}`, { sources: [path] });
-  return Shape.fromGeometry(await fromStl(data, { format, geometry }));
-});
+const Stl = Shape.registerShapeMethod(
+  'Stl',
+  async (path, { src, format = 'ascii', geometry = 'graph' } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    return Shape.fromGeometry(await fromStl(data, { format, geometry }));
+  }
+);
 
 function pad (hash, len) {
   while (hash.length < len) {
@@ -102,13 +102,11 @@ const prepareStl = async (shape, name, op = (s) => s, options = {}) => {
   return records;
 };
 
-const stl = Shape.registerMethod('stl',
-  (...args) =>
-  async (shape) => {
-    const { value: name, func: op, object: options } = destructure(args);
-    await prepareStl(shape, name, op, options);
-    return shape;
-  });
+const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
+  const { value: name, func: op, object: options } = destructure(args);
+  await prepareStl(shape, name, op, options);
+  return shape;
+});
 
 const api = {
   Stl,
