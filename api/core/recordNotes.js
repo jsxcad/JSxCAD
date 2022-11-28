@@ -66,7 +66,6 @@ export const emitSourceText = (sourceText) =>
 export const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
-    // console.log(`QQ/recompute: ${id} ${sha}`);
     logInfo('api/core/$run', text);
     const timer = startTime(`${path}/${id}`);
     beginRecordingNotes(path, id);
@@ -86,7 +85,6 @@ export const $run = async (op, { path, id, text, sha, line }) => {
         await resolvePending();
         finishEmitGroup({ path, id, line });
       }
-      console.log(`QQ/$run/text: ${text}`);
       throw error;
     }
     await resolvePending();
@@ -104,10 +102,8 @@ export const $run = async (op, { path, id, text, sha, line }) => {
     clearRecordedNotes();
     return result;
   } else {
-    // console.log(`QQ/replay: ${id} ${sha}`);
     await replayRecordedNotes(path, id);
     const result = await load(`data/def/${path}/${id}.data`);
-    // console.log(`QQ/result: ${JSON.stringify(result)}`);
     return Shape.chain(result);
   }
 };

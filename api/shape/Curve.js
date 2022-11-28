@@ -16,8 +16,6 @@ export const reifyCurve = async (start, c1, c2, end, zag) => {
   return Link(points.map((point) => Point(point)));
 };
 
-// Shape.registerReifier('Curve', reifyCurve);
-
 export const Curve = Shape.registerShapeMethod('Curve', async (...args) => {
   const { values, objects: options } = destructure(args);
   const [start, c1, c2, end] = values;
