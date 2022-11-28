@@ -6,7 +6,7 @@ import { visit } from '@jsxcad/geometry';
 
 // get, ignoring item boundaries.
 
-export const getAll = Shape.registerMethod('getAll', (...args) => (shape) => {
+export const getAll = Shape.registerMethod('getAll', (...args) => async (shape) => {
   const { strings: tags, func: groupOp = Group } = destructure(args);
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
@@ -27,7 +27,7 @@ export const getAll = Shape.registerMethod('getAll', (...args) => (shape) => {
     }
     return descend();
   };
-  const geometry = shape.toGeometry();
+  const geometry = await shape.toGeometry();
   visit(geometry, walk);
   return groupOp(...picks);
 });

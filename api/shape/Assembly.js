@@ -8,9 +8,7 @@ export const Assembly = Shape.registerShapeMethod(
   async (...args) => {
     const { strings: modes, shapesAndFunctions: unresolvedShapes } =
       destructure(args);
-    console.log(`QQ/Assembly/1`);
     const [shape, ...shapes] = await toShapes(unresolvedShapes)();
-    console.log(`QQ/Assembly/2`);
     return fitTo(...modes, ...shapes)(shape);
   }
 );

@@ -18,7 +18,7 @@ Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0))
   );
 ```
 
-![Image](f.md.0.png)
+![Image](f.md.$2.png)
 
 Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)).fill() produces a triangle.
 
@@ -32,6 +32,6 @@ Arc([4, 5], 2, 0)
   );
 ```
 
-![Image](f.md.1.png)
+![Image](f.md.$3.png)
 
 Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.

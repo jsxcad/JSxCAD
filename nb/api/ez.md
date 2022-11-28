@@ -17,6 +17,6 @@ Box(10)
   );
 ```
 
-![Image](ez.md.0.png)
+![Image](ez.md.$2.png)
 
 Box(10).rx(1 / 8).ez(1, -1, 4, 3) extrudes along the z axis by two extents

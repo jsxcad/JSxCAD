@@ -1,5 +1,5 @@
 ```JavaScript
-Hexagon(4)
+await Hexagon(4)
   .seq(
     { to: 10 },
     { to: 10 },
@@ -12,4 +12,4 @@ Hexagon(4)
   .view();
 ```
 
-![Image](honeycomb.md.0.png)
+![Image](honeycomb.md.$1.png)

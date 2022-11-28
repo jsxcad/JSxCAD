@@ -13,7 +13,7 @@ Box([0, 10], 3, [0, 2])
   .md('shadow() casts vertically onto XY(0).');
 ```
 
-![Image](shadow.md.0.png)
+![Image](shadow.md.$2_8.png)
 
 shadow() casts vertically onto XY(0).
 
@@ -27,7 +27,7 @@ Box([0, 10], 3, [0, 2])
   .md('shadow(YZ(0), YZ(1)) casts horizontally onto YZ(0).');
 ```
 
-![Image](shadow.md.1.png)
+![Image](shadow.md.$3_8.png)
 
 shadow(YZ(0), YZ(1)) casts horizontally onto YZ(0).
 
@@ -41,6 +41,6 @@ Box([0, 10], 3, [0, 2])
   .md('shadow(XY(0), XY(1).rx(-1 /8)) casts diagonally onto XY(0).');
 ```
 
-![Image](shadow.md.2.png)
+![Image](shadow.md.$4_8.png)
 
 shadow(XY(0), XY(1).rx(-1 /8)) casts diagonally onto XY(0).

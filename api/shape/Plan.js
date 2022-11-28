@@ -50,7 +50,6 @@ export const updatePlan = Shape.registerMethod(
       if (geometry.type !== 'plan') {
         throw Error(`Shape is not a plan: ${JSON.stringify(geometry)}`);
       }
-      // console.log(`QQ/updatePlan/shape.chain: ${shape.chain}`);
       return Shape.fromGeometry(
         taggedPlan(
           { tags: geometry.tags },
@@ -76,7 +75,6 @@ export const hasCorner1 = Shape.registerMethod(
   ['hasC1', 'hasCorner1'],
   (x = 0, y = x, z = 0) =>
     (shape) => {
-      // console.log(`QQ/hasCorner1/shape: ${JSON.stringify(shape)}`);
       return shape.updatePlan({ corner1: [x, y, z] });
     }
 );
@@ -205,6 +203,7 @@ export const buildCorners = (x, y, z) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {
+    while (x.length < 2) { x.push(0); }
     if (x[0] < x[1]) {
       c1[X] = x[1];
       c2[X] = x[0];
@@ -217,6 +216,7 @@ export const buildCorners = (x, y, z) => {
     c2[X] = x / -2;
   }
   if (y instanceof Array) {
+    while (y.length < 2) { y.push(0); }
     if (y[0] < y[1]) {
       c1[Y] = y[1];
       c2[Y] = y[0];
@@ -229,6 +229,7 @@ export const buildCorners = (x, y, z) => {
     c2[Y] = y / -2;
   }
   if (z instanceof Array) {
+    while (z.length < 2) { z.push(0); }
     if (z[0] < z[1]) {
       c1[Z] = z[1];
       c2[Z] = z[0];

@@ -19,7 +19,7 @@ Box(10)
   .md("Box(10).color('blue').cutFrom(Arc(12).color('red'))");
 ```
 
-![Image](cutFrom.md.0.png)
+![Image](cutFrom.md.$2.png)
 
 Box(10).color('blue').cutFrom(Arc(12).color('red'))
 
@@ -31,6 +31,6 @@ Box(10)
   .md("Box(10).color('blue').cut(Arc(12).color('red'))");
 ```
 
-![Image](cutFrom.md.1.png)
+![Image](cutFrom.md.$3.png)
 
 Box(10).color('blue').cut(Arc(12).color('red'))

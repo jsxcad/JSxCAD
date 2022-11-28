@@ -21,7 +21,7 @@ Group(
   );
 ```
 
-![Image](color.md.0.png)
+![Image](color.md.$2.png)
 
 Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()
 
@@ -43,10 +43,10 @@ Box(10)
   .md("Now color('pink') makes them are all pink.");
 ```
 
-![Image](color.md.1.png)
+![Image](color.md.$3_1.png)
 
 These have various colors
 
-![Image](color.md.2.png)
+![Image](color.md.$3_2.png)
 
 Now color('pink') makes them are all pink.

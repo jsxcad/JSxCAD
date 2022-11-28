@@ -16,6 +16,6 @@ Box(5)
   );
 ```
 
-![Image](origin.md.0.png)
+![Image](origin.md.$2.png)
 
 Box(5).x(5).and(color('red').by(origin())) adds a red version of the box back at the origin.

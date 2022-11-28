@@ -5,11 +5,11 @@ import { disjoint as disjointGeometry } from '@jsxcad/geometry';
 export const disjoint = Shape.registerMethod(
   'disjoint',
   (...args) =>
-    (shape) => {
+    async (shape) => {
       const { strings: modes } = destructure(args);
       return fromGeometry(
         disjointGeometry(
-          [shape.toGeometry()],
+          [await shape.toGeometry()],
           modes.includes('backward') ? 0 : 1,
           modes.includes('exact')
         )

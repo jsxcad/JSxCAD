@@ -19,7 +19,7 @@ Box(10)
   .md("Box(10).color('blue').clip(Arc(12).color('red'))");
 ```
 
-![Image](cut.md.0.png)
+![Image](cut.md.$2.png)
 
 Box(10).color('blue').clip(Arc(12).color('red'))
 
@@ -32,7 +32,7 @@ Box(10)
   .md("Box(10).ez(2).material('copper').clip(Orb(5))");
 ```
 
-![Image](cut.md.1.png)
+![Image](cut.md.$3.png)
 
 Box(10).ez(2).material('copper').clip(Orb(5))
 
@@ -43,6 +43,6 @@ Box(10, 10, 10)
   .md("Box(10, 10, 10).clip(Box(12, 12, 8), 'open')");
 ```
 
-![Image](cut.md.2.png)
+![Image](cut.md.$4.png)
 
 Box(10, 10, 10).clip(Box(12, 12, 8), 'open')

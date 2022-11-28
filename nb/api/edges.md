@@ -14,7 +14,7 @@ See: [eachEdge](../../nb/api/eachEdge.md)
 Box(5, 5, 5).edges().view().md('Box(5, 5, 5).edges()');
 ```
 
-![Image](edges.md.0.png)
+![Image](edges.md.$2.png)
 
 Box(5, 5, 5).edges()
 
@@ -26,6 +26,6 @@ Box(5, 5, 5)
   .md('Box(5, 5, 5).remesh().edges({ selections: Box(5, 5, [0, 2.5]) })');
 ```
 
-![Image](edges.md.1.png)
+![Image](edges.md.$3.png)
 
 Box(5, 5, 5).remesh().edges({ selections: Box(5, 5, [0, 2.5]) })

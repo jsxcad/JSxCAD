@@ -89,8 +89,6 @@ aDesign
     `We need to get into the 'design' item in order to get at 'box' and 'bolt'`
   );
 
-log(aDesign.bom());
-
 md`
 ---
 ### Grow
@@ -227,8 +225,6 @@ Size returns the size of the shape along with it's bounding box corners.
 A function can be provided to receive the dimensions along with the shape.
 `;
 
-log(aRectangle.size());
-
 aRectangle
   .size(
     ({ length }) =>
@@ -244,8 +240,6 @@ Tags lists all of the tags associated with a shape.
 
 A function can be supplied to receive the tags and shape.
 `;
-
-log(aRectangle.tag('tagString').tags());
 
 aRectangle.tag('tagString').tags((tags) => note(`Tags ${tags}`));
 
@@ -278,7 +272,7 @@ Group(
   Box(10).as('box').color('green').material('copper'),
   Arc(10).as('arc').color('red').material('brick')
 )
-  .view(1, (s) => s.get('*').pack())
+  .view(1, get('*').pack())
   .md('All items.')
   .view(2, get('color:green'))
   .md('All green things.')

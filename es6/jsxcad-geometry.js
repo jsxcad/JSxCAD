@@ -312,7 +312,7 @@ const disjoint = (geometries, mode, exact) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$B, inputs);
   }
-  console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
+  // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
   const outputs = disjoint$1(inputs, mode, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);

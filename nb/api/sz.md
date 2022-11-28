@@ -12,4 +12,4 @@ See: [scale](../../nb/api/scale.nb), [sx](#https://raw.githubusercontent.com/jsx
 Box(2, 3, [0, 5]).op(ghost(), sz(-0.5)).view();
 ```
 
-![Image](sz.md.0.png)
+![Image](sz.md.$2.png)

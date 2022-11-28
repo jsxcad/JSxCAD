@@ -39,7 +39,7 @@ export const size = Shape.registerMethod(
           min: [0, 0, 0],
           center: [0, 0, 0],
           radius: 0,
-        })(Shape.fromGeometry(geometry));
+        })(Shape.chain(Shape.fromGeometry(geometry)));
       }
       const [min, max] = bounds;
       const length = max[X] - min[X];
@@ -55,6 +55,6 @@ export const size = Shape.registerMethod(
         min,
         center,
         radius,
-      })(Shape.fromGeometry(geometry));
+      })(Shape.chain(Shape.fromGeometry(geometry)));
     }
 );

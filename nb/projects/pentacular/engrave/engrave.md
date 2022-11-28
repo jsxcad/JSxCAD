@@ -11,21 +11,21 @@ const text = await control('Engraving', '輝');
 ```
 
 ```JavaScript
-const model = Text(unYetGul, text, 25)
+const model = await Text(unYetGul, text, 25)
   .by(align('xy'))
   .cutFrom(Box(30, 26))
   .view()
   .md('Model');
 ```
 
-![Image](engrave.md.0.png)
+![Image](engrave.md.model.png)
 
 Model
 
 ```JavaScript
-const inset = model.inset(0.5).gridView().md('Section Inset');
+const inset = await model.inset(0.5).gridView().md('Section Inset');
 ```
 
-![Image](engrave.md.1.png)
+![Image](engrave.md.inset.png)
 
 Section Inset

@@ -26,7 +26,7 @@ const design = Group(
   );
 ```
 
-![Image](getNot.md.0.png)
+![Image](getNot.md.design_1.png)
 
 const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack().in();
 
@@ -37,7 +37,7 @@ design
   .note("design.getNot('color:blue') discards the Arc, but not the Triangle.");
 ```
 
-![Image](getNot.md.1.png)
+![Image](getNot.md.$2.png)
 
 design.getNot('color:blue') discards the Arc, but not the Triangle.
 
@@ -48,7 +48,7 @@ design
   .note("design.get('triangle') discards the triangle");
 ```
 
-![Image](getNot.md.2.png)
+![Image](getNot.md.$3.png)
 
 design.get('triangle') discards the triangle
 
@@ -59,4 +59,4 @@ design
   .note('design.get(' * ') discards all items');
 ```
 
-![Image](getNot.md.3.png)
+![Image](getNot.md.$4.png)

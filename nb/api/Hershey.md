@@ -10,6 +10,6 @@ This is a very simple font that can render ascii as line segments.
 Hershey('Hello', 12).view().note("Hershey('Hello', 12)");
 ```
 
-![Image](Hershey.md.0.png)
+![Image](Hershey.md.$2.png)
 
 Hershey('Hello', 12)

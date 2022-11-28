@@ -17,6 +17,6 @@ Edges([
   );
 ```
 
-![Image](Edges.md.0.png)
+![Image](Edges.md.$2.png)
 
 Edges([[[0, 0, 0], Point(1, 0, 0)], [Point(1, 0, 0), [1, 1, 0]]]) converts coordinates.

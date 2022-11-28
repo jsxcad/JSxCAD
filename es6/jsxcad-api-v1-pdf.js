@@ -99,7 +99,6 @@ const preparePdf = async (shape, name, op = (s) => s, options = {}) => {
 Shape.registerMethod('pdf',
   (...args) =>
   async (shape) => {
-    console.log(`QQ/pdf/shape: ${JSON.stringify(shape)}`);
     const { value: name, func: op, object: options } = Shape.destructure(args);
     await preparePdf(shape, name, op, options);
     return shape;

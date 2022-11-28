@@ -15,7 +15,7 @@ Box(5, 5, 5)
   .note('Box(5, 5, 5).faces().n(5, 2) selects two faces of the box');
 ```
 
-![Image](faces.md.0.png)
+![Image](faces.md.$2.png)
 
 Box(5, 5, 5).faces().n(5, 2) selects two faces of the box
 
@@ -27,7 +27,7 @@ Box(5, 5, 5)
   .note('Box(5, 5, 5).faces().each(cut(inset(1))) cuts a hole in each face');
 ```
 
-![Image](faces.md.1.png)
+![Image](faces.md.$3.png)
 
 Box(5, 5, 5).faces().each(cut(inset(1))) cuts a hole in each face
 
@@ -39,6 +39,6 @@ Box(5, 5, 5)
   .note('Box(5, 5, 5).faces().each(e(1)) extrudes each face along its normal');
 ```
 
-![Image](faces.md.2.png)
+![Image](faces.md.$4.png)
 
 Box(5, 5, 5).faces().each(e(1)) extrudes each face along its normal

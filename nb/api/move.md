@@ -12,7 +12,7 @@ See: [moveAlong](../../nb/api/moveAlong.md)
 Box().move(0, 1, 0).view().note('Box().move(0, 1, 0) moves one along y.');
 ```
 
-![Image](move.md.0.png)
+![Image](move.md.$2.png)
 
 Box().move(0, 1, 0) moves one along y.
 
@@ -23,6 +23,6 @@ Box()
   .note('Box().move(Point(1, 0, 0)) moves one along x');
 ```
 
-![Image](move.md.1.png)
+![Image](move.md.$3.png)
 
 Box().move(Point(1, 0, 0)) moves one along x

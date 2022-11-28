@@ -3,8 +3,10 @@ import { computeNormal } from '@jsxcad/geometry';
 
 export const normal = Shape.registerMethod(
   'normal',
-  () => async (shape) =>
-    Shape.fromGeometry(computeNormal(await shape.toGeometry()))
+  () => async (shape) => {
+    const result = Shape.fromGeometry(computeNormal(await shape.toGeometry()))
+    return result;
+  }
 );
 
 export default normal;

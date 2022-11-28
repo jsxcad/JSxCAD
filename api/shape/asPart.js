@@ -4,9 +4,9 @@ import { taggedItem } from '@jsxcad/geometry';
 // Constructs an item, as a part, from the designator.
 export const asPart = Shape.registerMethod(
   'asPart',
-  (partName) => (shape) =>
+  (partName) => async (shape) =>
     Shape.fromGeometry(
-      taggedItem({ tags: [`part:${partName}`] }, shape.toGeometry())
+      taggedItem({ tags: [`part:${partName}`] }, await shape.toGeometry())
     )
 );
 

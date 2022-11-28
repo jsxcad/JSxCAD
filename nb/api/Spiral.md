@@ -16,40 +16,38 @@ Spiral({ by: 1 / 32 })
   .note('Spiral({ by: 1 / 32 })');
 ```
 
-![Image](Spiral.md.0.png)
+![Image](Spiral.md.$2.png)
 
 Spiral({ by: 1 / 32 })
 
 ```JavaScript
 Spiral(
   (t) =>
-    Arc(0.5)
-      .hasAngle(0 / 4, 2 / 4)
+    Arc(0.5, { start: 0 / 4, end: 2 / 4 })
       .x(t),
   { from: 1 + 2 / 16, by: 1 / 16, to: 5 }
 )
   .view()
   .note(
-    'Spiral((t) => Arc(0.5).hasAngle(0 / 4, 2 / 4).x(t), { from: 1 + 2 / 16, by: 1 / 16, to: 5 })'
+    'Spiral((t) => Arc(0.5, { start: 0 / 4, end: 2 / 4}).x(t), { from: 1 + 2 / 16, by: 1 / 16, to: 5 })'
   );
 ```
 
-![Image](Spiral.md.1.png)
+![Image](Spiral.md.$3.png)
 
-Spiral((t) => Arc(0.5).hasAngle(0 / 4, 2 / 4).x(t), { from: 1 + 2 / 16, by: 1 / 16, to: 5 })
+Spiral((t) => Arc(0.5, { start: 0 / 4, end: 2 / 4}).x(t), { from: 1 + 2 / 16, by: 1 / 16, to: 5 })
 
 ```JavaScript
 Spiral(
   (t) =>
-    Arc(3)
-      .hasAngle(0 / 4, 2 / 4)
+    Arc(3, { end: 2 / 4 })
       .x(5),
   { by: 1 / 16 }
 )
   .view()
-  .note('Spiral((t) => Arc(3).hasAngle(0 / 4, 2 / 4).x(5), { by: 1 / 16 })');
+  .note('Spiral((t) => Arc(3, { end: 2 / 4 }).x(5), { by: 1 / 16 })');
 ```
 
-![Image](Spiral.md.2.png)
+![Image](Spiral.md.$4.png)
 
-Spiral((t) => Arc(3).hasAngle(0 / 4, 2 / 4).x(5), { by: 1 / 16 })
+Spiral((t) => Arc(3, { end: 2 / 4 }).x(5), { by: 1 / 16 })

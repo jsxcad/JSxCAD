@@ -13,7 +13,7 @@ const tileWidth = 64 * mm;
 Each tile is 64mm
 
 ```JavaScript
-const curve = Line(laneWidth / -2, laneWidth / 2)
+const curve = await Line(laneWidth / -2, laneWidth / 2)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)
@@ -23,7 +23,7 @@ const curve = Line(laneWidth / -2, laneWidth / 2)
 ```
 
 ```JavaScript
-const tightCurve = Line(laneWidth / -2, laneWidth / 2)
+const tightCurve = await Line(laneWidth / -2, laneWidth / 2)
   .x(tileWidth / 4)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -4)
@@ -33,7 +33,7 @@ const tightCurve = Line(laneWidth / -2, laneWidth / 2)
 ```
 
 ```JavaScript
-const doubleLaneCurve = Line(-laneWidth, laneWidth)
+const doubleLaneCurve = await Line(-laneWidth, laneWidth)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)
@@ -43,7 +43,7 @@ const doubleLaneCurve = Line(-laneWidth, laneWidth)
 ```
 
 ```JavaScript
-const doubleLaneCurveMarked = doubleLaneCurve.fitTo(
+const doubleLaneCurveMarked = await doubleLaneCurve.fitTo(
   Box(0.2, 0.4)
     .x(tileWidth / 2)
     .color('white')
@@ -55,27 +55,27 @@ const doubleLaneCurveMarked = doubleLaneCurve.fitTo(
 ```
 
 ```JavaScript
-const tile = Box(tileWidth)
+const tile = await Box(tileWidth)
   .color('white')
   .tag('pavement')
   .and(outline().color('black'));
 ```
 
 ```JavaScript
-const lane = Box(laneWidth, [laneWidth / -2, tileWidth / 2])
+const lane = await Box(laneWidth, [laneWidth / -2, tileWidth / 2])
   .color('black')
   .tag('road_surface');
 ```
 
 ```JavaScript
-const doubleLane = lane
+const doubleLane = await lane
   .x(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
 ```
 
 ```JavaScript
-const doubleLaneMarked = doubleLane.fitTo(
+const doubleLaneMarked = await doubleLane.fitTo(
   Box(0.2, 0.4)
     .color('white')
     .tag('road_marking')
@@ -84,49 +84,49 @@ const doubleLaneMarked = doubleLane.fitTo(
 ```
 
 ```JavaScript
-const roadEndTile = tile.fitTo(lane.rz(0 / 4)).as('road end');
+const roadEndTile = await tile.fitTo(lane.rz(0 / 4)).as('road end');
 ```
 
 ```JavaScript
-const doubleLaneRoadEndTile = tile
+const doubleLaneRoadEndTile = await tile
   .fitTo(doubleLaneMarked.rz(0 / 4))
   .as('double lane road end');
 ```
 
 ```JavaScript
-const curvedRoadTile = tile.fitTo(curve).as('curved road');
+const curvedRoadTile = await tile.fitTo(curve).as('curved road');
 ```
 
 ```JavaScript
-const doubleLaneCurvedRoadTile = tile
+const doubleLaneCurvedRoadTile = await tile
   .fitTo(doubleLaneCurveMarked)
   .as('2 lane curved road');
 ```
 
 ```JavaScript
-const roadCornerTile = tile.fitTo(lane.rz(0 / 4, 1 / 4)).as('road corner');
+const roadCornerTile = await tile.fitTo(lane.rz(0 / 4, 1 / 4)).as('road corner');
 ```
 
 ```JavaScript
-const threeWayIntersectionTile = tile
+const threeWayIntersectionTile = await tile
   .fitTo(lane.rz(0 / 4, 1 / 4, 2 / 4))
   .as('3 way intersection');
 ```
 
 ```JavaScript
-const curvedThreeWayIntersectionTile = tile
+const curvedThreeWayIntersectionTile = await tile
   .fitTo(curve.rz(0 / 4, 1 / 4), lane.rz(1 / 4, 3 / 4))
   .as('curved 3 way intersection');
 ```
 
 ```JavaScript
-const fourWayIntersectionTile = tile
+const fourWayIntersectionTile = await tile
   .fitTo(lane.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4))
   .as('4 way intersection');
 ```
 
 ```JavaScript
-const curvedFourWayIntersectionTile = tile
+const curvedFourWayIntersectionTile = await tile
   .fitTo(
     curve.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
     lane.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4)
@@ -135,7 +135,7 @@ const curvedFourWayIntersectionTile = tile
 ```
 
 ```JavaScript
-const doubleLaneCurvedFourWayIntersectionTile = tile
+const doubleLaneCurvedFourWayIntersectionTile = await tile
   .fitTo(
     doubleLaneCurve.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
     doubleLane.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4)
@@ -144,17 +144,17 @@ const doubleLaneCurvedFourWayIntersectionTile = tile
 ```
 
 ```JavaScript
-const roadTile = tile.fitTo(lane.rz(0 / 4, 2 / 4)).as('road');
+const roadTile = await tile.fitTo(lane.rz(0 / 4, 2 / 4)).as('road');
 ```
 
 ```JavaScript
-const doubleLaneRoadTile = tile
+const doubleLaneRoadTile = await tile
   .fitTo(doubleLaneMarked.rz(0 / 4, 2 / 4))
   .as('double lane road');
 ```
 
 ```JavaScript
-const doubleLaneCurvedThreeWayIntersectionTile = tile
+const doubleLaneCurvedThreeWayIntersectionTile = await tile
   .fitTo(doubleLaneCurve.rz(0 / 4, 1 / 4).join(doubleLane.rz(1 / 4, 3 / 4)))
   .fitTo(
     Box(0.2, 0.4)
@@ -169,7 +169,7 @@ const doubleLaneCurvedThreeWayIntersectionTile = tile
 ```
 
 ```JavaScript
-const doubleToSingleLaneCurvedThreeWayIntersectionTile = tile
+const doubleToSingleLaneCurvedThreeWayIntersectionTile = await tile
   .fitTo(
     curve
       .y(tileWidth / -2)
@@ -183,7 +183,7 @@ const doubleToSingleLaneCurvedThreeWayIntersectionTile = tile
 ```
 
 ```JavaScript
-const doubleToSingleLaneCurvedFourWayIntersectionTile = tile
+const doubleToSingleLaneCurvedFourWayIntersectionTile = await tile
   .fitTo(
     curve
       .y(tileWidth / -2)
@@ -198,29 +198,31 @@ const doubleToSingleLaneCurvedFourWayIntersectionTile = tile
 ```
 
 ```JavaScript
-const extrudeTile = () => (shape) =>
-  shape
+const extrudeTile = () => async (shape) => {
+  console.log(`QQ/extrudeTile/shape: ${JSON.stringify(shape)}`);
+  const result = await shape
     .on(getAll('user:road_marking'), ez(1.2 * mm))
     .on(getAll('user:road_surface'), ez(1 * mm))
     .on(getAll('user:pavement'), ez(2 * mm));
+  console.log(`QQ/extrudeTile/result: ${JSON.stringify(result)}`);
+  return result;
+}
 ```
 
 ```JavaScript
-Group(roadTile, curvedRoadTile)
+await Group(roadTile, curvedRoadTile)
   .op(extrudeTile())
   .stl('3yd tiles', page('individual'));
 ```
 
-![Image](road.md.0.png)
-
 [3yd tiles_1.stl](road.3yd%20tiles_1.stl)
 
-![Image](road.md.1.png)
+![Image](road.md.$2_3yd_tiles.png)
 
 [3yd tiles_3.stl](road.3yd%20tiles_3.stl)
 
 ```JavaScript
-Group(
+await Group(
   roadTile.copy(1),
   doubleLaneRoadTile.copy(1),
   roadEndTile.copy(1),
@@ -240,54 +242,52 @@ Group(
   .stl('3d road tile', op(extrudeTile()).page('individual'));
 ```
 
-![Image](road.md.2.png)
+![Image](road.md.$3_2d_road_tile_0.pdf.png)
 
 [2d road tile_0.pdf](road.2d%20road%20tile_0.pdf)
 
-![Image](road.md.3.png)
-
 [3d road tile_1.stl](road.3d%20road%20tile_1.stl)
 
-![Image](road.md.4.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_3.stl](road.3d%20road%20tile_3.stl)
 
-![Image](road.md.5.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_5.stl](road.3d%20road%20tile_5.stl)
 
-![Image](road.md.6.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_7.stl](road.3d%20road%20tile_7.stl)
 
-![Image](road.md.7.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_9.stl](road.3d%20road%20tile_9.stl)
 
-![Image](road.md.8.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_11.stl](road.3d%20road%20tile_11.stl)
 
-![Image](road.md.9.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_13.stl](road.3d%20road%20tile_13.stl)
 
-![Image](road.md.10.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_15.stl](road.3d%20road%20tile_15.stl)
 
-![Image](road.md.11.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_17.stl](road.3d%20road%20tile_17.stl)
 
-![Image](road.md.12.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_19.stl](road.3d%20road%20tile_19.stl)
 
-![Image](road.md.13.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_21.stl](road.3d%20road%20tile_21.stl)
 
-![Image](road.md.14.png)
+![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_23.stl](road.3d%20road%20tile_23.stl)

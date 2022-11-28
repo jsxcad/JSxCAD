@@ -10,12 +10,13 @@ const Z = 2;
 export const sort = Shape.registerMethod(
   'sort',
   (spec = 'z<y<x<') =>
-    (shape) => {
-      let leafs = getLeafs(shape.toGeometry()).map((leaf) => {
+    async (shape) => {
+      let leafs = [];
+      for (const leaf of getLeafs(await shape.toGeometry())) {
         const [min, max] = measureBoundingBox(leaf);
-        const shape = Shape.fromGeometry(leaf);
-        return { min, max, shape };
-      });
+        const shape = await Shape.fromGeometry(leaf);
+        leafs.push({ min, max, shape });
+      }
       const ops = [];
       while (spec) {
         const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);

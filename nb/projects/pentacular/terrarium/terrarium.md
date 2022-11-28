@@ -149,7 +149,7 @@ const makeTerrarium = () => (shape) =>
 This is a preview of the assembled 50x50x50mm terrarium formed from 3mm acrylic with a 5mm hinge length and a 20mm diameter hole in the top with matching plug, cut with a 0.09mm laser beam.
 
 ```JavaScript
-const terrarium = Terrarium(
+const terrarium = await Terrarium(
   length,
   width,
   height,
@@ -179,9 +179,9 @@ const terrarium = Terrarium(
   );
 ```
 
-![Image](terrarium.md.0.png)
+![Image](terrarium.md.terrarium_1.png)
 
-![Image](terrarium.md.1.png)
+![Image](terrarium.md.terrarium_2.png)
 
 ### Instructions
 
@@ -194,7 +194,7 @@ The panels should have a snug fit, so that the assembly is solid without requiri
 The lid should have a snug fit internally, but a loose connection to the top panel so that it can be easily removed.
 
 ```JavaScript
-terrarium
+await terrarium
   .z(-height)
   .note('### Laser cut profiles')
   .op(makeTerrarium(), makeLid());
@@ -206,29 +206,89 @@ terrarium
 
 These are the profiles you'll need to cut out to assemble the terrarium.
 
-![Image](terrarium.md.2.png)
+![Image](terrarium.md.$7_faces_0.pdf.png)
 
 [faces_0.pdf](terrarium.faces_0.pdf)
 
-![Image](terrarium.md.3.png)
+![Image](terrarium.md.$7_faces_1.pdf.png)
 
 [faces_1.pdf](terrarium.faces_1.pdf)
 
-![Image](terrarium.md.4.png)
+![Image](terrarium.md.$7_faces_2.pdf.png)
 
 [faces_2.pdf](terrarium.faces_2.pdf)
 
-![Image](terrarium.md.5.png)
+![Image](terrarium.md.$7_faces_3.pdf.png)
 
 [faces_3.pdf](terrarium.faces_3.pdf)
 
-![Image](terrarium.md.6.png)
+![Image](terrarium.md.$7_faces_4.pdf.png)
 
 [faces_4.pdf](terrarium.faces_4.pdf)
 
-![Image](terrarium.md.7.png)
+![Image](terrarium.md.$7_faces_5.pdf.png)
 
 [faces_5.pdf](terrarium.faces_5.pdf)
+
+![Image](terrarium.md.$7_faces_6.pdf.png)
+
+[faces_6.pdf](terrarium.faces_6.pdf)
+
+![Image](terrarium.md.$7_faces_7.pdf.png)
+
+[faces_7.pdf](terrarium.faces_7.pdf)
+
+![Image](terrarium.md.$7_faces_8.pdf.png)
+
+[faces_8.pdf](terrarium.faces_8.pdf)
+
+![Image](terrarium.md.$7_faces_9.pdf.png)
+
+[faces_9.pdf](terrarium.faces_9.pdf)
+
+![Image](terrarium.md.$7_faces_10.pdf.png)
+
+[faces_10.pdf](terrarium.faces_10.pdf)
+
+![Image](terrarium.md.$7_faces_11.pdf.png)
+
+[faces_11.pdf](terrarium.faces_11.pdf)
+
+![Image](terrarium.md.$7_faces_12.pdf.png)
+
+[faces_12.pdf](terrarium.faces_12.pdf)
+
+![Image](terrarium.md.$7_faces_13.pdf.png)
+
+[faces_13.pdf](terrarium.faces_13.pdf)
+
+![Image](terrarium.md.$7_faces_14.pdf.png)
+
+[faces_14.pdf](terrarium.faces_14.pdf)
+
+![Image](terrarium.md.$7_faces_15.pdf.png)
+
+[faces_15.pdf](terrarium.faces_15.pdf)
+
+![Image](terrarium.md.$7_faces_16.pdf.png)
+
+[faces_16.pdf](terrarium.faces_16.pdf)
+
+![Image](terrarium.md.$7_faces_17.pdf.png)
+
+[faces_17.pdf](terrarium.faces_17.pdf)
+
+![Image](terrarium.md.$7_faces_18.pdf.png)
+
+[faces_18.pdf](terrarium.faces_18.pdf)
+
+![Image](terrarium.md.$7_faces_19.pdf.png)
+
+[faces_19.pdf](terrarium.faces_19.pdf)
+
+![Image](terrarium.md.$7_faces_20.pdf.png)
+
+[faces_20.pdf](terrarium.faces_20.pdf)
 
 Fit the profiles together to form a box with the hole on the top.
 
@@ -236,16 +296,12 @@ Fit the profiles together to form a box with the hole on the top.
 
 These profiles assemble to form the lid
 
-![Image](terrarium.md.8.png)
+![Image](terrarium.md.$7_lid_base_0.pdf.png)
 
 [lid_base_0.pdf](terrarium.lid_base_0.pdf)
 
-![Image](terrarium.md.9.png)
+![Image](terrarium.md.$7_lid_top_0.pdf.png)
 
 [lid_top_0.pdf](terrarium.lid_top_0.pdf)
-
-![Image](terrarium.md.10.png)
-
-[lid_pin_0.pdf](terrarium.lid_pin_0.pdf)
 
 Stack the larger disc on the smaller and then push the rectangular pin through to connect them.

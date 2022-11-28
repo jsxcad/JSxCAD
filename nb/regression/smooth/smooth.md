@@ -1,5 +1,5 @@
 ```JavaScript
-const fused = Box(20, 20, 20)
+const fused = await Box(20, 20, 20)
   .move([0, 0], [3, 4, 6])
   .cut(Box(10, 10, 100))
   .fuse()
@@ -7,30 +7,30 @@ const fused = Box(20, 20, 20)
   .note('fused');
 ```
 
-![Image](smooth.md.0.png)
+![Image](smooth.md.fused_1.png)
 
 fused
 
 ```JavaScript
-const remeshed = fused.remesh().view(1, 'wireframe').note('remeshed');
+const remeshed = await fused.remesh().view(1, 'wireframe').note('remeshed');
 ```
 
-![Image](smooth.md.1.png)
+![Image](smooth.md.remeshed_1.png)
 
 remeshed
 
 ```JavaScript
-const smoothed = remeshed.smooth().view(1).note('smoothed');
+const smoothed = await remeshed.smooth().view(1).note('smoothed');
 ```
 
-![Image](smooth.md.2.png)
+![Image](smooth.md.smoothed_1.png)
 
 smoothed
 
 ```JavaScript
-const simplified = smoothed.simplify().view(1).note('simplified');
+const simplified = await smoothed.simplify().view(1).note('simplified');
 ```
 
-![Image](smooth.md.3.png)
+![Image](smooth.md.simplified_1.png)
 
 simplified

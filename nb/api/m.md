@@ -18,6 +18,6 @@ Box(5)
   );
 ```
 
-![Image](m.md.0.png)
+![Image](m.md.$2.png)
 
 Box(5).ry(7 / 8).and(m(1, 2, 3, 4)) adds the box moved along its normal by 1, 2, 3, and 4 mm.

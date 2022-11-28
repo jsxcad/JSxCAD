@@ -12,7 +12,7 @@ Hull(Point(1, 2, 3), Line(5, -2))
   .note('Hull(Point(1, 2, 3), Line(5, -2)) produces a single face.');
 ```
 
-![Image](Hull.md.0.png)
+![Image](Hull.md.$2.png)
 
 Hull(Point(1, 2, 3), Line(5, -2)) produces a single face.
 
@@ -22,6 +22,6 @@ Hull(Point(1, 2, 3), Line(5, -2), Arc(4))
   .note('Hull(Point(1, 2, 3), Line(5, -2), Arc(4)) produces a solid.');
 ```
 
-![Image](Hull.md.1.png)
+![Image](Hull.md.$3.png)
 
 Hull(Point(1, 2, 3), Line(5, -2), Arc(4)) produces a solid.

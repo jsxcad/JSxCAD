@@ -24,14 +24,14 @@ Box(5, 5, 5)
   .md("drop(getNot('color:yellow')) removes the non-yellow shapes.");
 ```
 
-![Image](drop.md.0.png)
+![Image](drop.md.$2_1.png)
 
 Box(5, 5, 5).color('red').and(Orb(4).color('green').x(4))
 
-![Image](drop.md.1.png)
+![Image](drop.md.$2_2.png)
 
 drop(get('color:red')) removes the red shapes.
 
-![Image](drop.md.2.png)
+![Image](drop.md.$2_3.png)
 
 drop(getNot('color:yellow')) removes the non-yellow shapes.

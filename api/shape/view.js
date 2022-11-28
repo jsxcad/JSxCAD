@@ -55,7 +55,8 @@ export const baseView =
     }
     const { id, path, nth } = sourceLocation;
     if (viewId) {
-      viewId = `${id}_${viewId}`;
+      // We can't put spaces into viewId since that would break dom classname requirements.
+      viewId = `${id}_${String(viewId).replace(/ /g, '_')}`;
     } else if (nth) {
       viewId = `${id}_${nth}`;
     } else {

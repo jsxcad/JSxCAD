@@ -20,6 +20,6 @@ Group(Box().color('red'), Triangle().outline(), Arc().points())
   );
 ```
 
-![Image](Group.md.0.png)
+![Image](Group.md.$2.png)
 
 Group(Box().color('red'), Triangle().outline(), Arc().points()).view() produces a group of different types of geometry.

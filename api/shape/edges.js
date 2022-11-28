@@ -19,7 +19,7 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
-export const edges = Shape.registerMethod('edges', (...args) => (shape) => {
+export const edges = Shape.registerMethod('edges', (...args) => async (shape) => {
   const { shapesAndFunctions, object: options = {} } = destructure(args);
   const { selections = [] } = options;
   let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
@@ -29,11 +29,11 @@ export const edges = Shape.registerMethod('edges', (...args) => (shape) => {
   }
   const edges = [];
   eachFaceEdges(
-    Shape.toShape(shape, shape).toGeometry(),
-    shape.toShapes(selections).map((selection) => selection.toGeometry()),
+    await shape.toGeometry(),
+    await shape.toShapesGeometries(selections),
     (faceGeometry, edgeGeometry) => {
       if (edgeGeometry) {
-        edges.push(edgesOp(Shape.fromGeometry(edgeGeometry)));
+        edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
       }
     }
   );

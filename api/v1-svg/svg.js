@@ -14,9 +14,7 @@ export const prepareSvg = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  const pages = await ensurePages(op(shape));
-  console.log(`QQ/prepareSvg/ensurePages: ${JSON.stringify(pages)}`);
-  for (const entry of pages) {
+  for (const entry of await ensurePages(op(shape))) {
     const svgPath = `download/svg/${path}/${generateUniqueId()}`;
     await write(svgPath, await toSvg(entry, options));
     const filename = `${name}_${index++}.svg`;

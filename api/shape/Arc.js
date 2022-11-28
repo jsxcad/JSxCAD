@@ -10,6 +10,9 @@ import Shape from './Shape.js';
 import Spiral from './Spiral.js';
 import { destructure } from './destructure.js';
 
+const toRadiusFromApothem = (apothem, sides = 32) =>
+  apothem / Math.cos(Math.PI / sides);
+
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -107,7 +110,13 @@ const ArcOp =
   async (...args) => {
     const { values, object: options } = destructure(args);
     let [x, y, z] = values;
-    const { radius, start, end, sides, zag } = options;
+    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
+    if (apothem !== undefined) {
+      radius = toRadiusFromApothem(apothem, sides) / 2;
+    }
+    if (diameter !== undefined) {
+      x = diameter;
+    }
     if (radius !== undefined) {
       x = radius * 2;
     }

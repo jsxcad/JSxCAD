@@ -12,7 +12,7 @@ Produces an axis-aligned bounding box dilated by the specified margin.
 Orb(5).and(bb(0).material('glass')).view().md('A minimal bounding box.');
 ```
 
-![Image](bb.md.0.png)
+![Image](bb.md.$2.png)
 
 A minimal bounding box.
 
@@ -23,6 +23,6 @@ Orb(5)
   .md('A bounding box with a margin of 1.');
 ```
 
-![Image](bb.md.1.png)
+![Image](bb.md.$3.png)
 
 A bounding box with a margin of 1.

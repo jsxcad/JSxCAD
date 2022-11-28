@@ -1,11 +1,11 @@
-import readCollada from './readCollada.js';
-import readSvg from './readSvg.js';
+import ThreejsCollada from './readCollada.js';
+import ThreejsSvg from './readSvg.js';
 
 const api = {
-  readCollada,
-  readSvg,
+  ThreejsCollada,
+  ThreejsSvg,
 };
 
-export { readCollada, readSvg };
+export { ThreejsCollada, ThreejsSvg };
 
 export default api;

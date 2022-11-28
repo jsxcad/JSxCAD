@@ -53,19 +53,23 @@ const build = async (...args) => {
   watchLog(logWatcher);
   try {
     const notebooks = [];
-    const walk = async (directory) => {
-      for (const entry of await fs.promises.readdir(directory, {
+    const walk = async (current) => {
+      if (current.endsWith('.nb')) {
+        notebooks.push(current.substring(0, current.length - 3));
+        return;
+      }
+      for (const entry of await fs.promises.readdir(current, {
         withFileTypes: true,
       })) {
         if (['node_modules', 'jsxcad'].includes(entry.name)) {
           continue;
         }
-        const filepath = makePosixPath(path.join(directory, entry.name));
+        const filepath = makePosixPath(path.join(current, entry.name));
         if (entry.isDirectory()) {
           await walk(filepath);
         } else if (entry.isFile()) {
           if (filepath.endsWith('.nb')) {
-            notebooks.push(filepath.substring(0, filepath.length - 3));
+            await walk(filepath);
           }
         }
       }

@@ -22,10 +22,10 @@ Box(10)
   .md("as('plate') means nth(0) is the whole item.");
 ```
 
-![Image](as.md.0.png)
+![Image](as.md.$2_1.png)
 
 Given Box(10).and(Arc(2, 2, [0, 2])) n(0) is the box.
 
-![Image](as.md.1.png)
+![Image](as.md.$2_2.png)
 
 as('plate') means nth(0) is the whole item.

@@ -9,7 +9,7 @@ export const mask = Shape.registerMethod(
       const shapes = [];
       for (const arg of args) {
         const s = await shape.toShape(arg);
-        shapes.push(s.void());
+        shapes.push(await s.void());
       }
       return Group(
         ...shapes,

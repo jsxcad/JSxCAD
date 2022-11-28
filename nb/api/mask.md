@@ -23,6 +23,6 @@ Arc(4)
   );
 ```
 
-![Image](mask.md.0.png)
+![Image](mask.md.$2.png)
 
 Arc(4).ez(10).mask(Hexagon(6).ez(10)) masks a cylinder with a hexagonal prism.

@@ -44,9 +44,9 @@ Assembly(
   .view(2, 'top');
 ```
 
-![Image](index.md.0.png)
+![Image](index.md.$2_1.png)
 
-![Image](index.md.1.png)
+![Image](index.md.$2_2.png)
 
 Clicking on a view maximizes and allows rotation and animation; use Escape to return.
 

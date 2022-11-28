@@ -10,11 +10,9 @@ export const socketBoard32x8x3_2 = await SocketBoard(4, 1, 3.2)
   .md('SocketBoard 32x32x3.2')
   .view();
 
-export const axleHole = await Arc()
-  .hasApothem(5.2 / 2)
+export const axleHole = await Arc({ apothem: 5.2 / 2 })
   .add(
-    Arc()
-      .hasApothem(4 / 2)
+    Arc({ apothem: 4 / 2 })
       .y(1.5 / 2)
   )
   .ez(4.00001, -4.00001)
@@ -59,11 +57,9 @@ export const AxleProfile = () => {
   const bar = Group(
     line.y(width / 2),
     line.y(width / -2),
-    Arc(diameter)
-      .hasAngle(1 / 4)
+    Arc(diameter, { start: 1 / 4 })
       .rz(50 / 360),
-    Arc(diameter)
-      .hasAngle(1 / 4)
+    Arc(diameter, { start: 1 / 4 })
       .rz((50 + 180) / 360)
   ).fill();
   return bar.add(bar.rz(90 / 360));
@@ -119,16 +115,16 @@ const technicConnector = await Arc(4.8)
       .y(8 - 0.2)
   )
   .cut(
-    YZ()
-      .Box(10, 6, 0.5)
+    Box(10, 6, 0.5)
+      .to(YZ())
       .y(-8 + 3)
   )
   .cut(
-    YZ()
-      .Box(10, 6, 0.5)
+    Box(10, 6, 0.5)
+      .to(YZ())
       .y(8 - 3)
   )
-  .clip(XZ().Box(4.5, 6.2, 16))
+  .clip(Box(4.5, 6.2, 16).to(XZ()))
   .material('plastic')
   .stl('technicConnector');
 
@@ -147,16 +143,16 @@ const halfTechnicConnector = await Arc(4.8)
       .y(8 - 0.2)
   )
   .cut(
-    YZ()
-      .Box(10, 6, 0.5)
+    Box(10, 6, 0.5)
+      .to(YZ())
       .y(-8 + 3)
   )
   .cut(
-    YZ()
-      .Box(10, 6, 0.5)
+    Box(10, 6, 0.5)
+      .to(YZ())
       .y(8 - 3)
   )
-  .clip(XZ().Box(4.5, 6.2, [0, 8]))
+  .clip(Box(4.5, 6.2, [0, 8]).to(XZ()))
   .material('plastic')
   .stl('halfTechnicConnector');
 

@@ -26,6 +26,8 @@ await Box(5).by(align('x>y>')).gridView();
 await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
 ```
 
+![Image](shape.md.$5.png)
+
 ```JavaScript
 await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView();
 ```
@@ -86,6 +88,8 @@ await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView();
 await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView();
 ```
 
+![Image](shape.md.$15.png)
+
 ```JavaScript
 await Box(10).material('copper').gridView();
 ```
@@ -119,6 +123,8 @@ await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
 ```JavaScript
 await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 ```
+
+![Image](shape.md.$21.png)
 
 ```JavaScript
 await Box(5).offset(1).gridView();
@@ -356,8 +362,6 @@ await Triangle(14).svg('triangle');
 ```
 
 [triangle_0.svg](shape.triangle_0.svg)
-
-![Image](shape.md.$51_31fbed8c8MR+fhAbba4aZ064UPXi7Q3Zg5GojB71te3XnHpoEwg=.png)
 
 ```JavaScript
 await Box(10)

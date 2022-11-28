@@ -10,7 +10,8 @@ export const toCoordinate = Shape.registerMethod(
       if (Shape.isShape(x)) {
         const points = await x.toPoints();
         if (points.length >= 1) {
-          return points[0];
+          const point = points[0];
+          return point;
         } else {
           throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
         }

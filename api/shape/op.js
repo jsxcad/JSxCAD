@@ -7,10 +7,14 @@ export const op = Shape.registerMethod('op', (...fns) => async (shape) => {
     if (fn === undefined) {
       continue;
     }
-    if (Shape.isFunction(fn)) {
-      results.push(fn(shape));
-    } else {
+    if (Shape.isShape(fn)) {
+      // console.log(`QQ/op/value: ${fn} ${JSON.stringify(fn)} ${fn.isChain}`);
       results.push(fn);
+    } else {
+      // console.log(`QQ/op/apply: ${fn} ${JSON.stringify(fn)} ${fn.isChain}`);
+      const result = await fn(Shape.chain(shape));
+      // console.log(`QQ/op/apply/result: ${result}`);
+      results.push(result);
     }
   }
   return Group(...results);

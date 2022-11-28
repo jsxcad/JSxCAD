@@ -14,6 +14,6 @@ Polygon(Point(6).seq({ by: 1 / 8, upto: 1 }, rz))
   );
 ```
 
-![Image](Polygon.md.0.png)
+![Image](Polygon.md.$2.png)
 
 Polygon(Point(10).seq({ by: 1 / 8, upto: 1 }, rz)) produces a regular octagon.

@@ -37,28 +37,19 @@ const tab = Tab(1.5, 32 / 8);
 tab.stl('tab', ry(1 / 4));
 ```
 
-![Image](hex.md.0.png)
-
 [tab_1.stl](hex.tab_1.stl)
 
 ```JavaScript
-const hexTile = hex
+const hexTile = await hex
   .inset(0.1)
   .ez(2, -1)
   .cut(hex.eachEdge(placeTab(tab)))
-  /*
-  .cut(
-    Hexagon(32).eachEdge(
-      (e, l, o) => (s) => s.at(e.origin(), s.by(o.origin()).get('tab'))
-    )
-  )
-*/
   .fuse()
   .clean();
 ```
 
 ```JavaScript
-const square = Box(32);
+const square = await Box(32);
 ```
 
 ```JavaScript
@@ -433,8 +424,9 @@ const turnPairs = (config) => {
 ```
 
 ```JavaScript
-const Tile = (...args) =>
-  testMode(false, () => {
+const Tile = Shape.registerShapeMethod('Tile', async (...args) =>
+  {
+  // testMode(false, () => {
     console.log(`QQ/Tile: ${JSON.stringify(args)}`);
     const [
       seed = 0,
@@ -454,7 +446,7 @@ const Tile = (...args) =>
       },
     ] = args;
     console.log(`QQ/1`);
-    const tileTerrain = {
+    const tileTerrain = await {
       meadow: Meadow,
       hill: Hill,
       mountain: Mountain,
@@ -467,7 +459,7 @@ const Tile = (...args) =>
     for (const [turn, nth] of turnSingles(trees)) {
       tile = tile.and(Forest(seed, turn, nth));
     }
-    console.log(`QQ/2`);
+    console.log(`QQ/2: ${tile}`);
 
     const peakTurns = turnList(peaks);
     if (peakTurns.length > 0) {
@@ -490,7 +482,7 @@ const Tile = (...args) =>
           .clip(hex.ez(20))
       );
     }
-    console.log(`QQ/3`);
+    console.log(`QQ/3: ${tile}`);
 
     const swampTurns = turnList(swamp);
     const swamps = [];
@@ -526,7 +518,7 @@ const Tile = (...args) =>
           .z(-0.5)
       );
     }
-    console.log(`QQ/4`);
+    console.log(`QQ/4: ${tile}`);
 
     const roads = [];
     for (const [from, to, nth] of turnPairs(road)) {
@@ -542,12 +534,12 @@ const Tile = (...args) =>
       tile = tile.and(Field(seed, turn, nth));
     }
 
-    console.log(`QQ/4a`);
+    console.log(`QQ/4a: ${tile}`);
 
     for (const [turn, nth] of turnSingles(buildings)) {
       tile = tile.and(Buildings(seed, turn, nth));
     }
-    console.log(`QQ/5`);
+    console.log(`QQ/5: ${tile}`);
 
     const tunnels = [];
     for (const [from, to, nth] of turnPairs(tunnel)) {
@@ -557,10 +549,11 @@ const Tile = (...args) =>
     if (tunnels.length > 0) {
       tile = tile.cut(...tunnels);
     }
-    console.log(`QQ/6`);
+    console.log(`QQ/6: ${tile}`);
 
     return tile.clean().fuse();
-  })();
+  // })();
+  });
 ```
 
 ### Tile Generator
@@ -625,7 +618,7 @@ const wall = control('wall', '', 'input');
 ```
 
 ```JavaScript
-Tile(seed4, {
+await Tile(seed4, {
   terrain: terrain2,
   trees: trees2,
   islands: islands3,
@@ -640,7 +633,5 @@ Tile(seed4, {
   field: field2,
 }).stl('tile');
 ```
-
-![Image](hex.md.1.png)
 
 [tile_1.stl](hex.tile_1.stl)

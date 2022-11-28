@@ -15,6 +15,6 @@ Point(1, 2, 3)
   );
 ```
 
-![Image](Point.md.0.png)
+![Image](Point.md.$2.png)
 
 Point(1, 2, 3).and((s) => Edge(Point(), s)) shows a point at [1, 2, 3].

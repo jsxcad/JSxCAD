@@ -21,6 +21,6 @@ Seq({ upto: 20 }, () => Box(), Group)
   );
 ```
 
-![Image](page.md.0.png)
+![Image](page.md.$2.png)
 
 Seq({ upto: 20 }, () => Box(), Group).page('pack') packs 20 boxes onto a page.

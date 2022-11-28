@@ -12,6 +12,6 @@ _Note: Should support ranged dimensions._
 Box(5, 1, 5).y(-5, 2, 5).view().note('Box(5, 1, 5).y(-5, 2, 5)');
 ```
 
-![Image](y.md.0.png)
+![Image](y.md.$2.png)
 
 Box(5, 1, 5).y(-5, 2, 5)

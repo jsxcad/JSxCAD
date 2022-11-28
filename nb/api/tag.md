@@ -39,7 +39,7 @@ Box()
   .note("Box().tag('a').and(Triangle().tag('b')).get('user:b')");
 ```
 
-![Image](tag.md.0.png)
+![Image](tag.md.$3.png)
 
 Box().tag('a').and(Triangle().tag('b')).get('user:b')
 
@@ -47,6 +47,6 @@ Box().tag('a').and(Triangle().tag('b')).get('user:b')
 Hexagon().tag('color:orange').view().note("Hexagon().tag('color:orange')");
 ```
 
-![Image](tag.md.1.png)
+![Image](tag.md.$4.png)
 
 Hexagon().tag('color:orange')

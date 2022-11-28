@@ -9,6 +9,6 @@ Box()
   .note('Box().noOp() just produces the box.');
 ```
 
-![Image](noOp.md.0.png)
+![Image](noOp.md.$2.png)
 
 Box().noOp() just produces the box.

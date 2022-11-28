@@ -4,7 +4,7 @@ import { destructure } from './destructure.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
-export const get = Shape.registerMethod(['get', 'g'], (...args) => (shape) => {
+export const get = Shape.registerMethod(['get', 'g'], (...args) => async (shape) => {
   const { strings: tags, func: groupOp = Group } = destructure(args);
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
@@ -27,7 +27,7 @@ export const get = Shape.registerMethod(['get', 'g'], (...args) => (shape) => {
       return descend();
     }
   };
-  const geometry = shape.toGeometry();
+  const geometry = await shape.toGeometry();
   visit(geometry, walk);
   return groupOp(...picks);
 });

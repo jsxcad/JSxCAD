@@ -16,6 +16,6 @@ Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))
   .note('Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))');
 ```
 
-![Image](Wave.md.0.png)
+![Image](Wave.md.$2.png)
 
 Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))

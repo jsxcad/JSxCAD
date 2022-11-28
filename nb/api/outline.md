@@ -11,6 +11,6 @@ Arc(3, 3, 1)
   .note('Arc(3, 3, 1).outline() shows the geometric shape.');
 ```
 
-![Image](outline.md.0.png)
+![Image](outline.md.$2.png)
 
 Arc(3, 3, 1).outline() shows the geometric shape.

@@ -6,7 +6,7 @@ const tileWidth = 64 * mm;
 
 md`Each tile is ${(tileWidth * 1000) / 160}mm`;
 
-const curve = Line(laneWidth / -2, laneWidth / 2)
+const curve = await Line(laneWidth / -2, laneWidth / 2)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)
@@ -14,7 +14,7 @@ const curve = Line(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
 
-const tightCurve = Line(laneWidth / -2, laneWidth / 2)
+const tightCurve = await Line(laneWidth / -2, laneWidth / 2)
   .x(tileWidth / 4)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -4)
@@ -22,7 +22,7 @@ const tightCurve = Line(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
 
-const doubleLaneCurve = Line(-laneWidth, laneWidth)
+const doubleLaneCurve = await Line(-laneWidth, laneWidth)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)
@@ -30,7 +30,7 @@ const doubleLaneCurve = Line(-laneWidth, laneWidth)
   .color('black')
   .tag('road_surface');
 
-const doubleLaneCurveMarked = doubleLaneCurve.fitTo(
+const doubleLaneCurveMarked = await doubleLaneCurve.fitTo(
   Box(0.2, 0.4)
     .x(tileWidth / 2)
     .color('white')
@@ -40,74 +40,74 @@ const doubleLaneCurveMarked = doubleLaneCurve.fitTo(
     .y(tileWidth / 2)
 );
 
-const tile = Box(tileWidth)
+const tile = await Box(tileWidth)
   .color('white')
   .tag('pavement')
   .and(outline().color('black'));
 
-const lane = Box(laneWidth, [laneWidth / -2, tileWidth / 2])
+const lane = await Box(laneWidth, [laneWidth / -2, tileWidth / 2])
   .color('black')
   .tag('road_surface');
 
-const doubleLane = lane
+const doubleLane = await lane
   .x(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
 
-const doubleLaneMarked = doubleLane.fitTo(
+const doubleLaneMarked = await doubleLane.fitTo(
   Box(0.2, 0.4)
     .color('white')
     .tag('road_marking')
     .seq({ from: laneWidth / -2 + 0.6, upto: tileWidth / 2 - 0.1, by: 0.8 }, y)
 );
 
-const roadEndTile = tile.fitTo(lane.rz(0 / 4)).as('road end');
+const roadEndTile = await tile.fitTo(lane.rz(0 / 4)).as('road end');
 
-const doubleLaneRoadEndTile = tile
+const doubleLaneRoadEndTile = await tile
   .fitTo(doubleLaneMarked.rz(0 / 4))
   .as('double lane road end');
 
-const curvedRoadTile = tile.fitTo(curve).as('curved road');
+const curvedRoadTile = await tile.fitTo(curve).as('curved road');
 
-const doubleLaneCurvedRoadTile = tile
+const doubleLaneCurvedRoadTile = await tile
   .fitTo(doubleLaneCurveMarked)
   .as('2 lane curved road');
 
-const roadCornerTile = tile.fitTo(lane.rz(0 / 4, 1 / 4)).as('road corner');
+const roadCornerTile = await tile.fitTo(lane.rz(0 / 4, 1 / 4)).as('road corner');
 
-const threeWayIntersectionTile = tile
+const threeWayIntersectionTile = await tile
   .fitTo(lane.rz(0 / 4, 1 / 4, 2 / 4))
   .as('3 way intersection');
 
-const curvedThreeWayIntersectionTile = tile
+const curvedThreeWayIntersectionTile = await tile
   .fitTo(curve.rz(0 / 4, 1 / 4), lane.rz(1 / 4, 3 / 4))
   .as('curved 3 way intersection');
 
-const fourWayIntersectionTile = tile
+const fourWayIntersectionTile = await tile
   .fitTo(lane.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4))
   .as('4 way intersection');
 
-const curvedFourWayIntersectionTile = tile
+const curvedFourWayIntersectionTile = await tile
   .fitTo(
     curve.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
     lane.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4)
   )
   .as('curved 4 way intersection');
 
-const doubleLaneCurvedFourWayIntersectionTile = tile
+const doubleLaneCurvedFourWayIntersectionTile = await tile
   .fitTo(
     doubleLaneCurve.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
     doubleLane.rz(0 / 4, 1 / 4, 2 / 4, 3 / 4)
   )
   .as('2 lane curved 4 way intersection');
 
-const roadTile = tile.fitTo(lane.rz(0 / 4, 2 / 4)).as('road');
+const roadTile = await tile.fitTo(lane.rz(0 / 4, 2 / 4)).as('road');
 
-const doubleLaneRoadTile = tile
+const doubleLaneRoadTile = await tile
   .fitTo(doubleLaneMarked.rz(0 / 4, 2 / 4))
   .as('double lane road');
 
-const doubleLaneCurvedThreeWayIntersectionTile = tile
+const doubleLaneCurvedThreeWayIntersectionTile = await tile
   .fitTo(doubleLaneCurve.rz(0 / 4, 1 / 4).join(doubleLane.rz(1 / 4, 3 / 4)))
   .fitTo(
     Box(0.2, 0.4)
@@ -120,7 +120,7 @@ const doubleLaneCurvedThreeWayIntersectionTile = tile
   )
   .as('2 lane 3 way curved intersection');
 
-const doubleToSingleLaneCurvedThreeWayIntersectionTile = tile
+const doubleToSingleLaneCurvedThreeWayIntersectionTile = await tile
   .fitTo(
     curve
       .y(tileWidth / -2)
@@ -132,7 +132,7 @@ const doubleToSingleLaneCurvedThreeWayIntersectionTile = tile
   )
   .as('2 to 1 lane 3 way curved intersection');
 
-const doubleToSingleLaneCurvedFourWayIntersectionTile = tile
+const doubleToSingleLaneCurvedFourWayIntersectionTile = await tile
   .fitTo(
     curve
       .y(tileWidth / -2)
@@ -145,17 +145,21 @@ const doubleToSingleLaneCurvedFourWayIntersectionTile = tile
   )
   .as('2 to 1 lane 4 way curved intersection');
 
-const extrudeTile = () => (shape) =>
-  shape
+const extrudeTile = () => async (shape) => {
+  console.log(`QQ/extrudeTile/shape: ${JSON.stringify(shape)}`);
+  const result = await shape
     .on(getAll('user:road_marking'), ez(1.2 * mm))
     .on(getAll('user:road_surface'), ez(1 * mm))
     .on(getAll('user:pavement'), ez(2 * mm));
+  console.log(`QQ/extrudeTile/result: ${JSON.stringify(result)}`);
+  return result;
+}
 
-Group(roadTile, curvedRoadTile)
+await Group(roadTile, curvedRoadTile)
   .op(extrudeTile())
   .stl('3yd tiles', page('individual'));
 
-Group(
+await Group(
   roadTile.copy(1),
   doubleLaneRoadTile.copy(1),
   roadEndTile.copy(1),

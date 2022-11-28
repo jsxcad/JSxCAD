@@ -14,8 +14,7 @@ export const prepareStl = async (shape, name, op = (s) => s, options = {}) => {
   const { path } = getSourceLocation();
   let index = 0;
   const records = [];
-  console.log(`QQ/prepareStl/shape: ${JSON.stringify(shape)}`);
-  for (const entry of await ensurePages(await op(shape))) {
+  for (const entry of await ensurePages(await op(Shape.chain(shape)))) {
     const stlPath = `download/stl/${path}/${generateUniqueId()}`;
     await write(stlPath, await toStl(entry, options));
     const filename = `${name}_${index++}.stl`;

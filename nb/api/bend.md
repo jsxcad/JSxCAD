@@ -19,6 +19,6 @@ Box(40, 1, 5)
   .note('Box(40, 1, 5).y(20).and(remesh().bend(20))');
 ```
 
-![Image](bend.md.0.png)
+![Image](bend.md.$2.png)
 
 Box(40, 1, 5).y(20).and(remesh().bend(20))

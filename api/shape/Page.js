@@ -54,9 +54,7 @@ const buildLayout = async ({
     Math.max(pageLength, margin)
   )
     .outline()
-    .and(
-      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
-    )
+    //.and(Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2))
     .color('red')
     .ghost();
   let layout = Shape.chain(
@@ -173,7 +171,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
   } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
-    const content = Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
+    const content = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
       size,
       pageMargin,
       itemMargin,
@@ -187,7 +185,7 @@ export const Page = Shape.registerShapeMethod('Page', async (...args) => {
     const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.get('pack:layout', List)) {
+      for (const layer of await content.get('pack:layout', List)) {
         plans.push(
           await buildLayout({
             layer,
@@ -256,13 +254,15 @@ export const page = Shape.registerMethod(
   'page',
   (...args) =>
     (shape) =>
-      Page(shape, ...args)
+      Page(Shape.chain(shape), ...args)
 );
 
 export default Page;
 
 export const ensurePages = async (shape, depth = 0) => {
-console.log(`QQ/ensurePages: ${JSON.stringify(shape)}`);
+  if (shape instanceof Promise) {
+    throw Error(`ensurePages/shape/promise`);
+  }
   const pages = getLayouts(await toDisplayGeometry()(shape));
   if (pages.length === 0 && depth === 0) {
     return ensurePages(await Page({ pack: false }, shape), depth + 1);

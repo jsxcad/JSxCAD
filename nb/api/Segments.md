@@ -23,6 +23,6 @@ Segments([
   .note('Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])');
 ```
 
-![Image](Segments.md.0.png)
+![Image](Segments.md.$2.png)
 
 Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])

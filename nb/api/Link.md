@@ -18,24 +18,22 @@ _Note: We should rethink Arc and Box being implicitly filled._
 Link(
   Line(5),
   Point(0, 8),
-  Arc([4, 5], [4, 5])
-    .hasAngle(0 / 4, 3 / 4)
+  Arc([4, 5], [4, 5], { start: 0 / 4, end: 3 / 4 })
     .outline()
 ).view();
 ```
 
-![Image](Link.md.0.png)
+![Image](Link.md.$2.png)
 
 ```JavaScript
 Seq(
   { by: 1 / 8, upto: 1 },
   (t) =>
-    Arc(4)
-      .hasAngle(3 / 8, 6 / 8)
+    Arc(4, { start: 3 / 8, end: 6 /8 })
       .x(5)
       .rz(t),
   Link
 ).view();
 ```
 
-![Image](Link.md.1.png)
+![Image](Link.md.$3.png)

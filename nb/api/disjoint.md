@@ -22,18 +22,18 @@ Box(10, 10, [0, -5])
   );
 ```
 
-![Image](disjoint.md.0.png)
+![Image](disjoint.md.$2_1.png)
 
 Box(10, 10, [0, -5]).and(Icosahedron(10))
 
-![Image](disjoint.md.1.png)
+![Image](disjoint.md.$2_2.png)
 
 Repacking shows the shapes aren't disjoint yet
 
-![Image](disjoint.md.2.png)
+![Image](disjoint.md.$2_3.png)
 
 disjoint() leaves the fitted pieces in place.
 
-![Image](disjoint.md.3.png)
+![Image](disjoint.md.$2_4.png)
 
 By repacking the objects we can see how disjoint() has fitted them together.

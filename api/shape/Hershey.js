@@ -1442,7 +1442,7 @@ export const toSegments = (letters) => {
     const code = letter.charCodeAt(0);
     const segments = hersheySegments[code];
     if (segments) {
-      rendered.push(Shape.fromSegments(segments).x(xOffset));
+      rendered.push(Shape.chain(Shape.fromSegments(segments)).x(xOffset));
     }
     xOffset += hersheyWidth[code] || 0;
   }

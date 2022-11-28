@@ -24,10 +24,10 @@ Box()
   .note("tint('orange')");
 ```
 
-![Image](tint.md.0.png)
+![Image](tint.md.$2_1.png)
 
 Box().op(color('white'), color('yellow'), color('green'), color('red')).pack()
 
-![Image](tint.md.1.png)
+![Image](tint.md.$2_2.png)
 
 tint('orange')

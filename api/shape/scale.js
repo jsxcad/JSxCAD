@@ -17,6 +17,15 @@ export const scale = Shape.registerMethod(
         z = 1;
       }
       const negatives = (x < 0) + (y < 0) + (z < 0);
+      if (!isFinite(x)) {
+        throw Error(`scale received non-finite x: ${x}`);
+      }
+      if (!isFinite(y)) {
+        throw Error(`scale received non-finite y: ${y}`);
+      }
+      if (!isFinite(z)) {
+        throw Error(`scale received non-finite z: ${z}`);
+      }
       if (negatives % 2) {
         // Compensate for inversion.
         return eagerTransform(fromScaleToTransform(x, y, z)).involute()(shape);

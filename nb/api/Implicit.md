@@ -20,6 +20,6 @@ Implicit((x, y, z) => x * x + y * y + z * z - 1, 2)
   );
 ```
 
-![Image](Implicit.md.0.png)
+![Image](Implicit.md.$2.png)
 
 Implicit((x, y, z) => x * x + y * y + z * z - 1, 2) produces a sphere of radius 1.

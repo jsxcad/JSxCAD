@@ -41,9 +41,7 @@ await Flat({ diameter, length: flatLength, thickness: flatThickness })
 
 await Shaft({ diameter, length, play })
   .view()
-  .note(
-    "import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
-  )
+  .note("import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';")
   .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
   .abstract();
 
