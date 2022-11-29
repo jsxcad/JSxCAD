@@ -1058,7 +1058,7 @@ const join = Shape.registerMethod(
       const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
       return Shape.fromGeometry(
         join$1(
-          shape.toGeometry(),
+          await shape.toGeometry(),
           await shape.toShapesGeometries(shapes),
           modes.includes('exact'),
           modes.includes('noVoid')
