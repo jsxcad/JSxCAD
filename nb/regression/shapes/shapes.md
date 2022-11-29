@@ -33,6 +33,8 @@ await ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .md(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 ```
 
+![Image](shapes.md.$4.png)
+
 ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 ```JavaScript

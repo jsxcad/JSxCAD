@@ -4,6 +4,8 @@ const star = await Triangle(5)
   .view();
 ```
 
+![Image](stars.md.star.png)
+
 ```JavaScript
 const r = Random();
 ```
@@ -18,3 +20,5 @@ const stars = await star
   .and(toolpath())
   .gcode('stars');
 ```
+
+[stars_0.gcode](stars.stars_0.gcode)

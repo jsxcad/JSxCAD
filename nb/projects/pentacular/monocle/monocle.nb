@@ -1,6 +1,6 @@
 const Rim = (diameter = 37, thickness = 2) =>
   Arc(diameter, { start: 1/4 })
-    .eachPoint((p) => (s) => p.Orb(thickness), ChainHull);
+    .eachPoint((p) => (s) => Orb(thickness).to(p), ChainHull);
 
 const Monocle = (
   diameter = 37,

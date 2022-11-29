@@ -1,7 +1,7 @@
 ```JavaScript
 const Rim = (diameter = 37, thickness = 2) =>
   Arc(diameter, { start: 1/4 })
-    .eachPoint((p) => (s) => p.Orb(thickness), ChainHull);
+    .eachPoint((p) => (s) => Orb(thickness).to(p), ChainHull);
 ```
 
 ```JavaScript
@@ -43,5 +43,9 @@ const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
 ```
 
 ![Image](monocle.md.monocle_37x12x2x2.png)
+
+[frame-37x12x2x2_1.stl](monocle.frame-37x12x2x2_1.stl)
+
+![Image](monocle.md.monocle_37x12x2x2_frame-37x12x2x2.png)
 
 [lens-37x12x2x2_1.stl](monocle.lens-37x12x2x2_1.stl)

@@ -16,7 +16,8 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
 );
 
 const reifyOrb = async ({ c1, c2, zag = DEFAULT_ORB_ZAG }) => {
-  const scale = computeScale(c1, c2);
+  // FIX: Check what's happening with scale.
+  const scale = computeScale(c1, c2).map((v) => v * 0.5);
   const middle = computeMiddle(c1, c2);
   const radius = Math.max(...scale);
   const tolerance = zag / radius;

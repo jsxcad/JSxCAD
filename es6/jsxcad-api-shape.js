@@ -280,7 +280,11 @@ Shape.isFunction = isFunction;
 const isArray = (value) => value instanceof Array;
 Shape.isArray = isArray;
 
-const isObject = (value) => value instanceof Object;
+const isObject = (value) =>
+  value instanceof Object &&
+  !isArray(value) &&
+  !isShape(value) &&
+  !isFunction(value);
 Shape.isObject = isObject;
 
 const isValue = (value) =>
@@ -587,6 +591,52 @@ const destructure = (
 };
 
 Shape.destructure = destructure;
+
+const destructure2 = async (shape, args, ...specs) => {
+  const output = [];
+  for (const spec of specs) {
+    const rest = [];
+    const out = [];
+    output.push(out);
+    switch (spec) {
+      case 'objects': {
+        for (const arg of args) {
+          if (Shape.isObject(arg)) {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        break;
+      }
+      case 'coordinates': {
+        for (let arg of args) {
+          if (Shape.isFunction(arg)) {
+            arg = await arg(shape);
+          }
+          if (Shape.isShape(arg)) {
+            const points = await arg.toPoints();
+            if (points.length >= 1) {
+              const point = points[0];
+              out.push(point);
+            } else {
+              throw Error(
+                `Unexpected coordinate value: ${JSON.stringify(arg)}`
+              );
+            }
+          } else if (Shape.isArray(arg)) {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        break;
+      }
+    }
+    args = rest;
+  }
+  return output;
+};
 
 const X$9 = 0;
 const Y$9 = 1;
@@ -917,10 +967,8 @@ const toCoordinate = Shape.registerMethod(
     }
 );
 
-const toCoordinateOp$4 = Shape.ops.get('toCoordinate');
-
 const Point = Shape.registerShapeMethod('Point', async (...args) =>
-  Shape.fromPoint(await toCoordinateOp$4(...args)())
+  Shape.fromPoint(await toCoordinate(...args)(null))
 );
 
 const Ref = Shape.registerShapeMethod('Ref', (...args) =>
@@ -1426,8 +1474,6 @@ const toShapesGeometries = Shape.registerMethod(
   }
 );
 
-// const toShapesGeometriesOp = Shape.ops.get('toShapesGeometries');
-
 const Group = Shape.registerShapeMethod('Group', async (...shapes) => {
   for (const item of shapes) {
     if (item instanceof Promise) {
@@ -1817,9 +1863,10 @@ const hull = Shape.registerMethod(
       Hull(...(await shape.toShapes(shapes)))
 );
 
-const Join = Shape.registerShapeMethod('Join', (...shapes) =>
-  Shape.fromGeometry(fuse$1(Group(...shapes).toGeometry()))
-);
+const Join = Shape.registerShapeMethod('Join', async (...shapes) => {
+  const group = await Group(...shapes);
+  return Shape.fromGeometry(fuse$1(await group.toGeometry()));
+});
 
 const ChainHull = Shape.registerShapeMethod('ChainHull', (...shapes) => {
   const chain = [];
@@ -6172,22 +6219,17 @@ var adaptiveBezierCurve = _function();
 
 const DEFAULT_CURVE_ZAG = 1;
 
-const reifyCurve = async (start, c1, c2, end, zag) => {
-  const p1 = await toCoordinate(start)(null);
-  const p2 = await toCoordinate(c1)(null);
-  const p3 = await toCoordinate(c2)(null);
-  const p4 = await toCoordinate(end)(null);
-  const points = adaptiveBezierCurve(p1, p2, p3, p4, 10 / zag);
-  return Link(points.map((point) => Point(point)));
-};
-
-// Shape.registerReifier('Curve', reifyCurve);
-
 const Curve = Shape.registerShapeMethod('Curve', async (...args) => {
-  const { values, objects: options } = destructure(args);
-  const [start, c1, c2, end] = values;
+  const [options, coordinates] = await destructure2(
+    null,
+    args,
+    'objects',
+    'coordinates'
+  );
+  const [start, c1, c2, end] = coordinates;
   const { zag = DEFAULT_CURVE_ZAG } = options;
-  return reifyCurve(start, c1, c2, end, zag);
+  const points = adaptiveBezierCurve(start, c1, c2, end, 10 / zag);
+  return Link(points.map((point) => Point(point)));
 });
 
 const Face = Shape.registerShapeMethod('Face', async (...points) => {
@@ -6331,7 +6373,8 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
 );
 
 const reifyOrb = async ({ c1, c2, zag = DEFAULT_ORB_ZAG }) => {
-  const scale$1 = computeScale(c1, c2);
+  // FIX: Check what's happening with scale.
+  const scale$1 = computeScale(c1, c2).map((v) => v * 0.5);
   const middle = computeMiddle(c1, c2);
   const radius = Math.max(...scale$1);
   const tolerance = zag / radius;
