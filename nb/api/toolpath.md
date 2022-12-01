@@ -22,3 +22,5 @@ Arc(4)
   .and(toolpath())
   .view(57);
 ```
+
+![Image](toolpath.md.$2_57.png)

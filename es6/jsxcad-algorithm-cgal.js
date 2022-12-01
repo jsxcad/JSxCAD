@@ -1059,9 +1059,6 @@ const withCgalGeometry = (inputs, op) => {
   try {
     return op(cgalGeometry, g);
   } catch (error) {
-    // console.log(`QQ/withCgalGeometry/inputs: ${JSON.stringify(inputs)}`);
-    // console.log(`QQ/withCgalGeometry/op: ${'' + op}`);
-    // throw Error(error);
     throw error;
   } finally {
     cgalGeometry.delete();

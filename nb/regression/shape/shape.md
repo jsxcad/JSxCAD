@@ -419,6 +419,8 @@ await Arc(4)
   .view();
 ```
 
+![Image](shape.md.$54.png)
+
 ```JavaScript
 await Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(54);
 ```

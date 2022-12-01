@@ -15,10 +15,14 @@ Join(Box(1, 2, 3), Box(3, 2, 1))
   .note('Join(Box(1, 2, 3), Box(3, 2, 1))');
 ```
 
+![Image](Join.md.$2.png)
+
 Join(Box(1, 2, 3), Box(3, 2, 1))
 
 ```JavaScript
 Join(Box(1, 2), Box(2, 1)).view().note('Join(Box(1, 2), Box(2, 1))');
 ```
+
+![Image](Join.md.$3.png)
 
 Join(Box(1, 2), Box(2, 1))

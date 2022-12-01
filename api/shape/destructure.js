@@ -66,3 +66,49 @@ export const destructure = (
 };
 
 Shape.destructure = destructure;
+
+export const destructure2 = async (shape, args, ...specs) => {
+  const output = [];
+  for (const spec of specs) {
+    const rest = [];
+    const out = [];
+    output.push(out);
+    switch (spec) {
+      case 'objects': {
+        for (const arg of args) {
+          if (Shape.isObject(arg)) {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        break;
+      }
+      case 'coordinates': {
+        for (let arg of args) {
+          if (Shape.isFunction(arg)) {
+            arg = await arg(shape);
+          }
+          if (Shape.isShape(arg)) {
+            const points = await arg.toPoints();
+            if (points.length >= 1) {
+              const point = points[0];
+              out.push(point);
+            } else {
+              throw Error(
+                `Unexpected coordinate value: ${JSON.stringify(arg)}`
+              );
+            }
+          } else if (Shape.isArray(arg)) {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        break;
+      }
+    }
+    args = rest;
+  }
+  return output;
+};

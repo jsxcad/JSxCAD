@@ -281,7 +281,11 @@ Shape.isFunction = isFunction;
 export const isArray = (value) => value instanceof Array;
 Shape.isArray = isArray;
 
-export const isObject = (value) => value instanceof Object;
+export const isObject = (value) =>
+  value instanceof Object &&
+  !isArray(value) &&
+  !isShape(value) &&
+  !isFunction(value);
 Shape.isObject = isObject;
 
 export const isValue = (value) =>

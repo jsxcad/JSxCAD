@@ -59,6 +59,8 @@ Performs the hull operation sequentially on the input shapes.
 ChainHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
 
+![Image](interactions_between_geometry.md.$9.png)
+
 ---
 ### Clip
 Returns the shape limited to the space of the clipping shapes.
