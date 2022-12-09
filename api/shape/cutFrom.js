@@ -1,6 +1,7 @@
 import Shape from './Shape.js';
 import { cut } from './cut.js';
 import { destructure } from './destructure.js';
+import { toShape } from './toShape.js';
 
 export const cutFrom = Shape.registerMethod(
   'cutFrom',
@@ -11,6 +12,6 @@ export const cutFrom = Shape.registerMethod(
         throw Error(`cutFrom requires one shape or function.`);
       }
       const [other] = others;
-      return cut(shape, ...modes)(await shape.toShape(other));
+      return cut(shape, ...modes)(await toShape(other)(shape));
     }
 );

@@ -121,7 +121,7 @@ Mask is used to create a mask around something. This allows the shape to cut a l
 `;
 
 const shaft = Arc(10, 10, 40).color('grey');
-shaft.mask(grow(1)).view();
+shaft.masked(grow(1)).view();
 
 md`
 ---

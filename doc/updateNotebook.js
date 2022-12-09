@@ -62,8 +62,9 @@ const writeMarkdown = async (
     }
     if (view) {
       const { imageUrl, viewId = imageCount++ } = imageUrlList[viewCount++];
+      const pathViewId = viewId.replace(/[/]/g, '_');
       if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
-        const imagePath = `${modulePath}.md.${viewId}.png`;
+        const imagePath = `${modulePath}.md.${pathViewId}.png`;
         output.push(`![Image](${pathModule.basename(imagePath)})`);
         output.push('');
       }
@@ -248,8 +249,9 @@ export const updateNotebook = async (
     );
     for (let nth = 0; nth < imageUrlList.length; nth++) {
       const { imageUrl, viewId = nth } = imageUrlList[nth];
-      const observedPath = `${target}.md.${viewId}.observed.png`;
-      const expectedPath = `${target}.md.${viewId}.png`;
+      const pathViewId = viewId.replace(/[/]/g, '_');
+      const observedPath = `${target}.md.${pathViewId}.observed.png`;
+      const expectedPath = `${target}.md.${pathViewId}.png`;
       const { dataBuffer } = imageDataUri.decode(imageUrl);
       writeFileSync(observedPath, dataBuffer);
       const observedPng = pngjs.PNG.sync.read(dataBuffer);
@@ -293,7 +295,7 @@ export const updateNotebook = async (
         numFailedPixels > PIXEL_THRESHOLD &&
         !IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS.has(observedPath)
       ) {
-        const differencePath = `${target}.md.${viewId}.difference.png`;
+        const differencePath = `${target}.md.${pathViewId}.difference.png`;
         writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
         // Note failures.
         failedExpectations.push(

@@ -1,4 +1,4 @@
-import { Text, readFont } from '@jsxcad/api-v1-font';
+import { Text } from '@jsxcad/api-v1-font';
 
 md`### (Needs redesign)`;
 
@@ -35,9 +35,7 @@ const Hand = ({ reach, tipRadius, thickness }) =>
       .move(reach * faceRadius)
   ).cut(Arc({ radius: axleRadius }));
 
-const aladinRegular = await readFont(
-  'https://jsxcad.js.org/ttf/Aladin-Regular.ttf'
-);
+const aladinRegular = 'https://jsxcad.js.org/ttf/Aladin-Regular.ttf';
 
 const Face = ({ axleRadius, faceRadius, fontSize }) =>
   Arc({ radius: faceRadius })

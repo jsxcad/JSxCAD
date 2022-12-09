@@ -112,7 +112,7 @@ const ArcOp =
     let [x, y, z] = values;
     let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
     if (apothem !== undefined) {
-      radius = toRadiusFromApothem(apothem, sides) / 2;
+      radius = toRadiusFromApothem(apothem, sides);
     }
     if (diameter !== undefined) {
       x = diameter;

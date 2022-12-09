@@ -1,11 +1,11 @@
-import { Stl } from './readStl.js';
+import { LoadStl } from './readStl.js';
 import { stl } from './stl.js';
 
 const api = {
-  Stl,
+  LoadStl,
   stl,
 };
 
-export { Stl, stl };
+export { LoadStl, stl };
 
 export default api;

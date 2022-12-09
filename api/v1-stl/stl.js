@@ -1,4 +1,4 @@
-import { Shape, destructure, ensurePages } from '@jsxcad/api-shape';
+import { Shape, destructure, ensurePages, view } from '@jsxcad/api-shape';
 import { emit, generateUniqueId, getSourceLocation, write } from '@jsxcad/sys';
 
 import { hash as hashGeometry } from '@jsxcad/geometry';
@@ -12,17 +12,17 @@ export const prepareStl = async (shape, name, op = (s) => s, options = {}) => {
   for (const entry of await ensurePages(await op(Shape.chain(shape)))) {
     const stlPath = `download/stl/${path}/${generateUniqueId()}`;
     await write(stlPath, await toStl(entry, options));
-    const filename = `${name}_${index++}.stl`;
+    const suffix = index++ === 0 ? '' : `_${index}`;
+    const filename = `${name}${suffix}.stl`;
     const record = {
       path: stlPath,
-      filename: `${name}_${index++}.stl`,
+      filename,
       type: 'application/sla',
     };
     records.push(record);
     // Produce a view of what will be downloaded.
-    const hash =
-      hashSum({ filename, options }) + hashGeometry(shape.toGeometry());
-    Shape.fromGeometry(entry).view(name, options.view);
+    const hash = hashSum({ filename, options }) + hashGeometry(entry);
+    await view(name, options.view)(Shape.fromGeometry(entry));
     emit({ download: { entries: [record] }, hash });
   }
   return records;

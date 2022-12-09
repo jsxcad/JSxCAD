@@ -36,4 +36,6 @@ const grabber = await Arc(12).ez(10).z(-2).view();
 const final = await base.cut(grabber).stl('test shape.stl');
 ```
 
-[test shape.stl_1.stl](thing.test%20shape.stl_1.stl)
+![Image](thing.md.final_test_shape.stl.png)
+
+[test shape.stl.stl](thing.test%20shape.stl.stl)

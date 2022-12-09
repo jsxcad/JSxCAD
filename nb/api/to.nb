@@ -1,0 +1,23 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### to()
+Parameter|Default|Type
+---|---|---
+reference||The reference to move to.
+
+Moves shape so that its origin is aligned at the reference.
+
+See: [at](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/at.nb)
+`;
+
+Box(1, 2, 3)
+  .to(
+    Ref()
+      .rz(1 / 4)
+      .x(5)
+      .seq({ by: 1 / 12 }, rz)
+  )
+  .view()
+  .note(
+    'Box(1, 2, 3).to(Ref().rz(1 / 4).x(5).seq({ by: 1 / 12 }, rz)) arranges the box at 12 reference points around a circle.'
+  );

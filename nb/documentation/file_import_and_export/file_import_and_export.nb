@@ -27,7 +27,7 @@ md`
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.`;
 
-const importedStl = await Stl('https://jsxcad.js.org/stl/teapot.stl');
+const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl');
 await importedStl.view();
 
 md`
@@ -35,7 +35,7 @@ md`
 ### Importing .svg
 Imports a .svg file which can then be used as geometry.`;
 
-const importedSvg = await Svg('https://jsxcad.js.org/svg/rocket.svg', { fill: false });
+const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false })
 await importedSvg.by(align('xy')).view();
 
 await importedSvg.by(align('xy')).scaleToFit(10).fill().ez(2).untag('color:#090000').view();

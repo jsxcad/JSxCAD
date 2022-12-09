@@ -20,7 +20,7 @@ const Monocle = (
     .fitTo(
       Arc(diameter)
         .ez(height - lensThickness, height)
-        .mask(grow('z', 0.1))
+        .masked(grow('z', 0.1))
         .material('glass')
         .as('lens')
     )

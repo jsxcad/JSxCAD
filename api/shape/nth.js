@@ -1,5 +1,6 @@
 import './each.js';
 
+import Empty from './Empty.js';
 import Group from './Group.js';
 import Shape from './Shape.js';
 
@@ -15,7 +16,19 @@ export const nth = Shape.registerMethod(
           (shape) =>
             leafs
       )(shape);
-      return Group(...ns.map((n) => candidates[n]));
+      const group = [];
+      for (let nth of ns) {
+        if (nth < 0) {
+          nth = candidates.length - nth;
+        }
+        const candidate = candidates[nth];
+        if (candidate === undefined) {
+          group.push(Empty());
+        } else {
+          group.push(candidate);
+        }
+      }
+      return Group(...group);
     }
 );
 
