@@ -149,7 +149,6 @@ const hashValue = (value, hash) => {
 };
 
 const computeHash = (value) => {
-  // const hash = createHash('sha256');
   const hash = new Digest.SHA256('sha256');
   hashValue(value, hash);
   return encode$1(hash.finalize());

@@ -215,11 +215,13 @@ await Group(roadTile, curvedRoadTile)
   .stl('3yd tiles', page('individual'));
 ```
 
-[3yd tiles_1.stl](road.3yd%20tiles_1.stl)
+![Image](road.md.$2_3yd_tiles.png)
+
+[3yd tiles.stl](road.3yd%20tiles.stl)
 
 ![Image](road.md.$2_3yd_tiles.png)
 
-[3yd tiles_3.stl](road.3yd%20tiles_3.stl)
+[3yd tiles_2.stl](road.3yd%20tiles_2.stl)
 
 ```JavaScript
 await Group(
@@ -246,7 +248,13 @@ await Group(
 
 [2d road tile_0.pdf](road.2d%20road%20tile_0.pdf)
 
-[3d road tile_1.stl](road.3d%20road%20tile_1.stl)
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile.stl](road.3d%20road%20tile.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_2.stl](road.3d%20road%20tile_2.stl)
 
 ![Image](road.md.$3_3d_road_tile.png)
 
@@ -254,7 +262,15 @@ await Group(
 
 ![Image](road.md.$3_3d_road_tile.png)
 
+[3d road tile_4.stl](road.3d%20road%20tile_4.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
 [3d road tile_5.stl](road.3d%20road%20tile_5.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_6.stl](road.3d%20road%20tile_6.stl)
 
 ![Image](road.md.$3_3d_road_tile.png)
 
@@ -262,7 +278,15 @@ await Group(
 
 ![Image](road.md.$3_3d_road_tile.png)
 
+[3d road tile_8.stl](road.3d%20road%20tile_8.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
 [3d road tile_9.stl](road.3d%20road%20tile_9.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_10.stl](road.3d%20road%20tile_10.stl)
 
 ![Image](road.md.$3_3d_road_tile.png)
 
@@ -270,24 +294,4 @@ await Group(
 
 ![Image](road.md.$3_3d_road_tile.png)
 
-[3d road tile_13.stl](road.3d%20road%20tile_13.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_15.stl](road.3d%20road%20tile_15.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_17.stl](road.3d%20road%20tile_17.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_19.stl](road.3d%20road%20tile_19.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_21.stl](road.3d%20road%20tile_21.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_23.stl](road.3d%20road%20tile_23.stl)
+[3d road tile_12.stl](road.3d%20road%20tile_12.stl)

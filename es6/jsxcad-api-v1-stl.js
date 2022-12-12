@@ -3,8 +3,8 @@ import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
-const Stl = Shape.registerShapeMethod(
-  'Stl',
+const LoadStl = Shape.registerShapeMethod(
+  'LoadStl',
   async (path, { src, format = 'ascii', geometry = 'graph' } = {}) => {
     const data = await read(`source/${path}`, { sources: [path] });
     return Shape.fromGeometry(await fromStl(data, { format, geometry }));
@@ -109,8 +109,8 @@ const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
 });
 
 const api = {
-  Stl,
+  LoadStl,
   stl,
 };
 
-export { Stl, api as default, stl };
+export { LoadStl, api as default, stl };

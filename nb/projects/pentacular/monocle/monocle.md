@@ -23,7 +23,7 @@ const Monocle = (
     .fitTo(
       Arc(diameter)
         .ez(height - lensThickness, height)
-        .mask(grow('z', 0.1))
+        .masked(grow('z', 0.1))
         .material('glass')
         .as('lens')
     )
@@ -44,8 +44,10 @@ const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
 
 ![Image](monocle.md.monocle_37x12x2x2.png)
 
-[frame-37x12x2x2_1.stl](monocle.frame-37x12x2x2_1.stl)
-
 ![Image](monocle.md.monocle_37x12x2x2_frame-37x12x2x2.png)
 
-[lens-37x12x2x2_1.stl](monocle.lens-37x12x2x2_1.stl)
+[frame-37x12x2x2.stl](monocle.frame-37x12x2x2.stl)
+
+![Image](monocle.md.monocle_37x12x2x2_lens-37x12x2x2.png)
+
+[lens-37x12x2x2.stl](monocle.lens-37x12x2x2.stl)

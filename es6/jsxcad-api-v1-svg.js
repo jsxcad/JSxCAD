@@ -3,8 +3,8 @@ import { fromSvg, fromSvgPath, toSvg } from './jsxcad-convert-svg.js';
 import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
-const ReadSvg = Shape.registerShapeMethod(
-  'ReadSvg',
+const LoadSvg = Shape.registerShapeMethod(
+  'LoadSvg',
   async (path, { fill = true, stroke = true } = {}) => {
     const data = await read(`source/${path}`, { sources: [path] });
     if (data === undefined) {
@@ -145,6 +145,6 @@ const svg = Shape.registerMethod(
     }
 );
 
-const api = { ReadSvg, SvgPath, Svg, svg };
+const api = { LoadSvg, SvgPath, Svg, svg };
 
-export { ReadSvg, Svg, SvgPath, api as default, svg };
+export { LoadSvg, Svg, SvgPath, api as default, svg };

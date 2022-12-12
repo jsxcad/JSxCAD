@@ -42,7 +42,9 @@ await Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash,
   .stl(`gear_${teeth}`);
 ```
 
-[gear_16_1.stl](examples.gear_16_1.stl)
+![Image](examples.md.$1_gear_16.png)
+
+[gear_16.stl](examples.gear_16.stl)
 
 ```JavaScript
 await Gear({ teeth: 8 })
@@ -258,14 +260,14 @@ const planetaryDesign = await planetaryDesign3
 
 ![Image](examples.md.planetaryDesign.png)
 
-[ring_1.stl](examples.ring_1.stl)
-
 ![Image](examples.md.planetaryDesign_ring.png)
 
-[planetary_1.stl](examples.planetary_1.stl)
+[ring.stl](examples.ring.stl)
 
 ![Image](examples.md.planetaryDesign_planetary.png)
 
-[solar_1.stl](examples.solar_1.stl)
+[planetary.stl](examples.planetary.stl)
 
 ![Image](examples.md.planetaryDesign_solar.png)
+
+[solar.stl](examples.solar.stl)

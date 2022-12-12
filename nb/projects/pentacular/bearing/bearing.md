@@ -16,7 +16,7 @@ const Bearing = (diameter) =>
       Arc(4.5)
         .ez(3.5, 3.0, -3.0, -3.5)
         .and(Arc(5).ez(3, -3))
-        .mask(Arc(5.2).ez(4, -4))
+        .masked(Arc(5.2).ez(4, -4))
         .as('pin')
     );
 ```
@@ -34,10 +34,12 @@ const bearing_10_7 = await Bearing(10.7)
 
 You'll need to print two of these
 
-[bearing_10_7_top_1.stl](bearing.bearing_10_7_top_1.stl)
+![Image](bearing.md.bearing_10_7_bearing_10_7_top.png)
+
+[bearing_10_7_top.stl](bearing.bearing_10_7_top.stl)
 
 And one of these
 
-![Image](bearing.md.bearing_10_7_bearing_10_7_top.png)
+![Image](bearing.md.bearing_10_7_bearing_10_7_pin.png)
 
-[bearing_10_7_pin_1.stl](bearing.bearing_10_7_pin_1.stl)
+[bearing_10_7_pin.stl](bearing.bearing_10_7_pin.stl)

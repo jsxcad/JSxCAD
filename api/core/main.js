@@ -6,14 +6,14 @@ import * as mathApi from '@jsxcad/api-v1-math';
 import * as notesApi from './recordNotes.js';
 import * as shapeApi from '@jsxcad/api-shape';
 
-import { LoadStl, stl } from '@jsxcad/api-v1-stl';
+// import { LoadStl, stl } from '@jsxcad/api-v1-stl';
 import {
   buildImportModule,
   registerDynamicModule,
   setToSourceFromNameFunction,
 } from './importModule.js';
 
-import { LoadSvg, Svg } from '@jsxcad/api-v1-svg';
+// import { LoadSvg, Svg } from '@jsxcad/api-v1-svg';
 import { control } from './control.js';
 import { readObj } from '@jsxcad/api-v1-obj';
 import { readOff } from '@jsxcad/api-v1-off';
@@ -27,14 +27,14 @@ const api = {
   ...mathApi,
   ...shapeApi,
   ...notesApi,
-  Svg,
-  LoadSvg,
-  LoadStl,
+  // Svg,
+  // LoadSvg,
+  // LoadStl,
   control,
   readObj,
   readOff,
   setToSourceFromNameFunction,
-  stl,
+  // stl,
   toSvg,
 };
 
@@ -84,11 +84,11 @@ registerDynamicModule(
   '@jsxcad/api-v1-pdf',
   '../v1-pdf/main.js'
 );
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-png',
-  '@jsxcad/api-v1-png',
-  '../v1-png/main.js'
-);
+// registerDynamicModule(
+//   '@' + 'jsxcad/api-v1-png',
+//   '@jsxcad/api-v1-png',
+//   '../v1-png/main.js'
+// );
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-threejs',
   '@jsxcad/api-v1-threejs',
@@ -104,16 +104,16 @@ registerDynamicModule(
   '@jsxcad/api-v1-shapefile',
   '../v1-shapefile/main.js'
 );
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-stl',
-  '@jsxcad/api-v1-stl',
-  '../v1-stl/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-svg',
-  '@jsxcad/api-v1-svg',
-  '../v1-svg/main.js'
-);
+// registerDynamicModule(
+//   '@' + 'jsxcad/api-v1-stl',
+//   '@jsxcad/api-v1-stl',
+//   '../v1-stl/main.js'
+// );
+// registerDynamicModule(
+//   '@' + 'jsxcad/api-v1-svg',
+//   '@jsxcad/api-v1-svg',
+//   '../v1-svg/main.js'
+// );
 
 export { evaluate, execute } from './evaluate.js';
 

@@ -13,7 +13,9 @@ Creates an option to download the shape as an stl file. A view is created to sho
 await Arc(10, 10, 10).stl('fileName');
 ```
 
-[fileName_1.stl](file_import_and_export.fileName_1.stl)
+![Image](file_import_and_export.md.$4_fileName.png)
+
+[fileName.stl](file_import_and_export.fileName.stl)
 
 ---
 ### Exporting .svg
@@ -23,6 +25,8 @@ Creates an option to download the shape as a svg file. A view is created to show
 await Arc(10).svg('fileName');
 ```
 
+![Image](file_import_and_export.md.$6_npt2aUtH8nUGeIDrk0Emb1JjeuKGptG+LxcDQeJZpUc=hpabDVVcHRcsFUAPna4lb7WP9Dc+cJWRD3KpECS+klo=.png)
+
 [fileName_0.svg](file_import_and_export.fileName_0.svg)
 
 ---
@@ -30,7 +34,7 @@ await Arc(10).svg('fileName');
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.
 
 ```JavaScript
-const importedStl = await Stl('https://jsxcad.js.org/stl/teapot.stl');
+const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl');
 ```
 
 ```JavaScript
@@ -44,7 +48,7 @@ await importedStl.view();
 Imports a .svg file which can then be used as geometry.
 
 ```JavaScript
-const importedSvg = await Svg('https://jsxcad.js.org/svg/rocket.svg', { fill: false });
+const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false })
 ```
 
 ```JavaScript

@@ -28,7 +28,9 @@ const ring = await Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
 const sorter = await ring.and(base).stl('sorter');
 ```
 
-[sorter_1.stl](lego_sorter.sorter_1.stl)
+![Image](lego_sorter.md.sorter_sorter.png)
+
+[sorter.stl](lego_sorter.sorter.stl)
 
 ```JavaScript
 const wall1 = await grid
@@ -69,4 +71,6 @@ await bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');
 
 ![Image](lego_sorter.md.$1.png)
 
-[tall_sorter_1.stl](lego_sorter.tall_sorter_1.stl)
+![Image](lego_sorter.md.$1_tall_sorter.png)
+
+[tall_sorter.stl](lego_sorter.tall_sorter.stl)

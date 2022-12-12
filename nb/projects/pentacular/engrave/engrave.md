@@ -3,7 +3,7 @@ import { Text, readFont } from '@jsxcad/api-v1-font';
 ```
 
 ```JavaScript
-const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
+const unYetGul = 'https://jsxcad.js.org/ttf/UnYetgul.ttf';
 ```
 
 ```JavaScript

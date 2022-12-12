@@ -25,7 +25,7 @@ const placeTab = (tab) => (e, l) => (s) =>
   tab
     .z(l * (1 / 2))
     .color('red')
-    .mask(grow(0.1, 'yz').grow(0.2, 'x'))
+    .masked(grow(0.1, 'yz').grow(0.2, 'x'))
     .to(e);
 ```
 
@@ -37,7 +37,9 @@ const tab = await Tab(1.5, 32 / 8);
 tab.stl('tab', ry(1 / 4));
 ```
 
-[tab_1.stl](hex.tab_1.stl)
+![Image](hex.md.$1_tab.png)
+
+[tab.stl](hex.tab.stl)
 
 ```JavaScript
 const hexTile = hex
@@ -764,4 +766,6 @@ await Tile(seed4, {
 }).stl('tile');
 ```
 
-[tile_1.stl](hex.tile_1.stl)
+![Image](hex.md.$3_tile.png)
+
+[tile.stl](hex.tile.stl)

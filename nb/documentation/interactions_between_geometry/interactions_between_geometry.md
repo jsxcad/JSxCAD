@@ -183,7 +183,7 @@ const shaft = Arc(10, 10, 40).color('grey');
 ```
 
 ```JavaScript
-shaft.mask(grow(1)).view();
+shaft.masked(grow(1)).view();
 ```
 
 ![Image](interactions_between_geometry.md.$26.png)

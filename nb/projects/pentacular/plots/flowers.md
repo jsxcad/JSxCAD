@@ -1,5 +1,5 @@
 ```JavaScript
-await Svg('https://jsxcad.js.org/svg/flowers.svg', { fill: false })
+await LoadSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false })
   .scale(1 / 60)
   .by(align())
   .and(toolpath())

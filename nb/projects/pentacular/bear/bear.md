@@ -13,18 +13,18 @@ const spacing = control('spacing', 2, 'input');
 ```
 
 ```JavaScript
-const a = await Stl(url).by(align('z>'));
+const a = await LoadStl(url).by(align('z>'));
 ```
 
 ```JavaScript
 await a.stl('bear').note('This is a low-poly model of a bear.');
 ```
 
-[bear_1.stl](bear.bear_1.stl)
+![Image](bear.md.$2_bear.png)
+
+[bear.stl](bear.bear.stl)
 
 This is a low-poly model of a bear.
-
-![Image](bear.md.$2_bear.png)
 
 ```JavaScript
 await a.section(seq({ to: height, by: spacing }, XY, Group))

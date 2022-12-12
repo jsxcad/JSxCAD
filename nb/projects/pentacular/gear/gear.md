@@ -96,7 +96,7 @@ export const rootRadius = (
 ```
 
 ```JavaScript
-export const Gear = ({ teeth = 16, mmPerTooth = Math.PI, hiddenTeeth = 0, pressureAngle = 20, clearance = 0, backlash = 0, toothResolution = 5 }) => {
+export const Gear = ({ teeth = 16, mmPerTooth = Math.PI, hiddenTeeth = 0, pressureAngle = 20, clearance = 0, backlash = 0, toothResolution = 5 } = {}) => {
   const pi = Math.PI;
   const p = pitchRadius(mmPerTooth, teeth);
   const c = outerRadius(mmPerTooth, teeth, clearance);
@@ -116,6 +116,7 @@ export const Gear = ({ teeth = 16, mmPerTooth = Math.PI, hiddenTeeth = 0, pressu
       Group
     )
     .loop()
+    .fill()
     .setTag('plan:gear/teeth', teeth)
     .setTag('plan:gear/mmPerTooth', mmPerTooth)
     .setTag('plan:gear/hiddenTeeth', hiddenTeeth)
