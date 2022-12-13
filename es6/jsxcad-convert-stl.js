@@ -109,10 +109,7 @@ const toParser = (format) => {
   }
 };
 
-const fromStl = async (
-  stl,
-  { format = 'ascii', geometry = 'graph' } = {}
-) => {
+const fromStl = async (stl, { format = 'ascii' } = {}) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
@@ -125,12 +122,7 @@ const fromStl = async (
     if (pc.some((value) => !isFinite(value))) continue;
     polygons.push({ points: [[...pa], [...pb], [...pc]] });
   }
-  switch (geometry) {
-    case 'graph':
-      return fromPolygons(polygons);
-    default:
-      throw Error(`Unknown geometry type ${geometry}`);
-  }
+  return fromPolygons(polygons);
 };
 
 const X = 0;

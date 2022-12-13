@@ -13,17 +13,20 @@ const readPngAsRasta = async (path) => {
   return raster;
 };
 
-export const LoadPng = Shape.registerShapeMethod('LoadPng', async (path, bands = [128, 256]) => {
-  const { width, height, pixels } = await readPngAsRasta(path);
-  // FIX: This uses the red channel for the value.
-  const getPixel = (x, y) => pixels[(y * width + x) << 2];
-  const data = Array(height);
-  for (let y = 0; y < height; y++) {
-    data[y] = Array(width);
-    for (let x = 0; x < width; x++) {
-      data[y][x] = getPixel(x, y);
+export const LoadPng = Shape.registerShapeMethod(
+  'LoadPng',
+  async (path, bands = [128, 256]) => {
+    const { width, height, pixels } = await readPngAsRasta(path);
+    // FIX: This uses the red channel for the value.
+    const getPixel = (x, y) => pixels[(y * width + x) << 2];
+    const data = Array(height);
+    for (let y = 0; y < height; y++) {
+      data[y] = Array(width);
+      for (let x = 0; x < width; x++) {
+        data[y][x] = getPixel(x, y);
+      }
     }
+    const contours = await fromRaster(data, bands);
+    return Shape.fromGeometry(taggedGroup({}, ...contours));
   }
-  const contours = await fromRaster(data, bands);
-  return Shape.fromGeometry(taggedGroup({}, ...contours));
-});
+);

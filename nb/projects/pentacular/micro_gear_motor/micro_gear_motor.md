@@ -34,5 +34,6 @@ export const MicroGearMotor = Shape.registerShapeMethod(
         -gearboxLength - motorLength - hubLength
       )
     )
+    .fuse()
 );
 ```

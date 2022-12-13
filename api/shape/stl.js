@@ -14,22 +14,13 @@ import { ensurePages } from './Page.js';
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import { view } from './view.js';
 
-export const LoadStl = Shape.registerShapeMethod(
-  'LoadStl',
-  async (...args) => {
-    const {
-      strings,
-      object: options = {},
-    } = destructure(args);
-    const [path, ...modes] = strings;
-    const data = await read(`source/${path}`, { sources: [path] });
-    const format = 'ascii';
-    if (modes.includes('binary')) {
-      format = 'binary';
-    }
-    return Shape.fromGeometry(await fromStl(data, { format }));
-  }
-);
+export const LoadStl = Shape.registerShapeMethod('LoadStl', async (...args) => {
+  const { strings } = destructure(args);
+  const [path, ...modes] = strings;
+  const data = await read(`source/${path}`, { sources: [path] });
+  const format = modes.includes('binary') ? 'binary' : 'ascii';
+  return Shape.fromGeometry(await fromStl(data, { format }));
+});
 
 export const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
   const {

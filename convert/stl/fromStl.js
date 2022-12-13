@@ -13,10 +13,7 @@ const toParser = (format) => {
   }
 };
 
-export const fromStl = async (
-  stl,
-  { format = 'ascii' } = {}
-) => {
+export const fromStl = async (stl, { format = 'ascii' } = {}) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
