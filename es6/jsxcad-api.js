@@ -432,14 +432,10 @@ const api = {
   ...mathApi,
   ...shapeApi,
   ...notesApi,
-  // Svg,
-  // LoadSvg,
-  // LoadStl,
   control,
   readObj,
   readOff,
   setToSourceFromNameFunction,
-  // stl,
   toSvg,
 };
 
@@ -489,11 +485,6 @@ registerDynamicModule(
   './jsxcad-api-v1-pdf.js',
   '../v1-pdf/main.js'
 );
-// registerDynamicModule(
-//   '@' + 'jsxcad/api-v1-png',
-//   './jsxcad-api-v1-png.js',
-//   '../v1-png/main.js'
-// );
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-threejs',
   './jsxcad-api-v1-threejs.js',
