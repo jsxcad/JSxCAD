@@ -1,0 +1,15 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### SurfaceMesh()
+Parameter|Default|Type
+---|---|---
+serialization||A serialized surface mesh.
+
+Reconstructs a surface mesh from its serialization.
+
+_This is intended for debugging._
+`;
+
+SurfaceMesh(
+  '8\n1/2 -1/2 -1/2 500 -500 -500\n1/2 1/2 -1/2 500 500 -500\n-1/2 1/2 -1/2 -500 500 -500\n-1/2 -1/2 -1/2 -500 -500 -500\n1/2 -1/2 1/2 500 -500 500\n1/2 1/2 1/2 500 500 500\n-1/2 1/2 1/2 -500 500 500\n-1/2 -1/2 1/2 -500 -500 500\n\n12\n3 2 1 0\n3 2 0 3\n3 6 4 5\n3 6 7 4\n3 5 4 1\n3 0 1 4\n3 6 5 2\n3 1 2 5\n3 7 6 3\n3 2 3 6\n3 4 7 0\n3 3 0 7\n'
+).view();

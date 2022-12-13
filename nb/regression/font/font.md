@@ -11,7 +11,7 @@ import { readFont, Text } from '@jsxcad/api-v1-font';
 readFont takes a path which may be a url, and is async so needs await.
 
 ```JavaScript
-const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
+const unYetGul = 'https://jsxcad.js.org/ttf/UnYetgul.ttf';
 ```
 
 #### Text(font, text, size=10)

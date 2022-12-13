@@ -5,9 +5,7 @@ import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
 import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
-import { Stl, stl } from './jsxcad-api-v1-stl.js';
 import { toEcmascript } from './jsxcad-compiler.js';
-import { Svg } from './jsxcad-api-v1-svg.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
 import { toSvg } from './jsxcad-convert-svg.js';
@@ -435,12 +433,9 @@ const api = {
   ...shapeApi,
   ...notesApi,
   control,
-  Svg,
-  Stl,
   readObj,
   readOff,
   setToSourceFromNameFunction,
-  stl,
   toSvg,
 };
 
@@ -491,11 +486,6 @@ registerDynamicModule(
   '../v1-pdf/main.js'
 );
 registerDynamicModule(
-  '@' + 'jsxcad/api-v1-png',
-  './jsxcad-api-v1-png.js',
-  '../v1-png/main.js'
-);
-registerDynamicModule(
   '@' + 'jsxcad/api-v1-threejs',
   './jsxcad-api-v1-threejs.js',
   '../v1-threejs/main.js'
@@ -509,16 +499,6 @@ registerDynamicModule(
   '@' + 'jsxcad/api-v1-shapefile',
   './jsxcad-api-v1-shapefile.js',
   '../v1-shapefile/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-stl',
-  './jsxcad-api-v1-stl.js',
-  '../v1-stl/main.js'
-);
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-svg',
-  './jsxcad-api-v1-svg.js',
-  '../v1-svg/main.js'
 );
 
 setApi(api);

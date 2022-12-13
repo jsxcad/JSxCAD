@@ -1,102 +1,29 @@
-import { Gear } from '../gear/gear.nb';
+md`## Gear Motor`;
 
-import { Block, SocketBoard, StudBoard, block16x8x9_6 } from '../lego/lego.nb';
+const motorProfile = await Arc(12).clip(Box(9.8, 12));
 
-md`## Gear Motor and Sheath`;
+export const gearboxProfile = await Box(9.8, 11.8);
 
-const motorProfile = await Arc(12).clip(Box(9.8, 12)).md('Motor Profile').gridView();
+export const axleProfile = await Arc(3.2);
 
-const gearboxProfile = await Box(9.8, 11.8).md('Gearbox Profile').gridView();
+export const axleFlatProfile = await axleProfile.clip(Box(3.2).x(0.5));
 
-const axleProfile = await Arc(3.2).md('Axle Profile').gridView();
-
-const axleFlatProfile = await axleProfile
-  .clip(Box(3.2).x(0.5))
-  .md('Flat Axle Profile')
-  .gridView();
-
-const rearHubProfile = await Arc(4.8).md('Rear Hub Profile').gridView();
-
-const motor = await Group(
-  axleFlatProfile.ez(13.5 + 9.1, 13.5 + 9.1 + 10.8),
-  gearboxProfile.ez(13.5, 13.5 + 9.1),
-  motorProfile.ez(13.5, 0)
-)
-  .md('Motor')
-  .view();
-
-const wireThickness = 0.8;
-
-const wireChannelProfile = await Box(wireThickness, wireThickness * 5)
-  .x(5.3)
-  .md('Wire Channel Profile')
-  .gridView();
-
-const capProfile = await Box(9.8 + 2, 12 + 2)
-  .add(Box(wireThickness * 2, wireThickness * 7).x(5.3 + 0.4))
-  .md('Cap Profile')
-  .gridView();
-
-const sheath = await capProfile
-  .cut(motorProfile, wireChannelProfile)
-  .ez(0, 5)
-  .md('Sheath')
-  .stl('sheath1');
-
-const cap = await Group(capProfile.ez(-2, -0.0), sheath).md('Cap').stl('cap');
-
-const gearProfile = await Gear(20).md('Gear Profile').gridView();
-
-const gear = await Gear(20)
-  .fill()
-  .cut(axleFlatProfile)
-  .ez(4)
-  .md('Gear')
-  .gridView()
-  .stl('gear2');
-
-const gearCutout = await Gear(20).fill()
-  .and(cutFrom(Arc(24)).inset(0.5))
-  .as('gear cutout')
-  .md('Gear Cutout')
-  .gridView();
-
-md`## Motor Driver Bracket`;
-
-const motorDriverHolder = await Block(4, 4, 3.2 * 5)
-  .cut(Box(20.7, 24.7).ez(2, 100))
-  .as('motor driver holder')
-  .md('Motor Driver Holder')
-  .stl('motor_driver_holder_3');
-
-md`## Wemos Bracket`;
-
-const wemosDriverHolder = await Block(4, 5, 3.2 * 11)
-  .cut(Box(25.7 + 0.2, 34.5 + 0.2).ez(2, 100))
-  .cut(Box(3 * 8, 2.5 * 8).to(XZ()).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
-  .cut(Box(3.2 * 8, 4 * 8).to(YZ()).extrudeAlong(normal(), 3.2 * (4 + 1.5), 100))
-  .cut(
-    Box(3 * 8, 2.5 * 8)
-      .to(XZ().involute())
-      .extrudeAlong(normal(), 3.2 * (4 + 1.5), 100)
-  )
-  .cut(
-    Box(3.2 * 8, 4 * 8)
-      .to(YZ().involute())
-      .extrudeAlong(normal(), 3.2 * (4 + 1.5), 100)
-  )
-  .as('wemos holder')
-  .md('Wemos Driver Holder')
-  .rz(1 / 2)
-  .stl('wemos_holder_2');
-
-md`## Gear Motor Bracket`;
-
-const motorHolderLegoBoard = await Block(1, 4, 3.2).y(6);
-const motorHolderMotor = await Group(motor, sheath.z(9.1 - 0.7), cap)
-  .rx(1 / 4)
-  .ry(-1 / 4)
-  .move(0, 14, 5.6 + 3.2 - 0.7)
-  .as('motor')
-  .md('Motor holder moter')
-  .view();
+export const MicroGearMotor = Shape.registerShapeMethod(
+  'MicroGearMotor',
+  async ({
+    axleLength = 10.8,
+    gearboxLength = 9.1,
+    motorLength = 15.5,
+    hubLength = 1.5,
+  } = {}) =>
+    Group(
+      axleFlatProfile.ez(axleLength),
+      gearboxProfile.ez(0 - gearboxLength),
+      motorProfile.ez(0 - gearboxLength, -gearboxLength - motorLength),
+      Arc(5).ez(
+        0 - gearboxLength - motorLength,
+        -gearboxLength - motorLength - hubLength
+      )
+    )
+    .fuse()
+);

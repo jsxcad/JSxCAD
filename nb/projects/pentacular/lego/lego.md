@@ -3,6 +3,18 @@
 [Examples](../../../../nb/projects/lego/examples.md)
 
 ```JavaScript
+export const Socket = (height = 2) =>
+  Arc({ apothem: 5 / 2 })
+    .ez(-height)
+    .void();
+```
+
+```JavaScript
+export const Stud = (height = 1.6) =>
+  Join(Arc(5).ez(height), Arc(4.8).ez(height, height + 0.2));
+```
+
+```JavaScript
 export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
   const isFlat = (x, y) => {
     if (sockets === undefined) return false;
@@ -52,6 +64,20 @@ export const StudBoard = (length, width, height, { studs = [] } = {}) => {
 ```
 
 ```JavaScript
+const legoify = () => (shape) =>
+  shape
+    .and(
+      faces().op(
+        sort('z>').n(0).put(Stud().x(-4, 4).y(-4, 4)),
+        sort('z<').n(0).put(Socket().x(-4, 4).y(-4, 4))
+      )
+    )
+    .disjoint()
+    .fuse()
+    .view();
+```
+
+```JavaScript
 export const Block = (
   length,
   width,
@@ -63,3 +89,88 @@ export const Block = (
     StudBoard(length, width, height - 2.1, { studs }).z(2.1)
   );
 ```
+
+```JavaScript
+export const bushingHoleProfile = await Arc({ apothem: 5 / 2 });
+```
+
+```JavaScript
+export const AxleProfile = () => {
+  const length = 4.8 + 0.1;
+  const width = 1.8 + 0.1;
+  const diameter = 5 + 0.1;
+  const line = Line(length / 2, length / -2);
+  const bar = Group(
+    line.y(width / 2),
+    line.y(width / -2),
+    Arc(diameter, { start: 3 / 16, end: 5 / 16 }).rz(0, 1 / 2)
+  ).fill();
+  return bar.rz(0 / 4, 1 / 4).fuse();
+};
+```
+
+```JavaScript
+export const axleProfile = AxleProfile();
+```
+
+```JavaScript
+export const axleHoleProfile = axleProfile.offset(0.1);
+```
+
+```JavaScript
+export const axleHole = await Box(8)
+  .cut(axleProfile.offset(0.1))
+  .ez(4)
+  .stl('axle_hole');
+```
+
+![Image](lego.md.axleHole_axle_hole.png)
+
+[axle_hole.stl](lego.axle_hole.stl)
+
+```JavaScript
+export const verticalBushingHole = Join(
+  bushingHoleProfile.ez(0.6, 7.4),
+  bushingHoleProfile.offset(0.4).ez(0, 0.6, 7.4, 8.0)
+)
+  .void()
+  .view(and(Point()));
+```
+
+![Image](lego.md.verticalBushingHole.png)
+
+```JavaScript
+export const horizontalBushingHole = verticalBushingHole
+  .rx(1 / 4)
+  .y(4)
+  .z(5.6)
+  .view(and(Point()));
+```
+
+![Image](lego.md.horizontalBushingHole.png)
+
+```JavaScript
+export const verticalConnector = await Arc(4.8)
+  .ez(8)
+  .add(Arc(5.8).ez(0.8 - 0.2))
+  .add(Arc(5.5).ez(8 - 0.4, 8))
+  .cut(Box(10, 1, [8, 1]))
+  .material('plastic')
+  .stl('verticalConnector');
+```
+
+![Image](lego.md.verticalConnector_verticalConnector.png)
+
+[verticalConnector.stl](lego.verticalConnector.stl)
+
+```JavaScript
+export const horizontalConnector = await verticalConnector
+  .ry(-1 / 4)
+  .clip(Box([0, 8], 8, 4))
+  .material('plastic')
+  .stl('horizontalConnector');
+```
+
+![Image](lego.md.horizontalConnector_horizontalConnector.png)
+
+[horizontalConnector.stl](lego.horizontalConnector.stl)

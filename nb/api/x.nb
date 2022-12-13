@@ -1,0 +1,12 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### x()
+Parameter|Default|Type
+---|---|---
+...offsets||Number of mm along x to move the shape.
+
+See: [y](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/y.nb), [z](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/z.nb).
+
+_Note: Should support ranged dimensions._
+`;
+Box(1, 5, 5).x(-5, 2, 5).view().note('Box(1, 5, 5).x(-5, 2, 5)');

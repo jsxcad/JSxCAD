@@ -23,4 +23,6 @@ Box(5)
 
 Box(5).seq({ by: 1 / 8, upto: 1 }, rx) produces eight sheets
 
+![Image](each.md.$2_2.png)
+
 each(offset(0.5).cut(inset(0.5))) has transformed each sheet individually

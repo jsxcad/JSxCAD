@@ -24,6 +24,8 @@ Box()
   );
 ```
 
+![Image](seq.md.$2.png)
+
 Box().seq({ from: 1, to: 3 }, offset) produces a group of three offsets from Box.
 
 ```JavaScript

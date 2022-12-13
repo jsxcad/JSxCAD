@@ -37,4 +37,6 @@ const magneticPenHolder = await Arc(magnetDiameter)
 
 ![Image](holder.md.magneticPenHolder.png)
 
-[holder_1.stl](holder.holder_1.stl)
+![Image](holder.md.magneticPenHolder_holder.png)
+
+[holder.stl](holder.holder.stl)

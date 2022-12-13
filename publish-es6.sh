@@ -20,10 +20,7 @@ cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
 cp api/v1-obj/dist/main.js es6/jsxcad-api-v1-obj.js
 cp api/v1-off/dist/main.js es6/jsxcad-api-v1-off.js
 cp api/v1-pdf/dist/main.js es6/jsxcad-api-v1-pdf.js
-cp api/v1-png/dist/main.js es6/jsxcad-api-v1-png.js
 cp api/v1-shapefile/dist/main.js es6/jsxcad-api-v1-shapefile.js
-cp api/v1-stl/dist/main.js es6/jsxcad-api-v1-stl.js
-cp api/v1-svg/dist/main.js es6/jsxcad-api-v1-svg.js
 cp api/v1-threejs/dist/main.js es6/jsxcad-api-v1-threejs.js
 cp api/v1-tools/dist/main.js es6/jsxcad-api-v1-tools.js
 cp cache/dist/main.js es6/jsxcad-cache.js

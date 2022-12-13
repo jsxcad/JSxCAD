@@ -4,7 +4,7 @@ const url = control('url', 'https://jsxcad.js.org/stl/bear.stl', 'input');
 const height = control('height', 200, 'input');
 const spacing = control('spacing', 2, 'input');
 
-const a = await Stl(url).by(align('z>'));
+const a = await LoadStl(url).by(align('z>'));
 
 await a.stl('bear').note('This is a low-poly model of a bear.');
 

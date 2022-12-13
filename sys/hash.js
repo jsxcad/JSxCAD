@@ -50,7 +50,6 @@ export const hashValue = (value, hash) => {
 };
 
 export const computeHash = (value) => {
-  // const hash = createHash('sha256');
   const hash = new Digest.SHA256('sha256');
   hashValue(value, hash);
   return encode(hash.finalize());

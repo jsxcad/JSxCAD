@@ -11,7 +11,7 @@ md`
 readFont takes a path which may be a url, and is async so needs await.
 `;
 
-const unYetGul = await readFont('https://jsxcad.js.org/ttf/UnYetgul.ttf');
+const unYetGul = 'https://jsxcad.js.org/ttf/UnYetgul.ttf';
 
 md`
 #### Text(font, text, size=10)

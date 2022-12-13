@@ -1,0 +1,11 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### sketch()
+Converts the incoming shape to a sketch.
+
+Sketches are displayed normally but do not interact.
+
+_Note: I'm not sure this does anything at this point._
+`;
+
+Box(5).sketch().and(Point()).view().note('Box(5).sketch().and(Point())');

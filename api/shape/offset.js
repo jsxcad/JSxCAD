@@ -4,9 +4,9 @@ import { offset as offsetGeometry } from '@jsxcad/geometry';
 export const offset = Shape.registerMethod(
   'offset',
   (initial = 1, { segments = 16, step, limit } = {}) =>
-    (shape) =>
+    async (shape) =>
       Shape.fromGeometry(
-        offsetGeometry(shape.toGeometry(), initial, step, limit, segments)
+        offsetGeometry(await shape.toGeometry(), initial, step, limit, segments)
       )
 );
 

@@ -26,4 +26,6 @@ const fiveTile = await Tile(5).view();
 const hexagonalTile = await Tile(6).stl('hex');
 ```
 
-[hex_1.stl](map.hex_1.stl)
+![Image](map.md.hexagonalTile_hex.png)
+
+[hex.stl](map.hex.stl)

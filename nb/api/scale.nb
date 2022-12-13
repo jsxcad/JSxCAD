@@ -1,0 +1,37 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### scale()
+...dimensions|[1, 1, 1]|Dimensions by which to scale.
+
+The shape is scaled along those dimensions.
+
+Negative dimensions are supported.
+
+See: [scaleToFit](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/scaleToFit.nb), [sx](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sx.nb), [sy](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sy.nb), [sz](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sz.nb). 
+
+`;
+
+Box(1, 1).scale(1, 1).topView().note('Box(1, 1).scale(1, 1)');
+Box([0, 1], 1)
+  .op(ghost(), scale(-2, 1, 1))
+  .topView()
+  .note('Box([0, 1], 1).scale(-2, 1)');
+Box([0, 1], [0, 1])
+  .op(ghost(), scale(-2, -3, 1))
+  .topView()
+  .note('Box([0, 1], [0, 1]).scale(-2, -3, 1)');
+
+Box(1, 1)
+  .scale(1, 1, -1)
+  .topView()
+  .note('Box(1, 1).scale(1, 1, -1) the surface is now upside down.');
+
+Box([0, 1], 1, 1)
+  .op(ghost(), scale(-1, 1, 1))
+  .topView()
+  .note('Box([0, 1], 1, 1).scale(-1, 1, 1)');
+
+Box([0, 1], [0, 1], 1)
+  .op(ghost(), scale(-1, -1, 1))
+  .topView()
+  .note('Box([0, 1], [0, 1], 1).scale(-1, -1, 1)');

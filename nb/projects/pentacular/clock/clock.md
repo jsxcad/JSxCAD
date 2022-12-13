@@ -1,5 +1,5 @@
 ```JavaScript
-import { Text, readFont } from '@jsxcad/api-v1-font';
+import { Text } from '@jsxcad/api-v1-font';
 ```
 
 ### (Needs redesign)
@@ -56,9 +56,7 @@ const Hand = ({ reach, tipRadius, thickness }) =>
 ```
 
 ```JavaScript
-const aladinRegular = await readFont(
-  'https://jsxcad.js.org/ttf/Aladin-Regular.ttf'
-);
+const aladinRegular = 'https://jsxcad.js.org/ttf/Aladin-Regular.ttf';
 ```
 
 ```JavaScript

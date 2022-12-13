@@ -130,6 +130,8 @@ await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 await Box(5).offset(1).gridView();
 ```
 
+![Image](shape.md.$22.png)
+
 ```JavaScript
 await Box(5).op(color('green')).gridView();
 ```
@@ -360,6 +362,8 @@ await Arc(2)
 ```JavaScript
 await Triangle(14).svg('triangle');
 ```
+
+![Image](shape.md.$51_v45gNMPiNr9UmOqan0IOitpKswLmYba1O+ifpQe7wLw=WPB7tEAoJ8Ps2tZ1NvtrqR_v9Bzgawua4CSDtJ74YQI=.png)
 
 [triangle_0.svg](shape.triangle_0.svg)
 

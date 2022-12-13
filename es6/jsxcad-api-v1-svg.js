@@ -1,15 +1,25 @@
-import { Shape, ensurePages } from './jsxcad-api-shape.js';
+import { Shape, ensurePages, gridView } from './jsxcad-api-shape.js';
 import { fromSvg, fromSvgPath, toSvg } from './jsxcad-convert-svg.js';
 import { read, getSourceLocation, generateUniqueId, write, emit } from './jsxcad-sys.js';
 import { hash } from './jsxcad-geometry.js';
 
-const Svg = Shape.registerShapeMethod(
-  'Svg',
+const LoadSvg = Shape.registerShapeMethod(
+  'LoadSvg',
   async (path, { fill = true, stroke = true } = {}) => {
     const data = await read(`source/${path}`, { sources: [path] });
     if (data === undefined) {
       throw Error(`Cannot read svg from ${path}`);
     }
+    return Shape.fromGeometry(
+      await fromSvg(data, { doFill: fill, doStroke: stroke })
+    );
+  }
+);
+
+const Svg = Shape.registerShapeMethod(
+  'Svg',
+  async (svg, { fill = true, stroke = true } = {}) => {
+    const data = new TextEncoder('utf8').encode(svg);
     return Shape.fromGeometry(
       await fromSvg(data, { doFill: fill, doStroke: stroke })
     );
@@ -119,9 +129,8 @@ const prepareSvg = async (shape, name, op = (s) => s, options = {}) => {
       type: 'image/svg+xml',
     };
     records.push(record);
-    const hash$1 =
-      hashSum({ filename, options }) + hash(await shape.toGeometry());
-    Shape.fromGeometry(entry).gridView(hash$1, options.view);
+    const hash$1 = hashSum({ filename, options }) + hash(entry);
+    await gridView(hash$1, options.view)(Shape.fromGeometry(entry));
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return records;
@@ -136,6 +145,6 @@ const svg = Shape.registerMethod(
     }
 );
 
-const api = { SvgPath, Svg, svg };
+const api = { LoadSvg, SvgPath, Svg, svg };
 
-export { Svg, SvgPath, api as default, svg };
+export { LoadSvg, Svg, SvgPath, api as default, svg };

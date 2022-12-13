@@ -1,6 +1,6 @@
-import { LDraw, loadLDrawPart, readLDraw } from './readLDraw.js';
+import { LDraw, LDrawPart, ReadLDraw } from './readLDraw.js';
 
-const api = { loadLDrawPart, readLDraw };
-export { LDraw, loadLDrawPart, readLDraw };
+const api = { LDraw, LDrawPart, ReadLDraw };
+export { LDraw, LDrawPart, ReadLDraw };
 
 export default api;

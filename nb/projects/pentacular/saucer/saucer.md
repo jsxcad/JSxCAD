@@ -38,7 +38,7 @@ const knob = await Loft(
   Hexagon(18).z(3, 7),
   Hexagon(4).z(9)
 )
-  .mask(
+  .masked(
     Loft(
       Hexagon(60)
         .rz(1 / 12)
@@ -80,7 +80,9 @@ const topWithPegHoles = await top
   );
 ```
 
-[top2_1.stl](saucer.top2_1.stl)
+![Image](saucer.md.topWithPegHoles_top2.png)
+
+[top2.stl](saucer.top2.stl)
 
 ```JavaScript
 const base = await saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
@@ -97,4 +99,6 @@ const baseWithPegHoles = await base
   .stl('base');
 ```
 
-[base_1.stl](saucer.base_1.stl)
+![Image](saucer.md.baseWithPegHoles_base.png)
+
+[base.stl](saucer.base.stl)

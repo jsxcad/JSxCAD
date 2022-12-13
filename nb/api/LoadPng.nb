@@ -1,0 +1,10 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### LoadPng()
+Parameter|Default|Type
+---|---|---
+path||The path or url to load
+bands|[128, 256]|The threshold bands to draw contours at.
+`;
+
+await LoadPng('https://jsxcad.js.org/png/bathymetry.png').view().note(`await LoadPng('https://jsxcad.js.org/png/bathymetry.png')`);
