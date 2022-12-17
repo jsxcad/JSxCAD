@@ -107,7 +107,7 @@ const reifyBox = async (corner1, corner2) => {
 export const Box = Shape.registerShapeMethod('Box', async (...args) => {
   const { values, object: options } = destructure(args);
   const [x = 1, y = x, z = 0] = values;
-  const [computedC1, computedC2] = buildCorners(x, y, z);
+  const [computedC1, computedC2] = await buildCorners(x, y, z)(null);
   let { c1 = computedC1, c2 = computedC2 } = options;
   return reifyBox(c1, c2);
 });

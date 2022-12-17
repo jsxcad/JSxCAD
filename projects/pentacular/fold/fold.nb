@@ -1,0 +1,14 @@
+const r = await Box(20).ez(20).unfold().clean().view();
+
+const p = await Arc({ radius: 0.5, sides: 4 }).clip(Box(0.5, 1)).view();
+
+const e = await r
+  .on(get('unfold:edge'), (e) => p.ez(e.diameter()))
+  .color('blue')
+  .view(4);
+
+await r
+  .on(get('unfold:faces'), inset(1).ez(-0.5).color('red'))
+  .view();
+
+r.ez(-0.5).cut(e).stl('cube');

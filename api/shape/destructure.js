@@ -84,9 +84,32 @@ export const destructure2 = async (shape, args, ...specs) => {
         }
         break;
       }
+      case 'modes': {
+        for (const arg of args) {
+          if (typeof args === 'string') {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        break;
+      }
+      case 'values': {
+        for (let arg of args) {
+          while (Shape.isFunction(arg)) {
+            arg = await arg(shape);
+          }
+          if (Shape.isValue(arg)) {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        break;
+      }
       case 'coordinates': {
         for (let arg of args) {
-          if (Shape.isFunction(arg)) {
+          while (Shape.isFunction(arg)) {
             arg = await arg(shape);
           }
           if (Shape.isShape(arg)) {

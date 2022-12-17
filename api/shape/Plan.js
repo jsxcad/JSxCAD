@@ -2,6 +2,7 @@ import { identity, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
 import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
+import { toValue } from './toValue.js';
 
 const X = 0;
 const Y = 1;
@@ -199,13 +200,15 @@ export const getScale = (geometry) => {
   ];
 };
 
-export const buildCorners = (x, y, z) => {
+export const buildCorners = (x, y, z) => async (shape) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {
     while (x.length < 2) {
       x.push(0);
     }
+    x[0] = await toValue(x[0])(shape);
+    x[1] = await toValue(x[1])(shape);
     if (x[0] < x[1]) {
       c1[X] = x[1];
       c2[X] = x[0];
@@ -221,6 +224,8 @@ export const buildCorners = (x, y, z) => {
     while (y.length < 2) {
       y.push(0);
     }
+    y[0] = await toValue(y[0])(shape);
+    y[1] = await toValue(y[1])(shape);
     if (y[0] < y[1]) {
       c1[Y] = y[1];
       c2[Y] = y[0];
@@ -236,6 +241,8 @@ export const buildCorners = (x, y, z) => {
     while (z.length < 2) {
       z.push(0);
     }
+    z[0] = await toValue(z[0])(shape);
+    z[1] = await toValue(z[1])(shape);
     if (z[0] < z[1]) {
       c1[Z] = z[1];
       c2[Z] = z[0];

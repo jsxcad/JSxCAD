@@ -185,6 +185,8 @@ typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Side_of_triangle_mesh;
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
 
+#include "mu3d.h"
+
 struct Edge {
   Edge(const Segment& segment, const Point& normal, int face_id)
       : segment(segment), normal(normal), face_id(face_id) {}
@@ -515,6 +517,15 @@ Transformation disorient_plane_along_z(Plane source) {
   Point s = source.to_3d(Point_2(0, 0));
   transform = transform * translate(Point(0, 0, 0) - s);
   return transform;
+}
+
+Transformation computeInverseSegmentTransform(const Point& start,
+                                              const Point& end,
+                                              const Vector& normal) {
+  Point zero(0, 0, 0);
+  Transformation align(CGAL::IDENTITY);
+  disorient_along_z(end - start, normal, align);
+  return Transformation(align * translate(zero - start));
 }
 
 Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
@@ -4500,6 +4511,10 @@ int disjointBackward(Geometry* geometry, emscripten::val getIsMasked,
 int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
                     bool exact) {
   int size = geometry->size();
+  if (size < 2) {
+    // Already disjoint.
+    return STATUS_OK;
+  }
 
   std::vector<bool> is_masked;
   is_masked.resize(size);
@@ -4510,11 +4525,6 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
-
-  if (size < 2) {
-    // Already disjoint.
-    return STATUS_OK;
-  }
 
   for (int start = size - 2; start >= 0; start--) {
     switch (geometry->type(start)) {
@@ -6775,6 +6785,107 @@ int Twist(Geometry* geometry, double turnsPerMm) {
   return STATUS_OK;
 }
 
+int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
+  std::cout << "QQ/Unfold/1" << std::endl;
+  size_t size = geometry->getSize();
+
+  CGAL::Cartesian_converter<Cartesian_kernel, Kernel> from_cartesian;
+
+  geometry->copyInputMeshesToOutputMeshes();
+  geometry->transformToAbsoluteFrame();
+  geometry->convertPolygonsToPlanarMeshes();
+
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_MESH: {
+        CGAL::Polyhedron_3<CGAL::Simple_cartesian<double>> polyhedron;
+        copy_face_graph(geometry->mesh(nth), polyhedron);
+        mu3d::Graph<Point_2> g;
+        g.load(polyhedron);
+        if (!g.unfold(20000, 0)) {
+          return STATUS_INVALID_INPUT;
+        }
+        std::vector<Point_2> points;
+        g.fillPoints(points);
+        int faces = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+        emit_tag(faces, std::string("unfold:faces"));
+        geometry->plane(faces) = Plane(0, 0, 1, 0);
+        geometry->setIdentityTransform(faces);
+        for (size_t nth = 0; nth < points.size(); nth += 3) {
+          Polygon_2 polygon;
+          polygon.push_back(points[nth + 0]);
+          polygon.push_back(points[nth + 1]);
+          polygon.push_back(points[nth + 2]);
+          geometry->pwh(faces).emplace_back(polygon);
+        }
+
+        if (enable_tabs) {
+          std::vector<Point_2> points;
+          g.fillTabs(points);
+          int faces = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          emit_tag(faces, std::string("unfold:tabs"));
+          // We want each of these to be a separate shape.
+          for (size_t nth = 0; nth < points.size(); nth += 4) {
+            Polygon_2 polygon;
+            polygon.push_back(points[nth + 0]);
+            polygon.push_back(points[nth + 1]);
+            polygon.push_back(points[nth + 3]);
+            polygon.push_back(points[nth + 2]);
+            geometry->pwh(faces).emplace_back(polygon);
+          }
+        }
+
+        const auto& bestPlanarFaces = g.getBestPlanarFaces();
+        for (const auto& edge : g.getBestEdges()) {
+          // TODO: Include angle magnitude.
+          const auto vs1 = edge.getSourceS2(bestPlanarFaces);
+          const auto vs2 = edge.getTargetS2(bestPlanarFaces);
+          const Point s1(vs1.x, vs1.y, 0);
+          const Point s2(vs2.x, vs2.y, 0);
+          const auto vt1 = edge.getSourceT2(bestPlanarFaces);
+          const auto vt2 = edge.getTargetT2(bestPlanarFaces);
+          const Point t1(vt1.x, vt1.y, 0);
+          const Point t2(vt2.x, vt2.y, 0);
+          if (edge.getAngle() == 0) {
+            // We exclude flat edges, since they do not contribute to the
+            // geometry.
+          } else if (t1 != s1 || t2 != s2) {
+            // This edge was split, include both sides.
+            {
+              int edge = geometry->add(GEOMETRY_SEGMENTS);
+              Transformation t =
+                  computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
+              geometry->segments(edge).emplace_back(s1, s2);
+              geometry->copyTransform(edge, t.inverse());
+              emit_tag(edge, std::string("unfold:edge"));
+            }
+            {
+              int edge = geometry->add(GEOMETRY_SEGMENTS);
+              Transformation t =
+                  computeInverseSegmentTransform(t2, t1, Vector(0, 0, 1));
+              geometry->segments(edge).emplace_back(t2, t1);
+              geometry->copyTransform(edge, t.inverse());
+              emit_tag(edge, std::string("unfold:edge"));
+            }
+          } else {
+            // This edge was not split, but with a fold -- include one side.
+            int edge = geometry->add(GEOMETRY_SEGMENTS);
+            Transformation t =
+                computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
+            geometry->segments(edge).emplace_back(s1, s2);
+            geometry->copyTransform(edge, t.inverse());
+            emit_tag(edge, std::string("unfold:edge"));
+          }
+        }
+      }
+    }
+  }
+
+  geometry->transformToLocalFrame();
+
+  return STATUS_OK;
+}
+
 int Wrap(Geometry* geometry, double alpha, double offset) {
   typedef CGAL::Cartesian_converter<Kernel, Epick_kernel> converter;
   converter to_cartesian;
@@ -7388,7 +7499,7 @@ std::shared_ptr<const Transformation> Transformation__rotate_z_to_y0(double x,
 std::shared_ptr<const Transformation> InverseSegmentTransform(
     double startX, double startY, double startZ, double endX, double endY,
     double endZ, double normalX, double normalY, double normalZ) {
-#if 1
+#if 0
   Point zero(0, 0, 0);
   Point start(startX, startY, startZ);
   Point end(endX, endY, endZ);
@@ -7397,52 +7508,10 @@ std::shared_ptr<const Transformation> InverseSegmentTransform(
   return std::shared_ptr<const Transformation>(
       new Transformation(align * translate(zero - start)));
 #else
-  Transformation orient =
-      Transformation(CGAL::TRANSLATION, Vector(-startX, -startY, -startZ));
-
-  Point oriented_end = Point(endX, endY, endZ).transform(orient);
-
-  Transformation align(CGAL::IDENTITY);
-
-  if (oriented_end.x() != 0 || oriented_end.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(oriented_end.x(), oriented_end.y(),
-                                          sin_alpha, cos_alpha, w, RT(1),
-                                          RT(1000));
-    // Z rotation to bring y to the x axis.
-    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
-    oriented_end = oriented_end.transform(rotation);
-    align = rotation * align;
-  }
-
-  if (oriented_end.x() != 0 || oriented_end.z() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(oriented_end.x(), -oriented_end.z(),
-                                          sin_alpha, cos_alpha, w, RT(1),
-                                          RT(1000));
-    // Y rotation to bring z to the x axis.
-    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
-    oriented_end = oriented_end.transform(rotation);
-    align = rotation * align;
-  }
-
-  Point oriented_normal = Point(normalX, normalY, normalZ).transform(align);
-
-  if (oriented_normal.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(oriented_normal.y(),
-                                          -oriented_normal.z(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // X rotation to bring the normal to the x axis.
-    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                            sin_alpha, cos_alpha, 0, w);
-    align = rotation * align;
-  }
-
   return std::shared_ptr<const Transformation>(
-      new Transformation(align * orient));
+      new Transformation(computeInverseSegmentTransform(
+          Point(startX, startY, startZ), Point(endX, endY, endZ),
+          Vector(normalX, normalY, normalZ))));
 #endif
 }
 
@@ -7654,6 +7723,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
+  emscripten::function("Unfold", &Unfold, emscripten::allow_raw_pointers());
   emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double,

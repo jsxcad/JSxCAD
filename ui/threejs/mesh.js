@@ -297,7 +297,6 @@ export const buildMeshes = async ({
   }
   const { tags = [] } = geometry;
   const layer = tags.includes('show:overlay') ? SKETCH_LAYER : GEOMETRY_LAYER;
-  let noTransform = false;
   let mesh;
   let matrix;
 
@@ -488,14 +487,6 @@ export const buildMeshes = async ({
       break;
     }
     case 'polygonsWithHoles': {
-      // noTransform = true;
-      /*
-      const normal = new Vector3(
-        geometry.plane[0],
-        geometry.plane[1],
-        geometry.plane[2]
-      ).normalize();
-      */
       const baseNormal = new Vector3(0, 0, 1);
       const plane = new Plane(baseNormal, 0);
       const meshes = new Group();
@@ -578,7 +569,7 @@ export const buildMeshes = async ({
       throw Error(`Non-display geometry: ${geometry.type}`);
   }
 
-  if (mesh && geometry.matrix && !noTransform) {
+  if (mesh && geometry.matrix) {
     mesh.applyMatrix4(matrix);
   }
 

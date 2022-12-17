@@ -160,7 +160,7 @@ const ArcOp =
         reify = reifyArcY;
         break;
     }
-    const [c1, c2] = buildCorners(x, y, z);
+    const [c1, c2] = await buildCorners(x, y, z)(null);
     const result = reify({ c1, c2, start, end, sides, zag });
     return result;
   };

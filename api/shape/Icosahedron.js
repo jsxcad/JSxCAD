@@ -76,7 +76,7 @@ const reifyIcosahedron = async (c1, c2) => {
 export const Icosahedron = Shape.registerShapeMethod(
   'Icosahedron',
   async (x = 1, y = x, z = x) => {
-    const [c1, c2] = buildCorners(x, y, z);
+    const [c1, c2] = await buildCorners(x, y, z)(null);
     return reifyIcosahedron(c1, c2);
   }
 );
