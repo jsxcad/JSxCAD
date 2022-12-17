@@ -6786,7 +6786,6 @@ int Twist(Geometry* geometry, double turnsPerMm) {
 }
 
 int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
-  std::cout << "QQ/Unfold/1" << std::endl;
   size_t size = geometry->getSize();
 
   CGAL::Cartesian_converter<Cartesian_kernel, Kernel> from_cartesian;
