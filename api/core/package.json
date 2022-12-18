@@ -30,7 +30,6 @@
     "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/api-v1-obj": "^0.0.79",
     "@jsxcad/api-v1-off": "^0.0.79",
-    "@jsxcad/api-v1-pdf": "^0.0.79",
     "@jsxcad/api-v1-shapefile": "^0.0.79",
     "@jsxcad/api-v1-threejs": "^0.0.79",
     "@jsxcad/api-v1-tools": "^0.0.79",
