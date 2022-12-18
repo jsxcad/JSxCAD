@@ -98,6 +98,7 @@ static void planar(const glm::dvec3& P1, const glm::dvec3& P2,
 }
 
 static void print_progress(int block_idx, double energy) {
+#ifndef MU3D_NDEBUG
   for (int i = 0; i < block_idx; i++) {
     std::cout << "[]";
   }
@@ -108,6 +109,7 @@ static void print_progress(int block_idx, double energy) {
 
   std::cout << " " << block_idx / 10.0f * 100 << "% with " << energy
             << std::endl;
+#endif
 }
 
 static double sh_overlapping_area(glm::dvec2& a, glm::dvec2& b, glm::dvec2& c,
@@ -495,11 +497,8 @@ class Graph {
       const auto& b = f2p.b;
       const auto& c = f2p.c;
       points.emplace_back(a.x, a.y);
-      std::cout << "QQ/fillPoints/a: " << points.back() << std::endl;
       points.emplace_back(b.x, b.y);
-      std::cout << "QQ/fillPoints/b: " << points.back() << std::endl;
       points.emplace_back(c.x, c.y);
-      std::cout << "QQ/fillPoints/c: " << points.back() << std::endl;
     }
   }
 
@@ -521,7 +520,6 @@ class Graph {
   }
 
   const std::vector<Edge>& getBestEdges() {
-    std::cout << "Returning " << _C.size() << " best edges." << std::endl;
     return _C;
   }
 

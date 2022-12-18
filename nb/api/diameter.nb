@@ -1,0 +1,13 @@
+md`
+[index](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/index.nb)
+### diameter()
+Parameter|Default|Type
+---|---|---
+op|function|(diameter) => (shape) => diameter
+
+Computes the longest distance between any two points in the shape to determine the generalized diameter.
+
+This is then transformed by _op_ which defaults to returning the numeric value.
+`;
+
+Box(3).diameter((d) => note(`The diameter is a Box(3) is ${d}`));
