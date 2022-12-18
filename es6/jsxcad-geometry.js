@@ -202,6 +202,40 @@ const isNotTypeVoid = isNotType(typeVoid);
 const isTypeVoid = isType(typeVoid);
 const isSegments = ({ type }) => type === 'segments';
 
+const linearize = (
+  geometry,
+  filter,
+  out = [],
+  includeSketches = false
+) => {
+  const collect = (geometry, descend) => {
+    if (filter(geometry)) {
+      out.push(geometry);
+    }
+    if (includeSketches || geometry.type !== 'sketch') {
+      descend();
+    }
+  };
+  visit(geometry, collect);
+  return out;
+};
+
+const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Group content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Group content is an array`);
+  }
+  if (content.some((value) => value.then)) {
+    throw Error(`Group content is a promise`);
+  }
+  if (content.length === 1) {
+    return content[0];
+  }
+  return { type: 'group', tags, matrix, content, provenance };
+};
+
 // import { asyncRewrite } from './visit.js';
 
 // export const registry = new Map();
@@ -262,41 +296,6 @@ const reify = (geometry) => {
 };
 
 const toConcreteGeometry = (geometry) => reify(geometry);
-
-const linearize = (
-  geometry,
-  filter,
-  out = [],
-  includeSketches = false
-) => {
-  const collect = (geometry, descend) => {
-    if (filter(geometry)) {
-      out.push(geometry);
-    }
-    if (includeSketches || geometry.type !== 'sketch') {
-      descend();
-    }
-  };
-  // FIX: Remove toConcreteGeometry.
-  visit(toConcreteGeometry(geometry), collect);
-  return out;
-};
-
-const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined Group content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Group content is an array`);
-  }
-  if (content.some((value) => value.then)) {
-    throw Error(`Group content is a promise`);
-  }
-  if (content.length === 1) {
-    return content[0];
-  }
-  return { type: 'group', tags, matrix, content, provenance };
-};
 
 const filter$B = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(

@@ -244,9 +244,9 @@ await Group(
   .stl('3d road tile', op(extrudeTile()).page('individual'));
 ```
 
-![Image](road.md.$3_2d_road_tile_0.pdf.png)
+![Image](road.md.$3_2d_road_tile.png)
 
-[2d road tile_0.pdf](road.2d%20road%20tile_0.pdf)
+[2d road tile.pdf](road.2d%20road%20tile.pdf)
 
 ![Image](road.md.$3_3d_road_tile.png)
 

@@ -1,5 +1,4 @@
 import './jsxcad-api-v1-gcode.js';
-import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
@@ -480,11 +479,11 @@ registerDynamicModule(
   './jsxcad-api-v1-math.js',
   '../v1-math/main.js'
 );
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-pdf',
-  './jsxcad-api-v1-pdf.js',
-  '../v1-pdf/main.js'
-);
+// registerDynamicModule(
+//   '@' + 'jsxcad/api-v1-pdf',
+//   './jsxcad-api-v1-pdf.js',
+//   '../v1-pdf/main.js'
+// );
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-threejs',
   './jsxcad-api-v1-threejs.js',

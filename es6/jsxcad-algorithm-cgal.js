@@ -1370,6 +1370,8 @@ const disjoint = (inputs, mode, exact = false) =>
         throw new ErrorZeroThickness('Zero thickness produced by disjoint');
       case STATUS_OK:
         return fromCgalGeometry(geometry, inputs);
+      case STATUS_UNCHANGED:
+        return inputs;
       default:
         throw new Error(`Unexpected status ${status}`);
     }

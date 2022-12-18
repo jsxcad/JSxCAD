@@ -121,6 +121,7 @@ export { outline } from './outline.js';
 export { orient } from './orient.js';
 export { pack } from './pack.js';
 export { page } from './Page.js';
+export { pdf } from './pdf.js';
 export { points } from './points.js';
 export { put } from './put.js';
 export { ref } from './Ref.js';

@@ -465,6 +465,7 @@ class Graph {
   }
 
   bool unfold(int max_its, int opt_its) {
+    srand(0);
     initialise(max_its, opt_its);
 
     int progress = 0;

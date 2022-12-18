@@ -1,4 +1,3 @@
-import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { visit } from './visit.js';
 
 export const linearize = (
@@ -15,7 +14,6 @@ export const linearize = (
       descend();
     }
   };
-  // FIX: Remove toConcreteGeometry.
-  visit(toConcreteGeometry(geometry), collect);
+  visit(geometry, collect);
   return out;
 };

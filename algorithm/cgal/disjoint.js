@@ -1,4 +1,8 @@
-import { STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
+import {
+  STATUS_OK,
+  STATUS_UNCHANGED,
+  STATUS_ZERO_THICKNESS,
+} from './status.js';
 import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
@@ -14,6 +18,8 @@ export const disjoint = (inputs, mode, exact = false) =>
         throw new ErrorZeroThickness('Zero thickness produced by disjoint');
       case STATUS_OK:
         return fromCgalGeometry(geometry, inputs);
+      case STATUS_UNCHANGED:
+        return inputs;
       default:
         throw new Error(`Unexpected status ${status}`);
     }

@@ -1,11 +1,12 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read, log as log$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, taggedPlan, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureBoundingBox, measureArea, taggedItem, transform as transform$1, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, bend as bend$1, rewrite, visit, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$1, fix as fix$1, grow as grow$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, hash, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, taggedPlan, hasTypeReference, taggedGroup, join as join$1, makeAbsolute, measureBoundingBox, measureArea, taggedItem, transform as transform$1, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, bend as bend$1, rewrite, visit, getLeafs, computeCentroid, convexHull, fuse as fuse$1, noGhost, clip as clip$1, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$1, fix as fix$1, grow as grow$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, hash, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, hasTypeVoid, measureVolume, withAabbTreeQuery, linearize, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, fromTranslateToTransform, fromRotateZToTransform, setTestMode, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
+import { toPdf } from './jsxcad-convert-pdf.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
@@ -1074,7 +1075,7 @@ const render = (abstract, shape) => {
 const abstract = Shape.registerMethod(
   'abstract',
   (types = ['item'], op = render) =>
-    (shape) => {
+    async (shape) => {
       const walk = ({ type, tags, plan, content }) => {
         if (type === 'group') {
           return content.flatMap(walk);
@@ -1090,7 +1091,7 @@ const abstract = Shape.registerMethod(
           return [];
         }
       };
-      return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
+      return op(taggedGroup({}, ...walk(await shape.toGeometry())), shape);
     }
 );
 
@@ -4319,9 +4320,21 @@ const applyModes = async (shape, options, modes) => {
   return shape;
 };
 
+const qualifyViewId = (viewId, { id, path, nth }) => {
+  if (viewId) {
+    // We can't put spaces into viewId since that would break dom classname requirements.
+    viewId = `${id}_${String(viewId).replace(/ /g, '_')}`;
+  } else if (nth) {
+    viewId = `${id}_${nth}`;
+  } else {
+    viewId = `${id}`;
+  }
+  return { id, path, viewId };
+};
+
 // FIX: Avoid the extra read-write cycle.
 const baseView =
-  (viewId, op = (x) => x, options = {}) =>
+  (name, op = (x) => x, options = {}) =>
   async (shape) => {
     let {
       size,
@@ -4340,22 +4353,14 @@ const baseView =
     if (!sourceLocation) {
       console.log('No sourceLocation');
     }
-    const { id, path, nth } = sourceLocation;
-    if (viewId) {
-      // We can't put spaces into viewId since that would break dom classname requirements.
-      viewId = `${id}_${String(viewId).replace(/ /g, '_')}`;
-    } else if (nth) {
-      viewId = `${id}_${nth}`;
-    } else {
-      viewId = `${id}`;
-    }
+    const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     const displayGeometry = await viewShape.toDisplayGeometry();
     for (const pageGeometry of await ensurePages(
       Shape.fromGeometry(displayGeometry),
       0)) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
-      const thumbnailPath = `thumbnail/${hash}`;
+      const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
       const view = {
         viewId,
         width,
@@ -4532,8 +4537,8 @@ const image = Shape.registerMethod(
   (url) => (shape) => untag('image:*').tag(`image:${url}`)(shape)
 );
 
-const inFn = Shape.registerMethod('in', () => (shape) => {
-  const geometry = shape.toGeometry();
+const inFn = Shape.registerMethod('in', () => async (shape) => {
+  const geometry = await shape.toGeometry();
   if (geometry.type === 'item') {
     return Shape.fromGeometry(geometry.content[0]);
   } else {
@@ -5012,6 +5017,31 @@ const pack = Shape.registerMethod(
       return packedShape;
     }
 );
+
+const pdf = Shape.registerMethod('pdf', (...args) => async (shape) => {
+  const {
+    value: name,
+    func: op = (s) => s,
+    object: options = {},
+  } = Shape.destructure(args);
+  const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
+  let index = 0;
+  for (const entry of await ensurePages(await op(shape))) {
+    const pdfPath = `download/pdf/${path}/${id}/${viewId}`;
+    await write(pdfPath, await toPdf(entry, options));
+    const suffix = index++ === 0 ? '' : `_${index}`;
+    const filename = `${name}${suffix}.pdf`;
+    const record = {
+      path: pdfPath,
+      filename,
+      type: 'application/pdf',
+    };
+    const hash$1 = computeHash({ filename, options }) + hash(entry);
+    await gridView(name, options.view)(Shape.fromGeometry(entry));
+    emit({ download: { entries: [record] }, hash: hash$1 });
+  }
+  return shape;
+});
 
 const points$1 = Shape.registerMethod('points', () => async (shape) => {
   const points = [];
@@ -5552,19 +5582,20 @@ const svg = Shape.registerMethod('svg', (...args) => async (shape) => {
     func: op = (s) => s,
     object: options = {},
   } = destructure(args);
-  const { path } = getSourceLocation();
+  const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
   let index = 0;
   for (const entry of await ensurePages(op(shape))) {
-    const svgPath = `download/svg/${path}/${generateUniqueId()}`;
+    const svgPath = `download/svg/${path}/${id}/${viewId}`;
     await write(svgPath, await toSvg(entry, options));
-    const filename = `${name}_${index++}.svg`;
+    const suffix = index++ === 0 ? '' : `_${index}`;
+    const filename = `${name}${suffix}.svg`;
     const record = {
       path: svgPath,
       filename,
       type: 'image/svg+xml',
     };
     const hash$1 = computeHash({ filename, options }) + hash(entry);
-    await gridView(hash$1, options.view)(Shape.fromGeometry(entry));
+    await gridView(name, options.view)(Shape.fromGeometry(entry));
     emit({ download: { entries: [record] }, hash: hash$1 });
   }
   return shape;
@@ -6659,4 +6690,4 @@ const Wave = Shape.registerShapeMethod('Wave', async (...args) => {
   return Link(particles);
 });
 
-export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$7 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, disjoint, drop, e, each, eachEdge, eachPoint, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$8 as X, XY, XZ, Y$8 as Y, YZ, Z$7 as Z, absolute, abstract, addTo, align, and, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, disjoint, drop, e, each, eachEdge, eachPoint, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

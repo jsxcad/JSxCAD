@@ -249,6 +249,7 @@ export const updateNotebook = async (
     );
     for (let nth = 0; nth < imageUrlList.length; nth++) {
       const { imageUrl, viewId = nth } = imageUrlList[nth];
+      console.log(`QQ/viewId: ${viewId}`);
       const pathViewId = viewId.replace(/[/]/g, '_');
       const observedPath = `${target}.md.${pathViewId}.observed.png`;
       const expectedPath = `${target}.md.${pathViewId}.png`;

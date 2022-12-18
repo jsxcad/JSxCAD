@@ -363,9 +363,9 @@ await Arc(2)
 await Triangle(14).svg('triangle');
 ```
 
-![Image](shape.md.$51_v45gNMPiNr9UmOqan0IOitpKswLmYba1O+ifpQe7wLw=WPB7tEAoJ8Ps2tZ1NvtrqR_v9Bzgawua4CSDtJ74YQI=.png)
+![Image](shape.md.$51_triangle.png)
 
-[triangle_0.svg](shape.triangle_0.svg)
+[triangle.svg](shape.triangle.svg)
 
 ```JavaScript
 await Box(10)

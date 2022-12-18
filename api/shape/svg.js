@@ -1,17 +1,10 @@
-import {
-  computeHash,
-  emit,
-  generateUniqueId,
-  getSourceLocation,
-  read,
-  write,
-} from '@jsxcad/sys';
+import { computeHash, emit, getSourceLocation, read, write } from '@jsxcad/sys';
 import { fromSvg, toSvg } from '@jsxcad/convert-svg';
+import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { ensurePages } from './Page.js';
-import { gridView } from './view.js';
 import { hash as hashGeometry } from '@jsxcad/geometry';
 
 export const LoadSvg = Shape.registerShapeMethod(
@@ -45,19 +38,20 @@ export const svg = Shape.registerMethod('svg', (...args) => async (shape) => {
     func: op = (s) => s,
     object: options = {},
   } = destructure(args);
-  const { path } = getSourceLocation();
+  const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
   let index = 0;
   for (const entry of await ensurePages(op(shape))) {
-    const svgPath = `download/svg/${path}/${generateUniqueId()}`;
+    const svgPath = `download/svg/${path}/${id}/${viewId}`;
     await write(svgPath, await toSvg(entry, options));
-    const filename = `${name}_${index++}.svg`;
+    const suffix = index++ === 0 ? '' : `_${index}`;
+    const filename = `${name}${suffix}.svg`;
     const record = {
       path: svgPath,
       filename,
       type: 'image/svg+xml',
     };
     const hash = computeHash({ filename, options }) + hashGeometry(entry);
-    await gridView(hash, options.view)(Shape.fromGeometry(entry));
+    await gridView(name, options.view)(Shape.fromGeometry(entry));
     emit({ download: { entries: [record] }, hash });
   }
   return shape;

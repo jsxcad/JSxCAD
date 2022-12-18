@@ -37,11 +37,15 @@ design
   .note("design.get('color:blue') finds the Arc, but not the Triangle.");
 ```
 
+![Image](get.md.$2.png)
+
 design.get('color:blue') finds the Arc, but not the Triangle.
 
 ```JavaScript
 design.get('triangle').view().note("design.get('triangle') finds the triangle");
 ```
+
+![Image](get.md.$3.png)
 
 design.get('triangle') finds the triangle
 
@@ -51,3 +55,5 @@ design
   .view()
   .note('design.get(' * ') finds all items');
 ```
+
+![Image](get.md.$4.png)

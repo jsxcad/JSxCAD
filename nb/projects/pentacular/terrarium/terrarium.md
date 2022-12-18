@@ -133,9 +133,7 @@ const makeTerrarium = () => (shape) =>
   shape
     .get('terrarium')
     .in()
-    .each(flat())
-    .section()
-    .offset(kerf)
+    .each(flat().section().offset(kerf))
     .note('#### Panels')
     .note(
       "These are the profiles you'll need to cut out to assemble the terrarium."
@@ -206,89 +204,29 @@ await terrarium
 
 These are the profiles you'll need to cut out to assemble the terrarium.
 
-![Image](terrarium.md.$7_faces_0.pdf.png)
+![Image](terrarium.md.$7_faces.png)
 
-[faces_0.pdf](terrarium.faces_0.pdf)
+[faces.pdf](terrarium.faces.pdf)
 
-![Image](terrarium.md.$7_faces_1.pdf.png)
-
-[faces_1.pdf](terrarium.faces_1.pdf)
-
-![Image](terrarium.md.$7_faces_2.pdf.png)
+![Image](terrarium.md.$7_faces.png)
 
 [faces_2.pdf](terrarium.faces_2.pdf)
 
-![Image](terrarium.md.$7_faces_3.pdf.png)
+![Image](terrarium.md.$7_faces.png)
 
 [faces_3.pdf](terrarium.faces_3.pdf)
 
-![Image](terrarium.md.$7_faces_4.pdf.png)
+![Image](terrarium.md.$7_faces.png)
 
 [faces_4.pdf](terrarium.faces_4.pdf)
 
-![Image](terrarium.md.$7_faces_5.pdf.png)
+![Image](terrarium.md.$7_faces.png)
 
 [faces_5.pdf](terrarium.faces_5.pdf)
 
-![Image](terrarium.md.$7_faces_6.pdf.png)
+![Image](terrarium.md.$7_faces.png)
 
 [faces_6.pdf](terrarium.faces_6.pdf)
-
-![Image](terrarium.md.$7_faces_7.pdf.png)
-
-[faces_7.pdf](terrarium.faces_7.pdf)
-
-![Image](terrarium.md.$7_faces_8.pdf.png)
-
-[faces_8.pdf](terrarium.faces_8.pdf)
-
-![Image](terrarium.md.$7_faces_9.pdf.png)
-
-[faces_9.pdf](terrarium.faces_9.pdf)
-
-![Image](terrarium.md.$7_faces_10.pdf.png)
-
-[faces_10.pdf](terrarium.faces_10.pdf)
-
-![Image](terrarium.md.$7_faces_11.pdf.png)
-
-[faces_11.pdf](terrarium.faces_11.pdf)
-
-![Image](terrarium.md.$7_faces_12.pdf.png)
-
-[faces_12.pdf](terrarium.faces_12.pdf)
-
-![Image](terrarium.md.$7_faces_13.pdf.png)
-
-[faces_13.pdf](terrarium.faces_13.pdf)
-
-![Image](terrarium.md.$7_faces_14.pdf.png)
-
-[faces_14.pdf](terrarium.faces_14.pdf)
-
-![Image](terrarium.md.$7_faces_15.pdf.png)
-
-[faces_15.pdf](terrarium.faces_15.pdf)
-
-![Image](terrarium.md.$7_faces_16.pdf.png)
-
-[faces_16.pdf](terrarium.faces_16.pdf)
-
-![Image](terrarium.md.$7_faces_17.pdf.png)
-
-[faces_17.pdf](terrarium.faces_17.pdf)
-
-![Image](terrarium.md.$7_faces_18.pdf.png)
-
-[faces_18.pdf](terrarium.faces_18.pdf)
-
-![Image](terrarium.md.$7_faces_19.pdf.png)
-
-[faces_19.pdf](terrarium.faces_19.pdf)
-
-![Image](terrarium.md.$7_faces_20.pdf.png)
-
-[faces_20.pdf](terrarium.faces_20.pdf)
 
 Fit the profiles together to form a box with the hole on the top.
 
@@ -296,12 +234,16 @@ Fit the profiles together to form a box with the hole on the top.
 
 These profiles assemble to form the lid
 
-![Image](terrarium.md.$7_lid_base_0.pdf.png)
+![Image](terrarium.md.$7_lid_base.png)
 
-[lid_base_0.pdf](terrarium.lid_base_0.pdf)
+[lid_base.pdf](terrarium.lid_base.pdf)
 
-![Image](terrarium.md.$7_lid_top_0.pdf.png)
+![Image](terrarium.md.$7_lid_top.png)
 
-[lid_top_0.pdf](terrarium.lid_top_0.pdf)
+[lid_top.pdf](terrarium.lid_top.pdf)
+
+![Image](terrarium.md.$7_lid_pin.png)
+
+[lid_pin.pdf](terrarium.lid_pin.pdf)
 
 Stack the larger disc on the smaller and then push the rectangular pin through to connect them.

@@ -32,9 +32,21 @@ const applyModes = async (shape, options, modes) => {
   return shape;
 };
 
+export const qualifyViewId = (viewId, { id, path, nth }) => {
+  if (viewId) {
+    // We can't put spaces into viewId since that would break dom classname requirements.
+    viewId = `${id}_${String(viewId).replace(/ /g, '_')}`;
+  } else if (nth) {
+    viewId = `${id}_${nth}`;
+  } else {
+    viewId = `${id}`;
+  }
+  return { id, path, viewId };
+};
+
 // FIX: Avoid the extra read-write cycle.
 export const baseView =
-  (viewId, op = (x) => x, options = {}) =>
+  (name, op = (x) => x, options = {}) =>
   async (shape) => {
     let {
       size,
@@ -53,15 +65,7 @@ export const baseView =
     if (!sourceLocation) {
       console.log('No sourceLocation');
     }
-    const { id, path, nth } = sourceLocation;
-    if (viewId) {
-      // We can't put spaces into viewId since that would break dom classname requirements.
-      viewId = `${id}_${String(viewId).replace(/ /g, '_')}`;
-    } else if (nth) {
-      viewId = `${id}_${nth}`;
-    } else {
-      viewId = `${id}`;
-    }
+    const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     const displayGeometry = await viewShape.toDisplayGeometry();
     for (const pageGeometry of await ensurePages(
       Shape.fromGeometry(displayGeometry),
@@ -70,7 +74,7 @@ export const baseView =
     )) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
-      const thumbnailPath = `thumbnail/${hash}`;
+      const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
       const view = {
         viewId,
         width,

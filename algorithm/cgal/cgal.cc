@@ -4513,7 +4513,7 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
   int size = geometry->size();
   if (size < 2) {
     // Already disjoint.
-    return STATUS_OK;
+    return STATUS_UNCHANGED;
   }
 
   std::vector<bool> is_masked;
