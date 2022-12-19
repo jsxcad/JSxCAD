@@ -40,6 +40,6 @@ Stl sliced each 2mm up to 200mm.
 
 Laid out on a single sheet for cutting.
 
-![Image](bear.md.$3_slices_0.pdf.png)
+![Image](bear.md.$3_slices.png)
 
-[slices_0.pdf](bear.slices_0.pdf)
+[slices.pdf](bear.slices.pdf)

@@ -35,7 +35,7 @@ const render = (abstract, shape) => {
 export const abstract = Shape.registerMethod(
   'abstract',
   (types = ['item'], op = render) =>
-    (shape) => {
+    async (shape) => {
       const walk = ({ type, tags, plan, content }) => {
         if (type === 'group') {
           return content.flatMap(walk);
@@ -51,6 +51,6 @@ export const abstract = Shape.registerMethod(
           return [];
         }
       };
-      return op(taggedGroup({}, ...walk(shape.toGeometry())), shape);
+      return op(taggedGroup({}, ...walk(await shape.toGeometry())), shape);
     }
 );

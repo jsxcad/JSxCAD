@@ -80,5 +80,6 @@ export { simplify } from './simplify.js';
 export { smooth } from './smooth.js';
 export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
 export { twist } from './twist.js';
+export { unfold } from './unfold.js';
 export { withAabbTreeQuery } from './aabbTreeQuery.js';
 export { wrap } from './wrap.js';

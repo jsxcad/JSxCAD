@@ -42,12 +42,6 @@ export const eachEdge = Shape.registerMethod(
         faceOp = (es, f) => (s) => es,
         groupOp = Group,
       ] = shapesAndFunctions;
-      /*
-      if (Shape.isShape(edgeOp)) {
-        const edgeShape = edgeOp;
-        edgeOp = (edge) => edgeShape.to(edge);
-      }
-      */
       const faces = [];
       const faceEdges = [];
       eachFaceEdges(

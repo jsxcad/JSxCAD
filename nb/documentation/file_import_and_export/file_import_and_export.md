@@ -25,9 +25,9 @@ Creates an option to download the shape as a svg file. A view is created to show
 await Arc(10).svg('fileName');
 ```
 
-![Image](file_import_and_export.md.$6_npt2aUtH8nUGeIDrk0Emb1JjeuKGptG+LxcDQeJZpUc=hpabDVVcHRcsFUAPna4lb7WP9Dc+cJWRD3KpECS+klo=.png)
+![Image](file_import_and_export.md.$6_fileName.png)
 
-[fileName_0.svg](file_import_and_export.fileName_0.svg)
+[fileName.svg](file_import_and_export.fileName.svg)
 
 ---
 ### Importing .stl

@@ -106,9 +106,7 @@ const makeTerrarium = () => (shape) =>
   shape
     .get('terrarium')
     .in()
-    .each(flat())
-    .section()
-    .offset(kerf)
+    .each(flat().section().offset(kerf))
     .note('#### Panels')
     .note(
       "These are the profiles you'll need to cut out to assemble the terrarium."

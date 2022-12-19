@@ -2,7 +2,7 @@ import './toCoordinate.js';
 
 import Point from './Point.js';
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
 import { normal } from './normal.js';
 import { toValue } from './toValue.js';
@@ -16,7 +16,13 @@ export const extrudeAlong = Shape.registerMethod(
   'extrudeAlong',
   (direction, ...args) =>
     async (shape) => {
-      const { strings: modes, values: extents } = destructure(args);
+      // const { strings: modes, values: extents } = destructure(args);
+      const [modes, extents] = await destructure2(
+        shape,
+        args,
+        'modes',
+        'values'
+      );
       let vector;
       try {
         // This will fail on ghost geometry.

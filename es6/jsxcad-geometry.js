@@ -1,4 +1,4 @@
-import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, identity, withAabbTreeQuery, convexHull as convexHull$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, cut as cut$1, deform as deform$1, demesh as demesh$1, faceEdges, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, eagerTransform as eagerTransform$1, extrude as extrude$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, wrap as wrap$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, disjoint as disjoint$1, deletePendingSurfaceMeshes, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeNormal as computeNormal$1, outline as outline$1, fuse as fuse$1, inset as inset$1, computeBoundingBox, section as section$1, identity, withAabbTreeQuery, convexHull as convexHull$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, cut as cut$1, deform as deform$1, demesh as demesh$1, faceEdges, eachPoint as eachPoint$1, eachTriangle as eachTriangle$1, eagerTransform as eagerTransform$1, extrude as extrude$1, fix as fix$1, fromPolygons as fromPolygons$1, generateEnvelope, invertTransform, grow as grow$1, involute as involute$1, fill as fill$1, join as join$1, link as link$1, loft as loft$1, makeAbsolute as makeAbsolute$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, twist as twist$1, unfold as unfold$1, wrap as wrap$1, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromTranslateToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
 import { toTagsFromName } from './jsxcad-algorithm-material.js';
@@ -202,6 +202,40 @@ const isNotTypeVoid = isNotType(typeVoid);
 const isTypeVoid = isType(typeVoid);
 const isSegments = ({ type }) => type === 'segments';
 
+const linearize = (
+  geometry,
+  filter,
+  out = [],
+  includeSketches = false
+) => {
+  const collect = (geometry, descend) => {
+    if (filter(geometry)) {
+      out.push(geometry);
+    }
+    if (includeSketches || geometry.type !== 'sketch') {
+      descend();
+    }
+  };
+  visit(geometry, collect);
+  return out;
+};
+
+const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
+  if (content.some((value) => !value)) {
+    throw Error(`Undefined Group content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Group content is an array`);
+  }
+  if (content.some((value) => value.then)) {
+    throw Error(`Group content is a promise`);
+  }
+  if (content.length === 1) {
+    return content[0];
+  }
+  return { type: 'group', tags, matrix, content, provenance };
+};
+
 // import { asyncRewrite } from './visit.js';
 
 // export const registry = new Map();
@@ -262,41 +296,6 @@ const reify = (geometry) => {
 };
 
 const toConcreteGeometry = (geometry) => reify(geometry);
-
-const linearize = (
-  geometry,
-  filter,
-  out = [],
-  includeSketches = false
-) => {
-  const collect = (geometry, descend) => {
-    if (filter(geometry)) {
-      out.push(geometry);
-    }
-    if (includeSketches || geometry.type !== 'sketch') {
-      descend();
-    }
-  };
-  // FIX: Remove toConcreteGeometry.
-  visit(toConcreteGeometry(geometry), collect);
-  return out;
-};
-
-const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
-  if (content.some((value) => !value)) {
-    throw Error(`Undefined Group content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Group content is an array`);
-  }
-  if (content.some((value) => value.then)) {
-    throw Error(`Group content is a promise`);
-  }
-  if (content.length === 1) {
-    return content[0];
-  }
-  return { type: 'group', tags, matrix, content, provenance };
-};
 
 const filter$B = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
@@ -991,7 +990,7 @@ const measureBoundingBox = (geometry) => {
   return boundingBox;
 };
 
-const filterInputs = (geometry) =>
+const filterInputs$1 = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) && isNotTypeGhost(geometry);
@@ -1004,7 +1003,7 @@ const filterReferences = (geometry) =>
 const section = (inputGeometry, referenceGeometries) => {
   const concreteGeometry = toConcreteGeometry(inputGeometry);
   const inputs = [];
-  linearize(concreteGeometry, filterInputs, inputs);
+  linearize(concreteGeometry, filterInputs$1, inputs);
   const count = inputs.length;
   for (const referenceGeometry of referenceGeometries) {
     linearize(referenceGeometry, filterReferences, inputs);
@@ -2517,6 +2516,23 @@ const twist = (geometry, radius) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
+const filterInputs = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
+
+const unfold = (inputGeometry) => {
+  const concreteGeometry = toConcreteGeometry(inputGeometry);
+  const inputs = [];
+  linearize(concreteGeometry, filterInputs, inputs);
+  const count = inputs.length;
+  const outputs = unfold$1(inputs);
+  const ghosts = [];
+  for (let nth = 0; nth < count; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
+  deletePendingSurfaceMeshes();
+  return taggedGroup({}, ...outputs, ...ghosts);
+};
+
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
@@ -2542,4 +2558,4 @@ const translate = (vector, geometry) =>
 const scale = (vector, geometry) =>
   transform$1(fromScaleToTransform(...vector), geometry);
 
-export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convertPolygonsToMeshes, convexHull, cut, deform, demesh, disjoint, drop, eachFaceEdges, eachItem, eachPoint, eachSegment, eachTriangle, eagerTransform, extrude, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, keep, linearize, link, load, loadNonblocking, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, reify, remesh, replacer, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, update, visit, wrap, write, writeNonblocking };
+export { allTags, assemble, bend, cached, cast, clip, computeCentroid, computeImplicitVolume, computeNormal, computeToolpath, convertPolygonsToMeshes, convexHull, cut, deform, demesh, disjoint, drop, eachFaceEdges, eachItem, eachPoint, eachSegment, eachTriangle, eagerTransform, extrude, fill, fix, fresh, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, keep, linearize, link, load, loadNonblocking, loft, makeAbsolute, measureArea, measureBoundingBox, measureVolume, noGhost, offset, op, outline, read, readNonblocking, reify, remesh, replacer, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, seam, section, separate, serialize, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, toConcreteGeometry, toDisplayGeometry, toPoints, toTransformedGeometry, toTriangleArray, transform$1 as transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, update, visit, wrap, write, writeNonblocking };

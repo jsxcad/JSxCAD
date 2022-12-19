@@ -29,7 +29,7 @@ export const Orb = Shape.registerShapeMethod('Orb', async (...args) => {
   const { values, object: options } = destructure(args);
   let [x = 1, y = x, z = x] = values;
   const { zag } = options;
-  const [c1, c2] = buildCorners(x, y, z);
+  const [c1, c2] = await buildCorners(x, y, z)(null);
   return reifyOrb({ c1, c2, zag });
 });
 
