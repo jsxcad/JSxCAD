@@ -1049,6 +1049,8 @@ const subtract = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
 const computeToolpath = (
   geometry,
   {
+    speed,
+    feedrate,
     jumpHeight = 1,
     toolDiameter = 1,
     stepCost = toolDiameter * -2,
@@ -1467,7 +1469,14 @@ const computeToolpath = (
         while (history.length > 0) {
           cuts.push(...history.pop());
         }
-        return taggedSegments({ tags: ['type:toolpath'] }, cuts);
+        const tags = ['type:toolpath'];
+        if (feedrate !== undefined) {
+          tags.push(`toolpath:feedrate=${feedrate}`);
+        }
+        if (speed !== undefined) {
+          tags.push(`toolpath:speed=${speed}`);
+        }
+        return taggedSegments({ tags }, cuts);
       }
       nextCandidates.sort((a, b) => a.cost - b.cost);
       candidate = nextCandidates[0];
