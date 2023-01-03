@@ -94,7 +94,8 @@ export const updateNotebookState = async (
       if (!note.url) {
         const loadThumbnail = async () => {
           let url = await (note.needsThumbnail ? read : readOrWatch)(
-            `thumbnail/${note.hash}`,
+            note.view.thumbnailPath,
+            // `thumbnail/${note.hash}`,
             {
               workspace,
             }

@@ -6,4 +6,6 @@ await LoadSvg('https://jsxcad.js.org/svg/flowers.svg', { fill: false })
   .gcode('flowers');
 ```
 
-[flowers_0.gcode](flowers.flowers_0.gcode)
+![Image](flowers.md.$1_flowers.png)
+
+[flowers.gcode](flowers.flowers.gcode)

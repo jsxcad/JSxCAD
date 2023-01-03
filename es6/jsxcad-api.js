@@ -1,4 +1,3 @@
-import './jsxcad-api-v1-gcode.js';
 import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
@@ -426,6 +425,8 @@ const control = (label, defaultValue, type, options) => {
   return value;
 };
 
+// import './jsxcad-api-v1-gcode.js';
+
 const api = {
   _: undefined,
   ...mathApi,
@@ -464,11 +465,13 @@ registerDynamicModule(
   './jsxcad-api-v1-font.js',
   '../v1-font/main.js'
 );
+/*
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-gcode',
   './jsxcad-api-v1-gcode.js',
   '../v1-gcode/main.js'
 );
+*/
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-ldraw',
   './jsxcad-api-v1-ldraw.js',

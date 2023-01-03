@@ -82,6 +82,7 @@ export const baseView =
         position,
         inline,
         needsThumbnail: isNode,
+        thumbnailPath,
       };
       emit({ hash, path: viewPath, view });
       await write(viewPath, pageGeometry);

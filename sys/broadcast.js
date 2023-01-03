@@ -51,16 +51,8 @@ export const sendBroadcast = async (message) => {
 };
 
 const initBroadcastChannel = async () => {
-  try {
-    broadcastChannel = new BroadcastChannel('sys/fs');
-    broadcastChannel.onmessage = receiveBroadcast;
-  } catch (error) {
-    if (error instanceof DOMException) {
-      // Fail silently -- not supported.
-      return;
-    }
-    throw error;
-  }
+  broadcastChannel = new BroadcastChannel('sys/fs');
+  broadcastChannel.onmessage = receiveBroadcast;
 };
 
 export const notifyFileChange = async (path, workspace) =>

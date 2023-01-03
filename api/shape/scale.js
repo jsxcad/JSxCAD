@@ -3,7 +3,7 @@ import { eagerTransform } from './eagerTransform.js';
 import { fromScaleToTransform } from '@jsxcad/geometry';
 
 export const scale = Shape.registerMethod(
-  'scale',
+  ['scale', 's'],
   (x = 1, y = x, z = y) =>
     async (shape) => {
       [x = 1, y = x, z = y] = await shape.toCoordinate(x, y, z);
@@ -34,3 +34,5 @@ export const scale = Shape.registerMethod(
       }
     }
 );
+
+export const s = scale;

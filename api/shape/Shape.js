@@ -288,6 +288,9 @@ export const isObject = (value) =>
   !isFunction(value);
 Shape.isObject = isObject;
 
+export const isNumber = (value) => typeof value === 'number';
+Shape.isNumber = isNumber;
+
 export const isValue = (value) =>
   (!isObject(value) && !isFunction(value)) || isArray(value);
 Shape.isValue = isValue;

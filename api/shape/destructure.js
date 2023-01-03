@@ -71,10 +71,9 @@ export const destructure2 = async (shape, args, ...specs) => {
   const output = [];
   for (const spec of specs) {
     const rest = [];
-    const out = [];
-    output.push(out);
     switch (spec) {
       case 'objects': {
+        const out = [];
         for (const arg of args) {
           if (Shape.isObject(arg)) {
             out.push(arg);
@@ -82,9 +81,38 @@ export const destructure2 = async (shape, args, ...specs) => {
             rest.push(arg);
           }
         }
+        output.push(out);
+        break;
+      }
+      case 'number': {
+        let number;
+        for (let arg of args) {
+          while (Shape.isFunction(arg)) {
+            arg = await arg(shape);
+          }
+          if (number === undefined && Shape.isNumber(arg)) {
+            number = arg;
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(number);
+        break;
+      }
+      case 'options': {
+        const options = {};
+        for (const arg of args) {
+          if (Shape.isObject(arg)) {
+            Object.assign(options, arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(options);
         break;
       }
       case 'modes': {
+        const out = [];
         for (const arg of args) {
           if (typeof args === 'string') {
             out.push(arg);
@@ -92,9 +120,11 @@ export const destructure2 = async (shape, args, ...specs) => {
             rest.push(arg);
           }
         }
+        output.push(out);
         break;
       }
       case 'values': {
+        const out = [];
         for (let arg of args) {
           while (Shape.isFunction(arg)) {
             arg = await arg(shape);
@@ -105,9 +135,26 @@ export const destructure2 = async (shape, args, ...specs) => {
             rest.push(arg);
           }
         }
+        output.push(out);
+        break;
+      }
+      case 'shapes': {
+        const out = [];
+        for (let arg of args) {
+          while (Shape.isFunction(arg)) {
+            arg = await arg(shape);
+          }
+          if (Shape.isShape(arg)) {
+            out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(out);
         break;
       }
       case 'coordinates': {
+        const out = [];
         for (let arg of args) {
           while (Shape.isFunction(arg)) {
             arg = await arg(shape);
@@ -128,10 +175,14 @@ export const destructure2 = async (shape, args, ...specs) => {
             rest.push(arg);
           }
         }
+        output.push(out);
         break;
       }
     }
     args = rest;
+  }
+  if (args.length !== 0) {
+    console.log(`QQQ/Warning: Unused arguments [${args.join(', ')}]`);
   }
   return output;
 };

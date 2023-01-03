@@ -51,3 +51,19 @@ const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
 ![Image](monocle.md.monocle_37x12x2x2_lens-37x12x2x2.png)
 
 [lens-37x12x2x2.stl](monocle.lens-37x12x2x2.stl)
+
+```JavaScript
+const simpleMonocle = Arc(35)
+  .cut(inset(1))
+  .ez(0, 2, 8, 10)
+  .join(Arc(33).cut(inset(1)).ez(10))
+  .clean()
+  .fuse()
+  .clip(ArcX(35, [16, -16], [-12, 12]).y(20 / 2))
+  .join(Arc(35).cut(inset(1)).ez(0, 2))
+  .stl('s2');
+```
+
+![Image](monocle.md.simpleMonocle_s2.png)
+
+[s2.stl](monocle.s2.stl)

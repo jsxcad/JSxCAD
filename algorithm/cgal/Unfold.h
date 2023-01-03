@@ -1,3 +1,7 @@
+#pragma once
+
+#include "mu3d.h"
+
 int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
   size_t size = geometry->getSize();
 

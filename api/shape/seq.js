@@ -92,8 +92,11 @@ export const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
   return groupOp(...results);
 });
 
-export const Seq = Shape.registerShapeMethod('Seq', (...args) =>
-  Empty().seq(...args)
+export const Seq = Shape.registerMethod(
+  'Seq',
+  (...args) =>
+    async (shape = Empty()) =>
+      shape.seq(...args)
 );
 
 export default Seq;
