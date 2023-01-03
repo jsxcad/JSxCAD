@@ -145,27 +145,6 @@ class SurfaceMeshQuery {
         points.push_back(target);
       }
       if (points.size() >= 2) {
-#if 0
-        if (points.size() % 2) {
-          std::cout << "QQ/odd intersections" << std::endl;
-          std::cout << "QQ/do_clip: " << do_clip << std::endl;
-          std::cout << "QQ/source: " << source << std::endl;
-          std::cout << "QQ/is_source_inside: " << is_source_inside << std::endl;
-          std::cout << "QQ/target: " << target << std::endl;
-          std::cout << "QQ/is_target_inside: " << is_target_inside << std::endl;
-          for (const auto& intersection : intersections) {
-            if (!intersection) {
-              continue;
-            }
-            // Note: intersection->second is the intersected face index.
-            // CHECK: We get doubles because we're intersecting with the
-            // interior of the faces.
-            if (const Point* point = boost::get<Point>(&intersection->first)) {
-              std::cout << "QQ/point: " << *point << std::endl;
-            }
-          }
-        }
-#endif
         std::sort(points.begin(), points.end(),
                   [&](const Point& a, const Point& b) {
                     return CGAL::squared_distance(a, source) <

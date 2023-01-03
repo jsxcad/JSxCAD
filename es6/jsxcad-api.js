@@ -425,8 +425,6 @@ const control = (label, defaultValue, type, options) => {
   return value;
 };
 
-// import './jsxcad-api-v1-gcode.js';
-
 const api = {
   _: undefined,
   ...mathApi,
@@ -465,13 +463,6 @@ registerDynamicModule(
   './jsxcad-api-v1-font.js',
   '../v1-font/main.js'
 );
-/*
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-gcode',
-  './jsxcad-api-v1-gcode.js',
-  '../v1-gcode/main.js'
-);
-*/
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-ldraw',
   './jsxcad-api-v1-ldraw.js',
@@ -482,11 +473,6 @@ registerDynamicModule(
   './jsxcad-api-v1-math.js',
   '../v1-math/main.js'
 );
-// registerDynamicModule(
-//   '@' + 'jsxcad/api-v1-pdf',
-//   './jsxcad-api-v1-pdf.js',
-//   '../v1-pdf/main.js'
-// );
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-threejs',
   './jsxcad-api-v1-threejs.js',

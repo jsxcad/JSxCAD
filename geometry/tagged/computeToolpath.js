@@ -455,13 +455,10 @@ export const computeToolpath = (
         const history = [];
         for (let node = candidate; node; node = node.last) {
           history.push(node.toolpath);
-          // cuts.push([node.last.at.start, node.at.start]);
         }
-        // const toolpath = [];
         while (history.length > 0) {
           cuts.push(...history.pop());
         }
-        // return taggedGroup({}, taggedToolpath({}, toolpath), taggedSegments({ tags: ['type:toolpath', 'color:red'] }, cuts));
         return taggedSegments({ tags: ['type:toolpath'] }, cuts);
       }
       nextCandidates.sort((a, b) => a.cost - b.cost);

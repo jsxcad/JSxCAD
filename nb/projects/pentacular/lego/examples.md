@@ -25,9 +25,9 @@ SocketBoard 32x32x3.2
 ![Image](examples.md.socketBoard32x8x3_2.png)
 
 ```JavaScript
-export const axleHole = await Arc({ apothem: 5.2 / 2 })
+export const axleHole = await Arc({ apothem: 5.2 })
   .add(
-    Arc({ apothem: 4 / 2 })
+    Arc({ apothem: 4 })
       .y(1.5 / 2)
   )
   .ez(4.00001, -4.00001)
