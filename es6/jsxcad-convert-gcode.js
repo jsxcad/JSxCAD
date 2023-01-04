@@ -93,6 +93,8 @@ const toGcode = async (
     f = state.f,
     s = state.s,
   } = {}) => {
+    cF({ f });
+    cS({ s });
     const code = `G1${pX(x)}${pY(y)}${pZ(z)}`;
     if (code === 'G1') {
       return;
@@ -137,19 +139,22 @@ const toGcode = async (
     return [update(ox, tx), update(oy, ty), update(oz, tz)];
   };
 
-  cS({ s: speed });
-  cF({ f: feedrate });
+  const fromTagsToParameters = (tags) => {
+    let parameters = {};
+    for (const tag of tags) {
+      if (tag.startsWith('toolpath:speed=')) {
+        parameters.s = parseFloat(tag.substring('toolpath:speed='.length));
+      } else if (tag.startsWith('toolpath:feedrate=')) {
+        parameters.f = parseFloat(tag.substring('toolpath:feedrate='.length));
+      }
+    }
+    return parameters;
+  };
 
   for (const { matrix, segments, tags } of linearize(geometry, ({ tags }) =>
     tags.includes('type:toolpath')
   )) {
-    for (const tag of tags) {
-      if (tag.startsWith('toolpath:speed=')) {
-        cS({ s: parseFloat(tag.substring('toolpath:speed='.length)) });
-      } else if (tag.startsWith('toolpath:feedrate=')) {
-        cF({ f: parseFloat(tag.substring('toolpath:feedrate='.length)) });
-      }
-    }
+    const { f = feedrate, s = speed } = fromTagsToParameters(tags);
     for (const [source, target] of segments) {
       const [sourceX = state.x, sourceY = state.y, sourceZ = state.z] =
         transform(source, matrix);
@@ -159,7 +164,7 @@ const toGcode = async (
         cG0({ z: jumpHeight });
         cG0({ x, y });
       }
-      cG1({ x, y, z });
+      cG1({ x, y, z, f, s });
     }
   }
 

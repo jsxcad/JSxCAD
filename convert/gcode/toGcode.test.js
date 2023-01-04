@@ -26,10 +26,8 @@ test('Simple', async (t) => {
 G21
 G90
 M3
-S3
-F4
-S50
 F100
+S50
 G1 X1 Y2 Z3
 G1 X4 Y5 Z6
 G0 Z1
