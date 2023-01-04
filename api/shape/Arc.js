@@ -10,7 +10,7 @@ import Shape from './Shape.js';
 import Spiral from './Spiral.js';
 import { destructure } from './destructure.js';
 
-const toRadiusFromApothem = (apothem, sides = 32) =>
+const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
 
 const X = 0;
@@ -112,13 +112,13 @@ const ArcOp =
     let [x, y, z] = values;
     let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
     if (apothem !== undefined) {
-      radius = toRadiusFromApothem(apothem, sides);
+      diameter = toDiameterFromApothem(apothem, sides);
+    }
+    if (radius !== undefined) {
+      diameter = radius * 2;
     }
     if (diameter !== undefined) {
       x = diameter;
-    }
-    if (radius !== undefined) {
-      x = radius * 2;
     }
     let reify;
     switch (type) {

@@ -6,4 +6,6 @@ await LoadSvg('https://jsxcad.js.org/svg/dinosaur.svg', { fill: false })
   .gcode('dinosaur');
 ```
 
-[dinosaur_0.gcode](dinosaur.dinosaur_0.gcode)
+![Image](dinosaur.md.$1_dinosaur.png)
+
+[dinosaur.gcode](dinosaur.dinosaur.gcode)

@@ -217,6 +217,7 @@ export const buildCorners = (x, y, z) => async (shape) => {
       c2[X] = x[1];
     }
   } else {
+    x = await toValue(x)(shape);
     c1[X] = x / 2;
     c2[X] = x / -2;
   }
@@ -234,6 +235,7 @@ export const buildCorners = (x, y, z) => async (shape) => {
       c2[Y] = y[1];
     }
   } else {
+    y = await toValue(y)(shape);
     c1[Y] = y / 2;
     c2[Y] = y / -2;
   }
@@ -251,6 +253,7 @@ export const buildCorners = (x, y, z) => async (shape) => {
       c2[Z] = z[1];
     }
   } else {
+    z = await toValue(z)(shape);
     c1[Z] = z / 2;
     c2[Z] = z / -2;
   }

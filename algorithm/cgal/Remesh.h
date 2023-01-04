@@ -1,3 +1,7 @@
+#pragma once
+
+#include "surface_mesh_util.h"
+
 int Remesh(Geometry* geometry, size_t count, size_t iterations,
            size_t relaxation_steps, double target_edge_length) {
   int size = geometry->getSize();

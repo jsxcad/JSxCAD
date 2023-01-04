@@ -5453,7 +5453,9 @@ const updateNotebookState = async (application, {
     if (note.view) {
       if (!note.url) {
         const loadThumbnail = async () => {
-          let url = await (note.needsThumbnail ? read : readOrWatch)(`thumbnail/${note.hash}`, {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath,
+          // `thumbnail/${note.hash}`,
+          {
             workspace
           });
           if (!url) {

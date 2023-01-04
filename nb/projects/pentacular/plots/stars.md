@@ -21,4 +21,6 @@ const stars = await star
   .gcode('stars');
 ```
 
-[stars_0.gcode](stars.stars_0.gcode)
+![Image](stars.md.stars_stars.png)
+
+[stars.gcode](stars.stars.gcode)

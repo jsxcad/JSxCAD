@@ -6,4 +6,6 @@ await Spiral((t) => Point(1 + (t * 360) / 100), {
   .gcode('spiral');
 ```
 
-[spiral_0.gcode](spiral.spiral_0.gcode)
+![Image](spiral.md.$1_spiral.png)
+
+[spiral.gcode](spiral.spiral.gcode)

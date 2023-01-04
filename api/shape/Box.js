@@ -7,7 +7,7 @@ import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { buildCorners } from './Plan.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 
 const X = 0;
 const Y = 1;
@@ -104,10 +104,15 @@ const reifyBox = async (corner1, corner2) => {
   return (await build()).absolute();
 };
 
-export const Box = Shape.registerShapeMethod('Box', async (...args) => {
-  const { values, object: options } = destructure(args);
+export const Box = Shape.registerMethod('Box', (...args) => async (shape) => {
+  const [values, options] = await destructure2(
+    shape,
+    args,
+    'values',
+    'options'
+  );
   const [x = 1, y = x, z = 0] = values;
-  const [computedC1, computedC2] = await buildCorners(x, y, z)(null);
+  const [computedC1, computedC2] = await buildCorners(x, y, z)(shape);
   let { c1 = computedC1, c2 = computedC2 } = options;
   return reifyBox(c1, c2);
 });

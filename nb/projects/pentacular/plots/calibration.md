@@ -6,3 +6,7 @@ await Box(10)
   .toolpath()
   .gcode('calibration');
 ```
+
+![Image](calibration.md.$1_calibration.png)
+
+[calibration.gcode](calibration.calibration.gcode)

@@ -1,4 +1,7 @@
-import { identity, withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
+import {
+  fromTranslateToTransform,
+  withAabbTreeQuery,
+} from '@jsxcad/algorithm-cgal';
 import { isSegments, isTypeGhost } from './type.js';
 
 import KdBush from 'kdbush';
@@ -9,7 +12,7 @@ import { inset } from '../inset.js';
 import { linearize } from './linearize.js';
 import { measureBoundingBox } from '../measureBoundingBox.js';
 import { section } from '../section.js';
-import { taggedToolpath } from './taggedToolpath.js';
+import { taggedSegments } from './taggedSegments.js';
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 import { transformCoordinate } from '../transform.js';
 
@@ -38,6 +41,8 @@ const subtract = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
 export const computeToolpath = (
   geometry,
   {
+    speed,
+    feedrate,
     jumpHeight = 1,
     toolDiameter = 1,
     stepCost = toolDiameter * -2,
@@ -46,20 +51,9 @@ export const computeToolpath = (
     stopCost = 30,
     candidateLimit = 1,
     subCandidateLimit = 1,
+    z = 0,
   }
 ) => {
-  const startTime = new Date();
-  let lastTime = startTime;
-  const time = (msg) => {
-    const now = new Date();
-    console.log(
-      `${msg}: ${((now - startTime) / 1000).toFixed(2)} ${(
-        (now - lastTime) /
-        1000
-      ).toFixed(2)}`
-    );
-    lastTime = now;
-  };
   const toolRadius = toolDiameter / 2;
 
   {
@@ -67,7 +61,7 @@ export const computeToolpath = (
 
     const concreteGeometry = toConcreteGeometry(geometry);
     const sections = section(concreteGeometry, [
-      { type: 'points', matrix: identity() },
+      { type: 'points', matrix: fromTranslateToTransform(0, 0, z) },
     ]);
     const fusedArea = fuse(sections);
     const insetArea = inset(fusedArea, toolRadius);
@@ -80,14 +74,21 @@ export const computeToolpath = (
       (query) => {
         // The hexagon diameter is the tool radius.
         const isInteriorPoint = (x, y, z) => {
-          return query.isIntersectingPointApproximate(x, y, z);
+          return query.isIntersectingSegmentApproximate(
+            x,
+            y,
+            z - 1,
+            x,
+            y,
+            z + 1
+          );
         };
         const bounds = measureBoundingBox(sections);
         if (!bounds) {
           return;
         }
         const [minPoint, maxPoint] = bounds;
-        const z = 0;
+        // const z = 0;
         const sqrt3 = Math.sqrt(3);
         const width = maxPoint[X] - minPoint[X];
         const offsetX = (maxPoint[X] + minPoint[X]) / 2 - width / 2;
@@ -140,14 +141,12 @@ export const computeToolpath = (
         }
       }
     );
-    time('QQ/computeToolpath/Surfaces');
 
     // Profiles
     eachSegment(insetArea, ([start, end]) => {
       points.push({ start: start, end: { end: end, type: 'required' } });
       points.push({ start: end, note: 'segment end' });
     });
-    time('QQ/computeToolpath/Profiles');
 
     // Grooves
     // FIX: These should be sectioned segments.
@@ -162,7 +161,6 @@ export const computeToolpath = (
         points.push({ start: end, note: 'groove end' });
       }
     }
-    time('QQ/computeToolpath/Grooves');
 
     const compareCoord = ([aX = 0, aY = 0], [bX = 0, bY = 0]) => {
       const dX = aX - bX;
@@ -218,7 +216,6 @@ export const computeToolpath = (
         }
       }
     }
-    time('QQ/computeToolpath/Fold');
 
     const pointByHash = new Map();
 
@@ -236,21 +233,10 @@ export const computeToolpath = (
       (p) => p.start[X],
       (p) => p.start[Y]
     );
-    time('QQ/computeToolpath/Index');
 
-    const jump = (toolpath, [fromX, fromY, fromZ], [toX, toY, toZ]) =>
-      toolpath.push({
-        op: 'jump',
-        from: [fromX, fromY, fromZ],
-        to: [toX, toY, toZ],
-      });
+    const jump = (toolpath, from, to) => {};
 
-    const cut = (toolpath, [fromX, fromY, fromZ], [toX, toY, toZ]) =>
-      toolpath.push({
-        op: 'cut',
-        from: [fromX, fromY, fromZ],
-        to: [toX, toY, toZ],
-      });
+    const cut = (toolpath, from, to) => toolpath.push([from, to]);
 
     const considerTargetPoint = (candidates, fulfilled, candidate, target) => {
       if (fulfilled.has(computeHash(target.start))) {
@@ -407,16 +393,13 @@ export const computeToolpath = (
     };
 
     let candidate = {
-      at: { start: [undefined, undefined, undefined], ends: [] },
+      at: { start: [0, 0, 0], ends: [] },
       toolpath: [],
       cost: 0,
       length: 0,
     };
     const fulfilled = new Set();
     for (;;) {
-      if (candidate.length % 1000 === 0) {
-        time(`QQ/computeToolpath/Candidate/${candidate.length}`);
-      }
       const nextCandidates = [];
       try {
         if (nextCandidates.length < subCandidateLimit && candidate.at.ends) {
@@ -468,18 +451,24 @@ export const computeToolpath = (
         throw error;
       }
       if (nextCandidates.length === 0) {
-        time('QQ/computeToolpath/Candidate/completed');
         // We have computed a total toolpath.
         // Note that we include the imaginary seed point.
+        const cuts = [];
         const history = [];
         for (let node = candidate; node; node = node.last) {
           history.push(node.toolpath);
         }
-        const toolpath = [];
         while (history.length > 0) {
-          toolpath.push(...history.pop());
+          cuts.push(...history.pop());
         }
-        return taggedToolpath({}, toolpath);
+        const tags = ['type:toolpath'];
+        if (feedrate !== undefined) {
+          tags.push(`toolpath:feedrate=${feedrate}`);
+        }
+        if (speed !== undefined) {
+          tags.push(`toolpath:speed=${speed}`);
+        }
+        return taggedSegments({ tags }, cuts);
       }
       nextCandidates.sort((a, b) => a.cost - b.cost);
       candidate = nextCandidates[0];

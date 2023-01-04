@@ -1,5 +1,5 @@
 import { Hull } from './Hull.js';
-import { Join } from './Join.js';
+import { Join } from './join.js';
 import Shape from './Shape.js';
 
 export const ChainHull = Shape.registerShapeMethod('ChainHull', (...shapes) => {

@@ -6,4 +6,6 @@ await LoadSvg('https://jsxcad.js.org/svg/mandala.svg', { fill: false })
   .gcode('mandala');
 ```
 
-[mandala_0.gcode](mandala.mandala_0.gcode)
+![Image](mandala.md.$1_mandala.png)
+
+[mandala.gcode](mandala.mandala.gcode)

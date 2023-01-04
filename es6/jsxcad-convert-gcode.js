@@ -1,15 +1,18 @@
-import { op, visit, transformCoordinate } from './jsxcad-geometry.js';
+import { linearize, transformCoordinate } from './jsxcad-geometry.js';
 
 // FIX: This is actually GRBL.
-const toGcode = async (geometry, { jumpHeight = 1 } = {}) => {
+const toGcode = async (
+  geometry,
+  { speed = 0, feedrate = 0, jumpHeight = 1 } = {}
+) => {
   const codes = [];
 
   // CHECK: Perhaps this should be a more direct modeling of the GRBL state?
   const state = {
     // Where is the tool
-    x: undefined,
-    y: undefined,
-    z: undefined,
+    x: 0,
+    y: 0,
+    z: 0,
     // How 'fast' the tool is running (rpm or power).
     s: 0,
     f: 0,
@@ -90,6 +93,8 @@ const toGcode = async (geometry, { jumpHeight = 1 } = {}) => {
     f = state.f,
     s = state.s,
   } = {}) => {
+    cF({ f });
+    cS({ s });
     const code = `G1${pX(x)}${pY(y)}${pZ(z)}`;
     if (code === 'G1') {
       return;
@@ -124,36 +129,48 @@ const toGcode = async (geometry, { jumpHeight = 1 } = {}) => {
 
   cM3();
 
-  const processToolpath = ({ matrix, toolpath }) => {
-    const update = (original, transformed) =>
-      isFinite(original) ? transformed : original;
-    const transform = ([ox, oy, oz]) => {
-      // Transform the coordinate.
-      const [x = 0, y = 0, z = 0] = [ox, oy, oz];
-      const [tx, ty, tz] = transformCoordinate([x, y, z], matrix);
-      // Making sure that undefined elements remain undefined.
-      return [update(ox, tx), update(oy, ty), update(oz, tz)];
-    };
-    for (const entry of toolpath) {
-      const [x, y, z] = transform(entry.to);
-      switch (entry.op) {
-        case 'jump':
-          cF({ f: entry.speed });
-          cS({ s: entry.power });
-          cG0({ x, y, z: jumpHeight });
-          break;
-        case 'cut':
-          cF({ f: entry.speed });
-          cS({ s: entry.power });
-          cG1({ x, y, z });
-          break;
-      }
-    }
+  const update = (original, transformed) =>
+    isFinite(original) ? transformed : original;
+  const transform = ([ox, oy, oz] = [], matrix) => {
+    // Transform the coordinate.
+    const [x = 0, y = 0, z = 0] = [ox, oy, oz];
+    const [tx, ty, tz] = transformCoordinate([x, y, z], matrix);
+    // Making sure that undefined elements remain undefined.
+    return [update(ox, tx), update(oy, ty), update(oz, tz)];
   };
 
-  op({ toolpath: processToolpath }, visit)(geometry);
+  const fromTagsToParameters = (tags) => {
+    let parameters = {};
+    for (const tag of tags) {
+      if (tag.startsWith('toolpath:speed=')) {
+        parameters.s = parseFloat(tag.substring('toolpath:speed='.length));
+      } else if (tag.startsWith('toolpath:feedrate=')) {
+        parameters.f = parseFloat(tag.substring('toolpath:feedrate='.length));
+      }
+    }
+    return parameters;
+  };
+
+  for (const { matrix, segments, tags } of linearize(geometry, ({ tags }) =>
+    tags.includes('type:toolpath')
+  )) {
+    const { f = feedrate, s = speed } = fromTagsToParameters(tags);
+    for (const [source, target] of segments) {
+      const [sourceX = state.x, sourceY = state.y, sourceZ = state.z] =
+        transform(source, matrix);
+      const [x = state.x, y = state.y, z = state.z] = transform(target, matrix);
+      if (sourceX !== state.x || sourceY !== state.y || sourceZ !== state.z) {
+        // Jump
+        cG0({ z: jumpHeight });
+        cG0({ x, y });
+      }
+      cG1({ x, y, z, f, s });
+    }
+  }
 
   cM5();
+  cG0({ z: jumpHeight });
+  cG0({ x: 0, y: 0 });
   codes.push('');
   return new TextEncoder('utf8').encode(codes.join('\n'));
 };
