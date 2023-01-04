@@ -4511,22 +4511,22 @@ const gcode = Shape.registerMethod(
       } = destructure(args);
       const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
       let index = 0;
-      // Gcode doesn't do layout (although maybe it should)
-      const entry = await op(shape).toGeometry();
-      const gcodePath = `download/gcode/${path}/${id}/${viewId}`;
-      await write(gcodePath, await toGcode(entry, {}, options));
+      for (const entry of await ensurePages(op(shape))) {
+        const gcodePath = `download/gcode/${path}/${id}/${viewId}`;
+        await write(gcodePath, await toGcode(entry, {}, options));
 
-      const suffix = index++ === 0 ? '' : `_${index}`;
-      const filename = `${name}${suffix}.gcode`;
-      const record = {
-        path: gcodePath,
-        filename,
-        type: 'application/x-gcode',
-      };
-      // Produce a view of what will be downloaded.
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await gridView(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
+        const suffix = index++ === 0 ? '' : `_${index}`;
+        const filename = `${name}${suffix}.gcode`;
+        const record = {
+          path: gcodePath,
+          filename,
+          type: 'application/x-gcode',
+        };
+        // Produce a view of what will be downloaded.
+        const hash$1 = computeHash({ filename, options }) + hash(entry);
+        await gridView(name, options.view)(Shape.fromGeometry(entry));
+        emit({ download: { entries: [record] }, hash: hash$1 });
+      }
       return shape;
     }
 );
