@@ -2,7 +2,7 @@ import { buildCorners, computeMiddle, computeScale } from './Plan.js';
 
 import Cached from './Cached.js';
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 import { makeUnitSphere as makeUnitSphereWithCgal } from '@jsxcad/algorithm-cgal';
 import { scale as scaleOp } from './scale.js';
 
@@ -25,11 +25,16 @@ const reifyOrb = async ({ c1, c2, zag = DEFAULT_ORB_ZAG }) => {
   return scaleOp(scale).move(middle).absolute()(unitSphere);
 };
 
-export const Orb = Shape.registerShapeMethod('Orb', async (...args) => {
-  const { values, object: options } = destructure(args);
+export const Orb = Shape.registerMethod('Orb', (...args) => async (shape) => {
+  const [values, options] = await destructure2(
+    shape,
+    args,
+    'values',
+    'options'
+  );
   let [x = 1, y = x, z = x] = values;
   const { zag } = options;
-  const [c1, c2] = await buildCorners(x, y, z)(null);
+  const [c1, c2] = await buildCorners(x, y, z)(shape);
   return reifyOrb({ c1, c2, zag });
 });
 

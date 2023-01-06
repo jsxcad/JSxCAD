@@ -29,6 +29,7 @@ export const toolpath = Shape.registerMethod(
         candidateLimit = 1,
         subCandidateLimit = 1,
         layerHeight = 1,
+        radialCutDepth = toolDiameter / 4,
       } = options;
       const geometry = await shape.toGeometry();
       const bounds = measureBoundingBox(geometry);
@@ -45,6 +46,7 @@ export const toolpath = Shape.registerMethod(
           neighborCost,
           stopCost,
           candidateLimit,
+          radialCutDepth,
           subCandidateLimit,
           z,
         });

@@ -24,7 +24,7 @@ const filterTargets = (noVoid) => (geometry) =>
 const filterRemoves = (noVoid) => (geometry) =>
   filterTargets(noVoid)(geometry) && isNotTypeMasked(geometry);
 
-export const cut = (geometry, geometries, open = false, exact, noVoid) => {
+export const cut = (geometry, geometries, open = false, exact, noVoid, noGhost) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets(noVoid), inputs);
@@ -34,8 +34,10 @@ export const cut = (geometry, geometries, open = false, exact, noVoid) => {
   }
   const outputs = cutWithCgal(inputs, count, open, exact);
   const ghosts = [];
-  for (let nth = count; nth < inputs.length; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  if (!noGhost) {
+    for (let nth = count; nth < inputs.length; nth++) {
+      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+    }
   }
   deletePendingSurfaceMeshes();
   return taggedGroup(

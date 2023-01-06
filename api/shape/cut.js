@@ -10,7 +10,8 @@ export const cut = Shape.registerMethod('cut', (...args) => async (shape) => {
       await shape.toShapesGeometries(shapes),
       modes.includes('open'),
       modes.includes('exact'),
-      modes.includes('noVoid')
+      modes.includes('noVoid'),
+      modes.includes('noGhost')
     )
   );
 });

@@ -10,21 +10,23 @@ const ReadLDraw = Shape.registerShapeMethod(
   }
 );
 
-const LDrawPart = Shape.registerShapeMethod(
+const LDrawPart = Shape.registerMethod(
   'LDrawPart',
-  async (part, { override, rebuild = false } = {}) =>
-    Shape.fromGeometry(await fromLDrawPart(part, { override, rebuild }))
+  (part, { override, rebuild = false } = {}) =>
+    async (shape) =>
+      Shape.fromGeometry(await fromLDrawPart(part, { override, rebuild }))
 );
 
-const LDraw = Shape.registerShapeMethod(
+const LDraw = Shape.registerMethod(
   'LDraw',
-  async (text, { override, rebuild = false } = {}) =>
-    Shape.fromGeometry(
-      await fromLDraw(new TextEncoder('utf8').encode(text), {
-        override,
-        rebuild,
-      })
-    )
+  (text, { override, rebuild = false } = {}) =>
+    async (shape) =>
+      Shape.fromGeometry(
+        await fromLDraw(new TextEncoder('utf8').encode(text), {
+          override,
+          rebuild,
+        })
+      )
 );
 
 const api = { LDraw, LDrawPart, ReadLDraw };

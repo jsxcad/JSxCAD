@@ -4,19 +4,23 @@ import Point from './Point.js';
 import Shape from './Shape.js';
 import { toFlatValues } from './toFlatValues.js';
 
-export const Line = Shape.registerShapeMethod('Line', async (...extents) => {
-  const offsets = await toFlatValues(extents)(null);
-  if (offsets.length % 2 === 1) {
-    offsets.push(0);
-  }
-  offsets.sort((a, b) => a - b);
-  const edges = [];
-  for (let nth = 0; nth < offsets.length; nth += 2) {
-    const end = offsets[nth];
-    const begin = offsets[nth + 1];
-    edges.push(Edge(Point(begin), Point(end)));
-  }
-  return Group(...edges);
-});
+export const Line = Shape.registerMethod(
+  'Line',
+  (...extents) =>
+    async (shape) => {
+      const offsets = await toFlatValues(extents)(shape);
+      if (offsets.length % 2 === 1) {
+        offsets.push(0);
+      }
+      offsets.sort((a, b) => a - b);
+      const edges = [];
+      for (let nth = 0; nth < offsets.length; nth += 2) {
+        const end = offsets[nth];
+        const begin = offsets[nth + 1];
+        edges.push(Edge(Point(begin), Point(end)));
+      }
+      return Group(...edges);
+    }
+);
 
 export default Line;

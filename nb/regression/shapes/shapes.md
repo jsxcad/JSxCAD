@@ -113,12 +113,12 @@ const torusFn = (x, y, z) => {
 ```
 
 ```JavaScript
-await Implicit(torusFn, 2).view({ withGrid: false }).md('Implicit(torusFn, 2');
+await Implicit(2, torusFn).view({ withGrid: false }).md('Implicit(2, torusFn');
 ```
 
 ![Image](shapes.md.$11.png)
 
-Implicit(torusFn, 2
+Implicit(2, torusFn
 
 ```JavaScript
 await Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
