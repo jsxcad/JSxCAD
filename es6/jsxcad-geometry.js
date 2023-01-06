@@ -1537,7 +1537,14 @@ const filterTargets$2 = (noVoid) => (geometry) =>
 const filterRemoves = (noVoid) => (geometry) =>
   filterTargets$2(noVoid)(geometry) && isNotTypeMasked(geometry);
 
-const cut = (geometry, geometries, open = false, exact, noVoid, noGhost) => {
+const cut = (
+  geometry,
+  geometries,
+  open = false,
+  exact,
+  noVoid,
+  noGhost
+) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets$2(noVoid), inputs);

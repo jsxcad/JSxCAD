@@ -200,7 +200,8 @@ const chainable = (op) => {
         }
         // console.log(`QQQ/chainable/terminal: ${JSON.stringify(terminal)}`);
         const pop = op(...args);
-        return await pop(terminal);
+        const result = await pop(terminal);
+        return result;
       },
     incomplete
   );
