@@ -1,9 +1,13 @@
 import Shape from './Shape.js';
 import { toCoordinates } from './toCoordinates.js';
 
-export const Face = Shape.registerShapeMethod('Face', async (...points) => {
-  const coordinates = await toCoordinates(points)(null);
-  return Shape.fromPolygons([{ points: coordinates }]);
-});
+export const Face = Shape.registerMethod(
+  'Face',
+  (...points) =>
+    async (shape) => {
+      const coordinates = await toCoordinates(points)(shape);
+      return Shape.fromPolygons([{ points: coordinates }]);
+    }
+);
 
 export default Face;

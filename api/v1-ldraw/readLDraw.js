@@ -11,19 +11,21 @@ export const ReadLDraw = Shape.registerShapeMethod(
   }
 );
 
-export const LDrawPart = Shape.registerShapeMethod(
+export const LDrawPart = Shape.registerMethod(
   'LDrawPart',
-  async (part, { override, rebuild = false } = {}) =>
-    Shape.fromGeometry(await fromLDrawPart(part, { override, rebuild }))
+  (part, { override, rebuild = false } = {}) =>
+    async (shape) =>
+      Shape.fromGeometry(await fromLDrawPart(part, { override, rebuild }))
 );
 
-export const LDraw = Shape.registerShapeMethod(
+export const LDraw = Shape.registerMethod(
   'LDraw',
-  async (text, { override, rebuild = false } = {}) =>
-    Shape.fromGeometry(
-      await fromLDraw(new TextEncoder('utf8').encode(text), {
-        override,
-        rebuild,
-      })
-    )
+  (text, { override, rebuild = false } = {}) =>
+    async (shape) =>
+      Shape.fromGeometry(
+        await fromLDraw(new TextEncoder('utf8').encode(text), {
+          override,
+          rebuild,
+        })
+      )
 );

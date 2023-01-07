@@ -53,7 +53,7 @@ const torusFn = (x, y, z) => {
 };
 
 // Determine why Implicit seems non-deterministic.
-await Implicit(torusFn, 2).view({ withGrid: false }).md('Implicit(torusFn, 2');
+await Implicit(2, torusFn).view({ withGrid: false }).md('Implicit(2, torusFn');
 
 await Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
 

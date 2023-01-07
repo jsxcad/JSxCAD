@@ -7,29 +7,31 @@ import { destructure } from './destructure.js';
 import { ensurePages } from './Page.js';
 import { hash as hashGeometry } from '@jsxcad/geometry';
 
-export const LoadSvg = Shape.registerShapeMethod(
+export const LoadSvg = Shape.registerMethod(
   'LoadSvg',
-  async (path, { fill = true, stroke = true } = {}) => {
-    const data = await read(`source/${path}`, { sources: [path] });
-    if (data === undefined) {
-      throw Error(`Cannot read svg from ${path}`);
+  (path, { fill = true, stroke = true } = {}) =>
+    async (shape) => {
+      const data = await read(`source/${path}`, { sources: [path] });
+      if (data === undefined) {
+        throw Error(`Cannot read svg from ${path}`);
+      }
+      return Shape.fromGeometry(
+        await fromSvg(data, { doFill: fill, doStroke: stroke })
+      );
     }
-    return Shape.fromGeometry(
-      await fromSvg(data, { doFill: fill, doStroke: stroke })
-    );
-  }
 );
 
 export default LoadSvg;
 
-export const Svg = Shape.registerShapeMethod(
+export const Svg = Shape.registerMethod(
   'Svg',
-  async (svg, { fill = true, stroke = true } = {}) => {
-    const data = new TextEncoder('utf8').encode(svg);
-    return Shape.fromGeometry(
-      await fromSvg(data, { doFill: fill, doStroke: stroke })
-    );
-  }
+  (svg, { fill = true, stroke = true } = {}) =>
+    async (shape) => {
+      const data = new TextEncoder('utf8').encode(svg);
+      return Shape.fromGeometry(
+        await fromSvg(data, { doFill: fill, doStroke: stroke })
+      );
+    }
 );
 
 export const svg = Shape.registerMethod('svg', (...args) => async (shape) => {

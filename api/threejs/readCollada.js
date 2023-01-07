@@ -6,14 +6,15 @@ import {
 import { Shape } from '@jsxcad/api-shape';
 import { read } from '@jsxcad/sys';
 
-export const ThreejsCollada = Shape.registerShapeMethod(
+export const ThreejsCollada = Shape.registerMethod(
   'ThreejsCollada',
-  async (path, { src, invert = false } = {}) => {
-    const data = await read(`source/${path}`, { sources: [path] });
-    return Shape.fromGeometry(
-      await fromThreejsToGeometry(await fromColladaToThreejs(data))
-    );
-  }
+  (path, { src, invert = false } = {}) =>
+    async (shape) => {
+      const data = await read(`source/${path}`, { sources: [path] });
+      return Shape.fromGeometry(
+        await fromThreejsToGeometry(await fromColladaToThreejs(data))
+      );
+    }
 );
 
 export default ThreejsCollada;

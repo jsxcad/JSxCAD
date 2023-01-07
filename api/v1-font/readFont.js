@@ -15,12 +15,13 @@ export const readFont = async (path) => {
   return cache.get(path);
 };
 
-export const Text = Shape.registerShapeMethod(
+export const Text = Shape.registerMethod(
   'Text',
-  async (path, text, size = 10) => {
-    const font = await readFont(path);
-    return Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
-  }
+  (path, text, size = 10) =>
+    async (shape) => {
+      const font = await readFont(path);
+      return Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
+    }
 );
 
 export default readFont;

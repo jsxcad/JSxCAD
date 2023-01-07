@@ -160,6 +160,7 @@ chain = (value) => {
   return result;
 };
 
+/*
 // This builds a chain from a constructor, like Box.
 const chainConstructor = (op) => {
   // This chain is a constructor that hasn't been applied yet.
@@ -179,6 +180,7 @@ const chainConstructor = (op) => {
 
   return new Proxy(op, constructor);
 };
+*/
 
 // This is the root of an untethered chain.
 const chainable = (op) => {
@@ -197,7 +199,8 @@ const chainable = (op) => {
           );
         }
         // console.log(`QQQ/chainable/terminal: ${JSON.stringify(terminal)}`);
-        const result = await op(...args)(terminal);
+        const pop = op(...args);
+        const result = await pop(terminal);
         return result;
       },
     incomplete
@@ -275,6 +278,13 @@ export const isShape = (value) =>
   (value !== undefined && value !== null && value.isChain === 'root');
 Shape.isShape = isShape;
 
+export const isOp = (value) =>
+  value !== undefined &&
+  value !== null &&
+  value.isChain !== undefined &&
+  value.isChain !== 'root';
+Shape.isOp = isOp;
+
 export const isFunction = (value) => value instanceof Function;
 Shape.isFunction = isFunction;
 
@@ -290,6 +300,9 @@ Shape.isObject = isObject;
 
 export const isNumber = (value) => typeof value === 'number';
 Shape.isNumber = isNumber;
+
+export const isString = (value) => typeof value === 'string';
+Shape.isString = isString;
 
 export const isValue = (value) =>
   (!isObject(value) && !isFunction(value)) || isArray(value);
@@ -330,6 +343,7 @@ export const registerMethod = (names, op) => {
   return chainable(op);
 };
 
+/*
 export const registerShapeMethod = (names, op) => {
   if (typeof names === 'string') {
     names = [names];
@@ -343,6 +357,7 @@ export const registerShapeMethod = (names, op) => {
 };
 
 Shape.registerShapeMethod = registerShapeMethod;
+*/
 
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromGraph = (graph, context) =>

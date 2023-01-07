@@ -8,7 +8,7 @@ import {
 import Point from './Point.js';
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
@@ -107,8 +107,14 @@ const reifyArcY = reifyArc(Y);
 
 const ArcOp =
   (type) =>
-  async (...args) => {
-    const { values, object: options } = destructure(args);
+  (...args) =>
+  async (shape) => {
+    const [values, options] = await destructure2(
+      shape,
+      args,
+      'values',
+      'options'
+    );
     let [x, y, z] = values;
     let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
     if (apothem !== undefined) {
@@ -165,9 +171,9 @@ const ArcOp =
     return result;
   };
 
-export const Arc = Shape.registerShapeMethod('Arc', ArcOp('Arc'));
-export const ArcX = Shape.registerShapeMethod('ArcX', ArcOp('ArcX'));
-export const ArcY = Shape.registerShapeMethod('ArcY', ArcOp('ArcY'));
-export const ArcZ = Shape.registerShapeMethod('ArcZ', ArcOp('ArcZ'));
+export const Arc = Shape.registerMethod('Arc', ArcOp('Arc'));
+export const ArcX = Shape.registerMethod('ArcX', ArcOp('ArcX'));
+export const ArcY = Shape.registerMethod('ArcY', ArcOp('ArcY'));
+export const ArcZ = Shape.registerMethod('ArcZ', ArcOp('ArcZ'));
 
 export default Arc;

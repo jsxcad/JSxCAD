@@ -2,9 +2,7 @@ import { buildCorners, computeMiddle, computeScale } from './Plan.js';
 
 import Shape from './Shape.js';
 
-/** @type {function(Point[], Path[]):Triangle[]} */
 const fromPointsAndPaths = (points = [], paths = []) => {
-  /** @type {Polygon[]} */
   const polygons = [];
   for (const path of paths) {
     polygons.push({ points: path.map((nth) => points[nth]) });
@@ -13,7 +11,6 @@ const fromPointsAndPaths = (points = [], paths = []) => {
 };
 
 // Unit icosahedron vertices.
-/** @type {Point[]} */
 const points = [
   [0.850651, 0.0, -0.525731],
   [0.850651, -0.0, 0.525731],
@@ -30,7 +27,6 @@ const points = [
 ];
 
 // Triangular decomposition structure.
-/** @type {Path[]} */
 const paths = [
   [1, 9, 0],
   [0, 10, 1],
@@ -73,12 +69,13 @@ const reifyIcosahedron = async (c1, c2) => {
     .absolute();
 };
 
-export const Icosahedron = Shape.registerShapeMethod(
+export const Icosahedron = Shape.registerMethod(
   'Icosahedron',
-  async (x = 1, y = x, z = x) => {
-    const [c1, c2] = await buildCorners(x, y, z)(null);
-    return reifyIcosahedron(c1, c2);
-  }
+  (x = 1, y = x, z = x) =>
+    async (shape) => {
+      const [c1, c2] = await buildCorners(x, y, z)(shape);
+      return reifyIcosahedron(c1, c2);
+    }
 );
 
 export default Icosahedron;

@@ -636,7 +636,7 @@ const filter$x = (noVoid) => (geometry) =>
   ) &&
   (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-const clip = (geometry, geometries, open, exact, noVoid) => {
+const clip = (geometry, geometries, open, exact, noVoid, noGhost) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$x(noVoid), inputs);
@@ -646,8 +646,10 @@ const clip = (geometry, geometries, open, exact, noVoid) => {
   }
   const outputs = clip$1(inputs, count, open, exact);
   const ghosts = [];
-  for (let nth = 0; nth < inputs.length; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  if (!noGhost) {
+    for (let nth = 0; nth < inputs.length; nth++) {
+      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+    }
   }
   deletePendingSurfaceMeshes();
   return taggedGroup(
@@ -1059,10 +1061,12 @@ const computeToolpath = (
     stopCost = 30,
     candidateLimit = 1,
     subCandidateLimit = 1,
+    radialCutDepth = toolDiameter / 4,
     z = 0,
   }
 ) => {
   const toolRadius = toolDiameter / 2;
+  const toolSpacing = radialCutDepth * 2;
 
   {
     let points = [];
@@ -1102,8 +1106,8 @@ const computeToolpath = (
         const offsetX = (maxPoint[X] + minPoint[X]) / 2 - width / 2;
         const height = maxPoint[Y] - minPoint[Y];
         const offsetY = (maxPoint[Y] + minPoint[Y]) / 2 - height / 2;
-        const columns = width / (sqrt3 * 0.5 * toolRadius) + 1;
-        const rows = height / (toolRadius * 0.75);
+        const columns = width / (sqrt3 * 0.5 * toolSpacing) + 1;
+        const rows = height / (toolSpacing * 0.75);
         const index = [];
         for (let i = 0; i < columns; i++) {
           index[i] = [];
@@ -1116,10 +1120,8 @@ const computeToolpath = (
         };
         for (let i = 0; i < columns; i++) {
           for (let j = 0; j < rows; j++) {
-            // const x = offsetX + (i + (j % 2 ? 0.5 : 0)) * sqrt3 * toolRadius;
-            // const y = offsetY + j * toolRadius * 0.75;
-            const x = offsetX + (i + (j % 2) * 0.5) * toolRadius * sqrt3 * 0.5;
-            const y = offsetY + j * toolRadius * 0.75;
+            const x = offsetX + (i + (j % 2) * 0.5) * toolSpacing * sqrt3 * 0.5;
+            const y = offsetY + j * toolSpacing * 0.75;
             // FIX: We need to produce an affinity with each distinct contiguous area.
             if (isInteriorPoint(x, y, z)) {
               const point = {
@@ -1138,8 +1140,12 @@ const computeToolpath = (
             if (!point) {
               continue;
             }
-            link(point, index[i - 1][j]);
-            link(point, index[i][j - 1]);
+            if (i >= 1) {
+              link(point, index[i - 1][j]);
+            }
+            if (j >= 1) {
+              link(point, index[i][j - 1]);
+            }
             if (j % 2) {
               link(point, index[i + 1][j - 1]);
             } else {
@@ -1280,7 +1286,7 @@ const computeToolpath = (
       const distance = measureDistance(candidate.at.start, target.start);
       if (
         (candidate.at.isFill || target.isFill) &&
-        distance < toolDiameter &&
+        distance <= toolSpacing &&
         candidate.at.start.every(isFinite)
       ) {
         // Reaching a fill point fulfills it, but reaching a profile or groove point won't.
@@ -1531,7 +1537,14 @@ const filterTargets$2 = (noVoid) => (geometry) =>
 const filterRemoves = (noVoid) => (geometry) =>
   filterTargets$2(noVoid)(geometry) && isNotTypeMasked(geometry);
 
-const cut = (geometry, geometries, open = false, exact, noVoid) => {
+const cut = (
+  geometry,
+  geometries,
+  open = false,
+  exact,
+  noVoid,
+  noGhost
+) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets$2(noVoid), inputs);
@@ -1541,8 +1554,10 @@ const cut = (geometry, geometries, open = false, exact, noVoid) => {
   }
   const outputs = cut$1(inputs, count, open, exact);
   const ghosts = [];
-  for (let nth = count; nth < inputs.length; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  if (!noGhost) {
+    for (let nth = count; nth < inputs.length; nth++) {
+      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+    }
   }
   deletePendingSurfaceMeshes();
   return taggedGroup(
@@ -2520,10 +2535,12 @@ const filter = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-const wrap = (geometry, offset, alpha) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
+const wrap = (geometries, offset, alpha) => {
   const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
+  for (const geometry of geometries) {
+    const concreteGeometry = toConcreteGeometry(geometry);
+    linearize(concreteGeometry, filter, inputs);
+  }
   const outputs = wrap$1(inputs, offset, alpha);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);

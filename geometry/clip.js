@@ -16,7 +16,7 @@ const filter = (noVoid) => (geometry) =>
   ) &&
   (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
 
-export const clip = (geometry, geometries, open, exact, noVoid) => {
+export const clip = (geometry, geometries, open, exact, noVoid, noGhost) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter(noVoid), inputs);
@@ -26,8 +26,10 @@ export const clip = (geometry, geometries, open, exact, noVoid) => {
   }
   const outputs = clipWithCgal(inputs, count, open, exact);
   const ghosts = [];
-  for (let nth = 0; nth < inputs.length; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  if (!noGhost) {
+    for (let nth = 0; nth < inputs.length; nth++) {
+      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+    }
   }
   deletePendingSurfaceMeshes();
   return taggedGroup(

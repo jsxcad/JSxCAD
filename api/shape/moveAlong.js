@@ -1,3 +1,4 @@
+import Group from './Group.js';
 import Shape from './Shape.js';
 import { normal } from './normal.js';
 
@@ -22,7 +23,7 @@ export const moveAlong = Shape.registerMethod(
         const delta = deltas.pop();
         moves.push(await shape.move(scale(delta, direction)));
       }
-      return Shape.Group(...moves);
+      return Group(...moves);
     }
 );
 

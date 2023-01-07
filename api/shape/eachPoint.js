@@ -3,6 +3,7 @@ import Point from './Point.js';
 import Shape from './Shape.js';
 import { destructure } from './destructure.js';
 import { eachPoint as eachPointOfGeometry } from '@jsxcad/geometry';
+import { move } from './move.js';
 
 export const eachPoint = Shape.registerMethod(
   'eachPoint',
@@ -18,7 +19,10 @@ export const eachPoint = Shape.registerMethod(
       );
       const points = [];
       for (const [x, y, z] of coordinates) {
-        points.push(await pointOp(Point().move(x, y, z), nth++));
+        const point = await Point();
+        const moved = await move(x, y, z)(point);
+        const operated = await pointOp(moved, nth++);
+        points.push(operated);
       }
       const grouped = groupOp(...points);
       if (Shape.isFunction(grouped)) {

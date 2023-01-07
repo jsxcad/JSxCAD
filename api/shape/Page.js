@@ -13,7 +13,7 @@ import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Shape from './Shape.js';
 import { align } from './align.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 import { getNot } from './getNot.js';
 import { toDisplayGeometry } from './toDisplayGeometry.js';
 
@@ -74,12 +74,14 @@ const buildLayout = async ({
   return layout;
 };
 
-export const Page = Shape.registerShapeMethod('Page', async (...args) => {
-  const {
-    object: options,
-    strings: modes,
-    shapesAndFunctions: shapes,
-  } = destructure(args);
+export const Page = Shape.registerMethod('Page', (...args) => async (shape) => {
+  const [options, modes, shapes] = await destructure2(
+    shape,
+    args,
+    'options',
+    'modes',
+    'shapes'
+  );
   let {
     size,
     pageMargin = 5,

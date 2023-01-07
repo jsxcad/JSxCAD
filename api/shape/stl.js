@@ -9,25 +9,35 @@ import {
 import { fromStl, toStl } from '@jsxcad/convert-stl';
 
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 import { ensurePages } from './Page.js';
 import { hash as hashGeometry } from '@jsxcad/geometry';
 import { view } from './view.js';
 
-export const LoadStl = Shape.registerShapeMethod('LoadStl', async (...args) => {
-  const { strings } = destructure(args);
-  const [path, ...modes] = strings;
-  const data = await read(`source/${path}`, { sources: [path] });
-  const format = modes.includes('binary') ? 'binary' : 'ascii';
-  return Shape.fromGeometry(await fromStl(data, { format }));
-});
+export const LoadStl = Shape.registerMethod(
+  'LoadStl',
+  (...args) =>
+    async (shape) => {
+      const [path, modes] = await await destructure2(
+        shape,
+        args,
+        'string',
+        'modes'
+      );
+      const data = await read(`source/${path}`, { sources: [path] });
+      const format = modes.includes('binary') ? 'binary' : 'ascii';
+      return Shape.fromGeometry(await fromStl(data, { format }));
+    }
+);
 
 export const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
-  const {
-    value: name,
-    func: op = (s) => s,
-    object: options = {},
-  } = destructure(args);
+  const [name, op = (s) => s, options] = await destructure2(
+    shape,
+    args,
+    'string',
+    'function',
+    'options'
+  );
   const { path } = getSourceLocation();
   let index = 0;
   for (const entry of await ensurePages(await op(Shape.chain(shape)))) {

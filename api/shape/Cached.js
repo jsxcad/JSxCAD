@@ -4,7 +4,7 @@ import { saveGeometry } from './saveGeometry.js';
 
 // This generates anonymous shape methods.
 export const Cached = (name, op, enable = true) =>
-  Shape.registerShapeMethod([], async (...args) => {
+  Shape.registerMethod([], (...args) => async (shape) => {
     const path = `cached/${name}/${JSON.stringify(args)}`;
     // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.
     const cached = await loadGeometry(path);
@@ -12,10 +12,10 @@ export const Cached = (name, op, enable = true) =>
       return cached;
     }
     // The read we scheduled last time produced undefined, so we fall through to here.
-    const shape = await op(...args);
+    const constructedShape = await op(...args);
     // This will schedule a write and throw, then wait for the write to complete, and retry.
-    await saveGeometry(path, shape);
-    return shape;
+    await saveGeometry(path, constructedShape);
+    return constructedShape;
   });
 
 export default Cached;

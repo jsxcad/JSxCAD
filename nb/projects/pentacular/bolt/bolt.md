@@ -40,10 +40,10 @@ export const ScrewThreadSegmentBuilder = Cached(
 ```
 
 ```JavaScript
-export const ScrewThreadSegment = Shape.registerShapeMethod('ScrewThreadSegment', (
+export const ScrewThreadSegment = Shape.registerMethod('ScrewThreadSegment', (
   diameter,
   { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => ScrewThreadSegmentBuilder(diameter, pitch, angle, play, turn));
+) => (shape) => ScrewThreadSegmentBuilder(diameter, pitch, angle, play, turn));
 ```
 
 ```JavaScript
@@ -58,11 +58,11 @@ export const ScrewThreadBuilder = Cached(
 ```
 
 ```JavaScript
-export const ScrewThread = Shape.registerShapeMethod('ScrewThread', (
+export const ScrewThread = Shape.registerMethod('ScrewThread', (
   diameter,
   height,
   { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn));
+) => (shape) => ScrewThreadBuilder(diameter, height, pitch, angle, play, turn));
 ```
 
 ```JavaScript
@@ -86,7 +86,7 @@ export const NutThreadSegmentBuilder = Cached(
 ```
 
 ```JavaScript
-export const NutThreadSegment = Shape.registerShapeMethod('NutThreadSegment', (
+export const NutThreadSegment = Shape.registerMethod('NutThreadSegment', (
   diameter,
   {
     pitch = 1,
@@ -95,7 +95,7 @@ export const NutThreadSegment = Shape.registerShapeMethod('NutThreadSegment', (
     play = 0.1,
     turn = 'right',
   } = {}
-) => NutThreadSegmentBuilder(diameter, pitch, thickness, angle, play, turn));
+) => (shape) => NutThreadSegmentBuilder(diameter, pitch, thickness, angle, play, turn));
 ```
 
 ```JavaScript
@@ -109,9 +109,9 @@ export const NutThreadBuilder = Cached(
 ```
 
 ```JavaScript
-export const NutThread = Shape.registerShapeMethod('NutThread', (
+export const NutThread = Shape.registerMethod('NutThread', (
   diameter,
   height,
   { pitch = 1, angle = 60 / 360, play = 0.1, turn = 'right' } = {}
-) => NutThreadBuilder(diameter, height, pitch, angle, play, turn));
+) => (shape) => NutThreadBuilder(diameter, height, pitch, angle, play, turn));
 ```
