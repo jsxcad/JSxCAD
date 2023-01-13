@@ -52,13 +52,18 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
 
   std::cout << "QQ/FromPolygonSoup/9" << std::endl;
 
-  CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
+  demesh(mesh);
 
   std::cout << "QQ/FromPolygonSoup/10" << std::endl;
 
-  demesh(mesh);
+  if (CGAL::Polygon_mesh_processing::volume(
+          mesh, CGAL::parameters::all_default()) < 0) {
+    std::cout << "QQ/FromPolygonSoup/11" << std::endl;
+    CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
+    std::cout << "QQ/FromPolygonSoup/12" << std::endl;
+  }
 
-  std::cout << "QQ/FromPolygonSoup/11" << std::endl;
+  std::cout << "QQ/FromPolygonSoup/13" << std::endl;
 
   return STATUS_OK;
 }
