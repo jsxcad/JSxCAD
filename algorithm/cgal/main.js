@@ -14,6 +14,7 @@ export {
   toCgalTransformFromJsTransform,
 } from './transform.js';
 
+export { approximate } from './approximate.js';
 export {
   arrangeSegments,
   arrangeSegmentsIntoTriangles,
@@ -36,6 +37,7 @@ export { computeBoundingBox } from './computeBoundingBox.js';
 export { computeCentroid } from './computeCentroid.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
+export { computeOrientedBoundingBox } from './computeOrientedBoundingBox.js';
 export { computeVolume } from './computeVolume.js';
 export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
 export { convexHull } from './convexHull.js';
@@ -53,6 +55,7 @@ export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
 export { fromPolygons } from './fromPolygons.js';
+export { fromPolygonSoup } from './fromPolygonSoup.js';
 export { fromSurfaceMesh } from './fromSurfaceMesh.js';
 export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';

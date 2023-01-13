@@ -21,6 +21,7 @@ export const scale = (vector, geometry) =>
 
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
+export { approximate } from './approximate.js';
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
 export { bend } from './bend.js';
@@ -30,6 +31,7 @@ export { clip } from './clip.js';
 export { computeCentroid } from './computeCentroid.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
+export { computeOrientedBoundingBox } from './computeOrientedBoundingBox.js';
 export { computeToolpath } from './tagged/computeToolpath.js';
 export { convexHull } from './convexHull.js';
 export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
@@ -37,6 +39,7 @@ export { cut } from './cut.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
 export { disjoint } from './disjoint.js';
+export { disorientSegment } from './disorientSegment.js';
 export { drop } from './tagged/drop.js';
 export { eachFaceEdges } from './eachFaceEdges.js';
 export { eachItem } from './tagged/eachItem.js';
@@ -48,6 +51,7 @@ export { extrude } from './extrude.js';
 export { fix } from './fix.js';
 export { fresh } from './tagged/fresh.js';
 export { fromPolygons } from './fromPolygons.js';
+export { fromPolygonSoup } from './fromPolygonSoup.js';
 export {
   identity,
   fromRotateXToTransform,

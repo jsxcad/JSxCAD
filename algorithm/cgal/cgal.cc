@@ -505,72 +505,6 @@ struct Triple_array_traits {
 Vector unitVector(const Vector& vector);
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
 
-#if 0
-const Surface_mesh* ApproximateSurfaceMesh(
-    const Surface_mesh* input, const Transformation* transform,
-    size_t iterations, size_t relaxation_steps, size_t proxies,
-    double minimum_error_drop, double subdivision_ratio, bool relative_to_chord,
-    bool with_dihedral_angle, bool optimize_anchor_location, bool pca_plane) {
-  // This depends on the standard prng.
-  // Lock it down to be deterministic.
-
-  CGAL::get_default_random() = CGAL::Random(0);
-  std::srand(0);
-
-  Surface_mesh working_input(*input);
-  CGAL::Polygon_mesh_processing::transform(*transform, working_input,
-                                           CGAL::parameters::all_default());
-
-  typedef CGAL::Exact_predicates_inexact_constructions_kernel Epick;
-  std::vector<Epick::Point_3> epick_anchors;
-  std::vector<std::array<std::size_t, 3>> triangles;
-  CGAL::Surface_mesh<Epick::Point_3> epick_mesh;
-  copy_face_graph(working_input, epick_mesh);
-
-  if (proxies > 0) {
-    CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
-        epick_mesh, CGAL::parameters::verbose_level(
-                        CGAL::Surface_mesh_approximation::MAIN_STEPS)
-                        .number_of_iterations(iterations)
-                        .number_of_relaxations(relaxation_steps)
-                        .max_number_of_proxies(proxies)
-                        .min_error_drop(minimum_error_drop)
-                        .subdivision_ratio(subdivision_ratio)
-                        .relative_to_chord(relative_to_chord)
-                        .with_dihedral_angle(with_dihedral_angle)
-                        .optimize_anchor_location(optimize_anchor_location)
-                        .pca_plane(pca_plane)
-                        .anchors(std::back_inserter(epick_anchors))
-                        .triangles(std::back_inserter(triangles)));
-  } else {
-    CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
-        epick_mesh, CGAL::parameters::verbose_level(
-                        CGAL::Surface_mesh_approximation::MAIN_STEPS)
-                        .number_of_iterations(iterations)
-                        .number_of_relaxations(relaxation_steps)
-                        .min_error_drop(minimum_error_drop)
-                        .subdivision_ratio(subdivision_ratio)
-                        .relative_to_chord(relative_to_chord)
-                        .with_dihedral_angle(with_dihedral_angle)
-                        .optimize_anchor_location(optimize_anchor_location)
-                        .pca_plane(pca_plane)
-                        .anchors(std::back_inserter(epick_anchors))
-                        .triangles(std::back_inserter(triangles)));
-  }
-  std::vector<Point> anchors;
-  for (const auto& epick_anchor : epick_anchors) {
-    anchors.emplace_back(epick_anchor.x(), epick_anchor.y(), epick_anchor.z());
-  }
-  std::unique_ptr<Surface_mesh> output(new Surface_mesh());
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
-      anchors, triangles, *output);
-
-  CGAL::Polygon_mesh_processing::transform(transform->inverse(), *output,
-                                           CGAL::parameters::all_default());
-  return output.release();
-}
-#endif
-
 template <typename Surface_mesh, typename Vertex_point_map,
           typename Halfedge_index>
 bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
@@ -2335,6 +2269,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
   convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs);
 }
 
+#include "Approximate.h"
 #include "Bend.h"
 #include "Cast.h"
 #include "Clip.h"
@@ -2343,6 +2278,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "ComputeCentroid.h"
 #include "ComputeImplicitVolume.h"
 #include "ComputeNormal.h"
+#include "ComputeOrientedBoundingBox.h"
 #include "ComputeVolume.h"
 #include "ConvertPolygonsToMeshes.h"
 #include "ConvexHull.h"
@@ -2357,6 +2293,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "FaceEdges.h"
 #include "Fill.h"
 #include "Fix.h"
+#include "FromPolygonSoup.h"
 #include "FromPolygons.h"
 #include "Fuse.h"
 #include "GenerateEnvelope.h"
@@ -2629,12 +2566,17 @@ EMSCRIPTEN_BINDINGS(module) {
                 &AabbTreeQuery::isIntersectingSegmentApproximate);
 
   // New primitives
+  emscripten::function("Approximate", &Approximate,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Bend", &Bend, emscripten::allow_raw_pointers());
   emscripten::function("Cast", &Cast, emscripten::allow_raw_pointers());
   emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
   emscripten::function("ComputeArea", &ComputeArea,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeBoundingBox", &ComputeBoundingBox,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("ComputeOrientedBoundingBox",
+                       &ComputeOrientedBoundingBox,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeCentroid", &ComputeCentroid,
                        emscripten::allow_raw_pointers());
@@ -2664,6 +2606,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
   emscripten::function("FromPolygons", &FromPolygons,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("FromPolygonSoup", &FromPolygonSoup,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
   emscripten::function("GenerateEnvelope", &GenerateEnvelope,
