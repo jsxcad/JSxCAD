@@ -618,6 +618,11 @@ Shape.destructure = destructure;
 
 const destructure2 = async (shape, args, ...specs) => {
   const output = [];
+  for (let nth = 0; nth < args.length; nth++) {
+    if (args[nth] instanceof Promise) {
+      args[nth] = await args[nth];
+    }
+  }
   for (const spec of specs) {
     const rest = [];
     switch (spec) {
