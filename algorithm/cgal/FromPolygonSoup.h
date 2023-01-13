@@ -1,7 +1,6 @@
 int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
   Points points;
   Polygons polygons;
-  std::cout << "QQ/FromPolygonSoup/1" << std::endl;
   {
     Triples triples;
     // Workaround for emscripten::val() bindings.
@@ -13,20 +12,15 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
     }
   }
 
-  std::cout << "QQ/FromPolygonSoup/2" << std::endl;
   CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
-  std::cout << "QQ/FromPolygonSoup/3" << std::endl;
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
 
-  std::cout << "QQ/FromPolygonSoup/4" << std::endl;
   int target = geometry->add(GEOMETRY_MESH);
   Surface_mesh& mesh = geometry->mesh(target);
   geometry->setIdentityTransform(target);
 
-  std::cout << "QQ/FromPolygonSoup/5" << std::endl;
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, mesh);
 
-  std::cout << "QQ/FromPolygonSoup/6" << std::endl;
   bool failed = false;
   while (!failed && !CGAL::is_closed(mesh)) {
     for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
@@ -44,26 +38,18 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
     }
   }
   if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
-    std::cout << "QQ/FromPolygonSoup/7" << std::endl;
     CGAL::Polygon_mesh_processing::experimental::
         autorefine_and_remove_self_intersections(mesh);
-    std::cout << "QQ/FromPolygonSoup/8" << std::endl;
   }
 
-  std::cout << "QQ/FromPolygonSoup/9" << std::endl;
 
   demesh(mesh);
 
-  std::cout << "QQ/FromPolygonSoup/10" << std::endl;
 
   if (CGAL::Polygon_mesh_processing::volume(
           mesh, CGAL::parameters::all_default()) < 0) {
-    std::cout << "QQ/FromPolygonSoup/11" << std::endl;
     CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
-    std::cout << "QQ/FromPolygonSoup/12" << std::endl;
   }
-
-  std::cout << "QQ/FromPolygonSoup/13" << std::endl;
 
   return STATUS_OK;
 }
