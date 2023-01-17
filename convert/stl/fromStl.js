@@ -1,4 +1,4 @@
-import { fromPolygons } from '@jsxcad/geometry';
+import { fromPolygonSoup } from '@jsxcad/geometry';
 import parseStlAscii from 'parse-stl-ascii';
 import { parse as parseStlBinary } from './parseStlBinary.js';
 
@@ -26,5 +26,5 @@ export const fromStl = async (stl, { format = 'ascii' } = {}) => {
     if (pc.some((value) => !isFinite(value))) continue;
     polygons.push({ points: [[...pa], [...pb], [...pc]] });
   }
-  return fromPolygons(polygons);
+  return fromPolygonSoup(polygons);
 };

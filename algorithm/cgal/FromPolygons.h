@@ -26,6 +26,8 @@ int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
   }
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
   demesh(mesh);
+#if 0
+  // This should be handled elsewhere.
   try {
     Surface_mesh tmp(mesh);
     if (CGAL::Polygon_mesh_processing::experimental::
@@ -41,5 +43,6 @@ int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
     std::cout << "QQ/FromPolygons/autorefine exception" << std::endl;
     std::cout << e.what() << std::endl;
   }
+#endif
   return STATUS_OK;
 }

@@ -1235,11 +1235,7 @@ var nodeFetch = _ => _;
  * returns true if the given object is a promise
  */
 function isPromise(obj) {
-  if (obj && typeof obj.then === 'function') {
-    return true;
-  } else {
-    return false;
-  }
+  return obj && typeof obj.then === 'function';
 }
 Promise.resolve(false);
 Promise.resolve(true);
@@ -1255,15 +1251,16 @@ function sleep$1(time, resolveWith) {
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
 /**
  * https://stackoverflow.com/a/8084248
  */
-
 function randomToken() {
   return Math.random().toString(36).substring(2);
 }
 var lastMs = 0;
 var additional = 0;
+
 /**
  * returns the current time in micro-seconds,
  * WARNING: This is a pseudo-function
@@ -1271,10 +1268,8 @@ var additional = 0;
  * This is enough in browsers, and this function will not be used in nodejs.
  * The main reason for this hack is to ensure that BroadcastChannel behaves equal to production when it is used in fast-running unit tests.
  */
-
 function microSeconds$4() {
   var ms = new Date().getTime();
-
   if (ms === lastMs) {
     additional++;
     return ms * 1000 + additional;
@@ -1292,7 +1287,6 @@ function create$3(channelName) {
     messagesCallback: null,
     bc: new BroadcastChannel(channelName),
     subFns: [] // subscriberFunctions
-
   };
 
   state.bc.onmessage = function (msg) {
@@ -1300,7 +1294,6 @@ function create$3(channelName) {
       state.messagesCallback(msg.data);
     }
   };
-
   return state;
 }
 function close$3(channelState) {
@@ -1322,12 +1315,10 @@ function canBeUsed$3() {
   if (typeof window === 'undefined') {
     return false;
   }
-
   if (typeof BroadcastChannel === 'function') {
     if (BroadcastChannel._pubkey) {
       throw new Error('BroadcastChannel: Do not overwrite window.BroadcastChannel with this module, this is not a polyfill');
     }
-
     return true;
   } else {
     return false;
@@ -1420,30 +1411,33 @@ function now() {
 
 function fillOptionsWithDefaults() {
   var originalOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var options = JSON.parse(JSON.stringify(originalOptions)); // main
+  var options = JSON.parse(JSON.stringify(originalOptions));
 
-  if (typeof options.webWorkerSupport === 'undefined') options.webWorkerSupport = true; // indexed-db
+  // main
+  if (typeof options.webWorkerSupport === 'undefined') options.webWorkerSupport = true;
 
-  if (!options.idb) options.idb = {}; //  after this time the messages get deleted
-
+  // indexed-db
+  if (!options.idb) options.idb = {};
+  //  after this time the messages get deleted
   if (!options.idb.ttl) options.idb.ttl = 1000 * 45;
-  if (!options.idb.fallbackInterval) options.idb.fallbackInterval = 150; //  handles abrupt db onclose events.
+  if (!options.idb.fallbackInterval) options.idb.fallbackInterval = 150;
+  //  handles abrupt db onclose events.
+  if (originalOptions.idb && typeof originalOptions.idb.onclose === 'function') options.idb.onclose = originalOptions.idb.onclose;
 
-  if (originalOptions.idb && typeof originalOptions.idb.onclose === 'function') options.idb.onclose = originalOptions.idb.onclose; // localstorage
-
+  // localstorage
   if (!options.localstorage) options.localstorage = {};
-  if (!options.localstorage.removeTimeout) options.localstorage.removeTimeout = 1000 * 60; // custom methods
+  if (!options.localstorage.removeTimeout) options.localstorage.removeTimeout = 1000 * 60;
 
-  if (originalOptions.methods) options.methods = originalOptions.methods; // node
+  // custom methods
+  if (originalOptions.methods) options.methods = originalOptions.methods;
 
+  // node
   if (!options.node) options.node = {};
   if (!options.node.ttl) options.node.ttl = 1000 * 60 * 2; // 2 minutes;
-
   /**
    * On linux use 'ulimit -Hn' to get the limit of open files.
    * On ubuntu this was 4096 for me, so we use half of that as maxParallelWrites default.
    */
-
   if (!options.node.maxParallelWrites) options.node.maxParallelWrites = 2048;
   if (typeof options.node.useFastPath === 'undefined') options.node.useFastPath = true;
   return options;
@@ -1460,49 +1454,47 @@ function fillOptionsWithDefaults() {
 var microSeconds$2 = microSeconds$4;
 var DB_PREFIX = 'pubkey.broadcast-channel-0-';
 var OBJECT_STORE_ID = 'messages';
+
 /**
  * Use relaxed durability for faster performance on all transactions.
  * @link https://nolanlawson.com/2021/08/22/speeding-up-indexeddb-reads-and-writes/
  */
-
 var TRANSACTION_SETTINGS = {
   durability: 'relaxed'
 };
 var type$2 = 'idb';
 function getIdb() {
   if (typeof indexedDB !== 'undefined') return indexedDB;
-
   if (typeof window !== 'undefined') {
     if (typeof window.mozIndexedDB !== 'undefined') return window.mozIndexedDB;
     if (typeof window.webkitIndexedDB !== 'undefined') return window.webkitIndexedDB;
     if (typeof window.msIndexedDB !== 'undefined') return window.msIndexedDB;
   }
-
   return false;
 }
+
 /**
  * If possible, we should explicitly commit IndexedDB transactions
  * for better performance.
  * @link https://nolanlawson.com/2021/08/22/speeding-up-indexeddb-reads-and-writes/
  */
-
 function commitIndexedDBTransaction(tx) {
   if (tx.commit) {
     tx.commit();
   }
 }
 function createDatabase(channelName) {
-  var IndexedDB = getIdb(); // create table
+  var IndexedDB = getIdb();
 
+  // create table
   var dbName = DB_PREFIX + channelName;
+
   /**
    * All IndexedDB databases are opened without version
    * because it is a bit faster, especially on firefox
    * @link http://nparashuram.com/IndexedDB/perf/#Open%20Database%20with%20version
    */
-
   var openRequest = IndexedDB.open(dbName);
-
   openRequest.onupgradeneeded = function (ev) {
     var db = ev.target.result;
     db.createObjectStore(OBJECT_STORE_ID, {
@@ -1510,23 +1502,20 @@ function createDatabase(channelName) {
       autoIncrement: true
     });
   };
-
-  var dbPromise = new Promise(function (res, rej) {
+  return new Promise(function (res, rej) {
     openRequest.onerror = function (ev) {
       return rej(ev);
     };
-
     openRequest.onsuccess = function () {
       res(openRequest.result);
     };
   });
-  return dbPromise;
 }
+
 /**
  * writes the new message to the database
  * so other readers can find it
  */
-
 function writeMessage(db, readerUuid, messageJson) {
   var time = new Date().getTime();
   var writeObject = {
@@ -1539,11 +1528,9 @@ function writeMessage(db, readerUuid, messageJson) {
     tx.oncomplete = function () {
       return res();
     };
-
     tx.onerror = function (ev) {
       return rej(ev);
     };
-
     var objectStore = tx.objectStore(OBJECT_STORE_ID);
     objectStore.add(writeObject);
     commitIndexedDBTransaction(tx);
@@ -1554,25 +1541,23 @@ function getMessagesHigherThan(db, lastCursorId) {
   var objectStore = tx.objectStore(OBJECT_STORE_ID);
   var ret = [];
   var keyRangeValue = IDBKeyRange.bound(lastCursorId + 1, Infinity);
+
   /**
    * Optimization shortcut,
    * if getAll() can be used, do not use a cursor.
    * @link https://rxdb.info/slow-indexeddb.html
    */
-
   if (objectStore.getAll) {
     var getAllRequest = objectStore.getAll(keyRangeValue);
     return new Promise(function (res, rej) {
       getAllRequest.onerror = function (err) {
         return rej(err);
       };
-
       getAllRequest.onsuccess = function (e) {
         res(e.target.result);
       };
     });
   }
-
   function openCursor() {
     // Occasionally Safari will fail on IDBKeyRange.bound, this
     // catches that error, having it open the cursor to the first
@@ -1584,17 +1569,13 @@ function getMessagesHigherThan(db, lastCursorId) {
       return objectStore.openCursor();
     }
   }
-
   return new Promise(function (res, rej) {
     var openCursorRequest = openCursor();
-
     openCursorRequest.onerror = function (err) {
       return rej(err);
     };
-
     openCursorRequest.onsuccess = function (ev) {
       var cursor = ev.target.result;
-
       if (cursor) {
         if (cursor.value.id < lastCursorId + 1) {
           cursor["continue"](lastCursorId + 1);
@@ -1613,7 +1594,6 @@ function removeMessagesById(channelState, ids) {
   if (channelState.closed) {
     return Promise.resolve([]);
   }
-
   var tx = channelState.db.transaction(OBJECT_STORE_ID, 'readwrite', TRANSACTION_SETTINGS);
   var objectStore = tx.objectStore(OBJECT_STORE_ID);
   return Promise.all(ids.map(function (id) {
@@ -1633,19 +1613,16 @@ function getOldMessages(db, ttl) {
   return new Promise(function (res) {
     objectStore.openCursor().onsuccess = function (ev) {
       var cursor = ev.target.result;
-
       if (cursor) {
         var msgObk = cursor.value;
-
         if (msgObk.time < olderThen) {
-          ret.push(msgObk); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
-
+          ret.push(msgObk);
+          //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
           cursor["continue"]();
         } else {
           // no more old messages,
           commitIndexedDBTransaction(tx);
           res(ret);
-          return;
         }
       } else {
         res(ret);
@@ -1669,43 +1646,39 @@ function create$2(channelName, options) {
       channelName: channelName,
       options: options,
       uuid: randomToken(),
-
       /**
        * emittedMessagesIds
        * contains all messages that have been emitted before
        * @type {ObliviousSet}
        */
       eMIs: new ObliviousSet(options.idb.ttl * 2),
-      // ensures we do not read messages in parrallel
+      // ensures we do not read messages in parallel
       writeBlockPromise: PROMISE_RESOLVED_VOID,
       messagesCallback: null,
       readQueuePromises: [],
       db: db
     };
+
     /**
      * Handle abrupt closes that do not originate from db.close().
      * This could happen, for example, if the underlying storage is
      * removed or if the user clears the database in the browser's
      * history preferences.
      */
-
     db.onclose = function () {
       state.closed = true;
       if (options.idb.onclose) options.idb.onclose();
     };
+
     /**
      * if service-workers are used,
      * we have no 'storage'-event if they post a message,
      * therefore we also have to set an interval
      */
-
-
     _readLoop(state);
-
     return state;
   });
 }
-
 function _readLoop(state) {
   if (state.closed) return;
   readNewMessages(state).then(function () {
@@ -1714,47 +1687,40 @@ function _readLoop(state) {
     return _readLoop(state);
   });
 }
-
 function _filterMessage(msgObj, state) {
   if (msgObj.uuid === state.uuid) return false; // send by own
-
   if (state.eMIs.has(msgObj.id)) return false; // already emitted
-
   if (msgObj.data.time < state.messagesCallbackTime) return false; // older then onMessageCallback
-
   return true;
 }
+
 /**
  * reads all new messages from the database and emits them
  */
-
-
 function readNewMessages(state) {
   // channel already closed
-  if (state.closed) return PROMISE_RESOLVED_VOID; // if no one is listening, we do not need to scan for new messages
+  if (state.closed) return PROMISE_RESOLVED_VOID;
 
+  // if no one is listening, we do not need to scan for new messages
   if (!state.messagesCallback) return PROMISE_RESOLVED_VOID;
   return getMessagesHigherThan(state.db, state.lastCursorId).then(function (newerMessages) {
     var useMessages = newerMessages
     /**
-     * there is a bug in iOS where the msgObj can be undefined some times
+     * there is a bug in iOS where the msgObj can be undefined sometimes
      * so we filter them out
      * @link https://github.com/pubkey/broadcast-channel/issues/19
-     */
-    .filter(function (msgObj) {
+     */.filter(function (msgObj) {
       return !!msgObj;
     }).map(function (msgObj) {
       if (msgObj.id > state.lastCursorId) {
         state.lastCursorId = msgObj.id;
       }
-
       return msgObj;
     }).filter(function (msgObj) {
       return _filterMessage(msgObj, state);
     }).sort(function (msgObjA, msgObjB) {
       return msgObjA.time - msgObjB.time;
     }); // sort by time
-
     useMessages.forEach(function (msgObj) {
       if (state.messagesCallback) {
         state.eMIs.add(msgObj.id);
@@ -1764,7 +1730,6 @@ function readNewMessages(state) {
     return PROMISE_RESOLVED_VOID;
   });
 }
-
 function close$2(channelState) {
   channelState.closed = true;
   channelState.db.close();
@@ -1786,18 +1751,12 @@ function onMessage$2(channelState, fn, time) {
   readNewMessages(channelState);
 }
 function canBeUsed$2() {
-  var idb = getIdb();
-
-  if (!idb) {
-    return false;
-  }
-
-  return true;
+  return !!getIdb();
 }
 function averageResponseTime$2(options) {
   return options.idb.fallbackInterval * 2;
 }
-var IndexeDbMethod = {
+var IndexedDBMethod = {
   create: create$2,
   close: close$2,
   onMessage: onMessage$2,
@@ -1810,41 +1769,40 @@ var IndexeDbMethod = {
 
 /**
  * A localStorage-only method which uses localstorage and its 'storage'-event
- * This does not work inside of webworkers because they have no access to locastorage
- * This is basically implemented to support IE9 or your grandmothers toaster.
+ * This does not work inside webworkers because they have no access to localstorage
+ * This is basically implemented to support IE9 or your grandmother's toaster.
  * @link https://caniuse.com/#feat=namevalue-storage
  * @link https://caniuse.com/#feat=indexeddb
  */
 var microSeconds$1 = microSeconds$4;
 var KEY_PREFIX = 'pubkey.broadcastChannel-';
 var type$1 = 'localstorage';
+
 /**
  * copied from crosstab
  * @link https://github.com/tejacques/crosstab/blob/master/src/crosstab.js#L32
  */
-
 function getLocalStorage() {
   var localStorage;
   if (typeof window === 'undefined') return null;
-
   try {
     localStorage = window.localStorage;
     localStorage = window['ie8-eventlistener/storage'] || window.localStorage;
-  } catch (e) {// New versions of Firefox throw a Security exception
+  } catch (e) {
+    // New versions of Firefox throw a Security exception
     // if cookies are disabled. See
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1028153
   }
-
   return localStorage;
 }
 function storageKey(channelName) {
   return KEY_PREFIX + channelName;
 }
+
 /**
 * writes the new message to the storage
 * and fires the storage-event so other readers can find it
 */
-
 function postMessage$1(channelState, messageJson) {
   return new Promise(function (res) {
     sleep$1().then(function () {
@@ -1857,12 +1815,12 @@ function postMessage$1(channelState, messageJson) {
       };
       var value = JSON.stringify(writeObj);
       getLocalStorage().setItem(key, value);
+
       /**
        * StorageEvent does not fire the 'storage' event
        * in the window that changes the state of the local storage.
        * So we fire it manually
        */
-
       var ev = document.createEvent('Event');
       ev.initEvent('storage', true, true);
       ev.key = key;
@@ -1874,13 +1832,11 @@ function postMessage$1(channelState, messageJson) {
 }
 function addStorageEventListener(channelName, fn) {
   var key = storageKey(channelName);
-
   var listener = function listener(ev) {
     if (ev.key === key) {
       fn(JSON.parse(ev.newValue));
     }
   };
-
   window.addEventListener('storage', listener);
   return listener;
 }
@@ -1889,32 +1845,27 @@ function removeStorageEventListener(listener) {
 }
 function create$1(channelName, options) {
   options = fillOptionsWithDefaults(options);
-
   if (!canBeUsed$1()) {
     throw new Error('BroadcastChannel: localstorage cannot be used');
   }
-
   var uuid = randomToken();
+
   /**
    * eMIs
    * contains all messages that have been emitted before
    * @type {ObliviousSet}
    */
-
   var eMIs = new ObliviousSet(options.localstorage.removeTimeout);
   var state = {
     channelName: channelName,
     uuid: uuid,
     eMIs: eMIs // emittedMessagesIds
-
   };
+
   state.listener = addStorageEventListener(channelName, function (msgObj) {
     if (!state.messagesCallback) return; // no listener
-
     if (msgObj.uuid === uuid) return; // own message
-
     if (!msgObj.token || eMIs.has(msgObj.token)) return; // already emitted
-
     if (msgObj.data.time && msgObj.data.time < state.messagesCallbackTime) return; // too old
 
     eMIs.add(msgObj.token);
@@ -1932,7 +1883,6 @@ function onMessage$1(channelState, fn, time) {
 function canBeUsed$1() {
   var ls = getLocalStorage();
   if (!ls) return false;
-
   try {
     var key = '__broadcastchannel_check';
     ls.setItem(key, 'works');
@@ -1943,18 +1893,15 @@ function canBeUsed$1() {
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API#Private_Browsing_Incognito_modes
     return false;
   }
-
   return true;
 }
 function averageResponseTime$1() {
   var defaultTime = 120;
   var userAgent = navigator.userAgent.toLowerCase();
-
   if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
     // safari is much slower so this time is higher
     return defaultTime * 2;
   }
-
   return defaultTime;
 }
 var LocalstorageMethod = {
@@ -2019,39 +1966,42 @@ var SimulateMethod = {
   microSeconds: microSeconds
 };
 
-var METHODS = [NativeMethod, // fastest
-IndexeDbMethod, LocalstorageMethod];
+// the line below will be removed from es5/browser builds
+
+// order is important
+var METHODS = [NativeMethod,
+// fastest
+IndexedDBMethod, LocalstorageMethod];
 function chooseMethod(options) {
-  var chooseMethods = [].concat(options.methods, METHODS).filter(Boolean); // the line below will be removed from es5/browser builds
+  var chooseMethods = [].concat(options.methods, METHODS).filter(Boolean);
 
+  // the line below will be removed from es5/browser builds
 
+  // directly chosen
   if (options.type) {
     if (options.type === 'simulate') {
       // only use simulate-method if directly chosen
       return SimulateMethod;
     }
-
     var ret = chooseMethods.find(function (m) {
       return m.type === options.type;
     });
     if (!ret) throw new Error('method-type ' + options.type + ' not found');else return ret;
   }
+
   /**
    * if no webworker support is needed,
-   * remove idb from the list so that localstorage is been chosen
+   * remove idb from the list so that localstorage will be chosen
    */
-
-
   if (!options.webWorkerSupport) {
     chooseMethods = chooseMethods.filter(function (m) {
       return m.type !== 'idb';
     });
   }
-
   var useMethod = chooseMethods.find(function (method) {
     return method.canBeUsed();
   });
-  if (!useMethod) throw new Error("No useable method found in " + JSON.stringify(METHODS.map(function (m) {
+  if (!useMethod) throw new Error("No usable method found in " + JSON.stringify(METHODS.map(function (m) {
     return m.type;
   })));else return useMethod;
 }
@@ -2060,7 +2010,6 @@ function chooseMethod(options) {
  * Contains all open channels,
  * used in tests to ensure everything is closed.
  */
-
 var OPEN_BROADCAST_CHANNELS = new Set();
 var lastId = 0;
 var BroadcastChannel$1 = function BroadcastChannel(name, options) {
@@ -2068,159 +2017,149 @@ var BroadcastChannel$1 = function BroadcastChannel(name, options) {
   this.id = lastId++;
   OPEN_BROADCAST_CHANNELS.add(this);
   this.name = name;
-
   if (ENFORCED_OPTIONS) {
     options = ENFORCED_OPTIONS;
   }
-
   this.options = fillOptionsWithDefaults(options);
-  this.method = chooseMethod(this.options); // isListening
+  this.method = chooseMethod(this.options);
 
+  // isListening
   this._iL = false;
+
   /**
    * _onMessageListener
    * setting onmessage twice,
    * will overwrite the first listener
    */
-
   this._onML = null;
+
   /**
    * _addEventListeners
    */
-
   this._addEL = {
     message: [],
     internal: []
   };
+
   /**
-   * Unsend message promises
+   * Unsent message promises
    * where the sending is still in progress
    * @type {Set<Promise>}
    */
-
   this._uMP = new Set();
+
   /**
    * _beforeClose
    * array of promises that will be awaited
    * before the channel is closed
    */
-
   this._befC = [];
+
   /**
    * _preparePromise
    */
-
   this._prepP = null;
-
   _prepareChannel(this);
-}; // STATICS
+};
+
+// STATICS
 
 /**
  * used to identify if someone overwrites
  * window.BroadcastChannel with this
  * See methods/native.js
  */
-
 BroadcastChannel$1._pubkey = true;
+
 /**
  * if set, this method is enforced,
  * no mather what the options are
  */
-
 var ENFORCED_OPTIONS;
 
+// PROTOTYPE
 BroadcastChannel$1.prototype = {
   postMessage: function postMessage(msg) {
     if (this.closed) {
       throw new Error('BroadcastChannel.postMessage(): ' + 'Cannot post message after channel has closed ' +
       /**
-       * In the past when this error appeared, it was realy hard to debug.
+       * In the past when this error appeared, it was really hard to debug.
        * So now we log the msg together with the error so it at least
        * gives some clue about where in your application this happens.
        */
       JSON.stringify(msg));
     }
-
     return _post(this, 'message', msg);
   },
   postInternal: function postInternal(msg) {
     return _post(this, 'internal', msg);
   },
-
   set onmessage(fn) {
     var time = this.method.microSeconds();
     var listenObj = {
       time: time,
       fn: fn
     };
-
     _removeListenerObject(this, 'message', this._onML);
-
     if (fn && typeof fn === 'function') {
       this._onML = listenObj;
-
       _addListenerObject(this, 'message', listenObj);
     } else {
       this._onML = null;
     }
   },
-
   addEventListener: function addEventListener(type, fn) {
     var time = this.method.microSeconds();
     var listenObj = {
       time: time,
       fn: fn
     };
-
     _addListenerObject(this, type, listenObj);
   },
   removeEventListener: function removeEventListener(type, fn) {
     var obj = this._addEL[type].find(function (obj) {
       return obj.fn === fn;
     });
-
     _removeListenerObject(this, type, obj);
   },
   close: function close() {
     var _this = this;
-
     if (this.closed) {
       return;
     }
-
     OPEN_BROADCAST_CHANNELS["delete"](this);
     this.closed = true;
     var awaitPrepare = this._prepP ? this._prepP : PROMISE_RESOLVED_VOID;
     this._onML = null;
     this._addEL.message = [];
-    return awaitPrepare // wait until all current sending are processed
+    return awaitPrepare
+    // wait until all current sending are processed
     .then(function () {
       return Promise.all(Array.from(_this._uMP));
-    }) // run before-close hooks
+    })
+    // run before-close hooks
     .then(function () {
       return Promise.all(_this._befC.map(function (fn) {
         return fn();
       }));
-    }) // close the channel
+    })
+    // close the channel
     .then(function () {
       return _this.method.close(_this._state);
     });
   },
-
   get type() {
     return this.method.type;
   },
-
   get isClosed() {
     return this.closed;
   }
-
 };
+
 /**
  * Post a message over the channel
  * @returns {Promise} that resolved when the message sending is done
  */
-
 function _post(broadcastChannel, type, msg) {
   var time = broadcastChannel.method.microSeconds();
   var msgObj = {
@@ -2230,25 +2169,22 @@ function _post(broadcastChannel, type, msg) {
   };
   var awaitPrepare = broadcastChannel._prepP ? broadcastChannel._prepP : PROMISE_RESOLVED_VOID;
   return awaitPrepare.then(function () {
-    var sendPromise = broadcastChannel.method.postMessage(broadcastChannel._state, msgObj); // add/remove to unsend messages list
+    var sendPromise = broadcastChannel.method.postMessage(broadcastChannel._state, msgObj);
 
+    // add/remove to unsent messages list
     broadcastChannel._uMP.add(sendPromise);
-
     sendPromise["catch"]().then(function () {
       return broadcastChannel._uMP["delete"](sendPromise);
     });
     return sendPromise;
   });
 }
-
 function _prepareChannel(channel) {
   var maybePromise = channel.method.create(channel.name, channel.options);
-
   if (isPromise(maybePromise)) {
     channel._prepP = maybePromise;
     maybePromise.then(function (s) {
       // used in tests to simulate slow runtime
-
       /*if (channel.options.prepareDelay) {
            await new Promise(res => setTimeout(res, this.options.prepareDelay));
       }*/
@@ -2258,36 +2194,31 @@ function _prepareChannel(channel) {
     channel._state = maybePromise;
   }
 }
-
 function _hasMessageListeners(channel) {
   if (channel._addEL.message.length > 0) return true;
   if (channel._addEL.internal.length > 0) return true;
   return false;
 }
-
 function _addListenerObject(channel, type, obj) {
   channel._addEL[type].push(obj);
-
   _startListening(channel);
 }
-
 function _removeListenerObject(channel, type, obj) {
   channel._addEL[type] = channel._addEL[type].filter(function (o) {
     return o !== obj;
   });
-
   _stopListening(channel);
 }
-
 function _startListening(channel) {
   if (!channel._iL && _hasMessageListeners(channel)) {
     // someone is listening, start subscribing
+
     var listenerFn = function listenerFn(msgObj) {
       channel._addEL[msgObj.type].forEach(function (listenerObject) {
         /**
          * Getting the current time in JavaScript has no good precision.
-         * So instead of only listening to events that happend 'after' the listener
-         * was added, we also listen to events that happended 100ms before it.
+         * So instead of only listening to events that happened 'after' the listener
+         * was added, we also listen to events that happened 100ms before it.
          * This ensures that when another process, like a WebWorker, sends events
          * we do not miss them out because their timestamp is a bit off compared to the main process.
          * Not doing this would make messages missing when we send data directly after subscribing and awaiting a response.
@@ -2295,15 +2226,12 @@ function _startListening(channel) {
          */
         var hundredMsInMicro = 100 * 1000;
         var minMessageTime = listenerObject.time - hundredMsInMicro;
-
         if (msgObj.time >= minMessageTime) {
           listenerObject.fn(msgObj.data);
         }
       });
     };
-
     var time = channel.method.microSeconds();
-
     if (channel._prepP) {
       channel._prepP.then(function () {
         channel._iL = true;
@@ -2315,10 +2243,9 @@ function _startListening(channel) {
     }
   }
 }
-
 function _stopListening(channel) {
   if (channel._iL && !_hasMessageListeners(channel)) {
-    // noone is listening, stop subscribing
+    // no one is listening, stop subscribing
     channel._iL = false;
     var time = channel.method.microSeconds();
     channel.method.onMessage(channel._state, null, time);

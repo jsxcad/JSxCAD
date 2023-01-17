@@ -380,8 +380,7 @@ function getCustomOptions(options) {
  * @returns is the function already memoized
  */
 function isMemoized(fn) {
-    return (typeof fn === 'function' &&
-        fn.isMemoized);
+    return (typeof fn === 'function' && fn.isMemoized);
 }
 /**
  * @function isSameValueZero
@@ -408,7 +407,6 @@ function isSameValueZero(object1, object2) {
  * @returns the merged options
  */
 function mergeOptions(existingOptions, newOptions) {
-    // @ts-ignore
     var target = {};
     /* eslint-disable no-restricted-syntax */
     for (var key in existingOptions) {
@@ -655,9 +653,7 @@ function createMemoizedFunction(fn, options) {
     }, getCustomOptions(options));
     var cache = new Cache(normalizedOptions);
     var keys = cache.keys, values = cache.values, canTransformKey = cache.canTransformKey, shouldCloneArguments = cache.shouldCloneArguments, shouldUpdateOnAdd = cache.shouldUpdateOnAdd, shouldUpdateOnChange = cache.shouldUpdateOnChange, shouldUpdateOnHit = cache.shouldUpdateOnHit;
-    // @ts-ignore
-    var memoized = function memoized() {
-        // @ts-ignore
+    var memoized = function () {
         var key = shouldCloneArguments
             ? cloneArray(arguments)
             : arguments;

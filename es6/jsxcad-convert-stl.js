@@ -1,4 +1,4 @@
-import { fromPolygons, eachTriangle } from './jsxcad-geometry.js';
+import { fromPolygonSoup, eachTriangle } from './jsxcad-geometry.js';
 
 function parse$1(str) {
   if(typeof str !== 'string') {
@@ -122,7 +122,7 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
     if (pc.some((value) => !isFinite(value))) continue;
     polygons.push({ points: [[...pa], [...pb], [...pc]] });
   }
-  return fromPolygons(polygons);
+  return fromPolygonSoup(polygons);
 };
 
 const X = 0;

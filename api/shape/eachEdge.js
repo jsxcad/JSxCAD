@@ -1,12 +1,4 @@
-import {
-  eachFaceEdges,
-  taggedSegments,
-  transformCoordinate,
-} from '@jsxcad/geometry';
-import {
-  fromSegmentToInverseTransform,
-  invertTransform,
-} from '@jsxcad/algorithm-cgal';
+import { disorientSegment, eachFaceEdges } from '@jsxcad/geometry';
 
 import Group from './Group.js';
 import Shape from './Shape.js';
@@ -57,6 +49,7 @@ export const eachEdge = Shape.registerMethod(
         if (segments) {
           for (let nth = 0; nth < segments.length; nth++) {
             const segment = segments[nth];
+            /*
             const absoluteSegment = [
               transformCoordinate(segment[SOURCE], matrix),
               transformCoordinate(segment[TARGET], matrix),
@@ -106,6 +99,19 @@ export const eachEdge = Shape.registerMethod(
                     ])
                   )
                 )
+              )(shape)
+            );
+            */
+            const [forward, backward] = disorientSegment(
+              segment,
+              matrix,
+              normals ? normals[nth] : undefined
+            );
+            edges.push(
+              await edgeOp(
+                Shape.chain(Shape.fromGeometry(forward)),
+                length(segment[SOURCE], segment[TARGET]),
+                Shape.chain(Shape.fromGeometry(backward))
               )(shape)
             );
           }

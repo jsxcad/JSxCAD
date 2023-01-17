@@ -69,6 +69,11 @@ Shape.destructure = destructure;
 
 export const destructure2 = async (shape, args, ...specs) => {
   const output = [];
+  for (let nth = 0; nth < args.length; nth++) {
+    if (args[nth] instanceof Promise) {
+      args[nth] = await args[nth];
+    }
+  }
   for (const spec of specs) {
     const rest = [];
     switch (spec) {
@@ -130,19 +135,19 @@ export const destructure2 = async (shape, args, ...specs) => {
         break;
       }
       case 'shape': {
-        let shape;
+        let result;
         for (const arg of args) {
           let value = arg;
           while (Shape.isFunction(value)) {
             value = await value(shape);
           }
-          if (shape === undefined && Shape.isShape(value)) {
-            shape = value;
+          if (result === undefined && Shape.isShape(value)) {
+            result = value;
           } else {
             rest.push(arg);
           }
         }
-        output.push(shape);
+        output.push(result);
         break;
       }
       case 'options': {
@@ -225,6 +230,10 @@ export const destructure2 = async (shape, args, ...specs) => {
           }
         }
         output.push(out);
+        break;
+      }
+      case 'rest': {
+        output.push(args);
         break;
       }
     }
