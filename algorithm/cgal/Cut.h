@@ -1,3 +1,5 @@
+#include "BRepAlgoAPI_Cut.hxx"
+
 int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -11,10 +13,25 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
-        if (geometry->is_empty_mesh(target)) {
+        if (geometry->is_empty_mesh(target) && !geometry->has_occt_shape(target)) {
+          // Nothing to cut.
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
+#ifdef ENABLE_OCCT
+          if (geometry->has_occt_shape(target) && geometry->has_occt_shape(nth)) {
+            // Occt vs Occt cut.
+            BRepAlgoAPI_Cut cut(geometry->occt_shape(target), geometry->occt_shape(nth));
+            cut.Build();
+            if (!cut.IsDone()) {
+              cut.DumpErrors(std::cout);
+              continue;
+            }
+            geometry->setOcctShape(target, std::shared_ptr<const TopoDS_Shape>(new TopoDS_Shape(cut.Shape())));
+            geometry->discard_mesh(target);
+            continue;
+          }
+#endif
           if (geometry->is_reference(nth)) {
             Plane plane(0, 0, 1, 0);
             plane = plane.transform(geometry->transform(nth)).opposite();

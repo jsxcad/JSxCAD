@@ -201,6 +201,7 @@ export { Edge } from './Edge.js';
 export { Edges } from './Edges.js';
 export { Empty } from './Empty.js';
 export { Face } from './Face.js';
+export { Geometry } from './Geometry.js';
 export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';
 export { Hexagon } from './Hexagon.js';

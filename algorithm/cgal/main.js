@@ -71,6 +71,8 @@ export { loft } from './loft.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { makeAbsolute } from './makeAbsolute.js';
+export { makeOcctBox } from './occt.js';
+export { makeOcctSphere } from './occt.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { remesh } from './remesh.js';

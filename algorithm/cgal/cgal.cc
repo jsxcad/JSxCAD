@@ -2138,8 +2138,7 @@ std::shared_ptr<Surface_mesh> DeserializeMesh(
   return std::shared_ptr<Surface_mesh>(mesh);
 }
 
-std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
-  const Surface_mesh& mesh = *input_mesh;
+std::string serializeMesh(const Surface_mesh& mesh) {
   std::ostringstream s;
   size_t number_of_vertices = mesh.number_of_vertices();
   s << number_of_vertices << "\n";
@@ -2184,7 +2183,14 @@ std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
   return s.str();
 }
 
+std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
+  return serializeMesh(*input_mesh);
+}
+
 #include "Geometry.h"
+#ifdef ENABLE_OCCT
+#include "occt_util.h"
+#endif
 #include "queries.h"
 
 void intersect_segment_with_volume(const Segment& segment, AABB_tree& tree,
@@ -2510,6 +2516,9 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("number_of_faces", &Surface_mesh::number_of_faces)
       .function("has_garbage", &Surface_mesh::has_garbage);
 
+  emscripten::class_<TopoDS_Shape>("TopoDS_Shape")
+      .smart_ptr<std::shared_ptr<const TopoDS_Shape>>("TopoDS_Shape");
+
   emscripten::class_<Quadruple>("Quadruple").constructor<>();
   emscripten::function("fillQuadruple", &fillQuadruple,
                        emscripten::allow_raw_pointers());
@@ -2546,13 +2555,21 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("getSize", &Geometry::getSize)
       .function("getTransform", &Geometry::getTransform)
       .function("getType", &Geometry::getType)
+      .function("has_mesh", &Geometry::has_mesh)
       .function("setTestMode", &Geometry::setTestMode)
       .function("setInputMesh", &Geometry::setInputMesh)
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform)
       .function("setType", &Geometry::setType)
-      .function("transformToAbsoluteFrame",
-                &Geometry::transformToAbsoluteFrame);
+      .function("transformToAbsoluteFrame", &Geometry::transformToAbsoluteFrame)
+#ifdef ENABLE_OCCT
+      .function("deserializeOcctShape", &Geometry::deserializeOcctShape)
+      .function("getOcctShape", &Geometry::getOcctShape)
+      .function("getSerializedOcctShape", &Geometry::getSerializedOcctShape)
+      .function("has_occt_shape", &Geometry::has_occt_shape)
+      .function("setOcctShape", &Geometry::setOcctShape)
+#endif
+      ;
 
   emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
       .constructor<>()
@@ -2658,6 +2675,16 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox,
                        emscripten::allow_raw_pointers());
-  // emscripten::function("DeleteSurfaceMesh", &DeleteSurfaceMesh,
-  // emscripten::allow_raw_pointers());
+
+  // OpenCascade
+#ifdef ENABLE_OCCT
+  emscripten::function("DeserializeOcctShape", &DeserializeOcctShape,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("MakeOcctBox", &MakeOcctBox,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("MakeOcctSphere", &MakeOcctSphere,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("SerializeOcctShape", &SerializeOcctShape,
+                       emscripten::allow_raw_pointers());
+#endif
 }

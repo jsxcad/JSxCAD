@@ -16,7 +16,7 @@ const M22 = 10;
 const M23 = 11;
 const HW = 12;
 
-const transformSymbol = Symbol('transform');
+const cgalTransforms = new WeakMap();
 
 export const toJsTransformFromCgalTransform = (cgalTransform) => {
   try {
@@ -45,7 +45,7 @@ export const toJsTransformFromCgalTransform = (cgalTransform) => {
     getCgal().Transformation__to_exact(cgalTransform, (value) =>
       jsTransform.push(value)
     );
-    jsTransform[transformSymbol] = cgalTransform;
+    cgalTransforms.set(jsTransform, cgalTransform);
     return jsTransform;
   } catch (error) {
     throw Error(error);
@@ -56,7 +56,7 @@ export const toCgalTransformFromJsTransform = (
   jsTransform = identityMatrix
 ) => {
   try {
-    let cgalTransform = jsTransform[transformSymbol];
+    let cgalTransform = cgalTransforms.get(jsTransform);
     if (cgalTransform === undefined) {
       if (jsTransform.length > 16) {
         cgalTransform = fromExactToCgalTransform(jsTransform.slice(16));
@@ -95,7 +95,7 @@ export const toCgalTransformFromJsTransform = (
           hw,
         ]);
       }
-      jsTransform[transformSymbol] = cgalTransform;
+      cgalTransforms.set(jsTransform, cgalTransform);
     }
     return cgalTransform;
   } catch (e) {
