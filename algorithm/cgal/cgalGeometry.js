@@ -12,6 +12,9 @@ const GEOMETRY_EMPTY = 5;
 const GEOMETRY_REFERENCE = 6;
 const GEOMETRY_EDGES = 7;
 
+const meshCache = new WeakMap();
+// const occtShapeCache = new WeakMap();
+
 let testMode = false;
 
 export const setTestMode = (mode) => { testMode = mode; };
@@ -36,14 +39,24 @@ export const fillCgalGeometry = (geometry, inputs) => {
       case 'graph':
         const { graph } = inputs[nth];
         geometry.setType(nth, GEOMETRY_MESH);
-        let mesh = graph.mesh?.deref();
+        let mesh = meshCache.get(graph);
         if (mesh) {
           geometry.setInputMesh(nth, mesh);
         } else if (graph.serializedSurfaceMesh) {
           geometry.deserializeInputMesh(nth, graph.serializedSurfaceMesh);
         } else {
-          throw Error(`Cannot deserialize surface mesh: ${JSON.stringify(inputs[nth])}`);
+          // throw Error(`Cannot deserialize surface mesh: ${JSON.stringify(inputs[nth])}`);
         }
+/*
+        let occt = occtShapeCache.get(graph);
+        if (occt) {
+          geometry.setOcctShape(nth, occt);
+        } else if (graph.serializedOcctShape) {
+          geometry.deserializeOcctShape(nth, graph.serializedOcctShape);
+        } else {
+          // throw Error(`Cannot deserialize occt shape: ${JSON.stringify(inputs[nth])}`);
+        }
+*/
         break;
       case 'polygonsWithHoles': {
         const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
@@ -155,21 +168,57 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 };
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
-  const g = getCgal();
   const results = [];
   for (let nth = start; nth < length; nth++) {
     const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
-        const newMesh = geometry.getMesh(nth);
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
         let { tags = [], graph } = inputs[origin] || {};
-        if (graph === undefined || newMesh !== graph.mesh) {
+        let update = false;
+        let newMesh;
+        let serializedSurfaceMesh;
+/*
+        let newOcctShape;
+*/
+        let serializedOcctShape;
+        if (geometry.has_mesh(nth)) {
+          const oldMesh = meshCache.get(graph);
+          newMesh = geometry.getMesh(nth);
+          if (newMesh === oldMesh) {
+            serializedSurfaceMesh = graph.serializedSurfaceMesh;
+          } else {
+            serializedSurfaceMesh = geometry.getSerializedMesh(nth);
+            update = true;
+          }
+        }
+/*
+        if (geometry.has_occt_shape(nth)) {
+          const oldOcctShape = occtShapeCache.get(graph);
+          newOcctShape = geometry.getOcctShape(nth);
+          if (newOcctShape === oldOcctShape) {
+            serializedOcctShape = graph.serializedOcctShape;
+          } else {
+            serializedOcctShape = geometry.getSerializedOcctShape(nth);
+            update = true;
+          }
+        }
+*/
+        if (update) {
           graph = {
-            serializedSurfaceMesh: g.SerializeMesh(newMesh),
+            serializedSurfaceMesh,
+            serializedOcctShape,
           };
           graph.hash = computeHash(graph);
-          newMesh.delete();
+          // Not part of the hash.
+          if (newMesh) {
+            meshCache.set(graph, newMesh);
+          }
+/*
+          if (newOcctShape) {
+            occtShapeCache.set(graph, newOcctShape);
+          }
+*/
         }
         results[nth] = {
           type: 'graph',
@@ -305,9 +354,11 @@ export const withCgalGeometry = (inputs, op) => {
   try {
     return op(cgalGeometry, g);
   } catch (error) {
+    console.log(`QQ/withCgalGeometry/error: ${op.name}`);
+    console.log(error.stack);
     throw error;
   } finally {
-    cgalGeometry.delete();
+    // cgalGeometry.delete();
   }
 };
 

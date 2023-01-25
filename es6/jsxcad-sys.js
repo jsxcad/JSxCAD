@@ -109,7 +109,7 @@ const hashObject = (object, hash) => {
   const keys = Object.keys(object);
   keys.sort();
   for (const key of keys) {
-    if (typeof key === 'symbol') {
+    if (typeof key === 'symbol' || object[key] === undefined) {
       continue;
     }
     hash.update(key);

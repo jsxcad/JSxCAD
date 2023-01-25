@@ -2,19 +2,19 @@
 
 template <typename Kernel, typename Surface_mesh>
 void remesh(Surface_mesh& mesh,
-            std::vector<std::reference_wrapper<const Surface_mesh>>& selections,
+            std::vector<const Surface_mesh*>& selections,
             int iterations, int relaxation_steps, double target_edge_length) {
   std::set<Vertex_index> unconstrained_vertices;
   std::set<Face_index> unconstrained_faces;
   if (selections.size() > 0) {
-    for (const Surface_mesh& selection : selections) {
+    for (const Surface_mesh* selection : selections) {
       {
-        Surface_mesh working_selection(selection);
+        Surface_mesh working_selection(*selection);
         CGAL::Polygon_mesh_processing::corefine(
             mesh, working_selection, CGAL::parameters::all_default(),
             CGAL::parameters::all_default());
       }
-      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(selection);
+      CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(*selection);
       for (Vertex_index vertex : mesh.vertices()) {
         if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
           // This vertex may be remeshed.

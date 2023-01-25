@@ -1,3 +1,5 @@
+#include "BRepAlgoAPI_Fuse.hxx"
+
 int Join(Geometry* geometry, int targets, bool exact) {
   size_t size = geometry->size();
 
@@ -16,9 +18,22 @@ int Join(Geometry* geometry, int targets, bool exact) {
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
-          if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
+          if (!geometry->is_mesh(nth) && !geometry->has_occt_shape(target)) {
             continue;
           }
+          if (!geometry->is_mesh(target) && !geometry->has_occt_shape(target)) {
+            continue;
+          }
+#ifdef ENABLE_OCCT
+          if (geometry->has_occt_shape(target) && geometry->has_occt_shape(nth)) {
+            // Occt vs Occt cut.
+            BRepAlgoAPI_Fuse fuse(geometry->occt_shape(target), geometry->occt_shape(nth));
+            fuse.Build();
+            geometry->setOcctShape(target, std::shared_ptr<const TopoDS_Shape>(new TopoDS_Shape(fuse.Shape())));
+            geometry->discard_mesh(target);
+            continue;
+          }
+#endif
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
           } else if (exact) {

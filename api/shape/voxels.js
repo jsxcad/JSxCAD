@@ -32,9 +32,9 @@ const ceilPoint = ([x, y, z], resolution) => [
 export const voxels = Shape.registerMethod(
   'voxels',
   (resolution = 1) =>
-    (shape) => {
+    async (shape) => {
       const offset = resolution / 2;
-      const geometry = shape.toGeometry();
+      const geometry = await shape.toGeometry();
       const [boxMin, boxMax] = measureBoundingBox(geometry);
       const min = floorPoint(boxMin, resolution);
       const max = ceilPoint(boxMax, resolution);

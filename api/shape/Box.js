@@ -3,11 +3,13 @@ import './rx.js';
 import './ry.js';
 
 import Edge from './Edge.js';
+import Geometry from './Geometry.js';
 import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { buildCorners } from './Plan.js';
 import { destructure2 } from './destructure.js';
+import { makeOcctBox } from '@jsxcad/algorithm-cgal';
 
 const X = 0;
 const Y = 1;
@@ -43,7 +45,7 @@ const buildFs = async () => {
   return fundamentalShapes;
 };
 
-const reifyBox = async (corner1, corner2) => {
+const reifyBox = async (corner1, corner2, isOcct = false) => {
   const build = async () => {
     const fs = await buildFs();
     const left = corner2[X];
@@ -91,11 +93,17 @@ const reifyBox = async (corner1, corner2) => {
             .sx(right - left)
             .move(left, front, bottom);
         } else {
-          return fs.box
-            .sz(top - bottom)
-            .sx(right - left)
-            .sy(back - front)
-            .move(left, front, bottom);
+          if (isOcct) {
+            return Geometry(
+              makeOcctBox(right - left, back - front, top - bottom)
+            ).move(left, front, bottom);
+          } else {
+            return fs.box
+              .sz(top - bottom)
+              .sx(right - left)
+              .sy(back - front)
+              .move(left, front, bottom);
+          }
         }
       }
     }
@@ -105,16 +113,17 @@ const reifyBox = async (corner1, corner2) => {
 };
 
 export const Box = Shape.registerMethod('Box', (...args) => async (shape) => {
-  const [values, options] = await destructure2(
+  const [modes, values, options] = await destructure2(
     shape,
     args,
+    'modes',
     'values',
     'options'
   );
   const [x = 1, y = x, z = 0] = values;
   const [computedC1, computedC2] = await buildCorners(x, y, z)(shape);
   let { c1 = computedC1, c2 = computedC2 } = options;
-  return reifyBox(c1, c2);
+  return reifyBox(c1, c2, modes.includes('occt'));
 });
 
 export default Box;

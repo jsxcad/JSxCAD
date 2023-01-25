@@ -1,11 +1,11 @@
 import { computeHash } from '@jsxcad/sys';
 import { withCgalGeometry } from './cgalGeometry.js';
 
-export const serialize = (inputs, targetsLength) => {
+export const serialize = (inputs) => {
   if (inputs.length === 0) {
     return;
   }
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry(inputs, (cgalGeometry, g) => {
     for (let nth = 0; nth < inputs.length; nth++) {
       const entry = inputs[nth];
       if (entry.type !== 'graph' || entry.graph.serializedSurfaceMesh) {
@@ -15,5 +15,6 @@ export const serialize = (inputs, targetsLength) => {
         cgalGeometry.getSerializedInputMesh(nth);
       entry.graph.hash = computeHash(entry.graph);
     }
+    return inputs;
   });
 };

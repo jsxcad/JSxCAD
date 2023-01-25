@@ -17,30 +17,27 @@ int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
 
-  std::vector<std::reference_wrapper<const Epick_surface_mesh>> selections;
+  std::vector<const Epick_surface_mesh*> selections;
   for (int selection = count; selection < size; selection++) {
-    selections.push_back(geometry->epick_mesh(selection));
+    selections.push_back(&geometry->epick_mesh(selection));
   }
 
-  for (size_t nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < count; nth++) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
     Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
 
     CGAL::Unique_hash_map<Vertex_index, bool> constrained_vertices(true);
-    // std::set<Vertex_index> constrained_vertices;
-    // std::set<Vertex_index> unconstrained_vertices;
     CGAL::Unique_hash_map<Face_index, bool> relevant_faces(false);
 
     if (count < size) {
       // Apply selections.
       // Remesh will handle adding the selection edges.
-      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
-                           remesh_relaxation_steps, resolution);
-      for (const Epick_surface_mesh& selection : selections) {
+      remesh<Epick_kernel>(mesh, selections, remesh_iterations, remesh_relaxation_steps, resolution);
+      for (const Epick_surface_mesh* selection : selections) {
         CGAL::Side_of_triangle_mesh<Epick_surface_mesh, Epick_kernel> inside(
-            selection);
+            *selection);
         for (Vertex_index vertex : mesh.vertices()) {
           if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
             // This vertex may be smoothed.
@@ -71,13 +68,7 @@ int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
       }
     }
 
-    // CGAL::Boolean_property_map<std::set<Vertex_index>>
-    // constrained_vertex_map(constrained_vertices);
-
     Constrained_vertex_map constrained_vertex_map(constrained_vertices);
-
-    // CGAL::Boolean_property_map<CGAL::Unique_hash_map<Vertex_index, bool>>
-    //    constrained_vertex_map(constrained_vertices);
 
     std::vector<Face_index> faces;
     for (Face_index face : mesh.faces()) {

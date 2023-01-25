@@ -26,9 +26,17 @@ enum GeometryType {
 class DN {
  public:
   DN(int key) : key_(key){};
-  // ~DN() { std::cout << "DN: " << key_ << std::endl; }
+  ~DN() { std::cout << "DN: " << key_ << std::endl; }
   int key_;
 };
+
+#ifdef ENABLE_OCCT
+class TopoDS_Shape;
+std::shared_ptr<const TopoDS_Shape> DeserializeOcctShape(std::string serialization);
+std::string SerializeOcctShape(std::shared_ptr<const TopoDS_Shape>& shape);
+void buildSurfaceMeshFromOcctShape(const TopoDS_Shape& shape, double deflection_tolerance, Surface_mesh& mesh);
+std::shared_ptr<const TopoDS_Shape> transformOcctShape(const Transformation& t, const TopoDS_Shape& shape);
+#endif
 
 class Geometry {
  public:
@@ -64,6 +72,9 @@ class Geometry {
     bbox2_.clear();
     bbox3_.clear();
     origin_.clear();
+#ifdef ENABLE_OCCT
+    occt_shape_.clear();
+#endif
     resize(size);
   }
 
@@ -91,6 +102,9 @@ class Geometry {
     bbox2_.resize(size);
     bbox3_.resize(size);
     origin_.resize(size);
+#ifdef ENABLE_OCCT
+    occt_shape_.resize(size);
+#endif
   }
 
   GeometryType& type(int nth) { return types_[nth]; }
@@ -128,16 +142,53 @@ class Geometry {
 
   bool has_input_mesh(int nth) { return input_meshes_[nth] != nullptr; }
 
-  const Surface_mesh& input_mesh(int nth) { return *input_meshes_[nth]; }
+  const Surface_mesh& input_mesh(int nth) {
+#ifdef ENABLE_OCCT
+    if (!has_input_mesh(nth) && has_occt_shape(nth)) {
+      Surface_mesh mesh;
+      buildSurfaceMeshFromOcctShape(occt_shape(nth), /*tolerance=*/0.01, mesh);
+      input_meshes_[nth] = std::shared_ptr<const Surface_mesh>(new Surface_mesh(mesh));
+    }
+#endif
+    return *input_meshes_[nth];
+  }
 
-  bool has_mesh(int nth) { return meshes_[nth] != nullptr; }
+  bool has_mesh(int nth) {
+    return meshes_[nth] != nullptr;
+  }
 
   Surface_mesh& mesh(int nth) {
     if (!has_mesh(nth)) {
       meshes_[nth].reset(new Surface_mesh);
+#ifdef ENABLE_OCCT
+      if (has_occt_shape(nth)) {
+        // TODO: Pick a better default tolerance.
+        buildSurfaceMeshFromOcctShape(occt_shape(nth), /*tolerance=*/0.01, *meshes_[nth]);
+      }
+#endif
     }
     return *meshes_[nth];
   }
+
+  void discard_mesh(int nth) {
+    meshes_[nth].reset();
+  }
+
+#ifdef ENABLE_OCCT
+  bool has_occt_shape(int nth) { return occt_shape_[nth] != nullptr; }
+#else
+  bool has_occt_shape(int nth) { return false; }
+#endif
+
+#ifdef ENABLE_OCCT
+  const TopoDS_Shape& occt_shape(int nth) {
+    return *occt_shape_[nth];
+  }
+
+  void discard_occt_shape(int nth) {
+    occt_shape_[nth].reset();
+  }
+#endif
 
   bool has_epick_mesh(int nth) { return epick_meshes_[nth] != nullptr; }
 
@@ -251,7 +302,7 @@ class Geometry {
 
   int getOrigin(int nth) { return origin_[nth]; }
 
-  void setTransform(int nth, std::shared_ptr<const Transformation> transform) {
+  void setTransform(int nth, std::shared_ptr<const Transformation>& transform) {
     transforms_[nth] = transform;
   }
 
@@ -259,7 +310,7 @@ class Geometry {
     transforms_[nth].reset(new Transformation(transform));
   }
 
-  const std::shared_ptr<const Transformation> getTransform(int nth) {
+  const std::shared_ptr<const Transformation>& getTransform(int nth) {
     return transforms_[nth];
   }
 
@@ -275,6 +326,20 @@ class Geometry {
     }
   }
 
+#ifdef ENABLE_OCCT
+  void setOcctShape(int nth, const std::shared_ptr<const TopoDS_Shape>& shape) {
+    occt_shape_[nth] = shape;
+  }
+
+  const std::shared_ptr<const TopoDS_Shape> getOcctShape(int nth) {
+    return occt_shape_[nth];
+  }
+
+  void deserializeOcctShape(int nth, const std::string& serialization) {
+    occt_shape_[nth] = DeserializeOcctShape(serialization);
+  }
+#endif
+
   void setTestMode(bool mode) { test_mode_ = mode; }
 
   const std::shared_ptr<const Surface_mesh> getInputMesh(int nth) {
@@ -285,15 +350,21 @@ class Geometry {
     input_meshes_[nth] = DeserializeMesh(serialization);
   }
 
+#ifdef ENABLE_OCCT
+  std::string getSerializedOcctShape(int nth) {
+    return SerializeOcctShape(occt_shape_[nth]);
+  }
+#endif
+
   void deserializeMesh(int nth, const std::string& serialization) {
     meshes_[nth] = DeserializeMesh(serialization);
   }
 
   std::string getSerializedInputMesh(int nth) {
-    return SerializeMesh(input_meshes_[nth]);
+    return serializeMesh(input_mesh(nth));
   }
 
-  std::string getSerializedMesh(int nth) { return SerializeMesh(meshes_[nth]); }
+  std::string getSerializedMesh(int nth) { return serializeMesh(mesh(nth)); }
 
   void setMesh(int nth, std::unique_ptr<Surface_mesh>& mesh) {
     meshes_[nth] = std::move(mesh);
@@ -497,8 +568,15 @@ class Geometry {
       assert(nth < size());
       switch (type(nth)) {
         case GEOMETRY_MESH: {
-          CGAL::Polygon_mesh_processing::transform(
-              transform(nth), mesh(nth), CGAL::parameters::all_default());
+          if (has_mesh(nth)) {
+            CGAL::Polygon_mesh_processing::transform(
+                transform(nth), mesh(nth), CGAL::parameters::all_default());
+          }
+#ifdef ENABLE_OCCT
+          if (has_occt_shape(nth)) {
+            setOcctShape(nth, transformOcctShape(transform(nth), occt_shape(nth)));
+          }
+#endif
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -536,9 +614,16 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       switch (type(nth)) {
         case GEOMETRY_MESH: {
-          CGAL::Polygon_mesh_processing::transform(
-              transform(nth).inverse(), mesh(nth),
-              CGAL::parameters::all_default());
+          if (has_mesh(nth)) {
+            CGAL::Polygon_mesh_processing::transform(
+                transform(nth).inverse(), mesh(nth),
+                CGAL::parameters::all_default());
+          }
+#ifdef ENABLE_OCCT
+          if (has_occt_shape(nth)) {
+            setOcctShape(nth, transformOcctShape(transform(nth).inverse(), occt_shape(nth)));
+          }
+#endif
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -573,7 +658,7 @@ class Geometry {
 
   void removeEmptyMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {
-      if (is_mesh(nth) && is_empty_mesh(nth)) {
+      if (is_mesh(nth) && is_empty_mesh(nth) && !has_occt_shape(nth)) {
         setType(nth, GEOMETRY_EMPTY);
       }
     }
@@ -658,5 +743,8 @@ class Geometry {
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
   DN dn8;
+#ifdef ENABLE_OCCT
+  std::vector<std::shared_ptr<const TopoDS_Shape>> occt_shape_;
+#endif
 };
 
