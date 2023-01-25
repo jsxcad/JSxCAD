@@ -1,7 +1,4 @@
-const a = await Box(10, 10, 1).color('red').x(10);
-console.log(`QQ/a.isChain: ${a.isChain}`);
-console.log(`QQ/a.align.isChain: ${a.align.isChain}`);
-console.log(`QQ/a.align('x>').isChain: ${a.align('x>').isChain}`);
-await a.align('x>').view();
-
-await Box(10, 10, 1).color('red').x(10).align('x>').view();
+await Box(10)
+  .cut(Arc(5))
+  .ez(5)
+  .view();

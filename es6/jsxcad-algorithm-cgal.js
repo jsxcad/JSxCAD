@@ -1693,37 +1693,6 @@ const fromPolygonSoup = (jsPolygons, tolerance = 0.001) => {
   });
 };
 
-const fromSurfaceMeshToLazyGraph = (mesh) => {
-  try {
-    const c = getCgal();
-    const graph = {
-      isClosed: c.Surface_mesh__is_closed(mesh),
-      isEmpty: c.Surface_mesh__is_empty(mesh),
-      isLazy: true,
-      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
-    };
-    return graph;
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-const fromSurfaceMesh = (surfaceMesh, forceNewGraph = false) => {
-  if (!surfaceMesh) {
-    throw Error('null surfaceMesh');
-  }
-  if (surfaceMesh.provenance === undefined) {
-    throw Error('Surface mesh has no provenance');
-  }
-  let graph = surfaceMesh[graphSymbol];
-  if (forceNewGraph || graph === undefined) {
-    graph = fromSurfaceMeshToLazyGraph(surfaceMesh);
-    surfaceMesh[graphSymbol] = graph;
-    graph[surfaceMeshSymbol] = surfaceMesh;
-  }
-  return graph;
-};
-
 const equals = ([ax, ay, az], [bx, by, bz]) =>
   ax === bx && ay === by && az === bz;
 
@@ -1769,6 +1738,21 @@ const fromSurfaceMeshToGraph = (mesh) => {
     if (graph.edges.length === 0) {
       graph.isEmpty = true;
     }
+    return graph;
+  } catch (error) {
+    throw Error(error);
+  }
+};
+
+const fromSurfaceMeshToLazyGraph = (mesh) => {
+  try {
+    const c = getCgal();
+    const graph = {
+      isClosed: c.Surface_mesh__is_closed(mesh),
+      isEmpty: c.Surface_mesh__is_empty(mesh),
+      isLazy: true,
+      provenance: 'algorithm/cgal/fromSurfaceMeshToLazyGraph',
+    };
     return graph;
   } catch (error) {
     throw Error(error);
@@ -2270,4 +2254,4 @@ const wrap = (inputs, alpha, offset) =>
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demesh, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fill, fitPlaneToPoints, fix, fromExactToCgalTransform, fromIdentityToCgalTransform, fromPolygonSoup, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMesh, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, join, link, loft, makeAbsolute, makeOcctBox, makeOcctSphere, makeUnitSphere, matrix6, offset, outline, pushSurfaceMesh, remesh, seam, section, separate, serialize, setTestMode, simplify, smooth, smoothSurfaceMesh, surfaceMeshSymbol, toCgalTransformFromJsTransform, twist, unfold, withAabbTreeQuery, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, deletePendingSurfaceMeshes, deleteSurfaceMesh, demesh, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fill, fitPlaneToPoints, fix, fromExactToCgalTransform, fromIdentityToCgalTransform, fromPolygonSoup, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromSurfaceMeshToGraph, fromSurfaceMeshToLazyGraph, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, join, link, loft, makeAbsolute, makeOcctBox, makeOcctSphere, makeUnitSphere, matrix6, offset, outline, pushSurfaceMesh, remesh, seam, section, separate, serialize, setTestMode, simplify, smooth, smoothSurfaceMesh, surfaceMeshSymbol, toCgalTransformFromJsTransform, twist, unfold, withAabbTreeQuery, wrap };

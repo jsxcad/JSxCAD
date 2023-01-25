@@ -79,8 +79,8 @@ void buildSurfaceMeshFromOcctShape(const TopoDS_Shape& shape, double deflection_
   for(TopExp_Explorer it(shape, TopAbs_SOLID) ; it.More() ; it.Next()){
     TopoDS_Solid solid = TopoDS::Solid(it.Current());
     BRepMesh_IncrementalMesh(solid, deflection_tolerance);
-    // Each face is triangulated separately.
-    // We could try to consolidate vertices, but let's see if we get t-junctions first.
+    // Each face is triangulated separately, but the vertices are aligned,
+    // so we merge them based on their locations using ensureVertex.
     for (RWMesh_FaceIterator face(solid); face.More(); face.Next()) {
       Standard_Integer elem_first = face.ElemLower();
       Standard_Integer elem_last = face.ElemUpper();

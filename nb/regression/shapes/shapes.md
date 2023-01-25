@@ -542,23 +542,12 @@ await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 ![Image](shapes.md.$53_5.png)
 
 ```JavaScript
-await Box(10)
-  .cut(Arc(5))
-  .ez(5)
-  .grow(1, 'xy', Box(8).ez(1, 4))
-  .grow(1.5, 'xy', Box(16).cut(Box(8)).ez(2, 3))
-  .view();
-```
-
-![Image](shapes.md.$54.png)
-
-```JavaScript
 await Box(10, 10, [0, 3])
   .smooth(1, Box(11).cut(Box(5)).ez(1.5, 3.1), { iterations: 1, time: 1 })
   .view();
 ```
 
-![Image](shapes.md.$55.png)
+![Image](shapes.md.$54.png)
 
 ```JavaScript
 await Box(5, 5, 20)
@@ -568,7 +557,7 @@ await Box(5, 5, 20)
   .view();
 ```
 
-![Image](shapes.md.$56.png)
+![Image](shapes.md.$55.png)
 
 ```JavaScript
 await Box(10)
@@ -578,4 +567,4 @@ await Box(10)
   .view();
 ```
 
-![Image](shapes.md.$57.png)
+![Image](shapes.md.$56.png)

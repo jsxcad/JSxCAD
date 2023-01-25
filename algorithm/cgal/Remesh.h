@@ -9,10 +9,10 @@ int Remesh(Geometry* geometry, size_t count, size_t iterations,
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
 
-  std::vector<std::reference_wrapper<const Surface_mesh>> selections;
+  std::vector<const Surface_mesh*> selections;
 
   for (int selection = count; selection < size; selection++) {
-    selections.push_back(geometry->mesh(selection));
+    selections.push_back(&geometry->mesh(selection));
   }
 
   for (int nth = 0; nth < count; nth++) {

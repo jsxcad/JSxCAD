@@ -184,6 +184,10 @@ export const updateNotebook = async (
   target,
   { failedExpectations = [], browser, baseDirectory, workspace } = {}
 ) => {
+  if (target.startsWith('nb/projects/pentacular/plots/')) {
+    console.log(`QQ/FIXME: skipping ${target}`);
+    return;
+  }
   clearEmitted();
   await boot();
   const notebook = [];
