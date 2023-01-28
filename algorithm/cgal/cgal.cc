@@ -1,6 +1,9 @@
 // #define CGAL_NO_UNCERTAIN_CONVERSION_OPERATOR
 // #define BOOST_DISABLE_THREADS
 
+// Still cannot work around the memory access errors with occt.
+// #define ENABLE_OCCT
+
 // These are added to make Deform work.
 // FIX: The underlying problem.
 #define EIGEN_DONT_VECTORIZE
@@ -2516,8 +2519,10 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("number_of_faces", &Surface_mesh::number_of_faces)
       .function("has_garbage", &Surface_mesh::has_garbage);
 
+#ifdef ENABLE_OCCT
   emscripten::class_<TopoDS_Shape>("TopoDS_Shape")
       .smart_ptr<std::shared_ptr<const TopoDS_Shape>>("TopoDS_Shape");
+#endif
 
   emscripten::class_<Quadruple>("Quadruple").constructor<>();
   emscripten::function("fillQuadruple", &fillQuadruple,

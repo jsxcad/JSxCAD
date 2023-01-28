@@ -415,7 +415,7 @@ const store = async (geometry) => {
     if (graph.hash === undefined) {
       throw Error(`Graph has no hash`);
     }
-    if (!graph.serializedSurfaceMesh) {
+    if (!graph.serializedSurfaceMesh && !graph.serializedOcctShape) {
       throw Error('Attempted to store graph without serialization');
     }
     await write$1(`graph/${graph.hash}`, graph);
@@ -462,8 +462,8 @@ const load = async (geometry) => {
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = await read$1(`graph/${geometry.graph.hash}`);
-    if (!geometry.graph.serializedSurfaceMesh) {
-      throw Error('die');
+    if (!geometry.graph.serializedSurfaceMesh && !geometry.graph.serializedOcctShape) {
+      throw Error('No serialized graph');
     }
   }
   if (geometry.content) {
@@ -498,8 +498,8 @@ const loadNonblocking = (geometry) => {
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = readNonblocking$1(`graph/${geometry.graph.hash}`);
-    if (!geometry.graph.serializedSurfaceMesh) {
-      throw Error('die');
+    if (!geometry.graph.serializedSurfaceMesh && !geometry.graph.serializedOcctShape) {
+      throw Error('No serialized graph');
     }
   }
   if (geometry.content) {
