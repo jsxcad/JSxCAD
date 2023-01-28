@@ -2571,10 +2571,9 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("deserializeOcctShape", &Geometry::deserializeOcctShape)
       .function("getOcctShape", &Geometry::getOcctShape)
       .function("getSerializedOcctShape", &Geometry::getSerializedOcctShape)
-      .function("has_occt_shape", &Geometry::has_occt_shape)
       .function("setOcctShape", &Geometry::setOcctShape)
-#endif
-      ;
+#endif ENABLE_OCCT
+      .function("has_occt_shape", &Geometry::has_occt_shape);
 
   emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
       .constructor<>()

@@ -462,7 +462,10 @@ const load = async (geometry) => {
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = await read$1(`graph/${geometry.graph.hash}`);
-    if (!geometry.graph.serializedSurfaceMesh && !geometry.graph.serializedOcctShape) {
+    if (
+      !geometry.graph.serializedSurfaceMesh &&
+      !geometry.graph.serializedOcctShape
+    ) {
       throw Error('No serialized graph');
     }
   }
@@ -498,7 +501,10 @@ const loadNonblocking = (geometry) => {
   // Link to any associated graph structure.
   if (geometry.graph && geometry.graph.hash) {
     geometry.graph = readNonblocking$1(`graph/${geometry.graph.hash}`);
-    if (!geometry.graph.serializedSurfaceMesh && !geometry.graph.serializedOcctShape) {
+    if (
+      !geometry.graph.serializedSurfaceMesh &&
+      !geometry.graph.serializedOcctShape
+    ) {
       throw Error('No serialized graph');
     }
   }
