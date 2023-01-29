@@ -2592,7 +2592,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Bend", &Bend, emscripten::allow_raw_pointers());
   emscripten::function("Cast", &Cast, emscripten::allow_raw_pointers());
   emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
-  emscripten::function("Common", &Common, emscripten::allow_raw_pointers());
   emscripten::function("ComputeArea", &ComputeArea,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeBoundingBox", &ComputeBoundingBox,
