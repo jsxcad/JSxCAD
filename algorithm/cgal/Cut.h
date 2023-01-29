@@ -1,4 +1,7 @@
+#ifdef ENABLE_OCCT
 #include "BRepAlgoAPI_Cut.hxx"
+#include "BRepCheck_Analyzer.hxx"
+#endif
 
 int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
@@ -21,13 +24,24 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
 #ifdef ENABLE_OCCT
           if (geometry->has_occt_shape(target) && geometry->has_occt_shape(nth)) {
             // Occt vs Occt cut.
+            BRepCheck_Analyzer target_checker(geometry->occt_shape(target));
+            if (!target_checker.IsValid()) {
+              std::cout << "QQ/shape/target: invalid" << std::endl;
+            }
+            BRepCheck_Analyzer nth_checker(geometry->occt_shape(nth));
+            if (!nth_checker.IsValid()) {
+              std::cout << "QQ/shape/nth: invalid" << std::endl;
+            }
             BRepAlgoAPI_Cut cut(geometry->occt_shape(target), geometry->occt_shape(nth));
             cut.Build();
             if (!cut.IsDone()) {
               cut.DumpErrors(std::cout);
               continue;
             }
-            geometry->setOcctShape(target, std::shared_ptr<const TopoDS_Shape>(new TopoDS_Shape(cut.Shape())));
+            const TopoDS_Shape shape = cut.Shape();
+            const TopoDS_Shape* indirect = new TopoDS_Shape(shape);
+            std::shared_ptr<const TopoDS_Shape> shared(indirect);
+            geometry->setOcctShape(target, shared);
             geometry->discard_mesh(target);
             continue;
           }

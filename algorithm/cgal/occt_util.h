@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ENABLE_OCCT
+
 #include "BRep_Builder.hxx"
 #include "BRepAlgoAPI_Fuse.hxx"
 #include "BRepBuilderAPI_GTransform.hxx"
@@ -121,8 +123,8 @@ std::string SerializeOcctShape(std::shared_ptr<const TopoDS_Shape>& shape) {
   return serializeOcctShape(*shape);
 }
 
-int MakeOcctSphere(Geometry* geometry, double diameter) {
-  std::shared_ptr<const TopoDS_Shape> shape(new TopoDS_Shape(BRepPrimAPI_MakeSphere(diameter / 2)));
+int MakeOcctSphere(Geometry* geometry, double radius) {
+  std::shared_ptr<const TopoDS_Shape> shape(new TopoDS_Shape(BRepPrimAPI_MakeSphere(radius)));
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setOcctShape(target, shape);
   geometry->setIdentityTransform(target);
@@ -186,3 +188,5 @@ std::shared_ptr<const TopoDS_Shape> transformGeometryOfOcctShape(const Transform
   BRepBuilderAPI_GTransform op(shape, g);
   return std::shared_ptr<const TopoDS_Shape>(new TopoDS_Shape(op.Shape()));
 }
+
+#endif

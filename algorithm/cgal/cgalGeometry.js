@@ -13,7 +13,7 @@ const GEOMETRY_REFERENCE = 6;
 const GEOMETRY_EDGES = 7;
 
 const meshCache = new WeakMap();
-// const occtShapeCache = new WeakMap();
+const occtShapeCache = new WeakMap();
 
 let testMode = false;
 
@@ -47,7 +47,6 @@ export const fillCgalGeometry = (geometry, inputs) => {
         } else {
           // throw Error(`Cannot deserialize surface mesh: ${JSON.stringify(inputs[nth])}`);
         }
-/*
         let occt = occtShapeCache.get(graph);
         if (occt) {
           geometry.setOcctShape(nth, occt);
@@ -56,7 +55,6 @@ export const fillCgalGeometry = (geometry, inputs) => {
         } else {
           // throw Error(`Cannot deserialize occt shape: ${JSON.stringify(inputs[nth])}`);
         }
-*/
         break;
       case 'polygonsWithHoles': {
         const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
@@ -178,9 +176,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         let update = false;
         let newMesh;
         let serializedSurfaceMesh;
-/*
         let newOcctShape;
-*/
         let serializedOcctShape;
         if (geometry.has_mesh(nth)) {
           const oldMesh = meshCache.get(graph);
@@ -192,7 +188,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
             update = true;
           }
         }
-/*
         if (geometry.has_occt_shape(nth)) {
           const oldOcctShape = occtShapeCache.get(graph);
           newOcctShape = geometry.getOcctShape(nth);
@@ -203,7 +198,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
             update = true;
           }
         }
-*/
         if (update) {
           graph = {
             serializedSurfaceMesh,
@@ -214,11 +208,9 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
           if (newMesh) {
             meshCache.set(graph, newMesh);
           }
-/*
           if (newOcctShape) {
             occtShapeCache.set(graph, newOcctShape);
           }
-*/
         }
         results[nth] = {
           type: 'graph',

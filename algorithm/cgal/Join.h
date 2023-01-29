@@ -1,4 +1,6 @@
+#ifdef ENABLE_OCCT
 #include "BRepAlgoAPI_Fuse.hxx"
+#endif
 
 int Join(Geometry* geometry, int targets, bool exact) {
   size_t size = geometry->size();

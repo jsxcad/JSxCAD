@@ -1,4 +1,6 @@
+#ifdef ENABLE_OCCT
 #include "BRepAlgoAPI_Common.hxx"
+#endif
 
 int Clip(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();

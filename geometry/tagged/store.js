@@ -19,7 +19,7 @@ export const store = async (geometry) => {
     if (graph.hash === undefined) {
       throw Error(`Graph has no hash`);
     }
-    if (!graph.serializedSurfaceMesh) {
+    if (!graph.serializedSurfaceMesh && !graph.serializedOcctShape) {
       throw Error('Attempted to store graph without serialization');
     }
     await write(`graph/${graph.hash}`, graph);
