@@ -1,5 +1,5 @@
 ```JavaScript
-const r = await Box(20).ez(20).unfold().clean().view();
+const r = await Box(20).ez([20]).unfold().clean().view();
 ```
 
 ![Image](fold.md.r.png)
@@ -12,7 +12,7 @@ const p = await Arc({ radius: 0.5, sides: 4 }).clip(Box(0.5, 1)).view();
 
 ```JavaScript
 const e = await r
-  .on(get('unfold:edge'), (e) => p.ez(e.diameter()))
+  .on(get('unfold:edge'), (e) => p.ez([e.diameter()]))
   .color('blue')
   .view(4);
 ```
@@ -21,14 +21,14 @@ const e = await r
 
 ```JavaScript
 await r
-  .on(get('unfold:faces'), inset(1).ez(-0.5).color('red'))
+  .on(get('unfold:faces'), inset(1).ez([-0.5]).color('red'))
   .view();
 ```
 
 ![Image](fold.md.$1.png)
 
 ```JavaScript
-r.ez(-0.5).cut(e).stl('cube');
+r.ez([-0.5]).cut(e).stl('cube');
 ```
 
 ![Image](fold.md.$2_cube.png)

@@ -10,15 +10,15 @@ The faces are tagged with 'unfold:faces' and each fold edge is tagged with 'fold
 `;
 
 await Box(10)
-  .ez(10)
+  .ez([10])
   .unfold()
   .view()
-  .note('Box(10).ez(10).unfold()');
+  .note('Box(10).ez([10]).unfold()');
 
 await Box(10)
-  .ez(10)
+  .ez([10])
   .unfold()
-  .on(get('unfold:faces'), color('blue').ez(0.1))
-  .and(on(get('unfold:edge'), (e) => Box(1).ez(e.diameter()).color('white')))
+  .on(get('unfold:faces'), color('blue').ez([0.1]))
+  .and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))
   .view()
-  .note(`Box(10).ez(10).unfold().on(get('unfold:faces'), color('blue').ez(0.1)).and(on(get('unfold:edge'), (e) => Box(1).ez(e.diameter()).color('white')))`);
+  .note(`Box(10).ez([10]).unfold().on(get('unfold:faces'), color('blue').ez([0.1])).and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))`);

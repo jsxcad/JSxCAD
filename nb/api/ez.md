@@ -10,13 +10,13 @@ See [extrudeAlong](../../nb/api/extrudeAlong.nb), [e](#https://raw.githubusercon
 
 ```JavaScript
 Box(10)
-  .ez(1, -1, 4, 3)
+  .ez([1, -1], [4, 3])
   .view()
   .note(
-    'Box(10).rx(1 / 8).ez(1, -1, 4, 3) extrudes along the z axis by two extents'
+    'Box(10).rx(1 / 8).ez([1, -1], [4, 3]) extrudes along the z axis by two extents'
   );
 ```
 
 ![Image](ez.md.$2.png)
 
-Box(10).rx(1 / 8).ez(1, -1, 4, 3) extrudes along the z axis by two extents
+Box(10).rx(1 / 8).ez([1, -1], [4, 3]) extrudes along the z axis by two extents

@@ -34,11 +34,11 @@ Box(5, 5, 5).faces().each(cut(inset(1))) cuts a hole in each face
 ```JavaScript
 Box(5, 5, 5)
   .faces()
-  .each(e(0.5, 1))
+  .each(e([0.5, 1]))
   .view()
-  .note('Box(5, 5, 5).faces().each(e(1)) extrudes each face along its normal');
+  .note('Box(5, 5, 5).faces().each(e([0.5, 1])) extrudes each face along its normal');
 ```
 
 ![Image](faces.md.$4.png)
 
-Box(5, 5, 5).faces().each(e(1)) extrudes each face along its normal
+Box(5, 5, 5).faces().each(e([0.5, 1])) extrudes each face along its normal

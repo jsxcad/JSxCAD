@@ -149,7 +149,7 @@ await Line(15, -15)
 
 await Line(15, -15)
   .seq({ from: -10, to: 11 }, y, Group)
-  .clip(Arc(20).cut(Arc(10)).ez(1))
+  .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 
 await Line(-15, 15)
@@ -159,7 +159,7 @@ await Line(-15, 15)
 
 await Line(-15, 15)
   .seq({ from: -15, to: 15 }, y, Group)
-  .cut(Arc(20).cut(Arc(10)).ez(1))
+  .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 
 await Box(12)
@@ -183,16 +183,16 @@ await Box(12)
   .view();
 
 await Group(Box(1), Box(1).rx(1 / 4))
-  .each(e(2))
+  .each(e([2]))
   .view();
 
 await Orb(10)
-  .op(lowerEnvelope().ez(-1).z(-5), upperEnvelope().ez(1).z(5))
+  .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
   .by(align('z>'))
   .view(1);
 
 // Show a section with a hole in it.
-await Box(10).cut(Box(5)).ez(1, -1).section().view();
+await Box(10).cut(Box(5)).ez([1, -1]).section().view();
 
 await Box(10, 10, 20)
   .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
@@ -277,14 +277,14 @@ await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 // We need a new implementation.
 await Box(10)
   .cut(Arc(5))
-  .ez(5)
-  .grow(1, 'xy', Box(8).ez(1, 4))
-  .grow(1.5, 'xy', Box(16).cut(Box(8)).ez(2, 3))
+  .ez([5])
+  .grow(1, 'xy', Box(8).ez([1, 4]))
+  .grow(1.5, 'xy', Box(16).cut(Box(8)).ez([2, 3]))
   .view();
 */
 
 await Box(10, 10, [0, 3])
-  .smooth(1, Box(11).cut(Box(5)).ez(1.5, 3.1), { iterations: 1, time: 1 })
+  .smooth(1, Box(11).cut(Box(5)).ez([1.5, 3.1]), { iterations: 1, time: 1 })
   .view();
 
 await Box(5, 5, 20)
@@ -295,6 +295,6 @@ await Box(5, 5, 20)
 
 await Box(10)
   .cut(Box(5).cut(Box(3).cut(Box(1))))
-  .ez(3)
+  .ez([3])
   .section()
   .view();

@@ -12,13 +12,13 @@ See [extrudeAlong](../../nb/api/extrudeAlong.md)
 ```JavaScript
 Box(10)
   .rx(1 / 8)
-  .e(1, -1, 4, 3)
+  .e([1, -1], [4, 3])
   .view()
   .note(
-    'Box(10).rx(1 / 8).e(1, -1, 4, 3) extrudes along the normal by two extents'
+    'Box(10).rx(1 / 8).e([1, -1], [4, 3]) extrudes along the normal by two extents'
   );
 ```
 
 ![Image](e.md.$2.png)
 
-Box(10).rx(1 / 8).e(1, -1, 4, 3) extrudes along the normal by two extents
+Box(10).rx(1 / 8).e([1, -1], [4, 3]) extrudes along the normal by two extents

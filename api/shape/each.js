@@ -1,15 +1,15 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
 import { getLeafs } from '@jsxcad/geometry';
 
 export const each = Shape.registerMethod('each', (...args) => async (shape) => {
-  const { shapesAndFunctions } = destructure(args);
-  let [leafOp = (l) => l, groupOp = Group] = shapesAndFunctions;
-  if (leafOp instanceof Shape) {
-    const leafShape = leafOp;
-    leafOp = (edge) => (shape) => leafShape.to(edge);
-  }
+  const [leafOp = (l) => l, groupOp = Group] = await destructure2(
+    shape,
+    args,
+    'function',
+    'function'
+  );
   const leafShapes = [];
   const leafGeometries = getLeafs(await shape.toGeometry());
   for (const leafGeometry of leafGeometries) {

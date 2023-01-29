@@ -30,15 +30,15 @@ Triangle(5).join(Arc(4).y(2).x(2)).and(center()) shows the centroid move as we c
 ```JavaScript
 Triangle(5)
   .join(Arc(4).y(2).x(2))
-  .ez(-1)
+  .ez([-1])
   .and(center())
   .material('glass')
   .view()
   .note(
-    'Triangle(5).join(Arc(4).y(2).x(2)).ez(-1).and(center()) shows the centroid of a volume'
+    'Triangle(5).join(Arc(4).y(2).x(2)).ez([-1]).and(center()) shows the centroid of a volume'
   );
 ```
 
 ![Image](center.md.$4.png)
 
-Triangle(5).join(Arc(4).y(2).x(2)).ez(-1).and(center()) shows the centroid of a volume
+Triangle(5).join(Arc(4).y(2).x(2)).ez([-1]).and(center()) shows the centroid of a volume

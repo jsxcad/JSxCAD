@@ -14,15 +14,15 @@ See: [masking](../../nb/api/masking.md)
 
 ```JavaScript
 Arc(4)
-  .ez(10)
-  .masked(Hexagon(6).ez(10))
+  .ez([10])
+  .masked(Hexagon(6).ez([10]))
   .fit(Box(8, 8, 4))
   .view()
   .note(
-    'Arc(4).ez(10).masked(Hexagon(6).ez(10)) masks a cylinder with a hexagonal prism.'
+    'Arc(4).ez([10]).masked(Hexagon(6).ez([10])) masks a cylinder with a hexagonal prism.'
   );
 ```
 
 ![Image](masked.md.$2.png)
 
-Arc(4).ez(10).masked(Hexagon(6).ez(10)) masks a cylinder with a hexagonal prism.
+Arc(4).ez([10]).masked(Hexagon(6).ez([10])) masks a cylinder with a hexagonal prism.

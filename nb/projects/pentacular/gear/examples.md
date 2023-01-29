@@ -37,7 +37,7 @@ const toothResolution = control('toothResolution', 5, 'input');
 ```JavaScript
 await Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash, toothResolution })
   .fill()
-  .ez(thickness)
+  .ez([thickness])
   .material('wood')
   .stl(`gear_${teeth}`);
 ```
@@ -177,17 +177,17 @@ We can do the same thing to cut a rack.
 
 ```JavaScript
 const planetaryDesign1 = await Arc(44)
-  .ez(-4)
+  .ez([-4])
   .as('hoop')
-  .fitTo(Octagon(42).ez(-2, -4))
+  .fitTo(Octagon(42).ez([-2, -4]))
   .clean();
 ```
 
 ```JavaScript
 const planetaryDesign2 = await planetaryDesign1
-  .cut(Octagon(42).ez(-2))
-  .and(ring.clip(Octagon(42)).ez(-2))
-  .cut(Arc(24).ez(-2, -4))
+  .cut(Octagon(42).ez([-2]))
+  .and(ring.clip(Octagon(42)).ez([-2]))
+  .cut(Arc(24).ez([-2, -4]))
   .color('blue')
   .as('ring')
   .clean();
@@ -197,8 +197,8 @@ const planetaryDesign2 = await planetaryDesign1
 const planetaryDesign3 = await planetaryDesign2
   .and(
     planetary
-      .ez(-2)
-      .cut(Arc(2).ez(-2))
+      .ez([-2])
+      .cut(Arc(2).ez([-2]))
       .color('red')
       .as('planetary')
       .x(12)
@@ -208,17 +208,17 @@ const planetaryDesign3 = await planetaryDesign2
 ```
 
 ```JavaScript
-const planetaryDesign4a = await solar.ez(-2);
+const planetaryDesign4a = await solar.ez([-2]);
 ```
 
 ```JavaScript
-const planetaryDesign4b = await planetaryDesign4a.and(Arc(23.5).ez(-2, -4));
+const planetaryDesign4b = await planetaryDesign4a.and(Arc(23.5).ez([-2, -4]));
 ```
 
 ```JavaScript
 const planetaryDesignAxle = await Octagon(12)
   .fitTo(Arc(8).void())
-  .ez(-4)
+  .ez([-4])
   .color('orange')
   .as('axle');
 ```

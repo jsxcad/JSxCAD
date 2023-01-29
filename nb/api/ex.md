@@ -12,13 +12,13 @@ See [extrudeAlong](../../nb/api/extrudeAlong.nb), [e](#https://raw.githubusercon
 ```JavaScript
 Box(10)
   .ry(1 / 4)
-  .ex(1, -1, 4, 3)
+  .ex([1, -1], [4, 3])
   .view()
   .note(
-    'Box(10).ry(1 / 4).ex(1, -1, 4, 3) extrudes along the x axis by two extents'
+    'Box(10).ry(1 / 4).ex([1, -1], [4, 3]) extrudes along the x axis by two extents'
   );
 ```
 
 ![Image](ex.md.$2.png)
 
-Box(10).ry(1 / 4).ex(1, -1, 4, 3) extrudes along the x axis by two extents
+Box(10).ry(1 / 4).ex([1, -1], [4, 3]) extrudes along the x axis by two extents

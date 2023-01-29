@@ -1,11 +1,11 @@
 Parts regression tests.
 
 ```JavaScript
-const disk = await Arc(4).ez(1).asPart('disk');
+const disk = await Arc(4).ez([1]).asPart('disk');
 ```
 
 ```JavaScript
-const beam = await Box(2, 2).ez(10).asPart('beam');
+const beam = await Box(2, 2).ez([10]).asPart('beam');
 ```
 
 ```JavaScript

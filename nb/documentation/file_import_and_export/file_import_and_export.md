@@ -58,7 +58,7 @@ await importedSvg.by(align('xy')).view();
 ![Image](file_import_and_export.md.$10.png)
 
 ```JavaScript
-await importedSvg.by(align('xy')).scaleToFit(10).fill().ez(2).untag('color:#090000').view();
+await importedSvg.by(align('xy')).scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
 ```
 
 ![Image](file_import_and_export.md.$11.png)

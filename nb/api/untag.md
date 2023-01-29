@@ -14,10 +14,10 @@ See: [tag](../../nb/api/tag.md).
 Box()
   .tag('a')
   .color('green')
-  .and(Triangle().ez(0.1).tag('b').material('copper'))
+  .and(Triangle().ez([0.1]).tag('b').material('copper'))
   .view(1)
   .note(
-    "Box().tag('a').color('green').and(Triangle().ez(0.1).tag('b').material('copper'))"
+    "Box().tag('a').color('green').and(Triangle().ez([0.1]).tag('b').material('copper'))"
   )
   .on(get('user:a'), untag('color:green'))
   .view(2)
@@ -28,7 +28,7 @@ Box()
 
 ![Image](untag.md.$2_1.png)
 
-Box().tag('a').color('green').and(Triangle().ez(0.1).tag('b').material('copper'))
+Box().tag('a').color('green').and(Triangle().ez([0.1]).tag('b').material('copper'))
 
 ![Image](untag.md.$2_2.png)
 

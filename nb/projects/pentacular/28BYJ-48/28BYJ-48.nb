@@ -59,10 +59,10 @@ export const StepperMotor28byj48 = ({
       .add(
         Box(connectorBaseHeight, connectorBaseWidth).x(bodyDiameter / -2 + 2)
       )
-      .ez(-bodyHeight)
+      .ez([-bodyHeight])
       .masked(grow(bodyPlay)),
     Group(
-      Arc(shaftBaseDiameter).ez(0, -shaftBaseHeight),
+      Arc(shaftBaseDiameter).ez([0, -shaftBaseHeight]),
       FlatShaft({
         diameter: shaftDiameter,
         length: shaftLength,
@@ -77,10 +77,10 @@ export const StepperMotor28byj48 = ({
       .y(totalDiameter / 2 - tabDiameter / 2)
       .rz(0, 1 / 2)
       .hull(noOp())
-      .ez(-tabThickness)
+      .ez([-tabThickness])
       .fitTo(
         Arc(holeDiameter)
-          .ez(-tabThickness)
+          .ez([-tabThickness])
           .void()
           .as('hole')
           .y(totalDiameter / 2 - tabDiameter / 2)

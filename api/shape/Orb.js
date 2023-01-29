@@ -20,14 +20,14 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
 );
 
 export const Orb = Shape.registerMethod('Orb', (...args) => async (shape) => {
-  const [modes, values, options] = await destructure2(
+  const [modes, intervals, options] = await destructure2(
     shape,
     args,
     'modes',
-    'values',
+    'intervals',
     'options'
   );
-  let [x = 1, y = x, z = x] = values;
+  let [x = 1, y = x, z = x] = intervals;
   const { zag = DEFAULT_ORB_ZAG } = options;
   const [c1, c2] = await buildCorners(x, y, z)(shape);
   const scale = computeScale(c1, c2).map((v) => v * 0.5);

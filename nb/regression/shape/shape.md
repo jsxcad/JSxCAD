@@ -267,7 +267,7 @@ await Box(5).z(1).gridView();
 ```JavaScript
 await Arc(10)
   .op((s) => s.offset(1).fitTo(s.void()))
-  .ez(5)
+  .ez([5])
   .view();
 ```
 
@@ -275,9 +275,9 @@ await Arc(10)
 
 ```JavaScript
 await Box(10)
-  .ez(10)
+  .ez([10])
   .color('green')
-  .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .and(faces().n(4).extrudeAlong(normal(), [1]).tint('red'))
   .view();
 ```
 
@@ -308,7 +308,7 @@ await Edges(
   )
 )
   .rz(1 / 8)
-  .clip(Arc(5).cut(Arc(2)).ez(1, -1))
+  .clip(Arc(5).cut(Arc(2)).ez([1, -1]))
   .gridView();
 ```
 
@@ -316,7 +316,7 @@ await Edges(
 
 ```JavaScript
 const b = await Box(5)
-  .ez(5)
+  .ez([5])
   .and(
     Hershey('A', 3)
       .color('green')
@@ -346,11 +346,11 @@ await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
 ```JavaScript
 await Arc(2)
-  .ez(5)
+  .ez([5])
   .cut(
     Box(5)
       .ry(1 / 16)
-      .ez(5)
+      .ez([5])
       .z(3)
   )
   .simplify({ ratio: 0.1, eps: 0.01 })
@@ -369,7 +369,7 @@ await Triangle(14).svg('triangle');
 
 ```JavaScript
 await Box(10)
-  .ez(50, -50)
+  .ez([50, -50])
   .rx(0, 1 / 4)
   .fuse()
   .view(0)
@@ -612,7 +612,7 @@ await Segments([
 ![Image](shape.md.$69.png)
 
 ```JavaScript
-await Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
+await Arc(37).cut(inset(2)).ez([2]).remesh(1).smooth(Box(50, 10, 20)).view();
 ```
 
 ![Image](shape.md.$70.png)
@@ -656,13 +656,13 @@ await Orb(5, 5, 5, { zag: 5 })
 ![Image](shape.md.$76.png)
 
 ```JavaScript
-await Box(4).fit(Arc(6).void()).ez(1).view();
+await Box(4).fit(Arc(6).void()).ez([1]).view();
 ```
 
 ![Image](shape.md.$77.png)
 
 ```JavaScript
-await Box(4).fit(Arc(6).void()).ez(1, 'noVoid').view();
+await Box(4).fit(Arc(6).void()).ez([1], 'noVoid').view();
 ```
 
 ![Image](shape.md.$78.png)
@@ -737,3 +737,31 @@ await Arc(10, 10, 10, { sides: 7 })
 ```
 
 ![Image](shape.md.$86.png)
+
+```JavaScript
+const xy = Box(20, 30).cut(Box(10)).to(XY());
+```
+
+```JavaScript
+const xz = Arc(20, 30).cut(Pentagon(7)).to(XZ());
+```
+
+```JavaScript
+const yz = Arc(20, 20).cut(Triangle(5)).to(YZ());
+```
+
+```JavaScript
+Group(xy, xz, yz)
+  .clean()
+  .each(e(diameter()))
+  .commonVolume()
+  .clean()
+  .and(
+    xy.e(50).color('red').ghost(),
+    xz.e(50).color('green').ghost(),
+    yz.e(50).color('blue').ghost()
+  )
+  .view();
+```
+
+![Image](shape.md.$87.png)

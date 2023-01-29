@@ -30,7 +30,7 @@ export const axleHole = await Arc({ apothem: 5.2 })
     Arc({ apothem: 4 })
       .y(1.5 / 2)
   )
-  .ez(4.00001, -4.00001)
+  .ez([4.00001, -4.00001])
   .rx(1 / 4)
   .z(5.6)
   .view();
@@ -144,7 +144,7 @@ Axle Profile
 ![Image](examples.md.axleProfile.png)
 
 ```JavaScript
-export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez(length);
+export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez([length]);
 ```
 
 ```JavaScript
@@ -166,16 +166,16 @@ const box = await Box(8, 3.2 * 4).y(3.2 * 2);
 ```JavaScript
 const technic = await Group(box, Arc(4.8 + 0.2).y(5.6))
   .fill()
-  .ez(8 - 0.8, 0.8)
+  .ez([8 - 0.8, 0.8])
   .and(
     Group(box, Arc(6.2 + 0.2).y(5.6))
       .fill()
-      .ez(0.8)
+      .ez([0.8])
   )
   .and(
     Group(box, Arc(6.2 + 0.2).y(5.6))
       .fill()
-      .ez(8, 8 - 0.8)
+      .ez([8, 8 - 0.8])
   )
   .stl('technic');
 ```
@@ -194,22 +194,22 @@ const technic_1x6 = await Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))
 
 ```JavaScript
 const technicConnector = await Arc(4.8)
-  .ez(8, -8)
+  .ez([8, -8])
   .to(XZ())
   .add(
     Arc(6.2)
-      .ez(0.8 - 0.2)
+      .ez([0.8 - 0.2])
       .to(XZ())
   )
   .add(
     Arc(5.5)
-      .ez(0.4)
+      .ez([0.4])
       .to(XZ())
       .y(-8 + 0.2)
   )
   .add(
     Arc(5.5)
-      .ez(0.4)
+      .ez([0.4])
       .to(XZ())
       .y(8 - 0.2)
   )
@@ -234,16 +234,16 @@ const technicConnector = await Arc(4.8)
 
 ```JavaScript
 const halfTechnicConnector = await Arc(4.8)
-  .ez(8)
+  .ez([8])
   .to(XZ())
   .add(
     Arc(6.2)
-      .ez(0.8 - 0.2)
+      .ez([0.8 - 0.2])
       .to(XZ())
   )
   .add(
     Arc(5.5)
-      .ez(0.4)
+      .ez([0.4])
       .to(XZ())
       .y(8 - 0.2)
   )
@@ -268,7 +268,7 @@ const halfTechnicConnector = await Arc(4.8)
 
 ```JavaScript
 const technicPlug5mm = await halfTechnicConnector
-  .and(Arc(5).clip(Box(4.5, 5)).ez(-8).to(XZ()))
+  .and(Arc(5).clip(Box(4.5, 5)).ez([-8]).to(XZ()))
   .stl('technicPlug5mm');
 ```
 

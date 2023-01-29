@@ -318,7 +318,7 @@ await Line(15, -15)
 ```JavaScript
 await Line(15, -15)
   .seq({ from: -10, to: 11 }, y, Group)
-  .clip(Arc(20).cut(Arc(10)).ez(1))
+  .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 ```
 
@@ -336,7 +336,7 @@ await Line(-15, 15)
 ```JavaScript
 await Line(-15, 15)
   .seq({ from: -15, to: 15 }, y, Group)
-  .cut(Arc(20).cut(Arc(10)).ez(1))
+  .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 ```
 
@@ -372,7 +372,7 @@ await Box(12)
 
 ```JavaScript
 await Group(Box(1), Box(1).rx(1 / 4))
-  .each(e(2))
+  .each(e([2]))
   .view();
 ```
 
@@ -380,7 +380,7 @@ await Group(Box(1), Box(1).rx(1 / 4))
 
 ```JavaScript
 await Orb(10)
-  .op(lowerEnvelope().ez(-1).z(-5), upperEnvelope().ez(1).z(5))
+  .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
   .by(align('z>'))
   .view(1);
 ```
@@ -388,7 +388,7 @@ await Orb(10)
 ![Image](shapes.md.$33_1.png)
 
 ```JavaScript
-await Box(10).cut(Box(5)).ez(1, -1).section().view();
+await Box(10).cut(Box(5)).ez([1, -1]).section().view();
 ```
 
 ![Image](shapes.md.$34.png)
@@ -543,7 +543,7 @@ await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 
 ```JavaScript
 await Box(10, 10, [0, 3])
-  .smooth(1, Box(11).cut(Box(5)).ez(1.5, 3.1), { iterations: 1, time: 1 })
+  .smooth(1, Box(11).cut(Box(5)).ez([1.5, 3.1]), { iterations: 1, time: 1 })
   .view();
 ```
 
@@ -562,7 +562,7 @@ await Box(5, 5, 20)
 ```JavaScript
 await Box(10)
   .cut(Box(5).cut(Box(3).cut(Box(1))))
-  .ez(3)
+  .ez([3])
   .section()
   .view();
 ```

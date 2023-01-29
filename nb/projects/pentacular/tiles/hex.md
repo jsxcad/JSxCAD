@@ -44,7 +44,7 @@ tab.stl('tab', ry(1 / 4));
 ```JavaScript
 const hexTile = hex
   .inset(0.1)
-  .ez(2, -1)
+  .ez([2, -1])
   .cut(hex.eachEdge(placeTab(tab)))
   /*
   .cut(
@@ -120,10 +120,10 @@ const Peaks = (seed = 0, turns = [0], nth = 0) => {
     );
   }
   return Group(...peaks)
-    .and(hex.ez(0.1))
+    .and(hex.ez([0.1]))
     .fuse()
     .remesh(1)
-    .smooth(hex.ez(0.2, 21))
+    .smooth(hex.ez([0.2, 21]))
     .clean();
 };
 ```
@@ -140,7 +140,7 @@ const Mountainous =
     )
       .fuse()
       .remesh(1)
-      .smooth(hex.ez(0.2, 21))
+      .smooth(hex.ez([0.2, 21]))
       .clean()
       .z(2)
       .and(hexTile);
@@ -235,13 +235,13 @@ const wave = (low = 1.5, high = 4.5, turn = 0) =>
 ```
 
 ```JavaScript
-const Waves = (seed = 0, nth = 0) => hex.ez(1.5, 3).join(hexTile).op(wave);
+const Waves = (seed = 0, nth = 0) => hex.ez([1.5, 3]).join(hexTile).op(wave);
 ```
 
 ```JavaScript
 const Dunes = (seed = 0, nth = 0) =>
   hex
-    .ez(1.5, 3.5)
+    .ez([1.5, 3.5])
     .join(hexTile)
     .cut(ArcX(32, 3, [2, 5.5]).seq({ from: -20, to: 20, by: 3 }, y));
 ```
@@ -395,11 +395,11 @@ const Tunnel = (seed = 0, to = 3 / 6, from = 0 / 6, nth = 0) => {
 ```JavaScript
 const buildField = Cached('Field', ({ dr, ds, turn }) => {
   if (turn === 0) {
-    return Hexagon(10).ez(2, 4).op(wave(3.5, 5));
+    return Hexagon(10).ez([2, 4]).op(wave(3.5, 5));
   } else {
     return Triangle(14 + ds)
       .clip(Box(20, 6 + ds))
-      .ez(2, 4)
+      .ez([2, 4])
       .to(place(turn))
       .on(
         noOp(),
@@ -423,7 +423,7 @@ const Field = (seed = 0, turn = 0, nth = 0) => {
 const Wall = (seed = 0, turn = 0, nth = 0) =>
   Triangle(18)
     .clip(Box(20, [-5, -3]))
-    .ez(2, 8)
+    .ez([2, 8])
     .to(place(turn))
     .on(self(), rz(-3 / 12).x(2.5));
 ```
@@ -434,7 +434,7 @@ const Building = (seed = 0, turn = 0, nth = 0) => {
   const da = random(seed * 432).in(0, 1);
   if (turn === 0) {
     return Hexagon(10)
-      .ez(2, dh(nth) + 10)
+      .ez([2, dh(nth) + 10])
       .hull(self(), Point(0, 0, dh(nth) + 15))
       .cut(
         Seq({ from: 2, to: dh(nth) + 5, by: 8 }, (h) =>
@@ -596,7 +596,7 @@ const Tile = (...args) => {
         islandTurns.map((turn) => turn / 6)
       )
         .z(-8)
-        .clip(hex.ez(20))
+        .clip(hex.ez([20]))
     );
   }
   console.log(`QQ/3`);

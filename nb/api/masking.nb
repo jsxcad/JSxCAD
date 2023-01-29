@@ -15,10 +15,10 @@ See: [mask](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/mask.
 `;
 
 Hexagon(6)
-  .ez(10)
-  .masking(Arc(5).ez(10))
+  .ez([10])
+  .masking(Arc(5).ez([10]))
   .fit(Box(8, 8, 4))
   .view()
   .note(
-    'Hexagon(6).ez(10).masking(Arc(5).ez(10)) produces a hexagonal mask for the cylindrical volume.'
+    'Hexagon(6).ez([10]).masking(Arc(5).ez([10])) produces a hexagonal mask for the cylindrical volume.'
   );

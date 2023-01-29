@@ -1,7 +1,7 @@
 ```JavaScript
 const Tile = (sides, offset = 0) =>
   Arc(20, { sides })
-    .op(ez(3, 2), cut(inset(1)).ez(2, 1), cut(inset(2)).ez(1, 0))
+    .op(ez([3, 2]), cut(inset(1)).ez([2, 1]), cut(inset(2)).ez([1, 0]))
     .fuse()
     .cut(
       Box(10, 2, [0, 1])
