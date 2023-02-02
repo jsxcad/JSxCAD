@@ -1,5 +1,6 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { destructure2 } from './destructure.js';
 import { normal } from './normal.js';
 
 const scale = (amount, [x = 0, y = 0, z = 0]) => [
@@ -10,17 +11,16 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
 
 export const moveAlong = Shape.registerMethod(
   'moveAlong',
-  (direction, ...offsets) =>
+  (...args) =>
     async (shape) => {
-      direction = await shape.toCoordinate(direction);
-      const deltas = [];
-      for (const offset of offsets) {
-        deltas.push(await shape.toValue(offset));
-      }
-      deltas.sort((a, b) => a - b);
+      const [direction, deltas] = await destructure2(
+        shape,
+        args,
+        'coordinate',
+        'numbers'
+      );
       const moves = [];
-      while (deltas.length > 0) {
-        const delta = deltas.pop();
+      for (const delta of deltas) {
         moves.push(await shape.move(scale(delta, direction)));
       }
       return Group(...moves);

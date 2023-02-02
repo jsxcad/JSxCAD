@@ -22,6 +22,6 @@ Box(5, 5, 5)
 
 Box(5, 5, 5)
   .faces()
-  .each(e(0.5, 1))
+  .each(e([0.5, 1]))
   .view()
-  .note('Box(5, 5, 5).faces().each(e(1)) extrudes each face along its normal');
+  .note('Box(5, 5, 5).faces().each(e([0.5, 1])) extrudes each face along its normal');

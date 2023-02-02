@@ -12,8 +12,8 @@ See [extrudeAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/ap
 `;
 
 Box(10)
-  .ez(1, -1, 4, 3)
+  .ez([1, -1], [4, 3])
   .view()
   .note(
-    'Box(10).rx(1 / 8).ez(1, -1, 4, 3) extrudes along the z axis by two extents'
+    'Box(10).rx(1 / 8).ez([1, -1], [4, 3]) extrudes along the z axis by two extents'
   );

@@ -26,12 +26,12 @@ export const MicroGearMotor = Shape.registerMethod(
     hubLength = 1.5,
   } = {}) => (shape) =>
     Group(
-      axleFlatProfile.ez(axleLength),
-      gearboxProfile.ez(0 - gearboxLength),
-      motorProfile.ez(0 - gearboxLength, -gearboxLength - motorLength),
+      axleFlatProfile.ez([axleLength]),
+      gearboxProfile.ez([0 - gearboxLength]),
+      motorProfile.ez([0 - gearboxLength, -gearboxLength - motorLength]),
       Arc(5).ez(
-        0 - gearboxLength - motorLength,
-        -gearboxLength - motorLength - hubLength
+        [0 - gearboxLength - motorLength,
+        -gearboxLength - motorLength - hubLength]
       )
     )
     .fuse()

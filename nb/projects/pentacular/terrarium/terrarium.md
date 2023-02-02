@@ -62,7 +62,7 @@ const Hinge = (l, thickness, hingeLength) =>
 ```JavaScript
 const Lid = (holeDiameter, thickness, kerf) =>
   Arc(holeDiameter)
-    .op(ez(-thickness), offset(2).ez(thickness))
+    .op(ez([-thickness]), offset(2).ez([thickness]))
     .fitTo(
       Box(thickness - kerf * 2, thickness - kerf * 2, thickness * 2).as('pin')
     )
@@ -120,7 +120,7 @@ const Terrarium = (
     .faces()
     .eachEdge(
       (e, l) => s => Hinge(l, thickness, hingeLength).to(e),
-      (e, f) => s => f.e(-thickness).cut(e)
+      (e, f) => s => f.e([-thickness]).cut(e)
     )
     .cut(Arc(holeDiameter, holeDiameter, [height - thickness, height]))
     .material('acrylic')

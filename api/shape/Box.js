@@ -39,7 +39,7 @@ const buildFs = async () => {
         .rx(1 / 4)
         .rz(1 / 2)
         .ry(-1 / 4),
-      box: await f.ez(1),
+      box: await f.ez([1]),
     };
   }
   return fundamentalShapes;
@@ -113,14 +113,14 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
 };
 
 export const Box = Shape.registerMethod('Box', (...args) => async (shape) => {
-  const [modes, values, options] = await destructure2(
+  const [modes, intervals, options] = await destructure2(
     shape,
     args,
     'modes',
-    'values',
+    'intervals',
     'options'
   );
-  const [x = 1, y = x, z = 0] = values;
+  const [x = 1, y = x, z = 0] = intervals;
   const [computedC1, computedC2] = await buildCorners(x, y, z)(shape);
   let { c1 = computedC1, c2 = computedC2 } = options;
   return reifyBox(c1, c2, modes.includes('occt'));

@@ -14,8 +14,8 @@ See [extrudeAlong](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/ap
 
 Box(10)
   .ry(1 / 4)
-  .ex(1, -1, 4, 3)
+  .ex([1, -1], [4, 3])
   .view()
   .note(
-    'Box(10).ry(1 / 4).ex(1, -1, 4, 3) extrudes along the x axis by two extents'
+    'Box(10).ry(1 / 4).ex([1, -1], [4, 3]) extrudes along the x axis by two extents'
   );

@@ -2,12 +2,12 @@
 
 ```JavaScript
 export const Flat = ({ diameter = 10, length = 10, thickness = 5 } = {}) =>
-  Arc(diameter).clip(Box(diameter, thickness)).ez(length).clean().as('flat');
+  Arc(diameter).clip(Box(diameter, thickness)).ez([length]).clean().as('flat');
 ```
 
 ```JavaScript
 export const Shaft = ({ diameter = 10, length = 10, play = 0.2 } = {}) =>
-  Arc(diameter).ez(length).clean().masked(grow(play)).as('shaft');
+  Arc(diameter).ez([length]).clean().masked(grow(play)).as('shaft');
 ```
 
 ```JavaScript
@@ -19,7 +19,7 @@ export const FlatShaft = ({
   play = 0.2,
 } = {}) =>
   Group(
-    Arc(diameter).ez(length - flatLength),
+    Arc(diameter).ez([length - flatLength]),
     Flat({ diameter, length: flatLength, thickness: flatThickness }).z(
       length - flatLength
     )
@@ -99,7 +99,7 @@ await FlatShaft({
   flatThickness,
   play,
 })
-  // .on(get('shaft').in().get('flat'), fit(Arc(10).ez(1, 2).material('acrylic')))
+  // .on(get('shaft').in().get('flat'), fit(Arc(10).ez([1, 2]).material('acrylic')))
   .view()
   .note(
     "import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"

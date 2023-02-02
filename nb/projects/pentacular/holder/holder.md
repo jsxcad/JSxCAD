@@ -13,12 +13,12 @@ const magnetHeight = 2.5;
 ```JavaScript
 const magneticPenHolder = await Arc(magnetDiameter)
   .material('steel')
-  .ez(magnetHeight)
+  .ez([magnetHeight])
   .fit(
     'exact',
     Arc(magnetDiameter + 2)
       .material('plastic')
-      .ez(magnetHeight)
+      .ez([magnetHeight])
   )
   .to(YZ(0))
   .by(align('z>'))
@@ -27,7 +27,7 @@ const magneticPenHolder = await Arc(magnetDiameter)
     Arc(penDiameter)
       .material('plastic')
       .op((s) => s.offset(1).fitTo(s.void()))
-      .ez(magnetDiameter + 2 + 0.1, -0.1)
+      .ez([magnetDiameter + 2 + 0.1, -0.1])
       .by(align('x<'))
       .x(1.1)
   )

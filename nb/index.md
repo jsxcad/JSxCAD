@@ -17,21 +17,21 @@ Jot allows CAD design as notebooks.
 
 ```JavaScript
 Assembly(
-  Box(15, 10).offset(4).material('wood').ez(2).as('base'),
-  Box(15, 1).material('copper').ez(2.5).as('bar'),
+  Box(15, 10).offset(4).material('wood').ez([2]).as('base'),
+  Box(15, 1).material('copper').ez([2.5]).as('bar'),
   Box(10, 20)
     .material('copper')
     .cut(Arc(5).y(-3).hull(noOp(), Line(-2.5, 2.5).y(5)))
     .clip(Arc(7).y(-4).hull(noOp(), Line(-3.5, 3.5).y(7)))
     .clip(loop(Point(3.5, 7), Point(3.5, -8), Point(-3.5, -8)).fill())
     .op(
-      x(-7).ez(3),
+      x(-7).ez([3]),
       ry(1 / 2)
         .x(7)
-        .ez(3)
+        .ez([3])
     )
     .as('j-and-t'),
-  Arc(6).material('copper').fitTo(inset(1).void()).ez(3).as('o')
+  Arc(6).material('copper').fitTo(inset(1).void()).ez([3]).as('o')
 )
   .scale(3)
   .ry(0 / 32)

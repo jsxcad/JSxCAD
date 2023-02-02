@@ -8,15 +8,15 @@ const grid = Hexagon(16)
   )
   .gridView();
 
-const base = await grid.cutFrom(Arc(100)).ez(1).gridView();
+const base = await grid.cutFrom(Arc(100)).ez([1]).gridView();
 
-const ring = await Arc(99).cutFrom(Arc(102)).ez(2.5).gridView();
+const ring = await Arc(99).cutFrom(Arc(102)).ez([2.5]).gridView();
 
 const sorter = await ring.and(base).stl('sorter');
 const wall1 = await grid
   .cutFrom(Box(80, 110))
   .rz(1 / 4)
-  .ez(2)
+  .ez([2])
   .rx(1 / 4);
 
 const wall = await wall1

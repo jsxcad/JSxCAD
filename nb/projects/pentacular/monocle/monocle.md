@@ -22,7 +22,7 @@ const Monocle = (
     )
     .fitTo(
       Arc(diameter)
-        .ez(height - lensThickness, height)
+        .ez([height - lensThickness, height])
         .masked(grow('z', 0.1))
         .material('glass')
         .as('lens')
@@ -55,12 +55,12 @@ const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
 ```JavaScript
 const simpleMonocle = Arc(35)
   .cut(inset(1))
-  .ez(0, 2, 8, 10)
-  .join(Arc(33).cut(inset(1)).ez(10))
+  .ez([0, 2], [8, 10])
+  .join(Arc(33).cut(inset(1)).ez([10]))
   .clean()
   .fuse()
   .clip(ArcX(35, [16, -16], [-12, 12]).y(20 / 2))
-  .join(Arc(35).cut(inset(1)).ez(0, 2))
+  .join(Arc(35).cut(inset(1)).ez([0, 2]))
   .stl('s2');
 ```
 

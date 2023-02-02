@@ -1,8 +1,8 @@
 md`Parts regression tests.`;
 
-const disk = await Arc(4).ez(1).asPart('disk');
+const disk = await Arc(4).ez([1]).asPart('disk');
 
-const beam = await Box(2, 2).ez(10).asPart('beam');
+const beam = await Box(2, 2).ez([10]).asPart('beam');
 
 const diskBeam = await disk.and(beam).asPart('diskBeam');
 

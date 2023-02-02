@@ -5,13 +5,13 @@
 ```JavaScript
 export const Socket = (height = 2) =>
   Arc({ apothem: 5 / 2 })
-    .ez(-height)
+    .ez([-height])
     .void();
 ```
 
 ```JavaScript
 export const Stud = (height = 1.6) =>
-  Join(Arc(5).ez(height), Arc(4.8).ez(height, height + 0.2));
+  Join(Arc(5).ez([height]), Arc(4.8).ez([height, height + 0.2]));
 ```
 
 ```JavaScript
@@ -32,7 +32,7 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
   }
   return Group(Box(length * 8, width * 8).by(align('x>y>')), ...pieces)
     .fill()
-    .ez(height)
+    .ez([height])
     .by(align('xy'))
     .as(`SocketBoard ${length} x ${width} x ${height}`);
 };
@@ -46,11 +46,11 @@ export const StudBoard = (length, width, height, { studs = [] } = {}) => {
     return studs[y][x] === '_';
   };
   const board = [];
-  const flat = Box(8).ez(height);
+  const flat = Box(8).ez([height]);
   const stud = Box(8)
-    .ez(height)
-    .add(Arc(5).ez(height, height + 1.6))
-    .add(Arc(4.8).ez(height + 1.6, height + 1.8));
+    .ez([height])
+    .add(Arc(5).ez([height, height + 1.6]))
+    .add(Arc(4.8).ez([height + 1.6, height + 1.8]));
   for (let x = 0; x < length; x++) {
     for (let y = 0; y < width; y++) {
       const part = isFlat(x, y) ? flat : stud;
@@ -120,7 +120,7 @@ export const axleHoleProfile = axleProfile.offset(0.1);
 ```JavaScript
 export const axleHole = await Box(8)
   .cut(axleProfile.offset(0.1))
-  .ez(4)
+  .ez([4])
   .stl('axle_hole');
 ```
 
@@ -130,8 +130,8 @@ export const axleHole = await Box(8)
 
 ```JavaScript
 export const verticalBushingHole = Join(
-  bushingHoleProfile.ez(0.6, 7.4),
-  bushingHoleProfile.offset(0.4).ez(0, 0.6, 7.4, 8.0)
+  bushingHoleProfile.ez([0.6, 7.4]),
+  bushingHoleProfile.offset(0.4).ez([0, 0.6], [7.4, 8.0])
 )
   .void()
   .view(and(Point()));
@@ -151,9 +151,9 @@ export const horizontalBushingHole = verticalBushingHole
 
 ```JavaScript
 export const verticalConnector = await Arc(4.8)
-  .ez(8)
-  .add(Arc(5.8).ez(0.8 - 0.2))
-  .add(Arc(5.5).ez(8 - 0.4, 8))
+  .ez([8])
+  .add(Arc(5.8).ez([0.8 - 0.2]))
+  .add(Arc(5.5).ez([8 - 0.4, 8]))
   .cut(Box(10, 1, [8, 1]))
   .material('plastic')
   .stl('verticalConnector');

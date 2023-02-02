@@ -7,8 +7,8 @@ await Hexagon(4)
     Group
   )
   .by(align('xy'))
-  .ez(10)
-  .clip(Arc(45).ez(10))
+  .ez([10])
+  .clip(Arc(45).ez([10]))
   .view();
 ```
 

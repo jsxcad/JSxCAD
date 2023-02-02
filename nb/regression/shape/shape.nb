@@ -100,13 +100,13 @@ await Box(5).z(1).gridView();
 
 await Arc(10)
   .op((s) => s.offset(1).fitTo(s.void()))
-  .ez(5)
+  .ez([5])
   .view();
 
 await Box(10)
-  .ez(10)
+  .ez([10])
   .color('green')
-  .and(faces().n(4).extrudeAlong(normal(), 1).tint('red'))
+  .and(faces().n(4).extrudeAlong(normal(), [1]).tint('red'))
   .view();
 
 await Arc(10).color('blue').color('red').view();
@@ -125,11 +125,11 @@ await Edges(
   )
 )
   .rz(1 / 8)
-  .clip(Arc(5).cut(Arc(2)).ez(1, -1))
+  .clip(Arc(5).cut(Arc(2)).ez([1, -1]))
   .gridView();
 
 const b = await Box(5)
-  .ez(5)
+  .ez([5])
   .and(
     Hershey('A', 3)
       .color('green')
@@ -145,11 +145,11 @@ await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
 await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
 await Arc(2)
-  .ez(5)
+  .ez([5])
   .cut(
     Box(5)
       .ry(1 / 16)
-      .ez(5)
+      .ez([5])
       .z(3)
   )
   .simplify({ ratio: 0.1, eps: 0.01 })
@@ -158,7 +158,7 @@ await Arc(2)
 await Triangle(14).svg('triangle');
 
 await Box(10)
-  .ez(50, -50)
+  .ez([50, -50])
   .rx(0, 1 / 4)
   .fuse()
   .view(0)
@@ -319,7 +319,7 @@ await Segments([
   .fill()
   .topView();
 
-await Arc(37).cut(inset(2)).ez(2).remesh(1).smooth(Box(50, 10, 20)).view();
+await Arc(37).cut(inset(2)).ez([2]).remesh(1).smooth(Box(50, 10, 20)).view();
 
 await Box(4, 4, 4).cutOut(X(0)).view();
 
@@ -333,9 +333,9 @@ await Orb(5, 5, 5, { zag: 5 })
   .eachEdge((e, l) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to)
   .view();
 
-await Box(4).fit(Arc(6).void()).ez(1).view();
+await Box(4).fit(Arc(6).void()).ez([1]).view();
 
-await Box(4).fit(Arc(6).void()).ez(1, 'noVoid').view();
+await Box(4).fit(Arc(6).void()).ez([1], 'noVoid').view();
 
 await Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
 
@@ -374,4 +374,19 @@ await Arc(10, 10, 10, { sides: 7 })
     )
   )
   .clean()
+  .view();
+
+const xy = Box(20, 30).cut(Box(10)).to(XY());
+const xz = Arc(20, 30).cut(Pentagon(7)).to(XZ());
+const yz = Arc(20, 20).cut(Triangle(5)).to(YZ());
+Group(xy, xz, yz)
+  .clean()
+  .each(e(diameter()))
+  .commonVolume()
+  .clean()
+  .and(
+    xy.e(50).color('red').ghost(),
+    xz.e(50).color('green').ghost(),
+    yz.e(50).color('blue').ghost()
+  )
   .view();

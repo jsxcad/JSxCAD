@@ -66,11 +66,11 @@ const top = await saucer
 
 ```JavaScript
 const topWithPegHoles = await top
-  .cut(Arc(8.2).ez(-12, 5).x(50, -50).y(35, -35))
+  .cut(Arc(8.2).ez([-12, 5]).x(50, -50).y(35, -35))
   .clip(
     Hexagon(155)
       .rz(1 / 12)
-      .ez(-12, 5)
+      .ez([-12, 5])
   )
   .stl(
     'top2',
@@ -90,11 +90,11 @@ const base = await saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('b
 
 ```JavaScript
 const baseWithPegHoles = await base
-  .cut(Arc(8.2).ez(-12, 5).x(50, -50).y(35, -35))
+  .cut(Arc(8.2).ez([-12, 5]).x(50, -50).y(35, -35))
   .clip(
     Hexagon(155)
       .rz(1 / 12)
-      .ez(-12)
+      .ez([-12])
   )
   .stl('base');
 ```

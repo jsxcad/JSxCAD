@@ -14,15 +14,15 @@ See: [mask](../../nb/api/mask.md)
 
 ```JavaScript
 Hexagon(6)
-  .ez(10)
-  .masking(Arc(5).ez(10))
+  .ez([10])
+  .masking(Arc(5).ez([10]))
   .fit(Box(8, 8, 4))
   .view()
   .note(
-    'Hexagon(6).ez(10).masking(Arc(5).ez(10)) produces a hexagonal mask for the cylindrical volume.'
+    'Hexagon(6).ez([10]).masking(Arc(5).ez([10])) produces a hexagonal mask for the cylindrical volume.'
   );
 ```
 
 ![Image](masking.md.$2.png)
 
-Hexagon(6).ez(10).masking(Arc(5).ez(10)) produces a hexagonal mask for the cylindrical volume.
+Hexagon(6).ez([10]).masking(Arc(5).ez([10])) produces a hexagonal mask for the cylindrical volume.

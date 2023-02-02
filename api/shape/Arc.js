@@ -73,7 +73,7 @@ const reifyArc =
           .scale(scale)
           .move(middle);
         if (left !== right) {
-          spiral = spiral.ex(left - middle[X], right - middle[X]);
+          spiral = spiral.ex([left - middle[X], right - middle[X]]);
         }
         break;
       }
@@ -84,7 +84,7 @@ const reifyArc =
           .scale(scale)
           .move(middle);
         if (front !== back) {
-          spiral = spiral.ey(front - middle[Y], back - middle[Y]);
+          spiral = spiral.ey([front - middle[Y], back - middle[Y]]);
         }
         break;
       }
@@ -92,7 +92,7 @@ const reifyArc =
         scale[Z] = 1;
         spiral = spiral.scale(scale).move(middle);
         if (top !== bottom) {
-          spiral = spiral.ez(top - middle[Z], bottom - middle[Z]);
+          spiral = spiral.ez([top - middle[Z], bottom - middle[Z]]);
         }
         break;
       }
@@ -109,13 +109,13 @@ const ArcOp =
   (type) =>
   (...args) =>
   async (shape) => {
-    const [values, options] = await destructure2(
+    const [intervals, options] = await destructure2(
       shape,
       args,
-      'values',
+      'intervals',
       'options'
     );
-    let [x, y, z] = values;
+    let [x, y, z] = intervals;
     let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
     if (apothem !== undefined) {
       diameter = toDiameterFromApothem(apothem, sides);

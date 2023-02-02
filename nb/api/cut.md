@@ -25,16 +25,16 @@ Box(10).color('blue').clip(Arc(12).color('red'))
 
 ```JavaScript
 Box(10)
-  .ez(2)
+  .ez([2])
   .material('copper')
   .cut(Orb(5))
   .view()
-  .md("Box(10).ez(2).material('copper').clip(Orb(5))");
+  .md("Box(10).ez([2]).material('copper').clip(Orb(5))");
 ```
 
 ![Image](cut.md.$3.png)
 
-Box(10).ez(2).material('copper').clip(Orb(5))
+Box(10).ez([2]).material('copper').clip(Orb(5))
 
 ```JavaScript
 Box(10, 10, 10)

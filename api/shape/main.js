@@ -55,6 +55,7 @@ export { clean } from './clean.js';
 export { clip } from './clip.js';
 export { clipFrom } from './clipFrom.js';
 export { color } from './color.js';
+export { commonVolume } from './commonVolume.js';
 export { copy } from './copy.js';
 export { cut } from './cut.js';
 export { cutFrom } from './cutFrom.js';

@@ -8,15 +8,15 @@ Here we break the bearing at the equator and pin the hemispheres together.
 const Bearing = (diameter) =>
   Orb(diameter)
     .cutOut(
-      Box(diameter).ez(diameter / 2),
+      Box(diameter).ez([diameter / 2]),
       cut => cut,
       clipped => clipped.as('top')
     )
     .fitTo(
       Arc(4.5)
-        .ez(3.5, 3.0, -3.0, -3.5)
-        .and(Arc(5).ez(3, -3))
-        .masked(Arc(5.2).ez(4, -4))
+        .ez([3.5, 3.0], [-3.0, -3.5])
+        .and(Arc(5).ez([3, -3]))
+        .masked(Arc(5.2).ez([4, -4]))
         .as('pin')
     );
 ```

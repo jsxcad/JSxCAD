@@ -9,10 +9,10 @@ See: [flat](../../nb/api/flat.md).
 
 ```JavaScript
 Box(10)
-  .ez(1)
+  .ez([1])
   .rx(1 / 8)
   .view(1)
-  .note('Box(10).ez(1).rx(1 / 8) rotates a box')
+  .note('Box(10).ez([1]).rx(1 / 8) rotates a box')
   .view(2, flat())
   .note('flat() will restore it to its local orientation.')
   .absolute()
@@ -25,7 +25,7 @@ Box(10)
 
 ![Image](absolute.md.$2_1.png)
 
-Box(10).ez(1).rx(1 / 8) rotates a box
+Box(10).ez([1]).rx(1 / 8) rotates a box
 
 ![Image](absolute.md.$2_2.png)
 
