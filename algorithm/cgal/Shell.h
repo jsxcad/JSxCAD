@@ -212,6 +212,9 @@ int Shell(Geometry* geometry, double inner_offset, double outer_offset,
       domain.add_features(polylines.begin(), polylines.end());
     }
 
+    CGAL::get_default_random() = CGAL::Random(0);
+    std::srand(0);
+
     C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
 
     const Tr& tr = c3t3.triangulation();
