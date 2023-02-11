@@ -15,6 +15,7 @@ subCandidateLimit|1
 Computes toolpaths along edges, filling areas, and volumes.
 `;
 
+/*
 Arc(4)
   .x(5)
   .seq({ by: 1 / 8 }, rz, Join)
@@ -22,3 +23,4 @@ Arc(4)
   .color('orange')
   .and(toolpath())
   .view(57);
+*/

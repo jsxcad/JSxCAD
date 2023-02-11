@@ -13,4 +13,3 @@ struct Edge {
 };
 
 typedef std::vector<Edge> Edges;
-

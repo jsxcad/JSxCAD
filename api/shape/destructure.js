@@ -184,6 +184,19 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(result);
         break;
       }
+      case 'geometry': {
+        let result;
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (result === undefined && Shape.isShape(value)) {
+            result = await value.toGeometry();
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(result);
+        break;
+      }
       case 'coordinate': {
         let result;
         for (const arg of args) {
@@ -236,6 +249,24 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(out);
         break;
       }
+      case 'interval': {
+        let interval;
+        for (const arg of args) {
+          let value = await resolveArray(shape, arg);
+          if (interval === undefined && Shape.isArray(value)) {
+            const [a = 0, b = 0] = value;
+            interval = a < b ? [a, b] : [b, a];
+          } else if (interval === undefined && Shape.isNumber(value)) {
+            // A number implies an interval of that size centered on zero.
+            interval =
+              value > 0 ? [value / -2, value / 2] : [value / 2, value / -2];
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(interval);
+        break;
+      }
       case 'intervals': {
         const out = [];
         for (const arg of args) {
@@ -268,6 +299,19 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(out);
         break;
       }
+      case 'geometries': {
+        const out = [];
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (Shape.isShape(value)) {
+            out.push(await value.toGeometry());
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(out);
+        break;
+      }
       case 'coordinates': {
         const out = [];
         for (const arg of args) {
@@ -289,6 +333,9 @@ export const destructure2 = async (shape, input, ...specs) => {
       case 'rest': {
         output.push(args);
         break;
+      }
+      default: {
+        throw Error(`Unknown destructure2 spec ${spec}`);
       }
     }
     args = rest;

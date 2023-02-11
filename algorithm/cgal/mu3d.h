@@ -293,7 +293,8 @@ class Edge {
   bool operator<(const Edge& other) const { return _weight < other._weight; }
 
   glm::dvec2 getSourceS2(const std::vector<FaceToPlane>& f2p) const {
-    return f2p[_sFace].get(point_to_vector(_halfedge->prev()->vertex()->point()));
+    return f2p[_sFace].get(
+        point_to_vector(_halfedge->prev()->vertex()->point()));
   }
 
   glm::dvec2 getTargetS2(const std::vector<FaceToPlane>& f2p) const {
@@ -301,16 +302,15 @@ class Edge {
   }
 
   glm::dvec2 getSourceT2(const std::vector<FaceToPlane>& f2p) const {
-    return f2p[_tFace].get(point_to_vector(_halfedge->prev()->vertex()->point()));
+    return f2p[_tFace].get(
+        point_to_vector(_halfedge->prev()->vertex()->point()));
   }
 
   glm::dvec2 getTargetT2(const std::vector<FaceToPlane>& f2p) const {
     return f2p[_tFace].get(point_to_vector(_halfedge->vertex()->point()));
   }
 
-  double getAngle() const {
-    return angle;
-  }
+  double getAngle() const { return angle; }
 
   int _sFace;
   int _tFace;
@@ -519,9 +519,7 @@ class Graph {
     return _CplanarFaces;
   }
 
-  const std::vector<Edge>& getBestEdges() {
-    return _C;
-  }
+  const std::vector<Edge>& getBestEdges() { return _C; }
 
  private:
   std::map<int, Facet> _facets;
@@ -750,7 +748,8 @@ class Graph {
                              point_to_vector(hfc->vertex()->point())) *
                             (double)0.5;
 
-        Edge e(faceId, oppositeFaceId, center, hfc, _facets[faceId], _facets[oppositeFaceId]);
+        Edge e(faceId, oppositeFaceId, center, hfc, _facets[faceId],
+               _facets[oppositeFaceId]);
 
         // if this edge doesn't exist already, add it (don't consider direction)
         if (!find(e)) {

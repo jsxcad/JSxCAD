@@ -1,4 +1,4 @@
-int Link(Geometry* geometry, bool close) {
+int Link(Geometry* geometry, bool close, bool reverse) {
   size_t size = geometry->size();
 
   geometry->copyInputSegmentsToOutputSegments();
@@ -53,6 +53,15 @@ int Link(Geometry* geometry, bool close) {
 
   if (close && out.size() >= 1) {
     out.emplace_back(out.back().target(), out.front().source());
+  }
+
+  if (reverse) {
+    // Reverse the segment order.
+    std::reverse(out.begin(), out.end());
+    for (auto& segment : out) {
+      // Reverse each segment direction.
+      segment = Segment(segment.target(), segment.source());
+    }
   }
 
   geometry->transformToLocalFrame();

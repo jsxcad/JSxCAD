@@ -2,7 +2,6 @@
 
 #ifdef ENABLE_OCCT
 
-#include "BRep_Builder.hxx"
 #include "BRepAlgoAPI_Fuse.hxx"
 #include "BRepBuilderAPI_GTransform.hxx"
 #include "BRepBuilderAPI_MakeEdge.hxx"
@@ -16,6 +15,7 @@
 #include "BRepPrimAPI_MakeBox.hxx"
 #include "BRepPrimAPI_MakeSphere.hxx"
 #include "BRepTools.hxx"
+#include "BRep_Builder.hxx"
 #include "GC_MakeSegment.hxx"
 #include "RWMesh_FaceIterator.hxx"
 #include "StdFail_NotDone.hxx"
@@ -35,8 +35,12 @@ TopoDS_Solid sewOcctSolidFromSurfaceMesh(const Surface_mesh& mesh) {
     do {
       Point cgal_s = mesh.point(mesh.source(edge));
       Point cgal_t = mesh.point(mesh.target(edge));
-      gp_Pnt occt_s(CGAL::to_double(cgal_s.x().exact()), CGAL::to_double(cgal_s.y().exact()), CGAL::to_double(cgal_s.z().exact()));
-      gp_Pnt occt_t(CGAL::to_double(cgal_t.x().exact()), CGAL::to_double(cgal_t.y().exact()), CGAL::to_double(cgal_t.z().exact()));
+      gp_Pnt occt_s(CGAL::to_double(cgal_s.x().exact()),
+                    CGAL::to_double(cgal_s.y().exact()),
+                    CGAL::to_double(cgal_s.z().exact()));
+      gp_Pnt occt_t(CGAL::to_double(cgal_t.x().exact()),
+                    CGAL::to_double(cgal_t.y().exact()),
+                    CGAL::to_double(cgal_t.z().exact()));
       Handle(Geom_TrimmedCurve) occt_segment = GC_MakeSegment(occt_s, occt_t);
       wire_maker.Add(BRepBuilderAPI_MakeEdge(occt_segment));
       edge = mesh.next(edge);
@@ -63,8 +67,12 @@ TopoDS_Solid buildOcctSolidFromSurfaceMesh(const Surface_mesh& mesh) {
     do {
       Point cgal_s = mesh.point(mesh.source(edge));
       Point cgal_t = mesh.point(mesh.target(edge));
-      gp_Pnt occt_s(CGAL::to_double(cgal_s.x().exact()), CGAL::to_double(cgal_s.y().exact()), CGAL::to_double(cgal_s.z().exact()));
-      gp_Pnt occt_t(CGAL::to_double(cgal_t.x().exact()), CGAL::to_double(cgal_t.y().exact()), CGAL::to_double(cgal_t.z().exact()));
+      gp_Pnt occt_s(CGAL::to_double(cgal_s.x().exact()),
+                    CGAL::to_double(cgal_s.y().exact()),
+                    CGAL::to_double(cgal_s.z().exact()));
+      gp_Pnt occt_t(CGAL::to_double(cgal_t.x().exact()),
+                    CGAL::to_double(cgal_t.y().exact()),
+                    CGAL::to_double(cgal_t.z().exact()));
       Handle(Geom_TrimmedCurve) occt_segment = GC_MakeSegment(occt_s, occt_t);
       wire_maker.Add(BRepBuilderAPI_MakeEdge(occt_segment));
       edge = mesh.next(edge);
@@ -76,9 +84,11 @@ TopoDS_Solid buildOcctSolidFromSurfaceMesh(const Surface_mesh& mesh) {
   return solid_maker.Solid();
 }
 
-void buildSurfaceMeshFromOcctShape(const TopoDS_Shape& shape, double deflection_tolerance, Surface_mesh& mesh) {
+void buildSurfaceMeshFromOcctShape(const TopoDS_Shape& shape,
+                                   double deflection_tolerance,
+                                   Surface_mesh& mesh) {
   Vertex_map vertices;
-  for(TopExp_Explorer it(shape, TopAbs_SOLID) ; it.More() ; it.Next()){
+  for (TopExp_Explorer it(shape, TopAbs_SOLID); it.More(); it.Next()) {
     TopoDS_Solid solid = TopoDS::Solid(it.Current());
     BRepMesh_IncrementalMesh(solid, deflection_tolerance);
     // Each face is triangulated separately, but the vertices are aligned,
@@ -103,7 +113,8 @@ void buildSurfaceMeshFromOcctShape(const TopoDS_Shape& shape, double deflection_
   }
 }
 
-std::shared_ptr<const TopoDS_Shape> DeserializeOcctShape(std::string serialization) {
+std::shared_ptr<const TopoDS_Shape> DeserializeOcctShape(
+    std::string serialization) {
   std::istringstream ss(serialization);
   BRep_Builder b;
   TopoDS_Shape* s = new TopoDS_Shape;
@@ -124,15 +135,18 @@ std::string SerializeOcctShape(std::shared_ptr<const TopoDS_Shape>& shape) {
 }
 
 int MakeOcctSphere(Geometry* geometry, double radius) {
-  std::shared_ptr<const TopoDS_Shape> shape(new TopoDS_Shape(BRepPrimAPI_MakeSphere(radius)));
+  std::shared_ptr<const TopoDS_Shape> shape(
+      new TopoDS_Shape(BRepPrimAPI_MakeSphere(radius)));
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setOcctShape(target, shape);
   geometry->setIdentityTransform(target);
   return STATUS_OK;
 }
 
-int MakeOcctBox(Geometry* geometry, double x_length, double y_length, double z_length) {
-  std::shared_ptr<const TopoDS_Shape> shape(new TopoDS_Shape(BRepPrimAPI_MakeBox(x_length, y_length, z_length)));
+int MakeOcctBox(Geometry* geometry, double x_length, double y_length,
+                double z_length) {
+  std::shared_ptr<const TopoDS_Shape> shape(
+      new TopoDS_Shape(BRepPrimAPI_MakeBox(x_length, y_length, z_length)));
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setOcctShape(target, shape);
   geometry->setIdentityTransform(target);
@@ -153,9 +167,7 @@ gp_Trsf occtTransformFromCgalTransform(const Transformation& t) {
   Standard_Real a33 = CGAL::to_double(t.m(2, 2));
   Standard_Real a34 = CGAL::to_double(t.m(2, 3));
   gp_Trsf trsf;
-  trsf.SetValues(a11, a12, a13, a14,
-                 a21, a22, a23, a24,
-                 a31, a32, a33, a34);
+  trsf.SetValues(a11, a12, a13, a14, a21, a22, a23, a24, a31, a32, a33, a34);
   return trsf;
 }
 
@@ -173,16 +185,19 @@ gp_GTrsf occtGeometryTransformFromCgalTransform(const Transformation& t) {
   Standard_Real a33 = CGAL::to_double(t.m(2, 2));
   Standard_Real a34 = CGAL::to_double(t.m(2, 3));
 
-  const gp_GTrsf r(gp_Mat(a11, a12, a13, a21, a22, a23, a31, a32, a33), gp_XYZ(a14, a24, a34));
+  const gp_GTrsf r(gp_Mat(a11, a12, a13, a21, a22, a23, a31, a32, a33),
+                   gp_XYZ(a14, a24, a34));
   return r;
 }
 
-std::shared_ptr<const TopoDS_Shape> transformOcctShape(const Transformation& t, const TopoDS_Shape& shape) {
+std::shared_ptr<const TopoDS_Shape> transformOcctShape(
+    const Transformation& t, const TopoDS_Shape& shape) {
   BRepBuilderAPI_Transform op(shape, occtTransformFromCgalTransform(t));
   return std::shared_ptr<const TopoDS_Shape>(new TopoDS_Shape(op.Shape()));
 }
 
-std::shared_ptr<const TopoDS_Shape> transformGeometryOfOcctShape(const Transformation& t, const TopoDS_Shape& shape) {
+std::shared_ptr<const TopoDS_Shape> transformGeometryOfOcctShape(
+    const Transformation& t, const TopoDS_Shape& shape) {
   gp_GTrsf g = occtGeometryTransformFromCgalTransform(t);
   // This causes memory corruption.
   BRepBuilderAPI_GTransform op(shape, g);

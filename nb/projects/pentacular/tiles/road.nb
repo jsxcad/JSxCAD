@@ -6,7 +6,7 @@ const tileWidth = 64 * mm;
 
 md`Each tile is ${(tileWidth * 1000) / 160}mm`;
 
-const curve = await Line(laneWidth / -2, laneWidth / 2)
+const curve = await Line(laneWidth)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)
@@ -14,7 +14,7 @@ const curve = await Line(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
 
-const tightCurve = await Line(laneWidth / -2, laneWidth / 2)
+const tightCurve = await Line(laneWidth)
   .x(tileWidth / 4)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -4)
@@ -22,7 +22,7 @@ const tightCurve = await Line(laneWidth / -2, laneWidth / 2)
   .color('black')
   .tag('road_surface');
 
-const doubleLaneCurve = await Line(-laneWidth, laneWidth)
+const doubleLaneCurve = await Line(laneWidth * 2)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)

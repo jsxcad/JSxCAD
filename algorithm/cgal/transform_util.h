@@ -206,4 +206,3 @@ void transformPoints(Points& points, const Transformation& transform) {
     point = point.transform(transform);
   }
 }
-

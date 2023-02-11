@@ -139,7 +139,7 @@ await Box(5).op(color('green')).gridView();
 ![Image](shape.md.$23.png)
 
 ```JavaScript
-await Line(10)
+await Line([10])
   .orient({ at: [40, 50, 0] })
   .gridView();
 ```
@@ -419,14 +419,16 @@ await Arc(4)
   .seq({ by: 1 / 8 }, rz, Join)
   .material('glass')
   .color('orange')
-  .and(toolpath())
+  // .and(toolpath())
   .view();
 ```
 
 ![Image](shape.md.$54.png)
 
 ```JavaScript
-await Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(54);
+await Box(10).cut(Arc(6).x(6, -6), Box(1, 10))
+  // .and(toolpath())
+  .view(54);
 ```
 
 ![Image](shape.md.$55_54.png)
@@ -765,3 +767,25 @@ Group(xy, xz, yz)
 ```
 
 ![Image](shape.md.$87.png)
+
+```JavaScript
+Box(20)
+  .ez(2)
+  .clean()
+  .And(color('red'), shell([2]).color('green'))
+  .clip(YZ(0))
+  .view();
+```
+
+![Image](shape.md.$88.png)
+
+```JavaScript
+Box(20)
+  .ez(2)
+  .clean()
+  .And(color('red'), shell([-1000000, 2], 'protect').color('green'))
+  .clip(YZ(0))
+  .view();
+```
+
+![Image](shape.md.$89.png)

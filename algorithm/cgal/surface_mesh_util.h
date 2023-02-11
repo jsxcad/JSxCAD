@@ -1,11 +1,13 @@
 #pragma once
 
 template <typename Kernel, typename Surface_mesh>
-void remesh(Surface_mesh& mesh,
-            std::vector<const Surface_mesh*>& selections,
-            int iterations, int relaxation_steps, double target_edge_length) {
+void prepare_selection(Surface_mesh& mesh,
+                       std::vector<const Surface_mesh*>& selections,
+                       std::set<Face_index>& unconstrained_faces,
+                       std::set<Vertex_index>& constrained_vertices,
+                       std::set<Edge_index>& constrained_edges) {
+  // Could these be unordered_set?
   std::set<Vertex_index> unconstrained_vertices;
-  std::set<Face_index> unconstrained_faces;
   if (selections.size() > 0) {
     for (const Surface_mesh* selection : selections) {
       {
@@ -44,11 +46,9 @@ void remesh(Surface_mesh& mesh,
     }
   }
   // The vertices are always constrained.
-  std::set<Vertex_index> constrained_vertices;
   for (Vertex_index vertex : mesh.vertices()) {
     constrained_vertices.insert(vertex);
   }
-  std::set<Edge_index> constrained_edges;
   for (Edge_index edge : mesh.edges()) {
     const Halfedge_index halfedge = mesh.halfedge(edge);
     const Vertex_index& source = mesh.source(halfedge);
@@ -58,6 +58,17 @@ void remesh(Surface_mesh& mesh,
       constrained_edges.insert(edge);
     }
   }
+}
+
+template <typename Kernel, typename Surface_mesh>
+void remesh(Surface_mesh& mesh, std::vector<const Surface_mesh*>& selections,
+            int iterations, int relaxation_steps, double target_edge_length) {
+  std::set<Face_index> unconstrained_faces;
+  std::set<Vertex_index> constrained_vertices;
+  std::set<Edge_index> constrained_edges;
+  prepare_selection<Kernel, Surface_mesh>(mesh, selections, unconstrained_faces,
+                                          constrained_vertices,
+                                          constrained_edges);
   CGAL::Boolean_property_map<std::set<Vertex_index>> constrained_vertex_map(
       constrained_vertices);
   CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(

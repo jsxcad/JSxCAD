@@ -121,12 +121,12 @@ await Implicit(2, torusFn).view({ withGrid: false }).md('Implicit(2, torusFn');
 Implicit(2, torusFn
 
 ```JavaScript
-await Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
+await Line([5, -1]).rz(45).gridView().md(`Line([5, -1])`);
 ```
 
 ![Image](shapes.md.$12.png)
 
-Line(5, -1)
+Line([5, -1])
 
 ```JavaScript
 await Octagon(5).gridView().md(`Octagon(5)`);
@@ -307,7 +307,7 @@ const q = await Group(
 Boxes and Arcs from extents
 
 ```JavaScript
-await Line(15, -15)
+await Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
   .view();
@@ -316,7 +316,7 @@ await Line(15, -15)
 ![Image](shapes.md.$26.png)
 
 ```JavaScript
-await Line(15, -15)
+await Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
@@ -325,7 +325,7 @@ await Line(15, -15)
 ![Image](shapes.md.$27.png)
 
 ```JavaScript
-await Line(-15, 15)
+await Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)))
   .view();
@@ -334,7 +334,7 @@ await Line(-15, 15)
 ![Image](shapes.md.$28.png)
 
 ```JavaScript
-await Line(-15, 15)
+await Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();

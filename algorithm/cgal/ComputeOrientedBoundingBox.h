@@ -64,18 +64,30 @@ int ComputeOrientedBoundingBox(Geometry* geometry) {
 
   const int target = geometry->add(GEOMETRY_SEGMENTS);
   geometry->setIdentityTransform(target);
-  geometry->segments(target).push_back(Segment(from_epick(o[0]), from_epick(o[1]))); // length
-  geometry->segments(target).push_back(Segment(from_epick(o[0]), from_epick(o[3]))); // depth
-  geometry->segments(target).push_back(Segment(from_epick(o[0]), from_epick(o[5]))); // height
-  geometry->segments(target).push_back(Segment(from_epick(o[1]), from_epick(o[2]))); // depth
-  geometry->segments(target).push_back(Segment(from_epick(o[1]), from_epick(o[6]))); // height
-  geometry->segments(target).push_back(Segment(from_epick(o[2]), from_epick(o[3]))); // length
-  geometry->segments(target).push_back(Segment(from_epick(o[2]), from_epick(o[7]))); // height
-  geometry->segments(target).push_back(Segment(from_epick(o[3]), from_epick(o[4]))); // height
-  geometry->segments(target).push_back(Segment(from_epick(o[4]), from_epick(o[5]))); // depth
-  geometry->segments(target).push_back(Segment(from_epick(o[4]), from_epick(o[7]))); // length
-  geometry->segments(target).push_back(Segment(from_epick(o[5]), from_epick(o[6]))); // length
-  geometry->segments(target).push_back(Segment(from_epick(o[6]), from_epick(o[7]))); // depth
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[0]), from_epick(o[1])));  // length
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[0]), from_epick(o[3])));  // depth
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[0]), from_epick(o[5])));  // height
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[1]), from_epick(o[2])));  // depth
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[1]), from_epick(o[6])));  // height
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[2]), from_epick(o[3])));  // length
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[2]), from_epick(o[7])));  // height
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[3]), from_epick(o[4])));  // height
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[4]), from_epick(o[5])));  // depth
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[4]), from_epick(o[7])));  // length
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[5]), from_epick(o[6])));  // length
+  geometry->segments(target).push_back(
+      Segment(from_epick(o[6]), from_epick(o[7])));  // depth
 
   geometry->transformToLocalFrame();
 

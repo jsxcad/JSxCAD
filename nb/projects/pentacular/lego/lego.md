@@ -99,7 +99,7 @@ export const AxleProfile = () => {
   const length = 4.8 + 0.1;
   const width = 1.8 + 0.1;
   const diameter = 5 + 0.1;
-  const line = Line(length / 2, length / -2);
+  const line = Line(length);
   const bar = Group(
     line.y(width / 2),
     line.y(width / -2),
