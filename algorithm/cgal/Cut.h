@@ -16,13 +16,15 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
-        if (geometry->is_empty_mesh(target) && !geometry->has_occt_shape(target)) {
+        if (geometry->is_empty_mesh(target) &&
+            !geometry->has_occt_shape(target)) {
           // Nothing to cut.
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
 #ifdef ENABLE_OCCT
-          if (geometry->has_occt_shape(target) && geometry->has_occt_shape(nth)) {
+          if (geometry->has_occt_shape(target) &&
+              geometry->has_occt_shape(nth)) {
             // Occt vs Occt cut.
             BRepCheck_Analyzer target_checker(geometry->occt_shape(target));
             if (!target_checker.IsValid()) {
@@ -32,7 +34,8 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
             if (!nth_checker.IsValid()) {
               std::cout << "QQ/shape/nth: invalid" << std::endl;
             }
-            BRepAlgoAPI_Cut cut(geometry->occt_shape(target), geometry->occt_shape(nth));
+            BRepAlgoAPI_Cut cut(geometry->occt_shape(target),
+                                geometry->occt_shape(nth));
             cut.Build();
             if (!cut.IsDone()) {
               cut.DumpErrors(std::cout);

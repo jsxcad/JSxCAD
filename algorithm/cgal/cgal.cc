@@ -254,6 +254,7 @@ Plane unitPlane(const Plane& p) {
   }
 }
 
+template <typename Vector>
 Vector unitVector(const Vector& vector) {
   // We can handle the axis aligned planes exactly.
   if (vector.direction() == Vector(0, 0, 1).direction()) {
@@ -470,6 +471,7 @@ bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
   return false;
 }
 
+template <typename Surface_mesh, typename Vector>
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
   const auto h = mesh.halfedge(facet);
   return CGAL::normal(mesh.point(mesh.source(h)),
@@ -479,7 +481,7 @@ Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
 
 Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   for (const auto& facet : mesh.faces()) {
-    return NormalOfSurfaceMeshFacet(mesh, facet);
+    return NormalOfSurfaceMeshFacet<Surface_mesh, Vector>(mesh, facet);
   }
   return CGAL::NULL_VECTOR;
 }
@@ -505,6 +507,7 @@ struct Triple_array_traits {
 
 #include "convert.h"
 
+template <typename Vector>
 Vector unitVector(const Vector& vector);
 Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
 
@@ -2288,12 +2291,14 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "ComputeImplicitVolume.h"
 #include "ComputeNormal.h"
 #include "ComputeOrientedBoundingBox.h"
+#include "ComputeToolpath.h"
 #include "ComputeVolume.h"
 #include "ConvertPolygonsToMeshes.h"
 #include "ConvexHull.h"
 #include "Cut.h"
 #include "Deform.h"
 #include "Demesh.h"
+#include "DilateXY.h"
 #include "Disjoint.h"
 #include "EachPoint.h"
 #include "EachTriangle.h"
@@ -2320,6 +2325,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Seam.h"
 #include "Section.h"
 #include "Separate.h"
+#include "Shell.h"
 #include "Simplify.h"
 #include "Smooth.h"
 #include "Twist.h"
@@ -2605,6 +2611,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeNormal", &ComputeNormal,
                        emscripten::allow_raw_pointers());
+  emscripten::function("ComputeToolpath", &ComputeToolpath,
+                       emscripten::allow_raw_pointers());
   emscripten::function("ComputeVolume", &ComputeVolume,
                        emscripten::allow_raw_pointers());
   emscripten::function("ConvexHull", &ConvexHull,
@@ -2614,6 +2622,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
   emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());
+  emscripten::function("DilateXY", &DilateXY, emscripten::allow_raw_pointers());
   emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
   emscripten::function("EachPoint", &EachPoint,
                        emscripten::allow_raw_pointers());
@@ -2649,6 +2658,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
+  emscripten::function("Shell", &Shell, emscripten::allow_raw_pointers());
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());

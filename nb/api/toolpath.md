@@ -12,15 +12,3 @@ candidateLimit|1
 subCandidateLimit|1
 
 Computes toolpaths along edges, filling areas, and volumes.
-
-```JavaScript
-Arc(4)
-  .x(5)
-  .seq({ by: 1 / 8 }, rz, Join)
-  .material('glass')
-  .color('orange')
-  .and(toolpath())
-  .view(57);
-```
-
-![Image](toolpath.md.$2_57.png)

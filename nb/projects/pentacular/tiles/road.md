@@ -13,7 +13,7 @@ const tileWidth = 64 * mm;
 Each tile is 64mm
 
 ```JavaScript
-const curve = await Line(laneWidth / -2, laneWidth / 2)
+const curve = await Line(laneWidth)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)
@@ -23,7 +23,7 @@ const curve = await Line(laneWidth / -2, laneWidth / 2)
 ```
 
 ```JavaScript
-const tightCurve = await Line(laneWidth / -2, laneWidth / 2)
+const tightCurve = await Line(laneWidth)
   .x(tileWidth / 4)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -4)
@@ -33,7 +33,7 @@ const tightCurve = await Line(laneWidth / -2, laneWidth / 2)
 ```
 
 ```JavaScript
-const doubleLaneCurve = await Line(-laneWidth, laneWidth)
+const doubleLaneCurve = await Line(laneWidth * 2)
   .x(tileWidth / 2)
   .seq({ by: 1 / 32, to: 1 / 4 }, rz, ChainHull)
   .x(tileWidth / -2)

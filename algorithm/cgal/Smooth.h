@@ -34,7 +34,8 @@ int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
     if (count < size) {
       // Apply selections.
       // Remesh will handle adding the selection edges.
-      remesh<Epick_kernel>(mesh, selections, remesh_iterations, remesh_relaxation_steps, resolution);
+      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
+                           remesh_relaxation_steps, resolution);
       for (const Epick_surface_mesh* selection : selections) {
         CGAL::Side_of_triangle_mesh<Epick_surface_mesh, Epick_kernel> inside(
             *selection);

@@ -45,7 +45,7 @@ await Box(5).offset(1).gridView();
 
 await Box(5).op(color('green')).gridView();
 
-await Line(10)
+await Line([10])
   .orient({ at: [40, 50, 0] })
   .gridView();
 
@@ -184,10 +184,12 @@ await Arc(4)
   .seq({ by: 1 / 8 }, rz, Join)
   .material('glass')
   .color('orange')
-  .and(toolpath())
+  // .and(toolpath())
   .view();
 
-await Box(10).cut(Arc(6).x(6, -6), Box(1, 10)).and(toolpath()).view(54);
+await Box(10).cut(Arc(6).x(6, -6), Box(1, 10))
+  // .and(toolpath())
+  .view(54);
 
 await Box(20, 20, 20)
   .join(Box(10, 10, 40))
@@ -389,4 +391,18 @@ Group(xy, xz, yz)
     xz.e(50).color('green').ghost(),
     yz.e(50).color('blue').ghost()
   )
+  .view();
+
+Box(20)
+  .ez(2)
+  .clean()
+  .And(color('red'), shell([2]).color('green'))
+  .clip(YZ(0))
+  .view();
+
+Box(20)
+  .ez(2)
+  .clean()
+  .And(color('red'), shell([-1000000, 2], 'protect').color('green'))
+  .clip(YZ(0))
   .view();

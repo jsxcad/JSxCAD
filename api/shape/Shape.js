@@ -55,8 +55,8 @@ complete = {
     if (prop === 'then') {
       return async (resolve, reject) => {
         // This should only happen at the end of a chain.
-        // But since target() is async, it returns it as a promise, which will end up getting then'd by the await, and so on.
-        // But that won't be this when.
+        // But since target() is async, it returns it as a promise, which will end up getting then'd by the await,
+        // and so on, which won't be this when.
         const link = async () => {
           const result = await target();
           if (isShape(result)) {

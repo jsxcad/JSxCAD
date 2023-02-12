@@ -19,7 +19,7 @@ export const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   )(shape)) {
     particles.push(particle(xDistance).x(xDistance));
   }
-  return Link(particles)(shape);
+  return Link(...particles)(shape);
 });
 
 export default Wave;

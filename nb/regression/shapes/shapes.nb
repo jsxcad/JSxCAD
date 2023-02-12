@@ -55,7 +55,7 @@ const torusFn = (x, y, z) => {
 // Determine why Implicit seems non-deterministic.
 await Implicit(2, torusFn).view({ withGrid: false }).md('Implicit(2, torusFn');
 
-await Line(5, -1).rz(45).gridView().md(`Line(5, -1)`);
+await Line([5, -1]).rz(45).gridView().md(`Line([5, -1])`);
 
 await Octagon(5).gridView().md(`Octagon(5)`);
 
@@ -142,22 +142,22 @@ const q = await Group(
   ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
 ).view().md`Boxes and Arcs from extents`;
 
-await Line(15, -15)
+await Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
   .view();
 
-await Line(15, -15)
+await Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 
-await Line(-15, 15)
+await Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)))
   .view();
 
-await Line(-15, 15)
+await Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();

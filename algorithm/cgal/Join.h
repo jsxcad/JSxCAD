@@ -27,11 +27,14 @@ int Join(Geometry* geometry, int targets, bool exact) {
             continue;
           }
 #ifdef ENABLE_OCCT
-          if (geometry->has_occt_shape(target) && geometry->has_occt_shape(nth)) {
+          if (geometry->has_occt_shape(target) &&
+              geometry->has_occt_shape(nth)) {
             // Occt vs Occt cut.
-            BRepAlgoAPI_Fuse fuse(geometry->occt_shape(target), geometry->occt_shape(nth));
+            BRepAlgoAPI_Fuse fuse(geometry->occt_shape(target),
+                                  geometry->occt_shape(nth));
             fuse.Build();
-            geometry->setOcctShape(target, std::shared_ptr<const TopoDS_Shape>(new TopoDS_Shape(fuse.Shape())));
+            geometry->setOcctShape(target, std::shared_ptr<const TopoDS_Shape>(
+                                               new TopoDS_Shape(fuse.Shape())));
             geometry->discard_mesh(target);
             continue;
           }

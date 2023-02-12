@@ -102,7 +102,8 @@ class SurfaceMeshQuery {
     intersectSegment(do_clip, segment, emit);
   }
 
-  bool isIntersectingSegmentApproximate(double sx, double sy, double sz, double tx, double ty, double tz) {
+  bool isIntersectingSegmentApproximate(double sx, double sy, double sz,
+                                        double tx, double ty, double tz) {
     return isIntersectingSegment(Segment(Point(sx, sy, sz), Point(tx, ty, tz)));
   }
 
@@ -240,7 +241,8 @@ class AabbTreeQuery {
     return false;
   }
 
-  bool isIntersectingSegmentApproximate(double sx, double sy, double sz, double tx, double ty, double tz) {
+  bool isIntersectingSegmentApproximate(double sx, double sy, double sz,
+                                        double tx, double ty, double tz) {
     return isIntersectingSegment(Segment(Point(sx, sy, sz), Point(tx, ty, tz)));
   }
 
@@ -289,4 +291,3 @@ class AabbTreeQuery {
  private:
   std::vector<std::unique_ptr<SurfaceMeshQuery>> surface_mesh_query_;
 };
-

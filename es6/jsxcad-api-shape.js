@@ -1,6 +1,6 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read, log as log$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, taggedPlan, hasTypeReference, taggedGroup, approximate as approximate$1, makeAbsolute, measureBoundingBox, measureArea, taggedItem, transform as transform$1, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, bend as bend$1, rewrite, visit, getLeafs, computeCentroid, convexHull, fuse as fuse$1, join as join$1, noGhost, clip as clip$1, linearize, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$1, fix as fix$1, hash, grow as grow$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, hasTypeVoid, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, taggedPlan, hasTypeReference, taggedGroup, approximate as approximate$1, makeAbsolute, measureBoundingBox, measureArea, taggedItem, transform as transform$1, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, bend as bend$1, rewrite, visit, getLeafs, computeCentroid, convexHull, fuse as fuse$1, join as join$1, noGhost, clip as clip$1, linearize, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$1, fix as fix$1, hash, grow as grow$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, hasTypeVoid, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, makeOcctBox, fromTranslateToTransform, fromRotateZToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -63,8 +63,8 @@ complete = {
     if (prop === 'then') {
       return async (resolve, reject) => {
         // This should only happen at the end of a chain.
-        // But since target() is async, it returns it as a promise, which will end up getting then'd by the await, and so on.
-        // But that won't be this when.
+        // But since target() is async, it returns it as a promise, which will end up getting then'd by the await,
+        // and so on, which won't be this when.
         const link = async () => {
           const result = await target();
           if (isShape(result)) {
@@ -523,6 +523,19 @@ const destructure2 = async (shape, input, ...specs) => {
         output.push(result);
         break;
       }
+      case 'geometry': {
+        let result;
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (result === undefined && Shape.isShape(value)) {
+            result = await value.toGeometry();
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(result);
+        break;
+      }
       case 'coordinate': {
         let result;
         for (const arg of args) {
@@ -575,6 +588,24 @@ const destructure2 = async (shape, input, ...specs) => {
         output.push(out);
         break;
       }
+      case 'interval': {
+        let interval;
+        for (const arg of args) {
+          let value = await resolveArray(shape, arg);
+          if (interval === undefined && Shape.isArray(value)) {
+            const [a = 0, b = 0] = value;
+            interval = a < b ? [a, b] : [b, a];
+          } else if (interval === undefined && Shape.isNumber(value)) {
+            // A number implies an interval of that size centered on zero.
+            interval =
+              value > 0 ? [value / -2, value / 2] : [value / 2, value / -2];
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(interval);
+        break;
+      }
       case 'intervals': {
         const out = [];
         for (const arg of args) {
@@ -607,6 +638,19 @@ const destructure2 = async (shape, input, ...specs) => {
         output.push(out);
         break;
       }
+      case 'geometries': {
+        const out = [];
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (Shape.isShape(value)) {
+            out.push(await value.toGeometry());
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(out);
+        break;
+      }
       case 'coordinates': {
         const out = [];
         for (const arg of args) {
@@ -628,6 +672,9 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'rest': {
         output.push(args);
         break;
+      }
+      default: {
+        throw Error(`Unknown destructure2 spec ${spec}`);
       }
     }
     args = rest;
@@ -651,7 +698,7 @@ const toValue = Shape.registerMethod(
 
 const X$a = 0;
 const Y$a = 1;
-const Z$a = 2;
+const Z$9 = 2;
 
 const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
 const subtract$2 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
@@ -664,7 +711,7 @@ const computeScale = (
 const computeMiddle = (c1, c2) => [
   (c1[X$a] + c2[X$a]) * 0.5,
   (c1[Y$a] + c2[Y$a]) * 0.5,
-  (c1[Z$a] + c2[Z$a]) * 0.5,
+  (c1[Z$9] + c2[Z$9]) * 0.5,
 ];
 
 const computeSides = (c1, c2, sides, zag$1 = 0.01) => {
@@ -838,16 +885,16 @@ const buildCorners = (x, y, z) => async (shape) => {
     z[0] = await toValue(z[0])(shape);
     z[1] = await toValue(z[1])(shape);
     if (z[0] < z[1]) {
-      c1[Z$a] = z[1];
-      c2[Z$a] = z[0];
+      c1[Z$9] = z[1];
+      c2[Z$9] = z[0];
     } else {
-      c1[Z$a] = z[0];
-      c2[Z$a] = z[1];
+      c1[Z$9] = z[0];
+      c2[Z$9] = z[1];
     }
   } else {
     z = await toValue(z)(shape);
-    c1[Z$a] = z / 2;
-    c2[Z$a] = z / -2;
+    c1[Z$9] = z / 2;
+    c2[Z$9] = z / -2;
   }
   return [c1, c2];
 };
@@ -1008,7 +1055,7 @@ const Ref = Shape.registerMethod('Ref', (...args) => async (shape) => {
 
 const X$9 = (x = 0) => Ref().x(x);
 const Y$9 = (y = 0) => Ref().y(y);
-const Z$9 = (z = 0) => Ref().z(z);
+const Z$8 = (z = 0) => Ref().z(z);
 const XY = (z = 0) => Ref().z(z);
 const XZ = (y = 0) =>
   Ref()
@@ -1115,14 +1162,10 @@ const absolute = Shape.registerMethod(
     Shape.fromGeometry(makeAbsolute(await shape.toGeometry()))
 );
 
-const And = Shape.registerMethod(
-  'And',
-  (...shapes) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        taggedGroup({}, ...(await shape.toShapesGeometries(shapes)))
-      )
-);
+const And = Shape.registerMethod('And', (...args) => async (shape) => {
+  const [geometries] = await destructure2(shape, args, 'geometries');
+  return Shape.fromGeometry(taggedGroup({}, ...geometries));
+});
 
 const and = Shape.registerMethod(
   'and',
@@ -1142,7 +1185,7 @@ const add$1 = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
   az + bz,
 ];
 
-const distance$1 = ([ax, ay, az], [bx, by, bz]) => {
+const distance$2 = ([ax, ay, az], [bx, by, bz]) => {
   const x = bx - ax;
   const y = by - ay;
   const z = bz - az;
@@ -1157,7 +1200,7 @@ const scale$3 = (amount, [x = 0, y = 0, z = 0]) => [
 
 const X$8 = 0;
 const Y$8 = 1;
-const Z$8 = 2;
+const Z$7 = 2;
 
 const size = Shape.registerMethod(
   'size',
@@ -1179,9 +1222,9 @@ const size = Shape.registerMethod(
       const [min, max] = bounds;
       const length = max[X$8] - min[X$8];
       const width = max[Y$8] - min[Y$8];
-      const height = max[Z$8] - min[Z$8];
+      const height = max[Z$7] - min[Z$7];
       const center = scale$3(0.5, add$1(min, max));
-      const radius = distance$1(center, max);
+      const radius = distance$2(center, max);
       return op({
         length,
         width,
@@ -1196,7 +1239,7 @@ const size = Shape.registerMethod(
 
 const X$7 = 0;
 const Y$7 = 1;
-const Z$7 = 2;
+const Z$6 = 2;
 
 const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
@@ -1250,15 +1293,15 @@ const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
         case 'z': {
           switch (spec[index]) {
             case '>':
-              offset[Z$7] = -min[Z$7];
+              offset[Z$6] = -min[Z$6];
               index += 1;
               break;
             case '<':
-              offset[Z$7] = -max[Z$7];
+              offset[Z$6] = -max[Z$6];
               index += 1;
               break;
             default:
-              offset[Z$7] = -center[Z$7];
+              offset[Z$6] = -center[Z$6];
           }
           break;
         }
@@ -1533,22 +1576,22 @@ const ry = Shape.registerMethod(
 
 const rotateY = ry;
 
-const Edge = Shape.registerMethod(
-  'Edge',
-  (source = [0, 0, 0], target = [0, 0, 1], normal = [1, 0, 0], rubbish) =>
-    async (shape) => {
-      const s = await toCoordinate(source)(shape);
-      const t = await toCoordinate(target)(shape);
-      const n = await toCoordinate(normal)(shape);
-      const inverse = fromSegmentToInverseTransform([s, t], n);
-      const baseSegment = [
-        transformCoordinate(s, inverse),
-        transformCoordinate(t, inverse),
-      ];
-      const matrix = invertTransform(inverse);
-      return Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]));
-    }
-);
+const Edge = Shape.registerMethod('Edge', (...args) => async (shape) => {
+  const [s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]] = await destructure2(
+    shape,
+    args,
+    'coordinate',
+    'coordinate',
+    'coordinate'
+  );
+  const inverse = fromSegmentToInverseTransform([s, t], n);
+  const baseSegment = [
+    transformCoordinate(s, inverse),
+    transformCoordinate(t, inverse),
+  ];
+  const matrix = invertTransform(inverse);
+  return Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]));
+});
 
 const Geometry = Shape.registerMethod(
   'Geometry',
@@ -1575,7 +1618,7 @@ const loop = Shape.registerMethod(
 
 const X$6 = 0;
 const Y$6 = 1;
-const Z$6 = 2;
+const Z$5 = 2;
 
 let fundamentalShapes;
 
@@ -1616,8 +1659,8 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
     const front = corner2[Y$6];
     const back = corner1[Y$6];
 
-    const bottom = corner2[Z$6];
-    const top = corner1[Z$6];
+    const bottom = corner2[Z$5];
+    const top = corner1[Z$5];
 
     if (top === bottom) {
       if (left === right) {
@@ -2071,12 +2114,37 @@ const copy = Shape.registerMethod('copy', (count) => async (shape) => {
   return Group(...copies);
 });
 
+const Cut = Shape.registerMethod('Cut', (...args) => async (shape) => {
+  const [first, rest, modes] = await destructure2(
+    shape,
+    args,
+    'geometry',
+    'geometries',
+    'modes'
+  );
+  return Shape.fromGeometry(
+    cut$1(
+      first,
+      rest,
+      modes.includes('open'),
+      modes.includes('exact'),
+      modes.includes('noVoid'),
+      modes.includes('noGhost')
+    )
+  );
+});
+
 const cut = Shape.registerMethod('cut', (...args) => async (shape) => {
-  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  const [geometries, modes] = await destructure2(
+    shape,
+    args,
+    'geometries',
+    'modes'
+  );
   return Shape.fromGeometry(
     cut$1(
       await shape.toGeometry(),
-      await shape.toShapesGeometries(shapes),
+      geometries,
       modes.includes('open'),
       modes.includes('exact'),
       modes.includes('noVoid'),
@@ -2157,10 +2225,10 @@ const toPoints = Shape.registerMethod(
   }
 );
 
-const square = (a) => a * a;
+const square$1 = (a) => a * a;
 
-const distance = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
-  Math.sqrt(square(ax - bx) + square(ay - by) + square(az - bz));
+const distance$1 = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
+  Math.sqrt(square$1(ax - bx) + square$1(ay - by) + square$1(az - bz));
 
 // This is not efficient.
 const diameter = Shape.registerMethod(
@@ -2171,13 +2239,24 @@ const diameter = Shape.registerMethod(
       let maximumDiameter = 0;
       for (let a of points) {
         for (let b of points) {
-          const diameter = distance(a, b);
+          const diameter = distance$1(a, b);
           if (diameter > maximumDiameter) {
             maximumDiameter = diameter;
           }
         }
       }
-      return op(maximumDiameter);
+      return op(maximumDiameter)(shape);
+    }
+);
+
+const dilateXY = Shape.registerMethod(
+  'dilateXY',
+  (...args) =>
+    async (shape) => {
+      const [amount = 1] = await destructure2(shape, args, 'number');
+      return Shape.fromGeometry(
+        dilateXY$1(await shape.toGeometry(), amount)
+      );
     }
 );
 
@@ -4801,21 +4880,23 @@ const involute = Shape.registerMethod(
     Shape.fromGeometry(involute$1(await shape.toGeometry()))
 );
 
-const Link = Shape.registerMethod(
-  'Link',
-  (...shapes) =>
-    async (shape) => {
-      return Shape.fromGeometry(
-        link$1(await toShapesGeometries(shapes)(shape))
-      );
-    }
-);
+const Link = Shape.registerMethod('Link', (...args) => async (shape) => {
+  const [modes, geometries] = await destructure2(
+    shape,
+    args,
+    'modes',
+    'geometries'
+  );
+  return Shape.fromGeometry(
+    link$1(geometries, modes.includes('close'), modes.includes('reverse'))
+  );
+});
 
 const link = Shape.registerMethod(
   'link',
-  (...shapes) =>
+  (...args) =>
     async (shape) =>
-      Link([shape, ...(await shape.toShapes(shapes))])
+      Link(shape, ...args)(shape)
 );
 
 const load = async (path) => {
@@ -5074,7 +5155,7 @@ const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 const X$4 = 0;
 const Y$4 = 1;
-const Z$5 = 2;
+const Z$4 = 2;
 
 // These are all absolute positions in the world.
 // at is where the object's origin should move to.
@@ -5089,21 +5170,21 @@ const orient = Shape.registerMethod(
       // Algorithm from threejs Matrix4
       let u = subtract(up, at);
       if (squaredLength(u) === 0) {
-        u[Z$5] = 1;
+        u[Z$4] = 1;
       }
       u = normalize(u);
       let z = subtract(to, at);
       if (squaredLength(z) === 0) {
-        z[Z$5] = 1;
+        z[Z$4] = 1;
       }
       z = normalize(z);
       let x = cross(u, z);
       if (squaredLength(x) === 0) {
         // u and z are parallel
-        if (Math.abs(u[Z$5]) === 1) {
+        if (Math.abs(u[Z$4]) === 1) {
           z[X$4] += 0.0001;
         } else {
-          z[Z$5] += 0.0001;
+          z[Z$4] += 0.0001;
         }
         z = normalize(z);
         x = cross(u, z);
@@ -5113,15 +5194,15 @@ const orient = Shape.registerMethod(
       const lookAt = [
         x[X$4],
         x[Y$4],
-        x[Z$5],
+        x[Z$4],
         0,
         y[X$4],
         y[Y$4],
-        y[Z$5],
+        y[Z$4],
         0,
         z[X$4],
         z[Y$4],
-        z[Z$5],
+        z[Z$4],
         0,
         0,
         0,
@@ -5275,6 +5356,28 @@ const rz = Shape.registerMethod(
 );
 
 const rotateZ = rz;
+
+const square = (a) => a * a;
+
+const distance = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
+  Math.sqrt(square(ax - bx) + square(ay - by) + square(az - bz));
+
+const runLength = Shape.registerMethod(
+  'runLength',
+  (op = (length) => (shape) => length) =>
+    async (shape) => {
+      let total = 0;
+      for (const { segments } of linearize(
+        await shape.toGeometry(),
+        ({ type }) => type === 'segments'
+      )) {
+        for (const [source, target] of segments) {
+          total += distance(source, target);
+        }
+      }
+      return op(total)(shape);
+    }
+);
 
 const save = async (path, data) => {
   const walk = async (data) => {
@@ -5579,6 +5682,28 @@ const shadow = Shape.registerMethod(
       )
 );
 
+const shell = Shape.registerMethod(
+  'shell',
+  (...args) =>
+    async (shape) => {
+      const [modes, interval = [1 / -2, 1 / 2]] = await destructure2(
+        shape,
+        args,
+        'modes',
+        'interval'
+      );
+      const [innerOffset, outerOffset] = interval;
+      return Shape.fromGeometry(
+        shell$1(
+          await shape.toGeometry(),
+          innerOffset,
+          outerOffset,
+          modes.includes('protect')
+        )
+      );
+    }
+);
+
 const simplify = Shape.registerMethod(
   'simplify',
   (...args) =>
@@ -5628,7 +5753,7 @@ const smooth = Shape.registerMethod(
 
 const X$3 = 0;
 const Y$3 = 1;
-const Z$4 = 2;
+const Z$3 = 2;
 
 const sort = Shape.registerMethod(
   'sort',
@@ -5665,7 +5790,7 @@ const sort = Shape.registerMethod(
             axis = Y$3;
             break;
           case 'z':
-            axis = Z$4;
+            axis = Z$3;
             break;
         }
         if (limit !== undefined) {
@@ -5881,9 +6006,43 @@ const tool = Shape.registerMethod(
     )
 );
 
-const Z$3 = 2;
+// import { computeToolpath, measureBoundingBox, taggedGroup, } from './jsxcad-geometry.js';
+
+// const Z = 2;
 
 const toolpath = Shape.registerMethod(
+  'toolpath',
+  (...args) =>
+    async (shape) => {
+      const [
+        toolSize = 2,
+        toolSpacing = toolSize,
+        toolCutDepth = toolSpacing / 2,
+        material,
+        selection,
+      ] = await destructure2(
+        shape,
+        args,
+        'number',
+        'number',
+        'number',
+        'geometry',
+        'geometry'
+      );
+      return Shape.fromGeometry(
+        computeToolpath(
+          await shape.toGeometry(),
+          material,
+          selection,
+          toolSpacing,
+          toolCutDepth
+        )
+      );
+    }
+);
+
+/*
+export const toolpath = Shape.registerMethod(
   'toolpath',
   (...args) =>
     async (shape) => {
@@ -5910,7 +6069,7 @@ const toolpath = Shape.registerMethod(
       const bounds = measureBoundingBox(geometry);
       const [min, max] = bounds;
       const toolpaths = [];
-      for (let z = max[Z$3]; z >= min[Z$3]; z -= layerHeight) {
+      for (let z = max[Z]; z >= min[Z]; z -= layerHeight) {
         const toolpath = computeToolpath(geometry, {
           speed,
           feedrate,
@@ -5930,6 +6089,7 @@ const toolpath = Shape.registerMethod(
       return Shape.fromGeometry(taggedGroup({}, ...toolpaths));
     }
 );
+*/
 
 const twist = Shape.registerMethod(
   'twist',
@@ -6189,7 +6349,7 @@ const Spiral = Shape.registerMethod(
       )) {
         particles.push(await particle(turn).rz(turn));
       }
-      const result = await Link(particles);
+      const result = await Link(...particles);
       return result;
     }
 );
@@ -6606,7 +6766,7 @@ const Curve = Shape.registerMethod(
       const [start, c1, c2, end] = coordinates;
       const { zag = DEFAULT_CURVE_ZAG } = options;
       const points = adaptiveBezierCurve(start, c1, c2, end, 10 / zag);
-      return Link(points.map((point) => Point(point)));
+      return Link(...points.map((point) => Point(point)));
     }
 );
 
@@ -6737,24 +6897,14 @@ const Implicit = Shape.registerMethod(
     }
 );
 
-const Line = Shape.registerMethod(
-  'Line',
-  (...extents) =>
-    async (shape) => {
-      const offsets = await toFlatValues(extents)(shape);
-      if (offsets.length % 2 === 1) {
-        offsets.push(0);
-      }
-      offsets.sort((a, b) => a - b);
-      const edges = [];
-      for (let nth = 0; nth < offsets.length; nth += 2) {
-        const end = offsets[nth];
-        const begin = offsets[nth + 1];
-        edges.push(Edge(Point(begin), Point(end)));
-      }
-      return Group(...edges);
-    }
-);
+const Line = Shape.registerMethod('Line', (...args) => async (shape) => {
+  const [intervals] = await destructure2(shape, args, 'intervals');
+  const edges = [];
+  for (const [begin, end] of intervals) {
+    edges.push(Edge(Point(begin), Point(end)));
+  }
+  return Group(...edges);
+});
 
 const readPngAsRasta = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
@@ -6913,7 +7063,7 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   )(shape)) {
     particles.push(particle(xDistance).x(xDistance));
   }
-  return Link(particles)(shape);
+  return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$9 as X, XY, XZ, Y$9 as Y, YZ, Z$9 as Z, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$9 as X, XY, XZ, Y$9 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

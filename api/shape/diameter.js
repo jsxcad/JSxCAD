@@ -21,6 +21,6 @@ export const diameter = Shape.registerMethod(
           }
         }
       }
-      return op(maximumDiameter);
+      return op(maximumDiameter)(shape);
     }
 );

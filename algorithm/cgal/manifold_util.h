@@ -57,4 +57,3 @@ void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
     }
   }
 }
-

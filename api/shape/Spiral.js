@@ -22,7 +22,7 @@ export const Spiral = Shape.registerMethod(
       )) {
         particles.push(await particle(turn).rz(turn));
       }
-      const result = await Link(particles);
+      const result = await Link(...particles);
       return result;
     }
 );

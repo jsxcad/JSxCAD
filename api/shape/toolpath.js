@@ -1,13 +1,42 @@
-import {
-  computeToolpath,
-  measureBoundingBox,
-  taggedGroup,
-} from '@jsxcad/geometry';
+// import { computeToolpath, measureBoundingBox, taggedGroup, } from '@jsxcad/geometry';
 import Shape from './Shape.js';
+import { computeToolpath } from '@jsxcad/geometry';
 import { destructure2 } from './destructure.js';
 
-const Z = 2;
+// const Z = 2;
 
+export const toolpath = Shape.registerMethod(
+  'toolpath',
+  (...args) =>
+    async (shape) => {
+      const [
+        toolSize = 2,
+        toolSpacing = toolSize,
+        toolCutDepth = toolSpacing / 2,
+        material,
+        selection,
+      ] = await destructure2(
+        shape,
+        args,
+        'number',
+        'number',
+        'number',
+        'geometry',
+        'geometry'
+      );
+      return Shape.fromGeometry(
+        computeToolpath(
+          await shape.toGeometry(),
+          material,
+          selection,
+          toolSpacing,
+          toolCutDepth
+        )
+      );
+    }
+);
+
+/*
 export const toolpath = Shape.registerMethod(
   'toolpath',
   (...args) =>
@@ -55,3 +84,4 @@ export const toolpath = Shape.registerMethod(
       return Shape.fromGeometry(taggedGroup({}, ...toolpaths));
     }
 );
+*/

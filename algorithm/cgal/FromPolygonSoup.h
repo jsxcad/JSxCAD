@@ -19,7 +19,8 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
   Surface_mesh& mesh = geometry->mesh(target);
   geometry->setIdentityTransform(target);
 
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons, mesh);
+  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
+                                                              mesh);
 
   bool failed = false;
   while (!failed && !CGAL::is_closed(mesh)) {
@@ -28,8 +29,7 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
         std::vector<Face_index> faces;
         CGAL::Polygon_mesh_processing::triangulate_hole(
             mesh, edge, std::back_inserter(faces),
-            CGAL::parameters::use_2d_constrained_delaunay_triangulation(
-                false));
+            CGAL::parameters::use_2d_constrained_delaunay_triangulation(false));
         if (faces.empty()) {
           failed = true;
         }
@@ -42,9 +42,7 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
         autorefine_and_remove_self_intersections(mesh);
   }
 
-
   demesh(mesh);
-
 
   if (CGAL::Polygon_mesh_processing::volume(
           mesh, CGAL::parameters::all_default()) < 0) {

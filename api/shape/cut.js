@@ -1,13 +1,38 @@
 import Shape from './Shape.js';
 import { cut as cutGeometry } from '@jsxcad/geometry';
-import { destructure } from './destructure.js';
+import { destructure2 } from './destructure.js';
+
+export const Cut = Shape.registerMethod('Cut', (...args) => async (shape) => {
+  const [first, rest, modes] = await destructure2(
+    shape,
+    args,
+    'geometry',
+    'geometries',
+    'modes'
+  );
+  return Shape.fromGeometry(
+    cutGeometry(
+      first,
+      rest,
+      modes.includes('open'),
+      modes.includes('exact'),
+      modes.includes('noVoid'),
+      modes.includes('noGhost')
+    )
+  );
+});
 
 export const cut = Shape.registerMethod('cut', (...args) => async (shape) => {
-  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
+  const [geometries, modes] = await destructure2(
+    shape,
+    args,
+    'geometries',
+    'modes'
+  );
   return Shape.fromGeometry(
     cutGeometry(
       await shape.toGeometry(),
-      await shape.toShapesGeometries(shapes),
+      geometries,
       modes.includes('open'),
       modes.includes('exact'),
       modes.includes('noVoid'),

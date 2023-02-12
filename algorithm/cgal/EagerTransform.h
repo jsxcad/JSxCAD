@@ -12,12 +12,12 @@ int EagerTransform(Geometry* geometry, int count) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         // Ideally we would:
-        //  auto r = transformGeometryOfOcctShape(transform, geometry->occt_shape(nth));
-        //  geometry->setOcctShape(nth, r);
+        //  auto r = transformGeometryOfOcctShape(transform,
+        //  geometry->occt_shape(nth)); geometry->setOcctShape(nth, r);
         //  geometry->discard_mesh(nth);
         // but transformGeometryOfOcctShape is not working reliably.
-        // So for now we drop down to the cgal mesh representation where we need a general transform
-        // (such as non-uniform scaling).
+        // So for now we drop down to the cgal mesh representation where we need
+        // a general transform (such as non-uniform scaling).
         if (geometry->has_occt_shape(nth) || geometry->has_mesh(nth)) {
           // geometry->mesh(nth) will convert the occt_shape, if necessary.
           CGAL::Polygon_mesh_processing::transform(

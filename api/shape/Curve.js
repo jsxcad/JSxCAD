@@ -19,6 +19,6 @@ export const Curve = Shape.registerMethod(
       const [start, c1, c2, end] = coordinates;
       const { zag = DEFAULT_CURVE_ZAG } = options;
       const points = bezier(start, c1, c2, end, 10 / zag);
-      return Link(points.map((point) => Point(point)));
+      return Link(...points.map((point) => Point(point)));
     }
 );
