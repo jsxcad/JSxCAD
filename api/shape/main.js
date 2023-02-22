@@ -214,7 +214,7 @@ export { Hull } from './Hull.js';
 export { Icosahedron } from './Icosahedron.js';
 export { Implicit } from './Implicit.js';
 export { Join } from './join.js';
-export { Line } from './Line.js';
+export { Line, LineX, LineY, LineZ } from './Line.js';
 export { Link } from './Link.js';
 export { List } from './List.js';
 export { LoadPng } from './png.js';

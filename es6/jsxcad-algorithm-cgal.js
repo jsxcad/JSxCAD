@@ -1384,20 +1384,24 @@ const computeOrientedBoundingBox = (inputs) => {
 
 const computeToolpath = (
   inputs,
-  material,
-  selection,
-  toolSpacing,
-  toolSize,
-  toolCutDepth
+  materialStart,
+  toolSpacing = 1,
+  toolSize = 1,
+  toolCutDepth = 1,
+  annealingMax = 1,
+  annealingMin = 0.01,
+  annealingDecay = 0.99
 ) =>
   withCgalGeometry(inputs, (cgalGeometry, g) => {
     const status = g.ComputeToolpath(
       cgalGeometry,
-      material,
-      selection,
+      materialStart,
       toolSpacing,
       toolSize,
-      toolCutDepth
+      toolCutDepth,
+      annealingMax,
+      annealingMin,
+      annealingDecay
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

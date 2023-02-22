@@ -13,25 +13,26 @@ const filter = (geometry) =>
 export const computeToolpath = (
   geometry,
   material,
-  selection,
   toolSpacing,
   toolSize,
-  toolCutDepth
+  toolCutDepth,
+  annealingMax,
+  annealingMin,
+  annealingDecay
 ) => {
   const inputs = [];
   linearize(geometry, filter, inputs);
   const materialStart = inputs.length;
   linearize(material, filter, inputs);
-  const selectionStart = inputs.length;
-  linearize(selection, filter, inputs);
   const outputs = computeToolpathWithCgal(
     inputs,
     materialStart,
-    selectionStart,
-    inputs.length,
     toolSpacing,
     toolSize,
-    toolCutDepth
+    toolCutDepth,
+    annealingMax,
+    annealingMin,
+    annealingDecay
   );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);

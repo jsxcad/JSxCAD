@@ -1216,6 +1216,7 @@ const buildMeshes = async ({
       const bufferGeometry = new BufferGeometry();
       const material = new LineBasicMaterial({
         color: new Color(setColor(definitions, tags, {}, [0, 0, 0]).color),
+        linewidth: 2,
       });
       const positions = [];
       for (const segment of segments) {

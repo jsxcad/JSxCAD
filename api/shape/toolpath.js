@@ -13,24 +13,31 @@ export const toolpath = Shape.registerMethod(
         toolSize = 2,
         toolSpacing = toolSize,
         toolCutDepth = toolSpacing / 2,
-        material,
-        selection,
+        annealingMax,
+        annealingMin,
+        annealingDecay,
+        target,
       ] = await destructure2(
         shape,
         args,
         'number',
         'number',
         'number',
-        'geometry',
+        'number',
+        'number',
+        'number',
         'geometry'
       );
       return Shape.fromGeometry(
         computeToolpath(
+          target,
           await shape.toGeometry(),
-          material,
-          selection,
           toolSpacing,
-          toolCutDepth
+          toolSize,
+          toolCutDepth,
+          annealingMax,
+          annealingMin,
+          annealingDecay
         )
       );
     }
