@@ -763,25 +763,26 @@ const filter$x = (geometry) =>
 const computeToolpath = (
   geometry,
   material,
-  selection,
   toolSpacing,
   toolSize,
-  toolCutDepth
+  toolCutDepth,
+  annealingMax,
+  annealingMin,
+  annealingDecay
 ) => {
   const inputs = [];
   linearize(geometry, filter$x, inputs);
   const materialStart = inputs.length;
   linearize(material, filter$x, inputs);
-  const selectionStart = inputs.length;
-  linearize(selection, filter$x, inputs);
   const outputs = computeToolpath$1(
     inputs,
     materialStart,
-    selectionStart,
-    inputs.length,
     toolSpacing,
     toolSize,
-    toolCutDepth
+    toolCutDepth,
+    annealingMax,
+    annealingMin,
+    annealingDecay
   );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);

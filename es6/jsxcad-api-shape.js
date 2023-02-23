@@ -6018,24 +6018,31 @@ const toolpath = Shape.registerMethod(
         toolSize = 2,
         toolSpacing = toolSize,
         toolCutDepth = toolSpacing / 2,
-        material,
-        selection,
+        annealingMax,
+        annealingMin,
+        annealingDecay,
+        target,
       ] = await destructure2(
         shape,
         args,
         'number',
         'number',
         'number',
-        'geometry',
+        'number',
+        'number',
+        'number',
         'geometry'
       );
       return Shape.fromGeometry(
         computeToolpath(
+          target,
           await shape.toGeometry(),
-          material,
-          selection,
           toolSpacing,
-          toolCutDepth
+          toolSize,
+          toolCutDepth,
+          annealingMax,
+          annealingMin,
+          annealingDecay
         )
       );
     }
@@ -6897,14 +6904,46 @@ const Implicit = Shape.registerMethod(
     }
 );
 
-const Line = Shape.registerMethod('Line', (...args) => async (shape) => {
-  const [intervals] = await destructure2(shape, args, 'intervals');
-  const edges = [];
-  for (const [begin, end] of intervals) {
-    edges.push(Edge(Point(begin), Point(end)));
-  }
-  return Group(...edges);
-});
+const Line = Shape.registerMethod(
+  ['Line', 'LineX'],
+  (...args) =>
+    async (shape) => {
+      const [intervals] = await destructure2(shape, args, 'intervals');
+      const edges = [];
+      for (const [begin, end] of intervals) {
+        edges.push(Edge(Point(begin), Point(end)));
+      }
+      return Group(...edges);
+    }
+);
+
+const LineX = Line;
+
+const LineY = Shape.registerMethod(
+  'LineY',
+  (...args) =>
+    async (shape) => {
+      const [intervals] = await destructure2(shape, args, 'intervals');
+      const edges = [];
+      for (const [begin, end] of intervals) {
+        edges.push(Edge(Point(0, begin), Point(0, end)));
+      }
+      return Group(...edges);
+    }
+);
+
+const LineZ = Shape.registerMethod(
+  'LineZ',
+  (...args) =>
+    async (shape) => {
+      const [intervals] = await destructure2(shape, args, 'intervals');
+      const edges = [];
+      for (const [begin, end] of intervals) {
+        edges.push(Edge(Point(0, 0, begin), Point(0, 0, end)));
+      }
+      return Group(...edges);
+    }
+);
 
 const readPngAsRasta = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
@@ -7066,4 +7105,4 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$9 as X, XY, XZ, Y$9 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$9 as X, XY, XZ, Y$9 as Y, YZ, Z$8 as Z, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

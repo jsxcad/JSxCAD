@@ -151,8 +151,9 @@ export const toGcode = async (
     return parameters;
   };
 
-  for (const { matrix, segments, tags } of linearize(geometry, ({ tags }) =>
-    tags.includes('type:toolpath')
+  for (const { matrix, segments, tags } of linearize(
+    geometry,
+    ({ type, tags }) => type === 'segments' && tags.includes('type:toolpath')
   )) {
     const { f = feedrate, s = speed } = fromTagsToParameters(tags);
     for (const [source, target] of segments) {
