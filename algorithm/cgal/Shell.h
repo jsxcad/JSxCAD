@@ -145,12 +145,6 @@ int Shell(Geometry* geometry, double inner_offset, double outer_offset,
         CGAL::FACET_VERTICES_ON_SAME_SURFACE_PATCH;
     auto manifold_option = p::manifold();
 
-    // These should be parameterized.
-    // double angle = 30;
-    // double sizing = 1;
-    // double approx = 0.1;
-    // double edge_size = 1;
-
     Mesh_criteria criteria(p::facet_angle = angle, p::facet_size = sizing,
                            p::facet_distance = approx,
                            p::facet_topology = topology,
