@@ -809,7 +809,7 @@ Box(10, 10, 10).shell(1, { approx: 1 }).clip(YZ()).view();
 ![Image](shape.md.$92.png)
 
 ```JavaScript
-Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).view();
+Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
 ```
 
 ![Image](shape.md.$93.png)
