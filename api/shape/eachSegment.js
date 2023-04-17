@@ -25,7 +25,9 @@ export const eachSegment = Shape.registerMethod(
             matrix,
             normals ? normals[nth] : undefined
           );
-          output.push(await op(Shape.fromGeometry(segment))(shape));
+          output.push(
+            await op(Shape.chain(Shape.fromGeometry(segment)))(shape)
+          );
         }
       }
       return Group(...output);

@@ -91,7 +91,8 @@ class Offset_function {
 }  // namespace
 
 int Shell(Geometry* geometry, double inner_offset, double outer_offset,
-          bool protect) {
+          bool protect, double angle, double sizing, double approx,
+          double edge_size) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -144,10 +145,11 @@ int Shell(Geometry* geometry, double inner_offset, double outer_offset,
         CGAL::FACET_VERTICES_ON_SAME_SURFACE_PATCH;
     auto manifold_option = p::manifold();
 
-    double angle = 30;
-    double sizing = 1;
-    double approx = 0.1;
-    double edge_size = 1;
+    // These should be parameterized.
+    // double angle = 30;
+    // double sizing = 1;
+    // double approx = 0.1;
+    // double edge_size = 1;
 
     Mesh_criteria criteria(p::facet_angle = angle, p::facet_size = sizing,
                            p::facet_distance = approx,

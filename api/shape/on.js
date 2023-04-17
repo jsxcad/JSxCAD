@@ -5,6 +5,7 @@ import { destructure2 } from './destructure.js';
 import { invertTransform } from '@jsxcad/algorithm-cgal';
 import { transform } from './transform.js';
 
+// Let's consider removing the parallel operations.
 export const on = Shape.registerMethod('on', (...args) => async (shape) => {
   const entries = [];
   while (args.length > 0) {
@@ -18,11 +19,13 @@ export const on = Shape.registerMethod('on', (...args) => async (shape) => {
     entries.push({ selection, op });
     args = rest;
   }
+  const inputLeafs = [];
+  const outputLeafs = [];
   let shapeGeometry = await shape.toGeometry();
   for (const { selection, op } of entries) {
-    const inputLeafs = getLeafs(await selection.toGeometry());
-    const outputLeafs = [];
-    for (const geometry of inputLeafs) {
+    const leafs = getLeafs(await selection.toGeometry());
+    inputLeafs.push(...leafs);
+    for (const geometry of leafs) {
       const global = geometry.matrix;
       const local = invertTransform(global);
       const target = Shape.fromGeometry(geometry);
@@ -34,8 +37,9 @@ export const on = Shape.registerMethod('on', (...args) => async (shape) => {
       const r = await c(target);
       outputLeafs.push(await r.toGeometry());
     }
-    shapeGeometry = replacer(inputLeafs, outputLeafs)(shapeGeometry);
   }
-  const result = Shape.fromGeometry(shapeGeometry);
+  const result = Shape.fromGeometry(
+    replacer(inputLeafs, outputLeafs)(shapeGeometry)
+  );
   return result;
 });

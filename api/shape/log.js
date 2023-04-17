@@ -24,6 +24,7 @@ export const log = Shape.registerMethod(
       const hash = computeHash(log);
       emit({ log, hash });
       sysLog({ op: 'text', text });
+      console.log(text);
       return shape;
     }
 );

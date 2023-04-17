@@ -763,7 +763,7 @@ const filter$x = (geometry) =>
 const computeToolpath = (
   geometry,
   material,
-  toolSpacing,
+  resolution,
   toolSize,
   toolCutDepth,
   annealingMax,
@@ -777,7 +777,7 @@ const computeToolpath = (
   const outputs = computeToolpath$1(
     inputs,
     materialStart,
-    toolSpacing,
+    resolution,
     toolSize,
     toolCutDepth,
     annealingMax,
@@ -1692,7 +1692,11 @@ const shell = (
   geometry,
   innerOffset = 0,
   outerOffset = 0,
-  protect = false
+  protect = false,
+  angle = 30 / 360,
+  sizing = 1,
+  approx = 0.1,
+  edgeLength = 1
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
@@ -1701,7 +1705,11 @@ const shell = (
     inputs,
     innerOffset,
     outerOffset,
-    (protect = false)
+    protect,
+    angle * 360,
+    sizing,
+    approx,
+    edgeLength
   );
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {

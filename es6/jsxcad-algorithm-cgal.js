@@ -1385,7 +1385,7 @@ const computeOrientedBoundingBox = (inputs) => {
 const computeToolpath = (
   inputs,
   materialStart,
-  toolSpacing = 1,
+  resolution = 1,
   toolSize = 1,
   toolCutDepth = 1,
   annealingMax = 1,
@@ -1396,7 +1396,7 @@ const computeToolpath = (
     const status = g.ComputeToolpath(
       cgalGeometry,
       materialStart,
-      toolSpacing,
+      resolution,
       toolSize,
       toolCutDepth,
       annealingMax,
@@ -2154,9 +2154,27 @@ const serialize = (inputs) => {
   });
 };
 
-const shell = (inputs, innerOffset, outerOffset, protect = false) => {
+const shell = (
+  inputs,
+  innerOffset,
+  outerOffset,
+  protect = false,
+  angle = 30,
+  sizing = 1,
+  approx = 0.1,
+  edgeSize = 1
+) => {
   return withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Shell(cgalGeometry, innerOffset, outerOffset, protect);
+    const status = g.Shell(
+      cgalGeometry,
+      innerOffset,
+      outerOffset,
+      protect,
+      angle,
+      sizing,
+      approx,
+      edgeSize
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by shell');
