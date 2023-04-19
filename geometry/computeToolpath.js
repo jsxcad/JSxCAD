@@ -13,7 +13,7 @@ const filter = (geometry) =>
 export const computeToolpath = (
   geometry,
   material,
-  toolSpacing,
+  resolution,
   toolSize,
   toolCutDepth,
   annealingMax,
@@ -27,7 +27,7 @@ export const computeToolpath = (
   const outputs = computeToolpathWithCgal(
     inputs,
     materialStart,
-    toolSpacing,
+    resolution,
     toolSize,
     toolCutDepth,
     annealingMax,

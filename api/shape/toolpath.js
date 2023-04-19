@@ -11,8 +11,8 @@ export const toolpath = Shape.registerMethod(
     async (shape) => {
       const [
         toolSize = 2,
-        toolSpacing = toolSize,
-        toolCutDepth = toolSpacing / 2,
+        resolution = toolSize,
+        toolCutDepth = toolSize / 2,
         annealingMax,
         annealingMin,
         annealingDecay,
@@ -32,7 +32,7 @@ export const toolpath = Shape.registerMethod(
         computeToolpath(
           target,
           await shape.toGeometry(),
-          toolSpacing,
+          resolution,
           toolSize,
           toolCutDepth,
           annealingMax,

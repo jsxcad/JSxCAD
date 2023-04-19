@@ -789,3 +789,27 @@ Box(20)
 ```
 
 ![Image](shape.md.$89.png)
+
+```JavaScript
+Box(10, 10, 10).shell().clip(YZ()).view();
+```
+
+![Image](shape.md.$90.png)
+
+```JavaScript
+Box(10, 10, 10).shell(5).clip(YZ()).view();
+```
+
+![Image](shape.md.$91.png)
+
+```JavaScript
+Box(10, 10, 10).shell(1, { approx: 1 }).clip(YZ()).view();
+```
+
+![Image](shape.md.$92.png)
+
+```JavaScript
+Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
+```
+
+![Image](shape.md.$93.png)

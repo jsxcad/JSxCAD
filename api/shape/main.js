@@ -9,13 +9,12 @@
 
 import './Shape.js';
 
-// We need destructure available via Shape.
+// We need these available via Shape.
 // eslint-disable-next-line sort-imports
 import './destructure.js';
 
-// We need Plan.js to add Shape.registerReifier before later imports call it.
 // eslint-disable-next-line sort-imports
-import './Plan.js';
+import './registerMethod.js';
 
 export {
   GrblConstantLaser,
@@ -30,7 +29,7 @@ export {
 
 export { md } from './md.js';
 
-export { X, Y, Z, XY, XZ, YZ, RX, RY, RZ } from './refs.js';
+export { X, Y, Z, XY, XZ, YX, YZ, ZX, ZY, RX, RY, RZ } from './refs.js';
 
 export { elapsed, emit, read, write } from '@jsxcad/sys';
 
@@ -94,6 +93,7 @@ export { ghost } from './ghost.js';
 export { gn, getNot } from './getNot.js';
 export { gridView, view } from './view.js';
 export { grow } from './grow.js';
+export { hold } from './hold.js';
 export { hull } from './Hull.js';
 export { image } from './image.js';
 export { inFn } from './in.js';

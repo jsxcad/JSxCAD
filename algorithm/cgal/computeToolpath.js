@@ -6,7 +6,7 @@ import { ErrorZeroThickness } from './error.js';
 export const computeToolpath = (
   inputs,
   materialStart,
-  toolSpacing = 1,
+  resolution = 1,
   toolSize = 1,
   toolCutDepth = 1,
   annealingMax = 1,
@@ -17,7 +17,7 @@ export const computeToolpath = (
     const status = g.ComputeToolpath(
       cgalGeometry,
       materialStart,
-      toolSpacing,
+      resolution,
       toolSize,
       toolCutDepth,
       annealingMax,

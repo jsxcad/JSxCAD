@@ -6,19 +6,38 @@ export const shell = Shape.registerMethod(
   'shell',
   (...args) =>
     async (shape) => {
-      const [modes, interval = [1 / -2, 1 / 2]] = await destructure2(
+      const [
+        modes,
+        interval = [1 / -2, 1 / 2],
+        sizingFallback,
+        approxFallback,
+        options = {},
+      ] = await destructure2(
         shape,
         args,
         'modes',
-        'interval'
+        'interval',
+        'number',
+        'options'
       );
+      // Application of angle and edgeLength is unclear.
+      const {
+        angle,
+        sizing = sizingFallback,
+        approx = approxFallback,
+        edgeLength,
+      } = options;
       const [innerOffset, outerOffset] = interval;
       return Shape.fromGeometry(
         shellGeometry(
           await shape.toGeometry(),
           innerOffset,
           outerOffset,
-          modes.includes('protect')
+          modes.includes('protect'),
+          angle,
+          sizing,
+          approx,
+          edgeLength
         )
       );
     }

@@ -3,9 +3,27 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const shell = (inputs, innerOffset, outerOffset, protect = false) => {
+export const shell = (
+  inputs,
+  innerOffset,
+  outerOffset,
+  protect = false,
+  angle = 30,
+  sizing = 1,
+  approx = 0.1,
+  edgeSize = 1
+) => {
   return withCgalGeometry(inputs, (cgalGeometry, g) => {
-    const status = g.Shell(cgalGeometry, innerOffset, outerOffset, protect);
+    const status = g.Shell(
+      cgalGeometry,
+      innerOffset,
+      outerOffset,
+      protect,
+      angle,
+      sizing,
+      approx,
+      edgeSize
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by shell');

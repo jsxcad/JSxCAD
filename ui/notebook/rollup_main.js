@@ -1,3 +1,4 @@
+import babel from '@rollup/plugin-babel';
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
@@ -24,6 +25,7 @@ export default {
   },
   plugins: [
     // watcher,
+    babel({ plugins: ['@babel/plugin-proposal-class-properties'] }),
     hypothetical({
       allowFallthrough: true,
       allowRealFiles: true,
