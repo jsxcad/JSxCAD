@@ -292,6 +292,8 @@ export const destructure2 = async (shape, input, ...specs) => {
           let value = await resolve(shape, arg);
           if (Shape.isShape(value)) {
             out.push(value);
+          } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
+            out.push(...value);
           } else {
             rest.push(arg);
           }

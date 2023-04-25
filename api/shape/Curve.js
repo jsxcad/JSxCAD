@@ -1,24 +1,25 @@
 import Link from './Link.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
-import bezier from 'adaptive-bezier-curve';
+import bSpline from 'b-spline';
 import { destructure2 } from './destructure.js';
-
-const DEFAULT_CURVE_ZAG = 1;
 
 export const Curve = Shape.registerMethod(
   'Curve',
   (...args) =>
     async (shape) => {
-      const [options, coordinates] = await destructure2(
+      const [coordinates, implicitSteps = 20, options] = await destructure2(
         shape,
         args,
-        'options',
-        'coordinates'
+        'coordinates',
+        'number',
+        'options'
       );
-      const [start, c1, c2, end] = coordinates;
-      const { zag = DEFAULT_CURVE_ZAG } = options;
-      const points = bezier(start, c1, c2, end, 10 / zag);
+      const { steps = implicitSteps } = options;
+      const points = [];
+      for (let t = 0; t <= steps; t++) {
+        points.push(bSpline(t / steps, 2, coordinates));
+      }
       return Link(...points.map((point) => Point(point)));
     }
 );

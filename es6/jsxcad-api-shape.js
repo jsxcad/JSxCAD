@@ -631,6 +631,8 @@ const destructure2 = async (shape, input, ...specs) => {
           let value = await resolve(shape, arg);
           if (Shape.isShape(value)) {
             out.push(value);
+          } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
+            out.push(...value);
           } else {
             rest.push(arg);
           }
@@ -2038,8 +2040,9 @@ const join = Shape.registerMethod(
 
 const ChainHull = Shape.registerMethod(
   'ChainHull',
-  (...shapes) =>
+  (...args) =>
     async (shape) => {
+      const [shapes] = await destructure2(shape, args, 'shapes');
       const chain = [];
       for (let nth = 1; nth < shapes.length; nth++) {
         chain.push(await Hull(shapes[nth - 1], shapes[nth])(shape));
@@ -6644,221 +6647,104 @@ const Cached = (name, op, enable = true) =>
     return constructedShape;
   });
 
-function clone(point) { //TODO: use gl-vec2 for this
-    return [point[0], point[1]]
+function interpolate(t, degree, points, knots, weights, result) {
+
+  var i,j,s,l;              // function-scoped iteration variables
+  var n = points.length;    // points count
+  var d = points[0].length; // point dimensionality
+
+  if(degree < 1) throw new Error('degree must be at least 1 (linear)');
+  if(degree > (n-1)) throw new Error('degree must be less than or equal to point count - 1');
+
+  if(!weights) {
+    // build weight vector of length [n]
+    weights = [];
+    for(i=0; i<n; i++) {
+      weights[i] = 1;
+    }
+  }
+
+  if(!knots) {
+    // build knot vector of length [n + degree + 1]
+    var knots = [];
+    for(i=0; i<n+degree+1; i++) {
+      knots[i] = i;
+    }
+  } else {
+    if(knots.length !== n+degree+1) throw new Error('bad knot vector length');
+  }
+
+  var domain = [
+    degree,
+    knots.length-1 - degree
+  ];
+
+  // remap t to the domain where the spline is defined
+  var low  = knots[domain[0]];
+  var high = knots[domain[1]];
+  t = t * (high - low) + low;
+
+  if(t < low || t > high) throw new Error('out of bounds');
+
+  // find s (the spline segment) for the [t] value provided
+  for(s=domain[0]; s<domain[1]; s++) {
+    if(t >= knots[s] && t <= knots[s+1]) {
+      break;
+    }
+  }
+
+  // convert points to homogeneous coordinates
+  var v = [];
+  for(i=0; i<n; i++) {
+    v[i] = [];
+    for(j=0; j<d; j++) {
+      v[i][j] = points[i][j] * weights[i];
+    }
+    v[i][d] = weights[i];
+  }
+
+  // l (level) goes from 1 to the curve degree + 1
+  var alpha;
+  for(l=1; l<=degree+1; l++) {
+    // build level l of the pyramid
+    for(i=s; i>s-degree-1+l; i--) {
+      alpha = (t - knots[i]) / (knots[i+degree+1-l] - knots[i]);
+
+      // interpolate each component
+      for(j=0; j<d+1; j++) {
+        v[i][j] = (1 - alpha) * v[i-1][j] + alpha * v[i][j];
+      }
+    }
+  }
+
+  // convert back to cartesian and return
+  var result = result || [];
+  for(i=0; i<d; i++) {
+    result[i] = v[s][i] / v[s][d];
+  }
+
+  return result;
 }
 
-function vec2(x, y) {
-    return [x, y]
-}
 
-var _function = function createBezierBuilder(opt) {
-    opt = opt||{};
-
-    var RECURSION_LIMIT = typeof opt.recursion === 'number' ? opt.recursion : 8;
-    var FLT_EPSILON = typeof opt.epsilon === 'number' ? opt.epsilon : 1.19209290e-7;
-    var PATH_DISTANCE_EPSILON = typeof opt.pathEpsilon === 'number' ? opt.pathEpsilon : 1.0;
-
-    var curve_angle_tolerance_epsilon = typeof opt.angleEpsilon === 'number' ? opt.angleEpsilon : 0.01;
-    var m_angle_tolerance = opt.angleTolerance || 0;
-    var m_cusp_limit = opt.cuspLimit || 0;
-
-    return function bezierCurve(start, c1, c2, end, scale, points) {
-        if (!points)
-            points = [];
-
-        scale = typeof scale === 'number' ? scale : 1.0;
-        var distanceTolerance = PATH_DISTANCE_EPSILON / scale;
-        distanceTolerance *= distanceTolerance;
-        begin(start, c1, c2, end, points, distanceTolerance);
-        return points
-    }
-
-
-    ////// Based on:
-    ////// https://github.com/pelson/antigrain/blob/master/agg-2.4/src/agg_curves.cpp
-
-    function begin(start, c1, c2, end, points, distanceTolerance) {
-        points.push(clone(start));
-        var x1 = start[0],
-            y1 = start[1],
-            x2 = c1[0],
-            y2 = c1[1],
-            x3 = c2[0],
-            y3 = c2[1],
-            x4 = end[0],
-            y4 = end[1];
-        recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, 0);
-        points.push(clone(end));
-    }
-
-    function recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, level) {
-        if(level > RECURSION_LIMIT) 
-            return
-
-        var pi = Math.PI;
-
-        // Calculate all the mid-points of the line segments
-        //----------------------
-        var x12   = (x1 + x2) / 2;
-        var y12   = (y1 + y2) / 2;
-        var x23   = (x2 + x3) / 2;
-        var y23   = (y2 + y3) / 2;
-        var x34   = (x3 + x4) / 2;
-        var y34   = (y3 + y4) / 2;
-        var x123  = (x12 + x23) / 2;
-        var y123  = (y12 + y23) / 2;
-        var x234  = (x23 + x34) / 2;
-        var y234  = (y23 + y34) / 2;
-        var x1234 = (x123 + x234) / 2;
-        var y1234 = (y123 + y234) / 2;
-
-        if(level > 0) { // Enforce subdivision first time
-            // Try to approximate the full cubic curve by a single straight line
-            //------------------
-            var dx = x4-x1;
-            var dy = y4-y1;
-
-            var d2 = Math.abs((x2 - x4) * dy - (y2 - y4) * dx);
-            var d3 = Math.abs((x3 - x4) * dy - (y3 - y4) * dx);
-
-            var da1, da2;
-
-            if(d2 > FLT_EPSILON && d3 > FLT_EPSILON) {
-                // Regular care
-                //-----------------
-                if((d2 + d3)*(d2 + d3) <= distanceTolerance * (dx*dx + dy*dy)) {
-                    // If the curvature doesn't exceed the distanceTolerance value
-                    // we tend to finish subdivisions.
-                    //----------------------
-                    if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
-                        points.push(vec2(x1234, y1234));
-                        return
-                    }
-
-                    // Angle & Cusp Condition
-                    //----------------------
-                    var a23 = Math.atan2(y3 - y2, x3 - x2);
-                    da1 = Math.abs(a23 - Math.atan2(y2 - y1, x2 - x1));
-                    da2 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - a23);
-                    if(da1 >= pi) da1 = 2*pi - da1;
-                    if(da2 >= pi) da2 = 2*pi - da2;
-
-                    if(da1 + da2 < m_angle_tolerance) {
-                        // Finally we can stop the recursion
-                        //----------------------
-                        points.push(vec2(x1234, y1234));
-                        return
-                    }
-
-                    if(m_cusp_limit !== 0.0) {
-                        if(da1 > m_cusp_limit) {
-                            points.push(vec2(x2, y2));
-                            return
-                        }
-
-                        if(da2 > m_cusp_limit) {
-                            points.push(vec2(x3, y3));
-                            return
-                        }
-                    }
-                }
-            }
-            else {
-                if(d2 > FLT_EPSILON) {
-                    // p1,p3,p4 are collinear, p2 is considerable
-                    //----------------------
-                    if(d2 * d2 <= distanceTolerance * (dx*dx + dy*dy)) {
-                        if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
-                            points.push(vec2(x1234, y1234));
-                            return
-                        }
-
-                        // Angle Condition
-                        //----------------------
-                        da1 = Math.abs(Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y2 - y1, x2 - x1));
-                        if(da1 >= pi) da1 = 2*pi - da1;
-
-                        if(da1 < m_angle_tolerance) {
-                            points.push(vec2(x2, y2));
-                            points.push(vec2(x3, y3));
-                            return
-                        }
-
-                        if(m_cusp_limit !== 0.0) {
-                            if(da1 > m_cusp_limit) {
-                                points.push(vec2(x2, y2));
-                                return
-                            }
-                        }
-                    }
-                }
-                else if(d3 > FLT_EPSILON) {
-                    // p1,p2,p4 are collinear, p3 is considerable
-                    //----------------------
-                    if(d3 * d3 <= distanceTolerance * (dx*dx + dy*dy)) {
-                        if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
-                            points.push(vec2(x1234, y1234));
-                            return
-                        }
-
-                        // Angle Condition
-                        //----------------------
-                        da1 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y3 - y2, x3 - x2));
-                        if(da1 >= pi) da1 = 2*pi - da1;
-
-                        if(da1 < m_angle_tolerance) {
-                            points.push(vec2(x2, y2));
-                            points.push(vec2(x3, y3));
-                            return
-                        }
-
-                        if(m_cusp_limit !== 0.0) {
-                            if(da1 > m_cusp_limit)
-                            {
-                                points.push(vec2(x3, y3));
-                                return
-                            }
-                        }
-                    }
-                }
-                else {
-                    // Collinear case
-                    //-----------------
-                    dx = x1234 - (x1 + x4) / 2;
-                    dy = y1234 - (y1 + y4) / 2;
-                    if(dx*dx + dy*dy <= distanceTolerance) {
-                        points.push(vec2(x1234, y1234));
-                        return
-                    }
-                }
-            }
-        }
-
-        // Continue subdivision
-        //----------------------
-        recursive(x1, y1, x12, y12, x123, y123, x1234, y1234, points, distanceTolerance, level + 1); 
-        recursive(x1234, y1234, x234, y234, x34, y34, x4, y4, points, distanceTolerance, level + 1); 
-    }
-};
-
-var adaptiveBezierCurve = _function();
-
-const DEFAULT_CURVE_ZAG = 1;
+var bSpline = interpolate;
 
 const Curve = Shape.registerMethod(
   'Curve',
   (...args) =>
     async (shape) => {
-      const [options, coordinates] = await destructure2(
+      const [coordinates, implicitSteps = 20, options] = await destructure2(
         shape,
         args,
-        'options',
-        'coordinates'
+        'coordinates',
+        'number',
+        'options'
       );
-      const [start, c1, c2, end] = coordinates;
-      const { zag = DEFAULT_CURVE_ZAG } = options;
-      const points = adaptiveBezierCurve(start, c1, c2, end, 10 / zag);
+      const { steps = implicitSteps } = options;
+      const points = [];
+      for (let t = 0; t <= steps; t++) {
+        points.push(bSpline(t / steps, 2, coordinates));
+      }
       return Link(...points.map((point) => Point(point)));
     }
 );
