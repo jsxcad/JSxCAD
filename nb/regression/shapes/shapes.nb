@@ -302,5 +302,5 @@ await Box(10)
 Curve([0, 12], [1, 12], [5, 10], [12.5 + 5, 0], [16, -12], [21, -12])
   .color('red')
   .Link(link('reverse'), sx(-1))
-  .ChainHull(eachPoint(Arc(1).to, List))
+  .stroke(1)
   .view();

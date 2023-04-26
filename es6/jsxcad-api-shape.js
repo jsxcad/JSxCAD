@@ -5949,6 +5949,220 @@ const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
   return shape;
 });
 
+const Spiral = Shape.registerMethod(
+  'Spiral',
+  (...args) =>
+    async (shape) => {
+      const [particle = Point, options] = await destructure2(
+        shape,
+        args,
+        'function',
+        'options'
+      );
+      let particles = [];
+      for (const turn of await Seq(
+        options,
+        (distance) => (shape) => distance,
+        (...numbers) => numbers
+      )) {
+        particles.push(await particle(turn).rz(turn));
+      }
+      const result = await Link(...particles);
+      return result;
+    }
+);
+
+const toDiameterFromApothem = (apothem, sides = 32) =>
+  apothem / Math.cos(Math.PI / sides);
+
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
+
+const reifyArc =
+  (axis = Z$2) =>
+  async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
+    while (start > end) {
+      start -= 1;
+    }
+
+    const scale = computeScale(c1, c2);
+    const middle = computeMiddle(c1, c2);
+
+    const left = c1[X$2];
+    const right = c2[X$2];
+
+    const front = c1[Y$2];
+    const back = c2[Y$2];
+
+    const bottom = c1[Z$2];
+    const top = c2[Z$2];
+
+    const step = 1 / computeSides(c1, c2, sides, zag);
+    const steps = Math.ceil((end - start) / step);
+    const effectiveStep = (end - start) / steps;
+
+    let spiral;
+
+    if (end - start === 1) {
+      spiral = Spiral((t) => Point(0.5), {
+        from: start - 1 / 4,
+        upto: end - 1 / 4,
+        by: effectiveStep,
+      })
+        .loop()
+        .fill();
+    } else {
+      spiral = Spiral((t) => Point(0.5), {
+        from: start - 1 / 4,
+        to: end - 1 / 4,
+        by: effectiveStep,
+      });
+      if (
+        (axis === X$2 && left !== right) ||
+        (axis === Y$2 && front !== back) ||
+        (axis === Z$2 && top !== bottom)
+      ) {
+        spiral = spiral.loop().fill();
+      }
+    }
+
+    switch (axis) {
+      case X$2: {
+        scale[X$2] = 1;
+        spiral = spiral
+          .ry(-1 / 4)
+          .scale(scale)
+          .move(middle);
+        if (left !== right) {
+          spiral = spiral.ex([left - middle[X$2], right - middle[X$2]]);
+        }
+        break;
+      }
+      case Y$2: {
+        scale[Y$2] = 1;
+        spiral = spiral
+          .rx(-1 / 4)
+          .scale(scale)
+          .move(middle);
+        if (front !== back) {
+          spiral = spiral.ey([front - middle[Y$2], back - middle[Y$2]]);
+        }
+        break;
+      }
+      case Z$2: {
+        scale[Z$2] = 1;
+        spiral = spiral.scale(scale).move(middle);
+        if (top !== bottom) {
+          spiral = spiral.ez([top - middle[Z$2], bottom - middle[Z$2]]);
+        }
+        break;
+      }
+    }
+
+    return spiral.absolute();
+  };
+
+const reifyArcZ = reifyArc(Z$2);
+const reifyArcX = reifyArc(X$2);
+const reifyArcY = reifyArc(Y$2);
+
+const ArcOp =
+  (type) =>
+  (...args) =>
+  async (shape) => {
+    const [intervals, options] = await destructure2(
+      shape,
+      args,
+      'intervals',
+      'options'
+    );
+    let [x, y, z] = intervals;
+    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
+    if (apothem !== undefined) {
+      diameter = toDiameterFromApothem(apothem, sides);
+    }
+    if (radius !== undefined) {
+      diameter = radius * 2;
+    }
+    if (diameter !== undefined) {
+      x = diameter;
+    }
+    let reify;
+    switch (type) {
+      case 'Arc':
+      case 'ArcZ':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (y === undefined) {
+          y = x;
+        }
+        if (z === undefined) {
+          z = 0;
+        }
+        reify = reifyArcZ;
+        break;
+      case 'ArcX':
+        if (y === undefined) {
+          y = 1;
+        }
+        if (z === undefined) {
+          z = y;
+        }
+        if (x === undefined) {
+          x = 0;
+        }
+        reify = reifyArcX;
+        break;
+      case 'ArcY':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (z === undefined) {
+          z = x;
+        }
+        if (y === undefined) {
+          y = 0;
+        }
+        reify = reifyArcY;
+        break;
+    }
+    const [c1, c2] = await buildCorners(x, y, z)(null);
+    const result = reify({ c1, c2, start, end, sides, zag });
+    return result;
+  };
+
+const Arc = Shape.registerMethod('Arc', ArcOp('Arc'));
+const ArcX = Shape.registerMethod('ArcX', ArcOp('ArcX'));
+const ArcY = Shape.registerMethod('ArcY', ArcOp('ArcY'));
+const ArcZ = Shape.registerMethod('ArcZ', ArcOp('ArcZ'));
+
+const Stroke = Shape.registerMethod(
+  'Stroke',
+  (...args) =>
+    async (shape) => {
+      const [shapes, implicitWidth = 1, options = {}] = await destructure2(
+        shape,
+        args,
+        'shapes',
+        'number',
+        'options'
+      );
+      const { width = implicitWidth } = options;
+      return ChainHull(
+        eachPoint(Arc(width).to, List)(await Group(shape, ...shapes))
+      );
+    }
+);
+
+const stroke = Shape.registerMethod(
+  'stroke',
+  (...args) =>
+    async (shape) =>
+      Stroke(shape, ...args)
+);
+
 const LoadSvg = Shape.registerMethod(
   'LoadSvg',
   (path, { fill = true, stroke = true } = {}) =>
@@ -6221,9 +6435,9 @@ const volume = Shape.registerMethod(
 
 const toCoordinateOp = Shape.ops.get('toCoordinate');
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const floor = (value, resolution) =>
   Math.floor(value / resolution) * resolution;
@@ -6257,15 +6471,15 @@ const voxels = Shape.registerMethod(
         (query) => {
           const isInteriorPoint = (x, y, z) =>
             query.isIntersectingPointApproximate(x, y, z);
-          for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
+          for (let x = min[X$1] - offset; x <= max[X$1] + offset; x += resolution) {
             for (
-              let y = min[Y$2] - offset;
-              y <= max[Y$2] + offset;
+              let y = min[Y$1] - offset;
+              y <= max[Y$1] + offset;
               y += resolution
             ) {
               for (
-                let z = min[Z$2] - offset;
-                z <= max[Z$2] + offset;
+                let z = min[Z$1] - offset;
+                z <= max[Z$1] + offset;
                 z += resolution
               ) {
                 const state = isInteriorPoint(x, y, z);
@@ -6317,18 +6531,18 @@ const Voxels = Shape.registerMethod(
       for (const point of points) {
         const [x, y, z] = await toCoordinateOp(point)(shape);
         index.add(key(x, y, z));
-        max[X$2] = Math.max(x + 1, max[X$2]);
-        max[Y$2] = Math.max(y + 1, max[Y$2]);
-        max[Z$2] = Math.max(z + 1, max[Z$2]);
-        min[X$2] = Math.min(x - 1, min[X$2]);
-        min[Y$2] = Math.min(y - 1, min[Y$2]);
-        min[Z$2] = Math.min(z - 1, min[Z$2]);
+        max[X$1] = Math.max(x + 1, max[X$1]);
+        max[Y$1] = Math.max(y + 1, max[Y$1]);
+        max[Z$1] = Math.max(z + 1, max[Z$1]);
+        min[X$1] = Math.min(x - 1, min[X$1]);
+        min[Y$1] = Math.min(y - 1, min[Y$1]);
+        min[Z$1] = Math.min(z - 1, min[Z$1]);
       }
       const isInteriorPoint = (x, y, z) => index.has(key(x, y, z));
       const polygons = [];
-      for (let x = min[X$2]; x <= max[X$2]; x++) {
-        for (let y = min[Y$2]; y <= max[Y$2]; y++) {
-          for (let z = min[Z$2]; z <= max[Z$2]; z++) {
+      for (let x = min[X$1]; x <= max[X$1]; x++) {
+        for (let y = min[Y$1]; y <= max[Y$1]; y++) {
+          for (let z = min[Z$1]; z <= max[Z$1]; z++) {
             const state = isInteriorPoint(x, y, z);
             if (state !== isInteriorPoint(x + 1, y, z)) {
               const face = [
@@ -6426,195 +6640,6 @@ const z = Shape.registerMethod('z', (...z) => async (shape) => {
   }
   return Group(...moved);
 });
-
-const Spiral = Shape.registerMethod(
-  'Spiral',
-  (...args) =>
-    async (shape) => {
-      const [particle = Point, options] = await destructure2(
-        shape,
-        args,
-        'function',
-        'options'
-      );
-      let particles = [];
-      for (const turn of await Seq(
-        options,
-        (distance) => (shape) => distance,
-        (...numbers) => numbers
-      )) {
-        particles.push(await particle(turn).rz(turn));
-      }
-      const result = await Link(...particles);
-      return result;
-    }
-);
-
-const toDiameterFromApothem = (apothem, sides = 32) =>
-  apothem / Math.cos(Math.PI / sides);
-
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-
-const reifyArc =
-  (axis = Z$1) =>
-  async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
-    while (start > end) {
-      start -= 1;
-    }
-
-    const scale = computeScale(c1, c2);
-    const middle = computeMiddle(c1, c2);
-
-    const left = c1[X$1];
-    const right = c2[X$1];
-
-    const front = c1[Y$1];
-    const back = c2[Y$1];
-
-    const bottom = c1[Z$1];
-    const top = c2[Z$1];
-
-    const step = 1 / computeSides(c1, c2, sides, zag);
-    const steps = Math.ceil((end - start) / step);
-    const effectiveStep = (end - start) / steps;
-
-    let spiral;
-
-    if (end - start === 1) {
-      spiral = Spiral((t) => Point(0.5), {
-        from: start - 1 / 4,
-        upto: end - 1 / 4,
-        by: effectiveStep,
-      })
-        .loop()
-        .fill();
-    } else {
-      spiral = Spiral((t) => Point(0.5), {
-        from: start - 1 / 4,
-        to: end - 1 / 4,
-        by: effectiveStep,
-      });
-      if (
-        (axis === X$1 && left !== right) ||
-        (axis === Y$1 && front !== back) ||
-        (axis === Z$1 && top !== bottom)
-      ) {
-        spiral = spiral.loop().fill();
-      }
-    }
-
-    switch (axis) {
-      case X$1: {
-        scale[X$1] = 1;
-        spiral = spiral
-          .ry(-1 / 4)
-          .scale(scale)
-          .move(middle);
-        if (left !== right) {
-          spiral = spiral.ex([left - middle[X$1], right - middle[X$1]]);
-        }
-        break;
-      }
-      case Y$1: {
-        scale[Y$1] = 1;
-        spiral = spiral
-          .rx(-1 / 4)
-          .scale(scale)
-          .move(middle);
-        if (front !== back) {
-          spiral = spiral.ey([front - middle[Y$1], back - middle[Y$1]]);
-        }
-        break;
-      }
-      case Z$1: {
-        scale[Z$1] = 1;
-        spiral = spiral.scale(scale).move(middle);
-        if (top !== bottom) {
-          spiral = spiral.ez([top - middle[Z$1], bottom - middle[Z$1]]);
-        }
-        break;
-      }
-    }
-
-    return spiral.absolute();
-  };
-
-const reifyArcZ = reifyArc(Z$1);
-const reifyArcX = reifyArc(X$1);
-const reifyArcY = reifyArc(Y$1);
-
-const ArcOp =
-  (type) =>
-  (...args) =>
-  async (shape) => {
-    const [intervals, options] = await destructure2(
-      shape,
-      args,
-      'intervals',
-      'options'
-    );
-    let [x, y, z] = intervals;
-    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
-    if (apothem !== undefined) {
-      diameter = toDiameterFromApothem(apothem, sides);
-    }
-    if (radius !== undefined) {
-      diameter = radius * 2;
-    }
-    if (diameter !== undefined) {
-      x = diameter;
-    }
-    let reify;
-    switch (type) {
-      case 'Arc':
-      case 'ArcZ':
-        if (x === undefined) {
-          x = 1;
-        }
-        if (y === undefined) {
-          y = x;
-        }
-        if (z === undefined) {
-          z = 0;
-        }
-        reify = reifyArcZ;
-        break;
-      case 'ArcX':
-        if (y === undefined) {
-          y = 1;
-        }
-        if (z === undefined) {
-          z = y;
-        }
-        if (x === undefined) {
-          x = 0;
-        }
-        reify = reifyArcX;
-        break;
-      case 'ArcY':
-        if (x === undefined) {
-          x = 1;
-        }
-        if (z === undefined) {
-          z = x;
-        }
-        if (y === undefined) {
-          y = 0;
-        }
-        reify = reifyArcY;
-        break;
-    }
-    const [c1, c2] = await buildCorners(x, y, z)(null);
-    const result = reify({ c1, c2, start, end, sides, zag });
-    return result;
-  };
-
-const Arc = Shape.registerMethod('Arc', ArcOp('Arc'));
-const ArcX = Shape.registerMethod('ArcX', ArcOp('ArcX'));
-const ArcY = Shape.registerMethod('ArcY', ArcOp('ArcY'));
-const ArcZ = Shape.registerMethod('ArcZ', ArcOp('ArcZ'));
 
 const Assembly = Shape.registerMethod(
   'Assembly',
@@ -7077,4 +7102,4 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

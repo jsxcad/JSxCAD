@@ -813,3 +813,9 @@ Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
 ```
 
 ![Image](shape.md.$93.png)
+
+```JavaScript
+Line(20).stroke(1).view();
+```
+
+![Image](shape.md.$94.png)
