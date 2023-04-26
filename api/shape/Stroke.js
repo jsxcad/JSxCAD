@@ -1,10 +1,10 @@
 import Arc from './Arc.js';
-import ChainHull from './ChainHull.js';
+import { Fuse } from './fuse.js';
 import Group from './Group.js';
 import List from './List.js';
 import Shape from './Shape.js';
 import { destructure2 } from './destructure.js';
-import eachPoint from './eachPoint.js';
+import { eachSegment } from './eachSegment.js';
 
 export const Stroke = Shape.registerMethod(
   'Stroke',
@@ -18,8 +18,12 @@ export const Stroke = Shape.registerMethod(
         'options'
       );
       const { width = implicitWidth } = options;
-      return ChainHull(
-        eachPoint(Arc(width).to, List)(await Group(shape, ...shapes))
+      // return ChainHull( eachPoint(Arc(width).to, List)(await Group(shape, ...shapes)));
+      return Fuse(
+        eachSegment(
+          (s) => s.eachPoint(Arc(width).to).hull(),
+          List
+        )(await Group(shape, ...shapes))
       );
     }
 );

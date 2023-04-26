@@ -8,11 +8,8 @@ export const eachSegment = Shape.registerMethod(
   'eachSegment',
   (...args) =>
     async (shape) => {
-      const [op = (segment) => (shape) => segment] = await destructure2(
-        shape,
-        args,
-        'function'
-      );
+      const [segmentOp = (segment) => (shape) => segment, groupOp = Group] =
+        await destructure2(shape, args, 'function', 'function');
       const inputs = linearize(
         await shape.toGeometry(),
         ({ type }) => type === 'segments'
@@ -26,10 +23,15 @@ export const eachSegment = Shape.registerMethod(
             normals ? normals[nth] : undefined
           );
           output.push(
-            await op(Shape.chain(Shape.fromGeometry(segment)))(shape)
+            await segmentOp(Shape.chain(Shape.fromGeometry(segment)))(shape)
           );
         }
       }
-      return Group(...output);
+      const grouped = groupOp(...output);
+      if (Shape.isFunction(grouped)) {
+        return grouped(shape);
+      } else {
+        return grouped;
+      }
     }
 );
