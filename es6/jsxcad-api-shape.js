@@ -631,6 +631,8 @@ const destructure2 = async (shape, input, ...specs) => {
           let value = await resolve(shape, arg);
           if (Shape.isShape(value)) {
             out.push(value);
+          } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
+            out.push(...value);
           } else {
             rest.push(arg);
           }
@@ -2007,13 +2009,22 @@ const toShapeGeometry = Shape.registerMethod(
   }
 );
 
-const Join = Shape.registerMethod('Join', (...args) => async (shape) => {
-  const [modes, shapes] = await destructure2(shape, args, 'modes', 'shapes');
-  const group = await Group(...shapes);
-  return Shape.fromGeometry(
-    fuse$1(await toShapeGeometry(group)(shape), modes.includes('exact'))
-  );
-});
+const Join = Shape.registerMethod(
+  ['Fuse', 'Join'],
+  (...args) =>
+    async (shape) => {
+      const [modes, shapes] = await destructure2(
+        shape,
+        args,
+        'modes',
+        'shapes'
+      );
+      const group = await Group(...shapes);
+      return Shape.fromGeometry(
+        fuse$1(await toShapeGeometry(group)(shape), modes.includes('exact'))
+      );
+    }
+);
 
 const join = Shape.registerMethod(
   ['add', 'join'],
@@ -2038,8 +2049,9 @@ const join = Shape.registerMethod(
 
 const ChainHull = Shape.registerMethod(
   'ChainHull',
-  (...shapes) =>
+  (...args) =>
     async (shape) => {
+      const [shapes] = await destructure2(shape, args, 'shapes');
       const chain = [];
       for (let nth = 1; nth < shapes.length; nth++) {
         chain.push(await Hull(shapes[nth - 1], shapes[nth])(shape));
@@ -4402,11 +4414,8 @@ const eachSegment = Shape.registerMethod(
   'eachSegment',
   (...args) =>
     async (shape) => {
-      const [op = (segment) => (shape) => segment] = await destructure2(
-        shape,
-        args,
-        'function'
-      );
+      const [segmentOp = (segment) => (shape) => segment, groupOp = Group] =
+        await destructure2(shape, args, 'function', 'function');
       const inputs = linearize(
         await shape.toGeometry(),
         ({ type }) => type === 'segments'
@@ -4420,11 +4429,16 @@ const eachSegment = Shape.registerMethod(
             normals ? normals[nth] : undefined
           );
           output.push(
-            await op(Shape.chain(Shape.fromGeometry(segment)))(shape)
+            await segmentOp(Shape.chain(Shape.fromGeometry(segment)))(shape)
           );
         }
       }
-      return Group(...output);
+      const grouped = groupOp(...output);
+      if (Shape.isFunction(grouped)) {
+        return grouped(shape);
+      } else {
+        return grouped;
+      }
     }
 );
 
@@ -4792,6 +4806,8 @@ const gcode = Shape.registerMethod(
       return shape;
     }
 );
+
+const Fuse = Join;
 
 const fuse = Shape.registerMethod('fuse', (...args) => async (shape) => {
   const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
@@ -5946,6 +5962,224 @@ const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
   return shape;
 });
 
+const Spiral = Shape.registerMethod(
+  'Spiral',
+  (...args) =>
+    async (shape) => {
+      const [particle = Point, options] = await destructure2(
+        shape,
+        args,
+        'function',
+        'options'
+      );
+      let particles = [];
+      for (const turn of await Seq(
+        options,
+        (distance) => (shape) => distance,
+        (...numbers) => numbers
+      )) {
+        particles.push(await particle(turn).rz(turn));
+      }
+      const result = await Link(...particles);
+      return result;
+    }
+);
+
+const toDiameterFromApothem = (apothem, sides = 32) =>
+  apothem / Math.cos(Math.PI / sides);
+
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
+
+const reifyArc =
+  (axis = Z$2) =>
+  async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
+    while (start > end) {
+      start -= 1;
+    }
+
+    const scale = computeScale(c1, c2);
+    const middle = computeMiddle(c1, c2);
+
+    const left = c1[X$2];
+    const right = c2[X$2];
+
+    const front = c1[Y$2];
+    const back = c2[Y$2];
+
+    const bottom = c1[Z$2];
+    const top = c2[Z$2];
+
+    const step = 1 / computeSides(c1, c2, sides, zag);
+    const steps = Math.ceil((end - start) / step);
+    const effectiveStep = (end - start) / steps;
+
+    let spiral;
+
+    if (end - start === 1) {
+      spiral = Spiral((t) => Point(0.5), {
+        from: start - 1 / 4,
+        upto: end - 1 / 4,
+        by: effectiveStep,
+      })
+        .loop()
+        .fill();
+    } else {
+      spiral = Spiral((t) => Point(0.5), {
+        from: start - 1 / 4,
+        to: end - 1 / 4,
+        by: effectiveStep,
+      });
+      if (
+        (axis === X$2 && left !== right) ||
+        (axis === Y$2 && front !== back) ||
+        (axis === Z$2 && top !== bottom)
+      ) {
+        spiral = spiral.loop().fill();
+      }
+    }
+
+    switch (axis) {
+      case X$2: {
+        scale[X$2] = 1;
+        spiral = spiral
+          .ry(-1 / 4)
+          .scale(scale)
+          .move(middle);
+        if (left !== right) {
+          spiral = spiral.ex([left - middle[X$2], right - middle[X$2]]);
+        }
+        break;
+      }
+      case Y$2: {
+        scale[Y$2] = 1;
+        spiral = spiral
+          .rx(-1 / 4)
+          .scale(scale)
+          .move(middle);
+        if (front !== back) {
+          spiral = spiral.ey([front - middle[Y$2], back - middle[Y$2]]);
+        }
+        break;
+      }
+      case Z$2: {
+        scale[Z$2] = 1;
+        spiral = spiral.scale(scale).move(middle);
+        if (top !== bottom) {
+          spiral = spiral.ez([top - middle[Z$2], bottom - middle[Z$2]]);
+        }
+        break;
+      }
+    }
+
+    return spiral.absolute();
+  };
+
+const reifyArcZ = reifyArc(Z$2);
+const reifyArcX = reifyArc(X$2);
+const reifyArcY = reifyArc(Y$2);
+
+const ArcOp =
+  (type) =>
+  (...args) =>
+  async (shape) => {
+    const [intervals, options] = await destructure2(
+      shape,
+      args,
+      'intervals',
+      'options'
+    );
+    let [x, y, z] = intervals;
+    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
+    if (apothem !== undefined) {
+      diameter = toDiameterFromApothem(apothem, sides);
+    }
+    if (radius !== undefined) {
+      diameter = radius * 2;
+    }
+    if (diameter !== undefined) {
+      x = diameter;
+    }
+    let reify;
+    switch (type) {
+      case 'Arc':
+      case 'ArcZ':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (y === undefined) {
+          y = x;
+        }
+        if (z === undefined) {
+          z = 0;
+        }
+        reify = reifyArcZ;
+        break;
+      case 'ArcX':
+        if (y === undefined) {
+          y = 1;
+        }
+        if (z === undefined) {
+          z = y;
+        }
+        if (x === undefined) {
+          x = 0;
+        }
+        reify = reifyArcX;
+        break;
+      case 'ArcY':
+        if (x === undefined) {
+          x = 1;
+        }
+        if (z === undefined) {
+          z = x;
+        }
+        if (y === undefined) {
+          y = 0;
+        }
+        reify = reifyArcY;
+        break;
+    }
+    const [c1, c2] = await buildCorners(x, y, z)(null);
+    const result = reify({ c1, c2, start, end, sides, zag });
+    return result;
+  };
+
+const Arc = Shape.registerMethod('Arc', ArcOp('Arc'));
+const ArcX = Shape.registerMethod('ArcX', ArcOp('ArcX'));
+const ArcY = Shape.registerMethod('ArcY', ArcOp('ArcY'));
+const ArcZ = Shape.registerMethod('ArcZ', ArcOp('ArcZ'));
+
+const Stroke = Shape.registerMethod(
+  'Stroke',
+  (...args) =>
+    async (shape) => {
+      const [shapes, implicitWidth = 1, options = {}] = await destructure2(
+        shape,
+        args,
+        'shapes',
+        'number',
+        'options'
+      );
+      const { width = implicitWidth } = options;
+      // return ChainHull( eachPoint(Arc(width).to, List)(await Group(shape, ...shapes)));
+      return Fuse(
+        eachSegment(
+          (s) => s.eachPoint(Arc(width).to).hull(),
+          List
+        )(await Group(shape, ...shapes))
+      );
+    }
+);
+
+const stroke = Shape.registerMethod(
+  'stroke',
+  (...args) =>
+    async (shape) =>
+      Stroke(shape, ...args)
+);
+
 const LoadSvg = Shape.registerMethod(
   'LoadSvg',
   (path, { fill = true, stroke = true } = {}) =>
@@ -6218,9 +6452,9 @@ const volume = Shape.registerMethod(
 
 const toCoordinateOp = Shape.ops.get('toCoordinate');
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const floor = (value, resolution) =>
   Math.floor(value / resolution) * resolution;
@@ -6254,15 +6488,15 @@ const voxels = Shape.registerMethod(
         (query) => {
           const isInteriorPoint = (x, y, z) =>
             query.isIntersectingPointApproximate(x, y, z);
-          for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
+          for (let x = min[X$1] - offset; x <= max[X$1] + offset; x += resolution) {
             for (
-              let y = min[Y$2] - offset;
-              y <= max[Y$2] + offset;
+              let y = min[Y$1] - offset;
+              y <= max[Y$1] + offset;
               y += resolution
             ) {
               for (
-                let z = min[Z$2] - offset;
-                z <= max[Z$2] + offset;
+                let z = min[Z$1] - offset;
+                z <= max[Z$1] + offset;
                 z += resolution
               ) {
                 const state = isInteriorPoint(x, y, z);
@@ -6314,18 +6548,18 @@ const Voxels = Shape.registerMethod(
       for (const point of points) {
         const [x, y, z] = await toCoordinateOp(point)(shape);
         index.add(key(x, y, z));
-        max[X$2] = Math.max(x + 1, max[X$2]);
-        max[Y$2] = Math.max(y + 1, max[Y$2]);
-        max[Z$2] = Math.max(z + 1, max[Z$2]);
-        min[X$2] = Math.min(x - 1, min[X$2]);
-        min[Y$2] = Math.min(y - 1, min[Y$2]);
-        min[Z$2] = Math.min(z - 1, min[Z$2]);
+        max[X$1] = Math.max(x + 1, max[X$1]);
+        max[Y$1] = Math.max(y + 1, max[Y$1]);
+        max[Z$1] = Math.max(z + 1, max[Z$1]);
+        min[X$1] = Math.min(x - 1, min[X$1]);
+        min[Y$1] = Math.min(y - 1, min[Y$1]);
+        min[Z$1] = Math.min(z - 1, min[Z$1]);
       }
       const isInteriorPoint = (x, y, z) => index.has(key(x, y, z));
       const polygons = [];
-      for (let x = min[X$2]; x <= max[X$2]; x++) {
-        for (let y = min[Y$2]; y <= max[Y$2]; y++) {
-          for (let z = min[Z$2]; z <= max[Z$2]; z++) {
+      for (let x = min[X$1]; x <= max[X$1]; x++) {
+        for (let y = min[Y$1]; y <= max[Y$1]; y++) {
+          for (let z = min[Z$1]; z <= max[Z$1]; z++) {
             const state = isInteriorPoint(x, y, z);
             if (state !== isInteriorPoint(x + 1, y, z)) {
               const face = [
@@ -6424,195 +6658,6 @@ const z = Shape.registerMethod('z', (...z) => async (shape) => {
   return Group(...moved);
 });
 
-const Spiral = Shape.registerMethod(
-  'Spiral',
-  (...args) =>
-    async (shape) => {
-      const [particle = Point, options] = await destructure2(
-        shape,
-        args,
-        'function',
-        'options'
-      );
-      let particles = [];
-      for (const turn of await Seq(
-        options,
-        (distance) => (shape) => distance,
-        (...numbers) => numbers
-      )) {
-        particles.push(await particle(turn).rz(turn));
-      }
-      const result = await Link(...particles);
-      return result;
-    }
-);
-
-const toDiameterFromApothem = (apothem, sides = 32) =>
-  apothem / Math.cos(Math.PI / sides);
-
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-
-const reifyArc =
-  (axis = Z$1) =>
-  async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
-    while (start > end) {
-      start -= 1;
-    }
-
-    const scale = computeScale(c1, c2);
-    const middle = computeMiddle(c1, c2);
-
-    const left = c1[X$1];
-    const right = c2[X$1];
-
-    const front = c1[Y$1];
-    const back = c2[Y$1];
-
-    const bottom = c1[Z$1];
-    const top = c2[Z$1];
-
-    const step = 1 / computeSides(c1, c2, sides, zag);
-    const steps = Math.ceil((end - start) / step);
-    const effectiveStep = (end - start) / steps;
-
-    let spiral;
-
-    if (end - start === 1) {
-      spiral = Spiral((t) => Point(0.5), {
-        from: start - 1 / 4,
-        upto: end - 1 / 4,
-        by: effectiveStep,
-      })
-        .loop()
-        .fill();
-    } else {
-      spiral = Spiral((t) => Point(0.5), {
-        from: start - 1 / 4,
-        to: end - 1 / 4,
-        by: effectiveStep,
-      });
-      if (
-        (axis === X$1 && left !== right) ||
-        (axis === Y$1 && front !== back) ||
-        (axis === Z$1 && top !== bottom)
-      ) {
-        spiral = spiral.loop().fill();
-      }
-    }
-
-    switch (axis) {
-      case X$1: {
-        scale[X$1] = 1;
-        spiral = spiral
-          .ry(-1 / 4)
-          .scale(scale)
-          .move(middle);
-        if (left !== right) {
-          spiral = spiral.ex([left - middle[X$1], right - middle[X$1]]);
-        }
-        break;
-      }
-      case Y$1: {
-        scale[Y$1] = 1;
-        spiral = spiral
-          .rx(-1 / 4)
-          .scale(scale)
-          .move(middle);
-        if (front !== back) {
-          spiral = spiral.ey([front - middle[Y$1], back - middle[Y$1]]);
-        }
-        break;
-      }
-      case Z$1: {
-        scale[Z$1] = 1;
-        spiral = spiral.scale(scale).move(middle);
-        if (top !== bottom) {
-          spiral = spiral.ez([top - middle[Z$1], bottom - middle[Z$1]]);
-        }
-        break;
-      }
-    }
-
-    return spiral.absolute();
-  };
-
-const reifyArcZ = reifyArc(Z$1);
-const reifyArcX = reifyArc(X$1);
-const reifyArcY = reifyArc(Y$1);
-
-const ArcOp =
-  (type) =>
-  (...args) =>
-  async (shape) => {
-    const [intervals, options] = await destructure2(
-      shape,
-      args,
-      'intervals',
-      'options'
-    );
-    let [x, y, z] = intervals;
-    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
-    if (apothem !== undefined) {
-      diameter = toDiameterFromApothem(apothem, sides);
-    }
-    if (radius !== undefined) {
-      diameter = radius * 2;
-    }
-    if (diameter !== undefined) {
-      x = diameter;
-    }
-    let reify;
-    switch (type) {
-      case 'Arc':
-      case 'ArcZ':
-        if (x === undefined) {
-          x = 1;
-        }
-        if (y === undefined) {
-          y = x;
-        }
-        if (z === undefined) {
-          z = 0;
-        }
-        reify = reifyArcZ;
-        break;
-      case 'ArcX':
-        if (y === undefined) {
-          y = 1;
-        }
-        if (z === undefined) {
-          z = y;
-        }
-        if (x === undefined) {
-          x = 0;
-        }
-        reify = reifyArcX;
-        break;
-      case 'ArcY':
-        if (x === undefined) {
-          x = 1;
-        }
-        if (z === undefined) {
-          z = x;
-        }
-        if (y === undefined) {
-          y = 0;
-        }
-        reify = reifyArcY;
-        break;
-    }
-    const [c1, c2] = await buildCorners(x, y, z)(null);
-    const result = reify({ c1, c2, start, end, sides, zag });
-    return result;
-  };
-
-const Arc = Shape.registerMethod('Arc', ArcOp('Arc'));
-const ArcX = Shape.registerMethod('ArcX', ArcOp('ArcX'));
-const ArcY = Shape.registerMethod('ArcY', ArcOp('ArcY'));
-const ArcZ = Shape.registerMethod('ArcZ', ArcOp('ArcZ'));
-
 const Assembly = Shape.registerMethod(
   'Assembly',
   (...args) =>
@@ -6644,221 +6689,104 @@ const Cached = (name, op, enable = true) =>
     return constructedShape;
   });
 
-function clone(point) { //TODO: use gl-vec2 for this
-    return [point[0], point[1]]
+function interpolate(t, degree, points, knots, weights, result) {
+
+  var i,j,s,l;              // function-scoped iteration variables
+  var n = points.length;    // points count
+  var d = points[0].length; // point dimensionality
+
+  if(degree < 1) throw new Error('degree must be at least 1 (linear)');
+  if(degree > (n-1)) throw new Error('degree must be less than or equal to point count - 1');
+
+  if(!weights) {
+    // build weight vector of length [n]
+    weights = [];
+    for(i=0; i<n; i++) {
+      weights[i] = 1;
+    }
+  }
+
+  if(!knots) {
+    // build knot vector of length [n + degree + 1]
+    var knots = [];
+    for(i=0; i<n+degree+1; i++) {
+      knots[i] = i;
+    }
+  } else {
+    if(knots.length !== n+degree+1) throw new Error('bad knot vector length');
+  }
+
+  var domain = [
+    degree,
+    knots.length-1 - degree
+  ];
+
+  // remap t to the domain where the spline is defined
+  var low  = knots[domain[0]];
+  var high = knots[domain[1]];
+  t = t * (high - low) + low;
+
+  if(t < low || t > high) throw new Error('out of bounds');
+
+  // find s (the spline segment) for the [t] value provided
+  for(s=domain[0]; s<domain[1]; s++) {
+    if(t >= knots[s] && t <= knots[s+1]) {
+      break;
+    }
+  }
+
+  // convert points to homogeneous coordinates
+  var v = [];
+  for(i=0; i<n; i++) {
+    v[i] = [];
+    for(j=0; j<d; j++) {
+      v[i][j] = points[i][j] * weights[i];
+    }
+    v[i][d] = weights[i];
+  }
+
+  // l (level) goes from 1 to the curve degree + 1
+  var alpha;
+  for(l=1; l<=degree+1; l++) {
+    // build level l of the pyramid
+    for(i=s; i>s-degree-1+l; i--) {
+      alpha = (t - knots[i]) / (knots[i+degree+1-l] - knots[i]);
+
+      // interpolate each component
+      for(j=0; j<d+1; j++) {
+        v[i][j] = (1 - alpha) * v[i-1][j] + alpha * v[i][j];
+      }
+    }
+  }
+
+  // convert back to cartesian and return
+  var result = result || [];
+  for(i=0; i<d; i++) {
+    result[i] = v[s][i] / v[s][d];
+  }
+
+  return result;
 }
 
-function vec2(x, y) {
-    return [x, y]
-}
 
-var _function = function createBezierBuilder(opt) {
-    opt = opt||{};
-
-    var RECURSION_LIMIT = typeof opt.recursion === 'number' ? opt.recursion : 8;
-    var FLT_EPSILON = typeof opt.epsilon === 'number' ? opt.epsilon : 1.19209290e-7;
-    var PATH_DISTANCE_EPSILON = typeof opt.pathEpsilon === 'number' ? opt.pathEpsilon : 1.0;
-
-    var curve_angle_tolerance_epsilon = typeof opt.angleEpsilon === 'number' ? opt.angleEpsilon : 0.01;
-    var m_angle_tolerance = opt.angleTolerance || 0;
-    var m_cusp_limit = opt.cuspLimit || 0;
-
-    return function bezierCurve(start, c1, c2, end, scale, points) {
-        if (!points)
-            points = [];
-
-        scale = typeof scale === 'number' ? scale : 1.0;
-        var distanceTolerance = PATH_DISTANCE_EPSILON / scale;
-        distanceTolerance *= distanceTolerance;
-        begin(start, c1, c2, end, points, distanceTolerance);
-        return points
-    }
-
-
-    ////// Based on:
-    ////// https://github.com/pelson/antigrain/blob/master/agg-2.4/src/agg_curves.cpp
-
-    function begin(start, c1, c2, end, points, distanceTolerance) {
-        points.push(clone(start));
-        var x1 = start[0],
-            y1 = start[1],
-            x2 = c1[0],
-            y2 = c1[1],
-            x3 = c2[0],
-            y3 = c2[1],
-            x4 = end[0],
-            y4 = end[1];
-        recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, 0);
-        points.push(clone(end));
-    }
-
-    function recursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, level) {
-        if(level > RECURSION_LIMIT) 
-            return
-
-        var pi = Math.PI;
-
-        // Calculate all the mid-points of the line segments
-        //----------------------
-        var x12   = (x1 + x2) / 2;
-        var y12   = (y1 + y2) / 2;
-        var x23   = (x2 + x3) / 2;
-        var y23   = (y2 + y3) / 2;
-        var x34   = (x3 + x4) / 2;
-        var y34   = (y3 + y4) / 2;
-        var x123  = (x12 + x23) / 2;
-        var y123  = (y12 + y23) / 2;
-        var x234  = (x23 + x34) / 2;
-        var y234  = (y23 + y34) / 2;
-        var x1234 = (x123 + x234) / 2;
-        var y1234 = (y123 + y234) / 2;
-
-        if(level > 0) { // Enforce subdivision first time
-            // Try to approximate the full cubic curve by a single straight line
-            //------------------
-            var dx = x4-x1;
-            var dy = y4-y1;
-
-            var d2 = Math.abs((x2 - x4) * dy - (y2 - y4) * dx);
-            var d3 = Math.abs((x3 - x4) * dy - (y3 - y4) * dx);
-
-            var da1, da2;
-
-            if(d2 > FLT_EPSILON && d3 > FLT_EPSILON) {
-                // Regular care
-                //-----------------
-                if((d2 + d3)*(d2 + d3) <= distanceTolerance * (dx*dx + dy*dy)) {
-                    // If the curvature doesn't exceed the distanceTolerance value
-                    // we tend to finish subdivisions.
-                    //----------------------
-                    if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
-                        points.push(vec2(x1234, y1234));
-                        return
-                    }
-
-                    // Angle & Cusp Condition
-                    //----------------------
-                    var a23 = Math.atan2(y3 - y2, x3 - x2);
-                    da1 = Math.abs(a23 - Math.atan2(y2 - y1, x2 - x1));
-                    da2 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - a23);
-                    if(da1 >= pi) da1 = 2*pi - da1;
-                    if(da2 >= pi) da2 = 2*pi - da2;
-
-                    if(da1 + da2 < m_angle_tolerance) {
-                        // Finally we can stop the recursion
-                        //----------------------
-                        points.push(vec2(x1234, y1234));
-                        return
-                    }
-
-                    if(m_cusp_limit !== 0.0) {
-                        if(da1 > m_cusp_limit) {
-                            points.push(vec2(x2, y2));
-                            return
-                        }
-
-                        if(da2 > m_cusp_limit) {
-                            points.push(vec2(x3, y3));
-                            return
-                        }
-                    }
-                }
-            }
-            else {
-                if(d2 > FLT_EPSILON) {
-                    // p1,p3,p4 are collinear, p2 is considerable
-                    //----------------------
-                    if(d2 * d2 <= distanceTolerance * (dx*dx + dy*dy)) {
-                        if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
-                            points.push(vec2(x1234, y1234));
-                            return
-                        }
-
-                        // Angle Condition
-                        //----------------------
-                        da1 = Math.abs(Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y2 - y1, x2 - x1));
-                        if(da1 >= pi) da1 = 2*pi - da1;
-
-                        if(da1 < m_angle_tolerance) {
-                            points.push(vec2(x2, y2));
-                            points.push(vec2(x3, y3));
-                            return
-                        }
-
-                        if(m_cusp_limit !== 0.0) {
-                            if(da1 > m_cusp_limit) {
-                                points.push(vec2(x2, y2));
-                                return
-                            }
-                        }
-                    }
-                }
-                else if(d3 > FLT_EPSILON) {
-                    // p1,p2,p4 are collinear, p3 is considerable
-                    //----------------------
-                    if(d3 * d3 <= distanceTolerance * (dx*dx + dy*dy)) {
-                        if(m_angle_tolerance < curve_angle_tolerance_epsilon) {
-                            points.push(vec2(x1234, y1234));
-                            return
-                        }
-
-                        // Angle Condition
-                        //----------------------
-                        da1 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y3 - y2, x3 - x2));
-                        if(da1 >= pi) da1 = 2*pi - da1;
-
-                        if(da1 < m_angle_tolerance) {
-                            points.push(vec2(x2, y2));
-                            points.push(vec2(x3, y3));
-                            return
-                        }
-
-                        if(m_cusp_limit !== 0.0) {
-                            if(da1 > m_cusp_limit)
-                            {
-                                points.push(vec2(x3, y3));
-                                return
-                            }
-                        }
-                    }
-                }
-                else {
-                    // Collinear case
-                    //-----------------
-                    dx = x1234 - (x1 + x4) / 2;
-                    dy = y1234 - (y1 + y4) / 2;
-                    if(dx*dx + dy*dy <= distanceTolerance) {
-                        points.push(vec2(x1234, y1234));
-                        return
-                    }
-                }
-            }
-        }
-
-        // Continue subdivision
-        //----------------------
-        recursive(x1, y1, x12, y12, x123, y123, x1234, y1234, points, distanceTolerance, level + 1); 
-        recursive(x1234, y1234, x234, y234, x34, y34, x4, y4, points, distanceTolerance, level + 1); 
-    }
-};
-
-var adaptiveBezierCurve = _function();
-
-const DEFAULT_CURVE_ZAG = 1;
+var bSpline = interpolate;
 
 const Curve = Shape.registerMethod(
   'Curve',
   (...args) =>
     async (shape) => {
-      const [options, coordinates] = await destructure2(
+      const [coordinates, implicitSteps = 20, options] = await destructure2(
         shape,
         args,
-        'options',
-        'coordinates'
+        'coordinates',
+        'number',
+        'options'
       );
-      const [start, c1, c2, end] = coordinates;
-      const { zag = DEFAULT_CURVE_ZAG } = options;
-      const points = adaptiveBezierCurve(start, c1, c2, end, 10 / zag);
+      const { steps = implicitSteps } = options;
+      const points = [];
+      for (let t = 0; t <= steps; t++) {
+        points.push(bSpline(t / steps, 2, coordinates));
+      }
       return Link(...points.map((point) => Point(point)));
     }
 );
@@ -7191,4 +7119,4 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

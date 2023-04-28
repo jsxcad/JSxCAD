@@ -37,7 +37,7 @@
     "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",
-    "adaptive-bezier-curve": "^1.0.3",
+    "b-spline": "^2.0.2",
     "parse-number": "^1.0.1"
   },
   "devDependencies": {

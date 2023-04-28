@@ -32,3 +32,5 @@ export const eachPoint = Shape.registerMethod(
       }
     }
 );
+
+export default eachPoint;
