@@ -8,10 +8,10 @@ See: [x](../../nb/api/x.nb), [z](#https://raw.githubusercontent.com/jsxcad/JSxCA
 
 _Note: Should support ranged dimensions._
 
-```JavaScript
-Box(5, 1, 5).y(-5, 2, 5).view().note('Box(5, 1, 5).y(-5, 2, 5)');
-```
-
 ![Image](y.md.$2.png)
 
 Box(5, 1, 5).y(-5, 2, 5)
+
+```JavaScript
+Box(5, 1, 5).y(-5, 2, 5).view().note('Box(5, 1, 5).y(-5, 2, 5)');
+```

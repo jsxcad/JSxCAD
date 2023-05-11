@@ -6,6 +6,10 @@ Parameter|Default|Type
 
 Constructs a reference point.
 
+![Image](Ref.md.$2.png)
+
+Ref(1, 2, 3).and((s) => Edge(Point(0, 0, 0), Point(1, 2, 3))) shows a reference point.
+
 ```JavaScript
 Ref(1, 2, 3)
   .and((s) => Edge(Point(0, 0, 0), Point(1, 2, 3)))
@@ -14,7 +18,3 @@ Ref(1, 2, 3)
     'Ref(1, 2, 3).and((s) => Edge(Point(0, 0, 0), Point(1, 2, 3))) shows a reference point.'
   );
 ```
-
-![Image](Ref.md.$2.png)
-
-Ref(1, 2, 3).and((s) => Edge(Point(0, 0, 0), Point(1, 2, 3))) shows a reference point.

@@ -8,6 +8,10 @@ Extracts a Bill of Materials from the parts in shape.
 
 See: [asPart](../../nb/api/asPart.md)
 
+![Image](bom.md.$2.png)
+
+Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces
+
 ```JavaScript
 Box(3)
   .asPart('lid')
@@ -21,7 +25,3 @@ Box(3)
     )
   );
 ```
-
-![Image](bom.md.$2.png)
-
-Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces

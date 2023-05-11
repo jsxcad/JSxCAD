@@ -20,22 +20,15 @@ See [e](../../nb/api/e.nb), [ex](#https://raw.githubusercontent.com/jsxcad/JSxCA
 
 _Consider renaming extrudeAlong to extrude._
 
-```JavaScript
-Box(10)
-  .extrudeAlong([0, 0, 1], [1])
-  .view()
-  .note('Box(10).extrudeAlong([0, 0, 1], [1])');
-```
-
 ![Image](extrudeAlong.md.$2.png)
 
 Box(10).extrudeAlong([0, 0, 1], [1])
 
 ```JavaScript
 Box(10)
-  .extrudeAlong([0, 0, 1], [5, 4], [3, 2], [1, 0])
+  .extrudeAlong([0, 0, 1], [1])
   .view()
-  .note('Box(10).extrudeAlong([0, 0, 1], [5, 4], [3, 2], [1, 0])');
+  .note('Box(10).extrudeAlong([0, 0, 1], [1])');
 ```
 
 ![Image](extrudeAlong.md.$3.png)
@@ -44,14 +37,25 @@ Box(10).extrudeAlong([0, 0, 1], [5, 4], [3, 2], [1, 0])
 
 ```JavaScript
 Box(10)
-  .extrudeAlong(Point(0, 1, 1), [1])
+  .extrudeAlong([0, 0, 1], [5, 4], [3, 2], [1, 0])
   .view()
-  .note('Box(10).extrudeAlong(Point(0, 1, 1), [1]) extrudes diagonally');
+  .note('Box(10).extrudeAlong([0, 0, 1], [5, 4], [3, 2], [1, 0])');
 ```
 
 ![Image](extrudeAlong.md.$4.png)
 
 Box(10).extrudeAlong(Point(0, 1, 1), [1]) extrudes diagonally
+
+```JavaScript
+Box(10)
+  .extrudeAlong(Point(0, 1, 1), [1])
+  .view()
+  .note('Box(10).extrudeAlong(Point(0, 1, 1), [1]) extrudes diagonally');
+```
+
+![Image](extrudeAlong.md.$5.png)
+
+Box(10).rx(1 / 8).extrudeAlong(normal(), [1, -1]) extrudes along the normal
 
 ```JavaScript
 Box(10)
@@ -62,7 +66,3 @@ Box(10)
     'Box(10).rx(1 / 8).extrudeAlong(normal(), [1, -1]) extrudes along the normal'
   );
 ```
-
-![Image](extrudeAlong.md.$5.png)
-
-Box(10).rx(1 / 8).extrudeAlong(normal(), [1, -1]) extrudes along the normal

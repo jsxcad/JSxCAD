@@ -13,8 +13,8 @@ The result is guaranteed to be a watertight manifold volume.
 
 _Check: the description seems off._
 
+![Image](wrap.md.$2.png)
+
 ```JavaScript
 Box(10, 10, 10).wrap(0.5, 2).view();
 ```
-
-![Image](wrap.md.$2.png)

@@ -8,6 +8,7 @@ import { read, readOrWatch, write } from '@jsxcad/sys';
 
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
+import EditNote from './EditNote.js';
 import MdNote from './MdNote.js';
 import React from 'react';
 import { SpinnerCircularSplit } from 'spinners-react';
@@ -53,26 +54,6 @@ export const updateNotebookState = async (
       return;
     }
     const { path } = sourceLocation;
-    /*
-    if (note.beginSourceLocation) {
-      // Remove any existing notes for this line.
-      const { line } = note.beginSourceLocation;
-      const op = (state) => {
-        const { [`NotebookNotes/${path}`]: oldNotebookNotes = {} } = state;
-        const newNotebookNotes = {
-          ...oldNotebookNotes,
-        };
-        for (const key of Object.keys(newNotebookNotes)) {
-          const note = newNotebookNotes[key];
-          if (note.sourceLocation && note.sourceLocation.line === line) {
-            delete newNotebookNotes[key];
-          }
-        }
-        return { [`NotebookNotes/${path}`]: newNotebookNotes };
-      };
-      application.setState(op);
-    }
-    */
     if (!note.hash) {
       return;
     }
@@ -95,7 +76,6 @@ export const updateNotebookState = async (
         const loadThumbnail = async () => {
           let url = await (note.needsThumbnail ? read : readOrWatch)(
             note.view.thumbnailPath,
-            // `thumbnail/${note.hash}`,
             {
               workspace,
             }
@@ -148,7 +128,9 @@ export class Notebook extends React.PureComponent {
   static get propTypes() {
     return {
       notes: PropTypes.object,
+      onChange: PropTypes.func,
       onClickView: PropTypes.func,
+      onKeyDown: PropTypes.func,
       selectedLine: PropTypes.number,
       notebookPath: PropTypes.string,
       state: PropTypes.string,
@@ -157,124 +139,165 @@ export class Notebook extends React.PureComponent {
   }
 
   render() {
-    try {
-      const {
-        notebookPath,
-        notes,
-        onClickView,
-        selectedLine,
-        state = 'idle',
-        workspace,
-      } = this.props;
-      const children = [];
-      const ordered = Object.values(notes);
-      const getLine = (note) => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = (note) => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      let line;
-      let selectedNote;
-      for (const note of ordered) {
-        if (!note.view && !note.md && !note.download && !note.control) {
-          continue;
-        }
-        // FIX: This seems wasteful.
-        if (note.sourceLocation && note.sourceLocation.line !== line) {
-          line = note.sourceLocation.line;
-          if (note.sourceLocation.line <= selectedLine) {
-            selectedNote = note;
-          }
-        }
+    const {
+      notebookPath,
+      notes,
+      onChange,
+      onClickView,
+      onKeyDown,
+      // selectedLine,
+      state = 'idle',
+      workspace,
+    } = this.props;
+    const ordered = Object.values(notes);
+    const getLine = (note) => {
+      if (note.sourceLocation) {
+        return note.sourceLocation.line;
+      } else {
+        return 0;
       }
-      for (const note of ordered) {
-        // FIX: This seems wasteful.
-        const selected = note === selectedNote;
-        let child;
-        if (note.view) {
-          child = (
-            <ViewNote
-              key={note.hash}
-              note={note}
-              onClickView={onClickView}
-              selected={selected}
-            />
-          );
-        } else if (note.md) {
-          child = (
-            <MdNote
-              key={note.hash}
-              note={note}
-              selected={selected}
-              workspace={workspace}
-            />
-          );
-        } else if (note.download) {
-          child = (
-            <DownloadNote
-              key={note.hash}
-              note={note}
-              selected={selected}
-              workspace={workspace}
-            />
-          );
-        } else if (note.control) {
-          child = (
-            <ControlNote
-              key={note.hash}
-              note={note}
-              selected={selected}
-              workspace={workspace}
-            />
-          );
-        }
-        if (child) {
-          children.push(child);
-        }
+    };
+    const getNth = (note) => {
+      if (note.sourceLocation) {
+        return note.sourceLocation.nth;
+      } else {
+        return 0;
       }
+    };
+    const order = (a, b) => {
+      const lineA = getLine(a);
+      const lineB = getLine(b);
+      if (lineA !== lineB) {
+        return lineA - lineB;
+      }
+      const nthA = getNth(a);
+      const nthB = getNth(b);
+      return nthA - nthB;
+    };
+    ordered.sort(order);
+    let line = 0;
+    let id;
+    let hasStub = false;
+    const ids = [];
+    let children;
+    for (const note of ordered) {
+      if (note.sourceLocation.id !== id) {
+        id = note.sourceLocation.id;
+        children = [];
+        ids.push({ id, children });
+      }
+      if (note.hash === 'stub') {
+        hasStub = true;
+      }
+      // FIX: This seems wasteful.
+      const selected = false;
+      let child;
+      if (note.sourceLocation) {
+        line = note.sourceLocation.line;
+      }
+      if (note.view) {
+        child = (
+          <ViewNote
+            key={note.hash}
+            note={note}
+            onClickView={onClickView}
+            selected={selected}
+          />
+        );
+      } else if (note.md) {
+        child = (
+          <MdNote
+            key={note.hash}
+            note={note}
+            selected={selected}
+            workspace={workspace}
+          />
+        );
+      } else if (note.download) {
+        child = (
+          <DownloadNote
+            key={note.hash}
+            note={note}
+            selected={selected}
+            workspace={workspace}
+          />
+        );
+      } else if (note.control) {
+        child = (
+          <ControlNote
+            key={note.hash}
+            note={note}
+            selected={selected}
+            workspace={workspace}
+          />
+        );
+      } else if (note.sourceText !== undefined) {
+        child = (
+          <EditNote
+            key={note.hash}
+            note={note}
+            onChange={(sourceText) => onChange(note, { sourceText })}
+            onKeyDown={onKeyDown}
+            selected={selected}
+            workspace={workspace}
+          />
+        );
+      }
+      if (child) {
+        children.push(child);
+      }
+    }
 
-      useEffect(() => mermaid.init(undefined, '.mermaid'));
+    if (!hasStub) {
+      // Append an empty editor.
+      const stub = {
+        hash: 'stub',
+        sourceText: '',
+        sourceLocation: { path: notebookPath, line: line + 1 },
+      };
+      ids.push({
+        id: '+',
+        children: [
+          <EditNote
+            key={stub.hash}
+            note={stub}
+            onChange={(sourceText) => onChange(stub, { sourceText })}
+            workspace={workspace}
+          />,
+        ],
+      });
+    }
 
-      return (
-        <div
-          id={notebookPath}
-          classList="notebook notes"
-          style={{ overflow: 'auto' }}
-        >
-          {state === 'running' && (
-            <SpinnerCircularSplit
-              color="#36d7b7"
-              size={64}
-              style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
-            />
-          )}
+    useEffect(() => mermaid.init(undefined, '.mermaid'));
+
+    const sections = [];
+    for (const { id, children } of ids) {
+      sections.push(
+        <div>
+          <h3>{id}</h3>
+          <br />
           {children}
+          <hr />
         </div>
       );
-    } catch (e) {
-      console.log(e.stack);
-      throw e;
     }
+
+    return (
+      <div
+        id={notebookPath}
+        classList="notebook notes"
+        style={{ overflow: 'auto' }}
+      >
+        {state === 'running' && (
+          <SpinnerCircularSplit
+            color="#36d7b7"
+            size={64}
+            style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
+          />
+        )}
+        {sections}
+      </div>
+    );
   }
 }
 

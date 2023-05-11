@@ -10,6 +10,14 @@ The names may be textual, e.g, 'red', or numeric, e.g., '#fafafe'.
 
 See: [color](../../nb/api/color.md)
 
+![Image](tint.md.$2_1.png)
+
+Box().op(color('white'), color('yellow'), color('green'), color('red')).pack()
+
+![Image](tint.md.$2_2.png)
+
+tint('orange')
+
 ```JavaScript
 Box()
   .op(color('white'), color('yellow'), color('green'), color('red'))
@@ -23,11 +31,3 @@ Box()
   .view(2)
   .note("tint('orange')");
 ```
-
-![Image](tint.md.$2_1.png)
-
-Box().op(color('white'), color('yellow'), color('green'), color('red')).pack()
-
-![Image](tint.md.$2_2.png)
-
-tint('orange')

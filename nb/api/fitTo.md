@@ -10,6 +10,14 @@ This is equivalent to Assembly(shape, ...others).
 
 See: [Assembly](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Assembly.nb), [disjoint](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/disjoint.nb), [fit](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/fit.nb).
 
+![Image](fitTo.md.$2_1.png)
+
+Box(3).fit(Arc(12), Arc(8), Arc(4)) fitted in place
+
+![Image](fitTo.md.$2_2.png)
+
+Repacked to show the pieces.
+
 ```JavaScript
 Box(10)
   .color('red')
@@ -20,11 +28,3 @@ Box(10)
   .view(2)
   .note('Repacked to show the pieces.');
 ```
-
-![Image](fitTo.md.$2_1.png)
-
-Box(3).fit(Arc(12), Arc(8), Arc(4)) fitted in place
-
-![Image](fitTo.md.$2_2.png)
-
-Repacked to show the pieces.

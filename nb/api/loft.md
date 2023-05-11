@@ -11,6 +11,10 @@ Note that the incoming shape provides context but is not automatically included 
 
 _Note: loft is a work in progress and has limited functionality._
 
+![Image](loft.md.$2.png)
+
+Box(5).loft(z(0), z(5).rz(1 / 8)) lofts a Box by 5 mm with a 1/8 rotation.
+
 ```JavaScript
 Box(5)
   .loft(z(0), z(5).rz(1 / 8))
@@ -20,9 +24,9 @@ Box(5)
   );
 ```
 
-![Image](loft.md.$2.png)
+![Image](loft.md.$3.png)
 
-Box(5).loft(z(0), z(5).rz(1 / 8)) lofts a Box by 5 mm with a 1/8 rotation.
+Box(5).loft(z(0), Arc(4).z(5)) lofts a box by 5 mm to a circle.
 
 ```JavaScript
 Box(5)
@@ -31,9 +35,9 @@ Box(5)
   .note('Box(5).loft(z(0), Arc(4).z(5)) lofts a box by 5 mm to a circle.');
 ```
 
-![Image](loft.md.$3.png)
+![Image](loft.md.$4.png)
 
-Box(5).loft(z(0), Arc(4).z(5)) lofts a box by 5 mm to a circle.
+Box(5).cut(inset(1)).loft(z(0), Arc(4).cut(inset(1)).z(5)) lofts a box with a hole to a circle with a hole
 
 ```JavaScript
 Box(5)
@@ -44,7 +48,3 @@ Box(5)
     'Box(5).cut(inset(1)).loft(z(0), Arc(4).cut(inset(1)).z(5)) lofts a box with a hole to a circle with a hole'
   );
 ```
-
-![Image](loft.md.$4.png)
-
-Box(5).cut(inset(1)).loft(z(0), Arc(4).cut(inset(1)).z(5)) lofts a box with a hole to a circle with a hole

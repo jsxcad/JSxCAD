@@ -8,17 +8,24 @@ export const Curve = Shape.registerMethod(
   'Curve',
   (...args) =>
     async (shape) => {
-      const [coordinates, implicitSteps = 20, options] = await destructure2(
-        shape,
-        args,
-        'coordinates',
-        'number',
-        'options'
-      );
+      const [coordinates, implicitSteps = 20, options, modes] =
+        await destructure2(
+          shape,
+          args,
+          'coordinates',
+          'number',
+          'options',
+          'modes'
+        );
       const { steps = implicitSteps } = options;
+      let maxT = 1;
+      if (modes.includes('closed')) {
+        maxT = 1 - 1 / (coordinates.length + 1);
+        coordinates.push(...coordinates.slice(0, 3));
+      }
       const points = [];
-      for (let t = 0; t <= steps; t++) {
-        points.push(bSpline(t / steps, 2, coordinates));
+      for (let t = 0; t <= maxT; t += 1 / steps) {
+        points.push(bSpline(t, 2, coordinates));
       }
       return Link(...points.map((point) => Point(point)));
     }

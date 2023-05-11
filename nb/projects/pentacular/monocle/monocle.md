@@ -38,10 +38,6 @@ const Monocle = (
     );
 ```
 
-```JavaScript
-const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
-```
-
 ![Image](monocle.md.monocle_37x12x2x2.png)
 
 ![Image](monocle.md.monocle_37x12x2x2_frame-37x12x2x2.png)
@@ -51,6 +47,14 @@ const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
 ![Image](monocle.md.monocle_37x12x2x2_lens-37x12x2x2.png)
 
 [lens-37x12x2x2.stl](monocle.lens-37x12x2x2.stl)
+
+```JavaScript
+const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
+```
+
+![Image](monocle.md.simpleMonocle_s2.png)
+
+[s2.stl](monocle.s2.stl)
 
 ```JavaScript
 const simpleMonocle = Arc(35)
@@ -63,7 +67,3 @@ const simpleMonocle = Arc(35)
   .join(Arc(35).cut(inset(1)).ez([0, 2]))
   .stl('s2');
 ```
-
-![Image](monocle.md.simpleMonocle_s2.png)
-
-[s2.stl](monocle.s2.stl)

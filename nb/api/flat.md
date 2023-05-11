@@ -9,6 +9,18 @@ This is equivalent to shape.to(XY()).
 
 See: [to](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/to.nb).
 
+![Image](flat.md.$2_1.png)
+
+Box(6, 4, 2) is our starting shape in its preferred orientation
+
+![Image](flat.md.$2_2.png)
+
+We arrange the boxes and perform a cut
+
+![Image](flat.md.$2_3.png)
+
+each(flat()).pack() arranges each box separately in its preferred orientation
+
 ```JavaScript
 Box(6, 4, 2)
   .view(1)
@@ -24,15 +36,3 @@ Box(6, 4, 2)
     'each(flat()).pack() arranges each box separately in its preferred orientation'
   );
 ```
-
-![Image](flat.md.$2_1.png)
-
-Box(6, 4, 2) is our starting shape in its preferred orientation
-
-![Image](flat.md.$2_2.png)
-
-We arrange the boxes and perform a cut
-
-![Image](flat.md.$2_3.png)
-
-each(flat()).pack() arranges each box separately in its preferred orientation

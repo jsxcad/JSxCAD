@@ -10,6 +10,10 @@ See: [remesh](../../nb/api/remesh.nb), [seam](#https://raw.githubusercontent.com
 
 _Note: May produce self-intersection._
 
+![Image](twist.md.$2.png)
+
+Box(2, 3, 10).remesh(1).twist(1 / 40)
+
 ```JavaScript
 Box(2, 3, 10)
   .remesh(1)
@@ -17,7 +21,3 @@ Box(2, 3, 10)
   .view()
   .note('Box(2, 3, 10).remesh(1).twist(1 / 40)');
 ```
-
-![Image](twist.md.$2.png)
-
-Box(2, 3, 10).remesh(1).twist(1 / 40)

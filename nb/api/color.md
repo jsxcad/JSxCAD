@@ -7,6 +7,10 @@ The names may be textual, e.g, 'red', or numeric, e.g., '#fafafe'.
 
 See: [tint](../../nb/api/tint.md)
 
+![Image](color.md.$2.png)
+
+Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()
+
 ```JavaScript
 Group(
   Box(3).color('red'),
@@ -21,9 +25,13 @@ Group(
   );
 ```
 
-![Image](color.md.$2.png)
+![Image](color.md.$3_1.png)
 
-Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()
+These have various colors
+
+![Image](color.md.$3_2.png)
+
+Now color('pink') makes them are all pink.
 
 ```JavaScript
 Box(10)
@@ -42,11 +50,3 @@ Box(10)
   .view(2)
   .md("Now color('pink') makes them are all pink.");
 ```
-
-![Image](color.md.$3_1.png)
-
-These have various colors
-
-![Image](color.md.$3_2.png)
-
-Now color('pink') makes them are all pink.

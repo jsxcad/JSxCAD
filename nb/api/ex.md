@@ -9,6 +9,10 @@ Extrudes the surface along the x axis by the extents provided.
 
 See [extrudeAlong](../../nb/api/extrudeAlong.nb), [e](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/e.nb), [ey](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ey.nb), [ez](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/ez.md)
 
+![Image](ex.md.$2.png)
+
+Box(10).ry(1 / 4).ex([1, -1], [4, 3]) extrudes along the x axis by two extents
+
 ```JavaScript
 Box(10)
   .ry(1 / 4)
@@ -18,7 +22,3 @@ Box(10)
     'Box(10).ry(1 / 4).ex([1, -1], [4, 3]) extrudes along the x axis by two extents'
   );
 ```
-
-![Image](ex.md.$2.png)
-
-Box(10).ry(1 / 4).ex([1, -1], [4, 3]) extrudes along the x axis by two extents

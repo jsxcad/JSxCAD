@@ -3,13 +3,17 @@
 
 Produces an icosahedron that fits the bounding dimensions.
 
+![Image](Icosahedron.md.$2.png)
+
+Icosahedron(3)
+
 ```JavaScript
 Icosahedron(3).and(Box(3, 3, 3).material('glass')).view().md('Icosahedron(3)');
 ```
 
-![Image](Icosahedron.md.$2.png)
+![Image](Icosahedron.md.$3.png)
 
-Icosahedron(3)
+Icosahedron(1, 2, [0, 3])
 
 ```JavaScript
 Icosahedron(1, 2, [0, 3])
@@ -17,7 +21,3 @@ Icosahedron(1, 2, [0, 3])
   .view()
   .md('Icosahedron(1, 2, [0, 3])');
 ```
-
-![Image](Icosahedron.md.$3.png)
-
-Icosahedron(1, 2, [0, 3])

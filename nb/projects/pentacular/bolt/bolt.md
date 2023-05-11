@@ -15,11 +15,11 @@ const Profile = (pitch = 1, depth = 4 / 3) =>
   ).inset(0.01);
 ```
 
+![Image](bolt.md.$2.png)
+
 ```JavaScript
 Profile().topView();
 ```
-
-![Image](bolt.md.$2.png)
 
 ```JavaScript
 export const ScrewThreadSegmentBuilder = Cached(

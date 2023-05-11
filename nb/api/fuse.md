@@ -13,6 +13,14 @@ However Group(a, b).fuse(c, d) will produce one shape.
 
 See: [join](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/join.nb).
 
+![Image](fuse.md.$2_1.png)
+
+Box(6, 4, 2).seq({ by: 1 / 8 }, ry) arranges boxes in a group
+
+![Image](fuse.md.$2_2.png)
+
+fuse() turns them into a single solid
+
 ```JavaScript
 Box(6, 4, 2)
   .seq({ by: 1 / 8 }, ry)
@@ -22,11 +30,3 @@ Box(6, 4, 2)
   .view(2)
   .note('fuse() turns them into a single solid');
 ```
-
-![Image](fuse.md.$2_1.png)
-
-Box(6, 4, 2).seq({ by: 1 / 8 }, ry) arranges boxes in a group
-
-![Image](fuse.md.$2_2.png)
-
-fuse() turns them into a single solid

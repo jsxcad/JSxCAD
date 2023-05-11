@@ -117,6 +117,10 @@ export const axleProfile = AxleProfile();
 export const axleHoleProfile = axleProfile.offset(0.1);
 ```
 
+![Image](lego.md.axleHole_axle_hole.png)
+
+[axle_hole.stl](lego.axle_hole.stl)
+
 ```JavaScript
 export const axleHole = await Box(8)
   .cut(axleProfile.offset(0.1))
@@ -124,9 +128,7 @@ export const axleHole = await Box(8)
   .stl('axle_hole');
 ```
 
-![Image](lego.md.axleHole_axle_hole.png)
-
-[axle_hole.stl](lego.axle_hole.stl)
+![Image](lego.md.verticalBushingHole.png)
 
 ```JavaScript
 export const verticalBushingHole = Join(
@@ -137,7 +139,7 @@ export const verticalBushingHole = Join(
   .view(and(Point()));
 ```
 
-![Image](lego.md.verticalBushingHole.png)
+![Image](lego.md.horizontalBushingHole.png)
 
 ```JavaScript
 export const horizontalBushingHole = verticalBushingHole
@@ -147,7 +149,9 @@ export const horizontalBushingHole = verticalBushingHole
   .view(and(Point()));
 ```
 
-![Image](lego.md.horizontalBushingHole.png)
+![Image](lego.md.verticalConnector_verticalConnector.png)
+
+[verticalConnector.stl](lego.verticalConnector.stl)
 
 ```JavaScript
 export const verticalConnector = await Arc(4.8)
@@ -159,9 +163,9 @@ export const verticalConnector = await Arc(4.8)
   .stl('verticalConnector');
 ```
 
-![Image](lego.md.verticalConnector_verticalConnector.png)
+![Image](lego.md.horizontalConnector_horizontalConnector.png)
 
-[verticalConnector.stl](lego.verticalConnector.stl)
+[horizontalConnector.stl](lego.horizontalConnector.stl)
 
 ```JavaScript
 export const horizontalConnector = await verticalConnector
@@ -170,7 +174,3 @@ export const horizontalConnector = await verticalConnector
   .material('plastic')
   .stl('horizontalConnector');
 ```
-
-![Image](lego.md.horizontalConnector_horizontalConnector.png)
-
-[horizontalConnector.stl](lego.horizontalConnector.stl)

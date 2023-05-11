@@ -8,6 +8,10 @@ Add non-geometric edges where the selections intersect the shape.
 
 See: [demesh](../../nb/api/demesh.nb), [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/remesh.md).
 
+![Image](seam.md.$2_wireframe.png)
+
+Box(5, 5, 5).seam(Box([0, 5], [0, 5], [0, 5])) adds seams around a corner
+
 ```JavaScript
 Box(5, 5, 5)
   .seam(Box([0, 5], [0, 5], [0, 5]))
@@ -17,9 +21,9 @@ Box(5, 5, 5)
   );
 ```
 
-![Image](seam.md.$2_wireframe.png)
+![Image](seam.md.$3_wireframe.png)
 
-Box(5, 5, 5).seam(Box([0, 5], [0, 5], [0, 5])) adds seams around a corner
+Box(5, 5, 5).seam(Arc(4, 3, 5)) adds cylindrical seams
 
 ```JavaScript
 Box(5, 5, 5)
@@ -28,9 +32,9 @@ Box(5, 5, 5)
   .note('Box(5, 5, 5).seam(Arc(4, 3, 5)) adds cylindrical seams');
 ```
 
-![Image](seam.md.$3_wireframe.png)
+![Image](seam.md.$4_wireframe.png)
 
-Box(5, 5, 5).seam(Arc(4, 3, 5)) adds cylindrical seams
+Box(2, 2, [0, 10]).seam(Box(3, 3, [8, 10])).grow(1, 'xy', Box(3, 3, [9, 10])) makes grow fold at the seam, rather than at the far end.
 
 ```JavaScript
 Box(2, 2, [0, 10])
@@ -41,7 +45,3 @@ Box(2, 2, [0, 10])
     "Box(2, 2, [0, 10]).seam(Box(3, 3, [8, 10])).grow(1, 'xy', Box(3, 3, [9, 10])) makes grow fold at the seam, rather than at the far end."
   );
 ```
-
-![Image](seam.md.$4_wireframe.png)
-
-Box(2, 2, [0, 10]).seam(Box(3, 3, [8, 10])).grow(1, 'xy', Box(3, 3, [9, 10])) makes grow fold at the seam, rather than at the far end.

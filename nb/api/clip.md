@@ -11,6 +11,10 @@ Limits the coverage of shape that covered by all of the other shapes.
 
 See: [clipFrom](../../nb/api/clipFrom.md)
 
+![Image](clip.md.$2.png)
+
+Box(10).color('blue').clip(Arc(12).color('red'))
+
 ```JavaScript
 Box(10)
   .color('blue')
@@ -19,9 +23,9 @@ Box(10)
   .md("Box(10).color('blue').clip(Arc(12).color('red'))");
 ```
 
-![Image](clip.md.$2.png)
+![Image](clip.md.$3.png)
 
-Box(10).color('blue').clip(Arc(12).color('red'))
+Box(10).ez([2]).material('copper').clip(Orb(5))
 
 ```JavaScript
 Box(10)
@@ -32,9 +36,9 @@ Box(10)
   .md("Box(10).ez([2]).material('copper').clip(Orb(5))");
 ```
 
-![Image](clip.md.$3.png)
+![Image](clip.md.$4.png)
 
-Box(10).ez([2]).material('copper').clip(Orb(5))
+Box(10, 10, 10).clip(Box(12, 12, 8), 'open')
 
 ```JavaScript
 Box(10, 10, 10)
@@ -42,7 +46,3 @@ Box(10, 10, 10)
   .view()
   .md("Box(10, 10, 10).clip(Box(12, 12, 8), 'open')");
 ```
-
-![Image](clip.md.$4.png)
-
-Box(10, 10, 10).clip(Box(12, 12, 8), 'open')

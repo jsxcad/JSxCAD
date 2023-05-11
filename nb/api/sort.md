@@ -8,6 +8,14 @@ This orders a group of shapes by their extremal bounding box corner.
 
 e.g., if ordering by 'z>' the leaf with the greatest minimum z value is selected.
 
+![Image](sort.md.$2_1.png)
+
+Box(4, 4, 4).faces().n(0) selects an arbitrary face
+
+![Image](sort.md.$2_2.png)
+
+Box(4, 4, 4).faces().sort().n(0) selects the top-most face
+
 ```JavaScript
 Box(4, 4, 4)
   .faces()
@@ -20,13 +28,9 @@ Box(4, 4, 4)
   );
 ```
 
-![Image](sort.md.$2_1.png)
+![Image](sort.md.$3.png)
 
-Box(4, 4, 4).faces().n(0) selects an arbitrary face
-
-![Image](sort.md.$2_2.png)
-
-Box(4, 4, 4).faces().sort().n(0) selects the top-most face
+_Check this one_.
 
 ```JavaScript
 Box(4, 4, 4)
@@ -39,7 +43,3 @@ Box(4, 4, 4)
   .view()
   .note('_Check this one_.');
 ```
-
-![Image](sort.md.$3.png)
-
-_Check this one_.

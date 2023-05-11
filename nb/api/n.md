@@ -10,6 +10,14 @@ A longhand operator nth() is equivalent.
 
 See: [nth](../../nb/api/nth.md)
 
+![Image](n.md.$2_1.png)
+
+All of the lines are included.
+
+![Image](n.md.$2_2.png)
+
+Line(0.1, 5).seq({ by: 1 / 8 }, rz).n(0, 3, 6) extracts lines 0, 3, and 6.
+
 ```JavaScript
 Line(0.1, 5)
   .seq({ by: 1 / 8 }, rz)
@@ -21,11 +29,3 @@ Line(0.1, 5)
     'Line(0.1, 5).seq({ by: 1 / 8 }, rz).n(0, 3, 6) extracts lines 0, 3, and 6.'
   );
 ```
-
-![Image](n.md.$2_1.png)
-
-All of the lines are included.
-
-![Image](n.md.$2_2.png)
-
-Line(0.1, 5).seq({ by: 1 / 8 }, rz).n(0, 3, 6) extracts lines 0, 3, and 6.

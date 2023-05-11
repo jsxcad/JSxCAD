@@ -6,6 +6,10 @@ Parameter|Default|Type
 
 Constructs a point at the coordinate.
 
+![Image](Points.md.$2.png)
+
+Points([[1, 2, 3], [3, 2, 1], [0, 0, 0]]).and(loop()) shows three points linked together.
+
 ```JavaScript
 Points([
   [1, 2, 3],
@@ -18,7 +22,3 @@ Points([
     'Points([[1, 2, 3], [3, 2, 1], [0, 0, 0]]).and(loop()) shows three points linked together.'
   );
 ```
-
-![Image](Points.md.$2.png)
-
-Points([[1, 2, 3], [3, 2, 1], [0, 0, 0]]).and(loop()) shows three points linked together.

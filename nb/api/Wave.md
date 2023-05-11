@@ -10,12 +10,12 @@ op|Point|Function or shape to build from.
 
 Links the points produced by _op_ to form a wave.
 
+![Image](Wave.md.$2.png)
+
+Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))
+
 ```JavaScript
 Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))
   .view()
   .note('Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))');
 ```
-
-![Image](Wave.md.$2.png)
-
-Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))

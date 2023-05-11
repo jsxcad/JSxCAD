@@ -27,16 +27,12 @@ Supported materials:
 
 See: [image](../../nb/api/image.md)
 
-```JavaScript
-Box(5, 5, 2).material('aluminium').view().note("material('aluminium')");
-```
-
 ![Image](material.md.$2.png)
 
 material('aluminium')
 
 ```JavaScript
-Box(5, 5, 2).material('brass').view().note("material('brass')");
+Box(5, 5, 2).material('aluminium').view().note("material('aluminium')");
 ```
 
 ![Image](material.md.$3.png)
@@ -44,7 +40,7 @@ Box(5, 5, 2).material('brass').view().note("material('brass')");
 material('brass')
 
 ```JavaScript
-Box(5, 5, 2).material('brick').view().note("material('brick')");
+Box(5, 5, 2).material('brass').view().note("material('brass')");
 ```
 
 ![Image](material.md.$4.png)
@@ -52,7 +48,7 @@ Box(5, 5, 2).material('brick').view().note("material('brick')");
 material('brick')
 
 ```JavaScript
-Box(5, 5, 2).material('cardboard').view().note("material('cardboard')");
+Box(5, 5, 2).material('brick').view().note("material('brick')");
 ```
 
 ![Image](material.md.$5.png)
@@ -60,7 +56,7 @@ Box(5, 5, 2).material('cardboard').view().note("material('cardboard')");
 material('cardboard')
 
 ```JavaScript
-Box(5, 5, 2).material('circuit').view().note("material('circuit')");
+Box(5, 5, 2).material('cardboard').view().note("material('cardboard')");
 ```
 
 ![Image](material.md.$6.png)
@@ -68,7 +64,7 @@ Box(5, 5, 2).material('circuit').view().note("material('circuit')");
 material('circuit')
 
 ```JavaScript
-Box(5, 5, 2).material('copper').view().note("material('copper')");
+Box(5, 5, 2).material('circuit').view().note("material('circuit')");
 ```
 
 ![Image](material.md.$7.png)
@@ -76,7 +72,7 @@ Box(5, 5, 2).material('copper').view().note("material('copper')");
 material('copper')
 
 ```JavaScript
-Box(5, 5, 2).material('glass').view().note("material('glass')");
+Box(5, 5, 2).material('copper').view().note("material('copper')");
 ```
 
 ![Image](material.md.$8.png)
@@ -84,7 +80,7 @@ Box(5, 5, 2).material('glass').view().note("material('glass')");
 material('glass')
 
 ```JavaScript
-Box(5, 5, 2).material('grass').view().note("material('grass')");
+Box(5, 5, 2).material('glass').view().note("material('glass')");
 ```
 
 ![Image](material.md.$9.png)
@@ -92,7 +88,7 @@ Box(5, 5, 2).material('grass').view().note("material('grass')");
 material('grass')
 
 ```JavaScript
-Box(5, 5, 2).material('leaves').view().note("material('leaves')");
+Box(5, 5, 2).material('grass').view().note("material('grass')");
 ```
 
 ![Image](material.md.$10.png)
@@ -100,7 +96,7 @@ Box(5, 5, 2).material('leaves').view().note("material('leaves')");
 material('leaves')
 
 ```JavaScript
-Box(5, 5, 2).material('metal').view().note("material('metal')");
+Box(5, 5, 2).material('leaves').view().note("material('leaves')");
 ```
 
 ![Image](material.md.$11.png)
@@ -108,7 +104,7 @@ Box(5, 5, 2).material('metal').view().note("material('metal')");
 material('metal')
 
 ```JavaScript
-Box(5, 5, 2).material('paper').view().note("material('paper')");
+Box(5, 5, 2).material('metal').view().note("material('metal')");
 ```
 
 ![Image](material.md.$12.png)
@@ -116,7 +112,7 @@ Box(5, 5, 2).material('paper').view().note("material('paper')");
 material('paper')
 
 ```JavaScript
-Box(5, 5, 2).material('plastic').view().note("material('plastic')");
+Box(5, 5, 2).material('paper').view().note("material('paper')");
 ```
 
 ![Image](material.md.$13.png)
@@ -124,7 +120,7 @@ Box(5, 5, 2).material('plastic').view().note("material('plastic')");
 material('plastic')
 
 ```JavaScript
-Box(5, 5, 2).material('rock').view().note("material('rock')");
+Box(5, 5, 2).material('plastic').view().note("material('plastic')");
 ```
 
 ![Image](material.md.$14.png)
@@ -132,7 +128,7 @@ Box(5, 5, 2).material('rock').view().note("material('rock')");
 material('rock')
 
 ```JavaScript
-Box(5, 5, 2).material('steel').view().note("material('steel')");
+Box(5, 5, 2).material('rock').view().note("material('rock')");
 ```
 
 ![Image](material.md.$15.png)
@@ -140,7 +136,7 @@ Box(5, 5, 2).material('steel').view().note("material('steel')");
 material('steel')
 
 ```JavaScript
-Box(5, 5, 2).material('transparent').view().note("material('transparent')");
+Box(5, 5, 2).material('steel').view().note("material('steel')");
 ```
 
 ![Image](material.md.$16.png)
@@ -148,7 +144,7 @@ Box(5, 5, 2).material('transparent').view().note("material('transparent')");
 material('transparent')
 
 ```JavaScript
-Box(5, 5, 2).material('water').view().note("material('water')");
+Box(5, 5, 2).material('transparent').view().note("material('transparent')");
 ```
 
 ![Image](material.md.$17.png)
@@ -156,7 +152,7 @@ Box(5, 5, 2).material('water').view().note("material('water')");
 material('water')
 
 ```JavaScript
-Box(5, 5, 2).material('wood').view().note("material('wood')");
+Box(5, 5, 2).material('water').view().note("material('water')");
 ```
 
 ![Image](material.md.$18.png)
@@ -164,7 +160,7 @@ Box(5, 5, 2).material('wood').view().note("material('wood')");
 material('wood')
 
 ```JavaScript
-Box(5, 5, 2).material('wet-glass').view().note("material('wet-glass')");
+Box(5, 5, 2).material('wood').view().note("material('wood')");
 ```
 
 ![Image](material.md.$19.png)
@@ -172,9 +168,13 @@ Box(5, 5, 2).material('wet-glass').view().note("material('wet-glass')");
 material('wet-glass')
 
 ```JavaScript
-Box(5, 5, 2).material('zinc-steel').view().note("material('zinc-steel')");
+Box(5, 5, 2).material('wet-glass').view().note("material('wet-glass')");
 ```
 
 ![Image](material.md.$20.png)
 
 material('zinc-steel')
+
+```JavaScript
+Box(5, 5, 2).material('zinc-steel').view().note("material('zinc-steel')");
+```

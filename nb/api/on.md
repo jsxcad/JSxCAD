@@ -9,6 +9,18 @@ Rewrites the shape structure so that the selected leaves are replaced.
 
 op is called with the leaf to be replaced.
 
+![Image](on.md.$2_1.png)
+
+Group(Box(5).color('blue'), Box(5).color('red')).pack()
+
+![Image](on.md.$2_2.png)
+
+on(get('color:red'), cut(inset(1))) replaces the red box with its cut(inset(1))
+
+![Image](on.md.$2_3.png)
+
+on(get('color:blue'), Triangle(5)) replaces the blue box with a triangle.
+
 ```JavaScript
 Group(Box(5).color('blue'), Box(5).color('red'))
   .pack()
@@ -26,15 +38,3 @@ Group(Box(5).color('blue'), Box(5).color('red'))
     "on(get('color:blue'), Triangle(5)) replaces the blue box with a triangle."
   );
 ```
-
-![Image](on.md.$2_1.png)
-
-Group(Box(5).color('blue'), Box(5).color('red')).pack()
-
-![Image](on.md.$2_2.png)
-
-on(get('color:red'), cut(inset(1))) replaces the red box with its cut(inset(1))
-
-![Image](on.md.$2_3.png)
-
-on(get('color:blue'), Triangle(5)) replaces the blue box with a triangle.

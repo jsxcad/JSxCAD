@@ -12,13 +12,17 @@ Dimensions may be ranges as usual. e.g., Orb(1, 2, [4, 5]).
 
 See: [hasZag](../../nb/api/hasZag.md)
 
+![Image](Orb.md.$2.png)
+
+Orb(5)
+
 ```JavaScript
 Orb(5).and(Box(5, 5, 5).material('glass')).view().md('Orb(5)');
 ```
 
-![Image](Orb.md.$2.png)
+![Image](Orb.md.$3.png)
 
-Orb(5)
+Orb(3, 4, [0, 5])
 
 ```JavaScript
 Orb(3, 4, [0, 5])
@@ -27,9 +31,9 @@ Orb(3, 4, [0, 5])
   .md('Orb(3, 4, [0, 5])');
 ```
 
-![Image](Orb.md.$3.png)
+![Image](Orb.md.$4_1.png)
 
-Orb(3, 4, [0, 5])
+Orb(5) is rough with an tolerance of 1 mm
 
 ```JavaScript
 Orb(5)
@@ -37,16 +41,12 @@ Orb(5)
   .md('Orb(5) is rough with an tolerance of 1 mm');
 ```
 
-![Image](Orb.md.$4_1.png)
+![Image](Orb.md.$5_2.png)
 
-Orb(5) is rough with an tolerance of 1 mm
+Orb(5).hasZag(0.1) is much smoother with a tolerance of 0.1 mm
 
 ```JavaScript
 Orb(5, { zag: 0.1 })
   .view(2)
   .md('Orb(5).hasZag(0.1) is much smoother with a tolerance of 0.1 mm');
 ```
-
-![Image](Orb.md.$5_2.png)
-
-Orb(5).hasZag(0.1) is much smoother with a tolerance of 0.1 mm

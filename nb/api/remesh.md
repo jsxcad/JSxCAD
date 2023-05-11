@@ -14,21 +14,25 @@ The shape can be returned to its geometric triangulation via [demesh](../../nb/a
 
 See: [demesh](../../nb/api/demesh.md)
 
-```JavaScript
-Box(5, 5, 5).remesh(2.5).view('wireframe').note('Box(5, 5, 5).remesh(2.5)');
-```
-
 ![Image](remesh.md.$2_wireframe.png)
 
 Box(5, 5, 5).remesh(2.5)
 
 ```JavaScript
-Box(5, 5, 5).remesh(1).view('wireframe').note('Box(5, 5, 5).remesh(1)');
+Box(5, 5, 5).remesh(2.5).view('wireframe').note('Box(5, 5, 5).remesh(2.5)');
 ```
 
 ![Image](remesh.md.$3_wireframe.png)
 
 Box(5, 5, 5).remesh(1)
+
+```JavaScript
+Box(5, 5, 5).remesh(1).view('wireframe').note('Box(5, 5, 5).remesh(1)');
+```
+
+![Image](remesh.md.$4_wireframe.png)
+
+Box(5, 5, 5).remesh(0.5, Box([0, 5], [0, 5], [0, 5])) shows remeshing a part of a shape.
 
 ```JavaScript
 Box(5, 5, 5)
@@ -39,7 +43,3 @@ Box(5, 5, 5)
     'Box(5, 5, 5).remesh(0.5, Box([0, 5], [0, 5], [0, 5])) shows remeshing a part of a shape.'
   );
 ```
-
-![Image](remesh.md.$4_wireframe.png)
-
-Box(5, 5, 5).remesh(0.5, Box([0, 5], [0, 5], [0, 5])) shows remeshing a part of a shape.

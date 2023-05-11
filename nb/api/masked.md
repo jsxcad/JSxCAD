@@ -12,6 +12,10 @@ This allows for things like threaded bolts with cylindrical hole fittings.
 
 See: [masking](../../nb/api/masking.md)
 
+![Image](masked.md.$2.png)
+
+Arc(4).ez([10]).masked(Hexagon(6).ez([10])) masks a cylinder with a hexagonal prism.
+
 ```JavaScript
 Arc(4)
   .ez([10])
@@ -22,7 +26,3 @@ Arc(4)
     'Arc(4).ez([10]).masked(Hexagon(6).ez([10])) masks a cylinder with a hexagonal prism.'
   );
 ```
-
-![Image](masked.md.$2.png)
-
-Arc(4).ez([10]).masked(Hexagon(6).ez([10])) masks a cylinder with a hexagonal prism.

@@ -12,6 +12,10 @@ Elements of the group can be accessed via [n](../../nb/api/n.md)
 
 See: [n](../../nb/api/n.md)
 
+![Image](Group.md.$2.png)
+
+Group(Box().color('red'), Triangle().outline(), Arc().points()).view() produces a group of different types of geometry.
+
 ```JavaScript
 Group(Box().color('red'), Triangle().outline(), Arc().points())
   .view()
@@ -19,7 +23,3 @@ Group(Box().color('red'), Triangle().outline(), Arc().points())
     "Group(Box().color('red'), Triangle().outline(), Arc().points()).view() produces a group of different types of geometry."
   );
 ```
-
-![Image](Group.md.$2.png)
-
-Group(Box().color('red'), Triangle().outline(), Arc().points()).view() produces a group of different types of geometry.

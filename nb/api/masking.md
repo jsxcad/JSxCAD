@@ -12,6 +12,10 @@ This allows for things like threaded bolts with cylindrical hole fittings.
 
 See: [mask](../../nb/api/mask.md)
 
+![Image](masking.md.$2.png)
+
+Hexagon(6).ez([10]).masking(Arc(5).ez([10])) produces a hexagonal mask for the cylindrical volume.
+
 ```JavaScript
 Hexagon(6)
   .ez([10])
@@ -22,7 +26,3 @@ Hexagon(6)
     'Hexagon(6).ez([10]).masking(Arc(5).ez([10])) produces a hexagonal mask for the cylindrical volume.'
   );
 ```
-
-![Image](masking.md.$2.png)
-
-Hexagon(6).ez([10]).masking(Arc(5).ez([10])) produces a hexagonal mask for the cylindrical volume.

@@ -10,22 +10,22 @@ const Tile = (sides, offset = 0) =>
     );
 ```
 
-```JavaScript
-const squareTile = await Tile(4, 1 / 8).view();
-```
-
 ![Image](map.md.squareTile.png)
 
 ```JavaScript
-const fiveTile = await Tile(5).view();
+const squareTile = await Tile(4, 1 / 8).view();
 ```
 
 ![Image](map.md.fiveTile.png)
 
 ```JavaScript
-const hexagonalTile = await Tile(6).stl('hex');
+const fiveTile = await Tile(5).view();
 ```
 
 ![Image](map.md.hexagonalTile_hex.png)
 
 [hex.stl](map.hex.stl)
+
+```JavaScript
+const hexagonalTile = await Tile(6).stl('hex');
+```

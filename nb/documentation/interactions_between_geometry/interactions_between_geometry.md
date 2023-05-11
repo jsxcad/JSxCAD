@@ -6,6 +6,10 @@ JSxCAD offers a number of ways to interact two or more geometries to create new 
 ### ADD
 Returns the shape extended to include the space of the added shapes.
 
+![Image](interactions_between_geometry.md.$3.png)
+
+The result is blue since the blue shape was added to
+
 ```JavaScript
 Arc(10, 10, 5)
   .color('blue')
@@ -13,10 +17,6 @@ Arc(10, 10, 5)
   .view()
   .note(`The result is blue since the blue shape was added to`);
 ```
-
-![Image](interactions_between_geometry.md.$3.png)
-
-The result is blue since the blue shape was added to
 
 ---
 ### Assembly
@@ -28,6 +28,8 @@ The assembled shapes can later be disassembled into their disjoint parts.
 
 See Group as an alternative.
 
+![Image](interactions_between_geometry.md.twoCylindersAssembled.png)
+
 ```JavaScript
 const twoCylindersAssembled = Assembly(
   Arc(10, 10, 3).color('red'),
@@ -35,35 +37,37 @@ const twoCylindersAssembled = Assembly(
 ).view();
 ```
 
-![Image](interactions_between_geometry.md.twoCylindersAssembled.png)
-
 This can also be achieved with a.fit(b) and a.fitTo(b).
+
+![Image](interactions_between_geometry.md.$6.png)
 
 ```JavaScript
 Arc(10).fit(Box(5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.$6.png)
+![Image](interactions_between_geometry.md.$7.png)
 
 ```JavaScript
 Arc(10).fitTo(Box(5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.$7.png)
-
 ---
 ### ChainHull
 Performs the hull operation sequentially on the input shapes.
+
+![Image](interactions_between_geometry.md.$9.png)
 
 ```JavaScript
 ChainHull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
 
-![Image](interactions_between_geometry.md.$9.png)
-
 ---
 ### Clip
 Returns the shape limited to the space of the clipping shapes.
+
+![Image](interactions_between_geometry.md.$11.png)
+
+The result is blue since the blue shape was clipped
 
 ```JavaScript
 Arc(10, 10, 5)
@@ -73,9 +77,9 @@ Arc(10, 10, 5)
   .md(`The result is blue since the blue shape was clipped`);
 ```
 
-![Image](interactions_between_geometry.md.$11.png)
+![Image](interactions_between_geometry.md.$12.png)
 
-The result is blue since the blue shape was clipped
+The result is red since the red shape was clipped from.
 
 ```JavaScript
 Arc(10, 10, 5)
@@ -85,13 +89,13 @@ Arc(10, 10, 5)
   .md(`The result is red since the red shape was clipped from.`);
 ```
 
-![Image](interactions_between_geometry.md.$12.png)
-
-The result is red since the red shape was clipped from.
-
 ---
 ### Cut
 Returns the shape with space of the cut shapes removed.
+
+![Image](interactions_between_geometry.md.$14.png)
+
+The result is blue since the blue shape was cut.
 
 ```JavaScript
 Arc(10, 10, 5)
@@ -101,9 +105,9 @@ Arc(10, 10, 5)
   .md(`The result is blue since the blue shape was cut.`);
 ```
 
-![Image](interactions_between_geometry.md.$14.png)
+![Image](interactions_between_geometry.md.$15.png)
 
-The result is blue since the blue shape was cut.
+The result is red since the red shape was cut from.
 
 ```JavaScript
 Arc(10, 10, 5)
@@ -111,10 +115,6 @@ Arc(10, 10, 5)
   .view()
   .md(`The result is red since the red shape was cut from.`);
 ```
-
-![Image](interactions_between_geometry.md.$15.png)
-
-The result is red since the red shape was cut from.
 
 ---
 ### Fit
@@ -128,23 +128,23 @@ const axle = Arc(5, 5, 10).color('brown');
 const wheel = Arc(20, 20, 2).color('grey');
 ```
 
-```JavaScript
-wheel.fitTo(axle).view();
-```
-
 ![Image](interactions_between_geometry.md.$17.png)
 
 ```JavaScript
-axle.fit(wheel).view();
+wheel.fitTo(axle).view();
 ```
 
 ![Image](interactions_between_geometry.md.$18.png)
 
 ```JavaScript
-wheel.fitTo(axle).pack().view(); //In both of these cases the axle cuts the wheel.
+axle.fit(wheel).view();
 ```
 
 ![Image](interactions_between_geometry.md.$19.png)
+
+```JavaScript
+wheel.fitTo(axle).pack().view(); //In both of these cases the axle cuts the wheel.
+```
 
 ---
 ### Group
@@ -152,27 +152,27 @@ Similar to Assembly, group joins together a number of shapes, however unlike Ass
 
 Group can also be done using the .and() operator.
 
+![Image](interactions_between_geometry.md.$21.png)
+
 ```JavaScript
 Group(Arc(10, 10, 3), Arc(10, 10, 3).x(4)).view();
 ```
 
-![Image](interactions_between_geometry.md.$21.png)
+![Image](interactions_between_geometry.md.$22.png)
 
 ```JavaScript
 Arc(10, 10, 3).and(Arc(10, 10, 3).x(4)).view(); //Does a group
 ```
 
-![Image](interactions_between_geometry.md.$22.png)
-
 ---
 ### Hull
 Performs the hull operation on the input shapes.
 
+![Image](interactions_between_geometry.md.$24.png)
+
 ```JavaScript
 Hull(Arc(10), Box(5).move(12, 12, 0), Arc(20).x(40)).view();
 ```
-
-![Image](interactions_between_geometry.md.$24.png)
 
 ---
 ### Mask
@@ -182,24 +182,24 @@ Mask is used to create a mask around something. This allows the shape to cut a l
 const shaft = Arc(10, 10, 40).color('grey');
 ```
 
+![Image](interactions_between_geometry.md.$26.png)
+
 ```JavaScript
 shaft.masked(grow(1)).view();
 ```
-
-![Image](interactions_between_geometry.md.$26.png)
 
 ---
 ### Pack
 Pack takes input geometry and lays it out on a sheet. Groups and Assemblies are split apart, but items are preserved.
 
+![Image](interactions_between_geometry.md.$28.png)
+
 ```JavaScript
 Group(Arc(10), Box(3), Box(3.5)).pack().view();
 ```
 
-![Image](interactions_between_geometry.md.$28.png)
+![Image](interactions_between_geometry.md.$29.png)
 
 ```JavaScript
 Group(Arc(10), Box(3), Box(3.5)).as('anItem').pack().view();
 ```
-
-![Image](interactions_between_geometry.md.$29.png)

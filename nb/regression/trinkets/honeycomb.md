@@ -1,3 +1,5 @@
+![Image](honeycomb.md.$1.png)
+
 ```JavaScript
 await Hexagon(4)
   .seq(
@@ -11,5 +13,3 @@ await Hexagon(4)
   .clip(Arc(45).ez([10]))
   .view();
 ```
-
-![Image](honeycomb.md.$1.png)

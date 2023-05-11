@@ -6,6 +6,14 @@ reference||The reference by which to transform shape.
 
 Transforms shape by the provided reference.
 
+![Image](by.md.$2_1.png)
+
+Box(10).and(align('x>')) produces a box and a reference point
+
+![Image](by.md.$2_2.png)
+
+by(align('x>')) moves both by the reference.
+
 ```JavaScript
 Box(10)
   .and(align('x>'))
@@ -15,11 +23,3 @@ Box(10)
   .view(2)
   .note("by(align('x>')) moves both by the reference.");
 ```
-
-![Image](by.md.$2_1.png)
-
-Box(10).and(align('x>')) produces a box and a reference point
-
-![Image](by.md.$2_2.png)
-
-by(align('x>')) moves both by the reference.

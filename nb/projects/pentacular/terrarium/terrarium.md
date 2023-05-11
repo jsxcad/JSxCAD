@@ -146,6 +146,10 @@ const makeTerrarium = () => (shape) =>
 
 This is a preview of the assembled 50x50x50mm terrarium formed from 3mm acrylic with a 5mm hinge length and a 20mm diameter hole in the top with matching plug, cut with a 0.09mm laser beam.
 
+![Image](terrarium.md.terrarium_1.png)
+
+![Image](terrarium.md.terrarium_2.png)
+
 ```JavaScript
 const terrarium = await Terrarium(
   length,
@@ -177,10 +181,6 @@ const terrarium = await Terrarium(
   );
 ```
 
-![Image](terrarium.md.terrarium_1.png)
-
-![Image](terrarium.md.terrarium_2.png)
-
 ### Instructions
 
 Specify the dimensions of the terrarium you want, taking some care with the sheet thickness and kerf.
@@ -190,13 +190,6 @@ I recommend cutting two pieces to test how well they mesh with the kerf supplied
 The panels should have a snug fit, so that the assembly is solid without requiring glue.
 
 The lid should have a snug fit internally, but a loose connection to the top panel so that it can be easily removed.
-
-```JavaScript
-await terrarium
-  .z(-height)
-  .note('### Laser cut profiles')
-  .op(makeTerrarium(), makeLid());
-```
 
 ### Laser cut profiles
 
@@ -247,3 +240,10 @@ These profiles assemble to form the lid
 [lid_pin.pdf](terrarium.lid_pin.pdf)
 
 Stack the larger disc on the smaller and then push the rectangular pin through to connect them.
+
+```JavaScript
+await terrarium
+  .z(-height)
+  .note('### Laser cut profiles')
+  .op(makeTerrarium(), makeLid());
+```

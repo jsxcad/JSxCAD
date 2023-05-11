@@ -8,13 +8,17 @@ Moves a shape by the offset given.
 
 See: [moveAlong](../../nb/api/moveAlong.md)
 
+![Image](move.md.$2.png)
+
+Box().move(0, 1, 0) moves one along y.
+
 ```JavaScript
 Box().move(0, 1, 0).view().note('Box().move(0, 1, 0) moves one along y.');
 ```
 
-![Image](move.md.$2.png)
+![Image](move.md.$3.png)
 
-Box().move(0, 1, 0) moves one along y.
+Box().move(Point(1, 0, 0)) moves one along x
 
 ```JavaScript
 Box()
@@ -22,7 +26,3 @@ Box()
   .view()
   .note('Box().move(Point(1, 0, 0)) moves one along x');
 ```
-
-![Image](move.md.$3.png)
-
-Box().move(Point(1, 0, 0)) moves one along x

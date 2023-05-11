@@ -14,6 +14,8 @@ See: [Link](../../nb/api/Link.md)
 
 _Note: We should rethink Arc and Box being implicitly filled._
 
+![Image](Loop.md.$2.png)
+
 ```JavaScript
 Loop(
   Line(5),
@@ -23,7 +25,7 @@ Loop(
 ).view();
 ```
 
-![Image](Loop.md.$2.png)
+![Image](Loop.md.$3.png)
 
 ```JavaScript
 Seq(
@@ -35,5 +37,3 @@ Seq(
   Loop
 ).view();
 ```
-
-![Image](Loop.md.$3.png)

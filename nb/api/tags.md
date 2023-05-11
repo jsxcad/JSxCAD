@@ -9,6 +9,10 @@ Collects the set of tags of the given namespace associated with leaf geometry in
 
 See: [tag](../../nb/api/tag.md).
 
+tags: user:a,user:b
+
+Box().tag('a').and(Box().tag('b')).tags()
+
 ```JavaScript
 Box()
   .tag('a')
@@ -16,7 +20,3 @@ Box()
   .tags()
   .note("Box().tag('a').and(Box().tag('b')).tags()");
 ```
-
-tags: user:a,user:b
-
-Box().tag('a').and(Box().tag('b')).tags()
