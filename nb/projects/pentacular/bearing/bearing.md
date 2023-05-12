@@ -21,15 +21,6 @@ const Bearing = (diameter) =>
     );
 ```
 
-```JavaScript
-const bearing_10_7 = await Bearing(10.7)
-  .view(material('glass'))
-  .md(`You'll need to print two of these`)
-  .stl('bearing_10_7_top', get('top'))
-  .md(`And one of these`)
-  .stl('bearing_10_7_pin', get('pin'));
-```
-
 ![Image](bearing.md.bearing_10_7.png)
 
 You'll need to print two of these
@@ -43,3 +34,12 @@ And one of these
 ![Image](bearing.md.bearing_10_7_bearing_10_7_pin.png)
 
 [bearing_10_7_pin.stl](bearing.bearing_10_7_pin.stl)
+
+```JavaScript
+const bearing_10_7 = await Bearing(10.7)
+  .view(material('glass'))
+  .md(`You'll need to print two of these`)
+  .stl('bearing_10_7_top', get('top'))
+  .md(`And one of these`)
+  .stl('bearing_10_7_pin', get('pin'));
+```

@@ -49,18 +49,6 @@ const flatThickness = control('flat thickness', 3, 'input');
 const play = control('play', 0.2, 'input');
 ```
 
-```JavaScript
-await Flat({ diameter, length: flatLength, thickness: flatThickness })
-  .view()
-  .note(
-    "import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
-  )
-  .note(
-    `Flat({ diameter: ${diameter}, length: ${flatLength}, thickness: ${flatThickness} })`
-  )
-  .abstract();
-```
-
 ![Image](shaft.md.$2.png)
 
 import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
@@ -73,10 +61,14 @@ graph LR;
 ```
 
 ```JavaScript
-await Shaft({ diameter, length, play })
+await Flat({ diameter, length: flatLength, thickness: flatThickness })
   .view()
-  .note("import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';")
-  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
+  .note(
+    "import { Flat } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';"
+  )
+  .note(
+    `Flat({ diameter: ${diameter}, length: ${flatLength}, thickness: ${flatThickness} })`
+  )
   .abstract();
 ```
 
@@ -89,6 +81,29 @@ Shaft({ diameter: 5, length: 10, play: 0.2 })
 ```mermaid
 graph LR;
   0[item<br>item:shaft]
+```
+
+```JavaScript
+await Shaft({ diameter, length, play })
+  .view()
+  .note("import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';")
+  .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
+  .abstract();
+```
+
+![Image](shaft.md.$4.png)
+
+import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
+
+FlatShaft({ diameter: 5, length: 10, flatLength: 5, flatThickness: 3, play: 0.2 })
+
+```mermaid
+graph LR;
+  0[item<br>item:shaft]
+  0 --> 1;
+  1[item<br>item:flat<br>type:void<br>type:ghost]
+  0 --> 2;
+  2[item<br>item:flat<br>type:masked]
 ```
 
 ```JavaScript
@@ -109,19 +124,4 @@ await FlatShaft({
     `FlatShaft({ diameter: ${diameter}, length: ${length}, flatLength: ${flatLength}, flatThickness: ${flatThickness}, play: ${play} })`
   )
   .abstract();
-```
-
-![Image](shaft.md.$4.png)
-
-import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
-
-FlatShaft({ diameter: 5, length: 10, flatLength: 5, flatThickness: 3, play: 0.2 })
-
-```mermaid
-graph LR;
-  0[item<br>item:shaft]
-  0 --> 1;
-  1[item<br>item:flat<br>type:void<br>type:ghost]
-  0 --> 2;
-  2[item<br>item:flat<br>type:masked]
 ```

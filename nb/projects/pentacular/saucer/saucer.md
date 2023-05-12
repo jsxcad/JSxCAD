@@ -1,3 +1,5 @@
+![Image](saucer.md.profile.png)
+
 ```JavaScript
 const profile = await Arc(1, { start: 0 / 4, end: 2 / 4 })
   .x(10)
@@ -8,7 +10,7 @@ const profile = await Arc(1, { start: 0 / 4, end: 2 / 4 })
   .view();
 ```
 
-![Image](saucer.md.profile.png)
+![Image](saucer.md.saucer_2.png)
 
 ```JavaScript
 const saucer = await profile
@@ -17,7 +19,7 @@ const saucer = await profile
   .view(2);
 ```
 
-![Image](saucer.md.saucer_2.png)
+![Image](saucer.md.knob.png)
 
 ```JavaScript
 const knob = await Loft(
@@ -52,8 +54,6 @@ const knob = await Loft(
   .view();
 ```
 
-![Image](saucer.md.knob.png)
-
 ```JavaScript
 const top = await saucer
   .upperEnvelope()
@@ -63,6 +63,10 @@ const top = await saucer
   .as('top')
   .stl('knob', get('knob').by(align('>z')));
 ```
+
+![Image](saucer.md.topWithPegHoles_top2.png)
+
+[top2.stl](saucer.top2.stl)
 
 ```JavaScript
 const topWithPegHoles = await top
@@ -80,13 +84,13 @@ const topWithPegHoles = await top
   );
 ```
 
-![Image](saucer.md.topWithPegHoles_top2.png)
-
-[top2.stl](saucer.top2.stl)
-
 ```JavaScript
 const base = await saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
 ```
+
+![Image](saucer.md.baseWithPegHoles_base.png)
+
+[base.stl](saucer.base.stl)
 
 ```JavaScript
 const baseWithPegHoles = await base
@@ -98,7 +102,3 @@ const baseWithPegHoles = await base
   )
   .stl('base');
 ```
-
-![Image](saucer.md.baseWithPegHoles_base.png)
-
-[base.stl](saucer.base.stl)

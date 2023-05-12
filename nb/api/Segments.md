@@ -8,6 +8,10 @@ These segments do not have individual orientation.
 
 See: [Edge](../../nb/api/Edge.md).
 
+![Image](Segments.md.$2.png)
+
+Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])
+
 ```JavaScript
 Segments([
   [
@@ -22,7 +26,3 @@ Segments([
   .view()
   .note('Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])');
 ```
-
-![Image](Segments.md.$2.png)
-
-Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])

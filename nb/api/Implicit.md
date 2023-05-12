@@ -12,6 +12,10 @@ Builds a volume by finding the surface at which function(x, y, z) is approximate
 
 _Note: non-deterministic._
 
+![Image](Implicit.md.$2.png)
+
+Implicit(2, (x, y, z) => x * x + y * y + z * z - 1) produces a sphere of radius 1.
+
 ```JavaScript
 Implicit(2, (x, y, z) => x * x + y * y + z * z - 1)
   .view({ withGrid: false })
@@ -19,7 +23,3 @@ Implicit(2, (x, y, z) => x * x + y * y + z * z - 1)
     'Implicit(2, (x, y, z) => x * x + y * y + z * z - 1) produces a sphere of radius 1.'
   );
 ```
-
-![Image](Implicit.md.$2.png)
-
-Implicit(2, (x, y, z) => x * x + y * y + z * z - 1) produces a sphere of radius 1.

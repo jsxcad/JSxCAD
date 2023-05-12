@@ -7,6 +7,14 @@ Demeshing a shape can speed up subsequent operations, but some operations requir
 
 See: [remesh](../../nb/api/remesh.md)
 
+![Image](demesh.md.$2_1.png)
+
+Box(5, 5, 5).remesh(1) produces these facets.
+
+![Image](demesh.md.$2_2.png)
+
+Box(5, 5, 5).remesh(1).demesh() produces the required facets.
+
 ```JavaScript
 Box(5, 5, 5)
   .remesh(1)
@@ -16,11 +24,3 @@ Box(5, 5, 5)
   .view(2, 'wireframe')
   .md('Box(5, 5, 5).remesh(1).demesh() produces the required facets.');
 ```
-
-![Image](demesh.md.$2_1.png)
-
-Box(5, 5, 5).remesh(1) produces these facets.
-
-![Image](demesh.md.$2_2.png)
-
-Box(5, 5, 5).remesh(1).demesh() produces the required facets.

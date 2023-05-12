@@ -12,6 +12,10 @@ The segment has a consistent local orientation along z, facing x.
 
 See: [eachEdge](../../nb/api/eachEdge.md).
 
+![Image](Edge.md.$2_1.png)
+
+Box([0, 1], [0, 2], [0, 10]).to(Edge(Point(), Point(0, 6), Point(0, 0, 5))) orients a box at an edge.
+
 ```JavaScript
 Box([0, 1], [0, 2], [0, 10])
   .to(Edge(Point(), Point(0, 6), Point(0, 0, 5)))
@@ -21,9 +25,9 @@ Box([0, 1], [0, 2], [0, 10])
   );
 ```
 
-![Image](Edge.md.$2_1.png)
+![Image](Edge.md.$3_1.png)
 
-Box([0, 1], [0, 2], [0, 10]).to(Edge(Point(), Point(0, 6), Point(0, 0, 5))) orients a box at an edge.
+Group(Edge([0, 0], [0, 1]), Edge([0, 1], [1, 1]), Edge([1, 1], [1, 0]), Edge([1, 0], [0, 0])).fill() builds a face from edges.
 
 ```JavaScript
 Group(
@@ -38,7 +42,3 @@ Group(
     'Group(Edge([0, 0], [0, 1]), Edge([0, 1], [1, 1]), Edge([1, 1], [1, 0]), Edge([1, 0], [0, 0])).fill() builds a face from edges.'
   );
 ```
-
-![Image](Edge.md.$3_1.png)
-
-Group(Edge([0, 0], [0, 1]), Edge([0, 1], [1, 1]), Edge([1, 1], [1, 0]), Edge([1, 0], [0, 0])).fill() builds a face from edges.

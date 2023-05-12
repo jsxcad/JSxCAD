@@ -11,6 +11,10 @@ Produces a surface inscribed around the shape.
 
 See: [inset](../../nb/api/inset.md).
 
+![Image](offset.md.$2.png)
+
+Arc(5).join(Box(10, 2, 2)).cutFrom(offset(0.5))
+
 ```JavaScript
 Arc(5)
   .join(Box(10, 2, 2))
@@ -19,9 +23,9 @@ Arc(5)
   .note('Arc(5).join(Box(10, 2, 2)).cutFrom(offset(0.5))');
 ```
 
-![Image](offset.md.$2.png)
+![Image](offset.md.$3.png)
 
-Arc(5).join(Box(10, 2, 2)).cutFrom(offset(0.5))
+Arc(5).join(Box(10, 2, 2)).cutFrom(offset(0.5, { step: 0.5, limit: 5 })) produces further offsets.
 
 ```JavaScript
 Arc(5)
@@ -32,7 +36,3 @@ Arc(5)
     'Arc(5).join(Box(10, 2, 2)).cutFrom(offset(0.5, { step: 0.5, limit: 5 })) produces further offsets.'
   );
 ```
-
-![Image](offset.md.$3.png)
-
-Arc(5).join(Box(10, 2, 2)).cutFrom(offset(0.5, { step: 0.5, limit: 5 })) produces further offsets.

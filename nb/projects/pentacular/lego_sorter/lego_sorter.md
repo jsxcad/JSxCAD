@@ -1,3 +1,5 @@
+![Image](lego_sorter.md.grid.png)
+
 ```JavaScript
 const grid = Hexagon(16)
   .seq(
@@ -10,27 +12,25 @@ const grid = Hexagon(16)
   .gridView();
 ```
 
-![Image](lego_sorter.md.grid.png)
+![Image](lego_sorter.md.base.png)
 
 ```JavaScript
 const base = await grid.cutFrom(Arc(100)).ez([1]).gridView();
 ```
 
-![Image](lego_sorter.md.base.png)
+![Image](lego_sorter.md.ring.png)
 
 ```JavaScript
 const ring = await Arc(99).cutFrom(Arc(102)).ez([2.5]).gridView();
 ```
 
-![Image](lego_sorter.md.ring.png)
+![Image](lego_sorter.md.sorter_sorter.png)
+
+[sorter.stl](lego_sorter.sorter.stl)
 
 ```JavaScript
 const sorter = await ring.and(base).stl('sorter');
 ```
-
-![Image](lego_sorter.md.sorter_sorter.png)
-
-[sorter.stl](lego_sorter.sorter.stl)
 
 ```JavaScript
 const wall1 = await grid
@@ -39,6 +39,8 @@ const wall1 = await grid
   .ez([2])
   .rx(1 / 4);
 ```
+
+![Image](lego_sorter.md.wall.png)
 
 ```JavaScript
 const wall = await wall1
@@ -51,7 +53,7 @@ const wall = await wall1
   .view();
 ```
 
-![Image](lego_sorter.md.wall.png)
+![Image](lego_sorter.md.bentWall.png)
 
 ```JavaScript
 const bentWall = await wall
@@ -63,14 +65,12 @@ const bentWall = await wall
   .view();
 ```
 
-![Image](lego_sorter.md.bentWall.png)
-
-```JavaScript
-await bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');
-```
-
 ![Image](lego_sorter.md.$1.png)
 
 ![Image](lego_sorter.md.$1_tall_sorter.png)
 
 [tall_sorter.stl](lego_sorter.tall_sorter.stl)
+
+```JavaScript
+await bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');
+```

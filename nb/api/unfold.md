@@ -7,6 +7,10 @@ Unfolds a solid into a set of flat faces and edges suitable for folding back int
 
 The faces are tagged with 'unfold:faces' and each fold edge is tagged with 'fold:edge'.
 
+![Image](unfold.md.$2.png)
+
+Box(10).ez([10]).unfold()
+
 ```JavaScript
 await Box(10)
   .ez([10])
@@ -15,9 +19,9 @@ await Box(10)
   .note('Box(10).ez([10]).unfold()');
 ```
 
-![Image](unfold.md.$2.png)
+![Image](unfold.md.$3.png)
 
-Box(10).ez([10]).unfold()
+Box(10).ez([10]).unfold().on(get('unfold:faces'), color('blue').ez([0.1])).and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))
 
 ```JavaScript
 await Box(10)
@@ -28,7 +32,3 @@ await Box(10)
   .view()
   .note(`Box(10).ez([10]).unfold().on(get('unfold:faces'), color('blue').ez([0.1])).and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))`);
 ```
-
-![Image](unfold.md.$3.png)
-
-Box(10).ez([10]).unfold().on(get('unfold:faces'), color('blue').ez([0.1])).and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))

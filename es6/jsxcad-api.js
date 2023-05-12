@@ -64,7 +64,6 @@ const $run = async (op, { path, id, text, sha, line }) => {
     const timer = startTime(`${path}/${id}`);
     beginRecordingNotes();
     beginEmitGroup({ path, id, line });
-    emitSourceText(text);
     let result;
     try {
       result = await op();
@@ -77,12 +76,14 @@ const $run = async (op, { path, id, text, sha, line }) => {
           .md('Debug Geometry: ')
           .view();
         await resolvePending();
+        emitSourceText(text);
         finishEmitGroup({ path, id, line });
       }
       throw error;
     }
     await resolvePending();
     endTime(timer);
+    emitSourceText(text);
     finishEmitGroup({ path, id });
     try {
       if (result !== undefined) {

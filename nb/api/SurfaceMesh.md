@@ -8,6 +8,8 @@ Reconstructs a surface mesh from its serialization.
 
 _This is intended for debugging._
 
+![Image](SurfaceMesh.md.$2.png)
+
 ```JavaScript
 SurfaceMesh(
   '8
@@ -36,5 +38,3 @@ SurfaceMesh(
 '
 ).view();
 ```
-
-![Image](SurfaceMesh.md.$2.png)

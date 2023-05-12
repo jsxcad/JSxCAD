@@ -95,6 +95,14 @@ const getCoordinate = async (value) => {
   }
 };
 
+const getCoordinates = async (value) => {
+  const coordinates = [];
+  for (const [x = 0, y = 0, z = 0] of await value.toPoints()) {
+    coordinates.push([x, y, z]);
+  }
+  return coordinates;
+};
+
 export const destructure2 = async (shape, input, ...specs) => {
   const output = [];
   let args = [];
@@ -319,11 +327,13 @@ export const destructure2 = async (shape, input, ...specs) => {
         for (const arg of args) {
           let value = await resolve(shape, arg);
           if (Shape.isShape(value)) {
-            value = await getCoordinate(value);
+            const coordinates = await getCoordinates(value);
+            if (coordinates.length > 0) {
+              out.push(...coordinates);
+            } else {
+              rest.push(arg);
+            }
           } else if (Shape.isArray(value)) {
-            value = await resolveArray(shape, value);
-          }
-          if (Shape.isValue(value)) {
             out.push(value);
           } else {
             rest.push(arg);

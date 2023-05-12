@@ -17,6 +17,8 @@ e.g., '''shape.deform(other.absolute().rx(1/4))'''
 
 See: [absolute](../../nb/api/absolute.md)
 
+![Image](deform.md.$2_1.png)
+
 ```JavaScript
 Box(10, 3, 3)
   .remesh(1)
@@ -32,5 +34,3 @@ Box(10, 3, 3)
   )
   .view(1);
 ```
-
-![Image](deform.md.$2_1.png)

@@ -209,12 +209,6 @@ const extrudeTile = () => async (shape) => {
 }
 ```
 
-```JavaScript
-await Group(roadTile, curvedRoadTile)
-  .op(extrudeTile())
-  .stl('3yd tiles', page('individual'));
-```
-
 ![Image](road.md.$2_3yd_tiles.png)
 
 [3yd tiles.stl](road.3yd%20tiles.stl)
@@ -224,24 +218,9 @@ await Group(roadTile, curvedRoadTile)
 [3yd tiles_2.stl](road.3yd%20tiles_2.stl)
 
 ```JavaScript
-await Group(
-  roadTile.copy(1),
-  doubleLaneRoadTile.copy(1),
-  roadEndTile.copy(1),
-  doubleLaneRoadEndTile.copy(1),
-  curvedRoadTile.copy(1),
-  doubleLaneCurvedRoadTile.copy(1),
-  curvedThreeWayIntersectionTile.copy(1),
-  curvedFourWayIntersectionTile.copy(1),
-  doubleLaneCurvedFourWayIntersectionTile.copy(1),
-  doubleLaneCurvedThreeWayIntersectionTile.copy(1),
-  doubleToSingleLaneCurvedThreeWayIntersectionTile.copy(1),
-  doubleToSingleLaneCurvedFourWayIntersectionTile.copy(1)
-)
-  .scale(1000 / 160)
-  .clean()
-  .pdf('2d road tile', page('a4', 'pack'))
-  .stl('3d road tile', op(extrudeTile()).page('individual'));
+await Group(roadTile, curvedRoadTile)
+  .op(extrudeTile())
+  .stl('3yd tiles', page('individual'));
 ```
 
 ![Image](road.md.$3_2d_road_tile.png)
@@ -295,3 +274,24 @@ await Group(
 ![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_12.stl](road.3d%20road%20tile_12.stl)
+
+```JavaScript
+await Group(
+  roadTile.copy(1),
+  doubleLaneRoadTile.copy(1),
+  roadEndTile.copy(1),
+  doubleLaneRoadEndTile.copy(1),
+  curvedRoadTile.copy(1),
+  doubleLaneCurvedRoadTile.copy(1),
+  curvedThreeWayIntersectionTile.copy(1),
+  curvedFourWayIntersectionTile.copy(1),
+  doubleLaneCurvedFourWayIntersectionTile.copy(1),
+  doubleLaneCurvedThreeWayIntersectionTile.copy(1),
+  doubleToSingleLaneCurvedThreeWayIntersectionTile.copy(1),
+  doubleToSingleLaneCurvedFourWayIntersectionTile.copy(1)
+)
+  .scale(1000 / 160)
+  .clean()
+  .pdf('2d road tile', page('a4', 'pack'))
+  .stl('3d road tile', op(extrudeTile()).page('individual'));
+```

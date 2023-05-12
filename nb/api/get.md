@@ -12,6 +12,10 @@ Does not find leaf geometry within items - use in() to access the interior of an
 
 See: [getNot](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/getNot.nb), [in](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/in.nb).
 
+![Image](get.md.design_1.png)
+
+const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack().in();
+
 ```JavaScript
 const design = Group(
   Box(5).as('box'),
@@ -26,9 +30,9 @@ const design = Group(
   );
 ```
 
-![Image](get.md.design_1.png)
+![Image](get.md.$2.png)
 
-const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack().in();
+design.get('color:blue') finds the Arc, but not the Triangle.
 
 ```JavaScript
 design
@@ -37,17 +41,15 @@ design
   .note("design.get('color:blue') finds the Arc, but not the Triangle.");
 ```
 
-![Image](get.md.$2.png)
+![Image](get.md.$3.png)
 
-design.get('color:blue') finds the Arc, but not the Triangle.
+design.get('triangle') finds the triangle
 
 ```JavaScript
 design.get('triangle').view().note("design.get('triangle') finds the triangle");
 ```
 
-![Image](get.md.$3.png)
-
-design.get('triangle') finds the triangle
+![Image](get.md.$4.png)
 
 ```JavaScript
 design
@@ -55,5 +57,3 @@ design
   .view()
   .note('design.get(' * ') finds all items');
 ```
-
-![Image](get.md.$4.png)

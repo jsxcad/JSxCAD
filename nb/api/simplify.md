@@ -7,6 +7,12 @@ eps||Number of mm for point resolution.
 
 _Check: does this actually do anything?_
 
+![Image](simplify.md.$2_1.png)
+
+Box(2).cut(Arc([0.5, 1.5], 0.5, { zag: 0.001 }).seq({ by: 1 / 12 }, rz))
+
+![Image](simplify.md.$2_2.png)
+
 ```JavaScript
 Box(2)
   .cut(
@@ -19,9 +25,3 @@ Box(2)
   .simplify(0)
   .view(2);
 ```
-
-![Image](simplify.md.$2_1.png)
-
-Box(2).cut(Arc([0.5, 1.5], 0.5, { zag: 0.001 }).seq({ by: 1 / 12 }, rz))
-
-![Image](simplify.md.$2_2.png)

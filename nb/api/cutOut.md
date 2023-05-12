@@ -14,6 +14,10 @@ Cut and clips shape by other, passing through the mode flags.
 
 See: [clip](../../nb/api/cut.nb), [cut](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/cut.md).
 
+![Image](cutOut.md.$2.png)
+
+Box(10).cutOut(Arc(12), color('red'), color('blue'))
+
 ```JavaScript
 Box(10)
   .cutOut(Arc(12), color('red'), color('blue'))
@@ -21,7 +25,3 @@ Box(10)
   .view()
   .md("Box(10).cutOut(Arc(12), color('red'), color('blue'))");
 ```
-
-![Image](cutOut.md.$2.png)
-
-Box(10).cutOut(Arc(12), color('red'), color('blue'))

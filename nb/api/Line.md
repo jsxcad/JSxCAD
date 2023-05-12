@@ -12,13 +12,17 @@ The extents are then sorted and paired.
 
 _Note: Appending a zero into a sequence with negative numbers can have surprising results._
 
+![Image](Line.md.$2.png)
+
+Line(5) produces a line from [0, 0, 0] to [5, 0, 0].
+
 ```JavaScript
 Line(5).view().note('Line(5) produces a line from [0, 0, 0] to [5, 0, 0].');
 ```
 
-![Image](Line.md.$2.png)
+![Image](Line.md.$3.png)
 
-Line(5) produces a line from [0, 0, 0] to [5, 0, 0].
+Line(5, -5) produces a line from [-5, 0, 0] to [5, 0, 0].
 
 ```JavaScript
 Line(5, -5)
@@ -26,9 +30,9 @@ Line(5, -5)
   .note('Line(5, -5) produces a line from [-5, 0, 0] to [5, 0, 0].');
 ```
 
-![Image](Line.md.$3.png)
+![Image](Line.md.$4.png)
 
-Line(5, -5) produces a line from [-5, 0, 0] to [5, 0, 0].
+Line(5).and(rz(1 / 8)) produces a 1/8th angle.
 
 ```JavaScript
 Line(5)
@@ -37,9 +41,9 @@ Line(5)
   .note('Line(5).and(rz(1 / 8)) produces a 1/8th angle.');
 ```
 
-![Image](Line.md.$4.png)
+![Image](Line.md.$5.png)
 
-Line(5).and(rz(1 / 8)) produces a 1/8th angle.
+Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.
 
 ```JavaScript
 Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => (v), List))
@@ -48,7 +52,3 @@ Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => (v), List))
     'Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.'
   );
 ```
-
-![Image](Line.md.$5.png)
-
-Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.

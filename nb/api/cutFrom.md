@@ -11,6 +11,10 @@ Cuts other by shape, rather than shape by other.
 
 See: [cut](../../nb/api/cut.md)
 
+![Image](cutFrom.md.$2.png)
+
+Box(10).color('blue').cutFrom(Arc(12).color('red'))
+
 ```JavaScript
 Box(10)
   .color('blue')
@@ -19,9 +23,9 @@ Box(10)
   .md("Box(10).color('blue').cutFrom(Arc(12).color('red'))");
 ```
 
-![Image](cutFrom.md.$2.png)
+![Image](cutFrom.md.$3.png)
 
-Box(10).color('blue').cutFrom(Arc(12).color('red'))
+Box(10).color('blue').cut(Arc(12).color('red'))
 
 ```JavaScript
 Box(10)
@@ -30,7 +34,3 @@ Box(10)
   .view()
   .md("Box(10).color('blue').cut(Arc(12).color('red'))");
 ```
-
-![Image](cutFrom.md.$3.png)
-
-Box(10).color('blue').cut(Arc(12).color('red'))

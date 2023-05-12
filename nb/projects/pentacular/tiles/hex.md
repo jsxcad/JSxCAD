@@ -33,13 +33,13 @@ const placeTab = (tab) => (e, l) => (s) =>
 const tab = await Tab(1.5, 32 / 8);
 ```
 
-```JavaScript
-tab.stl('tab', ry(1 / 4));
-```
-
 ![Image](hex.md.$1_tab.png)
 
 [tab.stl](hex.tab.stl)
+
+```JavaScript
+tab.stl('tab', ry(1 / 4));
+```
 
 ```JavaScript
 const hexTile = hex
@@ -747,6 +747,10 @@ const caves = control('caves', '', 'input');
 const wall = control('wall', '', 'input');
 ```
 
+![Image](hex.md.$3_tile.png)
+
+[tile.stl](hex.tile.stl)
+
 ```JavaScript
 await Tile(seed4, {
   terrain: terrain2,
@@ -765,7 +769,3 @@ await Tile(seed4, {
   field: field2,
 }).stl('tile');
 ```
-
-![Image](hex.md.$3_tile.png)
-
-[tile.stl](hex.tile.stl)

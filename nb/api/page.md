@@ -12,6 +12,10 @@ Paginates the incoming shape for display or output.
 
 See: [pack](../../nb/api/pack.nb), [Page](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Page.md).
 
+![Image](page.md.$2.png)
+
+Seq({ upto: 20 }, () => Box(), Group).page('pack') packs 20 boxes onto a page.
+
 ```JavaScript
 Seq({ upto: 20 }, () => Box(), Group)
   .page('pack')
@@ -20,7 +24,3 @@ Seq({ upto: 20 }, () => Box(), Group)
     "Seq({ upto: 20 }, () => Box(), Group).page('pack') packs 20 boxes onto a page."
   );
 ```
-
-![Image](page.md.$2.png)
-
-Seq({ upto: 20 }, () => Box(), Group).page('pack') packs 20 boxes onto a page.

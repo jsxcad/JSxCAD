@@ -434,6 +434,14 @@ const getCoordinate = async (value) => {
   }
 };
 
+const getCoordinates = async (value) => {
+  const coordinates = [];
+  for (const [x = 0, y = 0, z = 0] of await value.toPoints()) {
+    coordinates.push([x, y, z]);
+  }
+  return coordinates;
+};
+
 const destructure2 = async (shape, input, ...specs) => {
   const output = [];
   let args = [];
@@ -658,11 +666,13 @@ const destructure2 = async (shape, input, ...specs) => {
         for (const arg of args) {
           let value = await resolve(shape, arg);
           if (Shape.isShape(value)) {
-            value = await getCoordinate(value);
+            const coordinates = await getCoordinates(value);
+            if (coordinates.length > 0) {
+              out.push(...coordinates);
+            } else {
+              rest.push(arg);
+            }
           } else if (Shape.isArray(value)) {
-            value = await resolveArray(shape, value);
-          }
-          if (Shape.isValue(value)) {
             out.push(value);
           } else {
             rest.push(arg);
@@ -832,42 +842,20 @@ Shape.registerMethod('md', (...chunks) => (shape) => {
   return shape;
 });
 
-const toCoordinate = Shape.registerMethod(
-  'toCoordinate',
-  (x = 0, y = 0, z = 0) =>
-    async (shape) => {
-      if (Shape.isFunction(x)) {
-        x = await x(shape);
-      }
-      if (Shape.isShape(x)) {
-        const points = await x.toPoints();
-        if (points.length >= 1) {
-          const point = points[0];
-          return point;
-        } else {
-          throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
-        }
-      } else if (Shape.isArray(x)) {
-        return x;
-      } else if (typeof x === 'number') {
-        if (typeof y !== 'number') {
-          throw Error(`Unexpected coordinate value: ${JSON.stringify(y)}`);
-        }
-        if (typeof z !== 'number') {
-          throw Error(`Unexpected coordinate value: ${JSON.stringify(z)}`);
-        }
-        return [x, y, z];
-      } else {
-        throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
-      }
-    }
-);
-
 const Point = Shape.registerMethod(
   'Point',
   (...args) =>
-    async (shape) =>
-      Shape.fromPoint(await toCoordinate(...args)(shape))
+    async (shape) => {
+      const [coordinate, x = 0, y = 0, z = 0] = await destructure2(
+        shape,
+        args,
+        'coordinate',
+        'number',
+        'number',
+        'number'
+      );
+      return Shape.fromPoint(coordinate || [x, y, z]);
+    }
 );
 
 const ref = Shape.registerMethod(
@@ -4304,6 +4292,37 @@ const eachEdge = Shape.registerMethod(
     }
 );
 
+const toCoordinate = Shape.registerMethod(
+  'toCoordinate',
+  (x = 0, y = 0, z = 0) =>
+    async (shape) => {
+      if (Shape.isFunction(x)) {
+        x = await x(shape);
+      }
+      if (Shape.isShape(x)) {
+        const points = await x.toPoints();
+        if (points.length >= 1) {
+          const point = points[0];
+          return point;
+        } else {
+          throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
+        }
+      } else if (Shape.isArray(x)) {
+        return x;
+      } else if (typeof x === 'number') {
+        if (typeof y !== 'number') {
+          throw Error(`Unexpected coordinate value: ${JSON.stringify(y)}`);
+        }
+        if (typeof z !== 'number') {
+          throw Error(`Unexpected coordinate value: ${JSON.stringify(z)}`);
+        }
+        return [x, y, z];
+      } else {
+        throw Error(`Unexpected coordinate value: ${JSON.stringify(x)}`);
+      }
+    }
+);
+
 const toCoordinateOp$1 = Shape.ops.get('toCoordinate');
 let toCoordinatesOp$1;
 
@@ -6775,17 +6794,24 @@ const Curve = Shape.registerMethod(
   'Curve',
   (...args) =>
     async (shape) => {
-      const [coordinates, implicitSteps = 20, options] = await destructure2(
-        shape,
-        args,
-        'coordinates',
-        'number',
-        'options'
-      );
+      const [coordinates, implicitSteps = 20, options, modes] =
+        await destructure2(
+          shape,
+          args,
+          'coordinates',
+          'number',
+          'options',
+          'modes'
+        );
       const { steps = implicitSteps } = options;
+      let maxT = 1;
+      if (modes.includes('closed')) {
+        maxT = 1 - 1 / (coordinates.length + 1);
+        coordinates.push(...coordinates.slice(0, 3));
+      }
       const points = [];
-      for (let t = 0; t <= steps; t++) {
-        points.push(bSpline(t / steps, 2, coordinates));
+      for (let t = 0; t <= maxT; t += 1 / steps) {
+        points.push(bSpline(t, 2, coordinates));
       }
       return Link(...points.map((point) => Point(point)));
     }

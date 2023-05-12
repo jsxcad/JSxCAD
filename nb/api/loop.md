@@ -14,6 +14,10 @@ See: [Loop](../../nb/api/Loop.nb), [link](#https://raw.githubusercontent.com/jsx
 
 _Note: We should rethink Arc and Box being implicitly filled._
 
+![Image](loop.md.$2.png)
+
+Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))
+
 ```JavaScript
 Line(5)
   .loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))
@@ -22,7 +26,3 @@ Line(5)
     'Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))'
   );
 ```
-
-![Image](loop.md.$2.png)
-
-Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))

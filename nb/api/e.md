@@ -9,6 +9,10 @@ Extrudes the surface along its normal by the extents provided.
 
 See [extrudeAlong](../../nb/api/extrudeAlong.md)
 
+![Image](e.md.$2.png)
+
+Box(10).rx(1 / 8).e([1, -1], [4, 3]) extrudes along the normal by two extents
+
 ```JavaScript
 Box(10)
   .rx(1 / 8)
@@ -18,7 +22,3 @@ Box(10)
     'Box(10).rx(1 / 8).e([1, -1], [4, 3]) extrudes along the normal by two extents'
   );
 ```
-
-![Image](e.md.$2.png)
-
-Box(10).rx(1 / 8).e([1, -1], [4, 3]) extrudes along the normal by two extents

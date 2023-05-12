@@ -7,6 +7,10 @@ Parameter|Default|Type
 
 See: [m](../../nb/api/m.md)
 
+![Image](moveAlong.md.$2.png)
+
+Box().moveAlong(Point(0, 1), 2, 3, 4, 5) moves the box by 2, 3, 4, and 5 respectively toward y+.
+
 ```JavaScript
 Box()
   .moveAlong(Point(0, 1), 2, 3, 4, 5)
@@ -16,9 +20,9 @@ Box()
   );
 ```
 
-![Image](moveAlong.md.$2.png)
+![Image](moveAlong.md.$3.png)
 
-Box().moveAlong(Point(0, 1), 2, 3, 4, 5) moves the box by 2, 3, 4, and 5 respectively toward y+.
+Box(5, 5, 5).and(faces().n(2).moveAlong(normal(), 5)) copies one face of a box and moves it 5 along its normal.
 
 ```JavaScript
 Box(5, 5, 5)
@@ -28,7 +32,3 @@ Box(5, 5, 5)
     'Box(5, 5, 5).and(faces().n(2).moveAlong(normal(), 5)) copies one face of a box and moves it 5 along its normal.'
   );
 ```
-
-![Image](moveAlong.md.$3.png)
-
-Box(5, 5, 5).and(faces().n(2).moveAlong(normal(), 5)) copies one face of a box and moves it 5 along its normal.

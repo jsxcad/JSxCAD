@@ -15,16 +15,12 @@ const origin = Box(0.5, 0.5, 5)
   .overlay();
 ```
 
-```JavaScript
-Box(10, 10, 1).view().note('Box(10, 10, 1)');
-```
-
 ![Image](align.md.$2.png)
 
 Box(10, 10, 1)
 
 ```JavaScript
-Box(10, 10, 1).by(align()).and(origin).view().md('by(align())');
+Box(10, 10, 1).view().note('Box(10, 10, 1)');
 ```
 
 ![Image](align.md.$3.png)
@@ -32,7 +28,7 @@ Box(10, 10, 1).by(align()).and(origin).view().md('by(align())');
 by(align())
 
 ```JavaScript
-Box(10, 10, 1).by(align('x>')).and(origin).view().md("by(align('x>'))");
+Box(10, 10, 1).by(align()).and(origin).view().md('by(align())');
 ```
 
 ![Image](align.md.$4.png)
@@ -40,7 +36,7 @@ Box(10, 10, 1).by(align('x>')).and(origin).view().md("by(align('x>'))");
 by(align('x>'))
 
 ```JavaScript
-Box(10, 10, 1).by(align('x<')).and(origin).view().md("align('x<')");
+Box(10, 10, 1).by(align('x>')).and(origin).view().md("by(align('x>'))");
 ```
 
 ![Image](align.md.$5.png)
@@ -48,7 +44,7 @@ Box(10, 10, 1).by(align('x<')).and(origin).view().md("align('x<')");
 align('x<')
 
 ```JavaScript
-Box(10, 10, 1).by(align('x')).and(origin).view().md("align('x')");
+Box(10, 10, 1).by(align('x<')).and(origin).view().md("align('x<')");
 ```
 
 ![Image](align.md.$6.png)
@@ -56,9 +52,13 @@ Box(10, 10, 1).by(align('x')).and(origin).view().md("align('x')");
 align('x')
 
 ```JavaScript
-Box(10, 10, 1).by(align('x>y>z<')).and(origin).view().md("align('x>y>z<')");
+Box(10, 10, 1).by(align('x')).and(origin).view().md("align('x')");
 ```
 
 ![Image](align.md.$7.png)
 
 align('x>y>z<')
+
+```JavaScript
+Box(10, 10, 1).by(align('x>y>z<')).and(origin).view().md("align('x>y>z<')");
+```

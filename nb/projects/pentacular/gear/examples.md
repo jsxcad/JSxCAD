@@ -34,6 +34,10 @@ const thickness = control('thickness', 2, 'input');
 const toothResolution = control('toothResolution', 5, 'input');
 ```
 
+![Image](examples.md.$1_gear_16.png)
+
+[gear_16.stl](examples.gear_16.stl)
+
 ```JavaScript
 await Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash, toothResolution })
   .fill()
@@ -42,9 +46,9 @@ await Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash,
   .stl(`gear_${teeth}`);
 ```
 
-![Image](examples.md.$1_gear_16.png)
+![Image](examples.md.$2.png)
 
-[gear_16.stl](examples.gear_16.stl)
+Clearance adds play to the gear tips
 
 ```JavaScript
 await Gear({ teeth: 8 })
@@ -53,9 +57,9 @@ await Gear({ teeth: 8 })
   .md(`Clearance adds play to the gear tips`);
 ```
 
-![Image](examples.md.$2.png)
+![Image](examples.md.$3.png)
 
-Clearance adds play to the gear tips
+Backlash adds play to the gear sides
 
 ```JavaScript
 await Gear({ teeth: 8 })
@@ -64,9 +68,9 @@ await Gear({ teeth: 8 })
   .md(`Backlash adds play to the gear sides`);
 ```
 
-![Image](examples.md.$3.png)
+![Image](examples.md.$4.png)
 
-Backlash adds play to the gear sides
+Pressure Angle makes the tip sharper or blunter
 
 ```JavaScript
 await Gear({ teeth: 8 })
@@ -79,17 +83,17 @@ await Gear({ teeth: 8 })
   .md(`Pressure Angle makes the tip sharper or blunter`);
 ```
 
-![Image](examples.md.$4.png)
-
-Pressure Angle makes the tip sharper or blunter
-
 ### Planetary Gears
+
+Our base involute gear.
 
 ```JavaScript
 const planetary = await Gear({teeth: 8 }).fill().md(`Our base involute gear.`);
 ```
 
-Our base involute gear.
+![Image](examples.md.planetaryFootprint.png)
+
+We'll use an offset template to cut the other gears
 
 ```JavaScript
 const planetaryFootprint = await planetary
@@ -98,9 +102,9 @@ const planetaryFootprint = await planetary
   .md(`We'll use an offset template to cut the other gears`);
 ```
 
-![Image](examples.md.planetaryFootprint.png)
+![Image](examples.md.ring.png)
 
-We'll use an offset template to cut the other gears
+We simulate the gear motion to cut a single tooth, then rotate it around.
 
 ```JavaScript
 const ring = await Arc(50, { start: -1 / 64, end: 1 / 64 })
@@ -124,9 +128,7 @@ const ring = await Arc(50, { start: -1 / 64, end: 1 / 64 })
   );
 ```
 
-![Image](examples.md.ring.png)
-
-We simulate the gear motion to cut a single tooth, then rotate it around.
+![Image](examples.md.solar.png)
 
 ```JavaScript
 const solar = await Arc(20, { start: -1 / 30, end: 1 / 30 })
@@ -151,7 +153,9 @@ const solar = await Arc(20, { start: -1 / 30, end: 1 / 30 })
   .clean();
 ```
 
-![Image](examples.md.solar.png)
+![Image](examples.md.rack.png)
+
+We can do the same thing to cut a rack.
 
 ```JavaScript
 const rack = await Box(20, Math.PI)
@@ -170,10 +174,6 @@ const rack = await Box(20, Math.PI)
   .md(`We can do the same thing to cut a rack.`)
   .clean();
 ```
-
-![Image](examples.md.rack.png)
-
-We can do the same thing to cut a rack.
 
 ```JavaScript
 const planetaryDesign1 = await Arc(44)
@@ -231,6 +231,20 @@ const planetaryDesign4c = await planetaryDesign4b.fitTo(planetaryDesignAxle);
 const planetaryDesign4 = await planetaryDesign4c.color('green').as('solar');
 ```
 
+![Image](examples.md.planetaryDesign.png)
+
+![Image](examples.md.planetaryDesign_ring.png)
+
+[ring.stl](examples.ring.stl)
+
+![Image](examples.md.planetaryDesign_planetary.png)
+
+[planetary.stl](examples.planetary.stl)
+
+![Image](examples.md.planetaryDesign_solar.png)
+
+[solar.stl](examples.solar.stl)
+
 ```JavaScript
 const planetaryDesign = await planetaryDesign3
   .and(planetaryDesign4)
@@ -257,17 +271,3 @@ const planetaryDesign = await planetaryDesign3
       .rx(0 / 2, 1 / 2)
   );
 ```
-
-![Image](examples.md.planetaryDesign.png)
-
-![Image](examples.md.planetaryDesign_ring.png)
-
-[ring.stl](examples.ring.stl)
-
-![Image](examples.md.planetaryDesign_planetary.png)
-
-[planetary.stl](examples.planetary.stl)
-
-![Image](examples.md.planetaryDesign_solar.png)
-
-[solar.stl](examples.solar.stl)

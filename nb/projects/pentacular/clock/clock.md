@@ -75,27 +75,27 @@ const Face = ({ axleRadius, faceRadius, fontSize }) =>
     );
 ```
 
-```JavaScript
-Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
-```
-
 The clock face
 
 ![Image](clock.md.$5.png)
 
 ```JavaScript
-Hand(hourHand).topView();
+Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
 ```
 
 ![Image](clock.md.$6.png)
 
+```JavaScript
+Hand(hourHand).topView();
+```
+
 The hour hand.
+
+![Image](clock.md.$8.png)
 
 ```JavaScript
 Hand(minuteHand).topView();
 ```
-
-![Image](clock.md.$8.png)
 
 The minute hand.
 
@@ -112,10 +112,10 @@ const Clock = ({ hourHand, minuteHand }) =>
 
 ## Assembly
 
+![Image](clock.md.$11.png)
+
 ```JavaScript
 Clock(clock).topView();
 ```
-
-![Image](clock.md.$11.png)
 
 A complete clock.

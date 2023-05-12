@@ -6,6 +6,10 @@ Parameter|Default|Type
 
 Constructs a set of segments given the supplied coordinates.
 
+![Image](Edges.md.$2.png)
+
+Edges([[[0, 0, 0], Point(1, 0, 0)], [Point(1, 0, 0), [1, 1, 0]]]) converts coordinates.
+
 ```JavaScript
 Edges([
   [[0, 0, 0], Point(1, 0, 0)],
@@ -16,7 +20,3 @@ Edges([
     'Edges([[[0, 0, 0], Point(1, 0, 0)], [Point(1, 0, 0), [1, 1, 0]]]) converts coordinates.'
   );
 ```
-
-![Image](Edges.md.$2.png)
-
-Edges([[[0, 0, 0], Point(1, 0, 0)], [Point(1, 0, 0), [1, 1, 0]]]) converts coordinates.

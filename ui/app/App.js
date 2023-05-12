@@ -35,6 +35,7 @@ import {
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
+// import CodeJarEditorUi from './CodeJarEditorUi.js';
 import Col from 'react-bootstrap/Col';
 import DynamicView from './DynamicView.js';
 import FlexLayout from 'flexlayout-react';
@@ -42,7 +43,6 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
-// import OrbitView from './OrbitView.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import React from 'react';
@@ -247,7 +247,7 @@ class App extends React.Component {
 
     this.Clipboard.getCode = (data) => {
       const { Clipboard = {} } = this.state;
-      const { code = 'const $ = Group();' } = Clipboard;
+      const { code = '' } = Clipboard;
       return code;
     };
 
@@ -453,6 +453,50 @@ class App extends React.Component {
       return tab._attributes.id.substring('Notebook/'.length);
     };
 
+    this.Notebook.getText = (path) => {
+      const {
+        [`NotebookNotes/${path}`]: NotebookNotes,
+        [`NotebookText/${path}`]: NotebookText,
+      } = this.state;
+      if (Object.keys(NotebookNotes).length === 0) {
+        return NotebookText;
+      }
+
+      const ordered = Object.values(NotebookNotes);
+      const getLine = (note) => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.line;
+        } else {
+          return 0;
+        }
+      };
+      const getNth = (note) => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.nth;
+        } else {
+          return 0;
+        }
+      };
+      const order = (a, b) => {
+        const lineA = getLine(a);
+        const lineB = getLine(b);
+        if (lineA !== lineB) {
+          return lineA - lineB;
+        }
+        const nthA = getNth(a);
+        const nthB = getNth(b);
+        return nthA - nthB;
+      };
+      ordered.sort(order);
+      const statements = [];
+      for (const note of ordered) {
+        if (note.sourceText) {
+          statements.push(note.sourceText);
+        }
+      }
+      return statements.join('\n\n');
+    };
+
     this.Notebook.run = async (path, options) => {
       if (!path) {
         return;
@@ -501,7 +545,7 @@ class App extends React.Component {
           return;
         }
 
-        let script = this.Clipboard.getCode() + NotebookText;
+        let script = NotebookText;
 
         const version = new Date().getTime();
 
@@ -605,7 +649,8 @@ class App extends React.Component {
     this.Notebook.save = async (path) => {
       logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const { workspace } = this.props;
-      const { [`NotebookText/${path}`]: NotebookText } = this.state;
+      const NotebookText = this.Notebook.getText(path);
+      // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;
       const getCleanText = (data) => {
@@ -652,8 +697,7 @@ class App extends React.Component {
       this.Notebook.store();
     };
 
-    this.Notebook.change = (path, data) => {
-      // console.log(`QQ/Notebook.change: ${path} ${data}`);
+    this.Notebook.change = (path, data, id) => {
       this.setState({ [`NotebookText/${path}`]: data });
     };
 
@@ -1235,18 +1279,27 @@ class App extends React.Component {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
             [`NotebookState/${path}`]: NotebookState = 'idle',
             [`NotebookText/${path}`]: NotebookText,
+            // [`NotebookDefinitions/${path}`]: NotebookDefinitions = {},
             [`NotebookNotes/${path}`]: NotebookNotes = [],
             [`NotebookLine/${path}`]: NotebookLine,
           } = this.state;
           const NotebookAdvice = this.Notebook.ensureAdvice(path);
+          const onChange = (note, { sourceText }) =>
+            updateNotebookState(this, {
+              notes: [{ ...note, sourceText }],
+              sourceLocation: note.sourceLocation,
+              workspace,
+            });
           switch (NotebookMode) {
-            case 'edit':
+            case 'edit': {
               return (
                 <SplitPane>
                   <Notebook
                     notebookPath={path}
                     notes={NotebookNotes}
+                    onChange={onChange}
                     onClickView={this.Notebook.clickView}
+                    onKeyDown={(e) => this.onKeyDown(e)}
                     selectedLine={NotebookLine}
                     workspace={workspace}
                     state={NotebookState}
@@ -1260,12 +1313,14 @@ class App extends React.Component {
                     onCursorChange={(row) =>
                       this.Notebook.selectLine(path, row)
                     }
+                    notes={NotebookNotes}
                     path={path}
                     data={NotebookText}
                     advice={NotebookAdvice}
                   />
                 </SplitPane>
               );
+            }
             default:
             case 'view': {
               return (
@@ -1273,6 +1328,8 @@ class App extends React.Component {
                   notebookPath={path}
                   notes={NotebookNotes}
                   onClickView={this.Notebook.clickView}
+                  onChange={onChange}
+                  onKeyDown={(e) => this.onKeyDown(e)}
                   selectedLine={NotebookLine}
                   workspace={workspace}
                   state={NotebookState}

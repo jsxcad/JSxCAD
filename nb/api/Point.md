@@ -6,6 +6,10 @@ Parameter|Default|Type
 
 Constructs a point at the coordinate.
 
+![Image](Point.md.$2.png)
+
+Point(1, 2, 3).and((s) => Edge(Point(), s)) shows a point at [1, 2, 3].
+
 ```JavaScript
 Point(1, 2, 3)
   .and((s) => Edge(Point(), s))
@@ -14,7 +18,3 @@ Point(1, 2, 3)
     'Point(1, 2, 3).and((s) => Edge(Point(), s)) shows a point at [1, 2, 3].'
   );
 ```
-
-![Image](Point.md.$2.png)
-
-Point(1, 2, 3).and((s) => Edge(Point(), s)) shows a point at [1, 2, 3].

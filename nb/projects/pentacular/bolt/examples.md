@@ -7,16 +7,12 @@ import {
 } from './bolt.nb';
 ```
 
-```JavaScript
-await ScrewThreadSegment(20).material('steel').view().md(`ScrewThreadSegment(20)`);
-```
-
 ![Image](examples.md.$1.png)
 
 ScrewThreadSegment(20)
 
 ```JavaScript
-await ScrewThread(20, 10).material('steel').view().md(`ScrewThread(20, 10)`);
+await ScrewThreadSegment(20).material('steel').view().md(`ScrewThreadSegment(20)`);
 ```
 
 ![Image](examples.md.$2.png)
@@ -24,7 +20,7 @@ await ScrewThread(20, 10).material('steel').view().md(`ScrewThread(20, 10)`);
 ScrewThread(20, 10)
 
 ```JavaScript
-await NutThreadSegment(20).material('steel').view().md(`NutThreadSegment(20)`);
+await ScrewThread(20, 10).material('steel').view().md(`ScrewThread(20, 10)`);
 ```
 
 ![Image](examples.md.$3.png)
@@ -32,12 +28,20 @@ await NutThreadSegment(20).material('steel').view().md(`NutThreadSegment(20)`);
 NutThreadSegment(20)
 
 ```JavaScript
-await NutThread(20, 10).material('steel').view().md(`NutThread(20, 10)`);
+await NutThreadSegment(20).material('steel').view().md(`NutThreadSegment(20)`);
 ```
 
 ![Image](examples.md.$4.png)
 
 NutThread(20, 10)
+
+```JavaScript
+await NutThread(20, 10).material('steel').view().md(`NutThread(20, 10)`);
+```
+
+![Image](examples.md.$5.png)
+
+NutThread(20, 10).and(ScrewThread(20, 10))
 
 ```JavaScript
 await NutThreadSegment(20, { play: 0.1 })
@@ -47,7 +51,3 @@ await NutThreadSegment(20, { play: 0.1 })
   .view()
   .md(`NutThread(20, 10).and(ScrewThread(20, 10))`);
 ```
-
-![Image](examples.md.$5.png)
-
-NutThread(20, 10).and(ScrewThread(20, 10))

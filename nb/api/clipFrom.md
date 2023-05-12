@@ -10,6 +10,10 @@ Clips other by shape, rather than shape by other.
 
 See: [clip](../../nb/api/clip.md)
 
+![Image](clipFrom.md.$2.png)
+
+Box(10).color('blue').clipFrom(Arc(12).color('red'))
+
 ```JavaScript
 Box(10)
   .color('blue')
@@ -18,9 +22,9 @@ Box(10)
   .md("Box(10).color('blue').clipFrom(Arc(12).color('red'))");
 ```
 
-![Image](clipFrom.md.$2.png)
+![Image](clipFrom.md.$3.png)
 
-Box(10).color('blue').clipFrom(Arc(12).color('red'))
+Box(10).color('blue').clip(Arc(12).color('red'))
 
 ```JavaScript
 Box(10)
@@ -29,7 +33,3 @@ Box(10)
   .view()
   .md("Box(10).color('blue').clip(Arc(12).color('red'))");
 ```
-
-![Image](clipFrom.md.$3.png)
-
-Box(10).color('blue').clip(Arc(12).color('red'))

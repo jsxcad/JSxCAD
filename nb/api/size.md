@@ -15,14 +15,6 @@ min|point|The minimal corner.
 center|point|The central point.
 radius|number|The radius of a minimal sphere around center containing the shape.
 
-```JavaScript
-Box(3)
-  .view()
-  .size((size) => note(`${JSON.stringify(size, null, '
-
-')}`));
-```
-
 ![Image](size.md.$2.png)
 
 {
@@ -102,3 +94,11 @@ Box(3)
 
 "radius": 2.121320343559648
 }
+
+```JavaScript
+Box(3)
+  .view()
+  .size((size) => note(`${JSON.stringify(size, null, '
+
+')}`));
+```

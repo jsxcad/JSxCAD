@@ -9,6 +9,10 @@ This follows an odd-even winding rule, allowing holes to be constructed.
 
 See: [f](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/f.nb).
 
+![Image](fill.md.$2.png)
+
+Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)).fill() produces a triangle.
+
 ```JavaScript
 Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0))
   .fill()
@@ -18,9 +22,9 @@ Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0))
   );
 ```
 
-![Image](fill.md.$2.png)
+![Image](fill.md.$3.png)
 
-Loop(Point(0, 0, 0), Point(0, 1, 0), Point(1, 1, 0)).fill() produces a triangle.
+Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.
 
 ```JavaScript
 Arc([4, 5], 2, 0)
@@ -31,7 +35,3 @@ Arc([4, 5], 2, 0)
     'Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.'
   );
 ```
-
-![Image](fill.md.$3.png)
-
-Arc([4, 5], 2, 0).seq({ by: 1 / 32 }, rz).fill() shows the odd-even rule.

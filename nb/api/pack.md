@@ -20,6 +20,10 @@ The packaged page is an item, accessing the content will require using in().
 
 See: [in](../../nb/api/in.md)
 
+![Image](pack.md.$2.png)
+
+Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
+
 ```JavaScript
 Seq({ upto: 10 }, Box, Group)
   .pack()
@@ -29,9 +33,9 @@ Seq({ upto: 10 }, Box, Group)
   );
 ```
 
-![Image](pack.md.$2.png)
+![Image](pack.md.$3.png)
 
-Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
+pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those.
 
 ```JavaScript
 Seq({ upto: 10 }, Box, Group)
@@ -43,7 +47,3 @@ Seq({ upto: 10 }, Box, Group)
     "pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those."
   );
 ```
-
-![Image](pack.md.$3.png)
-
-pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those.
