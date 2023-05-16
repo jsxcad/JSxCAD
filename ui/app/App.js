@@ -35,7 +35,6 @@ import {
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
-// import CodeJarEditorUi from './CodeJarEditorUi.js';
 import Col from 'react-bootstrap/Col';
 import DynamicView from './DynamicView.js';
 import FlexLayout from 'flexlayout-react';
@@ -1353,22 +1352,6 @@ class App extends React.Component {
         case 'View': {
           const { workspace } = this.props;
           const { View = {} } = this.state;
-          /*
-          const trackballState = this.View.trackballState.load(View.path);
-          return (
-            <OrbitView
-              path={View.path}
-              view={View.view}
-              sourceLocation={View.sourceLocation}
-              workspace={workspace}
-              onClick={this.View.click}
-              onEdits={this.View.edits}
-              onMove={this.View.move}
-              onUpdateGeometry={this.View.updateGeometry}
-              trackballState={trackballState}
-            />
-          );
-          */
           return (
             <DynamicView
               path={View.path}

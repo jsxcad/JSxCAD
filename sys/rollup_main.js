@@ -1,7 +1,6 @@
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from '@rollup/plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
-// import hypothetical from 'rollup-plugin-hypothetical-windows-fix';
 import hypothetical from 'rollup-plugin-hypothetical';
 import nodeResolve from '@rollup/plugin-node-resolve';
 
@@ -26,7 +25,6 @@ export default {
           "export { BroadcastChannel } from 'broadcast-channel';",
         'node-fetch': 'export default _ => _;',
         './nodeWorker.js': 'export const nodeWorker = () => {};',
-        // './create-hash.cjs': 'exports.createHash = require("create-hash/browser");',
         v8: 'export default {};',
       },
     }),

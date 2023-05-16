@@ -6,16 +6,32 @@ const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 const fileReadWatchers = new Set();
 
+const runFileChangeWatchersByPath = async (path, workspace) => {
+  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
+  if (entry === undefined) {
+    return;
+  }
+  const { watchers } = entry;
+  if (watchers === undefined) {
+    return;
+  }
+  for (const watcher of watchers) {
+    await watcher(path, workspace);
+  }
+};
+
 export const runFileCreationWatchers = async (path, workspace) => {
   for (const watcher of fileCreationWatchers) {
     await watcher(path, workspace);
   }
+  return runFileChangeWatchersByPath(path, workspace);
 };
 
 export const runFileDeletionWatchers = async (path, workspace) => {
   for (const watcher of fileDeletionWatchers) {
     await watcher(path, workspace);
   }
+  return runFileChangeWatchersByPath(path, workspace);
 };
 
 export const runFileReadWatchers = async (path, workspace) => {
@@ -28,17 +44,7 @@ export const runFileChangeWatchers = async (path, workspace) => {
   for (const watcher of fileChangeWatchers) {
     await watcher(path, workspace);
   }
-  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
-  if (entry === undefined) {
-    return;
-  }
-  const { watchers } = entry;
-  if (watchers === undefined) {
-    return;
-  }
-  for (const watcher of watchers) {
-    await watcher(path, workspace);
-  }
+  return runFileChangeWatchersByPath(path, workspace);
 };
 
 export const watchFile = async (path, workspace, thunk) => {
