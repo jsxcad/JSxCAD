@@ -20,5 +20,5 @@ Text takes a font, the text to render, and an optional size defaulting to 10.
 ![Image](font.md.$5.png)
 
 ```JavaScript
-await Text(unYetGul, '字').by(align('xy')).gridView();
+await Text(unYetGul, '字').align('xy').gridView();
 ```

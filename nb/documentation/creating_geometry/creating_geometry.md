@@ -93,7 +93,7 @@ A built in single line font useful for adding text
 ![Image](creating_geometry.md.$14.png)
 
 ```JavaScript
-Hershey('Some Example Text', 20).by(align('xy')).view();
+Hershey('Some Example Text', 20).align('xy').view();
 ```
 
 ---

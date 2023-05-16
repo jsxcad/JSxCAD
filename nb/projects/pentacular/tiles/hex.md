@@ -89,7 +89,7 @@ const placeBetween = (turn) => {
 const buildTree = Cached('Tree', ({ dx, dy, dz }) =>
   Hull(Orb(6), Point(dx, dy, dz))
     .join(Arc(2, 2, [-4]))
-    .by(align('z>'))
+    .align('z>')
     .remesh(1)
     .smooth(Box(8, 8, [3, 20]))
     .clean()

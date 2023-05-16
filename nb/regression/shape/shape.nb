@@ -4,7 +4,7 @@ await Box(5).and(Arc(5)).view('top', 'noSkin', 'noWireframe', { size: 800 });
 
 await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 
-await Box(5).by(align('x>y>')).gridView();
+await Box(5).align('x>y>').gridView();
 
 await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
 
@@ -41,6 +41,8 @@ await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
 
 await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 
+await Assembly(Box(5), Arc(5.5).hole()).noHole().gridView();
+
 await Box(5).offset(1).gridView();
 
 await Box(5).op(color('green')).gridView();
@@ -69,12 +71,12 @@ await Box(5).scale(1, 2).gridView();
 // Box(5).rotate(45).gridView(24);
 
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(1, 1)
   .gridView();
 
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(-1, 1)
   .gridView();
 

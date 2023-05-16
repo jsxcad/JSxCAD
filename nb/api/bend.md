@@ -18,7 +18,7 @@ Box(40, 1, 5).y(20).and(remesh().bend(20))
 Box(40, 1, 5)
   .y(20)
   .and(remesh().bend(20))
-  .by(align())
+  .align()
   .view()
   .note('Box(40, 1, 5).y(20).and(remesh().bend(20))');
 ```

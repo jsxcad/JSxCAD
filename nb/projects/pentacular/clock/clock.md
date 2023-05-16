@@ -67,7 +67,7 @@ const Face = ({ axleRadius, faceRadius, fontSize }) =>
       seq(
         (n) =>
           Text(aladinRegular, `${n}`, 20)
-            .by(align('xy'))
+            .align('xy')
             .y(faceRadius - fontSize)
             .rz(-n / 12),
         { from: 1, to: 12 }

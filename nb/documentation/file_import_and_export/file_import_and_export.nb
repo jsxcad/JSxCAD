@@ -36,12 +36,12 @@ md`
 Imports a .svg file which can then be used as geometry.`;
 
 const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false })
-await importedSvg.by(align('xy')).view();
+await importedSvg.align('xy').view();
 
-await importedSvg.by(align('xy')).scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
+await importedSvg.align('xy').scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
 
 import { ThreejsCollada, ThreejsSvg } from '@jsxcad/api-threejs';
 
-await ThreejsSvg('https://jsxcad.js.org/svg/rocket.svg').by(align('xy')).view();
+await ThreejsSvg('https://jsxcad.js.org/svg/rocket.svg').align('xy').view();
 
 await ThreejsCollada('https://jsxcad.js.org/collada/duck_triangles.dae').rx(1/4).view();

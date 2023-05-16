@@ -2826,9 +2826,7 @@ class EditNote extends ReactDOM$1.Component {
     super(props);
     this.state = {};
   }
-  async componentDidMount() {
-    // this.codeJar = CodeJar(this.editor);
-  }
+  async componentDidMount() {}
   async componentWillUnmount() {}
   onChange(id, text) {
     const {

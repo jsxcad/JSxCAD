@@ -159,7 +159,7 @@ We can do the same thing to cut a rack.
 
 ```JavaScript
 const rack = await Box(20, Math.PI)
-  .by(align('x<'))
+  .align('x<')
   .cut(
     seq(
 {

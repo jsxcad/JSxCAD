@@ -8,18 +8,18 @@ Transforms shape by the provided reference.
 
 ![Image](by.md.$2_1.png)
 
-Box(10).and(align('x>')) produces a box and a reference point
+Box(10).and(alignment('x>')) produces a box and a reference point
 
 ![Image](by.md.$2_2.png)
 
-by(align('x>')) moves both by the reference.
+by(alignment('x>')) moves both by the reference.
 
 ```JavaScript
 Box(10)
   .and(align('x>'))
   .view(1)
-  .note("Box(10).and(align('x>')) produces a box and a reference point")
-  .by(align('x>'))
+  .note("Box(10).and(alignment('x>')) produces a box and a reference point")
+  .by(alignment('x>'))
   .view(2)
-  .note("by(align('x>')) moves both by the reference.");
+  .note("by(alignment('x>')) moves both by the reference.");
 ```

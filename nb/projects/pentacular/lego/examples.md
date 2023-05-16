@@ -188,7 +188,7 @@ const technic = await Group(box, Arc(4.8 + 0.2).y(5.6))
 
 ```JavaScript
 const technic_1x6 = await Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))
-  .by(align())
+  .align()
   .view();
 ```
 

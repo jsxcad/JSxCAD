@@ -19,7 +19,7 @@ await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 ![Image](shape.md.$4.png)
 
 ```JavaScript
-await Box(5).by(align('x>y>')).gridView();
+await Box(5).align('x>y>').gridView();
 ```
 
 ![Image](shape.md.$5.png)
@@ -188,7 +188,7 @@ await Box(5).scale(1, 2).gridView();
 
 ```JavaScript
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(1, 1)
   .gridView();
 ```
@@ -197,7 +197,7 @@ await Box(5)
 
 ```JavaScript
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(-1, 1)
   .gridView();
 ```

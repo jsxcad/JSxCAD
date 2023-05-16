@@ -62,7 +62,7 @@ md`
 A built in single line font useful for adding text
 `;
 
-Hershey('Some Example Text', 20).by(align('xy')).view();
+Hershey('Some Example Text', 20).align('xy').view();
 
 md`
 ---

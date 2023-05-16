@@ -56,13 +56,13 @@ await Group(Box(10), Arc(8), Triangle(5))
 
 ![Image](shapes.md.$7.png)
 
-Hershey(10)('Hershey').by(align('xy'))
+Hershey(10)('Hershey').align('xy')
 
 ```JavaScript
 await Hershey('Hershey', 10)
-  .by(align('xy'))
+  .align('xy')
   .gridView()
-  .md(`Hershey(10)('Hershey').by(align('xy'))`);
+  .md(`Hershey(10)('Hershey').align('xy')`);
 ```
 
 ![Image](shapes.md.$8.png)
@@ -254,7 +254,7 @@ Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 
 ```JavaScript
 await Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
-  .by(align('xy'))
+  .align('xy')
   .gridView()
   .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 ```
@@ -383,7 +383,7 @@ await Group(Box(1), Box(1).rx(1 / 4))
 ```JavaScript
 await Orb(10)
   .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
-  .by(align('z>'))
+  .align('z>')
   .view(1);
 ```
 
@@ -415,7 +415,7 @@ await Box(10, 10, 20)
 await Box(10, 10, 20)
   .seam(Box(10, 10, [6, 11]))
   .grow(1, Box(10, 10, [7, 10]))
-  .view(3, rx(1 / 2).by(align('z>')));
+  .view(3, rx(1 / 2).align('z>'));
 ```
 
 ```JavaScript

@@ -26,3 +26,5 @@ export const by = Shape.registerMethod(
       return Group(...placed);
     }
 );
+
+export default by;
