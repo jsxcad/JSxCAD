@@ -380,7 +380,7 @@ function getCustomOptions(options) {
  * @returns is the function already memoized
  */
 function isMemoized(fn) {
-    return (typeof fn === 'function' && fn.isMemoized);
+    return typeof fn === 'function' && fn.isMemoized;
 }
 /**
  * @function isSameValueZero
@@ -442,6 +442,9 @@ var Cache = /** @class */ (function () {
         this.shouldUpdateOnHit = typeof options.onCacheHit === 'function';
     }
     Object.defineProperty(Cache.prototype, "size", {
+        /**
+         * The number of cached [key,value] results.
+         */
         get: function () {
             return this.keys.length;
         },
@@ -449,6 +452,11 @@ var Cache = /** @class */ (function () {
         configurable: true
     });
     Object.defineProperty(Cache.prototype, "snapshot", {
+        /**
+         * A copy of the cache at a moment in time. This is useful
+         * to compare changes over time, since the cache mutates
+         * internally for performance reasons.
+         */
         get: function () {
             return {
                 keys: cloneArray(this.keys),
@@ -460,13 +468,7 @@ var Cache = /** @class */ (function () {
         configurable: true
     });
     /**
-     * @function _getKeyIndexFromMatchingKey
-     *
-     * @description
-     * gets the matching key index when a custom key matcher is used
-     *
-     * @param keyToMatch the key to match
-     * @returns the index of the matching key, or -1
+     * Gets the matching key index when a custom key matcher is used.
      */
     Cache.prototype._getKeyIndexFromMatchingKey = function (keyToMatch) {
         var _a = this.options, isMatchingKey = _a.isMatchingKey, maxSize = _a.maxSize;
@@ -488,13 +490,7 @@ var Cache = /** @class */ (function () {
         return -1;
     };
     /**
-     * @function _getKeyIndexForMany
-     *
-     * @description
-     * gets the matching key index when multiple keys are used
-     *
-     * @param keyToMatch the key to match
-     * @returns the index of the matching key, or -1
+     * Gets the matching key index when multiple keys are used.
      */
     Cache.prototype._getKeyIndexForMany = function (keyToMatch) {
         var isEqual = this.options.isEqual;
@@ -537,13 +533,7 @@ var Cache = /** @class */ (function () {
         return -1;
     };
     /**
-     * @function _getKeyIndexForSingle
-     *
-     * @description
-     * gets the matching key index when a single key is used
-     *
-     * @param keyToMatch the key to match
-     * @returns the index of the matching key, or -1
+     * Gets the matching key index when a single key is used.
      */
     Cache.prototype._getKeyIndexForSingle = function (keyToMatch) {
         var keys = this.keys;
@@ -567,14 +557,7 @@ var Cache = /** @class */ (function () {
         return isEqual(existingKey[0], keyToMatch[0]) ? 0 : -1;
     };
     /**
-     * @function orderByLru
-     *
-     * @description
-     * order the array based on a Least-Recently-Used basis
-     *
-     * @param key the new key to move to the front
-     * @param value the new value to move to the front
-     * @param startingIndex the index of the item to move to the front
+     * Order the array based on a Least-Recently-Used basis.
      */
     Cache.prototype.orderByLru = function (key, value, startingIndex) {
         var keys = this.keys;
@@ -598,13 +581,8 @@ var Cache = /** @class */ (function () {
         }
     };
     /**
-     * @function updateAsyncCache
-     *
-     * @description
-     * update the promise method to auto-remove from cache if rejected, and
-     * if resolved then fire cache hit / changed
-     *
-     * @param memoized the memoized function
+     * Update the promise method to auto-remove from cache if rejected, and
+     * if resolved then fire cache hit / changed.
      */
     Cache.prototype.updateAsyncCache = function (memoized) {
         var _this = this;
@@ -631,7 +609,6 @@ var Cache = /** @class */ (function () {
     return Cache;
 }());
 
-// cache
 function createMemoizedFunction(fn, options) {
     if (options === void 0) { options = {}; }
     if (isMemoized(fn)) {

@@ -16,7 +16,7 @@ Model
 
 ```JavaScript
 const model = await Text(unYetGul, text, 25)
-  .by(align('xy'))
+  .align('xy')
   .cutFrom(Box(30, 26))
   .view()
   .md('Model');

@@ -44,7 +44,7 @@ Assembly(
   .each(to(XY()))
   .pack()
   .y(-45)
-  .by(align('xy'))
+  .align('xy')
   .view(2, 'top');
 ```
 

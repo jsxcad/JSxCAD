@@ -217,6 +217,14 @@ const extrudeTile = () => async (shape) => {
 
 [3yd tiles_2.stl](road.3yd%20tiles_2.stl)
 
+![Image](road.md.$2_3yd_tiles.png)
+
+[3yd tiles_3.stl](road.3yd%20tiles_3.stl)
+
+![Image](road.md.$2_3yd_tiles.png)
+
+[3yd tiles_4.stl](road.3yd%20tiles_4.stl)
+
 ```JavaScript
 await Group(roadTile, curvedRoadTile)
   .op(extrudeTile())
@@ -274,6 +282,534 @@ await Group(roadTile, curvedRoadTile)
 ![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile_12.stl](road.3d%20road%20tile_12.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_13.stl](road.3d%20road%20tile_13.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_14.stl](road.3d%20road%20tile_14.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_15.stl](road.3d%20road%20tile_15.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_16.stl](road.3d%20road%20tile_16.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_17.stl](road.3d%20road%20tile_17.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_18.stl](road.3d%20road%20tile_18.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_19.stl](road.3d%20road%20tile_19.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_20.stl](road.3d%20road%20tile_20.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_21.stl](road.3d%20road%20tile_21.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_22.stl](road.3d%20road%20tile_22.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_23.stl](road.3d%20road%20tile_23.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_24.stl](road.3d%20road%20tile_24.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_25.stl](road.3d%20road%20tile_25.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_26.stl](road.3d%20road%20tile_26.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_27.stl](road.3d%20road%20tile_27.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_28.stl](road.3d%20road%20tile_28.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_29.stl](road.3d%20road%20tile_29.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_30.stl](road.3d%20road%20tile_30.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_31.stl](road.3d%20road%20tile_31.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_32.stl](road.3d%20road%20tile_32.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_33.stl](road.3d%20road%20tile_33.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_34.stl](road.3d%20road%20tile_34.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_35.stl](road.3d%20road%20tile_35.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_36.stl](road.3d%20road%20tile_36.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_37.stl](road.3d%20road%20tile_37.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_38.stl](road.3d%20road%20tile_38.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_39.stl](road.3d%20road%20tile_39.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_40.stl](road.3d%20road%20tile_40.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_41.stl](road.3d%20road%20tile_41.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_42.stl](road.3d%20road%20tile_42.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_43.stl](road.3d%20road%20tile_43.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_44.stl](road.3d%20road%20tile_44.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_45.stl](road.3d%20road%20tile_45.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_46.stl](road.3d%20road%20tile_46.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_47.stl](road.3d%20road%20tile_47.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_48.stl](road.3d%20road%20tile_48.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_49.stl](road.3d%20road%20tile_49.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_50.stl](road.3d%20road%20tile_50.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_51.stl](road.3d%20road%20tile_51.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_52.stl](road.3d%20road%20tile_52.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_53.stl](road.3d%20road%20tile_53.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_54.stl](road.3d%20road%20tile_54.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_55.stl](road.3d%20road%20tile_55.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_56.stl](road.3d%20road%20tile_56.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_57.stl](road.3d%20road%20tile_57.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_58.stl](road.3d%20road%20tile_58.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_59.stl](road.3d%20road%20tile_59.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_60.stl](road.3d%20road%20tile_60.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_61.stl](road.3d%20road%20tile_61.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_62.stl](road.3d%20road%20tile_62.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_63.stl](road.3d%20road%20tile_63.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_64.stl](road.3d%20road%20tile_64.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_65.stl](road.3d%20road%20tile_65.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_66.stl](road.3d%20road%20tile_66.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_67.stl](road.3d%20road%20tile_67.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_68.stl](road.3d%20road%20tile_68.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_69.stl](road.3d%20road%20tile_69.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_70.stl](road.3d%20road%20tile_70.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_71.stl](road.3d%20road%20tile_71.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_72.stl](road.3d%20road%20tile_72.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_73.stl](road.3d%20road%20tile_73.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_74.stl](road.3d%20road%20tile_74.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_75.stl](road.3d%20road%20tile_75.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_76.stl](road.3d%20road%20tile_76.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_77.stl](road.3d%20road%20tile_77.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_78.stl](road.3d%20road%20tile_78.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_79.stl](road.3d%20road%20tile_79.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_80.stl](road.3d%20road%20tile_80.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_81.stl](road.3d%20road%20tile_81.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_82.stl](road.3d%20road%20tile_82.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_83.stl](road.3d%20road%20tile_83.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_84.stl](road.3d%20road%20tile_84.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_85.stl](road.3d%20road%20tile_85.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_86.stl](road.3d%20road%20tile_86.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_87.stl](road.3d%20road%20tile_87.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_88.stl](road.3d%20road%20tile_88.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_89.stl](road.3d%20road%20tile_89.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_90.stl](road.3d%20road%20tile_90.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_91.stl](road.3d%20road%20tile_91.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_92.stl](road.3d%20road%20tile_92.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_93.stl](road.3d%20road%20tile_93.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_94.stl](road.3d%20road%20tile_94.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_95.stl](road.3d%20road%20tile_95.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_96.stl](road.3d%20road%20tile_96.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_97.stl](road.3d%20road%20tile_97.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_98.stl](road.3d%20road%20tile_98.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_99.stl](road.3d%20road%20tile_99.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_100.stl](road.3d%20road%20tile_100.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_101.stl](road.3d%20road%20tile_101.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_102.stl](road.3d%20road%20tile_102.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_103.stl](road.3d%20road%20tile_103.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_104.stl](road.3d%20road%20tile_104.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_105.stl](road.3d%20road%20tile_105.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_106.stl](road.3d%20road%20tile_106.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_107.stl](road.3d%20road%20tile_107.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_108.stl](road.3d%20road%20tile_108.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_109.stl](road.3d%20road%20tile_109.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_110.stl](road.3d%20road%20tile_110.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_111.stl](road.3d%20road%20tile_111.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_112.stl](road.3d%20road%20tile_112.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_113.stl](road.3d%20road%20tile_113.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_114.stl](road.3d%20road%20tile_114.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_115.stl](road.3d%20road%20tile_115.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_116.stl](road.3d%20road%20tile_116.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_117.stl](road.3d%20road%20tile_117.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_118.stl](road.3d%20road%20tile_118.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_119.stl](road.3d%20road%20tile_119.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_120.stl](road.3d%20road%20tile_120.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_121.stl](road.3d%20road%20tile_121.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_122.stl](road.3d%20road%20tile_122.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_123.stl](road.3d%20road%20tile_123.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_124.stl](road.3d%20road%20tile_124.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_125.stl](road.3d%20road%20tile_125.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_126.stl](road.3d%20road%20tile_126.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_127.stl](road.3d%20road%20tile_127.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_128.stl](road.3d%20road%20tile_128.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_129.stl](road.3d%20road%20tile_129.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_130.stl](road.3d%20road%20tile_130.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_131.stl](road.3d%20road%20tile_131.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_132.stl](road.3d%20road%20tile_132.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_133.stl](road.3d%20road%20tile_133.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_134.stl](road.3d%20road%20tile_134.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_135.stl](road.3d%20road%20tile_135.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_136.stl](road.3d%20road%20tile_136.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_137.stl](road.3d%20road%20tile_137.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_138.stl](road.3d%20road%20tile_138.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_139.stl](road.3d%20road%20tile_139.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_140.stl](road.3d%20road%20tile_140.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_141.stl](road.3d%20road%20tile_141.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_142.stl](road.3d%20road%20tile_142.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_143.stl](road.3d%20road%20tile_143.stl)
+
+![Image](road.md.$3_3d_road_tile.png)
+
+[3d road tile_144.stl](road.3d%20road%20tile_144.stl)
 
 ```JavaScript
 await Group(

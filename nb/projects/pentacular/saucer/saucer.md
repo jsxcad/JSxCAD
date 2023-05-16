@@ -61,7 +61,7 @@ const top = await saucer
   .loft(noOp(), Box(150).z(5))
   .fitTo(knob)
   .as('top')
-  .stl('knob', get('knob').by(align('>z')));
+  .stl('knob', get('knob').align('>z'));
 ```
 
 ![Image](saucer.md.topWithPegHoles_top2.png)
@@ -80,7 +80,7 @@ const topWithPegHoles = await top
     'top2',
     getNot('knob')
       .rx(1 / 2)
-      .by(align('>z'))
+      .align('>z')
   );
 ```
 

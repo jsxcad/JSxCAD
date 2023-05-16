@@ -85,7 +85,7 @@ const solar = await Arc(20, { start: -1 / 30, end: 1 / 30 })
   .clean();
 
 const rack = await Box(20, Math.PI)
-  .by(align('x<'))
+  .align('x<')
   .cut(
     seq(
 {

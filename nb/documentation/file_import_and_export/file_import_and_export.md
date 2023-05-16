@@ -54,13 +54,13 @@ const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill
 ![Image](file_import_and_export.md.$10.png)
 
 ```JavaScript
-await importedSvg.by(align('xy')).view();
+await importedSvg.align('xy').view();
 ```
 
 ![Image](file_import_and_export.md.$11.png)
 
 ```JavaScript
-await importedSvg.by(align('xy')).scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
+await importedSvg.align('xy').scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
 ```
 
 ```JavaScript
@@ -70,7 +70,7 @@ import { ThreejsCollada, ThreejsSvg } from '@jsxcad/api-threejs';
 ![Image](file_import_and_export.md.$12.png)
 
 ```JavaScript
-await ThreejsSvg('https://jsxcad.js.org/svg/rocket.svg').by(align('xy')).view();
+await ThreejsSvg('https://jsxcad.js.org/svg/rocket.svg').align('xy').view();
 ```
 
 ![Image](file_import_and_export.md.$13.png)

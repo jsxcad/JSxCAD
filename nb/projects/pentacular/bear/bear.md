@@ -13,7 +13,7 @@ const spacing = control('spacing', 2, 'input');
 ```
 
 ```JavaScript
-const a = await LoadStl(url).by(align('z>'));
+const a = await LoadStl(url).align('z>');
 ```
 
 ![Image](bear.md.$2_bear.png)

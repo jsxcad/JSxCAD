@@ -4,7 +4,7 @@ await Box(5).and(Arc(5)).view('top', 'noSkin', 'noWireframe', { size: 800 });
 
 await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 
-await Box(5).by(align('x>y>')).gridView();
+await Box(5).align('x>y>').gridView();
 
 await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
 
@@ -69,12 +69,12 @@ await Box(5).scale(1, 2).gridView();
 // Box(5).rotate(45).gridView(24);
 
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(1, 1)
   .gridView();
 
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(-1, 1)
   .gridView();
 
@@ -392,37 +392,3 @@ Group(xy, xz, yz)
     yz.e(50).color('blue').ghost()
   )
   .view();
-
-Box(20)
-  .ez(2)
-  .clean()
-  .And(color('red'), shell([2]).color('green'))
-  .clip(YZ(0))
-  .view();
-
-Box(20)
-  .ez(2)
-  .clean()
-  .And(color('red'), shell([-1000000, 2], 'protect').color('green'))
-  .clip(YZ(0))
-  .view();
-
-Box(10, 10, 10).shell().clip(YZ()).view();
-
-Box(10, 10, 10).shell(5).clip(YZ()).view();
-
-Box(10, 10, 10).shell(1, { approx: 1 }).clip(YZ()).view();
-
-Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
-
-Line(20).stroke(1).view();
-
-const Squiggle = (seed = 0, to = 10) =>
-  Curve(
-    Seq({ to }, (t) =>
-      Point(random(seed).in(-10, 10)(t), random(seed + 1).in(-10, 10)(t))
-    ),
-    to * 10
-  );
-
-Squiggle(1, 10).stroke(0.5).view(2);

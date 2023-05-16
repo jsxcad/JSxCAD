@@ -1104,16 +1104,32 @@ const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 const fileReadWatchers = new Set();
 
+const runFileChangeWatchersByPath = async (path, workspace) => {
+  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
+  if (entry === undefined) {
+    return;
+  }
+  const { watchers } = entry;
+  if (watchers === undefined) {
+    return;
+  }
+  for (const watcher of watchers) {
+    await watcher(path, workspace);
+  }
+};
+
 const runFileCreationWatchers = async (path, workspace) => {
   for (const watcher of fileCreationWatchers) {
     await watcher(path, workspace);
   }
+  return runFileChangeWatchersByPath(path, workspace);
 };
 
 const runFileDeletionWatchers = async (path, workspace) => {
   for (const watcher of fileDeletionWatchers) {
     await watcher(path, workspace);
   }
+  return runFileChangeWatchersByPath(path, workspace);
 };
 
 const runFileReadWatchers = async (path, workspace) => {
@@ -1126,17 +1142,7 @@ const runFileChangeWatchers = async (path, workspace) => {
   for (const watcher of fileChangeWatchers) {
     await watcher(path, workspace);
   }
-  const entry = fileChangeWatchersByPath.get(qualifyPath(path, workspace));
-  if (entry === undefined) {
-    return;
-  }
-  const { watchers } = entry;
-  if (watchers === undefined) {
-    return;
-  }
-  for (const watcher of watchers) {
-    await watcher(path, workspace);
-  }
+  return runFileChangeWatchersByPath(path, workspace);
 };
 
 const watchFile = async (path, workspace, thunk) => {
@@ -1312,10 +1318,7 @@ function onMessage$3(channelState, fn) {
   channelState.messagesCallback = fn;
 }
 function canBeUsed$3() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  if (typeof BroadcastChannel === 'function') {
+  if ((typeof window !== 'undefined' || typeof self !== 'undefined') && typeof BroadcastChannel === 'function') {
     if (BroadcastChannel._pubkey) {
       throw new Error('BroadcastChannel: Do not overwrite window.BroadcastChannel with this module, this is not a polyfill');
     }
@@ -2001,9 +2004,13 @@ function chooseMethod(options) {
   var useMethod = chooseMethods.find(function (method) {
     return method.canBeUsed();
   });
-  if (!useMethod) throw new Error("No usable method found in " + JSON.stringify(METHODS.map(function (m) {
-    return m.type;
-  })));else return useMethod;
+  if (!useMethod) {
+    throw new Error("No usable method found in " + JSON.stringify(METHODS.map(function (m) {
+      return m.type;
+    })));
+  } else {
+    return useMethod;
+  }
 }
 
 /**
@@ -2290,7 +2297,7 @@ const receiveBroadcast = ({ id, op, path, workspace }) => {
 const sendBroadcast = async (message) => {
   // We send to ourself immediately, so that we can order effects like cache clears and updates.
   await receiveNotification(message);
-  broadcastChannel.postMessage(message);
+  await broadcastChannel.postMessage(message);
 };
 
 const initBroadcastChannel = async () => {

@@ -47,7 +47,7 @@ const receiveBroadcast = ({ id, op, path, workspace }) => {
 export const sendBroadcast = async (message) => {
   // We send to ourself immediately, so that we can order effects like cache clears and updates.
   await receiveNotification(message);
-  broadcastChannel.postMessage(message);
+  await broadcastChannel.postMessage(message);
 };
 
 const initBroadcastChannel = async () => {

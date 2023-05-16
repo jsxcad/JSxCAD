@@ -19,7 +19,7 @@ await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 ![Image](shape.md.$4.png)
 
 ```JavaScript
-await Box(5).by(align('x>y>')).gridView();
+await Box(5).align('x>y>').gridView();
 ```
 
 ![Image](shape.md.$5.png)
@@ -188,7 +188,7 @@ await Box(5).scale(1, 2).gridView();
 
 ```JavaScript
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(1, 1)
   .gridView();
 ```
@@ -197,7 +197,7 @@ await Box(5)
 
 ```JavaScript
 await Box(5)
-  .cut(Arc(4.9).by(align('x>')))
+  .cut(Arc(4.9).align('x>'))
   .scale(-1, 1)
   .gridView();
 ```
@@ -766,72 +766,4 @@ Group(xy, xz, yz)
     yz.e(50).color('blue').ghost()
   )
   .view();
-```
-
-![Image](shape.md.$88.png)
-
-```JavaScript
-Box(20)
-  .ez(2)
-  .clean()
-  .And(color('red'), shell([2]).color('green'))
-  .clip(YZ(0))
-  .view();
-```
-
-![Image](shape.md.$89.png)
-
-```JavaScript
-Box(20)
-  .ez(2)
-  .clean()
-  .And(color('red'), shell([-1000000, 2], 'protect').color('green'))
-  .clip(YZ(0))
-  .view();
-```
-
-![Image](shape.md.$90.png)
-
-```JavaScript
-Box(10, 10, 10).shell().clip(YZ()).view();
-```
-
-![Image](shape.md.$91.png)
-
-```JavaScript
-Box(10, 10, 10).shell(5).clip(YZ()).view();
-```
-
-![Image](shape.md.$92.png)
-
-```JavaScript
-Box(10, 10, 10).shell(1, { approx: 1 }).clip(YZ()).view();
-```
-
-![Image](shape.md.$93.png)
-
-```JavaScript
-Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
-```
-
-![Image](shape.md.$94.png)
-
-```JavaScript
-Line(20).stroke(1).view();
-```
-
-```JavaScript
-const Squiggle = (seed = 0, to = 10) =>
-  Curve(
-    Seq({ to }, (t) =>
-      Point(random(seed).in(-10, 10)(t), random(seed + 1).in(-10, 10)(t))
-    ),
-    to * 10
-  );
-```
-
-![Image](shape.md.$95_2.png)
-
-```JavaScript
-Squiggle(1, 10).stroke(0.5).view(2);
 ```

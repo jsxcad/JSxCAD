@@ -131,7 +131,7 @@ const terrarium = await Terrarium(
   .view(
     2,
     get('terrarium')
-      .by(align())
+      .align()
       .in()
       .untag('material:acrylic')
       .each((s) =>

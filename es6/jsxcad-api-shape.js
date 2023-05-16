@@ -1,6 +1,6 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read, log as log$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, hasTypeReference, taggedGroup, approximate as approximate$1, makeAbsolute, measureBoundingBox, measureArea, taggedItem, transform as transform$1, getInverseMatrices, computeNormal, extrude, transformCoordinate, link as link$1, taggedPlan, bend as bend$1, rewrite, visit, getLeafs, computeCentroid, convexHull, fuse as fuse$1, join as join$1, noGhost, clip as clip$1, linearize, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$1, fix as fix$1, hash, grow as grow$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, hasTypeVoid, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, hasTypeReference, taggedGroup, approximate as approximate$1, makeAbsolute, measureBoundingBox, getLeafs, getInverseMatrices, measureArea, taggedItem, transform as transform$1, computeNormal, extrude, transformCoordinate, link as link$1, taggedPlan, bend as bend$1, rewrite, visit, computeCentroid, convexHull, fuse as fuse$1, join as join$1, noGhost, clip as clip$1, linearize, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$1, fix as fix$1, hash, grow as grow$1, hasTypeVoid, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, makeOcctBox, fromTranslateToTransform, fromRotateZToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -1143,8 +1143,8 @@ const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
   })(shape);
 };
 
-const align = Shape.registerMethod(
-  'align',
+const alignment = Shape.registerMethod(
+  'alignment',
   (spec = 'xyz', origin = [0, 0, 0]) =>
     async (shape) => {
       const offset = await computeOffset(spec, origin, shape);
@@ -1153,36 +1153,7 @@ const align = Shape.registerMethod(
     }
 );
 
-Shape.registerMethod('align', align);
-
-const area = Shape.registerMethod(
-  'area',
-  (op = (value) => (shape) => value) =>
-    (shape) =>
-      op(measureArea(shape.toGeometry()))(shape)
-);
-
-// Constructs an item from the designator.
-const as = Shape.registerMethod(
-  'as',
-  (...names) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        taggedItem(
-          { tags: names.map((name) => `item:${name}`) },
-          await shape.toGeometry()
-        )
-      )
-);
-
-// Constructs an item, as a part, from the designator.
-const asPart = Shape.registerMethod(
-  'asPart',
-  (partName) => async (shape) =>
-    Shape.fromGeometry(
-      taggedItem({ tags: [`part:${partName}`] }, await shape.toGeometry())
-    )
-);
+Shape.registerMethod('alignment', alignment);
 
 const toShape = Shape.registerMethod(
   'toShape',
@@ -1249,28 +1220,6 @@ const toShapes = Shape.registerMethod(
   }
 );
 
-const transform = Shape.registerMethod(
-  'transform',
-  (matrix) => async (shape) =>
-    Shape.fromGeometry(transform$1(matrix, await shape.toGeometry()))
-);
-
-const at = Shape.registerMethod('at', (...args) => async (shape) => {
-  const { shapesAndFunctions: ops } = destructure(args);
-  const { local, global } = getInverseMatrices(await shape.toGeometry());
-  const selections = await toShapes(ops.shift())(shape);
-  for (const selection of selections) {
-    const { local: selectionLocal, global: selectionGlobal } =
-      getInverseMatrices(await selection.toGeometry());
-    shape = transform(local)
-      .transform(selectionGlobal)
-      .op(...ops)
-      .transform(selectionLocal)
-      .transform(global)(shape);
-  }
-  return shape;
-});
-
 const toShapesGeometries = Shape.registerMethod(
   'toShapesGeometries',
   (value) => async (shape) => {
@@ -1300,6 +1249,105 @@ const Group = Shape.registerMethod(
       );
     }
 );
+
+const op = Shape.registerMethod('op', (...fns) => async (shape) => {
+  const results = [];
+  for (const fn of fns) {
+    if (fn === undefined) {
+      continue;
+    }
+    if (Shape.isShape(fn)) {
+      results.push(fn);
+    } else {
+      const result = await fn(Shape.chain(shape));
+      results.push(result);
+    }
+  }
+  return Group(...results);
+});
+
+const by = Shape.registerMethod(
+  'by',
+  (selection, ...ops) =>
+    async (shape) => {
+      if (ops.length === 0) {
+        ops.push((local) => local);
+      }
+      ops = ops.map((op) => (Shape.isFunction(op) ? op : () => op));
+      // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
+      if (Shape.isFunction(selection)) {
+        selection = await selection(shape);
+      }
+      const placed = [];
+      for (const leaf of getLeafs(await selection.toGeometry())) {
+        const { global } = getInverseMatrices(leaf);
+        // Perform the operation then place the
+        // result in the global frame of the reference.
+        placed.push(await op(...ops).transform(global)(shape));
+      }
+      return Group(...placed);
+    }
+);
+
+const align = Shape.registerMethod(
+  'align',
+  (...args) =>
+    async (shape) =>
+      by(await alignment(...args)(shape))(shape)
+);
+
+Shape.registerMethod('align', align);
+
+const area = Shape.registerMethod(
+  'area',
+  (op = (value) => (shape) => value) =>
+    (shape) =>
+      op(measureArea(shape.toGeometry()))(shape)
+);
+
+// Constructs an item from the designator.
+const as = Shape.registerMethod(
+  'as',
+  (...names) =>
+    async (shape) =>
+      Shape.fromGeometry(
+        taggedItem(
+          { tags: names.map((name) => `item:${name}`) },
+          await shape.toGeometry()
+        )
+      )
+);
+
+// Constructs an item, as a part, from the designator.
+const asPart = Shape.registerMethod(
+  'asPart',
+  (partName) => async (shape) =>
+    Shape.fromGeometry(
+      taggedItem({ tags: [`part:${partName}`] }, await shape.toGeometry())
+    )
+);
+
+const transform = Shape.registerMethod(
+  'transform',
+  (matrix) => async (shape) =>
+    Shape.fromGeometry(transform$1(matrix, await shape.toGeometry()))
+);
+
+const at = Shape.registerMethod('at', (...args) => async (shape) => {
+  const { shapesAndFunctions: ops } = destructure(args);
+  const { local, global } = getInverseMatrices(await shape.toGeometry());
+  const selections = await toShapes(ops.shift())(shape);
+  for (const selection of selections) {
+    const { local: selectionLocal, global: selectionGlobal } =
+      getInverseMatrices(await selection.toGeometry());
+    shape = transform(local)
+      .transform(selectionGlobal)
+      .op(...ops)
+      .transform(selectionLocal)
+      .transform(global)(shape);
+  }
+  return shape;
+});
 
 const normal = Shape.registerMethod('normal', () => async (shape) => {
   const result = Shape.fromGeometry(computeNormal(await shape.toGeometry()));
@@ -1929,45 +1977,6 @@ const billOfMaterials = Shape.registerMethod(
   (op = (...list) => note(`Materials: ${list.join(', ')}`)) =>
     (shape) =>
       get('part:*').tags('part', op)(shape)
-);
-
-const op = Shape.registerMethod('op', (...fns) => async (shape) => {
-  const results = [];
-  for (const fn of fns) {
-    if (fn === undefined) {
-      continue;
-    }
-    if (Shape.isShape(fn)) {
-      results.push(fn);
-    } else {
-      const result = await fn(Shape.chain(shape));
-      results.push(result);
-    }
-  }
-  return Group(...results);
-});
-
-const by = Shape.registerMethod(
-  'by',
-  (selection, ...ops) =>
-    async (shape) => {
-      if (ops.length === 0) {
-        ops.push((local) => local);
-      }
-      ops = ops.map((op) => (Shape.isFunction(op) ? op : () => op));
-      // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
-      if (Shape.isFunction(selection)) {
-        selection = await selection(shape);
-      }
-      const placed = [];
-      for (const leaf of getLeafs(await selection.toGeometry())) {
-        const { global } = getInverseMatrices(leaf);
-        // Perform the operation then place the
-        // result in the global frame of the reference.
-        placed.push(await op(...ops).transform(global)(shape));
-      }
-      return Group(...placed);
-    }
 );
 
 const center = Shape.registerMethod(
@@ -4961,6 +4970,14 @@ const hold = Shape.registerMethod2(
   (shapes) => async (shape) => shape.on(inFn(), inFn().and(...shapes))
 );
 
+const voidFn = Shape.registerMethod(
+  ['void', 'hole'],
+  () => async (shape) =>
+    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
+);
+
+const hole = voidFn;
+
 const image = Shape.registerMethod(
   'image',
   (url) => (shape) => untag('image:*').tag(`image:${url}`)(shape)
@@ -5171,9 +5188,11 @@ const m = Shape.registerMethod(
 const noOp = Shape.registerMethod('noOp', () => (shape) => shape);
 
 const noVoid = Shape.registerMethod(
-  'noVoid',
+  ['noVoid', 'noHole'],
   () => (shape) => shape.on(get('type:void'), Empty())
 );
+
+const noHole = noVoid;
 
 const eachOp = Shape.ops.get('each');
 
@@ -6456,12 +6475,6 @@ const unfold = Shape.registerMethod(
     Shape.fromGeometry(unfold$1(await shape.toGeometry()))
 );
 
-const voidFn = Shape.registerMethod(
-  'void',
-  () => async (shape) =>
-    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
-);
-
 const volume = Shape.registerMethod(
   'volume',
   (op = (value) => (shape) => value) =>
@@ -7145,4 +7158,4 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hole, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noHole, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

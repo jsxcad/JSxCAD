@@ -44,12 +44,12 @@ const wall1 = await grid
 
 ```JavaScript
 const wall = await wall1
-  .by(align('x<'))
-  .and(by(align('x>')))
-  .by(align('x<'))
-  .and(by(align('x>')))
-  .by(align('x<'))
-  .and(by(align('x>')))
+  .align('x<')
+  .and(align('x>'))
+  .align('x<')
+  .and(align('x>'))
+  .align('x<')
+  .and(align('x>'))
   .view();
 ```
 
@@ -59,7 +59,7 @@ const wall = await wall1
 const bentWall = await wall
   .clip(Box(475, 50, 500))
   .scale(1 / 1.5)
-  .by(align('z>'))
+  .align('z>')
   .y(51)
   .bend(50)
   .view();

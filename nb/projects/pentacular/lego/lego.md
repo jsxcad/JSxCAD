@@ -30,10 +30,10 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
       }
     }
   }
-  return Group(Box(length * 8, width * 8).by(align('x>y>')), ...pieces)
+  return Group(Box(length * 8, width * 8).align('x>y>'), ...pieces)
     .fill()
     .ez([height])
-    .by(align('xy'))
+    .align('xy')
     .as(`SocketBoard ${length} x ${width} x ${height}`);
 };
 ```
@@ -58,7 +58,7 @@ export const StudBoard = (length, width, height, { studs = [] } = {}) => {
     }
   }
   return Group(...board)
-    .by(align('xy'))
+    .align('xy')
     .as(`StudBoard ${length} x ${width} x ${height}`);
 };
 ```
