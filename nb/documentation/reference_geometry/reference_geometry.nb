@@ -13,7 +13,7 @@ md`
 Returns a point relative to a shape which can be used for positioning other shapes. Behavior needs to be updated to function this way.
 `;
 
-await Group(a, b, b.to(a.align('<x'))).view();
+await Group(a, b, b.to(a.alignment('<x'))).view();
 
 md`
 ---

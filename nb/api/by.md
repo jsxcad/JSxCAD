@@ -16,7 +16,7 @@ by(alignment('x>')) moves both by the reference.
 
 ```JavaScript
 Box(10)
-  .and(align('x>'))
+  .and(alignment('x>'))
   .view(1)
   .note("Box(10).and(alignment('x>')) produces a box and a reference point")
   .by(alignment('x>'))

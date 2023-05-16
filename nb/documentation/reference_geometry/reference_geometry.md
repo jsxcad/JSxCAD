@@ -23,7 +23,7 @@ Returns a point relative to a shape which can be used for positioning other shap
 ![Image](reference_geometry.md.$5.png)
 
 ```JavaScript
-await Group(a, b, b.to(a.align('<x'))).view();
+await Group(a, b, b.to(a.alignment('<x'))).view();
 ```
 
 ---

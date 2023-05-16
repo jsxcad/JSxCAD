@@ -119,7 +119,7 @@ export { move, xyz } from './move.js';
 export { moveAlong, m } from './moveAlong.js';
 export { noOp } from './noOp.js';
 export { normal } from './normal.js';
-export { noHole } from './noHole.js';
+export { noHole } from './noVoid.js';
 export { noVoid } from './noVoid.js';
 export { note } from './note.js';
 export { n, nth } from './nth.js';
