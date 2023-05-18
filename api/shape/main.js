@@ -57,6 +57,7 @@ export { clipFrom } from './clipFrom.js';
 export { color } from './color.js';
 export { commonVolume } from './commonVolume.js';
 export { copy } from './copy.js';
+export { curve } from './Curve.js';
 export { cut } from './cut.js';
 export { cutFrom } from './cutFrom.js';
 export { cutOut } from './cutOut.js';

@@ -79,47 +79,6 @@ function __param(paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 }
 
-function __esDecorate(ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
-    function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
-    var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
-    var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
-    var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
-    var _, done = false;
-    for (var i = decorators.length - 1; i >= 0; i--) {
-        var context = {};
-        for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
-        for (var p in contextIn.access) context.access[p] = contextIn.access[p];
-        context.addInitializer = function (f) { if (done) throw new TypeError("Cannot add initializers after decoration has completed"); extraInitializers.push(accept(f || null)); };
-        var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
-        if (kind === "accessor") {
-            if (result === void 0) continue;
-            if (result === null || typeof result !== "object") throw new TypeError("Object expected");
-            if (_ = accept(result.get)) descriptor.get = _;
-            if (_ = accept(result.set)) descriptor.set = _;
-            if (_ = accept(result.init)) initializers.push(_);
-        }
-        else if (_ = accept(result)) {
-            if (kind === "field") initializers.push(_);
-            else descriptor[key] = _;
-        }
-    }
-    if (target) Object.defineProperty(target, contextIn.name, descriptor);
-    done = true;
-}
-function __runInitializers(thisArg, initializers, value) {
-    var useValue = arguments.length > 2;
-    for (var i = 0; i < initializers.length; i++) {
-        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
-    }
-    return useValue ? value : void 0;
-}
-function __propKey(x) {
-    return typeof x === "symbol" ? x : "".concat(x);
-}
-function __setFunctionName(f, name, prefix) {
-    if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
-    return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
-}
 function __metadata(metadataKey, metadataValue) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
 }
@@ -303,38 +262,33 @@ function __classPrivateFieldIn(state, receiver) {
     return typeof state === "function" ? receiver === state : state.has(receiver);
 }
 
-var tslib_es6 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	__extends: __extends,
-	get __assign () { return __assign; },
-	__rest: __rest,
-	__decorate: __decorate,
-	__param: __param,
-	__esDecorate: __esDecorate,
-	__runInitializers: __runInitializers,
-	__propKey: __propKey,
-	__setFunctionName: __setFunctionName,
-	__metadata: __metadata,
-	__awaiter: __awaiter,
-	__generator: __generator,
-	__createBinding: __createBinding,
-	__exportStar: __exportStar,
-	__values: __values,
-	__read: __read,
-	__spread: __spread,
-	__spreadArrays: __spreadArrays,
-	__spreadArray: __spreadArray,
-	__await: __await,
-	__asyncGenerator: __asyncGenerator,
-	__asyncDelegator: __asyncDelegator,
-	__asyncValues: __asyncValues,
-	__makeTemplateObject: __makeTemplateObject,
-	__importStar: __importStar,
-	__importDefault: __importDefault,
-	__classPrivateFieldGet: __classPrivateFieldGet,
-	__classPrivateFieldSet: __classPrivateFieldSet,
-	__classPrivateFieldIn: __classPrivateFieldIn
-});
+var tslib_1 = {
+    __extends,
+    __assign,
+    __rest,
+    __decorate,
+    __param,
+    __metadata,
+    __awaiter,
+    __generator,
+    __createBinding,
+    __exportStar,
+    __values,
+    __read,
+    __spread,
+    __spreadArrays,
+    __spreadArray,
+    __await,
+    __asyncGenerator,
+    __asyncDelegator,
+    __asyncValues,
+    __makeTemplateObject,
+    __importStar,
+    __importDefault,
+    __classPrivateFieldGet,
+    __classPrivateFieldSet,
+    __classPrivateFieldIn,
+};
 
 var types$2 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -360,7 +314,7 @@ var BaseType = /** @class */ (function () {
     return BaseType;
 }());
 var ArrayType = /** @class */ (function (_super) {
-    tslib_es6.__extends(ArrayType, _super);
+    tslib_1.__extends(ArrayType, _super);
     function ArrayType(elemType) {
         var _this = _super.call(this) || this;
         _this.elemType = elemType;
@@ -377,7 +331,7 @@ var ArrayType = /** @class */ (function (_super) {
     return ArrayType;
 }(BaseType));
 var IdentityType = /** @class */ (function (_super) {
-    tslib_es6.__extends(IdentityType, _super);
+    tslib_1.__extends(IdentityType, _super);
     function IdentityType(value) {
         var _this = _super.call(this) || this;
         _this.value = value;
@@ -397,7 +351,7 @@ var IdentityType = /** @class */ (function (_super) {
     return IdentityType;
 }(BaseType));
 var ObjectType = /** @class */ (function (_super) {
-    tslib_es6.__extends(ObjectType, _super);
+    tslib_1.__extends(ObjectType, _super);
     function ObjectType(fields) {
         var _this = _super.call(this) || this;
         _this.fields = fields;
@@ -416,7 +370,7 @@ var ObjectType = /** @class */ (function (_super) {
     return ObjectType;
 }(BaseType));
 var OrType = /** @class */ (function (_super) {
-    tslib_es6.__extends(OrType, _super);
+    tslib_1.__extends(OrType, _super);
     function OrType(types) {
         var _this = _super.call(this) || this;
         _this.types = types;
@@ -434,7 +388,7 @@ var OrType = /** @class */ (function (_super) {
     return OrType;
 }(BaseType));
 var PredicateType = /** @class */ (function (_super) {
-    tslib_es6.__extends(PredicateType, _super);
+    tslib_1.__extends(PredicateType, _super);
     function PredicateType(name, predicate) {
         var _this = _super.call(this) || this;
         _this.name = name;
@@ -683,7 +637,7 @@ function typesPlugin(_fork) {
         return null;
     }
     var DefImpl = /** @class */ (function (_super) {
-        tslib_es6.__extends(DefImpl, _super);
+        tslib_1.__extends(DefImpl, _super);
         function DefImpl(typeName) {
             var _this = _super.call(this, new PredicateType(typeName, function (value, deep) { return _this.check(value, deep); }), typeName) || this;
             return _this;
@@ -1123,7 +1077,7 @@ types$2.Def;
 var path = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
+var types_1 = tslib_1.__importDefault(types$2);
 var Op = Object.prototype;
 var hasOwn = Op.hasOwnProperty;
 function pathPlugin(fork) {
@@ -1458,7 +1412,7 @@ unwrapExports(path);
 var scope = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
+var types_1 = tslib_1.__importDefault(types$2);
 var hasOwn = Object.prototype.hasOwnProperty;
 function scopePlugin(fork) {
     var types = fork.use(types_1.default);
@@ -1778,9 +1732,9 @@ unwrapExports(scope);
 var nodePath = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
-var path_1 = tslib_es6.__importDefault(path);
-var scope_1 = tslib_es6.__importDefault(scope);
+var types_1 = tslib_1.__importDefault(types$2);
+var path_1 = tslib_1.__importDefault(path);
+var scope_1 = tslib_1.__importDefault(scope);
 function nodePathPlugin(fork) {
     var types = fork.use(types_1.default);
     var n = types.namedTypes;
@@ -2185,8 +2139,8 @@ unwrapExports(nodePath);
 var pathVisitor = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
-var node_path_1 = tslib_es6.__importDefault(nodePath);
+var types_1 = tslib_1.__importDefault(types$2);
+var node_path_1 = tslib_1.__importDefault(nodePath);
 var hasOwn = Object.prototype.hasOwnProperty;
 function pathVisitorPlugin(fork) {
     var types = fork.use(types_1.default);
@@ -2530,7 +2484,7 @@ unwrapExports(pathVisitor);
 var equiv = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
+var types_1 = tslib_1.__importDefault(types$2);
 function default_1(fork) {
     var types = fork.use(types_1.default);
     var getFieldNames = types.getFieldNames;
@@ -2688,11 +2642,11 @@ unwrapExports(equiv);
 var fork = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
-var path_visitor_1 = tslib_es6.__importDefault(pathVisitor);
-var equiv_1 = tslib_es6.__importDefault(equiv);
-var path_1 = tslib_es6.__importDefault(path);
-var node_path_1 = tslib_es6.__importDefault(nodePath);
+var types_1 = tslib_1.__importDefault(types$2);
+var path_visitor_1 = tslib_1.__importDefault(pathVisitor);
+var equiv_1 = tslib_1.__importDefault(equiv);
+var path_1 = tslib_1.__importDefault(path);
+var node_path_1 = tslib_1.__importDefault(nodePath);
 function default_1(defs) {
     var fork = createFork();
     var types = fork.use(types_1.default);
@@ -2771,7 +2725,7 @@ coreOperators.BinaryOperators;
 var shared = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
+var types_1 = tslib_1.__importDefault(types$2);
 function default_1(fork) {
     var types = fork.use(types_1.default);
     var Type = types.Type;
@@ -2822,8 +2776,8 @@ var core = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
 
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     var types = fork.use(types_1.default);
     var Type = types.Type;
@@ -3122,9 +3076,9 @@ unwrapExports(core);
 var es6 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var core_1 = tslib_es6.__importDefault(core);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var core_1 = tslib_1.__importDefault(core);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(core_1.default);
     var types = fork.use(types_1.default);
@@ -3363,17 +3317,17 @@ var es2016 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
 
-var es6_1 = tslib_es6.__importDefault(es6);
-var types_1 = tslib_es6.__importDefault(types$2);
+var es6_1 = tslib_1.__importDefault(es6);
+var types_1 = tslib_1.__importDefault(types$2);
 function default_1(fork) {
     fork.use(es6_1.default);
     var types = fork.use(types_1.default);
     var def = types.Type.def;
     var or = types.Type.or;
-    var BinaryOperator = or.apply(void 0, tslib_es6.__spreadArrays(coreOperators.BinaryOperators, ["**"]));
+    var BinaryOperator = or.apply(void 0, tslib_1.__spreadArrays(coreOperators.BinaryOperators, ["**"]));
     def("BinaryExpression")
         .field("operator", BinaryOperator);
-    var AssignmentOperator = or.apply(void 0, tslib_es6.__spreadArrays(coreOperators.AssignmentOperators, ["**="]));
+    var AssignmentOperator = or.apply(void 0, tslib_1.__spreadArrays(coreOperators.AssignmentOperators, ["**="]));
     def("AssignmentExpression")
         .field("operator", AssignmentOperator);
 }
@@ -3386,9 +3340,9 @@ unwrapExports(es2016);
 var es2017 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es2016_1 = tslib_es6.__importDefault(es2016);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es2016_1 = tslib_1.__importDefault(es2016);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es2016_1.default);
     var types = fork.use(types_1.default);
@@ -3410,9 +3364,9 @@ unwrapExports(es2017);
 var es2018 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es2017_1 = tslib_es6.__importDefault(es2017);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es2017_1 = tslib_1.__importDefault(es2017);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es2017_1.default);
     var types = fork.use(types_1.default);
@@ -3448,9 +3402,9 @@ unwrapExports(es2018);
 var es2019 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es2018_1 = tslib_es6.__importDefault(es2018);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es2018_1 = tslib_1.__importDefault(es2018);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es2018_1.default);
     var types = fork.use(types_1.default);
@@ -3470,9 +3424,9 @@ var es2020 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
 
-var es2019_1 = tslib_es6.__importDefault(es2019);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es2019_1 = tslib_1.__importDefault(es2019);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es2019_1.default);
     var types = fork.use(types_1.default);
@@ -3510,7 +3464,7 @@ function default_1(fork) {
         .build("object", "property", "computed", "optional")
         .field("optional", Boolean, defaults["true"]);
     // Nullish coalescing
-    var LogicalOperator = or.apply(void 0, tslib_es6.__spreadArrays(coreOperators.LogicalOperators, ["??"]));
+    var LogicalOperator = or.apply(void 0, tslib_1.__spreadArrays(coreOperators.LogicalOperators, ["??"]));
     def("LogicalExpression")
         .field("operator", LogicalOperator);
 }
@@ -3523,9 +3477,9 @@ unwrapExports(es2020);
 var jsx = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es2020_1 = tslib_es6.__importDefault(es2020);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es2020_1 = tslib_1.__importDefault(es2020);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es2020_1.default);
     var types = fork.use(types_1.default);
@@ -3635,9 +3589,9 @@ unwrapExports(jsx);
 var esProposals = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
-var es2020_1 = tslib_es6.__importDefault(es2020);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
+var es2020_1 = tslib_1.__importDefault(es2020);
 function default_1(fork) {
     fork.use(es2020_1.default);
     var types = fork.use(types_1.default);
@@ -3684,8 +3638,8 @@ var typeAnnotations = createCommonjsModule(function (module, exports) {
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     var types = fork.use(types_1.default);
     var def = types.Type.def;
@@ -3723,10 +3677,10 @@ unwrapExports(typeAnnotations);
 var flow = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es_proposals_1 = tslib_es6.__importDefault(esProposals);
-var type_annotations_1 = tslib_es6.__importDefault(typeAnnotations);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es_proposals_1 = tslib_1.__importDefault(esProposals);
+var type_annotations_1 = tslib_1.__importDefault(typeAnnotations);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es_proposals_1.default);
     fork.use(type_annotations_1.default);
@@ -4076,9 +4030,9 @@ unwrapExports(flow);
 var esprima$2 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es2020_1 = tslib_es6.__importDefault(es2020);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es2020_1 = tslib_1.__importDefault(es2020);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es2020_1.default);
     var types = fork.use(types_1.default);
@@ -4129,9 +4083,9 @@ unwrapExports(esprima$2);
 var babelCore = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var es_proposals_1 = tslib_es6.__importDefault(esProposals);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var es_proposals_1 = tslib_1.__importDefault(esProposals);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     fork.use(es_proposals_1.default);
     var types = fork.use(types_1.default);
@@ -4335,8 +4289,8 @@ unwrapExports(babelCore);
 var babel = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var babel_core_1 = tslib_es6.__importDefault(babelCore);
-var flow_1 = tslib_es6.__importDefault(flow);
+var babel_core_1 = tslib_1.__importDefault(babelCore);
+var flow_1 = tslib_1.__importDefault(flow);
 function default_1(fork) {
     fork.use(babel_core_1.default);
     fork.use(flow_1.default);
@@ -4350,10 +4304,10 @@ unwrapExports(babel);
 var typescript = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var babel_core_1 = tslib_es6.__importDefault(babelCore);
-var type_annotations_1 = tslib_es6.__importDefault(typeAnnotations);
-var types_1 = tslib_es6.__importDefault(types$2);
-var shared_1 = tslib_es6.__importDefault(shared);
+var babel_core_1 = tslib_1.__importDefault(babelCore);
+var type_annotations_1 = tslib_1.__importDefault(typeAnnotations);
+var types_1 = tslib_1.__importDefault(types$2);
+var shared_1 = tslib_1.__importDefault(shared);
 function default_1(fork) {
     // Since TypeScript is parsed by Babylon, include the core Babylon types
     // but omit the Flow-related types.
@@ -4709,20 +4663,20 @@ var main$1 = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.visit = exports.use = exports.Type = exports.someField = exports.PathVisitor = exports.Path = exports.NodePath = exports.namedTypes = exports.getSupertypeNames = exports.getFieldValue = exports.getFieldNames = exports.getBuilderName = exports.finalize = exports.eachField = exports.defineMethod = exports.builtInTypes = exports.builders = exports.astNodesAreEquivalent = void 0;
 
-var fork_1 = tslib_es6.__importDefault(fork);
-var core_1 = tslib_es6.__importDefault(core);
-var es6_1 = tslib_es6.__importDefault(es6);
-var es2016_1 = tslib_es6.__importDefault(es2016);
-var es2017_1 = tslib_es6.__importDefault(es2017);
-var es2018_1 = tslib_es6.__importDefault(es2018);
-var es2019_1 = tslib_es6.__importDefault(es2019);
-var es2020_1 = tslib_es6.__importDefault(es2020);
-var jsx_1 = tslib_es6.__importDefault(jsx);
-var flow_1 = tslib_es6.__importDefault(flow);
-var esprima_1 = tslib_es6.__importDefault(esprima$2);
-var babel_1 = tslib_es6.__importDefault(babel);
-var typescript_1 = tslib_es6.__importDefault(typescript);
-var es_proposals_1 = tslib_es6.__importDefault(esProposals);
+var fork_1 = tslib_1.__importDefault(fork);
+var core_1 = tslib_1.__importDefault(core);
+var es6_1 = tslib_1.__importDefault(es6);
+var es2016_1 = tslib_1.__importDefault(es2016);
+var es2017_1 = tslib_1.__importDefault(es2017);
+var es2018_1 = tslib_1.__importDefault(es2018);
+var es2019_1 = tslib_1.__importDefault(es2019);
+var es2020_1 = tslib_1.__importDefault(es2020);
+var jsx_1 = tslib_1.__importDefault(jsx);
+var flow_1 = tslib_1.__importDefault(flow);
+var esprima_1 = tslib_1.__importDefault(esprima$2);
+var babel_1 = tslib_1.__importDefault(babel);
+var typescript_1 = tslib_1.__importDefault(typescript);
+var es_proposals_1 = tslib_1.__importDefault(esProposals);
 
 Object.defineProperty(exports, "namedTypes", { enumerable: true, get: function () { return namedTypes_1.namedTypes; } });
 var _a = fork_1.default([
@@ -11057,10 +11011,10 @@ var util = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isTrailingCommaEnabled = exports.getParentExportDeclaration = exports.isExportDeclaration = exports.fixFaultyLocations = exports.getTrueLoc = exports.composeSourceMaps = exports.copyPos = exports.comparePos = exports.getUnionOfKeys = exports.getOption = void 0;
 
-var assert_1 = tslib_es6.__importDefault(assert);
-var types = tslib_es6.__importStar(main$1);
+var assert_1 = tslib_1.__importDefault(assert);
+var types = tslib_1.__importStar(main$1);
 var n = types.namedTypes;
-var source_map_1 = tslib_es6.__importDefault(sourceMap);
+var source_map_1 = tslib_1.__importDefault(sourceMap);
 var SourceMapConsumer = source_map_1.default.SourceMapConsumer;
 var SourceMapGenerator = source_map_1.default.SourceMapGenerator;
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -18243,7 +18197,7 @@ options.normalize;
 var mapping = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var assert_1 = tslib_es6.__importDefault(assert);
+var assert_1 = tslib_1.__importDefault(assert);
 
 var Mapping = /** @class */ (function () {
     function Mapping(sourceLines, sourceLoc, targetLoc) {
@@ -18445,11 +18399,11 @@ var lines = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.concat = exports.fromString = exports.countSpaces = exports.Lines = void 0;
 
-var assert_1 = tslib_es6.__importDefault(assert);
-var source_map_1 = tslib_es6.__importDefault(sourceMap);
+var assert_1 = tslib_1.__importDefault(assert);
+var source_map_1 = tslib_1.__importDefault(sourceMap);
 
 
-var mapping_1 = tslib_es6.__importDefault(mapping);
+var mapping_1 = tslib_1.__importDefault(mapping);
 var Lines = /** @class */ (function () {
     function Lines(infos, sourceFileName) {
         if (sourceFileName === void 0) { sourceFileName = null; }
@@ -18562,7 +18516,7 @@ var Lines = /** @class */ (function () {
             return this;
         var lines = new Lines(this.infos.map(function (info, i) {
             if (info.line && (i > 0 || !skipFirstLine)) {
-                info = tslib_es6.__assign(tslib_es6.__assign({}, info), { indent: Math.max(0, info.indent - width) });
+                info = tslib_1.__assign(tslib_1.__assign({}, info), { indent: Math.max(0, info.indent - width) });
             }
             return info;
         }));
@@ -18581,7 +18535,7 @@ var Lines = /** @class */ (function () {
         }
         var lines = new Lines(this.infos.map(function (info) {
             if (info.line && !info.locked) {
-                info = tslib_es6.__assign(tslib_es6.__assign({}, info), { indent: info.indent + by });
+                info = tslib_1.__assign(tslib_1.__assign({}, info), { indent: info.indent + by });
             }
             return info;
         }));
@@ -18603,7 +18557,7 @@ var Lines = /** @class */ (function () {
         }
         var lines = new Lines(this.infos.map(function (info, i) {
             if (i > 0 && info.line && !info.locked) {
-                info = tslib_es6.__assign(tslib_es6.__assign({}, info), { indent: info.indent + by });
+                info = tslib_1.__assign(tslib_1.__assign({}, info), { indent: info.indent + by });
             }
             return info;
         }));
@@ -18620,7 +18574,7 @@ var Lines = /** @class */ (function () {
         if (this.length < 2) {
             return this;
         }
-        return new Lines(this.infos.map(function (info, i) { return (tslib_es6.__assign(tslib_es6.__assign({}, info), { locked: i > 0 })); }));
+        return new Lines(this.infos.map(function (info, i) { return (tslib_1.__assign(tslib_1.__assign({}, info), { locked: i > 0 })); }));
     };
     Lines.prototype.getIndentAt = function (line) {
         assert_1.default.ok(line >= 1, "no line " + line + " (line numbers start from 1)");
@@ -18926,7 +18880,7 @@ var Lines = /** @class */ (function () {
             }
             linesOrNull.infos.forEach(function (info, i) {
                 if (!prevInfo || i > 0) {
-                    prevInfo = tslib_es6.__assign({}, info);
+                    prevInfo = tslib_1.__assign({}, info);
                     infos.push(prevInfo);
                 }
             });
@@ -19107,8 +19061,8 @@ var comments = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.printComments = exports.attach = void 0;
 
-var assert_1 = tslib_es6.__importDefault(assert);
-var types = tslib_es6.__importStar(main$1);
+var assert_1 = tslib_1.__importDefault(assert);
+var types = tslib_1.__importStar(main$1);
 var n = types.namedTypes;
 var isArray = types.builtInTypes.array;
 var isObject = types.builtInTypes.object;
@@ -19419,15 +19373,15 @@ var parser = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parse = void 0;
 
-var assert_1 = tslib_es6.__importDefault(assert);
-var types = tslib_es6.__importStar(main$1);
+var assert_1 = tslib_1.__importDefault(assert);
+var types = tslib_1.__importStar(main$1);
 var b = types.builders;
 var isObject = types.builtInTypes.object;
 var isArray = types.builtInTypes.array;
 
 
 
-var util$1 = tslib_es6.__importStar(util);
+var util$1 = tslib_1.__importStar(util);
 function parse(source, options$1) {
     options$1 = options.normalize(options$1);
     var lines$1 = lines.fromString(source, options$1);
@@ -19673,9 +19627,9 @@ parser.parse;
 var fastPath = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
-var assert_1 = tslib_es6.__importDefault(assert);
-var types = tslib_es6.__importStar(main$1);
-var util$1 = tslib_es6.__importStar(util);
+var assert_1 = tslib_1.__importDefault(assert);
+var types = tslib_1.__importStar(main$1);
+var util$1 = tslib_1.__importStar(util);
 var n = types.namedTypes;
 var isArray = types.builtInTypes.array;
 var isNumber = types.builtInTypes.number;
@@ -20197,15 +20151,15 @@ var patcher = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getReprinter = exports.Patcher = void 0;
 
-var assert_1 = tslib_es6.__importDefault(assert);
-var linesModule = tslib_es6.__importStar(lines);
-var types = tslib_es6.__importStar(main$1);
+var assert_1 = tslib_1.__importDefault(assert);
+var linesModule = tslib_1.__importStar(lines);
+var types = tslib_1.__importStar(main$1);
 var Printable = types.namedTypes.Printable;
 var Expression = types.namedTypes.Expression;
 var ReturnStatement = types.namedTypes.ReturnStatement;
 var SourceLocation = types.namedTypes.SourceLocation;
 
-var fast_path_1 = tslib_es6.__importDefault(fastPath);
+var fast_path_1 = tslib_1.__importDefault(fastPath);
 var isObject = types.builtInTypes.object;
 var isArray = types.builtInTypes.array;
 var isString = types.builtInTypes.string;
@@ -20587,17 +20541,17 @@ var printer = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Printer = void 0;
 
-var assert_1 = tslib_es6.__importDefault(assert);
+var assert_1 = tslib_1.__importDefault(assert);
 
 
 
 
-var types = tslib_es6.__importStar(main$1);
+var types = tslib_1.__importStar(main$1);
 var namedTypes = types.namedTypes;
 var isString = types.builtInTypes.string;
 var isObject = types.builtInTypes.object;
-var fast_path_1 = tslib_es6.__importDefault(fastPath);
-var util$1 = tslib_es6.__importStar(util);
+var fast_path_1 = tslib_1.__importDefault(fastPath);
+var util$1 = tslib_1.__importStar(util);
 var PrintResult = function PrintResult(code, sourceMap) {
     assert_1.default.ok(this instanceof PrintResult);
     isString.assert(code);
@@ -22854,8 +22808,8 @@ var main = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = exports.prettyPrint = exports.print = exports.types = exports.parse = void 0;
 
-var fs_1 = tslib_es6.__importDefault(require$$0);
-var types = tslib_es6.__importStar(main$1);
+var fs_1 = tslib_1.__importDefault(require$$0);
+var types = tslib_1.__importStar(main$1);
 exports.types = types;
 
 Object.defineProperty(exports, "parse", { enumerable: true, get: function () { return parser.parse; } });

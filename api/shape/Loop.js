@@ -1,5 +1,6 @@
+import { fill as fillGeometry, link as linkGeometry } from '@jsxcad/geometry';
+
 import Shape from './Shape.js';
-import { link as linkGeometry } from '@jsxcad/geometry';
 import { toShapesGeometries } from './toShapesGeometries.js';
 
 export const Loop = Shape.registerMethod(
@@ -7,7 +8,12 @@ export const Loop = Shape.registerMethod(
   (...shapes) =>
     async (shape) =>
       Shape.fromGeometry(
-        linkGeometry(await toShapesGeometries(shapes)(shape), /* close= */ true)
+        fillGeometry(
+          linkGeometry(
+            await toShapesGeometries(shapes)(shape),
+            /* close= */ true
+          )
+        )
       )
 );
 

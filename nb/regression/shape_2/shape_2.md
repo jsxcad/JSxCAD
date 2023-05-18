@@ -4,7 +4,7 @@
 Box(20)
   .ez(2)
   .clean()
-  .And(color('red'), shell([2]).color('green'))
+  // .And(color('red'), shell([2]).color('green'))
   .clip(YZ(0))
   .view();
 ```
@@ -70,4 +70,13 @@ Squiggle(1, 10).stroke(0.5).view(2);
 
 ```JavaScript
 await Assembly(Box(5), Arc(5.5).hole()).noHole().gridView();
+```
+
+![Image](shape_2.md.$10.png)
+
+```JavaScript
+Box(8, 12)
+  .join(Box(12, 8))
+  .And(points(), curve('closed', 200))
+  .gridView();
 ```
