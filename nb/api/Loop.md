@@ -18,7 +18,7 @@ _Note: We should rethink Arc and Box being implicitly filled._
 
 ```JavaScript
 Loop(
-  Line(5),
+  Line(5).link('reverse'),
   Point(0, 8),
   Arc([4, 5], [4, 5], { start: 0 / 4, end: 3 /4 })
     .outline()
