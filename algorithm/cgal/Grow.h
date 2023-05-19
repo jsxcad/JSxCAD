@@ -8,6 +8,8 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   Point reference = Point(0, 0, 0).transform(geometry->transform(count));
   FT amount = reference.z();
 
+  bool hasSelections = count + 1 < size;
+
   for (int nth = 0; nth < count; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
@@ -35,11 +37,17 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
                   .geom_traits(Kernel()));
         }
 
+        /*
+        Using the vertex normal is incorrect.
+        To do this properly, for face adjacent to the vertex we should compute the intersection of its offset plane and the offset planes of its vertex adjacent neighbors.
+        Then convert the vertex to a face formed from these 3 plane intersections.
+        */
+
         for (const Vertex_index vertex : mesh.vertices()) {
           const Point& point = mesh.point(vertex);
           // By default all points are grown.
           bool inside = true;
-          if (count + 1 < size) {
+          if (hasSelections) {
             inside = false;
             for (int selection = count + 1; selection < size; selection++) {
               if (geometry->on_side(selection)(point) !=

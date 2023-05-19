@@ -5179,10 +5179,10 @@ const masked = Shape.registerMethod(
   'masked',
   (...args) =>
     async (shape) => {
+      const [masks] = await destructure2(shape, args, 'shapes');
       const shapes = [];
-      for (const arg of args) {
-        const s = await shape.toShape(arg);
-        shapes.push(await s.void());
+      for (const mask of masks) {
+        shapes.push(await hole()(mask));
       }
       return Group(
         ...shapes,
@@ -5193,11 +5193,13 @@ const masked = Shape.registerMethod(
 
 const masking = Shape.registerMethod(
   'masking',
-  (masked) => async (shape) =>
-    Group(
-      shape.void(),
-      Shape.fromGeometry(hasTypeMasked(await shape.toShapeGeometry(masked)))
-    )
+  (...args) => async (shape) => {
+    const [masked] = await destructure2(shape, args, 'geometry');
+    return Group(
+      await hole()(shape),
+      Shape.fromGeometry(hasTypeMasked(masked))
+    );
+  }
 );
 
 const material = Shape.registerMethod(
