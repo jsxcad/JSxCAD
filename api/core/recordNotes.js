@@ -63,6 +63,11 @@ export const replayRecordedNotes = async (path, id) => {
 export const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
+export const emitError = (exception) => {
+  const error = { text: '' + exception, level: 'serious' };
+  emit({ hash: computeHash(error), error });
+};
+
 export const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
@@ -82,9 +87,10 @@ export const $run = async (op, { path, id, text, sha, line }) => {
           .md('Debug Geometry: ')
           .view();
         await resolvePending();
-        emitSourceText(text);
-        finishEmitGroup({ path, id, line });
       }
+      emitError(error);
+      emitSourceText(text);
+      finishEmitGroup({ path, id, line });
       throw error;
     }
     await resolvePending();

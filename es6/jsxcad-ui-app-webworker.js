@@ -93,6 +93,7 @@ const reportError = error => {
     text: error.stack ? error.stack : '' + error,
     level: 'serious'
   });
+  sys.flushEmitGroup();
 };
 sys.setPendingErrorHandler(reportError);
 const agent = async ({
@@ -170,7 +171,7 @@ const agent = async ({
     }
   } catch (error) {
     console.log(error.stack);
-    throw error;
+    // throw error;
   }
 };
 

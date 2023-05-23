@@ -23,13 +23,13 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
               mesh, working_selection, CGAL::parameters::all_default(),
               CGAL::parameters::all_default());
         }
-        bool created = false;
+        bool is_vertex_normal_map_created = false;
         Surface_mesh::Property_map<Vertex_index, Vector> vertex_normal_map;
-        std::tie(vertex_normal_map, created) =
+        std::tie(vertex_normal_map, is_vertex_normal_map_created) =
             mesh.add_property_map<Vertex_index, Vector>("v:normal_map",
                                                         CGAL::NULL_VECTOR);
 
-        if (created) {
+        if (is_vertex_normal_map_created) {
           CGAL::Polygon_mesh_processing::compute_vertex_normals(
               mesh, vertex_normal_map,
               CGAL::Polygon_mesh_processing::parameters::vertex_point_map(
@@ -38,9 +38,13 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
         }
 
         /*
-        Using the vertex normal is incorrect.
-        To do this properly, for face adjacent to the vertex we should compute the intersection of its offset plane and the offset planes of its vertex adjacent neighbors.
-        Then convert the vertex to a face formed from these 3 plane intersections.
+        There are some useful ideas in "Offset Triangular Mesh Using the
+        Multiple Normal Vectors of a Vertex".
+        (https://www.cad-journal.net/files/vol_1/CAD_1(1-4)_2004_285-291.pdf)
+
+        The most significant problem with using the average face normal is that
+        the greater the angle between the faces the smaller the resulting offset
+        will be.
         */
 
         for (const Vertex_index vertex : mesh.vertices()) {

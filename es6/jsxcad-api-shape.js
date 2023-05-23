@@ -1,6 +1,6 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read, log as log$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, hasTypeReference, taggedGroup, approximate as approximate$1, makeAbsolute, measureBoundingBox, getLeafs, getInverseMatrices, measureArea, taggedItem, transform as transform$1, computeNormal, extrude, transformCoordinate, link as link$1, taggedPlan, bend as bend$1, rewrite, visit, computeCentroid, convexHull, fuse as fuse$1, join as join$1, noGhost, clip as clip$1, linearize, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$2, fix as fix$1, hash, grow as grow$1, hasTypeVoid, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import { taggedGraph, taggedSegments, taggedPoints, fromPolygons, hasTypeReference, taggedGroup, approximate as approximate$1, makeAbsolute, measureBoundingBox, getLeafs, getInverseMatrices, measureArea, taggedItem, transform as transform$1, computeNormal, extrude, transformCoordinate, link as link$1, taggedPlan, bend as bend$1, rewrite, visit, computeCentroid, convexHull, fuse as fuse$1, join as join$1, noGhost, clip as clip$1, linearize, cut as cut$1, deform as deform$1, demesh as demesh$1, toPoints as toPoints$1, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, eagerTransform as eagerTransform$1, fill as fill$2, fix as fix$1, hash, hasTypeVoid, grow as grow$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, makeOcctBox, fromTranslateToTransform, fromRotateZToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { zag } from './jsxcad-api-v1-math.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
@@ -285,6 +285,18 @@ const registerMethod = (names, op) => {
   }
   return chainable(op);
 };
+
+const registerMethod2 = (names, signature, op) => {
+  const method =
+    (...args) =>
+    async (shape) => {
+      const parameters = await Shape.destructure2a(shape, args, ...signature);
+      return op(...parameters);
+    };
+  return registerMethod(names, method);
+};
+
+Shape.registerMethod2 = registerMethod2;
 
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromGraph = (graph, context) =>
@@ -698,47 +710,20 @@ const destructure2 = async (shape, input, ...specs) => {
   return output;
 };
 
-const registerMethod2 = (names, signature, baseOp) => {
-  if (typeof names === 'string') {
-    names = [names];
+Shape.destructure2 = destructure2;
+
+const destructure2a = async (shape, args, inputSpec, ...specs) => {
+  switch (inputSpec) {
+    case 'input':
+      return [shape, ...(await destructure2(shape, args, ...specs))];
+    case 'inputGeometry':
+      return [shape.geometry, ...(await destructure2(shape, args, ...specs))];
+    default:
+      return destructure2(shape, args, inputSpec, ...specs);
   }
-  const path = getSourceLocation()?.path;
-
-  const op =
-    (...args) =>
-    async (shape) => {
-      const destructured = await destructure2(shape, args, ...signature);
-      return baseOp(...destructured)(shape);
-    };
-
-  for (const name of names) {
-    if (Shape.prototype.hasOwnProperty(name)) {
-      const { origin } = Shape.prototype[name];
-      if (origin !== path) {
-        throw Error(
-          `Method ${name} is already defined in ${origin} (this is ${path}).`
-        );
-      }
-    }
-    // Make the operation application available e.g., s.grow(1)
-    // These methods work directly on unchained shapes, but don't compose when async.
-    const { [name]: method } = {
-      [name]: function (...args) {
-        const timer = startTime(name);
-        const result = op(...args)(this);
-        endTime(timer);
-        return result;
-      },
-    };
-    method.origin = path;
-    Shape.prototype[name] = method;
-
-    ops.set(name, op);
-  }
-  return chainable(op);
 };
 
-Shape.registerMethod2 = registerMethod2;
+Shape.destructure2a = destructure2a;
 
 const define = (tag, data) => {
   const define = { tag, data };
@@ -1297,6 +1282,15 @@ const align = Shape.registerMethod(
 );
 
 Shape.registerMethod('align', align);
+
+const aligned = Shape.registerMethod2(
+  'aligned',
+  ['input', 'shape', 'rest'],
+  async (input, alignedShape, rest) =>
+    and(by(await alignment(...rest)(input))(alignedShape))(input)
+);
+
+Shape.registerMethod('aligned', aligned);
 
 const area = Shape.registerMethod(
   'area',
@@ -2070,34 +2064,37 @@ const clean = Shape.registerMethod(
 );
 
 // It's not entirely clear that Clip makes sense, but we set it up to clip the first argument for now.
-const Clip = Shape.registerMethod('Clip', (...args) => async (shape) => {
-  const [modes, shapes] = await destructure2(shape, args, 'modes', 'shapes');
-  const [first, ...rest] = shapes;
-  return Shape.fromGeometry(
-    clip$1(
-      await first.toGeometry(),
-      await shape.toShapesGeometries(rest),
-      modes.includes('open'),
-      modes.includes('exact'),
-      modes.includes('noVoid'),
-      modes.includes('noGhost')
+const Clip = Shape.registerMethod2(
+  'Clip',
+  ['modes', 'geometry', 'geometries'],
+  async (modes, first, rest) =>
+    Shape.fromGeometry(
+      clip$1(
+        first,
+        rest,
+        modes.includes('open'),
+        modes.includes('exact'),
+        modes.includes('noVoid'),
+        modes.includes('noGhost')
+      )
     )
-  );
-});
+);
 
-const clip = Shape.registerMethod('clip', (...args) => async (shape) => {
-  const [modes, shapes] = await destructure2(shape, args, 'modes', 'shapes');
-  return Shape.fromGeometry(
-    clip$1(
-      await shape.toGeometry(),
-      await shape.toShapesGeometries(shapes),
-      modes.includes('open'),
-      modes.includes('exact'),
-      modes.includes('noVoid'),
-      modes.includes('noGhost')
+const clip = Shape.registerMethod2(
+  'clip',
+  ['inputGeometry', 'modes', 'geometries'],
+  (inputGeometry, modes, geometries) =>
+    Shape.fromGeometry(
+      clip$1(
+        inputGeometry,
+        geometries,
+        modes.includes('open'),
+        modes.includes('exact'),
+        modes.includes('noVoid'),
+        modes.includes('noGhost')
+      )
     )
-  );
-});
+);
 
 const clipFrom = Shape.registerMethod(
   'clipFrom',
@@ -2248,44 +2245,37 @@ const curve = Shape.registerMethod(
       Curve(shape, ...args)
 );
 
-const Cut = Shape.registerMethod('Cut', (...args) => async (shape) => {
-  const [first, rest, modes] = await destructure2(
-    shape,
-    args,
-    'geometry',
-    'geometries',
-    'modes'
-  );
-  return Shape.fromGeometry(
-    cut$1(
-      first,
-      rest,
-      modes.includes('open'),
-      modes.includes('exact'),
-      modes.includes('noVoid'),
-      modes.includes('noGhost')
+const Cut = Shape.registerMethod2(
+  'Cut',
+  ['geometry', 'geometries', 'modes'],
+  (first, rest, modes) =>
+    Shape.fromGeometry(
+      cut$1(
+        first,
+        rest,
+        modes.includes('open'),
+        modes.includes('exact'),
+        modes.includes('noVoid'),
+        modes.includes('noGhost')
+      )
     )
-  );
-});
+);
 
-const cut = Shape.registerMethod('cut', (...args) => async (shape) => {
-  const [geometries, modes] = await destructure2(
-    shape,
-    args,
-    'geometries',
-    'modes'
-  );
-  return Shape.fromGeometry(
-    cut$1(
-      await shape.toGeometry(),
-      geometries,
-      modes.includes('open'),
-      modes.includes('exact'),
-      modes.includes('noVoid'),
-      modes.includes('noGhost')
+const cut = Shape.registerMethod2(
+  'cut',
+  ['inputGeometry', 'geometries', 'modes'],
+  async (inputGeometry, geometries, modes) =>
+    Shape.fromGeometry(
+      cut$1(
+        inputGeometry,
+        geometries,
+        modes.includes('open'),
+        modes.includes('exact'),
+        modes.includes('noVoid'),
+        modes.includes('noGhost')
+      )
     )
-  );
-});
+);
 
 const cutFrom = Shape.registerMethod(
   'cutFrom',
@@ -4918,6 +4908,14 @@ const fuse = Shape.registerMethod('fuse', (...args) => async (shape) => {
   );
 });
 
+const voidFn = Shape.registerMethod(
+  ['void', 'gap'],
+  () => async (shape) =>
+    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
+);
+
+const gap = voidFn;
+
 // get, ignoring item boundaries.
 
 const getAll = Shape.registerMethod(
@@ -5037,17 +5035,9 @@ const inFn = Shape.registerMethod('in', () => async (shape) => {
 
 const hold = Shape.registerMethod2(
   'hold',
-  ['shapes'],
-  (shapes) => async (shape) => shape.on(inFn(), inFn().and(...shapes))
+  ['inputShape', 'shapes'],
+  (inputShape, shapes) => inputShape.on(inFn(), inFn().and(...shapes))
 );
-
-const voidFn = Shape.registerMethod(
-  ['void', 'hole'],
-  () => async (shape) =>
-    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
-);
-
-const hole = voidFn;
 
 const image = Shape.registerMethod(
   'image',
@@ -5182,7 +5172,7 @@ const masked = Shape.registerMethod(
       const [masks] = await destructure2(shape, args, 'shapes');
       const shapes = [];
       for (const mask of masks) {
-        shapes.push(await hole()(mask));
+        shapes.push(await gap()(mask));
       }
       return Group(
         ...shapes,
@@ -5193,13 +5183,14 @@ const masked = Shape.registerMethod(
 
 const masking = Shape.registerMethod(
   'masking',
-  (...args) => async (shape) => {
-    const [masked] = await destructure2(shape, args, 'geometry');
-    return Group(
-      await hole()(shape),
-      Shape.fromGeometry(hasTypeMasked(masked))
-    );
-  }
+  (...args) =>
+    async (shape) => {
+      const [masked] = await destructure2(shape, args, 'geometry');
+      return Group(
+        await gap()(shape),
+        Shape.fromGeometry(hasTypeMasked(masked))
+      );
+    }
 );
 
 const material = Shape.registerMethod(
@@ -5242,11 +5233,11 @@ const m = Shape.registerMethod(
 const noOp = Shape.registerMethod('noOp', () => (shape) => shape);
 
 const noVoid = Shape.registerMethod(
-  ['noVoid', 'noHole'],
+  ['noVoid', 'noGap'],
   () => (shape) => shape.on(get('type:void'), Empty())
 );
 
-const noHole = noVoid;
+const noGap = noVoid;
 
 const eachOp = Shape.ops.get('each');
 
@@ -7103,4 +7094,4 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hole, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noHole, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

@@ -3,6 +3,6 @@ import { inFn } from './in.js';
 
 export const hold = Shape.registerMethod2(
   'hold',
-  ['shapes'],
-  (shapes) => async (shape) => shape.on(inFn(), inFn().and(...shapes))
+  ['inputShape', 'shapes'],
+  (inputShape, shapes) => inputShape.on(inFn(), inFn().and(...shapes))
 );

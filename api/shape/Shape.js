@@ -281,6 +281,18 @@ export const registerMethod = (names, op) => {
   return chainable(op);
 };
 
+export const registerMethod2 = (names, signature, op) => {
+  const method =
+    (...args) =>
+    async (shape) => {
+      const parameters = await Shape.destructure2a(shape, args, ...signature);
+      return op(...parameters);
+    };
+  return registerMethod(names, method);
+};
+
+Shape.registerMethod2 = registerMethod2;
+
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);

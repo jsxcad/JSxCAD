@@ -9,6 +9,7 @@ import { read, readOrWatch, write } from '@jsxcad/sys';
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
 import EditNote from './EditNote.js';
+import ErrorNote from './ErrorNote.js';
 import MdNote from './MdNote.js';
 import React from 'react';
 import { SpinnerCircularSplit } from 'spinners-react';
@@ -202,6 +203,15 @@ export class Notebook extends React.PureComponent {
             note={note}
             onClickView={onClickView}
             selected={selected}
+          />
+        );
+      } else if (note.error) {
+        child = (
+          <ErrorNote
+            key={note.hash}
+            note={note}
+            selected={selected}
+            workspace={workspace}
           />
         );
       } else if (note.md) {

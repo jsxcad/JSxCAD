@@ -1,8 +1,8 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
 import { destructure2 } from './destructure.js';
+import { gap } from './void.js';
 import { hasTypeMasked } from '@jsxcad/geometry';
-import { hole } from './void.js';
 
 export const masked = Shape.registerMethod(
   'masked',
@@ -11,7 +11,7 @@ export const masked = Shape.registerMethod(
       const [masks] = await destructure2(shape, args, 'shapes');
       const shapes = [];
       for (const mask of masks) {
-        shapes.push(await hole()(mask));
+        shapes.push(await gap()(mask));
       }
       return Group(
         ...shapes,
