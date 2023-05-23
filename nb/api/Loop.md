@@ -16,7 +16,7 @@ See: [Link](../../nb/api/Link.md)
 
 ```JavaScript
 Loop(
-  Line(5).link('reverse'),
+  Line(5),
   Point(0, 8),
   Arc([4, 5], [4, 5], { start: 0 / 4, end: 3 /4 })
 ).view();

@@ -1471,20 +1471,17 @@ const Geometry = Shape.registerMethod(
   }
 );
 
-const Loop = Shape.registerMethod(
+const Loop = Shape.registerMethod2(
   'Loop',
-  (...shapes) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        link$1(await toShapesGeometries(shapes)(shape), /* close= */ true)
-      )
+  ['geometries'],
+  (geometries) =>
+    Shape.fromGeometry(link$1(geometries, /* close= */ true))
 );
 
-const loop = Shape.registerMethod(
+const loop = Shape.registerMethod2(
   'loop',
-  (...shapes) =>
-    async (shape) =>
-      Loop(shape, ...(await shape.toShapes(shapes)))
+  ['input', 'shapes'],
+  (input, shapes) => Loop(input, ...shapes)
 );
 
 const toValue = Shape.registerMethod(
@@ -5722,98 +5719,79 @@ const separate = Shape.registerMethod(
 
 const EPSILON = 1e-5;
 
-const maybeApply = (value, shape) => {
+const maybeApply = (value, input) => {
   if (Shape.isFunction(value)) {
-    return value(shape);
+    return value(input);
   } else {
     return value;
   }
 };
 
-// This is getting a bit excessively magical.
-const seq = Shape.registerMethod('seq', (...args) => async (shape) => {
-  let op;
-  let groupOp;
-  let specs = [];
-  for (const arg of args) {
-    if (Shape.isFunction(arg)) {
-      if (!op) {
-        op = arg;
-      } else if (!groupOp) {
-        groupOp = arg;
-      }
-    } else if (Shape.isObject(arg)) {
-      specs.push(arg);
-    }
-  }
-  if (!op) {
-    op = (n) => (s) => n;
-  }
-  if (!groupOp) {
-    groupOp = Group;
-  }
+const seq = Shape.registerMethod2(
+  'seq',
+  ['input', 'objects', 'function', 'function'],
+  async (input, specs, op = (n) => (s) => s, groupOp = Group) => {
+    const indexes = [];
+    for (const spec of specs) {
+      let { from = 0, to = 1, upto, downto, by = 1 } = spec;
 
-  const indexes = [];
-  for (const spec of specs) {
-    let { from = 0, to = 1, upto, downto, by = 1 } = spec;
+      from = await toValue(from)(input);
+      to = await toValue(to)(input);
+      upto = await toValue(upto)(input);
+      downto = await toValue(downto)(input);
+      by = await toValue(by)(input);
 
-    from = await toValue(from)(shape);
-    to = await toValue(to)(shape);
-    upto = await toValue(upto)(shape);
-    downto = await toValue(downto)(shape);
-    by = await toValue(by)(shape);
+      let consider;
 
-    let consider;
-
-    if (by > 0) {
-      if (upto !== undefined) {
-        consider = (value) => value < upto - EPSILON;
+      if (by > 0) {
+        if (upto !== undefined) {
+          consider = (value) => value < upto - EPSILON;
+        } else {
+          consider = (value) => value <= to + EPSILON;
+        }
+      } else if (by < 0) {
+        if (downto !== undefined) {
+          consider = (value) => value > downto + EPSILON;
+        } else {
+          consider = (value) => value >= to - EPSILON;
+        }
       } else {
-        consider = (value) => value <= to + EPSILON;
+        throw Error('seq: Expects by != 0');
       }
-    } else if (by < 0) {
-      if (downto !== undefined) {
-        consider = (value) => value > downto + EPSILON;
-      } else {
-        consider = (value) => value >= to - EPSILON;
+      const numbers = [];
+      for (let number = from, nth = 0; consider(number); number += by, nth++) {
+        numbers.push(number);
       }
-    } else {
-      throw Error('seq: Expects by != 0');
+      indexes.push(numbers);
     }
-    const numbers = [];
-    for (let number = from, nth = 0; consider(number); number += by, nth++) {
-      numbers.push(number);
-    }
-    indexes.push(numbers);
-  }
-  const results = [];
-  const index = indexes.map(() => 0);
-  for (;;) {
-    const args = index.map((nth, index) => indexes[index][nth]);
-    if (args.some((value) => value === undefined)) {
-      break;
-    }
-    const result = await op(...args)(shape);
-    results.push(maybeApply(result, shape));
-    let nth;
-    for (nth = 0; nth < index.length; nth++) {
-      if (++index[nth] < indexes[nth].length) {
+    const results = [];
+    const index = indexes.map(() => 0);
+    for (;;) {
+      const args = index.map((nth, index) => indexes[index][nth]);
+      if (args.some((value) => value === undefined)) {
         break;
       }
-      index[nth] = 0;
+      const result = await op(...args)(input);
+      results.push(maybeApply(result, input));
+      let nth;
+      for (nth = 0; nth < index.length; nth++) {
+        if (++index[nth] < indexes[nth].length) {
+          break;
+        }
+        index[nth] = 0;
+      }
+      if (nth === index.length) {
+        break;
+      }
     }
-    if (nth === index.length) {
-      break;
-    }
+    return groupOp(...results);
   }
-  return groupOp(...results);
-});
+);
 
-const Seq = Shape.registerMethod(
+const Seq = Shape.registerMethod2(
   'Seq',
-  (...args) =>
-    async (shape = Empty()) =>
-      shape.seq(...args)
+  ['input', 'rest'],
+  (input = Empty(), rest) => input.seq(...rest)
 );
 
 const serialize = Shape.registerMethod(

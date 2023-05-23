@@ -829,7 +829,8 @@ const endTime = ({ start, name, aggregate }) => {
 
 const reportTimes = () => {
   const entries = [...aggregates.values()].sort((a, b) => a.total - b.total);
-  for (const { average, count, last, name, total } of entries) {
+  for (const entry of entries) {
+    const { average = 0, count = 0, last = 0, name = 0, total = 0 } = entry;
     logInfo(
       'profile',
       `${name} average: ${average.toFixed(
