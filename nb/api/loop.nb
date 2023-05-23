@@ -16,6 +16,7 @@ See: [Loop](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Loop.
 _Note: We should rethink Arc and Box being implicitly filled._
 `;
 Line(5)
+  .link('reverse')
   .loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))
   .view()
   .note(

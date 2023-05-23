@@ -20,6 +20,7 @@ Line(5).loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))
 
 ```JavaScript
 Line(5)
+  .link('reverse')
   .loop(Point(0, 8), Arc([4, 5], [4, 5], { end: 3 / 4 }))
   .view()
   .note(
