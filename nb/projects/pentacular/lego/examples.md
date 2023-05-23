@@ -137,6 +137,8 @@ export const AxleProfile = () => {
 
 Axle Profile
 
+![Image](examples.md.axleProfile.png)
+
 ```JavaScript
 export const axleProfile = await AxleProfile().md('Axle Profile').topView();
 ```

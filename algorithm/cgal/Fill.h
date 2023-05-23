@@ -6,12 +6,12 @@ int Fill(Geometry* geometry) {
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
-  std::unordered_map<Plane, Arrangement_2> arrangements;
+  std::unordered_set<Plane> planes;
+  std::set<Point> points;
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        std::set<Point> points;
         // The challenge here is that segments participate in many planes.
         for (Segment s3 : geometry->segments(nth)) {
           if (s3.source() == s3.target()) {
@@ -20,22 +20,35 @@ int Fill(Geometry* geometry) {
           points.insert(s3.source());
           points.insert(s3.target());
         }
-        std::unordered_set<Plane> planes;
-        for (auto a = points.begin(); a != points.end(); ++a) {
-          for (auto b = std::next(a); b != points.end(); ++b) {
-            for (auto c = std::next(b); c != points.end(); ++c) {
-              if (CGAL::collinear(*a, *b, *c)) {
-                continue;
-              }
-              Plane plane(*a, *b, *c);
-              if (plane.orthogonal_vector() * Vector(0, 0, 1) < 0) {
-                // Prefer upward facing planes.
-                plane = plane.opposite();
-              }
-              planes.insert(plane);
-            }
-          }
+        break;
+      }
+    }
+  }
+
+  for (auto a = points.begin(); a != points.end(); ++a) {
+    for (auto b = std::next(a); b != points.end(); ++b) {
+      for (auto c = std::next(b); c != points.end(); ++c) {
+        if (CGAL::collinear(*a, *b, *c)) {
+          continue;
         }
+        Plane plane(*a, *b, *c);
+        if (plane.orthogonal_vector() * Vector(0, 0, 1) < 0) {
+          // Prefer upward facing planes.
+          plane = plane.opposite();
+        }
+        plane = unitPlane(plane);
+        planes.insert(plane);
+      }
+    }
+  }
+
+  // The planes are induced -- construct the arrangements.
+
+  std::unordered_map<Plane, Arrangement_2> arrangements;
+
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_SEGMENTS: {
         for (Segment s3 : geometry->segments(nth)) {
           if (s3.source() == s3.target()) {
             continue;
@@ -72,6 +85,8 @@ int Fill(Geometry* geometry) {
     }
   }
 
+  // Convert the arrangements to polygons.
+
   for (auto entry : arrangements) {
     const Plane& plane = entry.first;
     int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
@@ -80,6 +95,7 @@ int Fill(Geometry* geometry) {
     std::vector<Polygon_with_holes_2> polygons;
     Arrangement_2& arrangement = entry.second;
     convertArrangementToPolygonsWithHoles(arrangement, geometry->pwh(target));
+    print_polygons_with_holes(geometry->pwh(target));
   }
 
   geometry->transformToLocalFrame();
