@@ -128,7 +128,8 @@ export const execute = async (
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {
-                throw error;
+                // This should be reported via a note.
+                // throw error;
               }
             };
             updatePromises.push(task());

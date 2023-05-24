@@ -43,4 +43,4 @@ export const registerMethod2 = (names, signature, baseOp) => {
   return chainable(op);
 };
 
-Shape.registerMethod2 = registerMethod2;
+// Shape.registerMethod2 = registerMethod2;

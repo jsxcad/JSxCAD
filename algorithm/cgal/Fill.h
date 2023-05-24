@@ -6,21 +6,63 @@ int Fill(Geometry* geometry) {
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
+  std::unordered_set<Plane> planes;
+  std::set<Point> points;
+
+  for (int nth = 0; nth < size; nth++) {
+    switch (geometry->getType(nth)) {
+      case GEOMETRY_SEGMENTS: {
+        // The challenge here is that segments participate in many planes.
+        for (Segment s3 : geometry->segments(nth)) {
+          if (s3.source() == s3.target()) {
+            continue;
+          }
+          points.insert(s3.source());
+          points.insert(s3.target());
+        }
+        break;
+      }
+    }
+  }
+
+  for (auto a = points.begin(); a != points.end(); ++a) {
+    for (auto b = std::next(a); b != points.end(); ++b) {
+      for (auto c = std::next(b); c != points.end(); ++c) {
+        if (CGAL::collinear(*a, *b, *c)) {
+          continue;
+        }
+        Plane plane(*a, *b, *c);
+        if (plane.orthogonal_vector() * Vector(0, 0, 1) < 0) {
+          // Prefer upward facing planes.
+          plane = plane.opposite();
+        }
+        plane = unitPlane(plane);
+        planes.insert(plane);
+      }
+    }
+  }
+
+  // The planes are induced -- construct the arrangements.
+
   std::unordered_map<Plane, Arrangement_2> arrangements;
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        // FIX: We project the segments onto (0, 0, 1, 0).
-        Arrangement_2& arrangement = arrangements[Plane(0, 0, 1, 0)];
         for (Segment s3 : geometry->segments(nth)) {
-          Point_2 source(s3.source().x(), s3.source().y());
-          Point_2 target(s3.target().x(), s3.target().y());
-          if (source == target) {
+          if (s3.source() == s3.target()) {
             continue;
           }
-          Segment_2 s2(source, target);
-          insert(arrangement, s2);
+          for (const auto& plane : planes) {
+            if (plane.has_on(s3.source()) && plane.has_on(s3.target())) {
+              Arrangement_2& arrangement = arrangements[plane];
+              Segment_2 s2(plane.to_2d(s3.source()), plane.to_2d(s3.target()));
+              if (s2.source() == s2.target()) {
+                continue;
+              }
+              insert(arrangement, s2);
+            }
+          }
         }
         break;
       }
@@ -42,6 +84,8 @@ int Fill(Geometry* geometry) {
       }
     }
   }
+
+  // Convert the arrangements to polygons.
 
   for (auto entry : arrangements) {
     const Plane& plane = entry.first;

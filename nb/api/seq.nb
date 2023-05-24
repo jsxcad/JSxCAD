@@ -30,3 +30,11 @@ Box([0, 1], [0, 1])
   .fill()
   .view()
   .note('Box([0, 1], [0, 1]).seq({ by: 1 / 8 }, rz).outline().fill()');
+
+Box(89, 64)
+  .inset(3)
+  .offset(3)
+  .seq({ from: 1, to: 12 })
+  .pack()
+  .view()
+  .note('Box(89, 64).inset(3).offset(3).seq({ from: 1, to: 12 }).pack() produces 12 playing card outlines.');

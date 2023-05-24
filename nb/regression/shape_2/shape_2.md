@@ -69,5 +69,14 @@ Squiggle(1, 10).stroke(0.5).view(2);
 ![Image](shape_2.md.$9.png)
 
 ```JavaScript
-await Assembly(Box(5), Arc(5.5).hole()).noHole().gridView();
+await Assembly(Box(5), Arc(5.5).gap()).noGap().gridView();
+```
+
+![Image](shape_2.md.$10.png)
+
+```JavaScript
+Box(8, 12)
+  .join(Box(12, 8))
+  .And(points(), curve('closed', 200))
+  .gridView();
 ```

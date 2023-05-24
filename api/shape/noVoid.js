@@ -3,8 +3,8 @@ import Shape from './Shape.js';
 import get from './get.js';
 
 export const noVoid = Shape.registerMethod(
-  ['noVoid', 'noHole'],
+  ['noVoid', 'noGap'],
   () => (shape) => shape.on(get('type:void'), Empty())
 );
 
-export const noHole = noVoid;
+export const noGap = noVoid;

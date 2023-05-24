@@ -12,16 +12,13 @@ The polyline is closed.
 
 See: [Link](../../nb/api/Link.md)
 
-_Note: We should rethink Arc and Box being implicitly filled._
-
 ![Image](Loop.md.$2.png)
 
 ```JavaScript
 Loop(
-  Line(5),
+  Line(5).link('reverse'),
   Point(0, 8),
   Arc([4, 5], [4, 5], { start: 0 / 4, end: 3 /4 })
-    .outline()
 ).view();
 ```
 

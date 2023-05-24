@@ -614,7 +614,7 @@ class App extends React.Component {
         });
       } catch (error) {
         // Include any high level notebook errors in the output.
-        window.alert(error.stack);
+        // window.alert(error.stack);
       } finally {
         await this.updateState({ [`NotebookState/${NotebookPath}`]: 'idle' });
         logInfo('app/App', `Completed notebook run ${path}`);

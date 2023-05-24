@@ -57,6 +57,11 @@ const replayRecordedNotes = async (path, id) => {
 const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
+const emitError = (exception) => {
+  const error = { text: '' + exception, level: 'serious' };
+  emit({ hash: computeHash(error), error });
+};
+
 const $run = async (op, { path, id, text, sha, line }) => {
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
@@ -76,9 +81,10 @@ const $run = async (op, { path, id, text, sha, line }) => {
           .md('Debug Geometry: ')
           .view();
         await resolvePending();
-        emitSourceText(text);
-        finishEmitGroup({ path, id, line });
       }
+      emitError(error);
+      emitSourceText(text);
+      finishEmitGroup({ path, id, line });
       throw error;
     }
     await resolvePending();
@@ -110,6 +116,7 @@ var notesApi = /*#__PURE__*/Object.freeze({
   saveRecordedNotes: saveRecordedNotes,
   replayRecordedNotes: replayRecordedNotes,
   emitSourceText: emitSourceText,
+  emitError: emitError,
   $run: $run
 });
 
@@ -260,7 +267,8 @@ const execute = async (
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {
-                throw error;
+                // This should be reported via a note.
+                // throw error;
               }
             };
             updatePromises.push(task());

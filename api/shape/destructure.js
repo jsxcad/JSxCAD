@@ -358,3 +358,18 @@ export const destructure2 = async (shape, input, ...specs) => {
   }
   return output;
 };
+
+Shape.destructure2 = destructure2;
+
+export const destructure2a = async (shape, args, inputSpec, ...specs) => {
+  switch (inputSpec) {
+    case 'input':
+      return [shape, ...(await destructure2(shape, args, ...specs))];
+    case 'inputGeometry':
+      return [shape.geometry, ...(await destructure2(shape, args, ...specs))];
+    default:
+      return destructure2(shape, args, inputSpec, ...specs);
+  }
+};
+
+Shape.destructure2a = destructure2a;

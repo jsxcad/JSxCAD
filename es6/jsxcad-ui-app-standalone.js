@@ -2859,6 +2859,36 @@ class EditNote extends ReactDOM$1.Component {
   }
 }
 
+class ErrorNote extends ReactDOM$1.Component {
+  static get propTypes() {
+    return {
+      note: propTypes$1.exports.string,
+      notebookPath: propTypes$1.exports.string,
+      workspace: propTypes$1.exports.string
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+  async componentDidMount() {}
+  async componentWillUnmount() {}
+  render() {
+    const {
+      note
+    } = this.props;
+    const {
+      error
+    } = note;
+    const {
+      text
+    } = error;
+    return v$1("div", {
+      class: "note error"
+    }, v$1("p", null, text));
+  }
+}
+
 /**
  * marked v4.3.0 - a markdown parser
  * Copyright (c) 2011-2023, Christopher Jeffrey. (MIT Licensed)
@@ -6170,6 +6200,13 @@ class Notebook extends ReactDOM$1.PureComponent {
           note: note,
           onClickView: onClickView,
           selected: selected
+        });
+      } else if (note.error) {
+        child = v$1(ErrorNote, {
+          key: note.hash,
+          note: note,
+          selected: selected,
+          workspace: workspace
         });
       } else if (note.md) {
         child = v$1(MdNote, {

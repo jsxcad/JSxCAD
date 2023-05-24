@@ -1,7 +1,8 @@
+import { CurveInterpolator } from 'curve-interpolator';
 import Link from './Link.js';
+import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
-import bSpline from 'b-spline';
 import { destructure2 } from './destructure.js';
 
 export const Curve = Shape.registerMethod(
@@ -18,15 +19,24 @@ export const Curve = Shape.registerMethod(
           'modes'
         );
       const { steps = implicitSteps } = options;
-      let maxT = 1;
-      if (modes.includes('closed')) {
-        maxT = 1 - 1 / (coordinates.length + 1);
-        coordinates.push(...coordinates.slice(0, 3));
+      const isClosed = modes.includes('closed');
+      const interpolator = new CurveInterpolator(coordinates, {
+        closed: isClosed,
+        tension: 0.2,
+        alpha: 0.5,
+      });
+      const points = interpolator.getPoints(steps);
+      if (isClosed) {
+        return Loop(...points.map((point) => Point(point)));
+      } else {
+        return Link(...points.map((point) => Point(point)));
       }
-      const points = [];
-      for (let t = 0; t <= maxT; t += 1 / steps) {
-        points.push(bSpline(t, 2, coordinates));
-      }
-      return Link(...points.map((point) => Point(point)));
     }
+);
+
+export const curve = Shape.registerMethod(
+  'curve',
+  (...args) =>
+    async (shape) =>
+      Curve(shape, ...args)
 );
