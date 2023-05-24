@@ -4,7 +4,7 @@
 Box(20)
   .ez(2)
   .clean()
-  // .And(color('red'), shell([2]).color('green'))
+  .And(color('red'), shell([2]).color('green'))
   .clip(YZ(0))
   .view();
 ```

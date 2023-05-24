@@ -95,7 +95,6 @@ int Fill(Geometry* geometry) {
     std::vector<Polygon_with_holes_2> polygons;
     Arrangement_2& arrangement = entry.second;
     convertArrangementToPolygonsWithHoles(arrangement, geometry->pwh(target));
-    print_polygons_with_holes(geometry->pwh(target));
   }
 
   geometry->transformToLocalFrame();
