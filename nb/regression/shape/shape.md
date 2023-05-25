@@ -202,7 +202,7 @@ await Box(5)
   .gridView();
 ```
 
-{"length":1.0000000000000009,"width":2.0000000000000018,"height":3.0000000000000013,"max":[0.5000000000000004,1.0000000000000009,1.5000000000000007],"min":[-0.5000000000000004,-1.0000000000000009,-1.5000000000000007],"center":[0,0,0],"radius":1.8708286933869718}
+undefined
 
 ```JavaScript
 await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`));
@@ -213,8 +213,6 @@ await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`)
 ```JavaScript
 await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 ```
-
-undefined
 
 ```JavaScript
 await Box(1)

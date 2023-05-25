@@ -25,19 +25,50 @@ int Fill(Geometry* geometry) {
     }
   }
 
-  for (auto a = points.begin(); a != points.end(); ++a) {
-    for (auto b = std::next(a); b != points.end(); ++b) {
-      for (auto c = std::next(b); c != points.end(); ++c) {
-        if (CGAL::collinear(*a, *b, *c)) {
-          continue;
+  if (points.size() >= 3) {
+    // Establish an initial support plane.
+    Plane base(Point(0, 0, 0), Vector(0, 0, 1));
+    for (auto a = points.begin(); a != points.end(); ++a) {
+      for (auto b = std::next(a); b != points.end(); ++b) {
+        for (auto c = std::next(b); c != points.end(); ++c) {
+          if (CGAL::collinear(*a, *b, *c)) {
+            continue;
+          }
+          base = Plane(*a, *b, *c);
+          if (base.orthogonal_vector() * Vector(0, 0, 1) < 0) {
+            base = base.opposite();
+          }
+          break;
         }
-        Plane plane(*a, *b, *c);
-        if (plane.orthogonal_vector() * Vector(0, 0, 1) < 0) {
-          // Prefer upward facing planes.
-          plane = plane.opposite();
+      }
+    }
+    bool has_common_plane = true;
+    for (auto p = points.begin(); p != points.end(); ++p) {
+      if (!base.has_on(*p)) {
+        has_common_plane = false;
+        break;
+      }
+    }
+    if (has_common_plane) {
+      // Generally we expect all of the segments to lie in a common plane.
+      planes.insert(base);
+    } else {
+      // This is very inefficient.
+      for (auto a = points.begin(); a != points.end(); ++a) {
+        for (auto b = std::next(a); b != points.end(); ++b) {
+          for (auto c = std::next(b); c != points.end(); ++c) {
+            if (CGAL::collinear(*a, *b, *c)) {
+              continue;
+            }
+            Plane plane(*a, *b, *c);
+            if (plane.orthogonal_vector() * Vector(0, 0, 1) < 0) {
+              // Prefer upward facing planes.
+              plane = plane.opposite();
+            }
+            plane = unitPlane(plane);
+            planes.insert(plane);
+          }
         }
-        plane = unitPlane(plane);
-        planes.insert(plane);
       }
     }
   }

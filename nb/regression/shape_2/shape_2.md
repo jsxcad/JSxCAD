@@ -80,3 +80,21 @@ Box(8, 12)
   .And(points(), curve('closed', 200))
   .gridView();
 ```
+
+![Image](shape_2.md.$11.png)
+
+```JavaScript
+Box(10)
+  .and(Arc(add(diameter(), 1)))
+  .fill()
+  .view();
+```
+
+![Image](shape_2.md.$12.png)
+
+```JavaScript
+Box(10)
+  .and(Arc(times(diameter(), 3/4)))
+  .fill()
+  .view();
+```

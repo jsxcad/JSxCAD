@@ -39,6 +39,7 @@ export const importScript = async (
     if (!replay) {
       replay = (script) => baseEvaluate(script, { api, path });
     }
+    console.log(`QQ/execute/begin`);
     const builtModule = await execute(scriptText, {
       evaluate,
       replay,
@@ -48,6 +49,7 @@ export const importScript = async (
       clearUpdateEmits,
       workspace,
     });
+    console.log(`QQ/execute/end`);
     CACHED_MODULES.set(name, builtModule);
     return builtModule;
   } catch (error) {

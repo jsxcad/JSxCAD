@@ -20,15 +20,34 @@ import { write } from './write.js';
 const { promises } = fs;
 const { deserialize } = v8;
 
+const fetchWithTimeout =
+  (fetch) =>
+  async (resource, options = {}) => {
+    console.log(`QQ/fetchWithTimeout/begin`);
+    const { timeout = 8000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => {
+      console.log('QQ/fetchWithTimeout: Timed out');
+      controller.abort();
+    }, timeout);
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    console.log(`QQ/fetchWithTimeout/end`);
+    return response;
+  };
+
 const getUrlFetcher = () => {
   if (isBrowser) {
-    return window.fetch;
+    return fetchWithTimeout(window.fetch);
   }
   if (isWebWorker) {
-    return self.fetch;
+    return fetchWithTimeout(self.fetch);
   }
   if (isNode) {
-    return nodeFetch;
+    return fetchWithTimeout(nodeFetch);
   }
   throw Error('Expected browser or web worker or node');
 };

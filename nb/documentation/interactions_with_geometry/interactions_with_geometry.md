@@ -309,8 +309,6 @@ Size returns the size of the shape along with it's bounding box corners.
 
 A function can be provided to receive the dimensions along with the shape.
 
-Move the shape along by its length
-
 ```JavaScript
 aRectangle
   .size(

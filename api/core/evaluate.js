@@ -13,6 +13,7 @@ export const evaluate = async (ecmascript, { api, path }) => {
   const where = isWebWorker ? 'worker' : 'browser';
   let emitGroup;
   try {
+    console.log(`QQ/evaluate/acquire`);
     await acquire();
     emitGroup = saveEmitGroup();
     logInfo(
@@ -24,10 +25,13 @@ export const evaluate = async (ecmascript, { api, path }) => {
       `return async () => { ${ecmascript} };`
     );
     // Add import to make import.meta.url available.
+    console.log(`QQ/evaluate/builder`);
     const op = await builder({ ...api, import: { meta: { url: path } } });
     // Retry until none of the operations block.
     for (;;) {
+      console.log(`QQ/evaluate/op/begin`);
       const result = await op();
+      console.log(`QQ/evaluate/op/end`);
       return result;
     }
   } catch (error) {
@@ -36,6 +40,7 @@ export const evaluate = async (ecmascript, { api, path }) => {
     if (emitGroup) {
       restoreEmitGroup(emitGroup);
     }
+    console.log(`QQ/evaluate/release`);
     await release();
   }
 };
@@ -58,6 +63,7 @@ export const execute = async (
     const scheduled = new Set();
     const completed = new Set();
     for (;;) {
+      console.log(`QQ/execute/step`);
       const updates = {};
       const replays = {};
       const exports = [];
@@ -84,12 +90,14 @@ export const execute = async (
         }
         // We could run these in parallel, but let's keep it simple for now.
         for (const path of imports) {
+          console.log(`QQ/evaluate/import`);
           await importModule(path, {
             evaluate,
             replay,
             doRelease: false,
             workspace,
           });
+          console.log(`QQ/evaluate/import/end`);
         }
         // At this point the modules should build with a simple replay.
       }
@@ -97,6 +105,7 @@ export const execute = async (
       if (!replaysDone) {
         replaysDone = true;
         for (const id of Object.keys(replays)) {
+          console.log(`QQ/evaluate/replay`);
           await replay(replays[id].program, { path });
           completed.add(id);
         }
@@ -124,6 +133,7 @@ export const execute = async (
             // For now, only do one thing at a time, and block the remaining updates.
             const task = async () => {
               try {
+                console.log(`QQ/evaluate/evaluate`);
                 await evaluate(updates[id].program, { path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
@@ -139,16 +149,21 @@ export const execute = async (
         }
         // FIX: We could instead use Promise.race() and then see what new updates could be queued.
         while (updatePromises.length > 0) {
+          console.log(`QQ/updatePromises`);
           await updatePromises.pop();
         }
       }
       // Finally compute the exports.
+      console.log(`QQ/exports`);
       for (const entry of exports) {
         return await evaluate(entry, { path });
       }
+      console.log(`QQ/end`);
       return;
     }
   } catch (error) {
+    console.log(`QQ/execute/error`);
     throw error;
   }
+  console.log(`QQ/execute/end`);
 };

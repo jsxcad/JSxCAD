@@ -937,6 +937,18 @@ const abstract = Shape.registerMethod(
     }
 );
 
+// These should probably be polymorphic and handle vector operations, etc.
+
+// e.g., a.x(times(diameter(), 1/2))
+const times = Shape.registerMethod2('times', ['numbers'], (numbers) =>
+  numbers.reduce((a, b) => a * b, 1)
+);
+
+// e.g., a.x(add(diameter(), -2))
+const add$2 = Shape.registerMethod2('add', ['numbers'], (numbers) =>
+  numbers.reduce((a, b) => a + b, 0)
+);
+
 const approximate = Shape.registerMethod(
   'approximate',
   (...args) =>
@@ -1016,39 +1028,67 @@ const X$9 = 0;
 const Y$9 = 1;
 const Z$8 = 2;
 
-const size = Shape.registerMethod(
+const size = Shape.registerMethod2(
   'size',
-  (op = (size) => (shape) => size) =>
-    async (shape) => {
-      const geometry = await shape.toGeometry();
-      const bounds = measureBoundingBox(geometry);
-      if (bounds === undefined) {
-        return op({
-          length: 0,
-          width: 0,
-          height: 0,
-          max: [0, 0, 0],
-          min: [0, 0, 0],
-          center: [0, 0, 0],
-          radius: 0,
-        })(Shape.chain(Shape.fromGeometry(geometry)));
+  ['input', 'modes', 'function'],
+  async (input, modes, op = (value) => (shape) => value) => {
+    const bounds = measureBoundingBox(input.geometry);
+    const args = [];
+    if (bounds === undefined) {
+      for (let nth = 0; nth < modes.length; nth++) {
+        args.push(undefined);
       }
+    } else {
       const [min, max] = bounds;
-      const length = max[X$9] - min[X$9];
-      const width = max[Y$9] - min[Y$9];
-      const height = max[Z$8] - min[Z$8];
-      const center = scale$3(0.5, add$1(min, max));
-      const radius = distance$3(center, max);
-      return op({
-        length,
-        width,
-        height,
-        max,
-        min,
-        center,
-        radius,
-      })(Shape.chain(Shape.fromGeometry(geometry)));
+      for (const mode of modes) {
+        switch (mode) {
+          case 'max':
+            args.push(max);
+            break;
+          case 'min':
+            args.push(min);
+            break;
+          case 'right':
+            args.push(max[X$9]);
+            break;
+          case 'left':
+            args.push(min[X$9]);
+            break;
+          case 'front':
+            args.push(min[Y$9]);
+            break;
+          case 'back':
+            args.push(max[Y$9]);
+            break;
+          case 'top':
+            args.push(max[Z$8]);
+            break;
+          case 'bottom':
+            args.push(min[Z$8]);
+            break;
+          case 'length':
+            args.push(max[X$9] - min[X$9]);
+            break;
+          case 'width':
+            args.push(max[Y$9] - min[Y$9]);
+            break;
+          case 'height':
+            args.push(max[Z$8] - min[Z$8]);
+            break;
+          case 'center':
+            args.push(scale$3(0.5, add$1(min, max)));
+            break;
+          case 'radius':
+            const center = scale$3(0.5, add$1(min, max));
+            args.push(distance$3(center, max));
+            break;
+          default:
+            throw Error(`Unknown size option ${mode}`);
+        }
+      }
+      return op(...args)(input);
     }
+  }
 );
 
 const X$8 = 0;
@@ -1064,7 +1104,9 @@ const round = (v) => Math.round(v * 1000) / 1000;
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
 const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
-  return size(({ max, min, center }) => (shape) => {
+  console.log(`QQ/computeOffset/0`);
+  return size('max', 'min', 'center', (max, min, center) => (shape) => {
+    console.log(`QQ/computeOffset/1: ${max} ${min} ${center}`);
     // This is producing very small deviations.
     // FIX: Try a more principled approach.
     max = roundCoordinate(max);
@@ -1132,8 +1174,11 @@ const alignment = Shape.registerMethod(
   'alignment',
   (spec = 'xyz', origin = [0, 0, 0]) =>
     async (shape) => {
+      console.log(`QQ/alignment/0`);
       const offset = await computeOffset(spec, origin, shape);
+      console.log(`QQ/alignment/1`);
       const reference = await Point().move(...subtract$2(offset, origin));
+      console.log(`QQ/alignment/2`);
       return reference;
     }
 );
@@ -5431,7 +5476,7 @@ const pack = Shape.registerMethod(
       // page that's packed?
       let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
       if (size === undefined) {
-        packedShape = packedShape.by(align('xy'));
+        packedShape = await packedShape.by(alignment('xy'));
       }
       return packedShape;
     }
@@ -7072,4 +7117,4 @@ const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
   return Link(...particles)(shape);
 });
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Edges, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinate, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toPoints, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z };

@@ -15,7 +15,7 @@ const round = (v) => Math.round(v * 1000) / 1000;
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
 const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
-  return size(({ max, min, center }) => (shape) => {
+  return size('max', 'min', 'center', (max = [0,0,0], min = [0,0,0], center = [0,0,0]) => (shape) => {
     // This is producing very small deviations.
     // FIX: Try a more principled approach.
     max = roundCoordinate(max);

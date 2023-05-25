@@ -35,6 +35,7 @@ export { elapsed, emit, read, write } from '@jsxcad/sys';
 
 export { Shape } from './Shape.js';
 export { abstract } from './abstract.js';
+export { add } from './math.js';
 export { approximate } from './approximate.js';
 export { absolute } from './absolute.js';
 export { and } from './and.js';
@@ -170,6 +171,7 @@ export { table } from './table.js';
 export { tag } from './tag.js';
 export { tags } from './tags.js';
 export { tint } from './tint.js';
+export { times } from './math.js';
 export { to } from './to.js';
 export { toCoordinate } from './toCoordinate.js';
 export { toCoordinates } from './toCoordinates.js';

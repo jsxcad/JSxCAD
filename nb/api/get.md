@@ -51,9 +51,11 @@ design.get('triangle').view().note("design.get('triangle') finds the triangle");
 
 ![Image](get.md.$4.png)
 
+design.get('*') finds all items
+
 ```JavaScript
 design
   .get('*')
   .view()
-  .note('design.get(' * ') finds all items');
+  .note("design.get('*') finds all items");
 ```

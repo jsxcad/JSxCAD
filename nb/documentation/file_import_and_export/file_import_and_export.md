@@ -57,8 +57,6 @@ const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill
 await importedSvg.align('xy').view();
 ```
 
-![Image](file_import_and_export.md.$11.png)
-
 ```JavaScript
 await importedSvg.align('xy').scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
 ```
