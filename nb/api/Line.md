@@ -17,28 +17,28 @@ _Note: Appending a zero into a sequence with negative numbers can have surprisin
 Line(5) produces a line from [0, 0, 0] to [5, 0, 0].
 
 ```JavaScript
-Line(5).view().note('Line(5) produces a line from [0, 0, 0] to [5, 0, 0].');
+Line([5]).view().note('Line(5) produces a line from [0, 0, 0] to [5, 0, 0].');
 ```
 
 ![Image](Line.md.$3.png)
 
-Line(5, -5) produces a line from [-5, 0, 0] to [5, 0, 0].
+Line(10) produces a line from [-5, 0, 0] to [5, 0, 0].
 
 ```JavaScript
-Line(5, -5)
+Line(10)
   .view()
-  .note('Line(5, -5) produces a line from [-5, 0, 0] to [5, 0, 0].');
+  .note('Line(10) produces a line from [-5, 0, 0] to [5, 0, 0].');
 ```
 
 ![Image](Line.md.$4.png)
 
-Line(5).and(rz(1 / 8)) produces a 1/8th angle.
+Line([5]).and(rz(1 / 8)) produces a 1/8th angle.
 
 ```JavaScript
-Line(5)
+Line([5])
   .and(rz(1 / 8))
   .view()
-  .note('Line(5).and(rz(1 / 8)) produces a 1/8th angle.');
+  .note('Line([5]).and(rz(1 / 8)) produces a 1/8th angle.');
 ```
 
 ![Image](Line.md.$5.png)
@@ -46,7 +46,7 @@ Line(5)
 Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.
 
 ```JavaScript
-Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => (v), List))
+Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => ([v]), List))
   .view()
   .note(
     'Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.'
