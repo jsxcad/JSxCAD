@@ -1031,8 +1031,9 @@ const Z$8 = 2;
 const size = Shape.registerMethod2(
   'size',
   ['input', 'modes', 'function'],
-  async (input, modes, op = (value) => (shape) => value) => {
-    const bounds = measureBoundingBox(input.geometry);
+  async (input, modes, op = (value) => async (shape) => value) => {
+    const geometry = await input.toGeometry();
+    const bounds = measureBoundingBox(geometry);
     const args = [];
     if (bounds === undefined) {
       for (let nth = 0; nth < modes.length; nth++) {
@@ -1086,8 +1087,8 @@ const size = Shape.registerMethod2(
             throw Error(`Unknown size option ${mode}`);
         }
       }
-      return op(...args)(input);
     }
+    return op(...args)(input);
   }
 );
 
@@ -1104,81 +1105,82 @@ const round = (v) => Math.round(v * 1000) / 1000;
 const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
 
 const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
-  console.log(`QQ/computeOffset/0`);
-  return size('max', 'min', 'center', (max, min, center) => (shape) => {
-    console.log(`QQ/computeOffset/1: ${max} ${min} ${center}`);
-    // This is producing very small deviations.
-    // FIX: Try a more principled approach.
-    max = roundCoordinate(max);
-    min = roundCoordinate(min);
-    center = roundCoordinate(center);
-    const offset = [0, 0, 0];
-    let index = 0;
-    while (index < spec.length) {
-      switch (spec[index++]) {
-        case 'x': {
-          switch (spec[index]) {
-            case '>':
-              offset[X$8] = -min[X$8];
-              index += 1;
+  return size(
+    'max',
+    'min',
+    'center',
+    (max = [0, 0, 0], min = [0, 0, 0], center = [0, 0, 0]) =>
+      (shape) => {
+        // This is producing very small deviations.
+        // FIX: Try a more principled approach.
+        max = roundCoordinate(max);
+        min = roundCoordinate(min);
+        center = roundCoordinate(center);
+        const offset = [0, 0, 0];
+        let index = 0;
+        while (index < spec.length) {
+          switch (spec[index++]) {
+            case 'x': {
+              switch (spec[index]) {
+                case '>':
+                  offset[X$8] = -min[X$8];
+                  index += 1;
+                  break;
+                case '<':
+                  offset[X$8] = -max[X$8];
+                  index += 1;
+                  break;
+                default:
+                  offset[X$8] = -center[X$8];
+              }
               break;
-            case '<':
-              offset[X$8] = -max[X$8];
-              index += 1;
+            }
+            case 'y': {
+              switch (spec[index]) {
+                case '>':
+                  offset[Y$8] = -min[Y$8];
+                  index += 1;
+                  break;
+                case '<':
+                  offset[Y$8] = -max[Y$8];
+                  index += 1;
+                  break;
+                default:
+                  offset[Y$8] = -center[Y$8];
+              }
               break;
-            default:
-              offset[X$8] = -center[X$8];
+            }
+            case 'z': {
+              switch (spec[index]) {
+                case '>':
+                  offset[Z$7] = -min[Z$7];
+                  index += 1;
+                  break;
+                case '<':
+                  offset[Z$7] = -max[Z$7];
+                  index += 1;
+                  break;
+                default:
+                  offset[Z$7] = -center[Z$7];
+              }
+              break;
+            }
           }
-          break;
         }
-        case 'y': {
-          switch (spec[index]) {
-            case '>':
-              offset[Y$8] = -min[Y$8];
-              index += 1;
-              break;
-            case '<':
-              offset[Y$8] = -max[Y$8];
-              index += 1;
-              break;
-            default:
-              offset[Y$8] = -center[Y$8];
-          }
-          break;
+        if (!offset.every(isFinite)) {
+          throw Error(`Non-finite/offset: ${offset}`);
         }
-        case 'z': {
-          switch (spec[index]) {
-            case '>':
-              offset[Z$7] = -min[Z$7];
-              index += 1;
-              break;
-            case '<':
-              offset[Z$7] = -max[Z$7];
-              index += 1;
-              break;
-            default:
-              offset[Z$7] = -center[Z$7];
-          }
-          break;
-        }
+        return offset;
       }
-    }
-    if (!offset.every(isFinite)) {
-      throw Error(`Non-finite/offset: ${offset}`);
-    }
-    return offset;
-  })(shape);
+  )(shape);
 };
 
 const alignment = Shape.registerMethod(
   'alignment',
   (spec = 'xyz', origin = [0, 0, 0]) =>
     async (shape) => {
-      console.log(`QQ/alignment/0`);
       const offset = await computeOffset(spec, origin, shape);
-      console.log(`QQ/alignment/1`);
       const reference = await Point().move(...subtract$2(offset, origin));
-      console.log(`QQ/alignment/2`);
       return reference;
     }
 );
@@ -5476,7 +5478,7 @@ const pack = Shape.registerMethod(
       // page that's packed?
       let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
       if (size === undefined) {
-        packedShape = await packedShape.by(alignment('xy'));
+        packedShape = await packedShape.align('xy');
       }
       return packedShape;
     }
@@ -5695,19 +5697,23 @@ const scaleZ = Shape.registerMethod(
 
 const sz = scaleZ;
 
-const scaleToFit = Shape.registerMethod(
+const scaleToFit = Shape.registerMethod2(
   'scaleToFit',
-  (x = 1, y = x, z = y) =>
-    async (shape) => {
-      return size(({ length, width, height }) => (shape) => {
+  ['input', 'number', 'number', 'number'],
+  async (input, x = 1, y = x, z = y) =>
+    size(
+      'length',
+      'width',
+      'height',
+      (length, width, height) => async (input) => {
         const xFactor = x / length;
         const yFactor = y / width;
         const zFactor = z / height;
         // Surfaces may get non-finite factors -- use the unit instead.
         const finite = (factor) => (isFinite(factor) ? factor : 1);
-        return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
-      })(shape);
-    }
+        return input.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+      }
+    )(input)
 );
 
 const seam = Shape.registerMethod('seam', (...args) => async (shape) => {

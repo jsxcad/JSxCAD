@@ -1,7 +1,6 @@
 import { getLeafs, taggedGroup, taggedItem } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
-import { alignment } from './alignment.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
 export const pack = Shape.registerMethod(

@@ -2449,7 +2449,7 @@ const { promises: promises$2 } = fs;
 const { deserialize } = v8$1;
 
 const fetchWithTimeout =
-  (fetch) =>
+  (fetch, AbortError) =>
   async (resource, options = {}) => {
     console.log(`QQ/fetchWithTimeout/begin`);
     const { timeout = 8000 } = options;
@@ -2458,13 +2458,16 @@ const fetchWithTimeout =
       console.log('QQ/fetchWithTimeout: Timed out');
       controller.abort();
     }, timeout);
-    const response = await fetch(resource, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id);
-    console.log(`QQ/fetchWithTimeout/end`);
-    return response;
+    try {
+      const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal,
+      });
+      return response;
+    } finally {
+      clearTimeout(id);
+      console.log(`QQ/fetchWithTimeout/end`);
+    }
   };
 
 const getUrlFetcher = () => {

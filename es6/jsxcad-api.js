@@ -165,9 +165,9 @@ const evaluate = async (ecmascript, { api, path }) => {
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
     // Retry until none of the operations block.
+    // Note: This retry mechanism should be obsolete now.
     for (;;) {
-      const result = await op();
-      return result;
+      return await op();
     }
   } catch (error) {
     throw error;
@@ -288,6 +288,7 @@ const execute = async (
       return;
     }
   } catch (error) {
+    console.log(`QQ/execute/error: ${error.stack}`);
     throw error;
   }
 };

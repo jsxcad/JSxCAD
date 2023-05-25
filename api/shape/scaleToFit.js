@@ -5,12 +5,17 @@ export const scaleToFit = Shape.registerMethod2(
   'scaleToFit',
   ['input', 'number', 'number', 'number'],
   async (input, x = 1, y = x, z = y) =>
-      size('length', 'width', 'height', (length, width, height) => async (input) => {
+    size(
+      'length',
+      'width',
+      'height',
+      (length, width, height) => async (input) => {
         const xFactor = x / length;
         const yFactor = y / width;
         const zFactor = z / height;
         // Surfaces may get non-finite factors -- use the unit instead.
         const finite = (factor) => (isFinite(factor) ? factor : 1);
-        return shape.scale(finite(xFactor), finite(yFactor), finite(zFactor));
-      })(input)
+        return input.scale(finite(xFactor), finite(yFactor), finite(zFactor));
+      }
+    )(input)
 );

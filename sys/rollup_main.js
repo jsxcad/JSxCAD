@@ -23,7 +23,8 @@ export default {
         './self.js': '/* global self */\nexport default self;',
         './broadcast-channel.js':
           "export { BroadcastChannel } from 'broadcast-channel';",
-        'node-fetch': 'export default _ => _;',
+        'node-fetch':
+          'export const AbortError = undefined; export default _ => _;',
         './nodeWorker.js': 'export const nodeWorker = () => {};',
         v8: 'export default {};',
       },
