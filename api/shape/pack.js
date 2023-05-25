@@ -54,7 +54,7 @@ export const pack = Shape.registerMethod(
       // page that's packed?
       let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
       if (size === undefined) {
-        packedShape = await packedShape.by(alignment('xy'));
+        packedShape = await packedShape.align('xy');
       }
       return packedShape;
     }

@@ -15,7 +15,6 @@ test.beforeEach(async (t) => {
   await boot();
 });
 
-false &&
   test('Rectangle', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
@@ -49,7 +48,6 @@ false &&
     );
   });
 
-false &&
   test('Rounded Rectangle', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
@@ -87,7 +85,6 @@ false &&
     );
   });
 
-false &&
   test('Polyline', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
@@ -148,7 +145,6 @@ test('Circle', async (t) => {
   );
 });
 
-false &&
   test('Ellipse', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
@@ -182,7 +178,6 @@ false &&
     );
   });
 
-false &&
   test('Polygon', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
@@ -214,7 +209,6 @@ false &&
     );
   });
 
-false &&
   test('Complex', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
@@ -258,7 +252,6 @@ false &&
     );
   });
 
-false &&
   test('Triangle', async (t) => {
     const assembly = await fromSvg(
       new TextEncoder('utf8').encode(
