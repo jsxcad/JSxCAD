@@ -78,7 +78,7 @@ await Box(5)
   .scale(-1, 1)
   .gridView();
 
-await Box(1, 2, 3).size((size) => (shape) => shape.md(`${JSON.stringify(size)}`));
+await Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => note(`length ${length}x${width}x${height}`));
 
 await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 
