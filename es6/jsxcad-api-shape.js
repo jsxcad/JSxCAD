@@ -1559,7 +1559,7 @@ const computeMiddle = (c1, c2) => [
   (c1[Z$6] + c2[Z$6]) * 0.5,
 ];
 
-const computeSides = (c1, c2, sides, zag$1 = 0.25) => {
+const computeSides = (c1, c2, sides, zag$1 = 0.01) => {
   if (sides) {
     return sides;
   }
@@ -1573,7 +1573,7 @@ const computeSides = (c1, c2, sides, zag$1 = 0.25) => {
 const zagSides = Shape.registerMethod2(
   'zagSides',
   ['number', 'number'],
-  (diameter = 1, zag$1 = 0.25) => 1 / zag(diameter, zag$1)
+  (diameter = 1, zag$1 = 0.01) => 1 / zag(diameter, zag$1)
 );
 const zagSteps = Shape.registerMethod2(
   'zagSteps',

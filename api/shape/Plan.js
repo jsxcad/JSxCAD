@@ -32,7 +32,7 @@ export const computeMiddle = (c1, c2) => [
   (c1[Z] + c2[Z]) * 0.5,
 ];
 
-export const computeSides = (c1, c2, sides, zag = 0.25) => {
+export const computeSides = (c1, c2, sides, zag = 0.01) => {
   if (sides) {
     return sides;
   }
@@ -46,7 +46,7 @@ export const computeSides = (c1, c2, sides, zag = 0.25) => {
 export const zagSides = Shape.registerMethod2(
   'zagSides',
   ['number', 'number'],
-  (diameter = 1, zag = 0.25) => 1 / toSidesFromZag(diameter, zag)
+  (diameter = 1, zag = 0.01) => 1 / toSidesFromZag(diameter, zag)
 );
 export const zagSteps = Shape.registerMethod2(
   'zagSteps',
