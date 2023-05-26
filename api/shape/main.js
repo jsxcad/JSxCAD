@@ -35,6 +35,7 @@ export { elapsed, emit, read, write } from '@jsxcad/sys';
 
 export { Shape } from './Shape.js';
 export { abstract } from './abstract.js';
+export { add } from './math.js';
 export { approximate } from './approximate.js';
 export { absolute } from './absolute.js';
 export { and } from './and.js';
@@ -170,6 +171,7 @@ export { table } from './table.js';
 export { tag } from './tag.js';
 export { tags } from './tags.js';
 export { tint } from './tint.js';
+export { times } from './math.js';
 export { to } from './to.js';
 export { toCoordinate } from './toCoordinate.js';
 export { toCoordinates } from './toCoordinates.js';
@@ -198,6 +200,8 @@ export { wrap } from './wrap.js';
 export { x } from './x.js';
 export { y } from './y.js';
 export { z } from './z.js';
+export { zagSides } from './Plan.js';
+export { zagSteps } from './Plan.js';
 
 export { And } from './and.js';
 export { Arc, ArcX, ArcY, ArcZ } from './Arc.js';

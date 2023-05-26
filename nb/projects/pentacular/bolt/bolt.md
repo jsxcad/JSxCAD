@@ -29,7 +29,7 @@ export const ScrewThreadSegmentBuilder = Cached(
     return Profile(pitch, (pitch * 0.5) / Math.tan(angle * Math.PI))
       .y(diameter / -2 + play)
       .ry(1 / 4)
-      .seq({ from: -1, by: 1 / 32, to: 1 }, (t) => rz(t).z(pitch * t), Loft)
+      .seq({ from: -1, by: zagSteps(diameter), to: 1 }, (t) => rz(t).z(pitch * t), Loft)
       .scale(1, 1, turn === 'right' ? 1 : -1)
       .simplify(0.01)
       .add(Arc(diameter - depth).ez([pitch, -pitch]))

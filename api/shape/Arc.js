@@ -116,7 +116,7 @@ const ArcOp =
       'options'
     );
     let [x, y, z] = intervals;
-    let { apothem, diameter, radius, start, end, sides = 32, zag } = options;
+    let { apothem, diameter, radius, start, end, sides, zag } = options;
     if (apothem !== undefined) {
       diameter = toDiameterFromApothem(apothem, sides);
     }

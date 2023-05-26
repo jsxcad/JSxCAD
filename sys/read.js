@@ -8,27 +8,49 @@ import { ensureQualifiedFile, getFile } from './files.js';
 import { getFilesystem, qualifyPath } from './filesystem.js';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 import { logError, logInfo } from './log.js';
+import nodeFetch, { AbortError as nodeAbortError } from 'node-fetch';
 import { unwatchFile, watchFile } from './watchers.js';
 
 import { ErrorWouldBlock } from './error.js';
 import { addPending } from './pending.js';
 import { db } from './db.js';
-import nodeFetch from 'node-fetch';
 import { notifyFileRead } from './broadcast.js';
 import { write } from './write.js';
 
 const { promises } = fs;
 const { deserialize } = v8;
 
+const fetchWithTimeout =
+  (fetch, AbortError) =>
+  async (resource, options = {}) => {
+    console.log(`QQ/fetchWithTimeout/begin`);
+    const { timeout = 8000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => {
+      console.log('QQ/fetchWithTimeout: Timed out');
+      controller.abort();
+    }, timeout);
+    try {
+      const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal,
+      });
+      return response;
+    } finally {
+      clearTimeout(id);
+      console.log(`QQ/fetchWithTimeout/end`);
+    }
+  };
+
 const getUrlFetcher = () => {
   if (isBrowser) {
-    return window.fetch;
+    return fetchWithTimeout(window.fetch, window.AbortError);
   }
   if (isWebWorker) {
-    return self.fetch;
+    return fetchWithTimeout(self.fetch, self.AbortError);
   }
   if (isNode) {
-    return nodeFetch;
+    return fetchWithTimeout(nodeFetch, nodeAbortError);
   }
   throw Error('Expected browser or web worker or node');
 };

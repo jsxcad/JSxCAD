@@ -20,4 +20,12 @@ radius|number|The radius of a minimal sphere around center containing the shape.
 
 Box(3)
   .view()
-  .size((size) => note(`${JSON.stringify(size, null, '\n\n')}`));
+  .size('length', (length) => note(`${JSON.stringify(size, null, '\n\n')}`));
+
+Box(5, 1)
+  .and(Box(size('length')).outline())
+  .view();
+
+Box(5, 1)
+  .and(Arc().y(size('front')).outline())
+  .view();

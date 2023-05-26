@@ -17,88 +17,28 @@ radius|number|The radius of a minimal sphere around center containing the shape.
 
 ![Image](size.md.$2.png)
 
-{
-
-
-"length": 3.000000000000008,
-
-
-"width": 3.000000000000007,
-
-
-"height": 6.4e-323,
-
-
-"max": [
-
-
-
-
-1.500000000000004,
-
-
-
-
-1.5000000000000036,
-
-
-
-
-3e-323
-
-
-],
-
-
-"min": [
-
-
-
-
--1.500000000000004,
-
-
-
-
--1.5000000000000036,
-
-
-
-
--3.5e-323
-
-
-],
-
-
-"center": [
-
-
-
-
-0,
-
-
-
-
-0,
-
-
-
-
-0
-
-
-],
-
-
-"radius": 2.121320343559648
-}
+undefined
 
 ```JavaScript
 Box(3)
   .view()
-  .size((size) => note(`${JSON.stringify(size, null, '
+  .size('length', (length) => note(`${JSON.stringify(size, null, '
 
 ')}`));
+```
+
+![Image](size.md.$3.png)
+
+```JavaScript
+Box(5, 1)
+  .and(Box(size('length')).outline())
+  .view();
+```
+
+![Image](size.md.$4.png)
+
+```JavaScript
+Box(5, 1)
+  .and(Arc().y(size('front')).outline())
+  .view();
 ```

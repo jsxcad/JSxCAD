@@ -1,7 +1,6 @@
 import { getLeafs, taggedGroup, taggedItem } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
-import { align } from './align.js';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
 export const pack = Shape.registerMethod(
@@ -54,7 +53,7 @@ export const pack = Shape.registerMethod(
       // page that's packed?
       let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
       if (size === undefined) {
-        packedShape = packedShape.by(align('xy'));
+        packedShape = await packedShape.align('xy');
       }
       return packedShape;
     }
