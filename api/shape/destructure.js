@@ -87,7 +87,7 @@ const resolveArray = async (shape, arg) => {
 };
 
 const getCoordinate = async (value) => {
-  const points = await value.toPoints();
+  const points = await value.toCoordinates();
   if (points.length >= 1) {
     return points[0];
   } else {
@@ -97,7 +97,7 @@ const getCoordinate = async (value) => {
 
 const getCoordinates = async (value) => {
   const coordinates = [];
-  for (const [x = 0, y = 0, z = 0] of await value.toPoints()) {
+  for (const [x = 0, y = 0, z = 0] of await value.toCoordinates()) {
     coordinates.push([x, y, z]);
   }
   return coordinates;
@@ -335,6 +335,29 @@ export const destructure2 = async (shape, input, ...specs) => {
             }
           } else if (Shape.isArray(value)) {
             out.push(value);
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(out);
+        break;
+      }
+      case 'coordinateLists': {
+        const out = [];
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (Shape.isArray(value)) {
+            const list = [];
+            for (const entry of value) {
+              if (Shape.isShape(entry)) {
+                list.push(await getCoordinate(entry));
+              } else if (Shape.isArray(entry)) {
+                list.push(entry);
+              } else {
+                throw Error(`Unexpected value ${entry} for coordinateLists`);
+              }
+            }
+            out.push(list);
           } else {
             rest.push(arg);
           }

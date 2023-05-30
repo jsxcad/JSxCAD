@@ -1,8 +1,9 @@
+/*
 import Shape from './Shape.js';
 import { toCoordinate } from './toCoordinate.js';
 import { toNestedValues } from './toNestedValues.js';
 
-export const Edges = Shape.registerMethod('Edges', (arg) => async (shape) => {
+export const Edges = Shape.registerMethod2('Edges', (arg) => async (shape) => {
   const segments = [];
   for (const [source, target] of await toNestedValues(arg)(shape)) {
     segments.push([
@@ -14,3 +15,4 @@ export const Edges = Shape.registerMethod('Edges', (arg) => async (shape) => {
 });
 
 export default Edges;
+*/

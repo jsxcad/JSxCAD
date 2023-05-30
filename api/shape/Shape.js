@@ -202,6 +202,7 @@ export class Shape {
     return this.context[symbol];
   }
 
+  /*
   toCoordinate(x, y, z) {
     return Shape.toCoordinate(this, x, y, z);
   }
@@ -209,6 +210,7 @@ export class Shape {
   toCoordinates(...args) {
     return Shape.toCoordinates(this, ...args);
   }
+*/
 }
 
 export const isShape = (value) =>

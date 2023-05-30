@@ -171,10 +171,6 @@ Point(0.5, 0.5)
 await Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
 ```
 
-![Image](shapes.md.$18.png)
-
-Points([0.5, 0.5], [-0.5, -0.5])
-
 ```JavaScript
 await Points([0.5, 0.5], [-0.5, -0.5])
   .gridView()

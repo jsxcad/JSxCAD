@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { toPoints } from './toPoints.js';
+import { toCoordinates } from './toCoordinates.js';
 
 const square = (a) => a * a;
 
@@ -11,7 +11,7 @@ export const diameter = Shape.registerMethod(
   'diameter',
   (op = (diameter) => (shape) => diameter) =>
     async (shape) => {
-      const points = await toPoints()(shape);
+      const points = await toCoordinates()(shape);
       let maximumDiameter = 0;
       for (let a of points) {
         for (let b of points) {

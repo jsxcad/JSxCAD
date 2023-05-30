@@ -90,6 +90,7 @@ export const $run = async (op, { path, id, text, sha, line }) => {
       }
       emitError(error);
       emitSourceText(text);
+      console.log(error.stack);
       finishEmitGroup({ path, id, line });
       throw error;
     }

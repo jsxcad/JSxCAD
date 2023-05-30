@@ -1,14 +1,11 @@
 import Shape from './Shape.js';
-import { toCoordinate } from './toCoordinate.js';
 
-export const Points = Shape.registerMethod(
+export const Points = Shape.registerMethod2(
   'Points',
-  (points) => async (shape) => {
-    const coordinates = [];
-    for (const point of points) {
-      coordinates.push(await toCoordinate(point)(shape));
-    }
-    return Shape.fromPoints(coordinates);
+  ['coordinateLists'],
+  (coordinatesLists) => {
+    const [coordinatesList = []] = coordinatesLists;
+    return Shape.fromPoints(coordinatesList);
   }
 );
 

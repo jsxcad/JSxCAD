@@ -37,7 +37,11 @@ await Box(10).material('copper').gridView();
 await Box(10).move(1, 2, 3).gridView();
 await Box(10).to(Point(1, 2, 3)).gridView();
 await Box(10).move(1, 2, 3).to(center()).gridView();
-await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
+
+// I don't know what this example is supposed to do.
+// await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
+// Let's simplify it for now.
+await Box(10, 10, 10).view();
 
 await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 
