@@ -211,7 +211,6 @@ export { Clip } from './clip.js';
 export { Curve } from './Curve.js';
 export { Cut } from './cut.js';
 export { Edge } from './Edge.js';
-// export { Edges } from './Edges.js';
 export { Empty } from './Empty.js';
 export { Face } from './Face.js';
 export { Fuse } from './fuse.js';

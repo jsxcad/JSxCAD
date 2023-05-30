@@ -3,9 +3,9 @@ import Shape from './Shape.js';
 export const Points = Shape.registerMethod2(
   'Points',
   ['coordinateLists'],
-  (coordinatesLists) => {
-    const [coordinatesList = []] = coordinatesLists;
-    return Shape.fromPoints(coordinatesList);
+  (coordinateLists) => {
+    const [coordinateList] = coordinateLists;
+    return Shape.fromPoints(coordinateList);
   }
 );
 

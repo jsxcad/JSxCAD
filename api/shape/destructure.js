@@ -334,7 +334,7 @@ export const destructure2 = async (shape, input, ...specs) => {
             } else {
               rest.push(arg);
             }
-          } else if (Shape.isArray(value)) {
+          } else if (Shape.isArray(value) && Shape.isNumber(value[0])) {
             out.push(value);
           } else {
             rest.push(arg);

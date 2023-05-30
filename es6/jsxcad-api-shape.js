@@ -206,16 +206,6 @@ class Shape {
   getContext(symbol) {
     return this.context[symbol];
   }
-
-  /*
-  toCoordinate(x, y, z) {
-    return Shape.toCoordinate(this, x, y, z);
-  }
-
-  toCoordinates(...args) {
-    return Shape.toCoordinates(this, ...args);
-  }
-*/
 }
 
 const isShape = (value) =>
@@ -861,20 +851,10 @@ Shape.registerMethod('md', (...chunks) => (shape) => {
   return shape;
 });
 
-const Point = Shape.registerMethod(
+const Point = Shape.registerMethod2(
   'Point',
-  (...args) =>
-    async (shape) => {
-      const [coordinate, x = 0, y = 0, z = 0] = await destructure2(
-        shape,
-        args,
-        'coordinate',
-        'number',
-        'number',
-        'number'
-      );
-      return Shape.fromPoint(coordinate || [x, y, z]);
-    }
+  ['coordinate', 'number', 'number', 'number'],
+  (coordinate, x = 0, y = 0, z = 0) => Shape.fromPoint(coordinate || [x, y, z])
 );
 
 const ref = Shape.registerMethod(
@@ -6963,9 +6943,9 @@ const Pentagon = Shape.registerMethod(
 
 const Points = Shape.registerMethod2(
   'Points',
-  ['coordinateLists'],
-  (coordinatesLists) => {
-    const [coordinatesList = []] = coordinatesLists;
+  ['coordinates', 'coordinateLists'],
+  (coordinates, coordinatesLists) => {
+    const [coordinatesList = coordinates] = coordinatesLists;
     return Shape.fromPoints(coordinatesList);
   }
 );
@@ -6993,7 +6973,7 @@ const Polyhedron = Shape.registerMethod(
     }
 );
 
-const Segments = Shape.registerMethod(
+const Segments = Shape.registerMethod2(
   'Segments',
   ['coordinateLists'],
   async (coordinateLists) => Shape.fromSegments(coordinateLists)

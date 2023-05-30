@@ -8,7 +8,6 @@ import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { buildCorners } from './Plan.js';
-// import { destructure2 } from './destructure.js';
 import { makeOcctBox } from '@jsxcad/algorithm-cgal';
 
 const X = 0;

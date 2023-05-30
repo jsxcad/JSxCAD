@@ -201,16 +201,6 @@ export class Shape {
   getContext(symbol) {
     return this.context[symbol];
   }
-
-  /*
-  toCoordinate(x, y, z) {
-    return Shape.toCoordinate(this, x, y, z);
-  }
-
-  toCoordinates(...args) {
-    return Shape.toCoordinates(this, ...args);
-  }
-*/
 }
 
 export const isShape = (value) =>
@@ -291,10 +281,11 @@ export const registerMethod2 = (names, signature, op) => {
         const parameters = await Shape.destructure2a(shape, args, ...signature);
         return op(...parameters);
       } catch (error) {
+        console.log(`QQ/registerMethod2: Error: ${'' + error}`);
         console.log(`QQ/registerMethod2: ${names}`);
         console.log(`QQ/registerMethod2: ${signature}`);
-        console.log(`QQ/registerMethod2: ${args}`);
-        console.log(error.stack);
+        console.log(`QQ/registerMethod2: ${JSON.stringify(args)}`);
+        console.log(`QQ/registerMethod2: Backtrace: ${error.stack}`);
         throw error;
       }
     };
