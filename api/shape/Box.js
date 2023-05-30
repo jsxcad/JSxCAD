@@ -114,8 +114,7 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
 export const Box = Shape.registerMethod2(
   'Box',
   ['input', 'modes', 'intervals', 'options'],
-  async (input, modes, intervals, options) => {
-    const [x = 1, y = x, z = 0] = intervals;
+  async (input, modes, [x = 1, y = x, z = 0], options) => {
     const [computedC1, computedC2] = await buildCorners(x, y, z)(input);
     let { c1 = computedC1, c2 = computedC2 } = options;
     return reifyBox(c1, c2, modes.includes('occt'));

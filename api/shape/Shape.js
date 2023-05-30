@@ -281,11 +281,7 @@ export const registerMethod2 = (names, signature, op) => {
         const parameters = await Shape.destructure2a(shape, args, ...signature);
         return op(...parameters);
       } catch (error) {
-        console.log(`QQ/registerMethod2: Error: ${'' + error}`);
-        console.log(`QQ/registerMethod2: ${names}`);
-        console.log(`QQ/registerMethod2: ${signature}`);
-        console.log(`QQ/registerMethod2: ${JSON.stringify(args)}`);
-        console.log(`QQ/registerMethod2: Backtrace: ${error.stack}`);
+        console.log(`Method ${names}: error ${'' + error}`);
         throw error;
       }
     };
