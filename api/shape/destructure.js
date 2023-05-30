@@ -232,6 +232,7 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(options);
         break;
       }
+      case 'strings':
       case 'modes': {
         const out = [];
         for (const arg of args) {

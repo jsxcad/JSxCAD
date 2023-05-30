@@ -1,17 +1,14 @@
 import Shape from './Shape.js';
-import { destructure2 } from './destructure.js';
 import { taggedGroup } from '@jsxcad/geometry';
 
-export const And = Shape.registerMethod('And', (...args) => async (shape) => {
-  const [geometries] = await destructure2(shape, args, 'geometries');
-  return Shape.fromGeometry(taggedGroup({}, ...geometries));
-});
+export const And = Shape.registerMethod2('And', ['geometries'], (geometries) =>
+  Shape.fromGeometry(taggedGroup({}, ...geometries))
+);
 
-export const and = Shape.registerMethod(
+export const and = Shape.registerMethod2(
   'and',
-  (...args) =>
-    async (shape) =>
-      shape.And(shape, ...args)
+  ['input', 'shapes'],
+  (input, shapes) => input.And(input, ...shapes)
 );
 
 export default and;

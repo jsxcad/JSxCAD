@@ -10,6 +10,4 @@ export const aligned = Shape.registerMethod2(
     and(by(await alignment(...rest)(input))(alignedShape))(input)
 );
 
-Shape.registerMethod('aligned', aligned);
-
 export default aligned;

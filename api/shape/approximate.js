@@ -1,13 +1,26 @@
 import Shape from './Shape.js';
 import { approximate as approximateGeometry } from '@jsxcad/geometry';
-import { destructure2 } from './destructure.js';
 
-export const approximate = Shape.registerMethod(
+export const approximate = Shape.registerMethod2(
   'approximate',
-  (...args) =>
-    async (shape) => {
-      const [options] = await destructure2(shape, args, 'options');
-      const {
+  ['inputGeometry', 'options'],
+  (
+    geometry,
+    {
+      iterations,
+      relaxationSteps,
+      minimumErrorDrop,
+      subdivisionRatio,
+      relativeToChord,
+      withDihedralAngle,
+      optimizeAnchorLocation,
+      pcaPlane,
+      maxNumberOfProxies,
+    } = {}
+  ) =>
+    Shape.fromGeometry(
+      approximateGeometry(
+        geometry,
         iterations,
         relaxationSteps,
         minimumErrorDrop,
@@ -16,21 +29,7 @@ export const approximate = Shape.registerMethod(
         withDihedralAngle,
         optimizeAnchorLocation,
         pcaPlane,
-        maxNumberOfProxies,
-      } = options;
-      return Shape.fromGeometry(
-        approximateGeometry(
-          shape.toGeometry(),
-          iterations,
-          relaxationSteps,
-          minimumErrorDrop,
-          subdivisionRatio,
-          relativeToChord,
-          withDihedralAngle,
-          optimizeAnchorLocation,
-          pcaPlane,
-          maxNumberOfProxies
-        )
-      );
-    }
+        maxNumberOfProxies
+      )
+    )
 );

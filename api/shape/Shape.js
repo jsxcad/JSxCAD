@@ -287,8 +287,16 @@ export const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
     async (shape) => {
-      const parameters = await Shape.destructure2a(shape, args, ...signature);
-      return op(...parameters);
+      try {
+        const parameters = await Shape.destructure2a(shape, args, ...signature);
+        return op(...parameters);
+      } catch (error) {
+        console.log(`QQ/registerMethod2: ${names}`);
+        console.log(`QQ/registerMethod2: ${signature}`);
+        console.log(`QQ/registerMethod2: ${args}`);
+        console.log(error.stack);
+        throw error;
+      }
     };
   return registerMethod(names, method);
 };

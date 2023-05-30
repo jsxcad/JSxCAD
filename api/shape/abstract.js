@@ -32,25 +32,28 @@ const render = (abstract, shape) => {
   return shape.md(graph.join('\n'));
 };
 
-export const abstract = Shape.registerMethod(
+export const abstract = Shape.registerMethod2(
   'abstract',
-  (types = ['item'], op = render) =>
-    async (shape) => {
-      const walk = ({ type, tags, plan, content }) => {
-        if (type === 'group') {
-          return content.flatMap(walk);
-        } else if (content) {
-          if (types.includes(type)) {
-            return [{ type, tags, content: content.flatMap(walk) }];
-          } else {
-            return content.flatMap(walk);
-          }
-        } else if (types.includes(type)) {
-          return [{ type, tags }];
-        } else {
-          return [];
-        }
-      };
-      return op(taggedGroup({}, ...walk(await shape.toGeometry())), shape);
+  ['input', 'strings', 'function'],
+  async (input, types, op = render) => {
+    if (types.length === 0) {
+      types.push('item');
     }
+    const walk = ({ type, tags, plan, content }) => {
+      if (type === 'group') {
+        return content.flatMap(walk);
+      } else if (content) {
+        if (types.includes(type)) {
+          return [{ type, tags, content: content.flatMap(walk) }];
+        } else {
+          return content.flatMap(walk);
+        }
+      } else if (types.includes(type)) {
+        return [{ type, tags }];
+      } else {
+        return [];
+      }
+    };
+    return op(taggedGroup({}, ...walk(await input.toGeometry())), input);
+  }
 );

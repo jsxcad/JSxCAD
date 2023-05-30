@@ -1,9 +1,10 @@
 import Shape from './Shape.js';
 import { computeCentroid } from '@jsxcad/geometry';
 
-export const center = Shape.registerMethod(
+export const center = Shape.registerMethod2(
   'center',
-  () => (shape) => Shape.fromGeometry(computeCentroid(shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(computeCentroid(geometry))
 );
 
 export default center;
