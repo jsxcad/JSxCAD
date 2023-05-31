@@ -226,11 +226,7 @@ A function can be provided to receive the dimensions along with the shape.
 `;
 
 aRectangle
-  .size(
-    ({ length }) =>
-      (s) =>
-        s.x(length)
-  )
+  .x(size('length'))
   .md(`Move the shape along by its length`);
 
 md`

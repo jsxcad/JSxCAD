@@ -1,6 +1,7 @@
 import { Shape } from './Shape.js';
 
-export const clipFrom = Shape.registerMethod(
+export const clipFrom = Shape.registerMethod2(
   'clipFrom',
-  (other) => (shape) => other.clip(shape)
+  ['input', 'shape', 'modes'],
+  (input, shape, modes) => shape.clip(input, ...modes)
 );

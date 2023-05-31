@@ -140,6 +140,19 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(number);
         break;
       }
+      case 'value': {
+        let number;
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (number === undefined && Shape.isValue(value)) {
+            number = value;
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(number);
+        break;
+      }
       case 'numbers': {
         const out = [];
         for (const arg of args) {
@@ -347,18 +360,8 @@ export const destructure2 = async (shape, input, ...specs) => {
         const out = [];
         for (const arg of args) {
           let value = await resolve(shape, arg);
-          if (Shape.isArray(value)) {
-            const list = [];
-            for (const entry of value) {
-              if (Shape.isShape(entry)) {
-                list.push(await getCoordinate(entry));
-              } else if (Shape.isArray(entry)) {
-                list.push(entry);
-              } else {
-                throw Error(`Unexpected value ${entry} for coordinateLists`);
-              }
-            }
-            out.push(list);
+          if (Shape.isArray(value) && value.every(Shape.isCoordinate)) {
+            out.push(value);
           } else {
             rest.push(arg);
           }
@@ -371,7 +374,7 @@ export const destructure2 = async (shape, input, ...specs) => {
         break;
       }
       default: {
-        throw Error(`Unknown destructure2 spec ${spec}`);
+        throw Error(`Unknown destructure2 spec "${spec}"`);
       }
     }
     args = rest;

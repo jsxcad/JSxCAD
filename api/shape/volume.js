@@ -1,9 +1,9 @@
 import Shape from './Shape.js';
 import { measureVolume } from '@jsxcad/geometry';
 
-export const volume = Shape.registerMethod(
+export const volume = Shape.registerMethod2(
   'volume',
-  (op = (value) => (shape) => value) =>
-    (shape) =>
-      op(measureVolume(shape.toGeometry()))(shape)
+  ['input', 'function'],
+  async (input, op = (value) => (shape) => value) =>
+    op(measureVolume(await input.toGeometry()))(input)
 );

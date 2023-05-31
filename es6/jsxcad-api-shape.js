@@ -243,6 +243,9 @@ const isValue = (value) =>
   (!isObject(value) && !isFunction(value)) || isArray(value);
 Shape.isValue = isValue;
 
+const isCoordinate = (value) => isArray(value) && value.every(isNumber);
+Shape.isCoordinate = isCoordinate;
+
 Shape.chain = chain;
 
 const registerMethod = (names, op) => {
@@ -286,10 +289,7 @@ const registerMethod2 = (names, signature, op) => {
         const parameters = await Shape.destructure2a(shape, args, ...signature);
         return op(...parameters);
       } catch (error) {
-        console.log(`QQ/registerMethod2: ${names}`);
-        console.log(`QQ/registerMethod2: ${signature}`);
-        console.log(`QQ/registerMethod2: ${args}`);
-        console.log(error.stack);
+        console.log(`Method ${names}: error ${'' + error}`);
         throw error;
       }
     };
@@ -483,6 +483,19 @@ const destructure2 = async (shape, input, ...specs) => {
         for (const arg of args) {
           let value = await resolve(shape, arg);
           if (number === undefined && Shape.isNumber(value)) {
+            number = value;
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(number);
+        break;
+      }
+      case 'value': {
+        let number;
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (number === undefined && Shape.isValue(value)) {
             number = value;
           } else {
             rest.push(arg);
@@ -685,7 +698,7 @@ const destructure2 = async (shape, input, ...specs) => {
             } else {
               rest.push(arg);
             }
-          } else if (Shape.isArray(value)) {
+          } else if (Shape.isArray(value) && Shape.isNumber(value[0])) {
             out.push(value);
           } else {
             rest.push(arg);
@@ -698,18 +711,8 @@ const destructure2 = async (shape, input, ...specs) => {
         const out = [];
         for (const arg of args) {
           let value = await resolve(shape, arg);
-          if (Shape.isArray(value)) {
-            const list = [];
-            for (const entry of value) {
-              if (Shape.isShape(entry)) {
-                list.push(await getCoordinate(entry));
-              } else if (Shape.isArray(entry)) {
-                list.push(entry);
-              } else {
-                throw Error(`Unexpected value ${entry} for coordinateLists`);
-              }
-            }
-            out.push(list);
+          if (Shape.isArray(value) && value.every(Shape.isCoordinate)) {
+            out.push(value);
           } else {
             rest.push(arg);
           }
@@ -722,7 +725,7 @@ const destructure2 = async (shape, input, ...specs) => {
         break;
       }
       default: {
-        throw Error(`Unknown destructure2 spec ${spec}`);
+        throw Error(`Unknown destructure2 spec "${spec}"`);
       }
     }
     args = rest;
@@ -1866,8 +1869,7 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
 const Box = Shape.registerMethod2(
   'Box',
   ['input', 'modes', 'intervals', 'options'],
-  async (input, modes, intervals, options) => {
-    const [x = 1, y = x, z = 0] = intervals;
+  async (input, modes, [x = 1, y = x, z = 0], options) => {
     const [computedC1, computedC2] = await buildCorners(x, y, z)(input);
     let { c1 = computedC1, c2 = computedC2 } = options;
     return reifyBox(c1, c2, modes.includes('occt'));
@@ -2154,9 +2156,10 @@ const clip = Shape.registerMethod2(
     )
 );
 
-const clipFrom = Shape.registerMethod(
+const clipFrom = Shape.registerMethod2(
   'clipFrom',
-  (other) => (shape) => other.clip(shape)
+  ['input', 'shape', 'modes'],
+  (input, shape, modes) => shape.clip(input, ...modes)
 );
 
 const untagGeometry = (geometry, tags) => {
@@ -2181,11 +2184,10 @@ const untagGeometry = (geometry, tags) => {
   return rewrite(geometry, op);
 };
 
-const untag = Shape.registerMethod(
+const untag = Shape.registerMethod2(
   'untag',
-  (...tags) =>
-    async (shape) =>
-      Shape.fromGeometry(untagGeometry(await shape.toGeometry(), tags))
+  ['inputGeometry', 'strings'],
+  (geometry, tags) => Shape.fromGeometry(untagGeometry(geometry, tags))
 );
 
 const color = Shape.registerMethod(
@@ -4698,29 +4700,28 @@ const baseView =
     return shape;
   };
 
-Shape.registerMethod(
+Shape.registerMethod2(
   'topView',
-  (...args) =>
-    async (shape) => {
-      const {
-        value: viewId,
-        func: op = (x) => x,
-        object: options,
-        strings: modes,
-      } = Shape.destructure(args, {
-        object: {
-          size: 512,
-          skin: true,
-          outline: true,
-          wireframe: false,
-          width: 512,
-          height: 512,
-          position: [0, 0, 100],
-        },
-      });
-      shape = await applyModes(shape, options, modes);
-      return baseView(viewId, op, options)(shape);
-    }
+  ['input', 'value', 'function', 'options', 'modes'],
+  async (
+    input,
+    viewId,
+    op = (x) => x,
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = true,
+      width = 512,
+      height = 512,
+      position = [0, 0, 100],
+    } = {},
+    modes
+  ) => {
+    const options = { size, skin, outline, wireframe, width, height, position };
+    const shape = await applyModes(input, options, modes);
+    return baseView(viewId, op, options)(shape);
+  }
 );
 
 const gridView = Shape.registerMethod(
@@ -5445,7 +5446,7 @@ const points$1 = Shape.registerMethod2(
   }
 );
 
-const self = Shape.registerMethod('self', () => (shape) => shape);
+const self = Shape.registerMethod2('self', ['input'], (input) => input);
 
 const put = Shape.registerMethod(
   'put',
@@ -5583,44 +5584,44 @@ const scale = Shape.registerMethod2(
 
 const s = scale;
 
-const scaleX = Shape.registerMethod(
+const scaleX = Shape.registerMethod2(
   ['scaleX', 'sx'],
-  (...x) =>
-    async (shape) => {
-      const scaled = [];
-      for (const value of await shape.toFlatValues(x)) {
-        scaled.push(await scale(value, 1, 1)(shape));
-      }
-      return Group(...scaled);
+  ['input', 'numbers'],
+  async (input, values) => {
+    const scaled = [];
+    for (const value of values) {
+      scaled.push(await scale(value, 1, 1)(input));
     }
+    return Group(...scaled);
+  }
 );
 
 const sx = scaleX;
 
-const scaleY = Shape.registerMethod(
+const scaleY = Shape.registerMethod2(
   ['scaleY', 'sy'],
-  (...y) =>
-    async (shape) => {
-      const scaled = [];
-      for (const value of await shape.toFlatValues(y)) {
-        scaled.push(await scale(1, value, 1)(shape));
-      }
-      return Group(...scaled);
+  ['input', 'numbers'],
+  async (input, values) => {
+    const scaled = [];
+    for (const value of values) {
+      scaled.push(await scale(1, value, 1)(input));
     }
+    return Group(...scaled);
+  }
 );
 
 const sy = scaleY;
 
-const scaleZ = Shape.registerMethod(
+const scaleZ = Shape.registerMethod2(
   ['scaleZ', 'sz'],
-  (...z) =>
-    async (shape) => {
-      const scaled = [];
-      for (const value of await shape.toFlatValues(z)) {
-        scaled.push(await scale(1, 1, value)(shape));
-      }
-      return Group(...scaled);
+  ['input', 'numbers'],
+  async (input, values) => {
+    const scaled = [];
+    for (const value of values) {
+      scaled.push(await scale(1, 1, value)(input));
     }
+    return Group(...scaled);
+  }
 );
 
 const sz = scaleZ;
@@ -5805,57 +5806,38 @@ const shadow = Shape.registerMethod(
       )
 );
 
-const shell = Shape.registerMethod(
+const shell = Shape.registerMethod2(
   'shell',
-  (...args) =>
-    async (shape) => {
-      const [
-        modes,
-        interval = [1 / -2, 1 / 2],
-        sizingFallback,
-        approxFallback,
-        options = {},
-      ] = await destructure2(
-        shape,
-        args,
-        'modes',
-        'interval',
-        'number',
-        'options'
-      );
-      // Application of angle and edgeLength is unclear.
-      const {
+  ['inputGeometry', 'modes', 'interval', 'number', 'number', 'options'],
+  async (
+    geometry,
+    modes,
+    interval = [1 / -2, 1 / 2],
+    sizingFallback,
+    approxFallback,
+    { angle, sizing = sizingFallback, approx = approxFallback, edgeLength } = {}
+  ) => {
+    const [innerOffset, outerOffset] = interval;
+    return Shape.fromGeometry(
+      shell$1(
+        geometry,
+        innerOffset,
+        outerOffset,
+        modes.includes('protect'),
         angle,
-        sizing = sizingFallback,
-        approx = approxFallback,
-        edgeLength,
-      } = options;
-      const [innerOffset, outerOffset] = interval;
-      return Shape.fromGeometry(
-        shell$1(
-          await shape.toGeometry(),
-          innerOffset,
-          outerOffset,
-          modes.includes('protect'),
-          angle,
-          sizing,
-          approx,
-          edgeLength
-        )
-      );
-    }
+        sizing,
+        approx,
+        edgeLength
+      )
+    );
+  }
 );
 
-const simplify = Shape.registerMethod(
+const simplify = Shape.registerMethod2(
   'simplify',
-  (...args) =>
-    async (shape) => {
-      const { object: options = {}, number: eps } = destructure(args);
-      const { ratio = 1.0 } = options;
-      return Shape.fromGeometry(
-        simplify$1(await shape.toGeometry(), ratio, eps)
-      );
-    }
+  ['inputGeometry', 'number', 'options'],
+  (geometry, eps, { ratio = 1.0 } = {}) =>
+    Shape.fromGeometry(simplify$1(geometry, ratio, eps))
 );
 
 const sketch = Shape.registerMethod(
@@ -5958,71 +5940,56 @@ const sort = Shape.registerMethod(
     }
 );
 
-const LoadStl = Shape.registerMethod(
+const LoadStl = Shape.registerMethod2(
   'LoadStl',
-  (...args) =>
-    async (shape) => {
-      const [path, modes] = await await destructure2(
-        shape,
-        args,
-        'string',
-        'modes'
-      );
-      const data = await read(`source/${path}`, { sources: [path] });
-      const format = modes.includes('binary') ? 'binary' : 'ascii';
-      return Shape.fromGeometry(await fromStl(data, { format }));
-    }
+  ['string', 'modes'],
+  async (path, modes) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    const format = modes.includes('binary') ? 'binary' : 'ascii';
+    return Shape.fromGeometry(await fromStl(data, { format }));
+  }
 );
 
-const stl = Shape.registerMethod('stl', (...args) => async (shape) => {
-  const [name, op = (s) => s, options] = await destructure2(
-    shape,
-    args,
-    'string',
-    'function',
-    'options'
-  );
-  const { path } = getSourceLocation();
-  let index = 0;
-  for (const entry of await ensurePages(await op(Shape.chain(shape)))) {
-    const stlPath = `download/stl/${path}/${generateUniqueId()}`;
-    await write(stlPath, await toStl(entry, options));
-    const suffix = index++ === 0 ? '' : `_${index}`;
-    const filename = `${name}${suffix}.stl`;
-    const record = {
-      path: stlPath,
-      filename,
-      type: 'application/sla',
-    };
-    // Produce a view of what will be downloaded.
-    const hash$1 = computeHash({ filename, options }) + hash(entry);
-    await view(name, options.view)(Shape.fromGeometry(entry));
-    emit({ download: { entries: [record] }, hash: hash$1 });
-  }
-  return shape;
-});
-
-const Spiral = Shape.registerMethod(
-  'Spiral',
-  (...args) =>
-    async (shape) => {
-      const [particle = Point, options] = await destructure2(
-        shape,
-        args,
-        'function',
-        'options'
-      );
-      let particles = [];
-      for (const turn of await Seq(
-        options,
-        (distance) => (shape) => distance,
-        (...numbers) => numbers
-      )) {
-        particles.push(await particle(turn).rz(turn));
-      }
-      const result = await Link(...particles);
-      return result;
+const stl = Shape.registerMethod2(
+  'stl',
+  ['input', 'string', 'function', 'options'],
+  async (input, name, op = (s) => s, options = {}) => {
+    const { path } = getSourceLocation();
+    let index = 0;
+    for (const entry of await ensurePages(await op(Shape.chain(input)))) {
+      const stlPath = `download/stl/${path}/${generateUniqueId()}`;
+      await write(stlPath, await toStl(entry, options));
+      const suffix = index++ === 0 ? '' : `_${index}`;
+      const filename = `${name}${suffix}.stl`;
+      const record = {
+        path: stlPath,
+        filename,
+        type: 'application/sla',
+      };
+      // Produce a view of what will be downloaded.
+      const hash$1 = computeHash({ filename, options }) + hash(entry);
+      await view(name, options.view)(Shape.fromGeometry(entry));
+      emit({ download: { entries: [record] }, hash: hash$1 });
     }
+    return input;
+  }
+);
+
+const Spiral = Shape.registerMethod2(
+  'Spiral',
+  ['function', 'options'],
+  async (particle = Point, options) => {
+    let particles = [];
+    for (const turn of await Seq(
+      options,
+      (distance) => (shape) => distance,
+      (...numbers) => numbers
+    )) {
+      particles.push(await particle(turn).rz(turn));
+    }
+    const result = await Link(...particles);
+    return result;
+  }
 );
 
 const toDiameterFromApothem = (apothem, sides = 32) =>
@@ -6191,104 +6158,93 @@ const ArcX = Shape.registerMethod('ArcX', ArcOp('ArcX'));
 const ArcY = Shape.registerMethod('ArcY', ArcOp('ArcY'));
 const ArcZ = Shape.registerMethod('ArcZ', ArcOp('ArcZ'));
 
-const Stroke = Shape.registerMethod(
+const Stroke = Shape.registerMethod2(
   'Stroke',
-  (...args) =>
-    async (shape) => {
-      const [shapes, implicitWidth = 1, options = {}] = await destructure2(
-        shape,
-        args,
-        'shapes',
-        'number',
-        'options'
-      );
-      const { width = implicitWidth } = options;
-      // return ChainHull( eachPoint(Arc(width).to, List)(await Group(shape, ...shapes)));
-      return Fuse(
-        eachSegment(
-          (s) => s.eachPoint(Arc(width).to).hull(),
-          List
-        )(await Group(shape, ...shapes))
-      );
-    }
-);
-
-const stroke = Shape.registerMethod(
-  'stroke',
-  (...args) =>
-    async (shape) =>
-      Stroke(shape, ...args)
-);
-
-const LoadSvg = Shape.registerMethod(
-  'LoadSvg',
-  (path, { fill = true, stroke = true } = {}) =>
-    async (shape) => {
-      const data = await read(`source/${path}`, { sources: [path] });
-      if (data === undefined) {
-        throw Error(`Cannot read svg from ${path}`);
-      }
-      return Shape.fromGeometry(
-        await fromSvg(data, { doFill: fill, doStroke: stroke })
-      );
-    }
-);
-
-const Svg = Shape.registerMethod(
-  'Svg',
-  (svg, { fill = true, stroke = true } = {}) =>
-    async (shape) => {
-      const data = new TextEncoder('utf8').encode(svg);
-      return Shape.fromGeometry(
-        await fromSvg(data, { doFill: fill, doStroke: stroke })
-      );
-    }
-);
-
-const svg = Shape.registerMethod('svg', (...args) => async (shape) => {
-  const {
-    value: name,
-    func: op = (s) => s,
-    object: options = {},
-  } = destructure(args);
-  const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
-  let index = 0;
-  for (const entry of await ensurePages(op(shape))) {
-    const svgPath = `download/svg/${path}/${id}/${viewId}`;
-    await write(svgPath, await toSvg(entry, options));
-    const suffix = index++ === 0 ? '' : `_${index}`;
-    const filename = `${name}${suffix}.svg`;
-    const record = {
-      path: svgPath,
-      filename,
-      type: 'image/svg+xml',
-    };
-    const hash$1 = computeHash({ filename, options }) + hash(entry);
-    await gridView(name, options.view)(Shape.fromGeometry(entry));
-    emit({ download: { entries: [record] }, hash: hash$1 });
+  ['input', 'shapes', 'number', 'options'],
+  async (input, shapes, implicitWidth = 1, { width = implicitWidth } = {}) => {
+    return Fuse(
+      eachSegment(
+        (s) => s.eachPoint(Arc(width).to).hull(),
+        List
+      )(await Group(input, ...shapes))
+    );
   }
-  return shape;
-});
+);
 
-const table = Shape.registerMethod(
-  'table',
-  (rows, columns, ...cells) =>
-    (shape) => {
-      const uniqueId = generateUniqueId;
-      const open = { open: { type: 'table', rows, columns, uniqueId } };
-      emit({ open, hash: computeHash(open) });
-      for (let cell of cells) {
-        if (cell instanceof Function) {
-          cell = cell(shape);
-        }
-        if (typeof cell === 'string') {
-          md(cell);
-        }
-      }
-      const close = { close: { type: 'table', rows, columns, uniqueId } };
-      emit({ close, hash: computeHash(close) });
-      return shape;
+const stroke = Shape.registerMethod2(
+  'stroke',
+  ['input', 'rest'],
+  (input, rest) => Stroke(input, ...rest)
+);
+
+const LoadSvg = Shape.registerMethod2(
+  'LoadSvg',
+  ['string', 'options'],
+  async (path, { fill = true, stroke = true } = {}) => {
+    const data = await read(`source/${path}`, { sources: [path] });
+    if (data === undefined) {
+      throw Error(`Cannot read svg from ${path}`);
     }
+    return Shape.fromGeometry(
+      await fromSvg(data, { doFill: fill, doStroke: stroke })
+    );
+  }
+);
+
+const Svg = Shape.registerMethod2(
+  'Svg',
+  ['string', 'options'],
+  async (svg, { fill = true, stroke = true } = {}) => {
+    const data = new TextEncoder('utf8').encode(svg);
+    return Shape.fromGeometry(
+      await fromSvg(data, { doFill: fill, doStroke: stroke })
+    );
+  }
+);
+
+const svg = Shape.registerMethod2(
+  'svg',
+  ['input', 'string', 'function', 'options'],
+  async (input, name, op = (s) => s, options = {}) => {
+    const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
+    let index = 0;
+    for (const entry of await ensurePages(op(input))) {
+      const svgPath = `download/svg/${path}/${id}/${viewId}`;
+      await write(svgPath, await toSvg(entry, options));
+      const suffix = index++ === 0 ? '' : `_${index}`;
+      const filename = `${name}${suffix}.svg`;
+      const record = {
+        path: svgPath,
+        filename,
+        type: 'image/svg+xml',
+      };
+      const hash$1 = computeHash({ filename, options }) + hash(entry);
+      await gridView(name, options.view)(Shape.fromGeometry(entry));
+      emit({ download: { entries: [record] }, hash: hash$1 });
+    }
+    return input;
+  }
+);
+
+const table = Shape.registerMethod2(
+  'table',
+  ['input', 'number', 'number', 'strings'],
+  async (input, rows, columns, cells) => {
+    const uniqueId = generateUniqueId;
+    const open = { open: { type: 'table', rows, columns, uniqueId } };
+    emit({ open, hash: computeHash(open) });
+    for (let cell of cells) {
+      if (cell instanceof Function) {
+        cell = cell(input);
+      }
+      if (typeof cell === 'string') {
+        md(cell);
+      }
+    }
+    const close = { close: { type: 'table', rows, columns, uniqueId } };
+    emit({ close, hash: computeHash(close) });
+    return input;
+  }
 );
 
 const tags = Shape.registerMethod('tags', (...args) => async (shape) => {
@@ -6308,9 +6264,10 @@ const tags = Shape.registerMethod('tags', (...args) => async (shape) => {
 });
 
 // Tint adds another color to the mix.
-const tint = Shape.registerMethod(
+const tint = Shape.registerMethod2(
   'tint',
-  (name) => (shape) => tag(...toTagsFromName(name))(shape)
+  ['input', 'string'],
+  (input, name) => tag(...toTagsFromName(name))(input)
 );
 
 const toFlatValues = Shape.registerMethod(
@@ -6458,11 +6415,11 @@ export const toolpath = Shape.registerMethod(
 );
 */
 
-const twist = Shape.registerMethod(
+const twist = Shape.registerMethod2(
   'twist',
-  (turnsPerMm = 1) =>
-    (shape) =>
-      Shape.fromGeometry(twist$1(shape.toGeometry(), turnsPerMm))
+  ['input', 'number'],
+  (input, turnsPerMm = 1) =>
+    Shape.fromGeometry(twist$1(input.toGeometry(), turnsPerMm))
 );
 
 const upperEnvelope = Shape.registerMethod(
@@ -6471,17 +6428,17 @@ const upperEnvelope = Shape.registerMethod(
     Shape.fromGeometry(generateUpperEnvelope(await shape.toGeometry()))
 );
 
-const unfold = Shape.registerMethod(
+const unfold = Shape.registerMethod2(
   'unfold',
-  () => async (shape) =>
-    Shape.fromGeometry(unfold$1(await shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(unfold$1(geometry))
 );
 
-const volume = Shape.registerMethod(
+const volume = Shape.registerMethod2(
   'volume',
-  (op = (value) => (shape) => value) =>
-    (shape) =>
-      op(measureVolume(shape.toGeometry()))(shape)
+  ['input', 'function'],
+  async (input, op = (value) => (shape) => value) =>
+    op(measureVolume(await input.toGeometry()))(input)
 );
 
 const X$1 = 0;
@@ -6640,24 +6597,19 @@ const toGeometry = Shape.registerMethod(
   () => (shape) => shape.geometry
 );
 
-const Wrap = Shape.registerMethod('Wrap', (...args) => async (shape) => {
-  const [offset = 1, alpha = 0.1, shapes] = await destructure2(
-    shape,
-    args,
-    'number',
-    'number',
-    'shapes'
-  );
-  return Shape.fromGeometry(
-    wrap$1(await shape.toShapesGeometries(shapes), offset, alpha)
-  ).setTags(...(await shape.getTags()));
-});
+const Wrap = Shape.registerMethod2(
+  'Wrap',
+  ['input', 'number', 'number', 'geometries'],
+  async (input, offset = 1, alpha = 0.1, geometries) =>
+    Shape.fromGeometry(wrap$1(geometries, offset, alpha)).setTags(
+      ...(await input.getTags())
+    )
+);
 
-const wrap = Shape.registerMethod(
+const wrap = Shape.registerMethod2(
   'wrap',
-  (...args) =>
-    async (shape) =>
-      Wrap(shape, ...args)(shape)
+  ['input', 'rest'],
+  (input, rest) => Wrap(input, ...rest)(input)
 );
 
 const x = Shape.registerMethod('x', (...x) => async (shape) => {
@@ -6687,10 +6639,7 @@ const z = Shape.registerMethod('z', (...z) => async (shape) => {
 const Assembly = Shape.registerMethod2(
   'Assembly',
   ['shapes', 'modes'],
-  (shapes, modes) => {
-    const [first, ...rest] = shapes;
-    return fitTo(modes, ...rest)(first);
-  }
+  ([first, ...rest], modes) => fitTo(modes, ...rest)(first)
 );
 
 // This generates anonymous shape methods.
@@ -6943,10 +6892,19 @@ const Pentagon = Shape.registerMethod(
 
 const Points = Shape.registerMethod2(
   'Points',
-  ['coordinates', 'coordinateLists'],
-  (coordinates, coordinatesLists) => {
-    const [coordinatesList = coordinates] = coordinatesLists;
-    return Shape.fromPoints(coordinatesList);
+  ['coordinateLists', 'coordinates'],
+  (coordinateLists = [], coordinates = []) => {
+    const coords = [];
+    for (const coordinateList of coordinateLists) {
+      for (const coordinate of coordinateList) {
+        coords.push(coordinate);
+      }
+    }
+    for (const coordinate of coordinates) {
+      coords.push(coordinate);
+    }
+    console.log(`QQQQ/Points: ${JSON.stringify(coords)}`);
+    return Shape.fromPoints(coords);
   }
 );
 
@@ -6976,7 +6934,7 @@ const Polyhedron = Shape.registerMethod(
 const Segments = Shape.registerMethod2(
   'Segments',
   ['coordinateLists'],
-  async (coordinateLists) => Shape.fromSegments(coordinateLists)
+  (coordinateLists) => Shape.fromSegments(coordinateLists)
 );
 
 const SurfaceMesh = (
@@ -6997,22 +6955,20 @@ const Triangle = Shape.registerMethod(
   (x, y, z) => async (shape) => Arc(x, y, z, { sides: 3 })(shape)
 );
 
-const Wave = Shape.registerMethod('Wave', (...args) => async (shape) => {
-  const [particle = Point, options] = await destructure2(
-    shape,
-    args,
-    'function',
-    'options'
-  );
-  let particles = [];
-  for (const xDistance of await seq(
-    options,
-    (distance) => (shape) => distance,
-    (...numbers) => numbers
-  )(shape)) {
-    particles.push(particle(xDistance).x(xDistance));
+const Wave = Shape.registerMethod2(
+  'Wave',
+  ['input', 'function', 'options'],
+  async (input, particle = Point, options) => {
+    let particles = [];
+    for (const xDistance of await seq(
+      options,
+      (distance) => (shape) => distance,
+      (...numbers) => numbers
+    )(input)) {
+      particles.push(particle(xDistance).x(xDistance));
+    }
+    return Link(...particles)(input);
   }
-  return Link(...particles)(shape);
-});
+);
 
 export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

@@ -3,7 +3,8 @@ import { tag } from './tag.js';
 import { toTagsFromName } from '@jsxcad/algorithm-color';
 
 // Tint adds another color to the mix.
-export const tint = Shape.registerMethod(
+export const tint = Shape.registerMethod2(
   'tint',
-  (name) => (shape) => tag(...toTagsFromName(name))(shape)
+  ['input', 'string'],
+  (input, name) => tag(...toTagsFromName(name))(input)
 );

@@ -1,3 +1,3 @@
 import Shape from './Shape.js';
 
-export const self = Shape.registerMethod('self', () => (shape) => shape);
+export const self = Shape.registerMethod2('self', ['input'], (input) => input);

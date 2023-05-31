@@ -63,6 +63,7 @@ const emitError = (exception) => {
 };
 
 const $run = async (op, { path, id, text, sha, line }) => {
+  console.log(`QQQQ/$run: ${text}`);
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
@@ -165,11 +166,7 @@ const evaluate = async (ecmascript, { api, path }) => {
     );
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
-    // Retry until none of the operations block.
-    // Note: This retry mechanism should be obsolete now.
-    for (;;) {
-      return await op();
-    }
+    return await op();
   } catch (error) {
     throw error;
   } finally {

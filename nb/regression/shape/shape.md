@@ -296,7 +296,7 @@ await Arc(10).color('blue').tint('red').view();
 ```
 
 ```JavaScript
-await Edges(
+await Segments(
   seq(
     (y) => (s) => [Point(-10, y, 0), Point(10, y, 0)],
     {
@@ -518,8 +518,10 @@ await Box(5, 5, 20)
 await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView();
 ```
 
+![Image](shape.md.$69.png)
+
 ```JavaScript
-await Segments([
+await Segments(
   [
     [-18.15, 40.34, 0.0],
     [-9.82, 45.66, 0.0],
@@ -603,8 +605,8 @@ await Segments([
   [
     [-20.62, 35.14, 0.0],
     [-17.37, 41.56, 0.0],
-  ],
-])
+  ]
+)
   .fill()
   .topView();
 ```

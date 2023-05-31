@@ -238,6 +238,9 @@ export const isValue = (value) =>
   (!isObject(value) && !isFunction(value)) || isArray(value);
 Shape.isValue = isValue;
 
+export const isCoordinate = (value) => isArray(value) && value.every(isNumber);
+Shape.isCoordinate = isCoordinate;
+
 Shape.chain = chain;
 
 export const registerMethod = (names, op) => {
