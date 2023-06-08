@@ -1403,10 +1403,11 @@ const op = Shape.registerMethod2(
   'op',
   ['input', 'functions'],
   async (input, functions = []) => {
+    const results = [];
     for (const fun of functions) {
-      input = await fun(input);
+      results.push(await fun(input));
     }
-    return input;
+    return Group(...results);
   }
 );
 

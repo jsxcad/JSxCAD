@@ -16,6 +16,8 @@ Box(1, 1).scale(1, 1)
 Box(1, 1).scale(1, 1).topView().note('Box(1, 1).scale(1, 1)');
 ```
 
+![Image](scale.md.$3.png)
+
 Box([0, 1], 1).scale(-2, 1)
 
 ```JavaScript
@@ -24,6 +26,8 @@ Box([0, 1], 1)
   .topView()
   .note('Box([0, 1], 1).scale(-2, 1)');
 ```
+
+![Image](scale.md.$4.png)
 
 Box([0, 1], [0, 1]).scale(-2, -3, 1)
 
@@ -45,6 +49,8 @@ Box(1, 1)
   .note('Box(1, 1).scale(1, 1, -1) the surface is now upside down.');
 ```
 
+![Image](scale.md.$6.png)
+
 Box([0, 1], 1, 1).scale(-1, 1, 1)
 
 ```JavaScript
@@ -53,6 +59,8 @@ Box([0, 1], 1, 1)
   .topView()
   .note('Box([0, 1], 1, 1).scale(-1, 1, 1)');
 ```
+
+![Image](scale.md.$7.png)
 
 Box([0, 1], [0, 1], 1).scale(-1, -1, 1)
 

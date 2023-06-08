@@ -10,6 +10,8 @@ Operations like cut and clip will leave ghosts of the shapes that were cut away 
 
 Box(10).op(x(5).as('a'), x(-5).as('b')) produces normal geometry.
 
+![Image](ghost.md.$2_2.png)
+
 on(get('b'), ghost()) turns one into a ghost.
 
 ```JavaScript
