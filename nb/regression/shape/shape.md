@@ -295,10 +295,12 @@ await Arc(10).color('blue').color('red').view();
 await Arc(10).color('blue').tint('red').view();
 ```
 
+![Image](shape.md.$46.png)
+
 ```JavaScript
 await Segments(
   seq(
-    (y) => (s) => [Point(-10, y, 0), Point(10, y, 0)],
+    (y) => (s) => [[-10, y, 0], [10, y, 0]],
     {
       from: -6,
       to: 6,

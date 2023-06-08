@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 import { transform as transformGeometry } from '@jsxcad/geometry';
 
-export const transform = Shape.registerMethod(
+export const transform = Shape.registerMethod2(
   'transform',
-  (matrix) => async (shape) =>
-    Shape.fromGeometry(transformGeometry(matrix, await shape.toGeometry()))
+  ['inputGeometry', 'value'],
+  (geometry, matrix) => Shape.fromGeometry(transformGeometry(matrix, geometry))
 );

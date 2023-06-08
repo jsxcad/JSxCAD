@@ -46,12 +46,12 @@ export const computeSides = (c1, c2, sides, zag = 0.01) => {
 export const zagSides = Shape.registerMethod2(
   'zagSides',
   ['number', 'number'],
-  (diameter = 1, zag = 0.01) => 1 / toSidesFromZag(diameter, zag)
+  (diameter = 1, zag = 0.01) => toSidesFromZag(diameter, zag)
 );
 export const zagSteps = Shape.registerMethod2(
   'zagSteps',
   ['number', 'number'],
-  (diameter = 1, zag = 0.25) => toSidesFromZag(diameter, zag)
+  (diameter = 1, zag = 0.25) => 1 / toSidesFromZag(diameter, zag)
 );
 
 export const updatePlan = Shape.registerMethod(

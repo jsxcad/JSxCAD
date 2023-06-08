@@ -1,23 +1,20 @@
 import Shape from './Shape.js';
-import { destructure2 } from './destructure.js';
 import { loft as loftGeometry } from '@jsxcad/geometry';
-import { toShapesGeometries } from './toShapesGeometries.js';
 
-export const Loft = Shape.registerMethod('Loft', (...args) => async (shape) => {
-  const [modes, shapes] = await destructure2(shape, args, 'modes', 'shapes');
-  return Shape.fromGeometry(
-    loftGeometry(
-      await toShapesGeometries(shapes)(shape),
-      !modes.includes('open')
-    )
-  );
-});
+export const Loft = Shape.registerMethod2(
+  'Loft',
+  ['geometries', 'modes'],
+  (geometries, modes) =>
+    Shape.fromGeometry(loftGeometry(geometries, !modes.includes('open')))
+);
 
-export const loft = Shape.registerMethod(
+export const loft = Shape.registerMethod2(
   'loft',
-  (...args) =>
-    async (shape) =>
-      Loft(shape, ...args)(shape)
+  ['inputGeometry', 'geometries', 'modes'],
+  (geometry, geometries, modes) =>
+    Shape.fromGeometry(
+      loftGeometry([geometry, ...geometries], !modes.includes('open'))
+    )
 );
 
 export default Loft;

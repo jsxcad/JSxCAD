@@ -236,6 +236,39 @@ Shape.isObject = isObject;
 const isNumber = (value) => typeof value === 'number';
 Shape.isNumber = isNumber;
 
+const isIntervalLike = (value) =>
+  isNumber(value) ||
+  (isArray(value) &&
+    isNumber(value[0]) &&
+    (isNumber(value[1]) || value[1] === undefined));
+Shape.isIntervalLike = isIntervalLike;
+
+const isInterval = (value) =>
+  isNumber(value) &&
+  value.length === 2 &&
+  isNumber(value[0]) &&
+  isNumber(value[1]);
+Shape.isInterval = isInterval;
+
+const normalizeInterval = (value) => {
+  if (isNumber(value)) {
+    value = [value / 2, value / -2];
+  }
+  const [a = 0, b = 0] = value;
+  if (typeof a !== 'number') {
+    throw Error(
+      `normalizeInterval expected number but received ${a} of type ${typeof a}`
+    );
+  }
+  if (typeof b !== 'number') {
+    throw Error(
+      `normalizeInterval expected number but received ${b} of type ${typeof b}`
+    );
+  }
+  return a < b ? [a, b] : [b, a];
+};
+Shape.normalizeInterval = normalizeInterval;
+
 const isString = (value) => typeof value === 'string';
 Shape.isString = isString;
 
@@ -245,6 +278,9 @@ Shape.isValue = isValue;
 
 const isCoordinate = (value) => isArray(value) && value.every(isNumber);
 Shape.isCoordinate = isCoordinate;
+
+const isSegment = (value) => isArray(value) && value.every(isCoordinate);
+Shape.isSegment = isSegment;
 
 Shape.chain = chain;
 
@@ -285,11 +321,16 @@ const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
     async (shape) => {
+      console.log(`Method ${names} [call] ${JSON.stringify(args)}`);
       try {
         const parameters = await Shape.destructure2a(shape, args, ...signature);
-        return op(...parameters);
+        const result = op(...parameters);
+        console.log(`Method ${names} [done]`);
+        return result;
       } catch (error) {
-        console.log(`Method ${names}: error ${'' + error}`);
+        console.log(
+          `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
+        );
         throw error;
       }
     };
@@ -419,31 +460,42 @@ const destructure = (
 Shape.destructure = destructure;
 
 const resolve = async (shape, value) => {
+  while (value instanceof Promise) {
+    value = await value;
+  }
   while (Shape.isFunction(value)) {
     value = await value(shape);
   }
-  return value;
-};
-
-const resolveArray = async (shape, arg) => {
-  const value = await resolve(shape, arg);
   if (Shape.isArray(value)) {
-    const resolved = [];
+    const resolvedElements = [];
     for (const element of value) {
-      resolved.push(await resolve(shape, element));
+      const result = await resolve(shape, element);
+      resolvedElements.push(result);
     }
-    return resolved;
+    return resolvedElements;
+  } else if (Shape.isObject(value)) {
+    const resolvedObject = {};
+    for (const key of Object.keys(value)) {
+      resolvedObject[key] = await resolve(shape, value[key]);
+    }
+    return resolvedObject;
+  } else {
+    return value;
   }
-  return value;
 };
 
 const getCoordinate = async (value) => {
-  const points = await value.toCoordinates();
-  if (points.length >= 1) {
-    return points[0];
-  } else {
-    throw Error(`Unexpected coordinate value: ${JSON.stringify(value)}`);
+  if (Shape.isCoordinate(value)) {
+    return value;
   }
+  if (Shape.isShape(value)) {
+    const points = await value.toCoordinates();
+    if (points.length >= 1) {
+      const [x = 0, y = 0, z = 0] = points[0];
+      return [x, y, z];
+    }
+  }
+  return undefined;
 };
 
 const getCoordinates = async (value) => {
@@ -469,8 +521,14 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'objects': {
         const out = [];
         for (const arg of args) {
-          if (Shape.isObject(arg)) {
-            out.push(arg);
+          if (!Shape.isObject(arg)) {
+            // These must be confirmed as objects prior to resolution in order to avoid functions.
+            rest.push(arg);
+            continue;
+          }
+          let value = await resolve(shape, arg);
+          if (Shape.isObject(value)) {
+            out.push(value);
           } else {
             rest.push(arg);
           }
@@ -543,6 +601,19 @@ const destructure2 = async (shape, input, ...specs) => {
         output.push(func);
         break;
       }
+      case 'functions': {
+        const functions = [];
+        for (const arg of args) {
+          const value = arg;
+          if (Shape.isFunction(value)) {
+            functions.push(value);
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(functions);
+        break;
+      }
       case 'shape': {
         let result;
         for (const arg of args) {
@@ -572,12 +643,13 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'coordinate': {
         let result;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
-          if (result === undefined && Shape.isShape(value)) {
+          if (result === undefined) {
+            let value = await resolve(shape, arg);
             result = await getCoordinate(value);
-          } else if (result === undefined && Shape.isArray(value)) {
-            result = value;
-          } else {
+            if (result === undefined) {
+              rest.push(arg);
+            }
+          } else if (result !== undefined) {
             rest.push(arg);
           }
         }
@@ -587,8 +659,9 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'options': {
         const options = {};
         for (const arg of args) {
-          if (Shape.isObject(arg)) {
-            Object.assign(options, arg);
+          let value = await resolve(shape, arg);
+          if (Shape.isObject(value)) {
+            Object.assign(options, value);
           } else {
             rest.push(arg);
           }
@@ -625,14 +698,9 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'interval': {
         let interval;
         for (const arg of args) {
-          let value = await resolveArray(shape, arg);
-          if (interval === undefined && Shape.isArray(value)) {
-            const [a = 0, b = 0] = value;
-            interval = a < b ? [a, b] : [b, a];
-          } else if (interval === undefined && Shape.isNumber(value)) {
-            // A number implies an interval of that size centered on zero.
-            interval =
-              value > 0 ? [value / -2, value / 2] : [value / 2, value / -2];
+          let value = await resolve(shape, arg);
+          if (interval === undefined && Shape.isIntervalLike(value)) {
+            interval = Shape.normalizeInterval(value);
           } else {
             rest.push(arg);
           }
@@ -643,15 +711,16 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'intervals': {
         const out = [];
         for (const arg of args) {
-          let value = await resolveArray(shape, arg);
-          if (Shape.isArray(value)) {
-            const [a = 0, b = 0] = value;
-            out.push(a < b ? [a, b] : [b, a]);
-          } else if (Shape.isNumber(value)) {
-            // A number implies an interval of that size centered on zero.
-            out.push(
-              value > 0 ? [value / -2, value / 2] : [value / 2, value / -2]
-            );
+          let value = await resolve(shape, arg);
+          if (Shape.isIntervalLike(value)) {
+            out.push(Shape.normalizeInterval(value));
+          } else if (
+            Shape.isArray(value) &&
+            value.every(Shape.isIntervalLike)
+          ) {
+            for (const element of value) {
+              out.push(Shape.normalizeInterval(element));
+            }
           } else {
             rest.push(arg);
           }
@@ -680,6 +749,10 @@ const destructure2 = async (shape, input, ...specs) => {
           let value = await resolve(shape, arg);
           if (Shape.isShape(value)) {
             out.push(await value.toGeometry());
+          } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
+            for (const element of value) {
+              out.push(await element.toGeometry());
+            }
           } else {
             rest.push(arg);
           }
@@ -700,6 +773,21 @@ const destructure2 = async (shape, input, ...specs) => {
             }
           } else if (Shape.isArray(value) && Shape.isNumber(value[0])) {
             out.push(value);
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(out);
+        break;
+      }
+      case 'segments': {
+        const out = [];
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (Shape.isSegment(value)) {
+            out.push(value);
+          } else if (Shape.isArray(value) && value.every(Shape.isSegment)) {
+            out.push(...value);
           } else {
             rest.push(arg);
           }
@@ -731,8 +819,22 @@ const destructure2 = async (shape, input, ...specs) => {
     args = rest;
   }
   if (args.length !== 0) {
-    console.log(`QQQ/Error: Unused arguments [${args.join(', ')}]`);
-    throw Error(`Unused arguments [${args.join(', ')}]`);
+    let diagnostic;
+    try {
+      // Try to format it nicely.
+      diagnostic = `QQQ/Error: ${
+        args.length
+      } unused arguments: ${JSON.stringify(args)} arguments: ${JSON.stringify(
+        input
+      )} specs: ${JSON.stringify(specs)}`;
+    } catch (error) {
+      // Otherwise fall back.
+      diagnostic = `QQQ/Error: ${args.length} unused arguments: ${args.join(
+        ', '
+      )} specs: ${specs.join(',')}`;
+    }
+    console.log(diagnostic);
+    throw Error(diagnostic);
   }
   return output;
 };
@@ -741,6 +843,8 @@ Shape.destructure2 = destructure2;
 
 const destructure2a = async (shape, args, inputSpec, ...specs) => {
   switch (inputSpec) {
+    case undefined:
+      return destructure2(shape, args, ...specs);
     case 'input':
       return [shape, ...(await destructure2(shape, args, ...specs))];
     case 'inputGeometry':
@@ -857,20 +961,25 @@ Shape.registerMethod('md', (...chunks) => (shape) => {
 const Point = Shape.registerMethod2(
   'Point',
   ['coordinate', 'number', 'number', 'number'],
-  (coordinate, x = 0, y = 0, z = 0) => Shape.fromPoint(coordinate || [x, y, z])
+  (coordinate, x = 0, y = 0, z = 0) => {
+    const result = Shape.fromPoint(coordinate || [x, y, z]);
+    console.log(`QQQ/Point: ${JSON.stringify(result)}`);
+    return result;
+  }
 );
 
-const ref = Shape.registerMethod(
-  'ref',
-  () => async (shape) =>
-    Shape.fromGeometry(hasTypeReference(await shape.toGeometry()))
+const ref = Shape.registerMethod2('ref', ['inputGeometry'], (geometry) =>
+  Shape.fromGeometry(hasTypeReference(geometry))
 );
 
-const Ref = Shape.registerMethod('Ref', (...args) => async (shape) => {
-  const point = await Point(...args)(shape);
-  const result = ref()(point);
-  return result;
-});
+const Ref = Shape.registerMethod2(
+  'Ref',
+  ['input', 'rest'],
+  async (input, rest) => {
+    const point = await Point(...rest)(input);
+    return ref()(point);
+  }
+);
 
 const X$a = (x = 0) => Ref().x(x);
 const Y$a = (y = 0) => Ref().y(y);
@@ -1299,21 +1408,16 @@ const Group = Shape.registerMethod(
     }
 );
 
-const op = Shape.registerMethod('op', (...fns) => async (shape) => {
-  const results = [];
-  for (const fn of fns) {
-    if (fn === undefined) {
-      continue;
+const op = Shape.registerMethod2(
+  'op',
+  ['input', 'functions'],
+  async (input, functions = []) => {
+    for (const fun of functions) {
+      input = await fun(input);
     }
-    if (Shape.isShape(fn)) {
-      results.push(fn);
-    } else {
-      const result = await fn(Shape.chain(shape));
-      results.push(result);
-    }
+    return input;
   }
-  return Group(...results);
-});
+);
 
 const by = Shape.registerMethod(
   'by',
@@ -1376,10 +1480,10 @@ const asPart = Shape.registerMethod2(
     Shape.fromGeometry(taggedItem({ tags: [`part:${partName}`] }, geometry))
 );
 
-const transform = Shape.registerMethod(
+const transform = Shape.registerMethod2(
   'transform',
-  (matrix) => async (shape) =>
-    Shape.fromGeometry(transform$1(matrix, await shape.toGeometry()))
+  ['inputGeometry', 'value'],
+  (geometry, matrix) => Shape.fromGeometry(transform$1(matrix, geometry))
 );
 
 const at = Shape.registerMethod('at', (...args) => async (shape) => {
@@ -1398,126 +1502,127 @@ const at = Shape.registerMethod('at', (...args) => async (shape) => {
   return shape;
 });
 
-const normal = Shape.registerMethod('normal', () => async (shape) => {
-  const result = Shape.fromGeometry(computeNormal(await shape.toGeometry()));
-  return result;
-});
+const normal = Shape.registerMethod2(
+  'normal',
+  ['inputGeometry'],
+  (geometry) => {
+    const result = Shape.fromGeometry(computeNormal(geometry));
+    console.log(`QQ/normal/geometry: ${JSON.stringify(geometry)}`);
+    console.log(`QQ/normal/result: ${JSON.stringify(result)}`);
+    return result;
+  }
+);
 
 // This interface is a bit awkward.
-const extrudeAlong = Shape.registerMethod(
+const extrudeAlong = Shape.registerMethod2(
   'extrudeAlong',
-  (...args) =>
-    async (shape) => {
-      const [vector, modes, intervals] = await destructure2(
-        shape,
-        args,
-        'coordinate',
-        'modes',
-        'intervals'
-      );
-      const extrusions = [];
-      for (const [depth, height] of intervals) {
-        if (height === depth) {
-          // Return unextruded geometry at this height, instead.
-          extrusions.push(await shape.moveAlong(vector, height));
-          continue;
-        }
-        extrusions.push(
-          Shape.fromGeometry(
-            extrude(
-              await shape.toGeometry(),
-              await Point().moveAlong(vector, height).toGeometry(),
-              await Point().moveAlong(vector, depth).toGeometry(),
-              modes.includes('noVoid')
-            )
-          )
-        );
+  ['input', 'coordinate', 'modes', 'intervals'],
+  async (input, vector, modes, intervals) => {
+    console.log(`QQQ/extrudeAlong/vector: ${JSON.stringify(vector)}`);
+    console.log(`QQQ/extrudeAlong/intervals: ${JSON.stringify(intervals)}`);
+    const extrusions = [];
+    for (const [depth, height] of intervals) {
+      if (height === depth) {
+        // Return unextruded geometry at this height, instead.
+        extrusions.push(await input.moveAlong(vector, height));
+        continue;
       }
-      return Group(...extrusions);
+      extrusions.push(
+        Shape.fromGeometry(
+          extrude(
+            await input.toGeometry(),
+            await Point().moveAlong(vector, height).toGeometry(),
+            await Point().moveAlong(vector, depth).toGeometry(),
+            modes.includes('noVoid')
+          )
+        )
+      );
     }
+    console.log(`QQQ/extrudeAlong/extrusions: ${extrusions}`);
+    return Group(...extrusions)();
+  }
 );
 
 // Note that the operator is applied to each leaf geometry by default.
-const e = Shape.registerMethod(
+const e = Shape.registerMethod2(
   'e',
-  (...extents) =>
-    async (shape) =>
-      extrudeAlong(normal(), ...extents)(shape)
+  ['input', 'intervals'],
+  (input, extents) => extrudeAlong(normal(), ...extents)(input)
 );
 
-const extrudeX = Shape.registerMethod(
+const extrudeX = Shape.registerMethod2(
   ['extrudeX', 'ex'],
-  (...extents) =>
-    (shape) =>
-      extrudeAlong(Point(1, 0, 0), ...extents)(shape)
+  ['input', 'intervals', 'modes'],
+  (input, extents, modes) =>
+    extrudeAlong(Point(1, 0, 0), ...extents, ...modes)(input)
 );
 
 const ex = extrudeX;
 
-const extrudeY = Shape.registerMethod(
+const extrudeY = Shape.registerMethod2(
   ['extrudeY', 'ey'],
-  (...extents) =>
-    (shape) =>
-      extrudeAlong(Point(0, 1, 0), ...extents)(shape)
+  ['input', 'intervals', 'modes'],
+  (input, extents, modes) =>
+    extrudeAlong(Point(0, 1, 0), ...extents, ...modes)(input)
 );
 
 const ey = extrudeY;
 
-const extrudeZ = Shape.registerMethod(
+const extrudeZ = Shape.registerMethod2(
   ['extrudeZ', 'ez'],
-  (...extents) =>
-    (shape) =>
-      extrudeAlong(Point(0, 0, 1), ...extents)(shape)
+  ['input', 'intervals', 'modes'],
+  (input, extents, modes) =>
+    extrudeAlong(Point(0, 0, 1), ...extents, ...modes)(input)
 );
 
 const ez = extrudeZ;
 
 // rx is in terms of turns -- 1/2 is a half turn.
-const rx = Shape.registerMethod(
+const rx = Shape.registerMethod2(
   ['rotateX', 'rx'],
-  (...turns) =>
-    async (shape) => {
-      const rotated = [];
-      for (const turn of await shape.toFlatValues(turns)) {
-        rotated.push(await transform(fromRotateXToTransform(turn))(shape));
-      }
-      return Group(...rotated);
+  ['input', 'numbers'],
+  async (input, turns) => {
+    const rotated = [];
+    for (const turn of turns) {
+      rotated.push(await transform(fromRotateXToTransform(turn))(input));
     }
+    return Group(...rotated);
+  }
 );
 
 const rotateX = rx;
 
 // ry is in terms of turns -- 1/2 is a half turn.
-const ry = Shape.registerMethod(
+const ry = Shape.registerMethod2(
   ['rotateY', 'ry'],
-  (...turns) =>
-    async (shape) => {
-      const rotated = [];
-      for (const turn of await shape.toFlatValues(turns)) {
-        rotated.push(await transform(fromRotateYToTransform(turn))(shape));
-      }
-      return Group(...rotated);
+  ['input', 'numbers'],
+  async (input, turns) => {
+    const rotated = [];
+    for (const turn of turns) {
+      console.log(`QQ/ry/turn: ${turn}`);
+      const result = await transform(fromRotateYToTransform(turn))(input);
+      console.log(`QQ/ry/result: ${JSON.stringify(result)}`);
+      rotated.push(result);
     }
+    return Group(...rotated);
+  }
 );
 
 const rotateY = ry;
 
-const Edge = Shape.registerMethod('Edge', (...args) => async (shape) => {
-  const [s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]] = await destructure2(
-    shape,
-    args,
-    'coordinate',
-    'coordinate',
-    'coordinate'
-  );
-  const inverse = fromSegmentToInverseTransform([s, t], n);
-  const baseSegment = [
-    transformCoordinate(s, inverse),
-    transformCoordinate(t, inverse),
-  ];
-  const matrix = invertTransform(inverse);
-  return Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]));
-});
+const Edge = Shape.registerMethod2(
+  'Edge',
+  ['coordinate', 'coordinate', 'coordinate'],
+  (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
+    const inverse = fromSegmentToInverseTransform([s, t], n);
+    const baseSegment = [
+      transformCoordinate(s, inverse),
+      transformCoordinate(t, inverse),
+    ];
+    const matrix = invertTransform(inverse);
+    return Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]));
+  }
+);
 
 const Geometry = Shape.registerMethod(
   'Geometry',
@@ -1581,12 +1686,12 @@ const computeSides = (c1, c2, sides, zag$1 = 0.01) => {
 const zagSides = Shape.registerMethod2(
   'zagSides',
   ['number', 'number'],
-  (diameter = 1, zag$1 = 0.01) => 1 / zag(diameter, zag$1)
+  (diameter = 1, zag$1 = 0.01) => zag(diameter, zag$1)
 );
 const zagSteps = Shape.registerMethod2(
   'zagSteps',
   ['number', 'number'],
-  (diameter = 1, zag$1 = 0.25) => zag(diameter, zag$1)
+  (diameter = 1, zag$1 = 0.25) => 1 / zag(diameter, zag$1)
 );
 
 Shape.registerMethod(
@@ -1876,11 +1981,8 @@ const Box = Shape.registerMethod2(
   }
 );
 
-const Empty = Shape.registerMethod(
-  'Empty',
-  (...shapes) =>
-    async (shape) =>
-      Shape.fromGeometry(taggedGroup({}))
+const Empty = Shape.registerMethod2('Empty', [], () =>
+  Shape.fromGeometry(taggedGroup({}))
 );
 
 const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
@@ -2413,22 +2515,24 @@ const distance$1 = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
   Math.sqrt(square$1(ax - bx) + square$1(ay - by) + square$1(az - bz));
 
 // This is not efficient.
-const diameter = Shape.registerMethod(
+const diameter = Shape.registerMethod2(
   'diameter',
-  (op = (diameter) => (shape) => diameter) =>
-    async (shape) => {
-      const points = await toCoordinates()(shape);
-      let maximumDiameter = 0;
-      for (let a of points) {
-        for (let b of points) {
-          const diameter = distance$1(a, b);
-          if (diameter > maximumDiameter) {
-            maximumDiameter = diameter;
-          }
+  ['input', 'function'],
+  async (input, op = (diameter) => (shape) => diameter) => {
+    const points = await toCoordinates()(input);
+    let maximumDiameter = 0;
+    for (let a of points) {
+      for (let b of points) {
+        const diameter = distance$1(a, b);
+        if (diameter > maximumDiameter) {
+          maximumDiameter = diameter;
         }
       }
-      return op(maximumDiameter)(shape);
     }
+    const result = op(maximumDiameter)(input);
+    console.log(`QQ/diameter/result: ${JSON.stringify(result)}`);
+    return result;
+  }
 );
 
 const dilateXY = Shape.registerMethod(
@@ -2462,44 +2566,47 @@ const ghost = Shape.registerMethod('ghost', () => async (shape) => {
   return result;
 });
 
-// Let's consider removing the parallel operations.
-const on = Shape.registerMethod('on', (...args) => async (shape) => {
-  const entries = [];
-  while (args.length > 0) {
-    const [selection, op, rest] = await destructure2(
-      shape,
-      args,
-      'shape',
-      'function',
-      'rest'
-    );
-    entries.push({ selection, op });
-    args = rest;
-  }
-  const inputLeafs = [];
-  const outputLeafs = [];
-  let shapeGeometry = await shape.toGeometry();
-  for (const { selection, op } of entries) {
-    const leafs = getLeafs(await selection.toGeometry());
-    inputLeafs.push(...leafs);
-    for (const geometry of leafs) {
-      const global = geometry.matrix;
-      const local = invertTransform(global);
-      const target = Shape.fromGeometry(geometry);
-      // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-      // FIXME: op may be async.
-      const a = transform(local);
-      const b = a.op(op);
-      const c = b.transform(global);
-      const r = await c(target);
-      outputLeafs.push(await r.toGeometry());
+const noOp = Shape.registerMethod2('noOp', ['input'], (input) => input);
+
+Shape.registerMethod2(
+  'value',
+  ['value'],
+  (value) => value
+);
+
+const on = Shape.registerMethod2(
+  'on',
+  ['inputGeometry', 'shape', 'function'],
+  async (geometry, selection, op$1 = noOp) => {
+    const entries = [];
+    entries.push({ selection, op: op$1 });
+    const inputLeafs = [];
+    const outputLeafs = [];
+    for (const { selection, op: op$1 } of entries) {
+      const leafs = getLeafs(await selection.toGeometry());
+      inputLeafs.push(...leafs);
+      for (const geometry of leafs) {
+        const global = geometry.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(geometry);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        console.log(`QQ/on/target: ${JSON.stringify(target)}`);
+        console.log(`QQ/on/local: ${JSON.stringify(local)}`);
+        const a = await transform(local)(target);
+        console.log(`QQ/on/a: ${JSON.stringify(a)}`);
+        const b = await op(op$1)(a);
+        console.log(`QQ/on/b: ${JSON.stringify(b)}`);
+        const r = await transform(global)(b);
+        console.log(`QQ/on/r: ${JSON.stringify(r)}`);
+        outputLeafs.push(await r.toGeometry());
+      }
     }
+    const result = Shape.fromGeometry(
+      replacer(inputLeafs, outputLeafs)(geometry)
+    );
+    return result;
   }
-  const result = Shape.fromGeometry(
-    replacer(inputLeafs, outputLeafs)(shapeGeometry)
-  );
-  return result;
-});
+);
 
 const drop = Shape.registerMethod(
   'drop',
@@ -4276,27 +4383,25 @@ const ensurePages = async (shape, depth = 0) => {
   }
 };
 
-const each = Shape.registerMethod('each', (...args) => async (shape) => {
-  const [leafOp = (l) => l, groupOp = Group] = await destructure2(
-    shape,
-    args,
-    'function',
-    'function'
-  );
-  const leafShapes = [];
-  const leafGeometries = getLeafs(await shape.toGeometry());
-  for (const leafGeometry of leafGeometries) {
-    leafShapes.push(
-      await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry)))
-    );
+const each = Shape.registerMethod2(
+  'each',
+  ['input', 'function', 'function'],
+  async (input, leafOp = (l) => l, groupOp = Group) => {
+    const leafShapes = [];
+    const leafGeometries = getLeafs(await input.toGeometry());
+    for (const leafGeometry of leafGeometries) {
+      leafShapes.push(
+        await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry)))
+      );
+    }
+    const grouped = await groupOp(...leafShapes);
+    if (Shape.isFunction(grouped)) {
+      return grouped(input);
+    } else {
+      return grouped;
+    }
   }
-  const grouped = await groupOp(...leafShapes);
-  if (Shape.isFunction(grouped)) {
-    return grouped(shape);
-  } else {
-    return grouped;
-  }
-});
+);
 
 // TODO: Add an option to include a virtual segment at the target of the last
 // edge.
@@ -4311,113 +4416,59 @@ const length = ([ax, ay, az], [bx, by, bz]) => {
 const SOURCE = 0;
 const TARGET = 1;
 
-const eachEdge = Shape.registerMethod(
+const eachEdge = Shape.registerMethod2(
   'eachEdge',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions, object: options = {} } = destructure(args);
-      const { selections = [] } = options;
-      let [
-        edgeOp = (e, l, o) => (s) => e,
-        faceOp = (es, f) => (s) => es,
-        groupOp = Group,
-      ] = shapesAndFunctions;
-      const faces = [];
-      const faceEdges = [];
-      eachFaceEdges(
-        await shape.toShapeGeometry(shape),
-        await shape.toShapesGeometries(selections),
-        (faceGeometry, edgeGeometry) => {
-          faceEdges.push({ faceGeometry, edgeGeometry });
+  ['input', 'function', 'function', 'function', 'options'],
+  async (
+    input,
+    edgeOp = (e, l, o) => (s) => e,
+    faceOp = (es, f) => (s) => es,
+    groupOp = Group,
+    { selections = [] } = {}
+  ) => {
+    const faces = [];
+    const faceEdges = [];
+    eachFaceEdges(
+      await input.toShapeGeometry(input),
+      await input.toShapesGeometries(selections),
+      (faceGeometry, edgeGeometry) => {
+        faceEdges.push({ faceGeometry, edgeGeometry });
+      }
+    );
+    for (const { faceGeometry, edgeGeometry } of faceEdges) {
+      const { matrix, segments, normals } = edgeGeometry;
+      const edges = [];
+      if (segments) {
+        for (let nth = 0; nth < segments.length; nth++) {
+          const segment = segments[nth];
+          const [forward, backward] = disorientSegment(
+            segment,
+            matrix,
+            normals ? normals[nth] : undefined
+          );
+          edges.push(
+            await edgeOp(
+              Shape.chain(Shape.fromGeometry(forward)),
+              length(segment[SOURCE], segment[TARGET]),
+              Shape.chain(Shape.fromGeometry(backward))
+            )(input)
+          );
         }
+      }
+      faces.push(
+        await faceOp(
+          await Group(...edges),
+          Shape.chain(Shape.fromGeometry(faceGeometry))
+        )
       );
-      for (const { faceGeometry, edgeGeometry } of faceEdges) {
-        const { matrix, segments, normals } = edgeGeometry;
-        const edges = [];
-        if (segments) {
-          for (let nth = 0; nth < segments.length; nth++) {
-            const segment = segments[nth];
-            /*
-            const absoluteSegment = [
-              transformCoordinate(segment[SOURCE], matrix),
-              transformCoordinate(segment[TARGET], matrix),
-            ];
-            const absoluteOppositeSegment = [
-              transformCoordinate(segment[TARGET], matrix),
-              transformCoordinate(segment[SOURCE], matrix),
-            ];
-            const absoluteNormal = normals
-              ? subtract(
-                  transformCoordinate(normals[nth], matrix),
-                  absoluteSegment[SOURCE]
-                )
-              : [0, 0, 1];
-            const inverse = fromSegmentToInverseTransform(
-              absoluteSegment,
-              absoluteNormal
-            );
-            const oppositeInverse = fromSegmentToInverseTransform(
-              absoluteOppositeSegment,
-              absoluteNormal
-            );
-            const baseSegment = [
-              transformCoordinate(absoluteSegment[SOURCE], inverse),
-              transformCoordinate(absoluteSegment[TARGET], inverse),
-            ];
-            const oppositeSegment = [
-              transformCoordinate(absoluteSegment[TARGET], oppositeInverse),
-              transformCoordinate(absoluteSegment[SOURCE], oppositeInverse),
-            ];
-            const inverseMatrix = invertTransform(inverse);
-            const oppositeInverseMatrix = invertTransform(oppositeInverse);
-            // We get a pair of absolute coordinates from eachSegment.
-            // We need a segment from [0,0,0] to [x,0,0] in its local space.
-            edges.push(
-              await edgeOp(
-                Shape.chain(
-                  Shape.fromGeometry(
-                    taggedSegments({ matrix: inverseMatrix }, [baseSegment])
-                  )
-                ),
-                length(segment[SOURCE], segment[TARGET]),
-                Shape.chain(
-                  Shape.fromGeometry(
-                    taggedSegments({ matrix: oppositeInverseMatrix }, [
-                      oppositeSegment,
-                    ])
-                  )
-                )
-              )(shape)
-            );
-            */
-            const [forward, backward] = disorientSegment(
-              segment,
-              matrix,
-              normals ? normals[nth] : undefined
-            );
-            edges.push(
-              await edgeOp(
-                Shape.chain(Shape.fromGeometry(forward)),
-                length(segment[SOURCE], segment[TARGET]),
-                Shape.chain(Shape.fromGeometry(backward))
-              )(shape)
-            );
-          }
-        }
-        faces.push(
-          await faceOp(
-            await Group(...edges),
-            Shape.chain(Shape.fromGeometry(faceGeometry))
-          )
-        );
-      }
-      const grouped = groupOp(...faces);
-      if (Shape.isFunction(grouped)) {
-        return grouped(shape);
-      } else {
-        return grouped;
-      }
     }
+    const grouped = groupOp(...faces);
+    if (Shape.isFunction(grouped)) {
+      return grouped(input);
+    } else {
+      return grouped;
+    }
+  }
 );
 
 // TODO: Fix toCoordinates.
@@ -4542,19 +4593,15 @@ const edges = Shape.registerMethod(
     }
 );
 
-const faces = Shape.registerMethod(
+const faces = Shape.registerMethod2(
   'faces',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions } = destructure(args);
-      let [faceOp = (face) => (shape) => face, groupOp = Group] =
-        shapesAndFunctions;
-      return eachEdge(
-        (e, l, o) => (s) => e,
-        (e, f) => (s) => faceOp(f),
-        groupOp
-      )(shape);
-    }
+  ['input', 'function', 'function'],
+  (input, faceOp = (face) => (shape) => face, groupOp = Group) =>
+    eachEdge(
+      (e, l, o) => (s) => e,
+      (e, f) => (s) => faceOp(f),
+      groupOp
+    )(input)
 );
 
 const fill = Shape.registerMethod(
@@ -5070,21 +5117,20 @@ const loadGeometry = async (
   }
 };
 
-const Loft = Shape.registerMethod('Loft', (...args) => async (shape) => {
-  const [modes, shapes] = await destructure2(shape, args, 'modes', 'shapes');
-  return Shape.fromGeometry(
-    loft$1(
-      await toShapesGeometries(shapes)(shape),
-      !modes.includes('open')
-    )
-  );
-});
+const Loft = Shape.registerMethod2(
+  'Loft',
+  ['geometries', 'modes'],
+  (geometries, modes) =>
+    Shape.fromGeometry(loft$1(geometries, !modes.includes('open')))
+);
 
-const loft = Shape.registerMethod(
+const loft = Shape.registerMethod2(
   'loft',
-  (...args) =>
-    async (shape) =>
-      Loft(shape, ...args)(shape)
+  ['inputGeometry', 'geometries', 'modes'],
+  (geometry, geometries, modes) =>
+    Shape.fromGeometry(
+      loft$1([geometry, ...geometries], !modes.includes('open'))
+    )
 );
 
 /**
@@ -5174,32 +5220,23 @@ const scale$2 = (amount, [x = 0, y = 0, z = 0]) => [
   z * amount,
 ];
 
-const moveAlong = Shape.registerMethod(
+const moveAlong = Shape.registerMethod2(
   'moveAlong',
-  (...args) =>
-    async (shape) => {
-      const [direction, deltas] = await destructure2(
-        shape,
-        args,
-        'coordinate',
-        'numbers'
-      );
-      const moves = [];
-      for (const delta of deltas) {
-        moves.push(await shape.move(scale$2(delta, direction)));
-      }
-      return Group(...moves);
+  ['input', 'coordinate', 'numbers'],
+  async (input, direction, deltas) => {
+    const moves = [];
+    for (const delta of deltas) {
+      moves.push(await input.move(scale$2(delta, direction)));
     }
+    return Group(...moves);
+  }
 );
 
-const m = Shape.registerMethod(
+const m = Shape.registerMethod2(
   'm',
-  (...offsets) =>
-    (shape) =>
-      shape.moveAlong(normal(), ...offsets)
+  ['input', 'numbers'],
+  (input, offsets) => input.moveAlong(normal(), ...offsets)
 );
-
-const noOp = Shape.registerMethod('noOp', () => (shape) => shape);
 
 const noVoid = Shape.registerMethod(
   ['noVoid', 'noGap'],
@@ -5208,32 +5245,31 @@ const noVoid = Shape.registerMethod(
 
 const noGap = noVoid;
 
-const eachOp = Shape.ops.get('each');
-
-const nth = Shape.registerMethod(
+const nth = Shape.registerMethod2(
   ['nth', 'n'],
-  (...ns) =>
-    async (shape) => {
-      const candidates = await eachOp(
-        (leaf) => leaf,
-        (...leafs) =>
-          (shape) =>
-            leafs
-      )(shape);
-      const group = [];
-      for (let nth of ns) {
-        if (nth < 0) {
-          nth = candidates.length - nth;
-        }
-        const candidate = candidates[nth];
-        if (candidate === undefined) {
-          group.push(Empty());
-        } else {
-          group.push(candidate);
-        }
+  ['input', 'numbers'],
+  async (input, nths) => {
+    const candidates = await each(
+      (leaf) => leaf,
+      (...leafs) =>
+        (shape) =>
+          leafs
+    )(input);
+    const group = [];
+    for (let nth of nths) {
+      if (nth < 0) {
+        nth = candidates.length + nth;
       }
-      return Group(...group);
+      let candidate = candidates[nth];
+      if (candidate === undefined) {
+        console.log(`QQ/nth/empty`);
+        candidate = await Empty();
+      }
+      console.log(`QQ/nth/candidate: ${candidate}`);
+      group.push(candidate);
     }
+    return Group(...group);
+  }
 );
 
 const n = nth;
@@ -5482,16 +5518,17 @@ const remesh = Shape.registerMethod(
 );
 
 // rz is in terms of turns -- 1/2 is a half turn.
-const rz = Shape.registerMethod(
+const rz = Shape.registerMethod2(
   ['rotateZ', 'rz'],
-  (...turns) =>
-    async (shape) => {
-      const rotated = [];
-      for (const turn of await shape.toFlatValues(turns)) {
-        rotated.push(await transform(fromRotateZToTransform(turn))(shape));
-      }
-      return Group(...rotated);
+  ['input', 'numbers'],
+  async (input, turns) => {
+    const rotated = [];
+    for (const turn of turns) {
+      console.log(`QQQ/rz: turn=${turn}`);
+      rotated.push(await transform(fromRotateZToTransform(turn))(input));
     }
+    return Group(...rotated);
+  }
 );
 
 const rotateZ = rz;
@@ -5645,15 +5682,12 @@ const scaleToFit = Shape.registerMethod2(
     )(input)
 );
 
-const seam = Shape.registerMethod('seam', (...args) => async (shape) => {
-  const { shapesAndFunctions: selections } = destructure(args);
-  return Shape.fromGeometry(
-    seam$1(
-      await shape.toGeometry(),
-      await shape.toShapesGeometries(selections)
-    )
-  );
-});
+const seam = Shape.registerMethod2(
+  'seam',
+  ['inputGeometry', 'geometries'],
+  (geometry, selections) =>
+    Shape.fromGeometry(seam$1(geometry, selections))
+);
 
 const baseSection =
   ({ profile = false } = {}, orientations) =>
@@ -5667,18 +5701,16 @@ const baseSection =
     );
   };
 
-const section = Shape.registerMethod(
+const section = Shape.registerMethod2(
   'section',
-  (...orientations) =>
-    (shape) =>
-      baseSection({ profile: false }, orientations)(shape)
+  ['input', 'shapes'],
+  (input, orientations) => baseSection({ profile: false }, orientations)(input)
 );
 
-const sectionProfile = Shape.registerMethod(
+const sectionProfile = Shape.registerMethod2(
   'sectionProfile',
-  (...orientations) =>
-    (shape) =>
-      baseSection({ profile: true }, orientations)(shape)
+  ['input', 'shapes'],
+  (input, orientations) => baseSection({ profile: true }, orientations)(input)
 );
 
 const separate = Shape.registerMethod(
@@ -5713,13 +5745,8 @@ const seq = Shape.registerMethod2(
   async (input, specs, op = (n) => (s) => s, groupOp = Group) => {
     const indexes = [];
     for (const spec of specs) {
-      let { from = 0, to = 1, upto, downto, by = 1 } = spec;
-
-      from = await toValue(from)(input);
-      to = await toValue(to)(input);
-      upto = await toValue(upto)(input);
-      downto = await toValue(downto)(input);
-      by = await toValue(by)(input);
+      const { from = 0, to = 1, upto, downto, by = 1 } = spec;
+      console.log(`QQQQQ/seq/spec: ${JSON.stringify(spec)}`);
 
       let consider;
 
@@ -5751,7 +5778,10 @@ const seq = Shape.registerMethod2(
       if (args.some((value) => value === undefined)) {
         break;
       }
+      console.log(`QQQ/seq/args: ${JSON.stringify(args)}`);
+      console.log(`QQQ/seq/op: ${'' + op}`);
       const result = await op(...args)(input);
+      console.log(`QQQ/seq/result: ${JSON.stringify(result)}`);
       results.push(maybeApply(result, input));
       let nth;
       for (nth = 0; nth < index.length; nth++) {
@@ -5763,6 +5793,10 @@ const seq = Shape.registerMethod2(
       if (nth === index.length) {
         break;
       }
+    }
+    console.log(`QQQQQ/seq/results: ${JSON.stringify(results)}`);
+    for (const result of results) {
+      console.log(`QQQQQ/seq/result: ${JSON.stringify(result)}`);
     }
     return groupOp(...results);
   }
@@ -5781,29 +5815,23 @@ const serialize = Shape.registerMethod(
       groupOp(op(serialize$1(shape.toGeometry())), shape)
 );
 
-const setTag = Shape.registerMethod(
+const setTag = Shape.registerMethod2(
   'setTag',
-  (tag, value) => (shape) => untag(`${tag}=*`).tag(`${tag}=${value}`)(shape)
+  ['input', 'string', 'value'],
+  (input, tag, value) => untag(`${tag}=*`).tag(`${tag}=${value}`)(input)
 );
 
-const setTags = Shape.registerMethod(
+const setTags = Shape.registerMethod2(
   'setTags',
-  (tags = []) =>
-    async (shape) =>
-      Shape.fromGeometry(rewriteTags(tags, [], await shape.toGeometry()))
+  ['inputGeometry', 'strings'],
+  (geometry, tags = []) => Shape.fromGeometry(rewriteTags(tags, [], geometry))
 );
 
-const shadow = Shape.registerMethod(
+const shadow = Shape.registerMethod2(
   'shadow',
-  (planeReference = XY(0), sourceReference = XY(1)) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        cast(
-          await toShapeGeometry(planeReference)(shape),
-          await toShapeGeometry(sourceReference)(shape),
-          await shape.toGeometry()
-        )
-      )
+  ['inputGeometry', 'geometry', 'geometry'],
+  (geometry, planeReference = XY(0), sourceReference = XY(1)) =>
+    Shape.fromGeometry(cast(planeReference, sourceReference, geometry))
 );
 
 const shell = Shape.registerMethod2(
@@ -5846,33 +5874,31 @@ const sketch = Shape.registerMethod(
     Shape.fromGeometry(taggedSketch({}, await shape.toGeometry()))
 );
 
-const smooth = Shape.registerMethod(
+const smooth = Shape.registerMethod2(
   'smooth',
-  (...args) =>
-    async (shape) => {
-      const {
-        number: resolution = 1,
-        object: options = {},
-        shapesAndFunctions: selections,
-      } = destructure(args);
-      const {
-        iterations = 1,
-        time = 1,
-        remeshIterations = 1,
-        remeshRelaxationSteps = 1,
-      } = options;
-      return Shape.fromGeometry(
-        smooth$1(
-          await shape.toGeometry(),
-          await shape.toShapesGeometries(selections),
-          resolution,
-          iterations,
-          time,
-          remeshIterations,
-          remeshRelaxationSteps
-        )
-      );
-    }
+  ['inputGeometry', 'number', 'options', 'geometries'],
+  (
+    geometry,
+    resolution = 1,
+    {
+      iterations = 1,
+      time = 1,
+      remeshIterations = 1,
+      remeshRelaxationSteps = 1,
+    } = {},
+    selections
+  ) =>
+    Shape.fromGeometry(
+      smooth$1(
+        geometry,
+        selections,
+        resolution,
+        iterations,
+        time,
+        remeshIterations,
+        remeshRelaxationSteps
+      )
+    )
 );
 
 const X$3 = 0;
@@ -6612,29 +6638,41 @@ const wrap = Shape.registerMethod2(
   (input, rest) => Wrap(input, ...rest)(input)
 );
 
-const x = Shape.registerMethod('x', (...x) => async (shape) => {
-  const moved = [];
-  for (const offset of await shape.toFlatValues(x)) {
-    moved.push(await move([offset, 0, 0])(shape));
+const x = Shape.registerMethod2(
+  'x',
+  ['input', 'numbers'],
+  async (input, offsets) => {
+    const moved = [];
+    for (const offset of offsets) {
+      moved.push(await move([offset, 0, 0])(input));
+    }
+    return Group(...moved);
   }
-  return Group(...moved);
-});
+);
 
-const y = Shape.registerMethod('y', (...y) => async (shape) => {
-  const moved = [];
-  for (const offset of await shape.toFlatValues(y)) {
-    moved.push(await move([0, offset, 0])(shape));
+const y = Shape.registerMethod2(
+  'y',
+  ['input', 'numbers'],
+  async (input, offsets) => {
+    const moved = [];
+    for (const offset of offsets) {
+      moved.push(await move([0, offset, 0])(input));
+    }
+    return Group(...moved);
   }
-  return Group(...moved);
-});
+);
 
-const z = Shape.registerMethod('z', (...z) => async (shape) => {
-  const moved = [];
-  for (const offset of await shape.toFlatValues(z)) {
-    moved.push(await move([0, 0, offset])(shape));
+const z = Shape.registerMethod2(
+  'z',
+  ['input', 'numbers'],
+  async (input, offsets) => {
+    const moved = [];
+    for (const offset of offsets) {
+      moved.push(await move([0, 0, offset])(input));
+    }
+    return Group(...moved);
   }
-  return Group(...moved);
-});
+);
 
 const Assembly = Shape.registerMethod2(
   'Assembly',
@@ -6774,45 +6812,43 @@ const Implicit = Shape.registerMethod(
     }
 );
 
-const Line = Shape.registerMethod(
+const Line = Shape.registerMethod2(
   ['Line', 'LineX'],
-  (...args) =>
-    async (shape) => {
-      const [intervals] = await destructure2(shape, args, 'intervals');
-      const edges = [];
-      for (const [begin, end] of intervals) {
-        edges.push(Edge(Point(begin), Point(end)));
-      }
-      return Group(...edges);
+  ['intervals'],
+  (intervals) => {
+    const edges = [];
+    console.log(`QQ/Line/intervals: ${JSON.stringify(intervals)}`);
+    for (const [begin, end] of intervals) {
+      edges.push(Edge(Point(begin), Point(end)));
     }
+    return Group(...edges);
+  }
 );
 
 const LineX = Line;
 
 const LineY = Shape.registerMethod(
   'LineY',
-  (...args) =>
-    async (shape) => {
-      const [intervals] = await destructure2(shape, args, 'intervals');
-      const edges = [];
-      for (const [begin, end] of intervals) {
-        edges.push(Edge(Point(0, begin), Point(0, end)));
-      }
-      return Group(...edges);
+  ['intervals'],
+  (intervals) => {
+    const edges = [];
+    for (const [begin, end] of intervals) {
+      edges.push(Edge(Point(0, begin), Point(0, end)));
     }
+    return Group(...edges);
+  }
 );
 
 const LineZ = Shape.registerMethod(
   'LineZ',
-  (...args) =>
-    async (shape) => {
-      const [intervals] = await destructure2(shape, args, 'intervals');
-      const edges = [];
-      for (const [begin, end] of intervals) {
-        edges.push(Edge(Point(0, 0, begin), Point(0, 0, end)));
-      }
-      return Group(...edges);
+  ['intervals'],
+  (intervals) => {
+    const edges = [];
+    for (const [begin, end] of intervals) {
+      edges.push(Edge(Point(0, 0, begin), Point(0, 0, end)));
     }
+    return Group(...edges);
+  }
 );
 
 const readPngAsRasta = async (path) => {
@@ -6933,8 +6969,8 @@ const Polyhedron = Shape.registerMethod(
 
 const Segments = Shape.registerMethod2(
   'Segments',
-  ['coordinateLists'],
-  (coordinateLists) => Shape.fromSegments(coordinateLists)
+  ['segments'],
+  (segments) => Shape.fromSegments(segments)
 );
 
 const SurfaceMesh = (
@@ -6950,9 +6986,10 @@ const SurfaceMesh = (
   return Shape.fromGeometry(geometry);
 };
 
-const Triangle = Shape.registerMethod(
+const Triangle = Shape.registerMethod2(
   'Triangle',
-  (x, y, z) => async (shape) => Arc(x, y, z, { sides: 3 })(shape)
+  ['input', 'interval', 'interval', 'interval'],
+  (input, x, y, z) => Arc(x, y, z, { sides: 3 })(input)
 );
 
 const Wave = Shape.registerMethod2(

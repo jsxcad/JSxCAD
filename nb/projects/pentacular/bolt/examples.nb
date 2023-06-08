@@ -7,6 +7,7 @@ import {
 
 await ScrewThreadSegment(20).material('steel').view().md(`ScrewThreadSegment(20)`);
 
+/*
 await ScrewThread(20, 10).material('steel').view().md(`ScrewThread(20, 10)`);
 
 await NutThreadSegment(20).material('steel').view().md(`NutThreadSegment(20)`);
@@ -19,6 +20,7 @@ await NutThreadSegment(20, { play: 0.1 })
   .clip(Box([0, 10], [0, 10], [0, 10]))
   .view()
   .md(`NutThread(20, 10).and(ScrewThread(20, 10))`);
+*/
 
 /*
 ScrewThreadSegment(20, { turn: 'right' })

@@ -209,14 +209,6 @@ const extrudeTile = () => async (shape) => {
 }
 ```
 
-![Image](road.md.$2_3yd_tiles.png)
-
-[3yd tiles.stl](road.3yd%20tiles.stl)
-
-![Image](road.md.$2_3yd_tiles.png)
-
-[3yd tiles_2.stl](road.3yd%20tiles_2.stl)
-
 ```JavaScript
 await Group(roadTile, curvedRoadTile)
   .op(extrudeTile())
@@ -226,54 +218,6 @@ await Group(roadTile, curvedRoadTile)
 ![Image](road.md.$3_2d_road_tile.png)
 
 [2d road tile.pdf](road.2d%20road%20tile.pdf)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile.stl](road.3d%20road%20tile.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_2.stl](road.3d%20road%20tile_2.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_3.stl](road.3d%20road%20tile_3.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_4.stl](road.3d%20road%20tile_4.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_5.stl](road.3d%20road%20tile_5.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_6.stl](road.3d%20road%20tile_6.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_7.stl](road.3d%20road%20tile_7.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_8.stl](road.3d%20road%20tile_8.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_9.stl](road.3d%20road%20tile_9.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_10.stl](road.3d%20road%20tile_10.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_11.stl](road.3d%20road%20tile_11.stl)
-
-![Image](road.md.$3_3d_road_tile.png)
-
-[3d road tile_12.stl](road.3d%20road%20tile_12.stl)
 
 ```JavaScript
 await Group(

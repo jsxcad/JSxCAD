@@ -1,9 +1,10 @@
 import Shape from './Shape.js';
 import { untag } from './untag.js';
 
-export const setTag = Shape.registerMethod(
+export const setTag = Shape.registerMethod2(
   'setTag',
-  (tag, value) => (shape) => untag(`${tag}=*`).tag(`${tag}=${value}`)(shape)
+  ['input', 'string', 'value'],
+  (input, tag, value) => untag(`${tag}=*`).tag(`${tag}=${value}`)(input)
 );
 
 export default setTag;

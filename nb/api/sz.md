@@ -8,8 +8,6 @@ Negative dimensions are supported.
 
 See: [scale](../../nb/api/scale.nb), [sx](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sx.nb), [sy](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/sy.md).
 
-![Image](sz.md.$2.png)
-
 ```JavaScript
 Box(2, 3, [0, 5]).op(ghost(), sz(-0.5)).view();
 ```

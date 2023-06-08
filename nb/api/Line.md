@@ -43,12 +43,12 @@ Line([5])
 
 ![Image](Line.md.$5.png)
 
-Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.
+Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => ([v]), List)) produces a dashed line.
 
 ```JavaScript
 Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => ([v]), List))
   .view()
   .note(
-    'Line(seq({ from: -1, upto: 1, by: 1 / 8 }, noOp(), List)) produces a dashed line.'
+    'Line(seq({ from: -1, upto: 1, by: 1 / 8 }, (v) => (s) => ([v]), List)) produces a dashed line.'
   );
 ```

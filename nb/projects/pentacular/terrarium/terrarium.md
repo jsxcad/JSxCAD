@@ -227,18 +227,6 @@ Fit the profiles together to form a box with the hole on the top.
 
 These profiles assemble to form the lid
 
-![Image](terrarium.md.$7_lid_base.png)
-
-[lid_base.pdf](terrarium.lid_base.pdf)
-
-![Image](terrarium.md.$7_lid_top.png)
-
-[lid_top.pdf](terrarium.lid_top.pdf)
-
-![Image](terrarium.md.$7_lid_pin.png)
-
-[lid_pin.pdf](terrarium.lid_pin.pdf)
-
 Stack the larger disc on the smaller and then push the rectangular pin through to connect them.
 
 ```JavaScript

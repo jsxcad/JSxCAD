@@ -1,35 +1,33 @@
-import './each.js';
-
 import Empty from './Empty.js';
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { each } from './each.js';
 
-const eachOp = Shape.ops.get('each');
-
-export const nth = Shape.registerMethod(
+export const nth = Shape.registerMethod2(
   ['nth', 'n'],
-  (...ns) =>
-    async (shape) => {
-      const candidates = await eachOp(
-        (leaf) => leaf,
-        (...leafs) =>
-          (shape) =>
-            leafs
-      )(shape);
-      const group = [];
-      for (let nth of ns) {
-        if (nth < 0) {
-          nth = candidates.length - nth;
-        }
-        const candidate = candidates[nth];
-        if (candidate === undefined) {
-          group.push(Empty());
-        } else {
-          group.push(candidate);
-        }
+  ['input', 'numbers'],
+  async (input, nths) => {
+    const candidates = await each(
+      (leaf) => leaf,
+      (...leafs) =>
+        (shape) =>
+          leafs
+    )(input);
+    const group = [];
+    for (let nth of nths) {
+      if (nth < 0) {
+        nth = candidates.length + nth;
       }
-      return Group(...group);
+      let candidate = candidates[nth];
+      if (candidate === undefined) {
+        console.log(`QQ/nth/empty`);
+        candidate = await Empty();
+      }
+      console.log(`QQ/nth/candidate: ${candidate}`);
+      group.push(candidate);
     }
+    return Group(...group);
+  }
 );
 
 export const n = nth;

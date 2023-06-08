@@ -34,8 +34,6 @@ Box(5, 5, 5)
   .note('The ghost is grown by 5 mm in only x and z directions.');
 ```
 
-![Image](grow.md.$4.png)
-
 Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.
 
 ```JavaScript

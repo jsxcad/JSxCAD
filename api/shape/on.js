@@ -1,45 +1,41 @@
 import { getLeafs, replacer } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
-import { destructure2 } from './destructure.js';
 import { invertTransform } from '@jsxcad/algorithm-cgal';
-import { transform } from './transform.js';
+import { noOp } from './noOp.js';
+import { op as opOp } from './op.js';
+import { transform as transformOp } from './transform.js';
 
-// Let's consider removing the parallel operations.
-export const on = Shape.registerMethod('on', (...args) => async (shape) => {
-  const entries = [];
-  while (args.length > 0) {
-    const [selection, op, rest] = await destructure2(
-      shape,
-      args,
-      'shape',
-      'function',
-      'rest'
-    );
+export const on = Shape.registerMethod2(
+  'on',
+  ['inputGeometry', 'shape', 'function'],
+  async (geometry, selection, op = noOp) => {
+    const entries = [];
     entries.push({ selection, op });
-    args = rest;
-  }
-  const inputLeafs = [];
-  const outputLeafs = [];
-  let shapeGeometry = await shape.toGeometry();
-  for (const { selection, op } of entries) {
-    const leafs = getLeafs(await selection.toGeometry());
-    inputLeafs.push(...leafs);
-    for (const geometry of leafs) {
-      const global = geometry.matrix;
-      const local = invertTransform(global);
-      const target = Shape.fromGeometry(geometry);
-      // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-      // FIXME: op may be async.
-      const a = transform(local);
-      const b = a.op(op);
-      const c = b.transform(global);
-      const r = await c(target);
-      outputLeafs.push(await r.toGeometry());
+    const inputLeafs = [];
+    const outputLeafs = [];
+    for (const { selection, op } of entries) {
+      const leafs = getLeafs(await selection.toGeometry());
+      inputLeafs.push(...leafs);
+      for (const geometry of leafs) {
+        const global = geometry.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(geometry);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        console.log(`QQ/on/target: ${JSON.stringify(target)}`);
+        console.log(`QQ/on/local: ${JSON.stringify(local)}`);
+        const a = await transformOp(local)(target);
+        console.log(`QQ/on/a: ${JSON.stringify(a)}`);
+        const b = await opOp(op)(a);
+        console.log(`QQ/on/b: ${JSON.stringify(b)}`);
+        const r = await transformOp(global)(b);
+        console.log(`QQ/on/r: ${JSON.stringify(r)}`);
+        outputLeafs.push(await r.toGeometry());
+      }
     }
+    const result = Shape.fromGeometry(
+      replacer(inputLeafs, outputLeafs)(geometry)
+    );
+    return result;
   }
-  const result = Shape.fromGeometry(
-    replacer(inputLeafs, outputLeafs)(shapeGeometry)
-  );
-  return result;
-});
+);

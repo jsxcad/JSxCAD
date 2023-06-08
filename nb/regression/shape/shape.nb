@@ -119,7 +119,7 @@ await Arc(10).color('blue').tint('red').view();
 
 await Segments(
   seq(
-    (y) => (s) => [Point(-10, y, 0), Point(10, y, 0)],
+    (y) => (s) => [[-10, y, 0], [10, y, 0]],
     {
       from: -6,
       to: 6,

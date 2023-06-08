@@ -1,9 +1,8 @@
 import Shape from './Shape.js';
 import { rewriteTags } from '@jsxcad/geometry';
 
-export const setTags = Shape.registerMethod(
+export const setTags = Shape.registerMethod2(
   'setTags',
-  (tags = []) =>
-    async (shape) =>
-      Shape.fromGeometry(rewriteTags(tags, [], await shape.toGeometry()))
+  ['inputGeometry', 'strings'],
+  (geometry, tags = []) => Shape.fromGeometry(rewriteTags(tags, [], geometry))
 );

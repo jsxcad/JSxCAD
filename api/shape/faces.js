@@ -1,21 +1,16 @@
 import { Group } from './Group.js';
 import { Shape } from './Shape.js';
-import { destructure } from './destructure.js';
 import { eachEdge } from './eachEdge.js';
 
-export const faces = Shape.registerMethod(
+export const faces = Shape.registerMethod2(
   'faces',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions } = destructure(args);
-      let [faceOp = (face) => (shape) => face, groupOp = Group] =
-        shapesAndFunctions;
-      return eachEdge(
-        (e, l, o) => (s) => e,
-        (e, f) => (s) => faceOp(f),
-        groupOp
-      )(shape);
-    }
+  ['input', 'function', 'function'],
+  (input, faceOp = (face) => (shape) => face, groupOp = Group) =>
+    eachEdge(
+      (e, l, o) => (s) => e,
+      (e, f) => (s) => faceOp(f),
+      groupOp
+    )(input)
 );
 
 export default faces;
