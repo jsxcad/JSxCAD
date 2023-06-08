@@ -9,8 +9,6 @@ export const extrudeAlong = Shape.registerMethod2(
   'extrudeAlong',
   ['input', 'coordinate', 'modes', 'intervals'],
   async (input, vector, modes, intervals) => {
-    console.log(`QQQ/extrudeAlong/vector: ${JSON.stringify(vector)}`);
-    console.log(`QQQ/extrudeAlong/intervals: ${JSON.stringify(intervals)}`);
     const extrusions = [];
     for (const [depth, height] of intervals) {
       if (height === depth) {
@@ -29,7 +27,6 @@ export const extrudeAlong = Shape.registerMethod2(
         )
       );
     }
-    console.log(`QQQ/extrudeAlong/extrusions: ${extrusions}`);
     return Group(...extrusions)();
   }
 );

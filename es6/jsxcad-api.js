@@ -63,7 +63,6 @@ const emitError = (exception) => {
 };
 
 const $run = async (op, { path, id, text, sha, line }) => {
-  console.log(`QQQQ/$run: ${text}`);
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);

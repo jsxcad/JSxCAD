@@ -316,12 +316,9 @@ export const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
     async (shape) => {
-      console.log(`Method ${names} [call] ${JSON.stringify(args)}`);
       try {
         const parameters = await Shape.destructure2a(shape, args, ...signature);
-        const result = op(...parameters);
-        console.log(`Method ${names} [done]`);
-        return result;
+        return op(...parameters);
       } catch (error) {
         console.log(
           `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`

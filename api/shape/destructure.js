@@ -430,14 +430,12 @@ export const destructure2 = async (shape, input, ...specs) => {
     let diagnostic;
     try {
       // Try to format it nicely.
-      diagnostic = `QQQ/Error: ${
-        args.length
-      } unused arguments: ${JSON.stringify(args)} arguments: ${JSON.stringify(
-        input
-      )} specs: ${JSON.stringify(specs)}`;
+      diagnostic = `Error: ${args.length} unused arguments: ${JSON.stringify(
+        args
+      )} arguments: ${JSON.stringify(input)} specs: ${JSON.stringify(specs)}`;
     } catch (error) {
       // Otherwise fall back.
-      diagnostic = `QQQ/Error: ${args.length} unused arguments: ${args.join(
+      diagnostic = `Error: ${args.length} unused arguments: ${args.join(
         ', '
       )} specs: ${specs.join(',')}`;
     }

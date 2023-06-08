@@ -19,7 +19,6 @@ export const seq = Shape.registerMethod2(
     const indexes = [];
     for (const spec of specs) {
       const { from = 0, to = 1, upto, downto, by = 1 } = spec;
-      console.log(`QQQQQ/seq/spec: ${JSON.stringify(spec)}`);
 
       let consider;
 
@@ -51,10 +50,7 @@ export const seq = Shape.registerMethod2(
       if (args.some((value) => value === undefined)) {
         break;
       }
-      console.log(`QQQ/seq/args: ${JSON.stringify(args)}`);
-      console.log(`QQQ/seq/op: ${'' + op}`);
       const result = await op(...args)(input);
-      console.log(`QQQ/seq/result: ${JSON.stringify(result)}`);
       results.push(maybeApply(result, input));
       let nth;
       for (nth = 0; nth < index.length; nth++) {
@@ -67,10 +63,7 @@ export const seq = Shape.registerMethod2(
         break;
       }
     }
-    console.log(`QQQQQ/seq/results: ${JSON.stringify(results)}`);
-    for (const result of results) {
-      console.log(`QQQQQ/seq/result: ${JSON.stringify(result)}`);
-    }
+
     return groupOp(...results);
   }
 );

@@ -10,10 +10,7 @@ export const ry = Shape.registerMethod2(
   async (input, turns) => {
     const rotated = [];
     for (const turn of turns) {
-      console.log(`QQ/ry/turn: ${turn}`);
-      const result = await transform(fromRotateYToTransform(turn))(input);
-      console.log(`QQ/ry/result: ${JSON.stringify(result)}`);
-      rotated.push(result);
+      rotated.push(await transform(fromRotateYToTransform(turn))(input));
     }
     return Group(...rotated);
   }

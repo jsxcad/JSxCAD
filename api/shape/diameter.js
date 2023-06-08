@@ -21,8 +21,6 @@ export const diameter = Shape.registerMethod2(
         }
       }
     }
-    const result = op(maximumDiameter)(input);
-    console.log(`QQ/diameter/result: ${JSON.stringify(result)}`);
-    return result;
+    return op(maximumDiameter)(input);
   }
 );

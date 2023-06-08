@@ -22,14 +22,9 @@ export const on = Shape.registerMethod2(
         const local = invertTransform(global);
         const target = Shape.fromGeometry(geometry);
         // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-        console.log(`QQ/on/target: ${JSON.stringify(target)}`);
-        console.log(`QQ/on/local: ${JSON.stringify(local)}`);
         const a = await transformOp(local)(target);
-        console.log(`QQ/on/a: ${JSON.stringify(a)}`);
         const b = await opOp(op)(a);
-        console.log(`QQ/on/b: ${JSON.stringify(b)}`);
         const r = await transformOp(global)(b);
-        console.log(`QQ/on/r: ${JSON.stringify(r)}`);
         outputLeafs.push(await r.toGeometry());
       }
     }

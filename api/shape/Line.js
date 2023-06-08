@@ -8,7 +8,6 @@ export const Line = Shape.registerMethod2(
   ['intervals'],
   (intervals) => {
     const edges = [];
-    console.log(`QQ/Line/intervals: ${JSON.stringify(intervals)}`);
     for (const [begin, end] of intervals) {
       edges.push(Edge(Point(begin), Point(end)));
     }

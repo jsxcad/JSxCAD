@@ -18,7 +18,6 @@ export const log = Shape.registerMethod2(
   'log',
   ['input', 'string'],
   async (input, prefix = '') => {
-    console.log(`QQ/log`);
     const text = prefix + JSON.stringify(await input.toGeometry());
     const level = 'serious';
     const log = { text, level };

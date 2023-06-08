@@ -13,7 +13,6 @@ export const Points = Shape.registerMethod2(
     for (const coordinate of coordinates) {
       coords.push(coordinate);
     }
-    console.log(`QQQQ/Points: ${JSON.stringify(coords)}`);
     return Shape.fromPoints(coords);
   }
 );

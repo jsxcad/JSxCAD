@@ -321,12 +321,9 @@ const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
     async (shape) => {
-      console.log(`Method ${names} [call] ${JSON.stringify(args)}`);
       try {
         const parameters = await Shape.destructure2a(shape, args, ...signature);
-        const result = op(...parameters);
-        console.log(`Method ${names} [done]`);
-        return result;
+        return op(...parameters);
       } catch (error) {
         console.log(
           `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
@@ -822,14 +819,12 @@ const destructure2 = async (shape, input, ...specs) => {
     let diagnostic;
     try {
       // Try to format it nicely.
-      diagnostic = `QQQ/Error: ${
-        args.length
-      } unused arguments: ${JSON.stringify(args)} arguments: ${JSON.stringify(
-        input
-      )} specs: ${JSON.stringify(specs)}`;
+      diagnostic = `Error: ${args.length} unused arguments: ${JSON.stringify(
+        args
+      )} arguments: ${JSON.stringify(input)} specs: ${JSON.stringify(specs)}`;
     } catch (error) {
       // Otherwise fall back.
-      diagnostic = `QQQ/Error: ${args.length} unused arguments: ${args.join(
+      diagnostic = `Error: ${args.length} unused arguments: ${args.join(
         ', '
       )} specs: ${specs.join(',')}`;
     }
@@ -961,11 +956,7 @@ Shape.registerMethod('md', (...chunks) => (shape) => {
 const Point = Shape.registerMethod2(
   'Point',
   ['coordinate', 'number', 'number', 'number'],
-  (coordinate, x = 0, y = 0, z = 0) => {
-    const result = Shape.fromPoint(coordinate || [x, y, z]);
-    console.log(`QQQ/Point: ${JSON.stringify(result)}`);
-    return result;
-  }
+  (coordinate, x = 0, y = 0, z = 0) => Shape.fromPoint(coordinate || [x, y, z])
 );
 
 const ref = Shape.registerMethod2('ref', ['inputGeometry'], (geometry) =>
@@ -1518,8 +1509,6 @@ const extrudeAlong = Shape.registerMethod2(
   'extrudeAlong',
   ['input', 'coordinate', 'modes', 'intervals'],
   async (input, vector, modes, intervals) => {
-    console.log(`QQQ/extrudeAlong/vector: ${JSON.stringify(vector)}`);
-    console.log(`QQQ/extrudeAlong/intervals: ${JSON.stringify(intervals)}`);
     const extrusions = [];
     for (const [depth, height] of intervals) {
       if (height === depth) {
@@ -1538,7 +1527,6 @@ const extrudeAlong = Shape.registerMethod2(
         )
       );
     }
-    console.log(`QQQ/extrudeAlong/extrusions: ${extrusions}`);
     return Group(...extrusions)();
   }
 );
@@ -1599,10 +1587,7 @@ const ry = Shape.registerMethod2(
   async (input, turns) => {
     const rotated = [];
     for (const turn of turns) {
-      console.log(`QQ/ry/turn: ${turn}`);
-      const result = await transform(fromRotateYToTransform(turn))(input);
-      console.log(`QQ/ry/result: ${JSON.stringify(result)}`);
-      rotated.push(result);
+      rotated.push(await transform(fromRotateYToTransform(turn))(input));
     }
     return Group(...rotated);
   }
@@ -2529,9 +2514,7 @@ const diameter = Shape.registerMethod2(
         }
       }
     }
-    const result = op(maximumDiameter)(input);
-    console.log(`QQ/diameter/result: ${JSON.stringify(result)}`);
-    return result;
+    return op(maximumDiameter)(input);
   }
 );
 
@@ -2590,14 +2573,9 @@ const on = Shape.registerMethod2(
         const local = invertTransform(global);
         const target = Shape.fromGeometry(geometry);
         // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-        console.log(`QQ/on/target: ${JSON.stringify(target)}`);
-        console.log(`QQ/on/local: ${JSON.stringify(local)}`);
         const a = await transform(local)(target);
-        console.log(`QQ/on/a: ${JSON.stringify(a)}`);
         const b = await op(op$1)(a);
-        console.log(`QQ/on/b: ${JSON.stringify(b)}`);
         const r = await transform(global)(b);
-        console.log(`QQ/on/r: ${JSON.stringify(r)}`);
         outputLeafs.push(await r.toGeometry());
       }
     }
@@ -5149,7 +5127,6 @@ const log = Shape.registerMethod2(
   'log',
   ['input', 'string'],
   async (input, prefix = '') => {
-    console.log(`QQ/log`);
     const text = prefix + JSON.stringify(await input.toGeometry());
     const level = 'serious';
     const log = { text, level };
@@ -5524,7 +5501,6 @@ const rz = Shape.registerMethod2(
   async (input, turns) => {
     const rotated = [];
     for (const turn of turns) {
-      console.log(`QQQ/rz: turn=${turn}`);
       rotated.push(await transform(fromRotateZToTransform(turn))(input));
     }
     return Group(...rotated);
@@ -5746,7 +5722,6 @@ const seq = Shape.registerMethod2(
     const indexes = [];
     for (const spec of specs) {
       const { from = 0, to = 1, upto, downto, by = 1 } = spec;
-      console.log(`QQQQQ/seq/spec: ${JSON.stringify(spec)}`);
 
       let consider;
 
@@ -5778,10 +5753,7 @@ const seq = Shape.registerMethod2(
       if (args.some((value) => value === undefined)) {
         break;
       }
-      console.log(`QQQ/seq/args: ${JSON.stringify(args)}`);
-      console.log(`QQQ/seq/op: ${'' + op}`);
       const result = await op(...args)(input);
-      console.log(`QQQ/seq/result: ${JSON.stringify(result)}`);
       results.push(maybeApply(result, input));
       let nth;
       for (nth = 0; nth < index.length; nth++) {
@@ -5794,10 +5766,7 @@ const seq = Shape.registerMethod2(
         break;
       }
     }
-    console.log(`QQQQQ/seq/results: ${JSON.stringify(results)}`);
-    for (const result of results) {
-      console.log(`QQQQQ/seq/result: ${JSON.stringify(result)}`);
-    }
+
     return groupOp(...results);
   }
 );
@@ -6817,7 +6786,6 @@ const Line = Shape.registerMethod2(
   ['intervals'],
   (intervals) => {
     const edges = [];
-    console.log(`QQ/Line/intervals: ${JSON.stringify(intervals)}`);
     for (const [begin, end] of intervals) {
       edges.push(Edge(Point(begin), Point(end)));
     }
@@ -6939,7 +6907,6 @@ const Points = Shape.registerMethod2(
     for (const coordinate of coordinates) {
       coords.push(coordinate);
     }
-    console.log(`QQQQ/Points: ${JSON.stringify(coords)}`);
     return Shape.fromPoints(coords);
   }
 );
