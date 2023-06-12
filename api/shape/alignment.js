@@ -85,16 +85,14 @@ const computeOffset = async (spec = 'xyz', origin = [0, 0, 0], shape) => {
   )(shape);
 };
 
-export const alignment = Shape.registerMethod(
+export const alignment = Shape.registerMethod2(
   'alignment',
-  (spec = 'xyz', origin = [0, 0, 0]) =>
-    async (shape) => {
-      const offset = await computeOffset(spec, origin, shape);
-      const reference = await Point().move(...subtract(offset, origin));
-      return reference;
-    }
+  ['input', 'string', 'coordinate'],
+  async (input, spec = 'xyz', origin = [0, 0, 0]) => {
+    const offset = await computeOffset(spec, origin, input);
+    const reference = await Point().move(...subtract(offset, origin));
+    return reference;
+  }
 );
-
-Shape.registerMethod('alignment', alignment);
 
 export default alignment;

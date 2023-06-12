@@ -14,19 +14,19 @@ import Shape from './Shape.js';
  *
  **/
 
-export const log = Shape.registerMethod(
+export const log = Shape.registerMethod2(
   'log',
-  (prefix = '') =>
-    async (shape) => {
-      const text = prefix + JSON.stringify(await shape.toGeometry());
-      const level = 'serious';
-      const log = { text, level };
-      const hash = computeHash(log);
-      emit({ log, hash });
-      sysLog({ op: 'text', text });
-      console.log(text);
-      return shape;
-    }
+  ['input', 'string'],
+  async (input, prefix = '') => {
+    const text = prefix + JSON.stringify(await input.toGeometry());
+    const level = 'serious';
+    const log = { text, level };
+    const hash = computeHash(log);
+    emit({ log, hash });
+    sysLog({ op: 'text', text });
+    console.log(text);
+    return input;
+  }
 );
 
 export default log;

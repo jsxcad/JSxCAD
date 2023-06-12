@@ -1,8 +1,7 @@
 ![Image](test.md.$1.png)
 
 ```JavaScript
-await Box(10)
-  .cut(Arc(5))
-  .ez([5])
+Arc(5)
+  .seq({ from: -1, by: zagSteps(diameter()), to: 1 }, x)
   .view();
 ```

@@ -10,10 +10,10 @@ See: [Edge](../../nb/api/Edge.md).
 
 ![Image](Segments.md.$2.png)
 
-Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])
+Segments([[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]])
 
 ```JavaScript
-Segments([
+Segments(
   [
     [1, 1],
     [1, -1],
@@ -22,7 +22,7 @@ Segments([
     [1, 1, 0],
     [1, 1, 1],
   ],
-])
+)
   .view()
-  .note('Segments([[[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]]])');
+  .note('Segments([[1, 1], [1, -1]], [[1, 1, 0], [1, 1, 1]])');
 ```

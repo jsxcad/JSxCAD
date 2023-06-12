@@ -1,7 +1,6 @@
 import Empty from './Empty.js';
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { toValue } from './toValue.js';
 
 const EPSILON = 1e-5;
 
@@ -19,13 +18,7 @@ export const seq = Shape.registerMethod2(
   async (input, specs, op = (n) => (s) => s, groupOp = Group) => {
     const indexes = [];
     for (const spec of specs) {
-      let { from = 0, to = 1, upto, downto, by = 1 } = spec;
-
-      from = await toValue(from)(input);
-      to = await toValue(to)(input);
-      upto = await toValue(upto)(input);
-      downto = await toValue(downto)(input);
-      by = await toValue(by)(input);
+      const { from = 0, to = 1, upto, downto, by = 1 } = spec;
 
       let consider;
 
@@ -70,6 +63,7 @@ export const seq = Shape.registerMethod2(
         break;
       }
     }
+
     return groupOp(...results);
   }
 );

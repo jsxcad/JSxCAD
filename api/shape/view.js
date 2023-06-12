@@ -93,29 +93,28 @@ export const baseView =
     return shape;
   };
 
-export const topView = Shape.registerMethod(
+export const topView = Shape.registerMethod2(
   'topView',
-  (...args) =>
-    async (shape) => {
-      const {
-        value: viewId,
-        func: op = (x) => x,
-        object: options,
-        strings: modes,
-      } = Shape.destructure(args, {
-        object: {
-          size: 512,
-          skin: true,
-          outline: true,
-          wireframe: false,
-          width: 512,
-          height: 512,
-          position: [0, 0, 100],
-        },
-      });
-      shape = await applyModes(shape, options, modes);
-      return baseView(viewId, op, options)(shape);
-    }
+  ['input', 'value', 'function', 'options', 'modes'],
+  async (
+    input,
+    viewId,
+    op = (x) => x,
+    {
+      size = 512,
+      skin = true,
+      outline = true,
+      wireframe = true,
+      width = 512,
+      height = 512,
+      position = [0, 0, 100],
+    } = {},
+    modes
+  ) => {
+    const options = { size, skin, outline, wireframe, width, height, position };
+    const shape = await applyModes(input, options, modes);
+    return baseView(viewId, op, options)(shape);
+  }
 );
 
 export const gridView = Shape.registerMethod(

@@ -2,13 +2,10 @@ import Shape from './Shape.js';
 import alignment from './alignment.js';
 import by from './by.js';
 
-export const align = Shape.registerMethod(
+export const align = Shape.registerMethod2(
   'align',
-  (...args) =>
-    async (shape) =>
-      by(await alignment(...args)(shape))(shape)
+  ['input', 'rest'],
+  async (input, rest) => by(await alignment(...rest)(input))(input)
 );
-
-Shape.registerMethod('align', align);
 
 export default align;

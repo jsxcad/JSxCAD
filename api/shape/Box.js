@@ -8,7 +8,6 @@ import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { buildCorners } from './Plan.js';
-import { destructure2 } from './destructure.js';
 import { makeOcctBox } from '@jsxcad/algorithm-cgal';
 
 const X = 0;
@@ -112,18 +111,14 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
   return (await build()).absolute();
 };
 
-export const Box = Shape.registerMethod('Box', (...args) => async (shape) => {
-  const [modes, intervals, options] = await destructure2(
-    shape,
-    args,
-    'modes',
-    'intervals',
-    'options'
-  );
-  const [x = 1, y = x, z = 0] = intervals;
-  const [computedC1, computedC2] = await buildCorners(x, y, z)(shape);
-  let { c1 = computedC1, c2 = computedC2 } = options;
-  return reifyBox(c1, c2, modes.includes('occt'));
-});
+export const Box = Shape.registerMethod2(
+  'Box',
+  ['input', 'modes', 'intervals', 'options'],
+  async (input, modes, [x = 1, y = x, z = 0], options) => {
+    const [computedC1, computedC2] = await buildCorners(x, y, z)(input);
+    let { c1 = computedC1, c2 = computedC2 } = options;
+    return reifyBox(c1, c2, modes.includes('occt'));
+  }
+);
 
 export default Box;

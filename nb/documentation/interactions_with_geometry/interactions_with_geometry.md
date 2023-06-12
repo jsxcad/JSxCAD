@@ -43,8 +43,6 @@ Arc(10).ez([1, 2], [-1, -2]).view();
 
 A plane (default XY(0)) to cast upon and a direction (default XY(1)) can be provided.
 
-![Image](interactions_with_geometry.md.$9.png)
-
 ```JavaScript
 Arc(4)
   .ez([10])
@@ -216,10 +214,6 @@ At each step the shape is retriangulated to preserve manifold structure.
 
 Once a shape is remeshed it can be twisted or bent about the origin.
 
-![Image](interactions_with_geometry.md.$30.png)
-
-A rectangle bent into a ring with a central radius of 25
-
 ```JavaScript
 Box(157, 20)
   .ez([1])
@@ -309,13 +303,11 @@ Size returns the size of the shape along with it's bounding box corners.
 
 A function can be provided to receive the dimensions along with the shape.
 
+Move the shape along by its length
+
 ```JavaScript
 aRectangle
-  .size(
-    ({ length }) =>
-      (s) =>
-        s.x(length)
-  )
+  .x(size('length'))
   .md(`Move the shape along by its length`);
 ```
 

@@ -1,20 +1,9 @@
 import Shape from './Shape.js';
-import { toCoordinate } from './toCoordinate.js';
-import { toNestedValues } from './toNestedValues.js';
 
-export const Segments = Shape.registerMethod(
+export const Segments = Shape.registerMethod2(
   'Segments',
-  (segments = []) =>
-    async (shape) => {
-      const coordinates = [];
-      for (const [source, target] of await toNestedValues(segments)(shape)) {
-        coordinates.push([
-          await toCoordinate(source)(shape),
-          await toCoordinate(target)(shape),
-        ]);
-      }
-      return Shape.fromSegments(coordinates);
-    }
+  ['segments'],
+  (segments) => Shape.fromSegments(segments)
 );
 
 export default Segments;

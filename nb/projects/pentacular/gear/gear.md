@@ -58,7 +58,6 @@ export const ToothProfile = (
     path.push(polar(rootRadius, angle));
   }
 
-  // return Link(...path.map(coordinate => Point(coordinate)));
   return Link(Points(path));
 };
 ```

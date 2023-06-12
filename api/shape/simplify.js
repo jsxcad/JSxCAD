@@ -1,15 +1,9 @@
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
 import { simplify as simplifyGeometry } from '@jsxcad/geometry';
 
-export const simplify = Shape.registerMethod(
+export const simplify = Shape.registerMethod2(
   'simplify',
-  (...args) =>
-    async (shape) => {
-      const { object: options = {}, number: eps } = destructure(args);
-      const { ratio = 1.0 } = options;
-      return Shape.fromGeometry(
-        simplifyGeometry(await shape.toGeometry(), ratio, eps)
-      );
-    }
+  ['inputGeometry', 'number', 'options'],
+  (geometry, eps, { ratio = 1.0 } = {}) =>
+    Shape.fromGeometry(simplifyGeometry(geometry, ratio, eps))
 );

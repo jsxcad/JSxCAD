@@ -2,7 +2,6 @@ import { disorientSegment, eachFaceEdges } from '@jsxcad/geometry';
 
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
 
 // TODO: Add an option to include a virtual segment at the target of the last
 // edge.
@@ -23,111 +22,57 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
 const SOURCE = 0;
 const TARGET = 1;
 
-export const eachEdge = Shape.registerMethod(
+export const eachEdge = Shape.registerMethod2(
   'eachEdge',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions, object: options = {} } = destructure(args);
-      const { selections = [] } = options;
-      let [
-        edgeOp = (e, l, o) => (s) => e,
-        faceOp = (es, f) => (s) => es,
-        groupOp = Group,
-      ] = shapesAndFunctions;
-      const faces = [];
-      const faceEdges = [];
-      eachFaceEdges(
-        await shape.toShapeGeometry(shape),
-        await shape.toShapesGeometries(selections),
-        (faceGeometry, edgeGeometry) => {
-          faceEdges.push({ faceGeometry, edgeGeometry });
+  ['input', 'function', 'function', 'function', 'options'],
+  async (
+    input,
+    edgeOp = (e, l, o) => (s) => e,
+    faceOp = (es, f) => (s) => es,
+    groupOp = Group,
+    { selections = [] } = {}
+  ) => {
+    const faces = [];
+    const faceEdges = [];
+    eachFaceEdges(
+      await input.toShapeGeometry(input),
+      await input.toShapesGeometries(selections),
+      (faceGeometry, edgeGeometry) => {
+        faceEdges.push({ faceGeometry, edgeGeometry });
+      }
+    );
+    for (const { faceGeometry, edgeGeometry } of faceEdges) {
+      const { matrix, segments, normals } = edgeGeometry;
+      const edges = [];
+      if (segments) {
+        for (let nth = 0; nth < segments.length; nth++) {
+          const segment = segments[nth];
+          const [forward, backward] = disorientSegment(
+            segment,
+            matrix,
+            normals ? normals[nth] : undefined
+          );
+          edges.push(
+            await edgeOp(
+              Shape.chain(Shape.fromGeometry(forward)),
+              length(segment[SOURCE], segment[TARGET]),
+              Shape.chain(Shape.fromGeometry(backward))
+            )(input)
+          );
         }
+      }
+      faces.push(
+        await faceOp(
+          await Group(...edges),
+          Shape.chain(Shape.fromGeometry(faceGeometry))
+        )
       );
-      for (const { faceGeometry, edgeGeometry } of faceEdges) {
-        const { matrix, segments, normals } = edgeGeometry;
-        const edges = [];
-        if (segments) {
-          for (let nth = 0; nth < segments.length; nth++) {
-            const segment = segments[nth];
-            /*
-            const absoluteSegment = [
-              transformCoordinate(segment[SOURCE], matrix),
-              transformCoordinate(segment[TARGET], matrix),
-            ];
-            const absoluteOppositeSegment = [
-              transformCoordinate(segment[TARGET], matrix),
-              transformCoordinate(segment[SOURCE], matrix),
-            ];
-            const absoluteNormal = normals
-              ? subtract(
-                  transformCoordinate(normals[nth], matrix),
-                  absoluteSegment[SOURCE]
-                )
-              : [0, 0, 1];
-            const inverse = fromSegmentToInverseTransform(
-              absoluteSegment,
-              absoluteNormal
-            );
-            const oppositeInverse = fromSegmentToInverseTransform(
-              absoluteOppositeSegment,
-              absoluteNormal
-            );
-            const baseSegment = [
-              transformCoordinate(absoluteSegment[SOURCE], inverse),
-              transformCoordinate(absoluteSegment[TARGET], inverse),
-            ];
-            const oppositeSegment = [
-              transformCoordinate(absoluteSegment[TARGET], oppositeInverse),
-              transformCoordinate(absoluteSegment[SOURCE], oppositeInverse),
-            ];
-            const inverseMatrix = invertTransform(inverse);
-            const oppositeInverseMatrix = invertTransform(oppositeInverse);
-            // We get a pair of absolute coordinates from eachSegment.
-            // We need a segment from [0,0,0] to [x,0,0] in its local space.
-            edges.push(
-              await edgeOp(
-                Shape.chain(
-                  Shape.fromGeometry(
-                    taggedSegments({ matrix: inverseMatrix }, [baseSegment])
-                  )
-                ),
-                length(segment[SOURCE], segment[TARGET]),
-                Shape.chain(
-                  Shape.fromGeometry(
-                    taggedSegments({ matrix: oppositeInverseMatrix }, [
-                      oppositeSegment,
-                    ])
-                  )
-                )
-              )(shape)
-            );
-            */
-            const [forward, backward] = disorientSegment(
-              segment,
-              matrix,
-              normals ? normals[nth] : undefined
-            );
-            edges.push(
-              await edgeOp(
-                Shape.chain(Shape.fromGeometry(forward)),
-                length(segment[SOURCE], segment[TARGET]),
-                Shape.chain(Shape.fromGeometry(backward))
-              )(shape)
-            );
-          }
-        }
-        faces.push(
-          await faceOp(
-            await Group(...edges),
-            Shape.chain(Shape.fromGeometry(faceGeometry))
-          )
-        );
-      }
-      const grouped = groupOp(...faces);
-      if (Shape.isFunction(grouped)) {
-        return grouped(shape);
-      } else {
-        return grouped;
-      }
     }
+    const grouped = groupOp(...faces);
+    if (Shape.isFunction(grouped)) {
+      return grouped(input);
+    } else {
+      return grouped;
+    }
+  }
 );

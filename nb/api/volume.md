@@ -8,7 +8,7 @@ See: [area](../../nb/api/area.md).
 
 Box(1, 1, 1).volume((value) => note('' + value)
 
-0
+1
 
 ```JavaScript
 Box(1, 1, 1)
@@ -17,6 +17,8 @@ Box(1, 1, 1)
 ```
 
 Orb(1).volume((value) => note('' + value))
+
+0.43463137275279373
 
 ```JavaScript
 Orb(1)

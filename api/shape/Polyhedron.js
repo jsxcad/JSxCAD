@@ -9,7 +9,7 @@ export const Polyhedron = Shape.registerMethod(
         if (polygon instanceof Array) {
           out.push({ points: polygon });
         } else if (polygon instanceof Shape) {
-          out.push({ points: polygon.toPoints().reverse() });
+          out.push({ points: polygon.toCoordinates().reverse() });
         }
       }
       return Shape.fromPolygons(out);

@@ -1,9 +1,9 @@
 import Shape from './Shape.js';
 import { measureArea } from '@jsxcad/geometry';
 
-export const area = Shape.registerMethod(
+export const area = Shape.registerMethod2(
   'area',
-  (op = (value) => (shape) => value) =>
-    (shape) =>
-      op(measureArea(shape.toGeometry()))(shape)
+  ['input', 'function'],
+  async (input, op = (value) => (shape) => value) =>
+    op(measureArea(await input.toGeometry()))(input)
 );

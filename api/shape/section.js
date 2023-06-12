@@ -14,16 +14,14 @@ const baseSection =
     );
   };
 
-export const section = Shape.registerMethod(
+export const section = Shape.registerMethod2(
   'section',
-  (...orientations) =>
-    (shape) =>
-      baseSection({ profile: false }, orientations)(shape)
+  ['input', 'shapes'],
+  (input, orientations) => baseSection({ profile: false }, orientations)(input)
 );
 
-export const sectionProfile = Shape.registerMethod(
+export const sectionProfile = Shape.registerMethod2(
   'sectionProfile',
-  (...orientations) =>
-    (shape) =>
-      baseSection({ profile: true }, orientations)(shape)
+  ['input', 'shapes'],
+  (input, orientations) => baseSection({ profile: true }, orientations)(input)
 );

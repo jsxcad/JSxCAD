@@ -1,6 +1,7 @@
 import Shape from './Shape.js';
 
-export const addTo = Shape.registerMethod(
+export const addTo = Shape.registerMethod2(
   'addTo',
-  (other) => (shape) => other.add(shape)
+  ['input', 'shape'],
+  (input, shape) => shape.add(input)
 );

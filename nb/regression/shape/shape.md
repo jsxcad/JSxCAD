@@ -117,7 +117,7 @@ await Box(10).move(1, 2, 3).to(center()).gridView();
 ![Image](shape.md.$20.png)
 
 ```JavaScript
-await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
+await Box(10, 10, 10).view();
 ```
 
 ![Image](shape.md.$21.png)
@@ -298,9 +298,9 @@ await Arc(10).color('blue').tint('red').view();
 ![Image](shape.md.$46.png)
 
 ```JavaScript
-await Edges(
+await Segments(
   seq(
-    (y) => (s) => [Point(-10, y, 0), Point(10, y, 0)],
+    (y) => (s) => [[-10, y, 0], [10, y, 0]],
     {
       from: -6,
       to: 6,
@@ -523,7 +523,7 @@ await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView();
 ![Image](shape.md.$69.png)
 
 ```JavaScript
-await Segments([
+await Segments(
   [
     [-18.15, 40.34, 0.0],
     [-9.82, 45.66, 0.0],
@@ -607,8 +607,8 @@ await Segments([
   [
     [-20.62, 35.14, 0.0],
     [-17.37, 41.56, 0.0],
-  ],
-])
+  ]
+)
   .fill()
   .topView();
 ```

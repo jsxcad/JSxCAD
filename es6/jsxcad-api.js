@@ -84,6 +84,7 @@ const $run = async (op, { path, id, text, sha, line }) => {
       }
       emitError(error);
       emitSourceText(text);
+      console.log(error.stack);
       finishEmitGroup({ path, id, line });
       throw error;
     }
@@ -164,11 +165,7 @@ const evaluate = async (ecmascript, { api, path }) => {
     );
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
-    // Retry until none of the operations block.
-    // Note: This retry mechanism should be obsolete now.
-    for (;;) {
-      return await op();
-    }
+    return await op();
   } catch (error) {
     throw error;
   } finally {

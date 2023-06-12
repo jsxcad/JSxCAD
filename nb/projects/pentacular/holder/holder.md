@@ -10,12 +10,6 @@ const magnetDiameter = 5.0;
 const magnetHeight = 2.5;
 ```
 
-![Image](holder.md.magneticPenHolder.png)
-
-![Image](holder.md.magneticPenHolder_holder.png)
-
-[holder.stl](holder.holder.stl)
-
 ```JavaScript
 const magneticPenHolder = await Arc(magnetDiameter)
   .material('steel')

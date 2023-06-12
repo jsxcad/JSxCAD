@@ -201,14 +201,6 @@ export class Shape {
   getContext(symbol) {
     return this.context[symbol];
   }
-
-  toCoordinate(x, y, z) {
-    return Shape.toCoordinate(this, x, y, z);
-  }
-
-  toCoordinates(...args) {
-    return Shape.toCoordinates(this, ...args);
-  }
 }
 
 export const isShape = (value) =>
@@ -239,12 +231,51 @@ Shape.isObject = isObject;
 export const isNumber = (value) => typeof value === 'number';
 Shape.isNumber = isNumber;
 
+export const isIntervalLike = (value) =>
+  isNumber(value) ||
+  (isArray(value) &&
+    isNumber(value[0]) &&
+    (isNumber(value[1]) || value[1] === undefined));
+Shape.isIntervalLike = isIntervalLike;
+
+export const isInterval = (value) =>
+  isNumber(value) &&
+  value.length === 2 &&
+  isNumber(value[0]) &&
+  isNumber(value[1]);
+Shape.isInterval = isInterval;
+
+export const normalizeInterval = (value) => {
+  if (isNumber(value)) {
+    value = [value / 2, value / -2];
+  }
+  const [a = 0, b = 0] = value;
+  if (typeof a !== 'number') {
+    throw Error(
+      `normalizeInterval expected number but received ${a} of type ${typeof a}`
+    );
+  }
+  if (typeof b !== 'number') {
+    throw Error(
+      `normalizeInterval expected number but received ${b} of type ${typeof b}`
+    );
+  }
+  return a < b ? [a, b] : [b, a];
+};
+Shape.normalizeInterval = normalizeInterval;
+
 export const isString = (value) => typeof value === 'string';
 Shape.isString = isString;
 
 export const isValue = (value) =>
   (!isObject(value) && !isFunction(value)) || isArray(value);
 Shape.isValue = isValue;
+
+export const isCoordinate = (value) => isArray(value) && value.every(isNumber);
+Shape.isCoordinate = isCoordinate;
+
+export const isSegment = (value) => isArray(value) && value.every(isCoordinate);
+Shape.isSegment = isSegment;
 
 Shape.chain = chain;
 
@@ -285,8 +316,15 @@ export const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
     async (shape) => {
-      const parameters = await Shape.destructure2a(shape, args, ...signature);
-      return op(...parameters);
+      try {
+        const parameters = await Shape.destructure2a(shape, args, ...signature);
+        return op(...parameters);
+      } catch (error) {
+        console.log(
+          `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
+        );
+        throw error;
+      }
     };
   return registerMethod(names, method);
 };
