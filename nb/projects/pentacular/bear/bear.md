@@ -16,7 +16,7 @@ const spacing = control('spacing', 2, 'input');
 const a = await LoadStl(url).align('z>');
 ```
 
-![Image](bear.md.$2_bear.png)
+![Image](bear.md.$2.png)
 
 [bear.stl](bear.bear.stl)
 
@@ -32,7 +32,7 @@ Stl sliced each 2mm up to 200mm.
 
 Laid out on a single sheet for cutting.
 
-![Image](bear.md.$3_slices.png)
+![Image](bear.md.$3.png)
 
 [slices.pdf](bear.slices.pdf)
 

@@ -91,9 +91,10 @@ export const baseView =
 
 export const topView = Shape.registerMethod2(
   'topView',
-  ['input', 'value', 'function', 'options', 'modes'],
+  ['input', 'modes', 'value', 'function', 'options'],
   async (
     input,
+    modes,
     viewId,
     op = (x) => x,
     {
@@ -104,8 +105,7 @@ export const topView = Shape.registerMethod2(
       width,
       height,
       position = [0, 0, 100],
-    } = {},
-    modes
+    } = {}
   ) => {
     const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -115,9 +115,10 @@ export const topView = Shape.registerMethod2(
 
 export const gridView = Shape.registerMethod2(
   'gridView',
-  ['input', 'value', 'function', 'options', 'modes'],
+  ['input', 'modes', 'value', 'function', 'options'],
   async (
     input,
+    modes,
     viewId,
     op = (x) => x,
     {
@@ -128,8 +129,7 @@ export const gridView = Shape.registerMethod2(
       width,
       height,
       position = [0, 0, 100],
-    } = {},
-    modes
+    } = {}
   ) => {
     const options = { skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -139,9 +139,10 @@ export const gridView = Shape.registerMethod2(
 
 export const frontView = Shape.registerMethod2(
   'frontView',
-  ['input', 'value', 'function', 'options', 'modes'],
+  ['input', 'modes', 'value', 'function', 'options'],
   async (
     input,
+    modes,
     viewId,
     op = (x) => x,
     {
@@ -152,8 +153,7 @@ export const frontView = Shape.registerMethod2(
       width,
       height,
       position = [0, -100, 0],
-    } = {},
-    modes
+    } = {}
   ) => {
     const options = { skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -163,9 +163,10 @@ export const frontView = Shape.registerMethod2(
 
 export const sideView = Shape.registerMethod2(
   'sideView',
-  ['input', 'value', 'function', 'options', 'modes'],
+  ['input', 'modes', 'value', 'function', 'options'],
   async (
     input,
+    modes,
     viewId,
     op = (x) => x,
     {
@@ -176,8 +177,7 @@ export const sideView = Shape.registerMethod2(
       width,
       height,
       position = [100, 0, 0],
-    } = {},
-    modes
+    } = {}
   ) => {
     const options = { skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -187,8 +187,8 @@ export const sideView = Shape.registerMethod2(
 
 export const view = Shape.registerMethod2(
   'view',
-  ['input', 'value', 'function', 'options', 'modes'],
-  async (input, viewId, op = (x) => x, options, modes) => {
+  ['input', 'modes', 'value', 'function', 'options'],
+  async (input, modes, viewId, op = (x) => x, options) => {
     const shape = await applyModes(input, options, modes);
     if (modes.includes('grid')) {
       options.style = 'grid';

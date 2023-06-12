@@ -215,7 +215,7 @@ await Group(roadTile, curvedRoadTile)
   .stl('3yd tiles', page('individual'));
 ```
 
-![Image](road.md.$3_2d_road_tile.png)
+![Image](road.md.$3.png)
 
 [2d road tile.pdf](road.2d%20road%20tile.pdf)
 

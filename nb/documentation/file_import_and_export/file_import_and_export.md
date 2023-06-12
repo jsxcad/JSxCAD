@@ -9,7 +9,7 @@ A filename like 'teapot' will have the page number and filetype appended, so it 
 ### Exporting .stl
 Creates an option to download the shape as an stl file. A view is created to show what will be downloaded.
 
-![Image](file_import_and_export.md.$4_fileName.png)
+![Image](file_import_and_export.md.$4.png)
 
 [fileName.stl](file_import_and_export.fileName.stl)
 
@@ -21,7 +21,7 @@ await Arc(10, 10, 10).stl('fileName');
 ### Exporting .svg
 Creates an option to download the shape as a svg file. A view is created to show what will be downloaded.
 
-![Image](file_import_and_export.md.$6_fileName.png)
+![Image](file_import_and_export.md.$6.png)
 
 [fileName.svg](file_import_and_export.fileName.svg)
 

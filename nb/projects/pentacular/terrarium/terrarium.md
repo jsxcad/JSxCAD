@@ -197,27 +197,27 @@ The lid should have a snug fit internally, but a loose connection to the top pan
 
 These are the profiles you'll need to cut out to assemble the terrarium.
 
-![Image](terrarium.md.$7_faces.png)
+![Image](terrarium.md.$7.png)
 
 [faces.pdf](terrarium.faces.pdf)
 
-![Image](terrarium.md.$7_faces.png)
+![Image](terrarium.md.$7.png)
 
 [faces_2.pdf](terrarium.faces_2.pdf)
 
-![Image](terrarium.md.$7_faces.png)
+![Image](terrarium.md.$7.png)
 
 [faces_3.pdf](terrarium.faces_3.pdf)
 
-![Image](terrarium.md.$7_faces.png)
+![Image](terrarium.md.$7.png)
 
 [faces_4.pdf](terrarium.faces_4.pdf)
 
-![Image](terrarium.md.$7_faces.png)
+![Image](terrarium.md.$7.png)
 
 [faces_5.pdf](terrarium.faces_5.pdf)
 
-![Image](terrarium.md.$7_faces.png)
+![Image](terrarium.md.$7.png)
 
 [faces_6.pdf](terrarium.faces_6.pdf)
 
@@ -227,15 +227,15 @@ Fit the profiles together to form a box with the hole on the top.
 
 These profiles assemble to form the lid
 
-![Image](terrarium.md.$7_lid_base.png)
+![Image](terrarium.md.$7.png)
 
 [lid_base.pdf](terrarium.lid_base.pdf)
 
-![Image](terrarium.md.$7_lid_top.png)
+![Image](terrarium.md.$7.png)
 
 [lid_top.pdf](terrarium.lid_top.pdf)
 
-![Image](terrarium.md.$7_lid_pin.png)
+![Image](terrarium.md.$7.png)
 
 [lid_pin.pdf](terrarium.lid_pin.pdf)
 

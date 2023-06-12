@@ -25,13 +25,13 @@ const Bearing = (diameter) =>
 
 You'll need to print two of these
 
-![Image](bearing.md.bearing_10_7_bearing_10_7_top.png)
+![Image](bearing.md.bearing_10_7.png)
 
 [bearing_10_7_top.stl](bearing.bearing_10_7_top.stl)
 
 And one of these
 
-![Image](bearing.md.bearing_10_7_bearing_10_7_pin.png)
+![Image](bearing.md.bearing_10_7.png)
 
 [bearing_10_7_pin.stl](bearing.bearing_10_7_pin.stl)
 

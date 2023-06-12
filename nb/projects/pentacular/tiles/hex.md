@@ -33,7 +33,7 @@ const placeTab = (tab) => (e, l) => (s) =>
 const tab = await Tab(1.5, 32 / 8);
 ```
 
-![Image](hex.md.$1_tab.png)
+![Image](hex.md.$1.png)
 
 [tab.stl](hex.tab.stl)
 
@@ -747,7 +747,7 @@ const caves = control('caves', '', 'input');
 const wall = control('wall', '', 'input');
 ```
 
-![Image](hex.md.$3_tile.png)
+![Image](hex.md.$3.png)
 
 [tile.stl](hex.tile.stl)
 

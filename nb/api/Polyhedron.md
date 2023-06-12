@@ -41,7 +41,7 @@ Polyhedron(
   );
 ```
 
-![Image](Polyhedron.md.$3_wireframe.png)
+![Image](Polyhedron.md.$3.png)
 
 Polyhedron(Polygon(Point(0, 0, 0), Point(1, 1, 0), Point(1, 0, 0)), Polygon([0, 0, 1], [1, 0, 0], [1, 1, 0]), [[0, 0, 1], [1, 1, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 1], [1, 0, 0]]) also produces that shape.
 

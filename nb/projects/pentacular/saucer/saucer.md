@@ -64,7 +64,7 @@ const top = await saucer
   .stl('knob', get('knob').align('>z'));
 ```
 
-![Image](saucer.md.topWithPegHoles_top2.png)
+![Image](saucer.md.topWithPegHoles.png)
 
 [top2.stl](saucer.top2.stl)
 
@@ -88,7 +88,7 @@ const topWithPegHoles = await top
 const base = await saucer.lowerEnvelope().loft(noOp(), Box(150).z(-12.01)).as('base');
 ```
 
-![Image](saucer.md.baseWithPegHoles_base.png)
+![Image](saucer.md.baseWithPegHoles.png)
 
 [base.stl](saucer.base.stl)
 

@@ -24,7 +24,7 @@ const base = await grid.cutFrom(Arc(100)).ez([1]).gridView();
 const ring = await Arc(99).cutFrom(Arc(102)).ez([2.5]).gridView();
 ```
 
-![Image](lego_sorter.md.sorter_sorter.png)
+![Image](lego_sorter.md.sorter.png)
 
 [sorter.stl](lego_sorter.sorter.stl)
 
@@ -67,7 +67,7 @@ const bentWall = await wall
 
 ![Image](lego_sorter.md.$1.png)
 
-![Image](lego_sorter.md.$1_tall_sorter.png)
+![Image](lego_sorter.md.$1.png)
 
 [tall_sorter.stl](lego_sorter.tall_sorter.stl)
 
