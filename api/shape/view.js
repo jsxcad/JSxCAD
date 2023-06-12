@@ -54,7 +54,7 @@ export const baseView =
   async (shape) => {
     if (size !== undefined) {
       width = size;
-      height = size / 2;
+      height = size;
     }
     const viewShape = await op(shape);
     const sourceLocation = getSourceLocation();
