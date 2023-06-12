@@ -1,4 +1,4 @@
-![Image](spindle_mount.md.$1.png)
+![Image](spindle_mount.md.$1_spindle_mount.png)
 
 [spindle_mount.stl](spindle_mount.spindle_mount.stl)
 

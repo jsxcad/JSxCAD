@@ -106,7 +106,7 @@ export const block16x8x9_6 = await Block(2, 1, 3.2 * 3)
   .view();
 ```
 
-![Image](examples.md.block32x8x9_6.png)
+![Image](examples.md.block32x8x9_6_block32x8x9_6e.png)
 
 [block32x8x9_6e.stl](examples.block32x8x9_6e.stl)
 
@@ -149,7 +149,7 @@ export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez([length]);
 
 Axle Joiner 16mm
 
-![Image](examples.md.axleJoiner16.png)
+![Image](examples.md.axleJoiner16_AxleJoiner16.png)
 
 [AxleJoiner16.stl](examples.AxleJoiner16.stl)
 
@@ -163,7 +163,7 @@ export const axleJoiner16 = await AxleJoiner(16)
 const box = await Box(8, 3.2 * 4).y(3.2 * 2);
 ```
 
-![Image](examples.md.technic.png)
+![Image](examples.md.technic_technic.png)
 
 [technic.stl](examples.technic.stl)
 
@@ -192,7 +192,7 @@ const technic_1x6 = await Group(seq((n) => technic.x(n), { upto: 48, by: 8 }))
   .view();
 ```
 
-![Image](examples.md.technicConnector.png)
+![Image](examples.md.technicConnector_technicConnector.png)
 
 [technicConnector.stl](examples.technicConnector.stl)
 
@@ -232,7 +232,7 @@ const technicConnector = await Arc(4.8)
   .stl('technicConnector');
 ```
 
-![Image](examples.md.halfTechnicConnector.png)
+![Image](examples.md.halfTechnicConnector_halfTechnicConnector.png)
 
 [halfTechnicConnector.stl](examples.halfTechnicConnector.stl)
 
@@ -266,7 +266,7 @@ const halfTechnicConnector = await Arc(4.8)
   .stl('halfTechnicConnector');
 ```
 
-![Image](examples.md.technicPlug5mm.png)
+![Image](examples.md.technicPlug5mm_technicPlug5mm.png)
 
 [technicPlug5mm.stl](examples.technicPlug5mm.stl)
 

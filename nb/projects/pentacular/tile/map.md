@@ -22,7 +22,7 @@ const squareTile = await Tile(4, 1 / 8).view();
 const fiveTile = await Tile(5).view();
 ```
 
-![Image](map.md.hexagonalTile.png)
+![Image](map.md.hexagonalTile_hex.png)
 
 [hex.stl](map.hex.stl)
 

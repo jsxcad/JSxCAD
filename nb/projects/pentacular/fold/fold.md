@@ -27,7 +27,7 @@ await r
   .view();
 ```
 
-![Image](fold.md.$2.png)
+![Image](fold.md.$2_cube.png)
 
 [cube.stl](fold.cube.stl)
 

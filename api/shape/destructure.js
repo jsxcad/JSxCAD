@@ -123,8 +123,13 @@ export const destructure2 = async (shape, input, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
-  for (const spec of specs) {
+  for (let spec of specs) {
     const rest = [];
+    let modes;
+    if (spec.startsWith('modes:')) {
+      modes = spec.substring('modes:'.length).split(',');
+      spec = 'modes';
+    }
     switch (spec) {
       case 'objects': {
         const out = [];
@@ -281,7 +286,7 @@ export const destructure2 = async (shape, input, ...specs) => {
       case 'modes': {
         const out = [];
         for (const arg of args) {
-          if (typeof arg === 'string') {
+          if (typeof arg === 'string' && (modes === undefined || modes.includes(arg))) {
             out.push(arg);
           } else {
             rest.push(arg);

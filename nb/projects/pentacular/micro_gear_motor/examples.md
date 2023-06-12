@@ -6,7 +6,7 @@ import { MicroGearMotor } from './micro_gear_motor.nb';
 import { horizontalConnector } from '../lego/lego.nb';
 ```
 
-![Image](examples.md.$1.png)
+![Image](examples.md.$1_motor_case.png)
 
 [motor case.stl](examples.motor%20case.stl)
 

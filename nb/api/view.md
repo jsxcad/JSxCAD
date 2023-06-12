@@ -36,17 +36,9 @@ Box(1, 2, 3).view(0, 'wireframe')
 Box(1, 2, 3).view(0, 'wireframe').note("Box(1, 2, 3).view(0, 'wireframe')");
 ```
 
-![Image](view.md.$5.png)
-
-Box(1, 2, 3).view(0, 'side')
-
 ```JavaScript
 Box(1, 2, 3).view(0, 'side').note("Box(1, 2, 3).view(0, 'side')");
 ```
-
-![Image](view.md.$6.png)
-
-Box(1, 2, 3).view(0, 'top')
 
 ```JavaScript
 Box(1, 2, 3).view(0, 'top').note("Box(1, 2, 3).view(0, 'top')");

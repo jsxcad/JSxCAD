@@ -34,7 +34,7 @@ const thickness = control('thickness', 2, 'input');
 const toothResolution = control('toothResolution', 5, 'input');
 ```
 
-![Image](examples.md.$1.png)
+![Image](examples.md.$1_gear_16.png)
 
 [gear_16.stl](examples.gear_16.stl)
 
@@ -233,15 +233,15 @@ const planetaryDesign4 = await planetaryDesign4c.color('green').as('solar');
 
 ![Image](examples.md.planetaryDesign.png)
 
-![Image](examples.md.planetaryDesign.png)
+![Image](examples.md.planetaryDesign_ring.png)
 
 [ring.stl](examples.ring.stl)
 
-![Image](examples.md.planetaryDesign.png)
+![Image](examples.md.planetaryDesign_planetary.png)
 
 [planetary.stl](examples.planetary.stl)
 
-![Image](examples.md.planetaryDesign.png)
+![Image](examples.md.planetaryDesign_solar.png)
 
 [solar.stl](examples.solar.stl)
 

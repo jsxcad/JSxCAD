@@ -25,10 +25,6 @@ Box([0, 1], [0, 2], [0, 10])
   );
 ```
 
-![Image](Edge.md.$3_1.png)
-
-Group(Edge([0, 0], [0, 1]), Edge([0, 1], [1, 1]), Edge([1, 1], [1, 0]), Edge([1, 0], [0, 0])).fill() builds a face from edges.
-
 ```JavaScript
 Group(
   Edge([0, 0], [0, 1]),
