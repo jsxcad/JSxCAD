@@ -342,8 +342,6 @@ await Line([-15, 15])
   .view();
 ```
 
-![Image](shapes.md.$30.png)
-
 ```JavaScript
 await Box(12)
   .cut(
@@ -355,8 +353,6 @@ await Box(12)
   .fit(separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow'))
   .view();
 ```
-
-![Image](shapes.md.$31.png)
 
 ```JavaScript
 await Box(12)
@@ -478,8 +474,6 @@ await Box(10).join(Box(5, 50, 5)).view();
 await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```
 
-![Image](shapes.md.$46.png)
-
 ```JavaScript
 await Box(10)
   .rz(1 / 8)
@@ -487,16 +481,12 @@ await Box(10)
   .view();
 ```
 
-![Image](shapes.md.$47.png)
-
 ```JavaScript
 await Triangle(10)
   .cut(inset(2))
   .cut(eachPoint(Arc(1).to))
   .view();
 ```
-
-![Image](shapes.md.$48.png)
 
 ```JavaScript
 await Triangle(10)
@@ -535,8 +525,6 @@ await Box(10).cut(Triangle(11)).view(1);
 await Box(10).cut(Triangle(11)).clean().view(2);
 ```
 
-![Image](shapes.md.$53_5.png)
-
 ```JavaScript
 await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 ```
@@ -568,8 +556,6 @@ await Box(10)
   .section()
   .view();
 ```
-
-![Image](shapes.md.$57.png)
 
 ```JavaScript
 Curve([0, 12], [1, 12], [5, 10], [12.5 + 5, 0], [16, -12], [21, -12])

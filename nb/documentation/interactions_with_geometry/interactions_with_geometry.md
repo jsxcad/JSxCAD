@@ -317,6 +317,8 @@ Tags lists all of the tags associated with a shape.
 
 A function can be supplied to receive the tags and shape.
 
+Tags [object Object]
+
 Tags user:tagString
 
 ```JavaScript

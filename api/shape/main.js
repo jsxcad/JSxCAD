@@ -212,7 +212,7 @@ export { Curve } from './Curve.js';
 export { Cut } from './cut.js';
 export { Edge } from './Edge.js';
 export { Empty } from './Empty.js';
-export { Face } from './Face.js';
+export { Face } from './Polygon.js';
 export { Fuse } from './fuse.js';
 export { Geometry } from './Geometry.js';
 export { Group } from './Group.js';

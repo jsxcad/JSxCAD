@@ -46,6 +46,8 @@ await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView();
 await Box(5).color('green').gridView();
 ```
 
+Colors are [object Object]
+
 Colors are undefined
 
 ```JavaScript
@@ -213,6 +215,8 @@ await Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => 
 ```JavaScript
 await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 ```
+
+[object Object]
 
 undefined
 

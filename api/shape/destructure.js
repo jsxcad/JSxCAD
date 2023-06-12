@@ -388,6 +388,26 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(out);
         break;
       }
+      case 'coordinateLists': {
+        const out = [];
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (Shape.isShape(value)) {
+            const coordinates = await getCoordinates(value);
+            if (coordinates.length > 0) {
+              out.push(coordinates);
+              continue;
+            }
+          } else if (Shape.isArray(value) && value.every(Shape.isCoordinate)) {
+            out.push(value);
+            continue;
+          }
+          // Otherwise
+          rest.push(arg);
+        }
+        output.push(out);
+        break;
+      }
       case 'segments': {
         const out = [];
         for (const arg of args) {
@@ -396,19 +416,6 @@ export const destructure2 = async (shape, input, ...specs) => {
             out.push(value);
           } else if (Shape.isArray(value) && value.every(Shape.isSegment)) {
             out.push(...value);
-          } else {
-            rest.push(arg);
-          }
-        }
-        output.push(out);
-        break;
-      }
-      case 'coordinateLists': {
-        const out = [];
-        for (const arg of args) {
-          let value = await resolve(shape, arg);
-          if (Shape.isArray(value) && value.every(Shape.isCoordinate)) {
-            out.push(value);
           } else {
             rest.push(arg);
           }

@@ -1,11 +1,11 @@
-import Face from './Face.js';
 import Shape from './Shape.js';
 
-export const Polygon = Shape.registerMethod(
-  'Polygon',
-  (...points) =>
-    async (shape) =>
-      Face(...points)(shape)
+export const Polygon = Shape.registerMethod2(
+  ['Face', 'Polygon'],
+  ['coordinates'],
+  (coordinates) => Shape.chain(Shape.fromPolygons([{ points: coordinates }]))
 );
+
+export const Face = Polygon;
 
 export default Polygon;
