@@ -1,19 +1,13 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { destructure2 } from './destructure.js';
 import { gap } from './void.js';
 import { hasTypeMasked } from '@jsxcad/geometry';
 
-export const masking = Shape.registerMethod(
+export const masking = Shape.registerMethod2(
   'masking',
-  (...args) =>
-    async (shape) => {
-      const [masked] = await destructure2(shape, args, 'geometry');
-      return Group(
-        await gap()(shape),
-        Shape.fromGeometry(hasTypeMasked(masked))
-      );
-    }
+  ['input', 'geometry'],
+  async (input, masked) =>
+    Group(await gap()(input), Shape.fromGeometry(hasTypeMasked(masked)))
 );
 
 export default masking;

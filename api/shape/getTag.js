@@ -1,31 +1,34 @@
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
 import { list } from './List.js';
 import parseNumber from 'parse-number';
 
-export const getTag = Shape.registerMethod('getTag', (...args) => (shape) => {
-  const {
-    strings: tags,
-    func: op = (...values) =>
+export const getTag = Shape.registerMethod2(
+  'getTag',
+  ['input', 'strings', 'function'],
+  (
+    input,
+    tags,
+    op = (...values) =>
       (shape) =>
-        shape,
-  } = destructure(args);
-  const values = [];
-  for (const tag of tags) {
-    const tags = shape.tags(`${tag}=*`, list);
-    if (tags.length === 0) {
-      values.push(undefined);
-      continue;
-    }
-    const [, value] = tags[0].split('=');
-    const number = parseNumber(value);
-    if (isFinite(number)) {
+        shape
+  ) => {
+    const values = [];
+    for (const tag of tags) {
+      const tags = input.tags(`${tag}=*`, list);
+      if (tags.length === 0) {
+        values.push(undefined);
+        continue;
+      }
+      const [, value] = tags[0].split('=');
+      const number = parseNumber(value);
+      if (isFinite(number)) {
+        values.push(value);
+        continue;
+      }
       values.push(value);
-      continue;
     }
-    values.push(value);
+    return op(...values)(input);
   }
-  return op(...values)(shape);
-});
+);
 
 export default getTag;

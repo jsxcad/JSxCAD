@@ -1,12 +1,14 @@
 import Shape from './Shape.js';
 
-export const getTags = Shape.registerMethod(
+// This should take an op.
+
+export const getTags = Shape.registerMethod2(
   'getTags',
-  (tags = []) =>
-    async (shape) => {
-      const { tags = [] } = await shape.toGeometry();
-      return tags;
-    }
+  ['inputGeometry'],
+  (geometry) => {
+    const { tags = [] } = geometry;
+    return tags;
+  }
 );
 
 export default getTags;

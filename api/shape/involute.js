@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 import { involute as involuteGeometry } from '@jsxcad/geometry';
 
-export const involute = Shape.registerMethod(
+export const involute = Shape.registerMethod2(
   'involute',
-  () => async (shape) =>
-    Shape.fromGeometry(involuteGeometry(await shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(involuteGeometry(geometry))
 );

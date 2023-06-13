@@ -296,8 +296,6 @@ const extentsC = [
 
 ![Image](shapes.md.q.png)
 
-Boxes and Arcs from extents
-
 ```JavaScript
 const q = await Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),

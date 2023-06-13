@@ -17,7 +17,7 @@ export const Line = Shape.registerMethod2(
 
 export const LineX = Line;
 
-export const LineY = Shape.registerMethod(
+export const LineY = Shape.registerMethod2(
   'LineY',
   ['intervals'],
   (intervals) => {
@@ -29,7 +29,7 @@ export const LineY = Shape.registerMethod(
   }
 );
 
-export const LineZ = Shape.registerMethod(
+export const LineZ = Shape.registerMethod2(
   'LineZ',
   ['intervals'],
   (intervals) => {
