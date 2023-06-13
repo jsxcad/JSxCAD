@@ -1,10 +1,10 @@
 import { Shape } from './Shape.js';
 import { fill as fillGeometry } from '@jsxcad/geometry';
 
-export const fill = Shape.registerMethod(
+export const fill = Shape.registerMethod2(
   ['fill', 'f'],
-  () => async (shape) =>
-    Shape.fromGeometry(fillGeometry(await shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(fillGeometry(geometry))
 );
 
 export const f = fill;

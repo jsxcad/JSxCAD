@@ -76,7 +76,7 @@ export { eachEdge } from './eachEdge.js';
 export { eachPoint } from './eachPoint.js';
 export { eachSegment } from './eachSegment.js';
 export { eagerTransform } from './eagerTransform.js';
-export { edit } from './edit.js';
+// export { edit } from './edit.js';
 export { edges } from './edges.js';
 export { extrudeX, extrudeY, extrudeZ, ex, ey, ez } from './extrude.js';
 export { extrudeAlong, e } from './extrudeAlong.js';

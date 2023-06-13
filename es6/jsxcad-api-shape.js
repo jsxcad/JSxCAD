@@ -1323,99 +1323,10 @@ const alignment = Shape.registerMethod2(
   }
 );
 
-const toShape = Shape.registerMethod(
-  'toShape',
-  (value) => async (shape) => {
-    if (Shape.isFunction(value)) {
-      value = await value(Shape.chain(shape));
-    } else {
-      value = await value;
-    }
-    if (Shape.isShape(value)) {
-      return value;
-    } else {
-      throw Error(
-        `Expected Function or Shape. Received: ${value.constructor.name}`
-      );
-    }
-  }
-);
-
-const toShapes = Shape.registerMethod(
-  'toShapes',
-  (value) => async (shape) => {
-    if (value instanceof Promise) {
-      throw Error('toShapes/promise/1');
-    }
-    if (Shape.isFunction(value)) {
-      value = await value(Shape.chain(shape));
-    }
-    if (value instanceof Promise) {
-      throw Error('toShapes/promise/2');
-    }
-    if (Shape.isShape(value) && value.toGeometry().type === 'group') {
-      const out = [];
-      for (const geometry of (await value.toGeometry()).content) {
-        const item = Shape.fromGeometry(geometry);
-        out.push(item);
-        if (item instanceof Promise) {
-          throw Error('toShapes/promise/2a');
-        }
-      }
-      value = out;
-    }
-    if (value instanceof Promise) {
-      throw Error('toShapes/promise/3');
-    }
-    if (Shape.isArray(value)) {
-      const out = [];
-      for (const item of value) {
-        if (item === undefined) {
-          continue;
-        }
-        if (item instanceof Promise) {
-          throw Error('toShapes/promise/4');
-        }
-        out.push(...(await toShapes(item)(shape)));
-      }
-      return out;
-    } else {
-      if (value instanceof Promise) {
-        throw Error('toShapes/promise/5');
-      }
-      return [await toShape(value)(shape)];
-    }
-  }
-);
-
-const toShapesGeometries = Shape.registerMethod(
-  'toShapesGeometries',
-  (value) => async (shape) => {
-    const shapes = await toShapes(value)(shape);
-    const geometries = [];
-    for (const shape of shapes) {
-      if (shape instanceof Promise) {
-        throw Error('promise');
-      }
-      geometries.push(await shape.toGeometry());
-    }
-    return geometries;
-  }
-);
-
-const Group = Shape.registerMethod(
+const Group = Shape.registerMethod2(
   'Group',
-  (...shapes) =>
-    async (shape) => {
-      for (const item of shapes) {
-        if (item instanceof Promise) {
-          throw Error(`Group/promise: ${JSON.stringify(await item)}`);
-        }
-      }
-      return Shape.fromGeometry(
-        taggedGroup({}, ...(await toShapesGeometries(shapes)(shape)))
-      );
-    }
+  ['geometries'],
+  (geometries) => Shape.fromGeometry(taggedGroup({}, ...geometries))
 );
 
 const op = Shape.registerMethod2(
@@ -1489,6 +1400,71 @@ const asPart = Shape.registerMethod2(
   ['inputGeometry', 'string'],
   (geometry, partName) =>
     Shape.fromGeometry(taggedItem({ tags: [`part:${partName}`] }, geometry))
+);
+
+const toShape = Shape.registerMethod(
+  'toShape',
+  (value) => async (shape) => {
+    if (Shape.isFunction(value)) {
+      value = await value(Shape.chain(shape));
+    } else {
+      value = await value;
+    }
+    if (Shape.isShape(value)) {
+      return value;
+    } else {
+      throw Error(
+        `Expected Function or Shape. Received: ${value.constructor.name}`
+      );
+    }
+  }
+);
+
+const toShapes = Shape.registerMethod(
+  'toShapes',
+  (value) => async (shape) => {
+    if (value instanceof Promise) {
+      throw Error('toShapes/promise/1');
+    }
+    if (Shape.isFunction(value)) {
+      value = await value(Shape.chain(shape));
+    }
+    if (value instanceof Promise) {
+      throw Error('toShapes/promise/2');
+    }
+    if (Shape.isShape(value) && value.toGeometry().type === 'group') {
+      const out = [];
+      for (const geometry of (await value.toGeometry()).content) {
+        const item = Shape.fromGeometry(geometry);
+        out.push(item);
+        if (item instanceof Promise) {
+          throw Error('toShapes/promise/2a');
+        }
+      }
+      value = out;
+    }
+    if (value instanceof Promise) {
+      throw Error('toShapes/promise/3');
+    }
+    if (Shape.isArray(value)) {
+      const out = [];
+      for (const item of value) {
+        if (item === undefined) {
+          continue;
+        }
+        if (item instanceof Promise) {
+          throw Error('toShapes/promise/4');
+        }
+        out.push(...(await toShapes(item)(shape)));
+      }
+      return out;
+    } else {
+      if (value instanceof Promise) {
+        throw Error('toShapes/promise/5');
+      }
+      return [await toShape(value)(shape)];
+    }
+  }
 );
 
 const transform = Shape.registerMethod2(
@@ -2431,17 +2407,10 @@ const cut = Shape.registerMethod2(
     )
 );
 
-const cutFrom = Shape.registerMethod(
+const cutFrom = Shape.registerMethod2(
   'cutFrom',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions: others, strings: modes } = destructure(args);
-      if (others.length !== 1) {
-        throw Error(`cutFrom requires one shape or function.`);
-      }
-      const [other] = others;
-      return cut(shape, ...modes)(await toShape(other)(shape));
-    }
+  ['input', 'shape', 'modes:open,exact,noVoid,noGhost'],
+  (input, other, modes) => cut(input, ...modes)(other)
 );
 
 const cutOut = Shape.registerMethod(
@@ -2469,30 +2438,19 @@ const cutOut = Shape.registerMethod(
     }
 );
 
-const deform = Shape.registerMethod(
+const deform = Shape.registerMethod2(
   'deform',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions: selections, object: options } =
-        destructure(args);
-      const { iterations, tolerance, alpha } = options;
-      return Shape.fromGeometry(
-        deform$1(
-          await shape.toGeometry(),
-          await shape.toShapesGeometries(selections),
-          iterations,
-          tolerance,
-          alpha
-        )
-      );
-    }
+  ['inputGeometry', 'geometries', 'options'],
+  (geometry, selections, { iterations, tolerance, alpha } = {}) =>
+    Shape.fromGeometry(
+      deform$1(geometry, selections, iterations, tolerance, alpha)
+    )
 );
 
-// TODO: Rename clean at the lower levels.
-const demesh = Shape.registerMethod(
+const demesh = Shape.registerMethod2(
   'demesh',
-  (options) => (shape) =>
-    Shape.fromGeometry(demesh$1(shape.toGeometry(), options))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(demesh$1(geometry))
 );
 
 const toCoordinates = Shape.registerMethod2(
@@ -2594,19 +2552,19 @@ const on = Shape.registerMethod2(
   }
 );
 
-const drop = Shape.registerMethod(
+const drop = Shape.registerMethod2(
   'drop',
-  (selector) => async (shape) => on(selector, ghost())(await shape)
+  ['input', 'shape'],
+  (input, selector) => on(selector, ghost())(input)
 );
 
 const List = (...shapes) => shapes;
 
-const list =
-  (...shapes) =>
-  (shape) =>
-    List(...shapes);
-
-Shape.registerMethod('list', list);
+const list = Shape.registerMethod2(
+  'list',
+  ['values'],
+  (values) => values
+);
 
 Shape.List = List;
 
@@ -4058,50 +4016,50 @@ const toSegments = (letters) => {
   return Group(...rendered).scale(1 / 28);
 };
 
-const Hershey = Shape.registerMethod(
+const Hershey = Shape.registerMethod2(
   'Hershey',
-  (text, size) => async (shape) => toSegments(text).scale(size)
+  ['string', 'number'],
+  (text, size) => toSegments(text).scale(size)
 );
 
-const getNot = Shape.registerMethod(
+const getNot = Shape.registerMethod2(
   ['getNot', 'gn'],
-  (...tags) =>
-    async (shape) => {
-      const isMatch = oneOfTagMatcher(tags, 'item');
-      const picks = [];
-      const walk = (geometry, descend) => {
-        const { tags, type } = geometry;
-        if (type === 'group') {
-          return descend();
-        }
-        let discard = false;
-        if (isMatch(`type:${geometry.type}`)) {
-          discard = true;
-        } else {
-          for (const tag of tags) {
-            if (isMatch(tag)) {
-              discard = true;
-              break;
-            }
+  ['inputGeometry', 'strings'],
+  (geometry, tags) => {
+    const isMatch = oneOfTagMatcher(tags, 'item');
+    const picks = [];
+    const walk = (geometry, descend) => {
+      const { tags, type } = geometry;
+      if (type === 'group') {
+        return descend();
+      }
+      let discard = false;
+      if (isMatch(`type:${geometry.type}`)) {
+        discard = true;
+      } else {
+        for (const tag of tags) {
+          if (isMatch(tag)) {
+            discard = true;
+            break;
           }
         }
-        if (!discard) {
-          picks.push(Shape.fromGeometry(geometry));
-        }
-        if (type !== 'item') {
-          return descend();
-        }
-      };
-      const geometry = await shape.toGeometry();
-      if (geometry.type === 'item') {
-        // FIX: Can we make this less magical?
-        // This allows constructions like s.get('a').get('b')
-        visit(geometry.content[0], walk);
-      } else {
-        visit(geometry, walk);
       }
-      return Group(...picks);
+      if (!discard) {
+        picks.push(Shape.fromGeometry(geometry));
+      }
+      if (type !== 'item') {
+        return descend();
+      }
+    };
+    if (geometry.type === 'item') {
+      // FIX: Can we make this less magical?
+      // This allows constructions like s.get('a').get('b')
+      visit(geometry.content[0], walk);
+    } else {
+      visit(geometry, walk);
     }
+    return Group(...picks);
+  }
 );
 
 const gn = getNot;
@@ -4546,40 +4504,27 @@ const eagerTransform = Shape.registerMethod(
     Shape.fromGeometry(eagerTransform$1(matrix, await shape.toGeometry()))
 );
 
-// TODO: deprecate.
-const edit = Shape.registerMethod(
-  'edit',
-  (editId) => (shape) => shape.untag('editId:*').tag(`editId:${editId}`)
-);
-
-const edges = Shape.registerMethod(
+const edges = Shape.registerMethod2(
   'edges',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions, object: options = {} } = destructure(args);
-      const { selections = [] } = options;
-      let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
-      if (edgesOp instanceof Shape) {
-        const edgesShape = edgesOp;
-        edgesOp = (edges) => edgesShape.to(edges);
-      }
-      const edges = [];
-      eachFaceEdges(
-        await shape.toGeometry(),
-        await shape.toShapesGeometries(selections),
-        (faceGeometry, edgeGeometry) => {
-          if (edgeGeometry) {
-            edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
-          }
+  ['input', 'function', 'function', 'geometries'],
+  async (input, edgesOp = (edges) => edges, groupOp = Group, selections) => {
+    const edges = [];
+    eachFaceEdges(
+      await input.toGeometry(),
+      selections,
+      (faceGeometry, edgeGeometry) => {
+        if (edgeGeometry) {
+          edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
         }
-      );
-      const grouped = groupOp(...edges);
-      if (grouped instanceof Function) {
-        return grouped(shape);
-      } else {
-        return grouped;
       }
+    );
+    const grouped = groupOp(...edges);
+    if (grouped instanceof Function) {
+      return grouped(input);
+    } else {
+      return grouped;
     }
+  }
 );
 
 const faces = Shape.registerMethod2(
@@ -4593,42 +4538,32 @@ const faces = Shape.registerMethod2(
     )(input)
 );
 
-const fill = Shape.registerMethod(
+const fill = Shape.registerMethod2(
   ['fill', 'f'],
-  () => async (shape) =>
-    Shape.fromGeometry(fill$2(await shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(fill$2(geometry))
 );
 
-const fit = Shape.registerMethod('fit', (...args) => {
-  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return async (shape) =>
+const fit = Shape.registerMethod2(
+  'fit',
+  ['inputGeometry', 'geometries', 'modes:exact'],
+  (geometry, geometries, modes) =>
     Shape.fromGeometry(
-      disjoint$1(
-        [...(await shape.toShapesGeometries(shapes)), await shape.toGeometry()],
-        undefined,
-        modes.includes('exact')
-      )
-    );
-});
-
-const fitTo = Shape.registerMethod('fitTo', (...args) => {
-  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return async (shape) =>
-    Shape.fromGeometry(
-      disjoint$1(
-        [await shape.toGeometry(), ...(await shape.toShapesGeometries(shapes))],
-        undefined,
-        modes.includes('exact')
-      )
-    );
-});
-
-const fix = Shape.registerMethod(
-  'fix',
-  () => (shape) =>
-    Shape.fromGeometry(
-      fix$1(shape.toGeometry(), /* removeSelfIntersections= */ true)
+      disjoint$1([...geometries, geometry], undefined, modes.includes('exact'))
     )
+);
+
+const fitTo = Shape.registerMethod2(
+  'fitTo',
+  ['inputGeometry', 'geometries', 'modes:exact'],
+  (geometry, geometries, modes) =>
+    Shape.fromGeometry(
+      disjoint$1([geometry, ...geometries], undefined, modes.includes('exact'))
+    )
+);
+
+const fix = Shape.registerMethod('fix', ['inputGeometry'], (geometry) =>
+  Shape.fromGeometry(fix$1(geometry, /* removeSelfIntersections= */ true))
 );
 
 const origin = Shape.registerMethod2(
@@ -4654,9 +4589,8 @@ const to = Shape.registerMethod2(
   }
 );
 
-const flat = Shape.registerMethod(
-  'flat',
-  () => async (shape) => to(XY())(shape)
+const flat = Shape.registerMethod2('flat', ['input'], (input) =>
+  to(XY())(input)
 );
 
 const MODES =
@@ -4868,35 +4802,36 @@ const view = Shape.registerMethod2(
   }
 );
 
-const gcode = Shape.registerMethod(
+const gcode = Shape.registerMethod2(
   'gcode',
-  (...args) =>
-    async (shape) => {
-      const {
-        value: name,
-        func: op = (s) => s,
-        object: options = {},
-      } = destructure(args);
-      const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
-      let index = 0;
-      for (const entry of await ensurePages(op(shape))) {
-        const gcodePath = `download/gcode/${path}/${id}/${viewId}`;
-        await write(gcodePath, await toGcode(entry, {}, options));
+  ['input', 'string', 'function', 'options'],
+  async (
+    input,
+    name,
+    op = (s) => s,
+    { speed = 0, feedrate = 0, jumpHeight = 1 } = {}
+  ) => {
+    const options = { speed, feedrate, jumpHeight };
+    const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
+    let index = 0;
+    for (const entry of await ensurePages(op(input))) {
+      const gcodePath = `download/gcode/${path}/${id}/${viewId}`;
+      await write(gcodePath, await toGcode(entry, {}, options));
 
-        const suffix = index++ === 0 ? '' : `_${index}`;
-        const filename = `${name}${suffix}.gcode`;
-        const record = {
-          path: gcodePath,
-          filename,
-          type: 'application/x-gcode',
-        };
-        // Produce a view of what will be downloaded.
-        const hash$1 = computeHash({ filename, options }) + hash(entry);
-        await gridView(name, options.view)(Shape.fromGeometry(entry));
-        emit({ download: { entries: [record] }, hash: hash$1 });
-      }
-      return shape;
+      const suffix = index++ === 0 ? '' : `_${index}`;
+      const filename = `${name}${suffix}.gcode`;
+      const record = {
+        path: gcodePath,
+        filename,
+        type: 'application/x-gcode',
+      };
+      // Produce a view of what will be downloaded.
+      const hash$1 = computeHash({ filename, options }) + hash(entry);
+      await gridView(name, options.view)(Shape.fromGeometry(entry));
+      emit({ download: { entries: [record] }, hash: hash$1 });
     }
+    return input;
+  }
 );
 
 const Fuse = Join;
@@ -5039,18 +4974,17 @@ const hold = Shape.registerMethod2(
   (inputShape, shapes) => inputShape.on(inFn(), inFn().and(...shapes))
 );
 
-const image = Shape.registerMethod(
+const image = Shape.registerMethod2(
   'image',
-  (url) => (shape) => untag('image:*').tag(`image:${url}`)(shape)
+  ['input', 'string'],
+  (input, url) => untag('image:*').tag(`image:${url}`)(input)
 );
 
-const inset = Shape.registerMethod(
+const inset = Shape.registerMethod2(
   'inset',
-  (initial = 1, { segments = 16, step, limit } = {}) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        inset$1(await shape.toGeometry(), initial, step, limit, segments)
-      )
+  ['inputGeometry', 'number', 'options'],
+  (geometry, initial = 1, { segments = 16, step, limit } = {}) =>
+    Shape.fromGeometry(inset$1(geometry, initial, step, limit, segments))
 );
 
 const involute = Shape.registerMethod2(
@@ -6294,6 +6228,21 @@ const toNestedValues = Shape.registerMethod(
   }
 );
 
+const toShapesGeometries = Shape.registerMethod(
+  'toShapesGeometries',
+  (value) => async (shape) => {
+    const shapes = await toShapes(value)(shape);
+    const geometries = [];
+    for (const shape of shapes) {
+      if (shape instanceof Promise) {
+        throw Error('promise');
+      }
+      geometries.push(await shape.toGeometry());
+    }
+    return geometries;
+  }
+);
+
 const tool = Shape.registerMethod2(
   'tool',
   ['inputGeometry', 'string'],
@@ -6600,9 +6549,10 @@ const Polygon = Shape.registerMethod2(
 
 const Face = Polygon;
 
-const Hexagon = Shape.registerMethod(
+const Hexagon = Shape.registerMethod2(
   'Hexagon',
-  (x, y, z) => async (shape) => Arc(x, y, z, { sides: 6 })
+  ['interval', 'interval', 'interval'],
+  (x, y, z) => Arc(x, y, z, { sides: 6 })
 );
 
 const fromPointsAndPaths = (points = [], paths = []) => {
@@ -6672,43 +6622,38 @@ const reifyIcosahedron = async (c1, c2) => {
     .absolute();
 };
 
-const Icosahedron = Shape.registerMethod(
+const Icosahedron = Shape.registerMethod2(
   'Icosahedron',
-  (x = 1, y = x, z = x) =>
-    async (shape) => {
-      const [c1, c2] = await buildCorners(x, y, z)(shape);
-      return reifyIcosahedron(c1, c2);
-    }
+  ['input', 'interval', 'interval', 'interval'],
+  async (input, x = 1, y = x, z = x) => {
+    const [c1, c2] = await buildCorners(x, y, z)(input);
+    return reifyIcosahedron(c1, c2);
+  }
 );
 
-const Implicit = Shape.registerMethod(
+const Implicit = Shape.registerMethod2(
   'Implicit',
-  (...args) =>
-    async (shape) => {
-      const [radius = 1, op, options] = await destructure2(
-        shape,
-        args,
-        'number',
-        'function',
-        'options'
-      );
-      const {
-        angularBound = 30,
-        radiusBound = 0.1,
-        distanceBound = 0.1,
-        errorBound = 0.001,
-      } = options;
-      return Shape.fromGeometry(
-        computeImplicitVolume(
-          op,
-          radius,
-          angularBound,
-          radiusBound,
-          distanceBound,
-          errorBound
-        )
-      );
-    }
+  ['number', 'function', 'options'],
+  (
+    radius = 1,
+    op,
+    {
+      angularBound = 30,
+      radiusBound = 0.1,
+      distanceBound = 0.1,
+      errorBound = 0.001,
+    } = {}
+  ) =>
+    Shape.fromGeometry(
+      computeImplicitVolume(
+        op,
+        radius,
+        angularBound,
+        radiusBound,
+        distanceBound,
+        errorBound
+      )
+    )
 );
 
 const Line = Shape.registerMethod2(
@@ -6899,4 +6844,4 @@ const Wave = Shape.registerMethod2(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, edit, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

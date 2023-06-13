@@ -1,6 +1,5 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
 import { eachFaceEdges } from '@jsxcad/geometry';
 
 // TODO: Add an option to include a virtual segment at the target of the last
@@ -19,32 +18,25 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
-export const edges = Shape.registerMethod(
+export const edges = Shape.registerMethod2(
   'edges',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions, object: options = {} } = destructure(args);
-      const { selections = [] } = options;
-      let [edgesOp = (edges) => edges, groupOp = Group] = shapesAndFunctions;
-      if (edgesOp instanceof Shape) {
-        const edgesShape = edgesOp;
-        edgesOp = (edges) => edgesShape.to(edges);
-      }
-      const edges = [];
-      eachFaceEdges(
-        await shape.toGeometry(),
-        await shape.toShapesGeometries(selections),
-        (faceGeometry, edgeGeometry) => {
-          if (edgeGeometry) {
-            edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
-          }
+  ['input', 'function', 'function', 'geometries'],
+  async (input, edgesOp = (edges) => edges, groupOp = Group, selections) => {
+    const edges = [];
+    eachFaceEdges(
+      await input.toGeometry(),
+      selections,
+      (faceGeometry, edgeGeometry) => {
+        if (edgeGeometry) {
+          edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
         }
-      );
-      const grouped = groupOp(...edges);
-      if (grouped instanceof Function) {
-        return grouped(shape);
-      } else {
-        return grouped;
       }
+    );
+    const grouped = groupOp(...edges);
+    if (grouped instanceof Function) {
+      return grouped(input);
+    } else {
+      return grouped;
     }
+  }
 );

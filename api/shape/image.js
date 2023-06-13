@@ -1,7 +1,8 @@
 import Shape from './Shape.js';
 import { untag } from './untag.js';
 
-export const image = Shape.registerMethod(
+export const image = Shape.registerMethod2(
   'image',
-  (url) => (shape) => untag('image:*').tag(`image:${url}`)(shape)
+  ['input', 'string'],
+  (input, url) => untag('image:*').tag(`image:${url}`)(input)
 );

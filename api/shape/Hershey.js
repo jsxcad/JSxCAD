@@ -1449,9 +1449,10 @@ export const toSegments = (letters) => {
   return Group(...rendered).scale(1 / 28);
 };
 
-export const Hershey = Shape.registerMethod(
+export const Hershey = Shape.registerMethod2(
   'Hershey',
-  (text, size) => async (shape) => toSegments(text).scale(size)
+  ['string', 'number'],
+  (text, size) => toSegments(text).scale(size)
 );
 
 export default Hershey;

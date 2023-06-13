@@ -69,13 +69,13 @@ const reifyIcosahedron = async (c1, c2) => {
     .absolute();
 };
 
-export const Icosahedron = Shape.registerMethod(
+export const Icosahedron = Shape.registerMethod2(
   'Icosahedron',
-  (x = 1, y = x, z = x) =>
-    async (shape) => {
-      const [c1, c2] = await buildCorners(x, y, z)(shape);
-      return reifyIcosahedron(c1, c2);
-    }
+  ['input', 'interval', 'interval', 'interval'],
+  async (input, x = 1, y = x, z = x) => {
+    const [c1, c2] = await buildCorners(x, y, z)(input);
+    return reifyIcosahedron(c1, c2);
+  }
 );
 
 export default Icosahedron;
