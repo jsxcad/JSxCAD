@@ -236,7 +236,7 @@ Multiple turns can be provided, which will produce one result per turn.
 const aRectangle = Box(5, 5, 15).view();
 ```
 
-![Image](interactions_with_geometry.md.$32_wireframe.png)
+![Image](interactions_with_geometry.md.$32.png)
 
 ```JavaScript
 aRectangle.remesh({ method: 'edgeLength', lengths: [4, 2] }).view('wireframe');
@@ -316,6 +316,8 @@ aRectangle
 Tags lists all of the tags associated with a shape.
 
 A function can be supplied to receive the tags and shape.
+
+Tags [object Object]
 
 Tags user:tagString
 

@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 import { taggedSketch } from '@jsxcad/geometry';
 
-export const sketch = Shape.registerMethod(
+export const sketch = Shape.registerMethod2(
   'sketch',
-  () => async (shape) =>
-    Shape.fromGeometry(taggedSketch({}, await shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(taggedSketch({}, geometry))
 );

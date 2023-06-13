@@ -2,10 +2,10 @@ import { hasTypeGhost, hasTypeVoid } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-export const voidFn = Shape.registerMethod(
+export const voidFn = Shape.registerMethod2(
   ['void', 'gap'],
-  () => async (shape) =>
-    Shape.fromGeometry(hasTypeGhost(hasTypeVoid(await shape.toGeometry())))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(hasTypeGhost(hasTypeVoid(geometry)))
 );
 
 export const gap = voidFn;

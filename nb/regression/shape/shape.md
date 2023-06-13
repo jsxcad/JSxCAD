@@ -4,8 +4,6 @@
 await Triangle(10).color('red').add(Box(5).color('blue')).gridView();
 ```
 
-![Image](shape.md.$2_top.png)
-
 ```JavaScript
 await Box(5).and(Arc(5)).view('top', 'noSkin', 'noWireframe', { size: 800 });
 ```
@@ -45,6 +43,8 @@ await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView();
 ```JavaScript
 await Box(5).color('green').gridView();
 ```
+
+Colors are [object Object]
 
 Colors are undefined
 
@@ -213,6 +213,8 @@ await Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => 
 ```JavaScript
 await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 ```
+
+[object Object]
 
 undefined
 

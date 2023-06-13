@@ -1,9 +1,10 @@
 import { Arc } from './Arc.js';
 import Shape from './Shape.js';
 
-export const Pentagon = Shape.registerMethod(
+export const Pentagon = Shape.registerMethod2(
   'Pentagon',
-  (x, y, z) => (shape) => Arc(x, y, z, { sides: 5 })(shape)
+  ['input', 'interval', 'interval', 'interval'],
+  (input, x, y, z) => Arc(x, y, z, { sides: 5 })(input)
 );
 
 export default Pentagon;

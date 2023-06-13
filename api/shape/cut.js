@@ -3,7 +3,7 @@ import { cut as cutGeometry } from '@jsxcad/geometry';
 
 export const Cut = Shape.registerMethod2(
   'Cut',
-  ['geometry', 'geometries', 'modes'],
+  ['geometry', 'geometries', 'modes:open,exact,noVoid,noGhost'],
   (first, rest, modes) =>
     Shape.fromGeometry(
       cutGeometry(

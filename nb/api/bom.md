@@ -10,6 +10,8 @@ See: [asPart](../../nb/api/asPart.md)
 
 ![Image](bom.md.$2.png)
 
+Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces [object Object]
+
 Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')).bom() produces
 
 ```JavaScript

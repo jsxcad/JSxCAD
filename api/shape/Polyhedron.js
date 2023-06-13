@@ -1,19 +1,15 @@
 import Shape from './Shape.js';
 
-export const Polyhedron = Shape.registerMethod(
+export const Polyhedron = Shape.registerMethod2(
   'Polyhedron',
-  (...polygons) =>
-    async (shape) => {
-      const out = [];
-      for (const polygon of polygons) {
-        if (polygon instanceof Array) {
-          out.push({ points: polygon });
-        } else if (polygon instanceof Shape) {
-          out.push({ points: polygon.toCoordinates().reverse() });
-        }
-      }
-      return Shape.fromPolygons(out);
+  ['coordinateLists'],
+  (coordinateLists) => {
+    const out = [];
+    for (const coordinates of coordinateLists) {
+      out.push({ points: coordinates });
     }
+    return Shape.fromPolygons(out);
+  }
 );
 
 export default Polyhedron;

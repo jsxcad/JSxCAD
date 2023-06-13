@@ -123,8 +123,13 @@ export const destructure2 = async (shape, input, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
-  for (const spec of specs) {
+  for (let spec of specs) {
     const rest = [];
+    let modes;
+    if (spec.startsWith('modes:')) {
+      modes = spec.substring('modes:'.length).split(',');
+      spec = 'modes';
+    }
     switch (spec) {
       case 'objects': {
         const out = [];
@@ -281,7 +286,7 @@ export const destructure2 = async (shape, input, ...specs) => {
       case 'modes': {
         const out = [];
         for (const arg of args) {
-          if (typeof arg === 'string') {
+          if (typeof arg === 'string' && (modes === undefined || modes.includes(arg))) {
             out.push(arg);
           } else {
             rest.push(arg);
@@ -388,6 +393,26 @@ export const destructure2 = async (shape, input, ...specs) => {
         output.push(out);
         break;
       }
+      case 'coordinateLists': {
+        const out = [];
+        for (const arg of args) {
+          let value = await resolve(shape, arg);
+          if (Shape.isShape(value)) {
+            const coordinates = await getCoordinates(value);
+            if (coordinates.length > 0) {
+              out.push(coordinates);
+              continue;
+            }
+          } else if (Shape.isArray(value) && value.every(Shape.isCoordinate)) {
+            out.push(value);
+            continue;
+          }
+          // Otherwise
+          rest.push(arg);
+        }
+        output.push(out);
+        break;
+      }
       case 'segments': {
         const out = [];
         for (const arg of args) {
@@ -396,19 +421,6 @@ export const destructure2 = async (shape, input, ...specs) => {
             out.push(value);
           } else if (Shape.isArray(value) && value.every(Shape.isSegment)) {
             out.push(...value);
-          } else {
-            rest.push(arg);
-          }
-        }
-        output.push(out);
-        break;
-      }
-      case 'coordinateLists': {
-        const out = [];
-        for (const arg of args) {
-          let value = await resolve(shape, arg);
-          if (Shape.isArray(value) && value.every(Shape.isCoordinate)) {
-            out.push(value);
           } else {
             rest.push(arg);
           }

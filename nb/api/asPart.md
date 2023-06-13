@@ -10,6 +10,8 @@ See: [as](../../nb/api/as.nb), [bom](#https://raw.githubusercontent.com/jsxcad/J
 
 ![Image](asPart.md.$2.png)
 
+Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')) produces these parts: [object Object]
+
 Box(3).asPart('lid').and(z(1).rz(1 / 5), Triangle(3).z(2).asPart('base')) produces these parts:
 
 ```JavaScript
