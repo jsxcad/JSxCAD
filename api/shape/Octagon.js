@@ -1,9 +1,10 @@
 import { Arc } from './Arc.js';
 import Shape from './Shape.js';
 
-export const Octagon = Shape.registerMethod(
+export const Octagon = Shape.registerMethod2(
   'Octagon',
-  (x, y, z) => (shape) => Arc(x, y, z, { sides: 8 })(shape)
+  ['input', 'interval', 'interval', 'interval'],
+  (input, x, y, z) => Arc(x, y, z, { sides: 8 })(input)
 );
 
 export default Octagon;

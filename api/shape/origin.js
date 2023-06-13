@@ -2,10 +2,11 @@ import Point from './Point.js';
 import Shape from './Shape.js';
 import { getInverseMatrices } from '@jsxcad/geometry';
 
-export const origin = Shape.registerMethod(
+export const origin = Shape.registerMethod2(
   ['origin', 'o'],
-  () => async (shape) => {
-    const { local } = getInverseMatrices(await shape.toGeometry());
+  ['inputGeometry'],
+  (geometry) => {
+    const { local } = getInverseMatrices(geometry);
     return Point().transform(local);
   }
 );

@@ -512,8 +512,13 @@ const destructure2 = async (shape, input, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
-  for (const spec of specs) {
+  for (let spec of specs) {
     const rest = [];
+    let modes;
+    if (spec.startsWith('modes:')) {
+      modes = spec.substring('modes:'.length).split(',');
+      spec = 'modes';
+    }
     switch (spec) {
       case 'objects': {
         const out = [];
@@ -670,7 +675,10 @@ const destructure2 = async (shape, input, ...specs) => {
       case 'modes': {
         const out = [];
         for (const arg of args) {
-          if (typeof arg === 'string') {
+          if (
+            typeof arg === 'string' &&
+            (modes === undefined || modes.includes(arg))
+          ) {
             out.push(arg);
           } else {
             rest.push(arg);
@@ -2401,7 +2409,7 @@ const curve = Shape.registerMethod(
 
 const Cut = Shape.registerMethod2(
   'Cut',
-  ['geometry', 'geometries', 'modes'],
+  ['geometry', 'geometries', 'modes:open,exact,noVoid,noGhost'],
   (first, rest, modes) =>
     Shape.fromGeometry(
       cut$1(
@@ -4169,88 +4177,54 @@ const buildLayout = async ({
   return layout;
 };
 
-const Page = Shape.registerMethod('Page', (...args) => async (shape) => {
-  const [options, modes, shapes] = await destructure2(
-    shape,
-    args,
-    'options',
-    'modes',
-    'shapes'
-  );
-  let {
-    size,
-    pageMargin = 5,
-    itemMargin = 1,
-    itemsPerPage = Infinity,
-  } = options;
-  let pack = modes.includes('pack');
-  const center = modes.includes('center');
+const Page = Shape.registerMethod2(
+  'Page',
+  ['geometries', 'modes:pack,center,a4,individual', 'options'],
+  async (
+    geometries,
+    modes,
+    { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
+  ) => {
+    let pack = modes.includes('pack');
+    const center = modes.includes('center');
 
-  if (modes.includes('a4')) {
-    size = [210, 297];
-  }
-
-  if (modes.includes('individual')) {
-    pack = true;
-    itemsPerPage = 1;
-  }
-
-  const margin = itemMargin;
-  const layers = [];
-  for (const shape of shapes) {
-    for (const leaf of getLeafs(await shape.toGeometry())) {
-      layers.push(leaf);
+    if (modes.includes('a4')) {
+      size = [210, 297];
     }
-  }
-  if (!pack && size) {
-    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-    const [width, height] = size;
-    const packSize = [
-      [-width / 2, -height / 2, 0],
-      [width / 2, height / 2, 0],
-    ];
-    const pageWidth =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][X$5] * 2),
-        Math.abs(packSize[MIN][X$5] * 2)
-      ) +
-      pageMargin * 2;
-    const pageLength =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][Y$5] * 2),
-        Math.abs(packSize[MIN][Y$5] * 2)
-      ) +
-      pageMargin * 2;
-    return buildLayout({
-      layer,
-      pageWidth,
-      pageLength,
-      margin,
-      center,
-    });
-  } else if (!pack && !size) {
-    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-    const packSize = measureBoundingBox(await layer.toGeometry());
-    if (packSize === undefined) {
-      return Group();
+
+    if (modes.includes('individual')) {
+      pack = true;
+      itemsPerPage = 1;
     }
-    const pageWidth =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][X$5] * 2),
-        Math.abs(packSize[MIN][X$5] * 2)
-      ) +
-      pageMargin * 2;
-    const pageLength =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][Y$5] * 2),
-        Math.abs(packSize[MIN][Y$5] * 2)
-      ) +
-      pageMargin * 2;
-    if (isFinite(pageWidth) && isFinite(pageLength)) {
+
+    const margin = itemMargin;
+    const layers = [];
+    for (const geometry of geometries) {
+      for (const leaf of getLeafs(geometry)) {
+        layers.push(leaf);
+      }
+    }
+    if (!pack && size) {
+      const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+      const [width, height] = size;
+      const packSize = [
+        [-width / 2, -height / 2, 0],
+        [width / 2, height / 2, 0],
+      ];
+      const pageWidth =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][X$5] * 2),
+          Math.abs(packSize[MIN][X$5] * 2)
+        ) +
+        pageMargin * 2;
+      const pageLength =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][Y$5] * 2),
+          Math.abs(packSize[MIN][Y$5] * 2)
+        ) +
+        pageMargin * 2;
       return buildLayout({
         layer,
         pageWidth,
@@ -4258,102 +4232,142 @@ const Page = Shape.registerMethod('Page', (...args) => async (shape) => {
         margin,
         center,
       });
-    } else {
-      return buildLayout({
-        layer,
-        pageWidth: 0,
-        pageLength: 0,
-        margin,
-        center,
-      });
-    }
-  } else if (pack && size) {
-    // Content fits to page size.
-    const packSize = [];
-    const content = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
-      size,
-      pageMargin,
-      itemMargin,
-      perLayout: itemsPerPage,
-      packSize,
-    });
-    if (packSize.length === 0) {
-      throw Error('Packing failed');
-    }
-    const pageWidth = Math.max(1, packSize[MAX][X$5] - packSize[MIN][X$5]);
-    const pageLength = Math.max(1, packSize[MAX][Y$5] - packSize[MIN][Y$5]);
-    if (isFinite(pageWidth) && isFinite(pageLength)) {
-      const plans = [];
-      for (const layer of await content.get('pack:layout', List)) {
-        plans.push(
-          await buildLayout({
-            layer,
-            pageWidth,
-            pageLength,
-            margin,
-            center,
-          })
-        );
-      }
-      return Group(...plans);
-    } else {
+    } else if (!pack && !size) {
       const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-      return buildLayout({
-        layer,
-        pageWidth: 0,
-        pageLength: 0,
-        margin,
-        center,
-      });
-    }
-  } else if (pack && !size) {
-    const packSize = [];
-    // Page fits to content size.
-    const contents = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
-      pageMargin,
-      itemMargin,
-      perLayout: itemsPerPage,
-      packSize,
-    });
-    if (packSize.length === 0) {
-      throw Error('Packing failed');
-    }
-    // FIX: Using content.size() loses the margin, which is a problem for repacking.
-    // Probably page plans should be generated by pack and count toward the size.
-    const pageWidth = packSize[MAX][X$5] - packSize[MIN][X$5];
-    const pageLength = packSize[MAX][Y$5] - packSize[MIN][Y$5];
-    if (isFinite(pageWidth) && isFinite(pageLength)) {
-      const plans = [];
-      for (const layer of await contents.get('pack:layout', List)) {
-        const layout = await buildLayout({
+      const packSize = measureBoundingBox(await layer.toGeometry());
+      if (packSize === undefined) {
+        return Group();
+      }
+      const pageWidth =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][X$5] * 2),
+          Math.abs(packSize[MIN][X$5] * 2)
+        ) +
+        pageMargin * 2;
+      const pageLength =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][Y$5] * 2),
+          Math.abs(packSize[MIN][Y$5] * 2)
+        ) +
+        pageMargin * 2;
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        return buildLayout({
           layer,
-          packSize,
           pageWidth,
           pageLength,
           margin,
           center,
         });
-        plans.push(layout);
+      } else {
+        return buildLayout({
+          layer,
+          pageWidth: 0,
+          pageLength: 0,
+          margin,
+          center,
+        });
       }
-      return Group(...plans);
-    } else {
-      const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-      return buildLayout({
-        layer,
-        pageWidth: 0,
-        pageLength: 0,
-        margin,
-        center,
-      });
+    } else if (pack && size) {
+      // Content fits to page size.
+      const packSize = [];
+      const content = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack(
+        (min, max) => {
+          packSize[MIN] = min;
+          packSize[MAX] = max;
+        },
+        {
+          size,
+          pageMargin,
+          itemMargin,
+          perLayout: itemsPerPage,
+        }
+      );
+      if (packSize.length === 0) {
+        throw Error('Packing failed');
+      }
+      const pageWidth = Math.max(1, packSize[MAX][X$5] - packSize[MIN][X$5]);
+      const pageLength = Math.max(1, packSize[MAX][Y$5] - packSize[MIN][Y$5]);
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        const plans = [];
+        for (const layer of await content.get('pack:layout', List)) {
+          plans.push(
+            await buildLayout({
+              layer,
+              pageWidth,
+              pageLength,
+              margin,
+              center,
+            })
+          );
+        }
+        return Group(...plans);
+      } else {
+        const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+        return buildLayout({
+          layer,
+          pageWidth: 0,
+          pageLength: 0,
+          margin,
+          center,
+        });
+      }
+    } else if (pack && !size) {
+      const packSize = [];
+      // Page fits to content size.
+      const contents = await Shape.fromGeometry(
+        taggedGroup({}, ...layers)
+      ).pack(
+        (min, max) => {
+          packSize[MIN] = min;
+          packSize[MAX] = max;
+        },
+        {
+          pageMargin,
+          itemMargin,
+          perLayout: itemsPerPage,
+        }
+      );
+      if (packSize.length === 0) {
+        throw Error('Packing failed');
+      }
+      // FIX: Using content.size() loses the margin, which is a problem for repacking.
+      // Probably page plans should be generated by pack and count toward the size.
+      const pageWidth = packSize[MAX][X$5] - packSize[MIN][X$5];
+      const pageLength = packSize[MAX][Y$5] - packSize[MIN][Y$5];
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        const plans = [];
+        for (const layer of await contents.get('pack:layout', List)) {
+          const layout = await buildLayout({
+            layer,
+            packSize,
+            pageWidth,
+            pageLength,
+            margin,
+            center,
+          });
+          plans.push(layout);
+        }
+        return Group(...plans);
+      } else {
+        const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+        return buildLayout({
+          layer,
+          pageWidth: 0,
+          pageLength: 0,
+          margin,
+          center,
+        });
+      }
     }
   }
-});
+);
 
-const page = Shape.registerMethod(
+const page = Shape.registerMethod2(
   'page',
-  (...args) =>
-    (shape) =>
-      Page(Shape.chain(shape), ...args)
+  ['input', 'rest'],
+  (input, rest) => Page(input, ...rest)
 );
 
 const ensurePages = async (shape, depth = 0) => {
@@ -4476,32 +4490,29 @@ const move = Shape.registerMethod2(
 
 const xyz = move;
 
-const eachPoint = Shape.registerMethod(
+const eachPoint = Shape.registerMethod2(
   'eachPoint',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions } = destructure(args);
-      let [pointOp = (point) => (shape) => point, groupOp = Group] =
-        shapesAndFunctions;
-      const coordinates = [];
-      let nth = 0;
-      eachPoint$1(await shape.toGeometry(), ([x = 0, y = 0, z = 0]) =>
-        coordinates.push([x, y, z])
-      );
-      const points = [];
-      for (const [x, y, z] of coordinates) {
-        const point = await Point();
-        const moved = await move(x, y, z)(point);
-        const operated = await pointOp(Shape.chain(moved), nth++);
-        points.push(operated);
-      }
-      const grouped = groupOp(...points);
-      if (Shape.isFunction(grouped)) {
-        return grouped(shape);
-      } else {
-        return grouped;
-      }
+  ['input', 'function', 'function'],
+  async (input, pointOp = (point) => (shape) => point, groupOp = Group) => {
+    const coordinates = [];
+    let nth = 0;
+    eachPoint$1(await input.toGeometry(), ([x = 0, y = 0, z = 0]) =>
+      coordinates.push([x, y, z])
+    );
+    const points = [];
+    for (const [x, y, z] of coordinates) {
+      const point = await Point();
+      const moved = await move(x, y, z)(point);
+      const operated = await pointOp(Shape.chain(moved), nth++);
+      points.push(operated);
     }
+    const grouped = groupOp(...points);
+    if (Shape.isFunction(grouped)) {
+      return grouped(input);
+    } else {
+      return grouped;
+    }
+  }
 );
 
 const eachSegment = Shape.registerMethod(
@@ -4627,10 +4638,11 @@ const fix = Shape.registerMethod(
     )
 );
 
-const origin = Shape.registerMethod(
+const origin = Shape.registerMethod2(
   ['origin', 'o'],
-  () => async (shape) => {
-    const { local } = getInverseMatrices(await shape.toGeometry());
+  ['inputGeometry'],
+  (geometry) => {
+    const { local } = getInverseMatrices(geometry);
     return Point().transform(local);
   }
 );
@@ -4653,6 +4665,9 @@ const flat = Shape.registerMethod(
   'flat',
   () => async (shape) => to(XY())(shape)
 );
+
+const MODES =
+  'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
 
 const applyModes = async (shape, options, modes) => {
   if (modes.includes('wireframe')) {
@@ -4706,6 +4721,7 @@ const baseView =
       console.log('No sourceLocation');
     }
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
+    console.log(`QQ/baseView: viewId=${viewId} id=${id} path=${path}`);
     const displayGeometry = await viewShape.toDisplayGeometry();
     for (const pageGeometry of await ensurePages(
       Shape.fromGeometry(displayGeometry),
@@ -4733,11 +4749,10 @@ const baseView =
 
 Shape.registerMethod2(
   'topView',
-  ['input', 'modes', 'value', 'function', 'options'],
+  ['input', MODES, 'function', 'options', 'value'],
   async (
     input,
     modes,
-    viewId,
     op = (x) => x,
     {
       size = 512,
@@ -4747,7 +4762,8 @@ Shape.registerMethod2(
       width,
       height,
       position = [0, 0, 100],
-    } = {}
+    } = {},
+    viewId
   ) => {
     const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -4757,11 +4773,10 @@ Shape.registerMethod2(
 
 const gridView = Shape.registerMethod2(
   'gridView',
-  ['input', 'modes', 'value', 'function', 'options'],
+  ['input', MODES, 'function', 'options', 'value'],
   async (
     input,
     modes,
-    viewId,
     op = (x) => x,
     {
       size = 512,
@@ -4771,7 +4786,8 @@ const gridView = Shape.registerMethod2(
       width,
       height,
       position = [0, 0, 100],
-    } = {}
+    } = {},
+    viewId
   ) => {
     const options = { skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -4781,11 +4797,10 @@ const gridView = Shape.registerMethod2(
 
 Shape.registerMethod2(
   'frontView',
-  ['input', 'modes', 'value', 'function', 'options'],
+  ['input', MODES, 'function', 'options', 'value'],
   async (
     input,
     modes,
-    viewId,
     op = (x) => x,
     {
       size = 512,
@@ -4795,7 +4810,8 @@ Shape.registerMethod2(
       width,
       height,
       position = [0, -100, 0],
-    } = {}
+    } = {},
+    viewId
   ) => {
     const options = { skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -4805,11 +4821,10 @@ Shape.registerMethod2(
 
 Shape.registerMethod2(
   'sideView',
-  ['input', 'modes', 'value', 'function', 'options'],
+  ['input', MODES, 'function', 'options', 'value'],
   async (
     input,
     modes,
-    viewId,
     op = (x) => x,
     {
       size = 512,
@@ -4819,7 +4834,8 @@ Shape.registerMethod2(
       width,
       height,
       position = [100, 0, 0],
-    } = {}
+    } = {},
+    viewId
   ) => {
     const options = { skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
@@ -4829,8 +4845,8 @@ Shape.registerMethod2(
 
 const view = Shape.registerMethod2(
   'view',
-  ['input', 'modes', 'value', 'function', 'options'],
-  async (input, modes, viewId, op = (x) => x, options) => {
+  ['input', MODES, 'function', 'options', 'value'],
+  async (input, modes, op = (x) => x, options, viewId) => {
     const shape = await applyModes(input, options, modes);
     if (modes.includes('grid')) {
       options.style = 'grid';
@@ -5145,33 +5161,31 @@ const lowerEnvelope = Shape.registerMethod(
     Shape.fromGeometry(generateLowerEnvelope(await shape.toGeometry()))
 );
 
-const overlay = Shape.registerMethod(
+const overlay = Shape.registerMethod2(
   'overlay',
-  () => (shape) => Shape.fromGeometry(hasShowOverlay(shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(hasShowOverlay(geometry))
 );
 
 // Note: the first three segments are notionally 'length', 'depth', 'height'.
+// Really this should probably be some kind of 'diameter at an angle' measurement, like using a set of calipers.
 
-const mark = Shape.registerMethod('mark', () => async (shape) => {
-  return Shape.fromGeometry(
-    computeOrientedBoundingBox(await shape.toGeometry())
-  );
-});
+const mark = Shape.registerMethod2(
+  'mark',
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(computeOrientedBoundingBox(geometry))
+);
 
-const masked = Shape.registerMethod(
+const masked = Shape.registerMethod2(
   'masked',
-  (...args) =>
-    async (shape) => {
-      const [masks] = await destructure2(shape, args, 'shapes');
-      const shapes = [];
-      for (const mask of masks) {
-        shapes.push(await gap()(mask));
-      }
-      return Group(
-        ...shapes,
-        Shape.fromGeometry(hasTypeMasked(await shape.toGeometry()))
-      );
+  ['inputGeometry', 'shapes'],
+  async (geometry, masks) => {
+    const shapes = [];
+    for (const mask of masks) {
+      shapes.push(await gap()(mask));
     }
+    return Group(...shapes, Shape.fromGeometry(hasTypeMasked(geometry)));
+  }
 );
 
 const masking = Shape.registerMethod(
@@ -5253,27 +5267,18 @@ const nth = Shape.registerMethod2(
 
 const n = nth;
 
-const offset = Shape.registerMethod(
+const offset = Shape.registerMethod2(
   'offset',
-  (initial = 1, { segments = 16, step, limit } = {}) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        offset$1(await shape.toGeometry(), initial, step, limit, segments)
-      )
+  ['inputGeometry', 'number', 'options'],
+  (geometry, initial = 1, { segments = 16, step, limit } = {}) =>
+    Shape.fromGeometry(offset$1(geometry, initial, step, limit, segments))
 );
 
-const outline = Shape.registerMethod(
+const outline = Shape.registerMethod2(
   'outline',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions: selections } = destructure(args);
-      return Shape.fromGeometry(
-        outline$1(
-          await shape.toGeometry(),
-          await shape.toShapesGeometries(selections)
-        )
-      );
-    }
+  ['inputGeometry', 'geometries'],
+  (geometry, selections) =>
+    Shape.fromGeometry(outline$1(geometry, selections))
 );
 
 const cross = ([ax, ay, az], [bx, by, bz]) => [
@@ -5368,60 +5373,54 @@ const orient = Shape.registerMethod(
     }
 );
 
-const pack = Shape.registerMethod(
+const pack = Shape.registerMethod2(
   'pack',
-  ({
-      size,
-      pageMargin = 5,
-      itemMargin = 1,
-      perLayout = Infinity,
-      packSize = [],
-    } = {}) =>
-    async (shape) => {
-      if (perLayout === 0) {
-        // Packing was disabled -- do nothing.
-        return shape;
-      }
-
-      let todo = [];
-      for (const leaf of getLeafs(await shape.toGeometry())) {
-        todo.push(leaf);
-      }
-      const packedLayers = [];
-      while (todo.length > 0) {
-        const input = [];
-        while (todo.length > 0 && input.length < perLayout) {
-          input.push(todo.shift());
-        }
-        const [packed, unpacked, minPoint, maxPoint] = pack$1(
-          { size, pageMargin, itemMargin },
-          ...input
-        );
-        if (minPoint.every(isFinite) && maxPoint.every(isFinite)) {
-          // CHECK: Why is this being overwritten by each pass?
-          packSize[0] = minPoint;
-          packSize[1] = maxPoint;
-          if (packed.length === 0) {
-            break;
-          } else {
-            packedLayers.push(
-              taggedItem(
-                { tags: ['pack:layout'] },
-                taggedGroup({}, ...packed) // .map(shape => shape.toGeometry())
-              )
-            );
-          }
-          todo.unshift(...unpacked);
-        }
-      }
-      // CHECK: Can this distinguish between a set of packed paged, and a single
-      // page that's packed?
-      let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
-      if (size === undefined) {
-        packedShape = await packedShape.align('xy');
-      }
-      return packedShape;
+  ['input', 'function', 'options'],
+  async (
+    input,
+    adviseSize = (min, max) => {},
+    { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity } = {}
+  ) => {
+    if (perLayout === 0) {
+      // Packing was disabled -- do nothing.
+      return input;
     }
+
+    let todo = [];
+    for (const leaf of getLeafs(await input.toGeometry())) {
+      todo.push(leaf);
+    }
+    const packedLayers = [];
+    while (todo.length > 0) {
+      const input = [];
+      while (todo.length > 0 && input.length < perLayout) {
+        input.push(todo.shift());
+      }
+      const [packed, unpacked, minPoint, maxPoint] = pack$1(
+        { size, pageMargin, itemMargin },
+        ...input
+      );
+      if (minPoint.every(isFinite) && maxPoint.every(isFinite)) {
+        // CHECK: Why is this being overwritten by each pass?
+        adviseSize(minPoint, maxPoint);
+        if (packed.length === 0) {
+          break;
+        } else {
+          packedLayers.push(
+            taggedItem({ tags: ['pack:layout'] }, taggedGroup({}, ...packed))
+          );
+        }
+        todo.unshift(...unpacked);
+      }
+    }
+    // CHECK: Can this distinguish between a set of packed paged, and a single
+    // page that's packed?
+    let packedShape = Shape.fromGeometry(taggedGroup({}, ...packedLayers));
+    if (size === undefined) {
+      packedShape = await packedShape.align('xy');
+    }
+    return packedShape;
+  }
 );
 
 const pdf = Shape.registerMethod('pdf', (...args) => async (shape) => {
@@ -5463,11 +5462,10 @@ const points$1 = Shape.registerMethod2(
 
 const self = Shape.registerMethod2('self', ['input'], (input) => input);
 
-const put = Shape.registerMethod(
+const put = Shape.registerMethod2(
   'put',
-  (...shapes) =>
-    async (shape) =>
-      on(self(), shapes)(shape)
+  ['input', 'shapes'],
+  (input, shapes) => on(self(), shapes)(input)
 );
 
 const remesh = Shape.registerMethod2(
@@ -6771,28 +6769,32 @@ const readPngAsRasta = async (path) => {
   return raster;
 };
 
-const LoadPng = Shape.registerMethod(
+const LoadPng = Shape.registerMethod2(
   'LoadPng',
-  (path, bands = [128, 256]) =>
-    async (shape) => {
-      const { width, height, pixels } = await readPngAsRasta(path);
-      // FIX: This uses the red channel for the value.
-      const getPixel = (x, y) => pixels[(y * width + x) << 2];
-      const data = Array(height);
-      for (let y = 0; y < height; y++) {
-        data[y] = Array(width);
-        for (let x = 0; x < width; x++) {
-          data[y][x] = getPixel(x, y);
-        }
-      }
-      const contours = await fromRaster(data, bands);
-      return Shape.fromGeometry(taggedGroup({}, ...contours));
+  ['string', 'numbers'],
+  async (path, bands) => {
+    if (bands.length === 0) {
+      bands = [128, 256];
     }
+    const { width, height, pixels } = await readPngAsRasta(path);
+    // FIX: This uses the red channel for the value.
+    const getPixel = (x, y) => pixels[(y * width + x) << 2];
+    const data = Array(height);
+    for (let y = 0; y < height; y++) {
+      data[y] = Array(width);
+      for (let x = 0; x < width; x++) {
+        data[y][x] = getPixel(x, y);
+      }
+    }
+    const contours = await fromRaster(data, bands);
+    return Shape.fromGeometry(taggedGroup({}, ...contours));
+  }
 );
 
-const Octagon = Shape.registerMethod(
+const Octagon = Shape.registerMethod2(
   'Octagon',
-  (x, y, z) => (shape) => Arc(x, y, z, { sides: 8 })(shape)
+  ['input', 'interval', 'interval', 'interval'],
+  (input, x, y, z) => Arc(x, y, z, { sides: 8 })(input)
 );
 
 // 1mm seems reasonable for spheres.

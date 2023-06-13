@@ -2,9 +2,8 @@ import Shape from './Shape.js';
 import { on } from './on.js';
 import { self } from './self.js';
 
-export const put = Shape.registerMethod(
+export const put = Shape.registerMethod2(
   'put',
-  (...shapes) =>
-    async (shape) =>
-      on(self(), shapes)(shape)
+  ['input', 'shapes'],
+  (input, shapes) => on(self(), shapes)(input)
 );

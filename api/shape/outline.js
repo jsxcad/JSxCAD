@@ -1,17 +1,9 @@
 import { Shape } from './Shape.js';
-import { destructure } from './destructure.js';
 import { outline as outlineGeometry } from '@jsxcad/geometry';
 
-export const outline = Shape.registerMethod(
+export const outline = Shape.registerMethod2(
   'outline',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions: selections } = destructure(args);
-      return Shape.fromGeometry(
-        outlineGeometry(
-          await shape.toGeometry(),
-          await shape.toShapesGeometries(selections)
-        )
-      );
-    }
+  ['inputGeometry', 'geometries'],
+  (geometry, selections) =>
+    Shape.fromGeometry(outlineGeometry(geometry, selections))
 );

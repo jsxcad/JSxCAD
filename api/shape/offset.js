@@ -1,13 +1,11 @@
 import Shape from './Shape.js';
 import { offset as offsetGeometry } from '@jsxcad/geometry';
 
-export const offset = Shape.registerMethod(
+export const offset = Shape.registerMethod2(
   'offset',
-  (initial = 1, { segments = 16, step, limit } = {}) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        offsetGeometry(await shape.toGeometry(), initial, step, limit, segments)
-      )
+  ['inputGeometry', 'number', 'options'],
+  (geometry, initial = 1, { segments = 16, step, limit } = {}) =>
+    Shape.fromGeometry(offsetGeometry(geometry, initial, step, limit, segments))
 );
 
 export default offset;

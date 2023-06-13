@@ -1,7 +1,8 @@
 import Shape from './Shape.js';
 import { hasShowOverlay } from '@jsxcad/geometry';
 
-export const overlay = Shape.registerMethod(
+export const overlay = Shape.registerMethod2(
   'overlay',
-  () => (shape) => Shape.fromGeometry(hasShowOverlay(shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(hasShowOverlay(geometry))
 );

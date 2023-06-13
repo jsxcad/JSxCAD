@@ -13,7 +13,6 @@ import Group from './Group.js';
 import Hershey from './Hershey.js';
 import Shape from './Shape.js';
 import { align } from './align.js';
-import { destructure2 } from './destructure.js';
 import { getNot } from './getNot.js';
 import { toDisplayGeometry } from './toDisplayGeometry.js';
 
@@ -74,88 +73,54 @@ const buildLayout = async ({
   return layout;
 };
 
-export const Page = Shape.registerMethod('Page', (...args) => async (shape) => {
-  const [options, modes, shapes] = await destructure2(
-    shape,
-    args,
-    'options',
-    'modes',
-    'shapes'
-  );
-  let {
-    size,
-    pageMargin = 5,
-    itemMargin = 1,
-    itemsPerPage = Infinity,
-  } = options;
-  let pack = modes.includes('pack');
-  const center = modes.includes('center');
+export const Page = Shape.registerMethod2(
+  'Page',
+  ['geometries', 'modes:pack,center,a4,individual', 'options'],
+  async (
+    geometries,
+    modes,
+    { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
+  ) => {
+    let pack = modes.includes('pack');
+    const center = modes.includes('center');
 
-  if (modes.includes('a4')) {
-    size = [210, 297];
-  }
-
-  if (modes.includes('individual')) {
-    pack = true;
-    itemsPerPage = 1;
-  }
-
-  const margin = itemMargin;
-  const layers = [];
-  for (const shape of shapes) {
-    for (const leaf of getLeafs(await shape.toGeometry())) {
-      layers.push(leaf);
+    if (modes.includes('a4')) {
+      size = [210, 297];
     }
-  }
-  if (!pack && size) {
-    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-    const [width, height] = size;
-    const packSize = [
-      [-width / 2, -height / 2, 0],
-      [width / 2, height / 2, 0],
-    ];
-    const pageWidth =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][X] * 2),
-        Math.abs(packSize[MIN][X] * 2)
-      ) +
-      pageMargin * 2;
-    const pageLength =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][Y] * 2),
-        Math.abs(packSize[MIN][Y] * 2)
-      ) +
-      pageMargin * 2;
-    return buildLayout({
-      layer,
-      pageWidth,
-      pageLength,
-      margin,
-      center,
-    });
-  } else if (!pack && !size) {
-    const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-    const packSize = measureBoundingBox(await layer.toGeometry());
-    if (packSize === undefined) {
-      return Group();
+
+    if (modes.includes('individual')) {
+      pack = true;
+      itemsPerPage = 1;
     }
-    const pageWidth =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][X] * 2),
-        Math.abs(packSize[MIN][X] * 2)
-      ) +
-      pageMargin * 2;
-    const pageLength =
-      Math.max(
-        1,
-        Math.abs(packSize[MAX][Y] * 2),
-        Math.abs(packSize[MIN][Y] * 2)
-      ) +
-      pageMargin * 2;
-    if (isFinite(pageWidth) && isFinite(pageLength)) {
+
+    const margin = itemMargin;
+    const layers = [];
+    for (const geometry of geometries) {
+      for (const leaf of getLeafs(geometry)) {
+        layers.push(leaf);
+      }
+    }
+    if (!pack && size) {
+      const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+      const [width, height] = size;
+      const packSize = [
+        [-width / 2, -height / 2, 0],
+        [width / 2, height / 2, 0],
+      ];
+      const pageWidth =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][X] * 2),
+          Math.abs(packSize[MIN][X] * 2)
+        ) +
+        pageMargin * 2;
+      const pageLength =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][Y] * 2),
+          Math.abs(packSize[MIN][Y] * 2)
+        ) +
+        pageMargin * 2;
       return buildLayout({
         layer,
         pageWidth,
@@ -163,102 +128,142 @@ export const Page = Shape.registerMethod('Page', (...args) => async (shape) => {
         margin,
         center,
       });
-    } else {
-      return buildLayout({
-        layer,
-        pageWidth: 0,
-        pageLength: 0,
-        margin,
-        center,
-      });
-    }
-  } else if (pack && size) {
-    // Content fits to page size.
-    const packSize = [];
-    const content = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
-      size,
-      pageMargin,
-      itemMargin,
-      perLayout: itemsPerPage,
-      packSize,
-    });
-    if (packSize.length === 0) {
-      throw Error('Packing failed');
-    }
-    const pageWidth = Math.max(1, packSize[MAX][X] - packSize[MIN][X]);
-    const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
-    if (isFinite(pageWidth) && isFinite(pageLength)) {
-      const plans = [];
-      for (const layer of await content.get('pack:layout', List)) {
-        plans.push(
-          await buildLayout({
-            layer,
-            pageWidth,
-            pageLength,
-            margin,
-            center,
-          })
-        );
-      }
-      return Group(...plans);
-    } else {
+    } else if (!pack && !size) {
       const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-      return buildLayout({
-        layer,
-        pageWidth: 0,
-        pageLength: 0,
-        margin,
-        center,
-      });
-    }
-  } else if (pack && !size) {
-    const packSize = [];
-    // Page fits to content size.
-    const contents = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack({
-      pageMargin,
-      itemMargin,
-      perLayout: itemsPerPage,
-      packSize,
-    });
-    if (packSize.length === 0) {
-      throw Error('Packing failed');
-    }
-    // FIX: Using content.size() loses the margin, which is a problem for repacking.
-    // Probably page plans should be generated by pack and count toward the size.
-    const pageWidth = packSize[MAX][X] - packSize[MIN][X];
-    const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
-    if (isFinite(pageWidth) && isFinite(pageLength)) {
-      const plans = [];
-      for (const layer of await contents.get('pack:layout', List)) {
-        const layout = await buildLayout({
+      const packSize = measureBoundingBox(await layer.toGeometry());
+      if (packSize === undefined) {
+        return Group();
+      }
+      const pageWidth =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][X] * 2),
+          Math.abs(packSize[MIN][X] * 2)
+        ) +
+        pageMargin * 2;
+      const pageLength =
+        Math.max(
+          1,
+          Math.abs(packSize[MAX][Y] * 2),
+          Math.abs(packSize[MIN][Y] * 2)
+        ) +
+        pageMargin * 2;
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        return buildLayout({
           layer,
-          packSize,
           pageWidth,
           pageLength,
           margin,
           center,
         });
-        plans.push(layout);
+      } else {
+        return buildLayout({
+          layer,
+          pageWidth: 0,
+          pageLength: 0,
+          margin,
+          center,
+        });
       }
-      return Group(...plans);
-    } else {
-      const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
-      return buildLayout({
-        layer,
-        pageWidth: 0,
-        pageLength: 0,
-        margin,
-        center,
-      });
+    } else if (pack && size) {
+      // Content fits to page size.
+      const packSize = [];
+      const content = await Shape.fromGeometry(taggedGroup({}, ...layers)).pack(
+        (min, max) => {
+          packSize[MIN] = min;
+          packSize[MAX] = max;
+        },
+        {
+          size,
+          pageMargin,
+          itemMargin,
+          perLayout: itemsPerPage,
+        }
+      );
+      if (packSize.length === 0) {
+        throw Error('Packing failed');
+      }
+      const pageWidth = Math.max(1, packSize[MAX][X] - packSize[MIN][X]);
+      const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        const plans = [];
+        for (const layer of await content.get('pack:layout', List)) {
+          plans.push(
+            await buildLayout({
+              layer,
+              pageWidth,
+              pageLength,
+              margin,
+              center,
+            })
+          );
+        }
+        return Group(...plans);
+      } else {
+        const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+        return buildLayout({
+          layer,
+          pageWidth: 0,
+          pageLength: 0,
+          margin,
+          center,
+        });
+      }
+    } else if (pack && !size) {
+      const packSize = [];
+      // Page fits to content size.
+      const contents = await Shape.fromGeometry(
+        taggedGroup({}, ...layers)
+      ).pack(
+        (min, max) => {
+          packSize[MIN] = min;
+          packSize[MAX] = max;
+        },
+        {
+          pageMargin,
+          itemMargin,
+          perLayout: itemsPerPage,
+        }
+      );
+      if (packSize.length === 0) {
+        throw Error('Packing failed');
+      }
+      // FIX: Using content.size() loses the margin, which is a problem for repacking.
+      // Probably page plans should be generated by pack and count toward the size.
+      const pageWidth = packSize[MAX][X] - packSize[MIN][X];
+      const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
+      if (isFinite(pageWidth) && isFinite(pageLength)) {
+        const plans = [];
+        for (const layer of await contents.get('pack:layout', List)) {
+          const layout = await buildLayout({
+            layer,
+            packSize,
+            pageWidth,
+            pageLength,
+            margin,
+            center,
+          });
+          plans.push(layout);
+        }
+        return Group(...plans);
+      } else {
+        const layer = Shape.fromGeometry(taggedGroup({}, ...layers));
+        return buildLayout({
+          layer,
+          pageWidth: 0,
+          pageLength: 0,
+          margin,
+          center,
+        });
+      }
     }
   }
-});
+);
 
-export const page = Shape.registerMethod(
+export const page = Shape.registerMethod2(
   'page',
-  (...args) =>
-    (shape) =>
-      Page(Shape.chain(shape), ...args)
+  ['input', 'rest'],
+  (input, rest) => Page(input, ...rest)
 );
 
 export default Page;

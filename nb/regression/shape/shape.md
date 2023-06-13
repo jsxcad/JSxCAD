@@ -4,6 +4,8 @@
 await Triangle(10).color('red').add(Box(5).color('blue')).gridView();
 ```
 
+![Image](shape.md.$2.png)
+
 ```JavaScript
 await Box(5).and(Arc(5)).view('top', 'noSkin', 'noWireframe', { size: 800 });
 ```
