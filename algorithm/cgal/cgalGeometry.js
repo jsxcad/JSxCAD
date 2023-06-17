@@ -28,8 +28,8 @@ export const getCachedMesh = (key, mesh) => {
 };
 
 export const setCachedMesh = (key, mesh) => {
-  // const ref = new WeakRef(mesh);
-  // meshCache.set(key, ref);
+  const ref = new WeakRef(mesh);
+  meshCache.set(key, ref);
 };
 
 let testMode = false;

@@ -42,6 +42,7 @@ export const fromStl = async (
     cornerThreshold = 0,
   } = {}
 ) => {
+  console.log(`QQ/fromStl/cornerThreshold: ${cornerThreshold}`);
   const { positions, cells } = parse(stl, format);
   const polygons = [];
   for (const [a, b, c] of cells) {

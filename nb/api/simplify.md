@@ -2,8 +2,8 @@
 ### simplify()
 Parameter|Default|Type
 ---|---|---
+{cornerThreshold}|20/360|Keep corners which turn more than this.
 eps||Number of mm for point resolution.
-{cornerThreshold}|100/360|Keep corners which turn more than this.
 
 _Check: does this actually do anything?_
 
@@ -22,6 +22,6 @@ Box(2)
   .ez([0.1])
   .view(1)
   .note('Box(2).cut(Arc([0.5, 1.5], 0.5, { zag: 0.001 }).seq({ by: 1 / 12 }, rz))')
-  .simplify(0)
+  .simplify()
   .view(2);
 ```

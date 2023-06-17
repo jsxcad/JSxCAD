@@ -24,6 +24,13 @@ export const fromPolygonSoup = (
       cornerThreshold,
     })}`
   );
+  if (cornerThreshold === 0) {
+    try {
+      throw Error(`die`);
+    } catch (error) {
+      console.log(`QQ: ${error.stack}`);
+    }
+  }
 
   return withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
     const status = g.FromPolygonSoup(

@@ -16,7 +16,7 @@ export const fromPolygonSoup = (
     wrapAbsoluteOffset,
     wrapRelativeAlpha,
     wrapRelativeOffset,
-    angleThreshold,
+    cornerThreshold,
   } = {}
 ) => {
   const outputs = fromPolygonSoupWithCgal(
@@ -27,7 +27,7 @@ export const fromPolygonSoup = (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    angleThreshold
+    cornerThreshold
   );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
