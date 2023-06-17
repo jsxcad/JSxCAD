@@ -1,7 +1,3 @@
-![Image](test.md.$1.png)
-
 ```JavaScript
-Arc(5)
-  .seq({ from: -1, by: zagSteps(diameter()), to: 1 }, x)
-  .view();
+export const axleProfile = await Arc(3.2);
 ```

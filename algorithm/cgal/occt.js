@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const makeOcctBox = (xLength = 1, yLength = 1, zLength = 1) =>
-  withCgalGeometry([], (geometry, g) => {
+  withCgalGeometry('makeOcctBox', [], (geometry, g) => {
     const status = g.MakeOcctBox(geometry, xLength, yLength, zLength);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -17,7 +17,7 @@ export const makeOcctBox = (xLength = 1, yLength = 1, zLength = 1) =>
   });
 
 export const makeOcctSphere = (diameter) =>
-  withCgalGeometry([], (geometry, g) => {
+  withCgalGeometry('makeOcctSphere', [], (geometry, g) => {
     const status = g.MakeOcctSphere(geometry, diameter);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

@@ -296,12 +296,14 @@ const extentsC = [
 
 ![Image](shapes.md.q.png)
 
+Boxes and Arcs from extents
+
 ```JavaScript
 const q = await Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
   ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
-).view().md`Boxes and Arcs from extents`;
+).view().note(`Boxes and Arcs from extents`);
 ```
 
 ![Image](shapes.md.$26.png)
@@ -340,17 +342,7 @@ await Line([-15, 15])
   .view();
 ```
 
-```JavaScript
-await Box(12)
-  .cut(
-    Arc(3)
-      .y(3)
-      .rz(1 / 4, 3 / 4)
-  )
-  .color('black')
-  .fit(separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow'))
-  .view();
-```
+![Image](shapes.md.$30.png)
 
 ```JavaScript
 await Box(12)
@@ -360,7 +352,21 @@ await Box(12)
       .rz(1 / 4, 3 / 4)
   )
   .color('black')
-  .fit(separate({ keepHolesInShapes: false }).offset(1).fuse().color('yellow'))
+  .fit(separate().offset(1).fuse().color('yellow'))
+  .view();
+```
+
+![Image](shapes.md.$31.png)
+
+```JavaScript
+await Box(12)
+  .cut(
+    Arc(3)
+      .y(3)
+      .rz(1 / 4, 3 / 4)
+  )
+  .color('black')
+  .fit(separate('noHoles').offset(1).fuse().color('yellow'))
   .view();
 ```
 
@@ -472,25 +478,31 @@ await Box(10).join(Box(5, 50, 5)).view();
 await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```
 
+![Image](shapes.md.$46.png)
+
 ```JavaScript
 await Box(10)
   .rz(1 / 8)
-  .cut(eachPoint(Arc(5).to))
+  .cut(eachPoint((p) => Arc(5).to(p)))
   .view();
 ```
+
+![Image](shapes.md.$47.png)
 
 ```JavaScript
 await Triangle(10)
   .cut(inset(2))
-  .cut(eachPoint(Arc(1).to))
+  .cut(eachPoint((p) => Arc(1).to(p)))
   .view();
 ```
+
+![Image](shapes.md.$48.png)
 
 ```JavaScript
 await Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
-  .cut(eachPoint(Arc(5).to))
+  .cut(eachPoint((p) => Arc(5).to(p)))
   .view();
 ```
 
@@ -506,7 +518,7 @@ await Orb(6, { zag: 2 })
 
 ```JavaScript
 await Box(10, 10, 10)
-  .cut(faces(Box(4, 4, 4).to))
+  .cut(faces((p) => Box(4, 4, 4).to(p)))
   .faces(cut(inset(1)))
   .view();
 ```
@@ -554,6 +566,8 @@ await Box(10)
   .section()
   .view();
 ```
+
+![Image](shapes.md.$57.png)
 
 ```JavaScript
 Curve([0, 12], [1, 12], [5, 10], [12.5 + 5, 0], [16, -12], [21, -12])

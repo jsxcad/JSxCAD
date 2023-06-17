@@ -244,6 +244,7 @@ export { Ref } from './Ref.js';
 export { Segments } from './Segments.js';
 export { Seq } from './seq.js';
 export { Spiral } from './Spiral.js';
+export { Stl } from './stl.js';
 export { Stroke } from './Stroke.js';
 export { SurfaceMesh } from './SurfaceMesh.js';
 export { Svg } from './svg.js';

@@ -1,4 +1,6 @@
 import { withCgalGeometry } from './cgalGeometry.js';
 
 export const computeVolume = (linear) =>
-  withCgalGeometry(linear, (geometry, g) => g.ComputeVolume(geometry));
+  withCgalGeometry('computeVolume', linear, (geometry, g) =>
+    g.ComputeVolume(geometry)
+  );

@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const makeUnitSphere = (angularBound, radiusBound, distanceBound) =>
-  withCgalGeometry([], (cgalGeometry, g) => {
+  withCgalGeometry('makeUnitSphere', [], (cgalGeometry, g) => {
     const status = g.MakeUnitSphere(
       cgalGeometry,
       angularBound,

@@ -11,7 +11,7 @@ export const eachTriangle = (inputs, emitTriangle) => {
       triangle = [];
     }
   };
-  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry('eachTriangle', inputs, (cgalGeometry, g) => {
     const status = g.EachTriangle(cgalGeometry, admitPoint);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

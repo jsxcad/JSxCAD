@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const fromPolygons = (jsPolygons, close = false, tolerance = 0.001) => {
-  return withCgalGeometry([], (cgalGeometry, g) => {
+  return withCgalGeometry('fromPolygons', [], (cgalGeometry, g) => {
     const status = g.FromPolygons(cgalGeometry, close, (triples, polygons) => {
       let index = 0;
       // FIX: Prefer exactPoints

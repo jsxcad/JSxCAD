@@ -11,7 +11,7 @@ export const computeImplicitVolume = (
   distanceBound = 0.1,
   errorBound = 0.001
 ) =>
-  withCgalGeometry([], (cgalGeometry, g) => {
+  withCgalGeometry('computeImplicitVolume', [], (cgalGeometry, g) => {
     const status = g.ComputeImplicitVolume(
       cgalGeometry,
       op,

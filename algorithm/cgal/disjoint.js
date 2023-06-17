@@ -8,7 +8,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const disjoint = (inputs, mode, exact = false) =>
-  withCgalGeometry(inputs, (geometry, g) => {
+  withCgalGeometry('disjoint', inputs, (geometry, g) => {
     // These are custom inputs.
     const getIsMasked = (nth) =>
       inputs[nth].tags && inputs[nth].tags.includes('type:masked');

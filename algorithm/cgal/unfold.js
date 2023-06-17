@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const unfold = (inputs, enableTabs = false) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('unfold', inputs, (cgalGeometry, g) => {
     const tags = [];
     // Not sure that passing tags around like this is a sensible idea.
     const status = g.Unfold(

@@ -9,7 +9,7 @@ export const separate = (
   keepHolesInShapes = true,
   keepHolesAsShapes = false
 ) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('separate', inputs, (cgalGeometry, g) => {
     const status = g.Separate(
       cgalGeometry,
       keepShapes,

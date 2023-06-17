@@ -13,7 +13,7 @@ export const computeToolpath = (
   annealingMin = 0.01,
   annealingDecay = 0.99
 ) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('computeToolpath', inputs, (cgalGeometry, g) => {
     const status = g.ComputeToolpath(
       cgalGeometry,
       materialStart,

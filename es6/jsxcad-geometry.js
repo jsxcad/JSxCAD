@@ -1160,9 +1160,28 @@ const fromPolygons = (
 
 const fromPolygonSoup = (
   polygons,
-  { tags = [], close = false, tolerance = 0.001 } = {}
+  {
+    tags = [],
+    close = false,
+    tolerance,
+    wrapAlways,
+    wrapAbsoluteAlpha,
+    wrapAbsoluteOffset,
+    wrapRelativeAlpha,
+    wrapRelativeOffset,
+    simplifyRatio,
+  } = {}
 ) => {
-  const outputs = fromPolygonSoup$1(polygons, close, tolerance);
+  const outputs = fromPolygonSoup$1(
+    polygons,
+    tolerance,
+    wrapAlways,
+    wrapRelativeAlpha,
+    wrapRelativeOffset,
+    wrapAbsoluteAlpha,
+    wrapAbsoluteOffset,
+    simplifyRatio
+  );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

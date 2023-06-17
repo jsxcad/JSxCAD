@@ -10,7 +10,7 @@ export const inset = (
   limit = -1,
   segments = 16
 ) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('inset', inputs, (cgalGeometry, g) => {
     const status = g.Inset(cgalGeometry, initial, step, limit, segments);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

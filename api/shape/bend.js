@@ -1,9 +1,8 @@
 import Shape from './Shape.js';
 import { bend as bendGeometry } from '@jsxcad/geometry';
 
-export const bend = Shape.registerMethod(
+export const bend = Shape.registerMethod2(
   'bend',
-  (radius = 100) =>
-    async (shape) =>
-      Shape.fromGeometry(bendGeometry(await shape.toGeometry(), radius))
+  ['inputGeometry', 'number'],
+  (geometry, radius = 100) => Shape.fromGeometry(bendGeometry(geometry, radius))
 );

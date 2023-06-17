@@ -1335,7 +1335,7 @@ const op = Shape.registerMethod2(
   async (input, functions = []) => {
     const results = [];
     for (const fun of functions) {
-      results.push(await fun(input));
+      results.push(await fun(Shape.chain(input)));
     }
     return Group(...results);
   }
@@ -1990,11 +1990,10 @@ const bb = Shape.registerMethod(
     }
 );
 
-const bend = Shape.registerMethod(
+const bend = Shape.registerMethod2(
   'bend',
-  (radius = 100) =>
-    async (shape) =>
-      Shape.fromGeometry(bend$1(await shape.toGeometry(), radius))
+  ['inputGeometry', 'number'],
+  (geometry, radius = 100) => Shape.fromGeometry(bend$1(geometry, radius))
 );
 
 const qualifyTag = (tag, namespace = 'user') => {
@@ -5415,11 +5414,13 @@ const remesh = Shape.registerMethod2(
 // rz is in terms of turns -- 1/2 is a half turn.
 const rz = Shape.registerMethod2(
   ['rotateZ', 'rz'],
-  ['input', 'numbers'],
-  async (input, turns) => {
+  ['inputGeometry', 'numbers'],
+  async (geometry, turns) => {
     const rotated = [];
     for (const turn of turns) {
-      rotated.push(await transform(fromRotateZToTransform(turn))(input));
+      rotated.push(
+        Shape.fromGeometry(transform$1(fromRotateZToTransform(turn), geometry))
+      );
     }
     return Group(...rotated);
   }
@@ -5609,7 +5610,7 @@ const sectionProfile = Shape.registerMethod2(
 
 const separate = Shape.registerMethod2(
   'separate',
-  ['inputGeometry', 'modes'],
+  ['inputGeometry', 'modes:noShapes,noHoles,holesAsShapes'],
   (geometry, modes) =>
     Shape.fromGeometry(
       separate$1(
@@ -5714,9 +5715,15 @@ const setTags = Shape.registerMethod2(
 
 const shadow = Shape.registerMethod2(
   'shadow',
-  ['inputGeometry', 'geometry', 'geometry'],
-  (geometry, planeReference = XY(0), sourceReference = XY(1)) =>
-    Shape.fromGeometry(cast(planeReference, sourceReference, geometry))
+  ['inputGeometry', 'shape', 'shape'],
+  async (geometry, planeReference = XY(0), sourceReference = XY(1)) =>
+    Shape.fromGeometry(
+      cast(
+        await planeReference.toGeometry(),
+        await sourceReference.toGeometry(),
+        geometry
+      )
+    )
 );
 
 const shell = Shape.registerMethod2(
@@ -5853,11 +5860,62 @@ const sort = Shape.registerMethod2(
 
 const LoadStl = Shape.registerMethod2(
   'LoadStl',
-  ['string', 'modes'],
-  async (path, modes) => {
+  ['string', 'modes:binary,ascii,wrap', 'options'],
+  async (
+    path,
+    modes,
+    {
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      simplifyRatio,
+    } = {}
+  ) => {
     const data = await read(`source/${path}`, { sources: [path] });
-    const format = modes.includes('binary') ? 'binary' : 'ascii';
-    return Shape.fromGeometry(await fromStl(data, { format }));
+    let format = 'binary';
+    if (modes.includes('ascii')) {
+      format = 'ascii';
+    }
+    return Shape.fromGeometry(
+      await fromStl(data, {
+        format,
+        wrapAlways: modes.includes('wrap'),
+        wrapAbsoluteAlpha,
+        wrapAbsoluteOffset,
+        wrapRelativeAlpha,
+        wrapRelativeOffset,
+        simplifyRatio,
+      })
+    );
+  }
+);
+
+const Stl = Shape.registerMethod2(
+  'Stl',
+  ['string', 'modes:binary,ascii,wrap', 'options'],
+  async (
+    text,
+    modes,
+    {
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      simplifyRatio,
+    } = {}
+  ) => {
+    return Shape.fromGeometry(
+      await fromStl(new TextEncoder('utf8').encode(text), {
+        format: 'ascii',
+        wrapAlways: modes.includes('wrap'),
+        wrapAbsoluteAlpha,
+        wrapAbsoluteOffset,
+        wrapRelativeAlpha,
+        wrapRelativeOffset,
+        simplifyRatio,
+      })
+    );
   }
 );
 
@@ -6075,7 +6133,7 @@ const Stroke = Shape.registerMethod2(
   async (input, shapes, implicitWidth = 1, { width = implicitWidth } = {}) => {
     return Fuse(
       eachSegment(
-        (s) => s.eachPoint(Arc(width).to).hull(),
+        (s) => s.eachPoint((p) => Arc(width).to(p)).hull(),
         List
       )(await Group(input, ...shapes))
     );
@@ -6844,4 +6902,4 @@ const Wave = Shape.registerMethod2(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, destructure, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toFlatValues, toGeometry, toNestedValues, toShape, toShapeGeometry, toShapes, toShapesGeometries, toValue, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

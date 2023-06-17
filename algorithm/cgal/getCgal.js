@@ -11,6 +11,9 @@ export const initCgal = async () => {
   if (cgal === undefined) {
     const Cgal = isNode ? CgalNode : CgalBrowser;
     cgal = await Cgal({
+      destroy(obj) {
+        console.log(`QQ/cgal/destroy`);
+      },
       print(...texts) {
         const text = texts.join(' ');
         const level = 'serious';

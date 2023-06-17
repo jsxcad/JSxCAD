@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const eagerTransform = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('eagerTransform', inputs, (cgalGeometry, g) => {
     const status = g.EagerTransform(cgalGeometry, inputs.length - 1);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

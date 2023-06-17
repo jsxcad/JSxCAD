@@ -19,7 +19,7 @@ export const Cut = Shape.registerMethod2(
 
 export const cut = Shape.registerMethod2(
   'cut',
-  ['inputGeometry', 'geometries', 'modes'],
+  ['inputGeometry', 'geometries', 'modes:open,exact,noVoid,noGhost'],
   async (inputGeometry, geometries, modes) =>
     Shape.fromGeometry(
       cutGeometry(

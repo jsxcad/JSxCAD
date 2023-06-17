@@ -12,7 +12,7 @@ export const smooth = (
   remesh_iterations = 1,
   remesh_relaxation_steps = 1
 ) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('smooth', inputs, (cgalGeometry, g) => {
     const status = g.Smooth(
       cgalGeometry,
       count,

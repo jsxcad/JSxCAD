@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const grow = (inputs, count, { x = true, y = true, z = true } = {}) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('grow', inputs, (cgalGeometry, g) => {
     const status = g.Grow(cgalGeometry, count, x, y, z);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

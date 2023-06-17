@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const generateEnvelope = (inputs, envelopeType) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('generateEnvelope', inputs, (cgalGeometry, g) => {
     const status = g.GenerateEnvelope(cgalGeometry, envelopeType);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

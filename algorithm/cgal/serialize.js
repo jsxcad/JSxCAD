@@ -5,7 +5,7 @@ export const serialize = (inputs) => {
   if (inputs.length === 0) {
     return;
   }
-  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry('serialize', inputs, (cgalGeometry, g) => {
     for (let nth = 0; nth < inputs.length; nth++) {
       const entry = inputs[nth];
       if (entry.type !== 'graph' || entry.graph.serializedSurfaceMesh) {

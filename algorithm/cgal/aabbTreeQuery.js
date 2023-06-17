@@ -1,7 +1,7 @@
 import { withCgalGeometry } from './cgalGeometry.js';
 
 export const withAabbTreeQuery = (inputs, op) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('withAabbTreeQuery', inputs, (cgalGeometry, g) => {
     cgalGeometry.copyInputMeshesToOutputMeshes();
     cgalGeometry.transformToAbsoluteFrame();
     cgalGeometry.convertPolygonsToPlanarMeshes();

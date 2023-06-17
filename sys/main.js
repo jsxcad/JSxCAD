@@ -32,6 +32,7 @@ export {
   restoreEmitGroup,
   saveEmitGroup,
 } from './emit.js';
+export { clearFileCache } from './files.js';
 export { decode, decodeFiles, encode, encodeFiles } from './encode.js';
 export {
   getFilesystem,

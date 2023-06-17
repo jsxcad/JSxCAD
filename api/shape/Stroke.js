@@ -11,7 +11,7 @@ export const Stroke = Shape.registerMethod2(
   async (input, shapes, implicitWidth = 1, { width = implicitWidth } = {}) => {
     return Fuse(
       eachSegment(
-        (s) => s.eachPoint(Arc(width).to).hull(),
+        (s) => s.eachPoint((p) => Arc(width).to(p)).hull(),
         List
       )(await Group(input, ...shapes))
     );

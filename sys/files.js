@@ -3,6 +3,11 @@ import { watchFileDeletion } from './watchers.js';
 
 const files = new Map();
 
+export const clearFileCache = () => {
+  console.log(`QQ/clearFileCache`);
+  files.clear();
+};
+
 // Do we need the ensureFile functions?
 export const ensureQualifiedFile = (path, qualifiedPath) => {
   let file = files.get(qualifiedPath);
