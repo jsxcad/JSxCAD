@@ -3,9 +3,14 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const simplify = (inputs, ratio = 0.5, eps) =>
+export const simplify = (inputs, cornerThreshold, eps) =>
   withCgalGeometry('simplify', inputs, (cgalGeometry, g) => {
-    const status = g.Simplify(cgalGeometry, ratio, eps !== undefined, eps || 0);
+    const status = g.Simplify(
+      cgalGeometry,
+      cornerThreshold,
+      eps !== undefined,
+      eps || 0
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by simplify');

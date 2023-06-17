@@ -39,7 +39,7 @@ export const fromStl = async (
     wrapAbsoluteOffset,
     wrapRelativeAlpha = 300,
     wrapRelativeOffset = 5000,
-    simplifyRatio = 0,
+    cornerThreshold = 0,
   } = {}
 ) => {
   const { positions, cells } = parse(stl, format);
@@ -60,6 +60,6 @@ export const fromStl = async (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    simplifyRatio,
+    cornerThreshold,
   });
 };

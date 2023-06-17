@@ -26,7 +26,7 @@ enum GeometryType {
 class DN {
  public:
   DN(int key) : key_(key){};
-  ~DN() { std::cout << "DN: " << key_ << std::endl; }
+  ~DN() {}
   int key_;
 };
 

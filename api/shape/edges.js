@@ -20,8 +20,8 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
 
 export const edges = Shape.registerMethod2(
   'edges',
-  ['input', 'function', 'function', 'geometries'],
-  async (input, edgesOp = (edges) => edges, groupOp = Group, selections) => {
+  ['input', 'geometries', 'function', 'function'],
+  async (input, selections, edgesOp = (edges) => edges, groupOp = Group) => {
     const edges = [];
     eachFaceEdges(
       await input.toGeometry(),

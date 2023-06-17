@@ -9,11 +9,11 @@ import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) => ['graph'].includes(geometry.type);
 
-export const simplify = (geometry, ratio, eps) => {
+export const simplify = (geometry, cornerThreshold, eps) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = simplifyWithCgal(inputs, ratio, eps);
+  const outputs = simplifyWithCgal(inputs, cornerThreshold, eps);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

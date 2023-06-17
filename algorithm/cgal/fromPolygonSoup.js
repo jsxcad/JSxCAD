@@ -11,7 +11,7 @@ export const fromPolygonSoup = (
   wrapRelativeOffset = 5000,
   wrapAbsoluteAlpha = 0,
   wrapAbsoluteOffset = 0,
-  simplifyRatio = 0
+  cornerThreshold = 0
 ) => {
   console.log(
     `QQ/fromPolygonSoup: ${JSON.stringify({
@@ -21,7 +21,7 @@ export const fromPolygonSoup = (
       wrapRelativeOffset,
       wrapAbsoluteAlpha,
       wrapAbsoluteOffset,
-      simplifyRatio,
+      cornerThreshold,
     })}`
   );
 
@@ -46,7 +46,7 @@ export const fromPolygonSoup = (
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      simplifyRatio
+      cornerThreshold
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

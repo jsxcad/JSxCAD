@@ -2392,7 +2392,7 @@ const Cut = Shape.registerMethod2(
 
 const cut = Shape.registerMethod2(
   'cut',
-  ['inputGeometry', 'geometries', 'modes'],
+  ['inputGeometry', 'geometries', 'modes:open,exact,noVoid,noGhost'],
   async (inputGeometry, geometries, modes) =>
     Shape.fromGeometry(
       cut$1(
@@ -4505,8 +4505,8 @@ const eagerTransform = Shape.registerMethod(
 
 const edges = Shape.registerMethod2(
   'edges',
-  ['input', 'function', 'function', 'geometries'],
-  async (input, edgesOp = (edges) => edges, groupOp = Group, selections) => {
+  ['input', 'geometries', 'function', 'function'],
+  async (input, selections, edgesOp = (edges) => edges, groupOp = Group) => {
     const edges = [];
     eachFaceEdges(
       await input.toGeometry(),
@@ -5755,9 +5755,9 @@ const shell = Shape.registerMethod2(
 
 const simplify = Shape.registerMethod2(
   'simplify',
-  ['inputGeometry', 'number', 'options'],
-  (geometry, eps, { ratio = 1.0 } = {}) =>
-    Shape.fromGeometry(simplify$1(geometry, ratio, eps))
+  ['inputGeometry', 'number', 'number', 'options'],
+  (geometry, cornerThreshold = 100 / 360, eps, { ratio = 1.0 } = {}) =>
+    Shape.fromGeometry(simplify$1(geometry, cornerThreshold, eps))
 );
 
 const sketch = Shape.registerMethod2(
@@ -5869,7 +5869,7 @@ const LoadStl = Shape.registerMethod2(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      simplifyRatio,
+      cornerThreshold = 100 / 360,
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
@@ -5885,7 +5885,7 @@ const LoadStl = Shape.registerMethod2(
         wrapAbsoluteOffset,
         wrapRelativeAlpha,
         wrapRelativeOffset,
-        simplifyRatio,
+        cornerThreshold,
       })
     );
   }

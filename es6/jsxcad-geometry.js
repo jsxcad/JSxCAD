@@ -1169,7 +1169,7 @@ const fromPolygonSoup = (
     wrapAbsoluteOffset,
     wrapRelativeAlpha,
     wrapRelativeOffset,
-    simplifyRatio,
+    angleThreshold,
   } = {}
 ) => {
   const outputs = fromPolygonSoup$1(
@@ -1180,7 +1180,7 @@ const fromPolygonSoup = (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    simplifyRatio
+    angleThreshold
   );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
@@ -1744,11 +1744,11 @@ const shell = (
 
 const filter$4 = (geometry) => ['graph'].includes(geometry.type);
 
-const simplify = (geometry, ratio, eps) => {
+const simplify = (geometry, cornerThreshold, eps) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$4, inputs);
-  const outputs = simplify$1(inputs, ratio, eps);
+  const outputs = simplify$1(inputs, cornerThreshold, eps);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

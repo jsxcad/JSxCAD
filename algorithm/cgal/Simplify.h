@@ -1,6 +1,6 @@
 #include "simplify_util.h"
 
-int Simplify(Geometry* geometry, double ratio, bool simplify_points,
+int Simplify(Geometry* geometry, double corner_threshold, bool simplify_points,
              double eps) {
   size_t size = geometry->getSize();
 
@@ -13,7 +13,7 @@ int Simplify(Geometry* geometry, double ratio, bool simplify_points,
     }
     Surface_mesh& mesh = geometry->mesh(nth);
 
-    simplify(ratio, mesh);
+    simplify(corner_threshold, mesh);
 
     if (simplify_points) {
       for (const Vertex_index vertex : mesh.vertices()) {

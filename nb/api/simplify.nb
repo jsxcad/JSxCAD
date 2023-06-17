@@ -4,7 +4,7 @@ md`
 Parameter|Default|Type
 ---|---|---
 eps||Number of mm for point resolution.
-{ratio}|1|Stop when the remaining edges reaches this fraction.
+{cornerThreshold}|100/360|Keep corners which turn more than this.
 
 _Check: does this actually do anything?_
 `;

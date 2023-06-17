@@ -4,7 +4,7 @@
 int FromPolygonSoup(Geometry* geometry, emscripten::val fill, bool wrap_always,
                     double wrap_absolute_alpha, double wrap_absolute_offset,
                     double wrap_relative_alpha, double wrap_relative_offset,
-                    double simplify_ratio) {
+                    double corner_threshold) {
   Points points;
   Polygons polygons;
   {
@@ -48,9 +48,9 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill, bool wrap_always,
     wrap_epick(points, faces, alpha, offset, mesh);
   }
 
-  if (simplify_ratio > 0) {
+  if (corner_threshold > 0) {
     // Enable simplification to reduce polygon count.
-    simplify(simplify_ratio, mesh);
+    simplify(corner_threshold, mesh);
   }
 
   demesh(mesh);
