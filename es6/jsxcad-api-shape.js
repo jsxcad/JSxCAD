@@ -5756,7 +5756,7 @@ const shell = Shape.registerMethod2(
 const simplify = Shape.registerMethod2(
   'simplify',
   ['inputGeometry', 'number', 'number', 'options'],
-  (geometry, cornerThreshold = 100 / 360, eps, { ratio = 1.0 } = {}) =>
+  (geometry, cornerThreshold = 20 / 360, eps, { ratio = 1.0 } = {}) =>
     Shape.fromGeometry(simplify$1(geometry, cornerThreshold, eps))
 );
 
@@ -5869,7 +5869,7 @@ const LoadStl = Shape.registerMethod2(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold = 100 / 360,
+      cornerThreshold = 20 / 360,
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });

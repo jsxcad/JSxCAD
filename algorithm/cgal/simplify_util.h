@@ -70,7 +70,7 @@ void simplify(double angle_threshold, Surface_mesh& mesh) {
       std::pair<Cartesian_surface_mesh::Point, Cartesian_surface_mesh::Point> >
       constrained_edges;
   std::size_t nb_sharp_edges = 0;
-  const double angle_threshold_degrees = angle_threshold * 360;
+  const double angle_threshold_degrees = 180 - angle_threshold * 360;
 
   for (Cartesian_surface_mesh::Edge_index ed : edges(csm)) {
     Cartesian_surface_mesh::Halfedge_index hd = halfedge(ed, csm);

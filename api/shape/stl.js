@@ -24,7 +24,7 @@ export const LoadStl = Shape.registerMethod2(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold = 100 / 360,
+      cornerThreshold = 20 / 360,
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
