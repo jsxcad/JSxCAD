@@ -12,27 +12,8 @@ export const fromPolygonSoup = (
   wrapAbsoluteAlpha = 0,
   wrapAbsoluteOffset = 0,
   cornerThreshold = 0
-) => {
-  console.log(
-    `QQ/fromPolygonSoup: ${JSON.stringify({
-      tolerance,
-      wrapAlways,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      cornerThreshold,
-    })}`
-  );
-  if (cornerThreshold === 0) {
-    try {
-      throw Error(`die`);
-    } catch (error) {
-      console.log(`QQ: ${error.stack}`);
-    }
-  }
-
-  return withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
+) =>
+  withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
     const status = g.FromPolygonSoup(
       cgalGeometry,
       (triples, polygons) => {
@@ -64,4 +45,3 @@ export const fromPolygonSoup = (
         throw new Error(`Unexpected status ${status}`);
     }
   });
-};

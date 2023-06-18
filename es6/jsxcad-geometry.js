@@ -1169,7 +1169,7 @@ const fromPolygonSoup = (
     wrapAbsoluteOffset,
     wrapRelativeAlpha,
     wrapRelativeOffset,
-    angleThreshold,
+    cornerThreshold,
   } = {}
 ) => {
   const outputs = fromPolygonSoup$1(
@@ -1180,7 +1180,7 @@ const fromPolygonSoup = (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    angleThreshold
+    cornerThreshold
   );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));

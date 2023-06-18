@@ -5902,7 +5902,7 @@ const Stl = Shape.registerMethod2(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      simplifyRatio,
+      cornerThreshold = 20 / 360,
     } = {}
   ) => {
     return Shape.fromGeometry(
@@ -5913,7 +5913,7 @@ const Stl = Shape.registerMethod2(
         wrapAbsoluteOffset,
         wrapRelativeAlpha,
         wrapRelativeOffset,
-        simplifyRatio,
+        cornerThreshold,
       })
     );
   }

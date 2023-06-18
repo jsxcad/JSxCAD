@@ -2456,11 +2456,9 @@ const { deserialize } = v8$1;
 const fetchWithTimeout =
   (fetch, AbortError) =>
   async (resource, options = {}) => {
-    console.log(`QQ/fetchWithTimeout/begin`);
     const { timeout = 8000 } = options;
     const controller = new AbortController();
     const id = setTimeout(() => {
-      console.log('QQ/fetchWithTimeout: Timed out');
       controller.abort();
     }, timeout);
     try {
@@ -2471,7 +2469,6 @@ const fetchWithTimeout =
       return response;
     } finally {
       clearTimeout(id);
-      console.log(`QQ/fetchWithTimeout/end`);
     }
   };
 

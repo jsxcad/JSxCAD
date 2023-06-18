@@ -1,3 +1,5 @@
+/* globals WeakRef */
+
 import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
 
 import { computeHash } from '@jsxcad/sys';

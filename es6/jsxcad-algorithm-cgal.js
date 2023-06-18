@@ -687,6 +687,8 @@ const STATUS_EMPTY = 1;
 const STATUS_ZERO_THICKNESS = 2;
 const STATUS_UNCHANGED = 3;
 
+/* globals WeakRef */
+
 const GEOMETRY_UNKNOWN = 0;
 const GEOMETRY_MESH = 1;
 const GEOMETRY_POLYGONS_WITH_HOLES = 2;
@@ -709,6 +711,11 @@ const getCachedMesh = (key, mesh) => {
     return;
   }
   return ref.deref();
+};
+
+const setCachedMesh = (key, mesh) => {
+  const ref = new WeakRef(mesh);
+  meshCache.set(key, ref);
 };
 
 let testMode = false;
@@ -896,6 +903,10 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, c
             serializedOcctShape,
           };
           graph.hash = computeHash(graph);
+          // Not part of the hash.
+          if (newMesh) {
+            setCachedMesh(graph, newMesh);
+          }
           if (newOcctShape) {
             occtShapeCache.set(graph, newOcctShape);
           }
@@ -1737,20 +1748,8 @@ const fromPolygonSoup = (
   wrapAbsoluteAlpha = 0,
   wrapAbsoluteOffset = 0,
   cornerThreshold = 0
-) => {
-  console.log(
-    `QQ/fromPolygonSoup: ${JSON.stringify({
-      tolerance,
-      wrapAlways,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      cornerThreshold,
-    })}`
-  );
-
-  return withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
+) =>
+  withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
     const status = g.FromPolygonSoup(
       cgalGeometry,
       (triples, polygons) => {
@@ -1782,7 +1781,6 @@ const fromPolygonSoup = (
         throw new Error(`Unexpected status ${status}`);
     }
   });
-};
 
 const equals = ([ax, ay, az], [bx, by, bz]) =>
   ax === bx && ay === by && az === bz;

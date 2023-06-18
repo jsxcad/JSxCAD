@@ -27,14 +27,15 @@ md`
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.`;
 
-const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl');
-await importedStl.view();
+const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl', { cornerThreshold: 20/360 });
+importedStl.view('teapot');
 
 md`
 ---
 ### Importing .svg
 Imports a .svg file which can then be used as geometry.`;
 
+/*
 const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false })
 await importedSvg.align('xy').view();
 
@@ -45,3 +46,4 @@ import { ThreejsCollada, ThreejsSvg } from '@jsxcad/api-threejs';
 await ThreejsSvg('https://jsxcad.js.org/svg/rocket.svg').align('xy').view();
 
 await ThreejsCollada('https://jsxcad.js.org/collada/duck_triangles.dae').rx(1/4).view();
+*/

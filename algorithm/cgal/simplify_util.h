@@ -85,8 +85,6 @@ void simplify(double angle_threshold, Surface_mesh& mesh) {
           csm.point(csm.target(csm.opposite(hd))), csm.point(csm.target(hd)),
           csm.point(csm.target(csm.next(hd))),
           csm.point(csm.target(csm.next(csm.opposite(hd)))));
-      std::cout << "Angle=" << angle
-                << " Threshold=" << angle_threshold_degrees;
       if (CGAL::abs(angle) < angle_threshold_degrees) {
         ++nb_sharp_edges;
         constraint_hmap[ed] = true;
@@ -95,9 +93,6 @@ void simplify(double angle_threshold, Surface_mesh& mesh) {
       }
     }
   }
-
-  std::cout << "Simplify: Number of protected sharp edges: " << nb_sharp_edges
-            << std::endl;
 
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
 
@@ -108,8 +103,6 @@ void simplify(double angle_threshold, Surface_mesh& mesh) {
       csm, stop,
       CGAL::parameters::edge_is_constrained_map(constraints_map)
           .get_placement(placement));
-
-  std::cout << "Simplify: Removed edges: " << nb_removed_edges << std::endl;
 
   mesh.clear();
   copy_face_graph(csm, mesh,

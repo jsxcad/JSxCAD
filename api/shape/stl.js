@@ -32,7 +32,6 @@ export const LoadStl = Shape.registerMethod2(
     if (modes.includes('ascii')) {
       format = 'ascii';
     }
-    console.log(`QQ/api/stl/LoadStl/cornerThreshold: ${cornerThreshold}`);
     return Shape.fromGeometry(
       await fromStl(data, {
         format,
@@ -58,7 +57,7 @@ export const Stl = Shape.registerMethod2(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold = 20/360,
+      cornerThreshold = 20 / 360,
     } = {}
   ) => {
     return Shape.fromGeometry(

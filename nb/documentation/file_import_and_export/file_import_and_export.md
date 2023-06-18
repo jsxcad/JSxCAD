@@ -34,47 +34,15 @@ await Arc(10).svg('fileName');
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.
 
 ```JavaScript
-const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl');
+const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl', { cornerThreshold: 20/360 });
 ```
 
-![Image](file_import_and_export.md.$8.png)
+![Image](file_import_and_export.md.$8_teapot.png)
 
 ```JavaScript
-await importedStl.view();
+importedStl.view('teapot');
 ```
 
 ---
 ### Importing .svg
 Imports a .svg file which can then be used as geometry.
-
-```JavaScript
-const importedSvg = await LoadSvg('https://jsxcad.js.org/svg/rocket.svg', { fill: false })
-```
-
-![Image](file_import_and_export.md.$10.png)
-
-```JavaScript
-await importedSvg.align('xy').view();
-```
-
-![Image](file_import_and_export.md.$11.png)
-
-```JavaScript
-await importedSvg.align('xy').scaleToFit(10).fill().ez([2]).untag('color:#090000').view();
-```
-
-```JavaScript
-import { ThreejsCollada, ThreejsSvg } from '@jsxcad/api-threejs';
-```
-
-![Image](file_import_and_export.md.$12.png)
-
-```JavaScript
-await ThreejsSvg('https://jsxcad.js.org/svg/rocket.svg').align('xy').view();
-```
-
-![Image](file_import_and_export.md.$13.png)
-
-```JavaScript
-await ThreejsCollada('https://jsxcad.js.org/collada/duck_triangles.dae').rx(1/4).view();
-```
