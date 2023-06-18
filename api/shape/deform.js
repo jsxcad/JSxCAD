@@ -1,22 +1,11 @@
 import Shape from './Shape.js';
 import { deform as deformGeometry } from '@jsxcad/geometry';
-import { destructure } from './destructure.js';
 
-export const deform = Shape.registerMethod(
+export const deform = Shape.registerMethod2(
   'deform',
-  (...args) =>
-    async (shape) => {
-      const { shapesAndFunctions: selections, object: options } =
-        destructure(args);
-      const { iterations, tolerance, alpha } = options;
-      return Shape.fromGeometry(
-        deformGeometry(
-          await shape.toGeometry(),
-          await shape.toShapesGeometries(selections),
-          iterations,
-          tolerance,
-          alpha
-        )
-      );
-    }
+  ['inputGeometry', 'geometries', 'options'],
+  (geometry, selections, { iterations, tolerance, alpha } = {}) =>
+    Shape.fromGeometry(
+      deformGeometry(geometry, selections, iterations, tolerance, alpha)
+    )
 );

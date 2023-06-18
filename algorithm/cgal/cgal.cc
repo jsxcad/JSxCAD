@@ -137,7 +137,9 @@ typedef Kernel::Direction_3 Direction;
 typedef Kernel::Aff_transformation_3 Transformation;
 typedef std::vector<Point> Points;
 typedef std::vector<Point_2> Point_2s;
+
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
+
 typedef Surface_mesh::Edge_index Edge_index;
 typedef Surface_mesh::Face_index Face_index;
 typedef Surface_mesh::Halfedge_index Halfedge_index;
@@ -2442,6 +2444,22 @@ void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
 
 using emscripten::select_const;
 using emscripten::select_overload;
+
+namespace emscripten {
+namespace internal {
+template <>
+void raw_destructor<Surface_mesh>(Surface_mesh* ptr) {
+  std::cout << "QQ/Destroying Surface_mesh" << std::endl;
+  delete ptr;
+}
+
+template <>
+void raw_destructor<Transformation>(Transformation* ptr) {
+  std::cout << "QQ/Destroying Transformation" << std::endl;
+  delete ptr;
+}
+}  // namespace internal
+}  // namespace emscripten
 
 EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Transformation>("Transformation")

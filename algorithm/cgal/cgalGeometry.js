@@ -1,3 +1,5 @@
+/* globals WeakRef */
+
 import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
 
 import { computeHash } from '@jsxcad/sys';
@@ -13,7 +15,24 @@ const GEOMETRY_REFERENCE = 6;
 const GEOMETRY_EDGES = 7;
 
 const meshCache = new WeakMap();
-const occtShapeCache = new WeakMap();
+const occtShapeCache = new Map();
+
+export const clearMeshCache = () => {
+  console.log(`QQ/clearMeshCache/noop`);
+};
+
+export const getCachedMesh = (key, mesh) => {
+  const ref = meshCache.get(key);
+  if (ref === undefined) {
+    return;
+  }
+  return ref.deref();
+};
+
+export const setCachedMesh = (key, mesh) => {
+  const ref = new WeakRef(mesh);
+  meshCache.set(key, ref);
+};
 
 let testMode = false;
 
@@ -39,7 +58,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
       case 'graph':
         const { graph } = inputs[nth];
         geometry.setType(nth, GEOMETRY_MESH);
-        let mesh = meshCache.get(graph);
+        let mesh = getCachedMesh(graph);
         if (mesh) {
           geometry.setInputMesh(nth, mesh);
         } else if (graph.serializedSurfaceMesh) {
@@ -179,7 +198,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         let newOcctShape;
         let serializedOcctShape;
         if (geometry.has_mesh(nth)) {
-          const oldMesh = meshCache.get(graph);
+          const oldMesh = getCachedMesh(graph);
           newMesh = geometry.getMesh(nth);
           if (newMesh === oldMesh) {
             serializedSurfaceMesh = graph.serializedSurfaceMesh;
@@ -206,7 +225,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
           graph.hash = computeHash(graph);
           // Not part of the hash.
           if (newMesh) {
-            meshCache.set(graph, newMesh);
+            setCachedMesh(graph, newMesh);
           }
           if (newOcctShape) {
             occtShapeCache.set(graph, newOcctShape);
@@ -340,17 +359,17 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
   return output;
 };
 
-export const withCgalGeometry = (inputs, op) => {
+export const withCgalGeometry = (name, inputs, op) => {
   const g = getCgal();
   const cgalGeometry = toCgalGeometry(inputs, g);
   try {
     return op(cgalGeometry, g);
   } catch (error) {
-    console.log(`QQ/withCgalGeometry/error: ${op.name}`);
+    console.log(`QQ/withCgalGeometry/error: ${name}`);
     console.log(error.stack);
     throw error;
   } finally {
-    // cgalGeometry.delete();
+    cgalGeometry.delete();
   }
 };
 

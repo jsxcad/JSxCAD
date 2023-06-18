@@ -7,7 +7,7 @@ export const op = Shape.registerMethod2(
   async (input, functions = []) => {
     const results = [];
     for (const fun of functions) {
-      results.push(await fun(input));
+      results.push(await fun(Shape.chain(input)));
     }
     return Group(...results);
   }

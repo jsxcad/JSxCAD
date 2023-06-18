@@ -10,16 +10,20 @@ export const md = (strings, ...placeholders) => {
   return md;
 };
 
-export const mdMethod = Shape.registerMethod('md', (...chunks) => (shape) => {
-  const strings = [];
-  for (const chunk of chunks) {
-    if (chunk instanceof Function) {
-      strings.push(chunk(shape));
-    } else {
-      strings.push(chunk);
+export const mdMethod = Shape.registerMethod2(
+  'md',
+  ['input', 'rest'],
+  (input, chunks) => {
+    const strings = [];
+    for (const chunk of chunks) {
+      if (chunk instanceof Function) {
+        strings.push(chunk(input));
+      } else {
+        strings.push(chunk);
+      }
     }
+    const md = strings.join('');
+    emit({ md, hash: computeHash(md) });
+    return input;
   }
-  const md = strings.join('');
-  emit({ md, hash: computeHash(md) });
-  return shape;
-});
+);

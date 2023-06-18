@@ -1,39 +1,36 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from '@jsxcad/geometry';
 
-export const get = Shape.registerMethod(
+export const get = Shape.registerMethod2(
   ['get', 'g'],
-  (...args) =>
-    async (shape) => {
-      const { strings: tags, func: groupOp = Group } = destructure(args);
-      const isMatch = oneOfTagMatcher(tags, 'item');
-      const picks = [];
-      const walk = (geometry, descend) => {
-        const { tags, type } = geometry;
-        if (type === 'group') {
-          return descend();
-        }
-        if (isMatch(`type:${geometry.type}`)) {
-          picks.push(Shape.fromGeometry(geometry));
-        } else {
-          for (const tag of tags) {
-            if (isMatch(tag)) {
-              picks.push(Shape.fromGeometry(geometry));
-              break;
-            }
+  ['inputGeometry', 'strings', 'function'],
+  (geometry, tags, groupOp = Group) => {
+    const isMatch = oneOfTagMatcher(tags, 'item');
+    const picks = [];
+    const walk = (geometry, descend) => {
+      const { tags, type } = geometry;
+      if (type === 'group') {
+        return descend();
+      }
+      if (isMatch(`type:${geometry.type}`)) {
+        picks.push(Shape.fromGeometry(geometry));
+      } else {
+        for (const tag of tags) {
+          if (isMatch(tag)) {
+            picks.push(Shape.fromGeometry(geometry));
+            break;
           }
         }
-        if (type !== 'item') {
-          return descend();
-        }
-      };
-      const geometry = await shape.toGeometry();
-      visit(geometry, walk);
-      return groupOp(...picks);
-    }
+      }
+      if (type !== 'item') {
+        return descend();
+      }
+    };
+    visit(geometry, walk);
+    return groupOp(...picks);
+  }
 );
 
 export const g = get;

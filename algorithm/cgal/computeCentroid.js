@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const computeCentroid = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('computeCentroid', inputs, (cgalGeometry, g) => {
     const status = g.ComputeCentroid(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

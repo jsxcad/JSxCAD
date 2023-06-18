@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const involute = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('involute', inputs, (cgalGeometry, g) => {
     const status = g.Involute(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

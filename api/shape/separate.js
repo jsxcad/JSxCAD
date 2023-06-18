@@ -3,7 +3,7 @@ import { separate as separateGeometry } from '@jsxcad/geometry';
 
 export const separate = Shape.registerMethod2(
   'separate',
-  ['inputGeometry', 'modes'],
+  ['inputGeometry', 'modes:noShapes,noHoles,holesAsShapes'],
   (geometry, modes) =>
     Shape.fromGeometry(
       separateGeometry(

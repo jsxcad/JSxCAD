@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const makeAbsolute = (inputs) => {
-  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry('makeAbsolute', inputs, (cgalGeometry, g) => {
     const status = g.MakeAbsolute(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

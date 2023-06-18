@@ -21,7 +21,7 @@ const Bearing = (diameter) =>
     );
 ```
 
-![Image](bearing.md.bearing_10_7_[object_Object].png)
+![Image](bearing.md.bearing_10_7.png)
 
 You'll need to print two of these
 

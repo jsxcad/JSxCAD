@@ -64,13 +64,3 @@ const bentWall = await wall
   .bend(50)
   .view();
 ```
-
-![Image](lego_sorter.md.$1.png)
-
-![Image](lego_sorter.md.$1_tall_sorter.png)
-
-[tall_sorter.stl](lego_sorter.tall_sorter.stl)
-
-```JavaScript
-await bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');
-```

@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const convertPolygonsToMeshes = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('convertPolygonsToMeshes', inputs, (cgalGeometry, g) => {
     const status = g.ConvertPolygonsToMeshes(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

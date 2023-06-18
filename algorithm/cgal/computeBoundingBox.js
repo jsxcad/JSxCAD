@@ -6,7 +6,7 @@ export const computeBoundingBox = (inputs) => {
   if (inputs.length === 0) {
     return;
   }
-  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry('computeBoundingBox', inputs, (cgalGeometry, g) => {
     let bbox;
     const status = g.ComputeBoundingBox(
       cgalGeometry,

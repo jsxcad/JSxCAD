@@ -54,9 +54,11 @@ design
 
 ![Image](getNot.md.$4.png)
 
+design.get(' * ') discards all items
+
 ```JavaScript
 design
   .getNot('*')
   .view()
-  .note('design.get(' * ') discards all items');
+  .note("design.get(' * ') discards all items");
 ```

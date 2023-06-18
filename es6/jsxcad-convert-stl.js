@@ -1,6 +1,6 @@
 import { fromPolygonSoup, eachTriangle } from './jsxcad-geometry.js';
 
-function parse$1(str) {
+function parse$2(str) {
   if(typeof str !== 'string') {
     str = str.toString();
   }
@@ -50,7 +50,7 @@ function parse$1(str) {
   };
 }
 
-var parseStlAscii = parse$1;
+var parseStlAscii = parse$2;
 
 // Adapted for ArrayBuffer from parse-stl-binary version ^1.0.1.
 
@@ -62,7 +62,7 @@ const readVector = (view, off) => [
   view.getFloat32(off + 8, LITTLE_ENDIAN),
 ];
 
-const parse = (data) => {
+const parse$1 = (data) => {
   const view = new DataView(data.buffer);
   var off = 80; // skip header
 
@@ -98,20 +98,47 @@ const parse = (data) => {
   };
 };
 
-const toParser = (format) => {
+const parse = (data, format) => {
   switch (format) {
     case 'ascii':
-      return (data) => parseStlAscii(new TextDecoder('utf8').decode(data));
+      try {
+        return parseStlAscii(new TextDecoder('utf8').decode(data));
+      } catch (error) {
+        if (error instanceof RangeError) {
+          return parse$1(data);
+        } else {
+          throw error;
+        }
+      }
     case 'binary':
-      return parse;
+      try {
+        return parse$1(data);
+      } catch (error) {
+        // Try falling back to ascii.
+        if (error instanceof RangeError) {
+          return parseStlAscii(new TextDecoder('utf8').decode(data));
+        } else {
+          throw error;
+        }
+      }
     default:
       throw Error('die');
   }
 };
 
-const fromStl = async (stl, { format = 'ascii' } = {}) => {
-  const parse = toParser(format);
-  const { positions, cells } = parse(stl);
+const fromStl = async (
+  stl,
+  {
+    format = 'ascii',
+    wrapAlways,
+    wrapAbsoluteAlpha,
+    wrapAbsoluteOffset,
+    wrapRelativeAlpha = 300,
+    wrapRelativeOffset = 5000,
+    cornerThreshold = 0,
+  } = {}
+) => {
+  const { positions, cells } = parse(stl, format);
   const polygons = [];
   for (const [a, b, c] of cells) {
     const pa = positions[a];
@@ -122,7 +149,15 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
     if (pc.some((value) => !isFinite(value))) continue;
     polygons.push({ points: [[...pa], [...pb], [...pc]] });
   }
-  return fromPolygonSoup(polygons);
+  return fromPolygonSoup(polygons, {
+    tolerance: 0,
+    wrapAlways,
+    wrapRelativeAlpha,
+    wrapRelativeOffset,
+    wrapAbsoluteAlpha,
+    wrapAbsoluteOffset,
+    cornerThreshold,
+  });
 };
 
 const X = 0;

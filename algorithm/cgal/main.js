@@ -81,7 +81,7 @@ export { seam } from './seam.js';
 export { section } from './section.js';
 export { separate } from './separate.js';
 export { serialize } from './serialize.js';
-export { setTestMode } from './cgalGeometry.js';
+export { clearMeshCache, setTestMode } from './cgalGeometry.js';
 export { shell } from './shell.js';
 export { simplify } from './simplify.js';
 export { smooth } from './smooth.js';

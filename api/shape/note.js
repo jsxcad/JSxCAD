@@ -9,9 +9,13 @@ export const Note = (md) => {
   emit({ md, hash: computeHash(md) });
 };
 
-export const note = Shape.registerMethod('note', (md) => (shape) => {
-  Note(md);
-  return shape;
-});
+export const note = Shape.registerMethod2(
+  ['note', 'md'],
+  ['input', 'string'],
+  (input, md) => {
+    Note(md);
+    return input;
+  }
+);
 
 export default note;

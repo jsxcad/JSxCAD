@@ -1,4 +1,10 @@
-int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
+#include "simplify_util.h"
+#include "wrap_util.h"
+
+int FromPolygonSoup(Geometry* geometry, emscripten::val fill, bool wrap_always,
+                    double wrap_absolute_alpha, double wrap_absolute_offset,
+                    double wrap_relative_alpha, double wrap_relative_offset,
+                    double corner_threshold) {
   Points points;
   Polygons polygons;
   {
@@ -22,32 +28,32 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill) {
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
                                                               mesh);
 
-  bool failed = false;
-  while (!failed && !CGAL::is_closed(mesh)) {
-    for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
-      if (mesh.is_border(edge)) {
-        std::vector<Face_index> faces;
-        CGAL::Polygon_mesh_processing::triangulate_hole(
-            mesh, edge, std::back_inserter(faces),
-            CGAL::parameters::use_2d_constrained_delaunay_triangulation(false));
-        if (faces.empty()) {
-          failed = true;
-        }
-        break;
-      }
+  if (wrap_always || CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
+    // Use a wrapping pass to remove self-intersection.
+    CGAL::Cartesian_converter<Kernel, Epick_kernel> to_cartesian;
+    Epick_points points;
+    std::vector<std::vector<size_t>> faces;
+    wrap_add_mesh_epick(to_cartesian, mesh, points, faces);
+    double alpha;
+    double offset;
+    if (wrap_absolute_alpha == 0 && wrap_absolute_offset == 0) {
+      wrap_compute_alpha_and_offset(CGAL::Polygon_mesh_processing::bbox(mesh),
+                                    wrap_relative_alpha, wrap_relative_offset,
+                                    alpha, offset);
+    } else {
+      alpha = wrap_absolute_alpha;
+      offset = wrap_absolute_offset;
     }
+    mesh.clear();
+    wrap_epick(points, faces, alpha, offset, mesh);
   }
-  if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
-    CGAL::Polygon_mesh_processing::experimental::
-        autorefine_and_remove_self_intersections(mesh);
+
+  if (corner_threshold > 0) {
+    // Enable simplification to reduce polygon count.
+    simplify(corner_threshold, mesh);
   }
 
   demesh(mesh);
-
-  if (CGAL::Polygon_mesh_processing::volume(
-          mesh, CGAL::parameters::all_default()) < 0) {
-    CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
-  }
 
   return STATUS_OK;
 }

@@ -1,3 +1,4 @@
+/*
 import { linearize, transformCoordinate } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
@@ -37,3 +38,4 @@ export const moveTo = Shape.registerMethod(
 );
 
 export default moveTo;
+*/

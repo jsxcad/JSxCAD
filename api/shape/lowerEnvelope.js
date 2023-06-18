@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 import { generateLowerEnvelope } from '@jsxcad/geometry';
 
-export const lowerEnvelope = Shape.registerMethod(
+export const lowerEnvelope = Shape.registerMethod2(
   'lowerEnvelope',
-  () => async (shape) =>
-    Shape.fromGeometry(generateLowerEnvelope(await shape.toGeometry()))
+  ['inputGeometry'],
+  (geometry) => Shape.fromGeometry(generateLowerEnvelope(geometry))
 );

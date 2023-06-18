@@ -1205,6 +1205,11 @@ const watchFileRead = async (thunk) => {
 
 const files = new Map();
 
+const clearFileCache = () => {
+  console.log(`QQ/clearFileCache`);
+  files.clear();
+};
+
 // Do we need the ensureFile functions?
 const ensureQualifiedFile = (path, qualifiedPath) => {
   let file = files.get(qualifiedPath);
@@ -2451,11 +2456,9 @@ const { deserialize } = v8$1;
 const fetchWithTimeout =
   (fetch, AbortError) =>
   async (resource, options = {}) => {
-    console.log(`QQ/fetchWithTimeout/begin`);
     const { timeout = 8000 } = options;
     const controller = new AbortController();
     const id = setTimeout(() => {
-      console.log('QQ/fetchWithTimeout: Timed out');
       controller.abort();
     }, timeout);
     try {
@@ -2466,7 +2469,6 @@ const fetchWithTimeout =
       return response;
     } finally {
       clearTimeout(id);
-      console.log(`QQ/fetchWithTimeout/end`);
     }
   };
 
@@ -3173,4 +3175,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };

@@ -15,11 +15,62 @@ import { view } from './view.js';
 
 export const LoadStl = Shape.registerMethod2(
   'LoadStl',
-  ['string', 'modes'],
-  async (path, modes) => {
+  ['string', 'modes:binary,ascii,wrap', 'options'],
+  async (
+    path,
+    modes,
+    {
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      cornerThreshold = 20 / 360,
+    } = {}
+  ) => {
     const data = await read(`source/${path}`, { sources: [path] });
-    const format = modes.includes('binary') ? 'binary' : 'ascii';
-    return Shape.fromGeometry(await fromStl(data, { format }));
+    let format = 'binary';
+    if (modes.includes('ascii')) {
+      format = 'ascii';
+    }
+    return Shape.fromGeometry(
+      await fromStl(data, {
+        format,
+        wrapAlways: modes.includes('wrap'),
+        wrapAbsoluteAlpha,
+        wrapAbsoluteOffset,
+        wrapRelativeAlpha,
+        wrapRelativeOffset,
+        cornerThreshold,
+      })
+    );
+  }
+);
+
+export const Stl = Shape.registerMethod2(
+  'Stl',
+  ['string', 'modes:binary,ascii,wrap', 'options'],
+  async (
+    text,
+    modes,
+    {
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      cornerThreshold = 20 / 360,
+    } = {}
+  ) => {
+    return Shape.fromGeometry(
+      await fromStl(new TextEncoder('utf8').encode(text), {
+        format: 'ascii',
+        wrapAlways: modes.includes('wrap'),
+        wrapAbsoluteAlpha,
+        wrapAbsoluteOffset,
+        wrapRelativeAlpha,
+        wrapRelativeOffset,
+        cornerThreshold,
+      })
+    );
   }
 );
 

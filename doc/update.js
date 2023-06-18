@@ -1,6 +1,7 @@
-import { getTimes, reportTimes, watchLog } from '@jsxcad/sys';
+import { clearFileCache, getTimes, reportTimes, watchLog } from '@jsxcad/sys';
 
 import { argv } from 'process';
+import { clearMeshCache } from '@jsxcad/algorithm-cgal';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -99,6 +100,8 @@ const build = async (...args) => {
       console.log(
         `Notebook ${notebook} completed in ${minutesDuration.toFixed(2)}.`
       );
+      clearFileCache();
+      clearMeshCache();
     }
     reportTimes();
     notebookDurations.sort((a, b) => a.minutesDuration - b.minutesDuration);

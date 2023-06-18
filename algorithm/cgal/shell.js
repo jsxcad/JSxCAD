@@ -13,7 +13,7 @@ export const shell = (
   approx = 0.1,
   edgeSize = 1
 ) => {
-  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry('shell', inputs, (cgalGeometry, g) => {
     const status = g.Shell(
       cgalGeometry,
       innerOffset,

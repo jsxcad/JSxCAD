@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const convexHull = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('convexHull', inputs, (cgalGeometry, g) => {
     const status = g.ConvexHull(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

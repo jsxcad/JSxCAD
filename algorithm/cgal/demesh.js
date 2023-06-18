@@ -4,7 +4,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
 export const demesh = (inputs) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('demesh', inputs, (cgalGeometry, g) => {
     const status = g.Demesh(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

@@ -11,7 +11,7 @@ export const deform = (
   tolerance = 0.0001,
   alpha = 0.02
 ) => {
-  return withCgalGeometry(inputs, (cgalGeometry, g) => {
+  return withCgalGeometry('deform', inputs, (cgalGeometry, g) => {
     const status = g.Deform(cgalGeometry, length, iterations, tolerance, alpha);
     switch (status) {
       case STATUS_ZERO_THICKNESS:

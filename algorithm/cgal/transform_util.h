@@ -108,10 +108,17 @@ std::shared_ptr<const Transformation> Transformation__rotate_y(double a) {
 }
 
 std::shared_ptr<const Transformation> Transformation__rotate_z(double a) {
-  RT sin_alpha, cos_alpha, w;
-  compute_turn(a, sin_alpha, cos_alpha, w);
-  return std::shared_ptr<const Transformation>(new Transformation(
-      cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0, 0, 0, w, 0, w));
+  try {
+    RT sin_alpha, cos_alpha, w;
+    compute_turn(a, sin_alpha, cos_alpha, w);
+    return std::shared_ptr<const Transformation>(
+        new Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0,
+                           0, 0, 0, w, 0, w));
+  } catch (const std::exception& e) {
+    std::cout << "QQ/Transformation__rotate_z/exception" << std::endl;
+    std::cout << e.what() << std::endl;
+    throw;
+  }
 }
 
 std::shared_ptr<const Transformation> Transformation__rotate_x_to_y0(double x,

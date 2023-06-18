@@ -128,6 +128,8 @@ export const axleHole = await Box(8)
   .stl('axle_hole');
 ```
 
+![Image](lego.md.verticalBushingHole.png)
+
 ```JavaScript
 export const verticalBushingHole = Join(
   bushingHoleProfile.ez([0.6, 7.4]),
@@ -136,6 +138,8 @@ export const verticalBushingHole = Join(
   .void()
   .view(and(Point()));
 ```
+
+![Image](lego.md.horizontalBushingHole.png)
 
 ```JavaScript
 export const horizontalBushingHole = verticalBushingHole

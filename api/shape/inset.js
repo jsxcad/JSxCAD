@@ -1,11 +1,9 @@
 import Shape from './Shape.js';
 import { inset as insetGeometry } from '@jsxcad/geometry';
 
-export const inset = Shape.registerMethod(
+export const inset = Shape.registerMethod2(
   'inset',
-  (initial = 1, { segments = 16, step, limit } = {}) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        insetGeometry(await shape.toGeometry(), initial, step, limit, segments)
-      )
+  ['inputGeometry', 'number', 'options'],
+  (geometry, initial = 1, { segments = 16, step, limit } = {}) =>
+    Shape.fromGeometry(insetGeometry(geometry, initial, step, limit, segments))
 );

@@ -10,7 +10,7 @@ export const remesh = (
   relaxationSteps,
   targetEdgeLength
 ) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('remesh', inputs, (cgalGeometry, g) => {
     const status = g.Remesh(
       cgalGeometry,
       count,

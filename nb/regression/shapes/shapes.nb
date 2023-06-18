@@ -140,7 +140,7 @@ const q = await Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
   ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
-).view().md`Boxes and Arcs from extents`;
+).view().note(`Boxes and Arcs from extents`);
 
 await Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
@@ -169,7 +169,7 @@ await Box(12)
       .rz(1 / 4, 3 / 4)
   )
   .color('black')
-  .fit(separate({ keepHolesInShapes: true }).offset(1).fuse().color('yellow'))
+  .fit(separate().offset(1).fuse().color('yellow'))
   .view();
 
 await Box(12)
@@ -179,7 +179,7 @@ await Box(12)
       .rz(1 / 4, 3 / 4)
   )
   .color('black')
-  .fit(separate({ keepHolesInShapes: false }).offset(1).fuse().color('yellow'))
+  .fit(separate('noHoles').offset(1).fuse().color('yellow'))
   .view();
 
 await Group(Box(1), Box(1).rx(1 / 4))
@@ -230,18 +230,18 @@ await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 
 await Box(10)
   .rz(1 / 8)
-  .cut(eachPoint(Arc(5).to))
+  .cut(eachPoint((p) => Arc(5).to(p)))
   .view();
 
 await Triangle(10)
   .cut(inset(2))
-  .cut(eachPoint(Arc(1).to))
+  .cut(eachPoint((p) => Arc(1).to(p)))
   .view();
 
 await Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
-  .cut(eachPoint(Arc(5).to))
+  .cut(eachPoint((p) => Arc(5).to(p)))
   .view();
 
 /*
@@ -262,7 +262,7 @@ await Orb(6, { zag: 2 })
   .view();
 
 await Box(10, 10, 10)
-  .cut(faces(Box(4, 4, 4).to))
+  .cut(faces((p) => Box(4, 4, 4).to(p)))
   .faces(cut(inset(1)))
   .view();
 

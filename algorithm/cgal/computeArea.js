@@ -1,4 +1,6 @@
 import { withCgalGeometry } from './cgalGeometry.js';
 
 export const computeArea = (linear) =>
-  withCgalGeometry(linear, (geometry, g) => g.ComputeArea(geometry));
+  withCgalGeometry('computeArea', linear, (geometry, g) =>
+    g.ComputeArea(geometry)
+  );

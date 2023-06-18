@@ -36,4 +36,5 @@ const bentWall = await wall
   .bend(50)
   .view();
 
-await bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');
+// TODO: Figure out why this is hanging.
+// await bentWall.and(ring, base, ring.z(52)).scale(1.5).view().stl('tall_sorter');

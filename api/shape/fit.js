@@ -1,15 +1,11 @@
 import Shape from './Shape.js';
-import { destructure } from './destructure.js';
 import { disjoint } from '@jsxcad/geometry';
 
-export const fit = Shape.registerMethod('fit', (...args) => {
-  const { strings: modes, shapesAndFunctions: shapes } = destructure(args);
-  return async (shape) =>
+export const fit = Shape.registerMethod2(
+  'fit',
+  ['inputGeometry', 'geometries', 'modes:exact'],
+  (geometry, geometries, modes) =>
     Shape.fromGeometry(
-      disjoint(
-        [...(await shape.toShapesGeometries(shapes)), await shape.toGeometry()],
-        undefined,
-        modes.includes('exact')
-      )
-    );
-});
+      disjoint([...geometries, geometry], undefined, modes.includes('exact'))
+    )
+);

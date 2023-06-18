@@ -1160,9 +1160,28 @@ const fromPolygons = (
 
 const fromPolygonSoup = (
   polygons,
-  { tags = [], close = false, tolerance = 0.001 } = {}
+  {
+    tags = [],
+    close = false,
+    tolerance,
+    wrapAlways,
+    wrapAbsoluteAlpha,
+    wrapAbsoluteOffset,
+    wrapRelativeAlpha,
+    wrapRelativeOffset,
+    cornerThreshold,
+  } = {}
 ) => {
-  const outputs = fromPolygonSoup$1(polygons, close, tolerance);
+  const outputs = fromPolygonSoup$1(
+    polygons,
+    tolerance,
+    wrapAlways,
+    wrapRelativeAlpha,
+    wrapRelativeOffset,
+    wrapAbsoluteAlpha,
+    wrapAbsoluteOffset,
+    cornerThreshold
+  );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
@@ -1725,11 +1744,11 @@ const shell = (
 
 const filter$4 = (geometry) => ['graph'].includes(geometry.type);
 
-const simplify = (geometry, ratio, eps) => {
+const simplify = (geometry, cornerThreshold, eps) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$4, inputs);
-  const outputs = simplify$1(inputs, ratio, eps);
+  const outputs = simplify$1(inputs, cornerThreshold, eps);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

@@ -39,4 +39,4 @@ design
 design
   .getNot('*')
   .view()
-  .note('design.get(' * ') discards all items');
+  .note("design.get(' * ') discards all items");

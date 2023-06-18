@@ -15,7 +15,7 @@ export const approximate = (
   pcaPlane = false,
   maxNumberOfProxies
 ) =>
-  withCgalGeometry(inputs, (cgalGeometry, g) => {
+  withCgalGeometry('approximate', inputs, (cgalGeometry, g) => {
     const status = g.Approximate(
       cgalGeometry,
       iterations !== undefined,

@@ -44,7 +44,7 @@ export const ScrewThreadBuilder = Cached(
   (diameter, height, pitch, angle, play, turn) =>
     ScrewThreadSegment(diameter, { pitch, angle, play, turn })
       .seq({ from: 0, to: height, by: pitch }, z)
-      .cut('fastx', Box(diameter * 2).ez([height, height + pitch * 2]))
+      .cut(Box(diameter * 2).ez([height, height + pitch * 2]))
       .clean()
 );
 
@@ -64,9 +64,8 @@ export const NutThreadSegmentBuilder = Cached(
       play: -play,
       turn,
     }).cutFrom(
-      'fastx',
       Arc(diameter + thickness)
-        .cut('fastx', Arc(diameter - depth))
+        .cut(Arc(diameter - depth))
         .ez([pitch])
     );
   }
@@ -88,7 +87,7 @@ export const NutThreadBuilder = Cached(
   (diameter, height, pitch, angle, play, turn) =>
     NutThreadSegment(diameter, { pitch, angle, play, turn })
       .seq({ from: 0, to: height, by: pitch }, z)
-      .cut('fastx', Box(diameter * 2).ez([height, height + pitch * 2]))
+      .cut(Box(diameter * 2).ez([height, height + pitch * 2]))
 );
 
 export const NutThread = Shape.registerMethod('NutThread', (
