@@ -479,13 +479,13 @@ await c.by(origin()).view();
 ![Image](shape.md.$62.png)
 
 ```JavaScript
-await c.by(origin(), and(Box(5, 5, 5))).view();
+await c.by(origin()).and(Box(5, 5, 5)).view();
 ```
 
 ![Image](shape.md.$63.png)
 
 ```JavaScript
-await c.by(origin(), cut(Box(5, 5, 5))).view();
+await c.by(origin()).cut(Box(5, 5, 5)).view();
 ```
 
 ![Image](shape.md.$64.png)

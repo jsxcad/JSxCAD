@@ -217,8 +217,8 @@ const c = await Box(10)
   .view();
 
 await c.by(origin()).view();
-await c.by(origin(), and(Box(5, 5, 5))).view();
-await c.by(origin(), cut(Box(5, 5, 5))).view();
+await c.by(origin()).and(Box(5, 5, 5)).view();
+await c.by(origin()).cut(Box(5, 5, 5)).view();
 
 await Triangle(4)
   .x(5)
