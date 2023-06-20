@@ -165,6 +165,7 @@ const chainable = (op) => {
   return new Proxy(
     (...args) =>
       async (terminal) => {
+        terminal = await terminal;
         if (
           !(terminal instanceof Shape) &&
           terminal !== null &&
@@ -215,11 +216,11 @@ export const isOp = (value) =>
   value.isChain !== 'root';
 Shape.isOp = isOp;
 
-export const isChainFunction = (value) => value instanceof Function && value.isChain !== undefined;
+export const isChainFunction = (value) =>
+  value instanceof Function && value.isChain !== undefined;
 Shape.isChainFunction = isChainFunction;
 
-export const isFunction = (value) =>
-  value instanceof Function && (value.isChain === undefined || value.isChain === 'incomplete');
+export const isFunction = (value) => value instanceof Function;
 Shape.isFunction = isFunction;
 
 export const isArray = (value) => value instanceof Array;
@@ -322,7 +323,12 @@ export const registerMethod2 = (names, signature, op) => {
     async (shape) => {
       try {
         // console.log(`QQ/method2: ${names} shape=${shape}`);
-        const parameters = await Shape.destructure2(shape, args, ...signature);
+        const parameters = await Shape.destructure2(
+          names,
+          shape,
+          args,
+          ...signature
+        );
         return op(...parameters);
       } catch (error) {
         console.log(

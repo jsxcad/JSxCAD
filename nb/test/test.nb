@@ -1,16 +1,1 @@
-const borigin = Box(0.5, 0.5, 5)
-  .to(YZ())
-  // .and(to(YZ()), to(XZ()))
-  // .overlay();
-
-// Box(10, 10, 1).view().note('Box(10, 10, 1)');
-
-// Box(10, 10, 1).align().and(borigin).view().md('align()');
-Box(10, 10, 1).align().and(borigin).view();
-
-// Box(10, 10, 1).align('x>').and(origin).view().md("align('x>')");
-
-// Box(10, 10, 1).align('x<').and(origin).view().md("align('x<')");
-// Box(10, 10, 1).align('x').and(origin).view().md("align('x')");
-
-// Box(10, 10, 1).align('x>y>z<').and(origin).view().md("align('x>y>z<')");
+Triangle(11).eachPoint((p) => (s) => Arc(5).to(p), cut).view(5)

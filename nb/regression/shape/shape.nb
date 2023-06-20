@@ -370,7 +370,7 @@ await Box(10, 10, 10)
 
 await Arc(10, 10, 10, { sides: 7 })
   .cut(
-    eachEdge(Box(10, [-4, 10], [5, 10]), (e, l) =>
+    eachEdge({ select: Box(10, [-4, 10], [5, 10]) }, (e, l) =>
       Box(2, 2, [0, l])
         .clip(
           Arc(2, 2, [0, l], { start: 1/4, end: 3/4 })

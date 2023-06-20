@@ -4,7 +4,7 @@ const resolve = async (shape, value) => {
   while (value instanceof Promise) {
     value = await value;
   }
-  while (Shape.isChainFunction(value)) {
+  while (Shape.isFunction(value)) {
     value = await value(shape);
   }
   if (Shape.isArray(value)) {
@@ -47,7 +47,7 @@ const getCoordinates = async (value) => {
   return coordinates;
 };
 
-export const destructure2 = async (shape, input, ...specs) => {
+export const destructure2 = async (names, shape, input, ...specs) => {
   const output = [];
   let args = [];
   for (const arg of input) {
@@ -152,10 +152,7 @@ export const destructure2 = async (shape, input, ...specs) => {
         let func;
         for (const arg of args) {
           let value = arg;
-          console.log(`QQ/destructure/function: value=${value}`);
-          console.log(`QQ/destructure/function: value.isChain=${value.isChain}`);
           if (func === undefined && Shape.isFunction(value)) {
-            console.log(`QQ/destructure/function/accept: ${value}`);
             func = value;
           } else {
             rest.push(arg);
@@ -395,14 +392,18 @@ export const destructure2 = async (shape, input, ...specs) => {
     let diagnostic;
     try {
       // Try to format it nicely.
-      diagnostic = `Error: ${args.length} unused arguments: ${JSON.stringify(
+      diagnostic = `Error[${names}] ${
+        args.length
+      } unused arguments: ${args.join(',')} JSON=${JSON.stringify(
         args
-      )} arguments: ${JSON.stringify(input)} specs: ${JSON.stringify(specs)}`;
+      )} arguments: ${JSON.stringify(input)} specs: ${JSON.stringify(
+        specs
+      )} output=${JSON.stringify(output)}`;
     } catch (error) {
       // Otherwise fall back.
-      diagnostic = `Error: ${args.length} unused arguments: ${args.join(
-        ', '
-      )} specs: ${specs.join(',')}`;
+      diagnostic = `Error[${names}] ${
+        args.length
+      } unused arguments: ${args.join(', ')} specs: ${specs.join(',')}`;
     }
     console.log(diagnostic);
     throw Error(diagnostic);

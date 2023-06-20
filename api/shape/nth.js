@@ -20,10 +20,8 @@ export const nth = Shape.registerMethod2(
       }
       let candidate = candidates[nth];
       if (candidate === undefined) {
-        console.log(`QQ/nth/empty`);
         candidate = await Empty();
       }
-      console.log(`QQ/nth/candidate: ${candidate}`);
       group.push(candidate);
     }
     return Group(...group);

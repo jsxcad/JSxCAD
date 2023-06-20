@@ -6,7 +6,12 @@ import { tagMatcher } from './tag.js';
 export const tags = Shape.registerMethod2(
   'tags',
   ['input', 'inputGeometry', 'string', 'function'],
-  async (input, geometry, tag = '*', op = (...tags) => note(`tags: ${tags}`)) => {
+  async (
+    input,
+    geometry,
+    tag = '*',
+    op = (...tags) => note(`tags: ${tags}`)
+  ) => {
     const isMatchingTag = tagMatcher(tag, 'user');
     const collected = [];
     for (const { tags } of getLeafs(geometry)) {
@@ -16,7 +21,6 @@ export const tags = Shape.registerMethod2(
         }
       }
     }
-    console.log(`QQ/tags op=${op}`);
     const result = op(...collected)(input);
     return result;
   }

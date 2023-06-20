@@ -8,7 +8,7 @@ export const And = Shape.registerMethod2('And', ['geometries'], (geometries) =>
 export const and = Shape.registerMethod2(
   'and',
   ['input', 'shapes'],
-  (input, shapes) => input.And(input, ...shapes)
+  (input, shapes) => And(input, ...shapes)(input)
 );
 
 export default and;

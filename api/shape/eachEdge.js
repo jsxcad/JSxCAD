@@ -22,24 +22,26 @@ export const subtract = ([ax, ay, az], [bx, by, bz]) => [
 const SOURCE = 0;
 const TARGET = 1;
 
+// TODO: Fix up option destructuring to handle geometry, etc.
 export const eachEdge = Shape.registerMethod2(
   'eachEdge',
-  ['input', 'inputGeometry', 'function', 'function', 'function', 'geometries'],
+  ['input', 'inputGeometry', 'function', 'function', 'function', 'options'],
   async (
     input,
     geometry,
     edgeOp = (e, l, o) => (s) => e,
     faceOp = (es, f) => (s) => es,
     groupOp = Group,
-    selections
+    { select } = {}
   ) => {
-    console.log(`QQ/eachEdge: input=${input}`);
-    console.log(`QQ/eachEdge: inputGeometry=${geometry}`);
-    console.log(`QQ/eachEdge: edgeOp=${edgeOp}`);
-    console.log(`QQ/eachEdge: faceOp=${faceOp}`);
-    console.log(`QQ/eachEdge: selections=${selections}`);
     const faces = [];
     const faceEdges = [];
+    const selections = [];
+    if (select) {
+      selections.push(await select.toGeometry());
+    } else {
+      selections.push(geometry);
+    }
     eachFaceEdges(geometry, selections, (faceGeometry, edgeGeometry) => {
       faceEdges.push({ faceGeometry, edgeGeometry });
     });

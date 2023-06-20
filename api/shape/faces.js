@@ -6,7 +6,6 @@ export const faces = Shape.registerMethod2(
   'faces',
   ['input', 'function', 'function'],
   (input, faceOp = (face) => (shape) => face, groupOp = Group) => {
-    console.log(`QQ/faces: faceOp=${faceOp}`);
     return eachEdge(
       (e, l, o) => (s) => e,
       (e, f) => (s) => faceOp(f)(s),
