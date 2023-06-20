@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 import { toShapes } from './toShapes.js';
 
@@ -15,3 +16,4 @@ export const toShapesGeometries = Shape.registerMethod(
     return geometries;
   }
 );
+*/

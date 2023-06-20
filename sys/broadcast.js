@@ -6,16 +6,11 @@ import {
 } from './watchers.js';
 
 import { BroadcastChannel } from './broadcast-channel.js';
-import { logInfo } from './log.js';
 import self from './self.js';
 
 let broadcastChannel;
 
 const receiveNotification = async ({ id, op, path, workspace }) => {
-  logInfo(
-    'sys/broadcast',
-    `Received broadcast: ${JSON.stringify({ id, op, path, workspace })}`
-  );
   switch (op) {
     case 'changePath':
       await runFileChangeWatchers(path, workspace);
@@ -51,8 +46,17 @@ export const sendBroadcast = async (message) => {
 };
 
 const initBroadcastChannel = async () => {
-  broadcastChannel = new BroadcastChannel('sys/fs');
-  broadcastChannel.onmessage = receiveBroadcast;
+  try {
+    broadcastChannel = new BroadcastChannel('sys/fs');
+    broadcastChannel.onmessage = receiveBroadcast;
+  } catch (error) {
+    /*
+    if (error instanceof NotSupportedError) {
+      return;
+    }
+    throw error;
+*/
+  }
 };
 
 export const notifyFileChange = async (path, workspace) =>

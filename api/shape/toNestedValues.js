@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 
 export const toNestedValues = Shape.registerMethod(
@@ -21,3 +22,4 @@ export const toNestedValues = Shape.registerMethod(
     }
   }
 );
+*/

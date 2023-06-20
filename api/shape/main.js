@@ -11,7 +11,7 @@ import './Shape.js';
 
 // We need these available via Shape.
 // eslint-disable-next-line sort-imports
-import './destructure.js';
+// import './destructure.js';
 
 // eslint-disable-next-line sort-imports
 import './registerMethod.js';
@@ -65,7 +65,7 @@ export { cutFrom } from './cutFrom.js';
 export { cutOut } from './cutOut.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
-export { destructure } from './destructure.js';
+// export { destructure } from './destructure.js';
 export { diameter } from './diameter.js';
 export { dilateXY } from './dilateXY.js';
 export { disjoint } from './disjoint.js';
@@ -175,13 +175,13 @@ export { times } from './math.js';
 export { to } from './to.js';
 export { toCoordinates } from './toCoordinates.js';
 export { toDisplayGeometry } from './toDisplayGeometry.js';
-export { toFlatValues } from './toFlatValues.js';
-export { toNestedValues } from './toNestedValues.js';
-export { toShape } from './toShape.js';
-export { toShapeGeometry } from './toShapeGeometry.js';
-export { toShapes } from './toShapes.js';
-export { toShapesGeometries } from './toShapesGeometries.js';
-export { toValue } from './toValue.js';
+// export { toFlatValues } from './toFlatValues.js';
+// export { toNestedValues } from './toNestedValues.js';
+// export { toShape } from './toShape.js';
+// export { toShapeGeometry } from './toShapeGeometry.js';
+// export { toShapes } from './toShapes.js';
+// export { toShapesGeometries } from './toShapesGeometries.js';
+// export { toValue } from './toValue.js';
 export { tool } from './tool.js';
 export { toolpath } from './toolpath.js';
 export { transform } from './transform.js';

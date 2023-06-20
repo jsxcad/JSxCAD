@@ -205,7 +205,7 @@ export class Shape {
 
 export const isShape = (value) =>
   value instanceof Shape ||
-  (value !== undefined && value !== null && value.isChain === 'root');
+  (value !== undefined && value !== null && value.isChain !== undefined);
 Shape.isShape = isShape;
 
 export const isOp = (value) =>
@@ -215,7 +215,11 @@ export const isOp = (value) =>
   value.isChain !== 'root';
 Shape.isOp = isOp;
 
-export const isFunction = (value) => value instanceof Function;
+export const isChainFunction = (value) => value instanceof Function && value.isChain !== undefined;
+Shape.isChainFunction = isChainFunction;
+
+export const isFunction = (value) =>
+  value instanceof Function && (value.isChain === undefined || value.isChain === 'incomplete');
 Shape.isFunction = isFunction;
 
 export const isArray = (value) => value instanceof Array;
@@ -317,7 +321,8 @@ export const registerMethod2 = (names, signature, op) => {
     (...args) =>
     async (shape) => {
       try {
-        const parameters = await Shape.destructure2a(shape, args, ...signature);
+        // console.log(`QQ/method2: ${names} shape=${shape}`);
+        const parameters = await Shape.destructure2(shape, args, ...signature);
         return op(...parameters);
       } catch (error) {
         console.log(

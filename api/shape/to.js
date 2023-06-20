@@ -9,7 +9,7 @@ export const to = Shape.registerMethod2(
   async (input, references) => {
     const arranged = [];
     for (const reference of references) {
-      arranged.push(await by(origin()).by(reference)(input));
+      arranged.push(await by(origin()(input)).by(reference)(input));
     }
     return Group(...arranged);
   }

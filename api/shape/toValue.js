@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 
 export const toValue = Shape.registerMethod(
@@ -9,3 +10,4 @@ export const toValue = Shape.registerMethod(
     return to;
   }
 );
+*/

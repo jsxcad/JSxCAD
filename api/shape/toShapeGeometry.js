@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 import { toShape } from './toShape.js';
 
@@ -8,3 +9,4 @@ export const toShapeGeometry = Shape.registerMethod(
     return valueShape.toGeometry();
   }
 );
+*/

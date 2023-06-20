@@ -82,7 +82,7 @@ const makeLid = () => (shape) =>
       z(-thickness / 2)
         .section()
         .outline()
-        .clean(1)
+        .clean()
     )
     .pdf(
       'lid_top',

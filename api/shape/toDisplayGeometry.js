@@ -1,9 +1,8 @@
 import Shape from './Shape.js';
 import { toDisplayGeometry as op } from '@jsxcad/geometry';
 
-export const toDisplayGeometry = Shape.registerMethod(
+export const toDisplayGeometry = Shape.registerMethod2(
   'toDisplayGeometry',
-  () => async (shape) => {
-    return op(await shape.toGeometry());
-  }
+  ['inputGeometry'],
+  (geometry) => op(geometry)
 );

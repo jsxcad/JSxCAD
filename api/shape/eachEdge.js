@@ -24,23 +24,25 @@ const TARGET = 1;
 
 export const eachEdge = Shape.registerMethod2(
   'eachEdge',
-  ['input', 'function', 'function', 'function', 'options'],
+  ['input', 'inputGeometry', 'function', 'function', 'function', 'geometries'],
   async (
     input,
+    geometry,
     edgeOp = (e, l, o) => (s) => e,
     faceOp = (es, f) => (s) => es,
     groupOp = Group,
-    { selections = [] } = {}
+    selections
   ) => {
+    console.log(`QQ/eachEdge: input=${input}`);
+    console.log(`QQ/eachEdge: inputGeometry=${geometry}`);
+    console.log(`QQ/eachEdge: edgeOp=${edgeOp}`);
+    console.log(`QQ/eachEdge: faceOp=${faceOp}`);
+    console.log(`QQ/eachEdge: selections=${selections}`);
     const faces = [];
     const faceEdges = [];
-    eachFaceEdges(
-      await input.toShapeGeometry(input),
-      await input.toShapesGeometries(selections),
-      (faceGeometry, edgeGeometry) => {
-        faceEdges.push({ faceGeometry, edgeGeometry });
-      }
-    );
+    eachFaceEdges(geometry, selections, (faceGeometry, edgeGeometry) => {
+      faceEdges.push({ faceGeometry, edgeGeometry });
+    });
     for (const { faceGeometry, edgeGeometry } of faceEdges) {
       const { matrix, segments, normals } = edgeGeometry;
       const edges = [];
@@ -52,13 +54,12 @@ export const eachEdge = Shape.registerMethod2(
             matrix,
             normals ? normals[nth] : undefined
           );
-          edges.push(
-            await edgeOp(
-              Shape.chain(Shape.fromGeometry(forward)),
-              length(segment[SOURCE], segment[TARGET]),
-              Shape.chain(Shape.fromGeometry(backward))
-            )(input)
-          );
+          const edge = edgeOp(
+            Shape.chain(Shape.fromGeometry(forward)),
+            length(segment[SOURCE], segment[TARGET]),
+            Shape.chain(Shape.fromGeometry(backward))
+          )(input);
+          edges.push(edge);
         }
       }
       faces.push(

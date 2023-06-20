@@ -506,15 +506,11 @@ await Triangle(10)
   .view();
 ```
 
-![Image](shapes.md.$49.png)
-
 ```JavaScript
 await Orb(6, { zag: 2 })
   .faces(cut(inset(0.2)))
   .view();
 ```
-
-![Image](shapes.md.$50.png)
 
 ```JavaScript
 await Box(10, 10, 10)

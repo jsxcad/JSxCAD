@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 import { toValue } from './toValue.js';
 
@@ -23,3 +24,4 @@ export const toFlatValues = Shape.registerMethod(
     }
   }
 );
+*/

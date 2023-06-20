@@ -46555,6 +46555,17 @@ class App extends ReactDOM$3.Component {
       return statements.join('\n\n');
     };
     this.Notebook.run = async (path, options) => {
+      if (this.Notebook.runDebounce) {
+        return;
+      }
+      try {
+        this.Notebook.runDebounce = true;
+        const sleep = duration => new Promise((resolve, reject) => setTimeout(resolve, duration));
+        // Give time for bounce.
+        await sleep(0.1);
+      } finally {
+        this.Notebook.runDebounce = false;
+      }
       if (!path) {
         return;
       }

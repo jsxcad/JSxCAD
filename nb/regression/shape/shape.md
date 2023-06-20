@@ -715,7 +715,7 @@ await Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 await Box(10, 10, 10)
   .and(
     eachEdge(
-      (e, l) => (s) => Box([0, 1.5], 0, [0, l])
+      (e, l) => Box([0, 1.5], 0, [0, l])
         .and(
           Arc([1, 2], 1, [0, l * 0.95], { start: 1 / 4, end: 3 / 4 })
             .y(1)
@@ -726,12 +726,10 @@ await Box(10, 10, 10)
   .view();
 ```
 
-![Image](shape.md.$86.png)
-
 ```JavaScript
 await Arc(10, 10, 10, { sides: 7 })
   .cut(
-    eachEdge({ selections: [Box(10, [-4, 10], [5, 10])] }, (e, l) => (s) =>
+    eachEdge(Box(10, [-4, 10], [5, 10]), (e, l) =>
       Box(2, 2, [0, l])
         .clip(
           Arc(2, 2, [0, l], { start: 1/4, end: 3/4 })
