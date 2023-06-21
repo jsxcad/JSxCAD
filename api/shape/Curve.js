@@ -3,40 +3,28 @@ import Link from './Link.js';
 import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
-import { destructure2 } from './destructure.js';
 
-export const Curve = Shape.registerMethod(
+export const Curve = Shape.registerMethod2(
   'Curve',
-  (...args) =>
-    async (shape) => {
-      const [coordinates, implicitSteps = 20, options, modes] =
-        await destructure2(
-          shape,
-          args,
-          'coordinates',
-          'number',
-          'options',
-          'modes'
-        );
-      const { steps = implicitSteps } = options;
-      const isClosed = modes.includes('closed');
-      const interpolator = new CurveInterpolator(coordinates, {
-        closed: isClosed,
-        tension: 0.2,
-        alpha: 0.5,
-      });
-      const points = interpolator.getPoints(steps);
-      if (isClosed) {
-        return Loop(...points.map((point) => Point(point)));
-      } else {
-        return Link(...points.map((point) => Point(point)));
-      }
+  ['coordinates', 'number', 'options', 'modes:closed'],
+  (coordinates, implicitSteps = 20, { steps = implicitSteps } = {}, modes) => {
+    const isClosed = modes.includes('closed');
+    const interpolator = new CurveInterpolator(coordinates, {
+      closed: isClosed,
+      tension: 0.2,
+      alpha: 0.5,
+    });
+    const points = interpolator.getPoints(steps);
+    if (isClosed) {
+      return Loop(...points.map((point) => Point(point)));
+    } else {
+      return Link(...points.map((point) => Point(point)));
     }
+  }
 );
 
-export const curve = Shape.registerMethod(
+export const curve = Shape.registerMethod2(
   'curve',
-  (...args) =>
-    async (shape) =>
-      Curve(shape, ...args)
+  ['input', 'rest'],
+  (input, rest) => Curve(input, ...rest)
 );

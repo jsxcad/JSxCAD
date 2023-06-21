@@ -1,26 +1,23 @@
 import { Hull } from './Hull.js';
 import { Join } from './join.js';
 import Shape from './Shape.js';
-import { destructure2 } from './destructure.js';
 
-export const ChainHull = Shape.registerMethod(
+export const ChainHull = Shape.registerMethod2(
   'ChainHull',
-  (...args) =>
-    async (shape) => {
-      const [shapes] = await destructure2(shape, args, 'shapes');
-      const chain = [];
-      for (let nth = 1; nth < shapes.length; nth++) {
-        chain.push(await Hull(shapes[nth - 1], shapes[nth])(shape));
-      }
-      return Join(...chain);
+  ['input', 'shapes'],
+  async (input, shapes) => {
+    const chain = [];
+    for (let nth = 1; nth < shapes.length; nth++) {
+      chain.push(await Hull(shapes[nth - 1], shapes[nth])(input));
     }
+    return Join(...chain);
+  }
 );
 
-export const chainHull = Shape.registerMethod(
+export const chainHull = Shape.registerMethod2(
   'chainHull',
-  (...shapes) =>
-    (shape) =>
-      ChainHull(shape, ...shapes)(shape)
+  ['input', 'shapes'],
+  (input, shapes) => ChainHull(input, ...shapes)(input)
 );
 
 export default ChainHull;

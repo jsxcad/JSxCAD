@@ -2268,10 +2268,6 @@ function _stopListening(channel) {
 let broadcastChannel;
 
 const receiveNotification = async ({ id, op, path, workspace }) => {
-  logInfo(
-    'sys/broadcast',
-    `Received broadcast: ${JSON.stringify({ id, op, path, workspace })}`
-  );
   switch (op) {
     case 'changePath':
       await runFileChangeWatchers(path, workspace);
@@ -2307,8 +2303,17 @@ const sendBroadcast = async (message) => {
 };
 
 const initBroadcastChannel = async () => {
-  broadcastChannel = new BroadcastChannel$1('sys/fs');
-  broadcastChannel.onmessage = receiveBroadcast;
+  try {
+    broadcastChannel = new BroadcastChannel$1('sys/fs');
+    broadcastChannel.onmessage = receiveBroadcast;
+  } catch (error) {
+    /*
+    if (error instanceof NotSupportedError) {
+      return;
+    }
+    throw error;
+*/
+  }
 };
 
 const notifyFileChange = async (path, workspace) =>

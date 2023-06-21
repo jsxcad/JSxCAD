@@ -1,10 +1,9 @@
 import Shape from './Shape.js';
 
-export const Geometry = Shape.registerMethod(
+export const Geometry = Shape.registerMethod2(
   'Geometry',
-  (geometry) => async (shape) => {
-    return Shape.chain(Shape.fromGeometry(geometry));
-  }
+  ['rest'],
+  ([geometry]) => Shape.chain(Shape.fromGeometry(geometry))
 );
 
 export default Geometry;

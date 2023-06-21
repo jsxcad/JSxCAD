@@ -2,29 +2,23 @@ import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
 
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { op } from './op.js';
+import { transform } from './transform.js';
 
-export const by = Shape.registerMethod(
+export const by = Shape.registerMethod2(
   'by',
-  (selection, ...ops) =>
-    async (shape) => {
-      if (ops.length === 0) {
-        ops.push((local) => local);
-      }
-      ops = ops.map((op) => (Shape.isFunction(op) ? op : () => op));
-      // We've already selected the item for reference, e.g., s.to(g('plate'), ...);
-      if (Shape.isFunction(selection)) {
-        selection = await selection(shape);
-      }
-      const placed = [];
-      for (const leaf of getLeafs(await selection.toGeometry())) {
+  ['input', 'geometries'],
+  async (input, selections) => {
+    const placed = [];
+    for (const selection of selections) {
+      for (const leaf of getLeafs(selection)) {
         const { global } = getInverseMatrices(leaf);
         // Perform the operation then place the
         // result in the global frame of the reference.
-        placed.push(await op(...ops).transform(global)(shape));
+        placed.push(await transform(global)(input));
       }
-      return Group(...placed);
     }
+    return Group(...placed);
+  }
 );
 
 export default by;

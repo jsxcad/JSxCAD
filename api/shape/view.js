@@ -65,7 +65,6 @@ export const baseView =
       console.log('No sourceLocation');
     }
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
-    console.log(`QQ/baseView: viewId=${viewId} id=${id} path=${path}`);
     const displayGeometry = await viewShape.toDisplayGeometry();
     for (const pageGeometry of await ensurePages(
       Shape.fromGeometry(displayGeometry),

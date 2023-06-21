@@ -2,7 +2,6 @@ import { identity, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
 import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
-import { toValue } from './toValue.js';
 
 const X = 0;
 const Y = 1;
@@ -218,8 +217,6 @@ export const buildCorners = (x, y, z) => async (shape) => {
     while (x.length < 2) {
       x.push(0);
     }
-    x[0] = await toValue(x[0])(shape);
-    x[1] = await toValue(x[1])(shape);
     if (x[0] < x[1]) {
       c1[X] = x[1];
       c2[X] = x[0];
@@ -228,7 +225,6 @@ export const buildCorners = (x, y, z) => async (shape) => {
       c2[X] = x[1];
     }
   } else {
-    x = await toValue(x)(shape);
     c1[X] = x / 2;
     c2[X] = x / -2;
   }
@@ -236,8 +232,6 @@ export const buildCorners = (x, y, z) => async (shape) => {
     while (y.length < 2) {
       y.push(0);
     }
-    y[0] = await toValue(y[0])(shape);
-    y[1] = await toValue(y[1])(shape);
     if (y[0] < y[1]) {
       c1[Y] = y[1];
       c2[Y] = y[0];
@@ -246,7 +240,6 @@ export const buildCorners = (x, y, z) => async (shape) => {
       c2[Y] = y[1];
     }
   } else {
-    y = await toValue(y)(shape);
     c1[Y] = y / 2;
     c2[Y] = y / -2;
   }
@@ -254,8 +247,6 @@ export const buildCorners = (x, y, z) => async (shape) => {
     while (z.length < 2) {
       z.push(0);
     }
-    z[0] = await toValue(z[0])(shape);
-    z[1] = await toValue(z[1])(shape);
     if (z[0] < z[1]) {
       c1[Z] = z[1];
       c2[Z] = z[0];
@@ -264,7 +255,6 @@ export const buildCorners = (x, y, z) => async (shape) => {
       c2[Z] = z[1];
     }
   } else {
-    z = await toValue(z)(shape);
     c1[Z] = z / 2;
     c2[Z] = z / -2;
   }

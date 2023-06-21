@@ -5,7 +5,7 @@ import by from './by.js';
 export const align = Shape.registerMethod2(
   'align',
   ['input', 'rest'],
-  async (input, rest) => by(await alignment(...rest)(input))(input)
+  async (input, rest) => by(alignment(...rest)(input))(input)
 );
 
 export default align;

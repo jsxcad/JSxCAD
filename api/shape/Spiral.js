@@ -8,11 +8,12 @@ export const Spiral = Shape.registerMethod2(
   ['function', 'options'],
   async (particle = Point, options) => {
     let particles = [];
-    for (const turn of await Seq(
+    const turns = await Seq(
       options,
       (distance) => (shape) => distance,
       (...numbers) => numbers
-    )) {
+    );
+    for (const turn of turns) {
       particles.push(await particle(turn).rz(turn));
     }
     const result = await Link(...particles);
