@@ -159,9 +159,11 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
           let value = arg;
           if (func !== undefined) {
             rest.push(arg);
-          } else if (Shape.isFunction(value)) {
-            func = value;
-          } else if (Shape.isPendingInput(value)) {
+          } else if (
+            Shape.isFunction(value) ||
+            Shape.isPendingInput(value) ||
+            Shape.isPendingArguments(value)
+          ) {
             func = value;
           } else {
             rest.push(arg);
@@ -174,9 +176,11 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
         const functions = [];
         for (const arg of args) {
           const value = arg;
-          if (Shape.isFunction(value)) {
-            functions.push(value);
-          } else if (Shape.isPendingInput(value)) {
+          if (
+            Shape.isFunction(value) ||
+            Shape.isPendingInput(value) ||
+            Shape.isPendingArguments(value)
+          ) {
             functions.push(value);
           } else {
             rest.push(arg);

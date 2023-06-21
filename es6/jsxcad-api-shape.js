@@ -231,6 +231,10 @@ const isPendingInput = (value) =>
   (value.isChain === 'complete' || value.isChain === 'root');
 Shape.isPendingInput = isPendingInput;
 
+const isPendingArguments = (value) =>
+  value instanceof Function && value.isChain === 'incomplete';
+Shape.isPendingArguments = isPendingArguments;
+
 // Incomplete chains are ordinary functions waiting for arguments.
 const isFunction = (value) =>
   value instanceof Function &&
@@ -297,6 +301,27 @@ const isSegment = (value) => isArray(value) && value.every(isCoordinate);
 Shape.isSegment = isSegment;
 
 Shape.chain = chain;
+
+const apply = async (input, op, value) => {
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
+    op = op(value);
+  }
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  if (Shape.isPendingInput(op)) {
+    op = op(input);
+  }
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  return op;
+};
+
+Shape.apply = apply;
 
 const registerMethod = (names, op) => {
   if (typeof names === 'string') {
@@ -568,9 +593,11 @@ const destructure2 = async (names, input, originalArgs, ...specs) => {
           let value = arg;
           if (func !== undefined) {
             rest.push(arg);
-          } else if (Shape.isFunction(value)) {
-            func = value;
-          } else if (Shape.isPendingInput(value)) {
+          } else if (
+            Shape.isFunction(value) ||
+            Shape.isPendingInput(value) ||
+            Shape.isPendingArguments(value)
+          ) {
             func = value;
           } else {
             rest.push(arg);
@@ -583,9 +610,11 @@ const destructure2 = async (names, input, originalArgs, ...specs) => {
         const functions = [];
         for (const arg of args) {
           const value = arg;
-          if (Shape.isFunction(value)) {
-            functions.push(value);
-          } else if (Shape.isPendingInput(value)) {
+          if (
+            Shape.isFunction(value) ||
+            Shape.isPendingInput(value) ||
+            Shape.isPendingArguments(value)
+          ) {
             functions.push(value);
           } else {
             rest.push(arg);
@@ -4317,15 +4346,11 @@ const eachPoint = Shape.registerMethod2(
     for (const [x, y, z] of coordinates) {
       const point = await Point();
       const moved = await move(x, y, z)(point);
-      const operated = await pointOp(Shape.chain(moved));
+      const operated = await Shape.apply(input, pointOp, moved);
       points.push(operated);
     }
-    const grouped = groupOp(...points);
-    if (Shape.isFunction(grouped)) {
-      return grouped(input);
-    } else {
-      return grouped;
-    }
+    console.log(`QQ/Points: ${JSON.stringify(points)}`);
+    return groupOp(...points)(input);
   }
 );
 
@@ -4399,7 +4424,7 @@ const faces = Shape.registerMethod2(
   (input, faceOp = (face) => (shape) => face, groupOp = Group) => {
     return eachEdge(
       (e, l, o) => (s) => e,
-      (e, f) => (s) => faceOp(f)(s),
+      (e, f) => faceOp(f),
       groupOp
     )(input);
   }

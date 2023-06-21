@@ -8,7 +8,7 @@ export const faces = Shape.registerMethod2(
   (input, faceOp = (face) => (shape) => face, groupOp = Group) => {
     return eachEdge(
       (e, l, o) => (s) => e,
-      (e, f) => (s) => faceOp(f)(s),
+      (e, f) => faceOp(f),
       groupOp
     )(input);
   }
