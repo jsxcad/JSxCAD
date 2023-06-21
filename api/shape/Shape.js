@@ -220,7 +220,13 @@ export const isChainFunction = (value) =>
   value instanceof Function && value.isChain !== undefined;
 Shape.isChainFunction = isChainFunction;
 
-export const isFunction = (value) => value instanceof Function;
+// Complete chains are Shapes waiting for an input.
+export const isPendingInput = (value) =>
+  value instanceof Function && (value.isChain === 'complete' || value.isChain === 'root');
+Shape.isPendingInput = isPendingInput;
+
+// Incomplete chains are ordinary functions waiting for arguments.
+export const isFunction = (value) => value instanceof Function && (value.isChain === undefined || value.isChain === 'incomplete');
 Shape.isFunction = isFunction;
 
 export const isArray = (value) => value instanceof Array;

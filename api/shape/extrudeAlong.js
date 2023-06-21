@@ -13,7 +13,7 @@ export const extrudeAlong = Shape.registerMethod2(
     for (const [depth, height] of intervals) {
       if (height === depth) {
         // Return unextruded geometry at this height, instead.
-        extrusions.push(await input.moveAlong(vector, height));
+        extrusions.push(await moveAlong(vector, height)(input));
         continue;
       }
       extrusions.push(

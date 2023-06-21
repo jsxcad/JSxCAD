@@ -535,8 +535,6 @@ await Box(10).cut(Triangle(11)).view(1);
 await Box(10).cut(Triangle(11)).clean().view(2);
 ```
 
-![Image](shapes.md.$53_5.png)
-
 ```JavaScript
 await Triangle(11).eachPoint((e) => (s) => Arc(5).to(e), cut).view(5);
 ```
