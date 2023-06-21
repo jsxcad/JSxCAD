@@ -2,6 +2,7 @@ import Group from './Group.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
+import { moveAlong } from './moveAlong.js';
 import { normal } from './normal.js';
 
 // This interface is a bit awkward.

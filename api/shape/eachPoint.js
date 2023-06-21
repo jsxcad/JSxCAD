@@ -9,7 +9,6 @@ export const eachPoint = Shape.registerMethod2(
   ['input', 'function', 'function'],
   async (input, pointOp = (point) => (shape) => point, groupOp = Group) => {
     const coordinates = [];
-    let nth = 0;
     eachPointOfGeometry(await input.toGeometry(), ([x = 0, y = 0, z = 0]) =>
       coordinates.push([x, y, z])
     );
