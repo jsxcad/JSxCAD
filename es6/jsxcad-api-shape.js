@@ -225,7 +225,20 @@ const isChainFunction = (value) =>
   value instanceof Function && value.isChain !== undefined;
 Shape.isChainFunction = isChainFunction;
 
-const isFunction = (value) => value instanceof Function;
+// Complete chains are Shapes waiting for an input.
+const isPendingInput = (value) =>
+  value instanceof Function &&
+  (value.isChain === 'complete' || value.isChain === 'root');
+Shape.isPendingInput = isPendingInput;
+
+const isPendingArguments = (value) =>
+  value instanceof Function && value.isChain === 'incomplete';
+Shape.isPendingArguments = isPendingArguments;
+
+// Incomplete chains are ordinary functions waiting for arguments.
+const isFunction = (value) =>
+  value instanceof Function &&
+  (value.isChain === undefined || value.isChain === 'incomplete');
 Shape.isFunction = isFunction;
 
 const isArray = (value) => value instanceof Array;
@@ -288,6 +301,27 @@ const isSegment = (value) => isArray(value) && value.every(isCoordinate);
 Shape.isSegment = isSegment;
 
 Shape.chain = chain;
+
+const apply = async (input, op, value) => {
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
+    op = op(value);
+  }
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  if (Shape.isPendingInput(op)) {
+    op = op(input);
+  }
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  return op;
+};
+
+Shape.apply = apply;
 
 const registerMethod = (names, op) => {
   if (typeof names === 'string') {
@@ -400,24 +434,29 @@ Shape.ops = ops;
 
 const fromGeometry = Shape.fromGeometry;
 
-const resolve = async (shape, value) => {
+const resolve = async (input, value) => {
   while (value instanceof Promise) {
     value = await value;
   }
-  while (Shape.isFunction(value)) {
-    value = await value(shape);
+  if (Shape.isFunction(value)) {
+    // Functions being resolved to shapes receive the input.
+    value = await value(input);
+  }
+  while (Shape.isPendingInput(value)) {
+    // Complete chains should receive their inputs.
+    value = await value(input);
   }
   if (Shape.isArray(value)) {
     const resolvedElements = [];
     for (const element of value) {
-      const result = await resolve(shape, element);
+      const result = await resolve(input, element);
       resolvedElements.push(result);
     }
     return resolvedElements;
   } else if (Shape.isObject(value)) {
     const resolvedObject = {};
     for (const key of Object.keys(value)) {
-      resolvedObject[key] = await resolve(shape, value[key]);
+      resolvedObject[key] = await resolve(input, value[key]);
     }
     return resolvedObject;
   } else {
@@ -447,10 +486,10 @@ const getCoordinates = async (value) => {
   return coordinates;
 };
 
-const destructure2 = async (names, shape, input, ...specs) => {
+const destructure2 = async (names, input, originalArgs, ...specs) => {
   const output = [];
   let args = [];
-  for (const arg of input) {
+  for (const arg of originalArgs) {
     if (arg === undefined) {
       continue;
     }
@@ -465,15 +504,15 @@ const destructure2 = async (names, shape, input, ...specs) => {
     }
     switch (spec) {
       case 'input': {
-        output.push(shape);
+        output.push(input);
         rest.push(...args);
         break;
       }
       case 'inputGeometry': {
-        if (shape === undefined) {
+        if (input === undefined) {
           output.push(undefined);
         } else {
-          output.push(shape.geometry);
+          output.push(input.geometry);
         }
         rest.push(...args);
         break;
@@ -486,7 +525,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
             rest.push(arg);
             continue;
           }
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isObject(value)) {
             out.push(value);
           } else {
@@ -499,7 +538,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'number': {
         let number;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (number === undefined && Shape.isNumber(value)) {
             number = value;
           } else {
@@ -512,7 +551,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'value': {
         let number;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (number === undefined && Shape.isValue(value)) {
             number = value;
           } else {
@@ -525,7 +564,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'numbers': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isNumber(value)) {
             out.push(value);
           } else {
@@ -538,7 +577,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'string': {
         let string;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (string === undefined && Shape.isString(value)) {
             string = value;
           } else {
@@ -552,7 +591,13 @@ const destructure2 = async (names, shape, input, ...specs) => {
         let func;
         for (const arg of args) {
           let value = arg;
-          if (func === undefined && Shape.isFunction(value)) {
+          if (func !== undefined) {
+            rest.push(arg);
+          } else if (
+            Shape.isFunction(value) ||
+            Shape.isPendingInput(value) ||
+            Shape.isPendingArguments(value)
+          ) {
             func = value;
           } else {
             rest.push(arg);
@@ -565,7 +610,11 @@ const destructure2 = async (names, shape, input, ...specs) => {
         const functions = [];
         for (const arg of args) {
           const value = arg;
-          if (Shape.isFunction(value)) {
+          if (
+            Shape.isFunction(value) ||
+            Shape.isPendingInput(value) ||
+            Shape.isPendingArguments(value)
+          ) {
             functions.push(value);
           } else {
             rest.push(arg);
@@ -577,7 +626,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'shape': {
         let result;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (result === undefined && Shape.isShape(value)) {
             result = value;
           } else {
@@ -590,7 +639,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'geometry': {
         let result;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (result === undefined && Shape.isShape(value)) {
             result = await value.toGeometry();
           } else {
@@ -604,7 +653,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
         let result;
         for (const arg of args) {
           if (result === undefined) {
-            let value = await resolve(shape, arg);
+            let value = await resolve(input, arg);
             result = await getCoordinate(value);
             if (result === undefined) {
               rest.push(arg);
@@ -619,7 +668,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'options': {
         const options = {};
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isObject(value)) {
             Object.assign(options, value);
           } else {
@@ -648,7 +697,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'values': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isValue(value)) {
             out.push(value);
           } else {
@@ -661,7 +710,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'interval': {
         let interval;
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (interval === undefined && Shape.isIntervalLike(value)) {
             interval = Shape.normalizeInterval(value);
           } else {
@@ -674,7 +723,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'intervals': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isIntervalLike(value)) {
             out.push(Shape.normalizeInterval(value));
           } else if (
@@ -694,7 +743,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'shapes': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isShape(value)) {
             out.push(value);
           } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
@@ -709,7 +758,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'geometries': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isShape(value)) {
             out.push(await value.toGeometry());
           } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
@@ -726,7 +775,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'coordinates': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isShape(value)) {
             const coordinates = await getCoordinates(value);
             if (coordinates.length > 0) {
@@ -746,7 +795,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'coordinateLists': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isShape(value)) {
             const coordinates = await getCoordinates(value);
             if (coordinates.length > 0) {
@@ -766,7 +815,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
       case 'segments': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(shape, arg);
+          let value = await resolve(input, arg);
           if (Shape.isSegment(value)) {
             out.push(value);
           } else if (Shape.isArray(value) && value.every(Shape.isSegment)) {
@@ -796,7 +845,7 @@ const destructure2 = async (names, shape, input, ...specs) => {
         args.length
       } unused arguments: ${args.join(',')} JSON=${JSON.stringify(
         args
-      )} arguments: ${JSON.stringify(input)} specs: ${JSON.stringify(
+      )} arguments: ${JSON.stringify(originalArgs)} specs: ${JSON.stringify(
         specs
       )} output=${JSON.stringify(output)}`;
     } catch (error) {
@@ -1358,6 +1407,30 @@ const normal = Shape.registerMethod2(
   (geometry) => Shape.fromGeometry(computeNormal(geometry))
 );
 
+const scale$2 = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
+
+const moveAlong = Shape.registerMethod2(
+  'moveAlong',
+  ['input', 'coordinate', 'numbers'],
+  async (input, direction, deltas) => {
+    const moves = [];
+    for (const delta of deltas) {
+      moves.push(await input.move(scale$2(delta, direction)));
+    }
+    return Group(...moves);
+  }
+);
+
+const m = Shape.registerMethod2(
+  'm',
+  ['input', 'numbers'],
+  (input, offsets) => input.moveAlong(normal(), ...offsets)
+);
+
 // This interface is a bit awkward.
 const extrudeAlong = Shape.registerMethod2(
   'extrudeAlong',
@@ -1367,7 +1440,7 @@ const extrudeAlong = Shape.registerMethod2(
     for (const [depth, height] of intervals) {
       if (height === depth) {
         // Return unextruded geometry at this height, instead.
-        extrusions.push(await input.moveAlong(vector, height));
+        extrusions.push(await moveAlong(vector, height)(input));
         continue;
       }
       extrusions.push(
@@ -4266,7 +4339,6 @@ const eachPoint = Shape.registerMethod2(
   ['input', 'function', 'function'],
   async (input, pointOp = (point) => (shape) => point, groupOp = Group) => {
     const coordinates = [];
-    let nth = 0;
     eachPoint$1(await input.toGeometry(), ([x = 0, y = 0, z = 0]) =>
       coordinates.push([x, y, z])
     );
@@ -4274,15 +4346,11 @@ const eachPoint = Shape.registerMethod2(
     for (const [x, y, z] of coordinates) {
       const point = await Point();
       const moved = await move(x, y, z)(point);
-      const operated = await pointOp(Shape.chain(moved), nth++);
+      const operated = await Shape.apply(input, pointOp, moved);
       points.push(operated);
     }
-    const grouped = groupOp(...points);
-    if (Shape.isFunction(grouped)) {
-      return grouped(input);
-    } else {
-      return grouped;
-    }
+    console.log(`QQ/Points: ${JSON.stringify(points)}`);
+    return groupOp(...points)(input);
   }
 );
 
@@ -4356,7 +4424,7 @@ const faces = Shape.registerMethod2(
   (input, faceOp = (face) => (shape) => face, groupOp = Group) => {
     return eachEdge(
       (e, l, o) => (s) => e,
-      (e, f) => (s) => faceOp(f)(s),
+      (e, f) => faceOp(f),
       groupOp
     )(input);
   }
@@ -4805,6 +4873,14 @@ const image = Shape.registerMethod2(
   (input, url) => untag('image:*').tag(`image:${url}`)(input)
 );
 
+const self = Shape.registerMethod2(
+  ['input', 'self'],
+  ['input'],
+  (input) => input
+);
+
+const input = self;
+
 const inset = Shape.registerMethod2(
   'inset',
   ['inputGeometry', 'number', 'options'],
@@ -4948,30 +5024,6 @@ const material = Shape.registerMethod2(
   'material',
   ['inputGeometry', 'string'],
   (geometry, name) => Shape.fromGeometry(hasMaterial(geometry, name))
-);
-
-const scale$2 = (amount, [x = 0, y = 0, z = 0]) => [
-  x * amount,
-  y * amount,
-  z * amount,
-];
-
-const moveAlong = Shape.registerMethod2(
-  'moveAlong',
-  ['input', 'coordinate', 'numbers'],
-  async (input, direction, deltas) => {
-    const moves = [];
-    for (const delta of deltas) {
-      moves.push(await input.move(scale$2(delta, direction)));
-    }
-    return Group(...moves);
-  }
-);
-
-const m = Shape.registerMethod2(
-  'm',
-  ['input', 'numbers'],
-  (input, offsets) => input.moveAlong(normal(), ...offsets)
 );
 
 const noVoid = Shape.registerMethod2(
@@ -5206,8 +5258,6 @@ const points$1 = Shape.registerMethod2(
     return Shape.fromGeometry(taggedPoints({}, points));
   }
 );
-
-const self = Shape.registerMethod2('self', ['input'], (input) => input);
 
 const put = Shape.registerMethod2(
   'put',
@@ -6681,4 +6731,4 @@ const Wave = Shape.registerMethod2(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$a as X, XY, XZ, Y$a as Y, YX, YZ, Z$9 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, aligned, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

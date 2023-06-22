@@ -100,6 +100,7 @@ export { hold } from './hold.js';
 export { hull } from './Hull.js';
 export { image } from './image.js';
 export { inFn } from './in.js';
+export { input } from './self.js';
 export { inset } from './inset.js';
 export { involute } from './involute.js';
 export { join } from './join.js';

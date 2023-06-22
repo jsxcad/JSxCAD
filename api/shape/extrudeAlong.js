@@ -2,6 +2,7 @@ import Group from './Group.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { extrude as extrudeGeometry } from '@jsxcad/geometry';
+import { moveAlong } from './moveAlong.js';
 import { normal } from './normal.js';
 
 // This interface is a bit awkward.
@@ -13,7 +14,7 @@ export const extrudeAlong = Shape.registerMethod2(
     for (const [depth, height] of intervals) {
       if (height === depth) {
         // Return unextruded geometry at this height, instead.
-        extrusions.push(await input.moveAlong(vector, height));
+        extrusions.push(await moveAlong(vector, height)(input));
         continue;
       }
       extrusions.push(

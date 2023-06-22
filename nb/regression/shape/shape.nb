@@ -1,123 +1,123 @@
-await Triangle(10).color('red').add(Box(5).color('blue')).gridView();
+Triangle(10).color('red').add(Box(5).color('blue')).gridView();
 
-await Box(5).and(Arc(5)).view('top', 'noSkin', 'noWireframe', { size: 800 });
+Box(5).and(Arc(5)).view('top', 'noSkin', 'noWireframe', { size: 800 });
 
-await Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
+Triangle(10).color('red').addTo(Box(5).color('blue')).gridView();
 
-await Box(5).align('x>y>').gridView();
+Box(5).align('x>y>').gridView();
 
-await Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
+Box(5).as('box').fitTo(Arc(4).as('arc')).drop(getNot('box')).gridView();
 
-await Box(5).color('red').clip(Arc(5.8).color('blue')).gridView();
+Box(5).color('red').clip(Arc(5.8).color('blue')).gridView();
 
-await Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView();
+Box(5).color('red').clipFrom(Arc(5.8).color('blue')).gridView();
 
-await Box(5).color('green').gridView();
+Box(5).color('green').gridView();
 
-await Box(5)
+Box(5)
   .color('green')
   .tags('color', (colors) => note(`Colors are ${colors}`));
 
-await Box(5).color('red').cut(Arc(6).color('blue')).gridView();
+Box(5).color('red').cut(Arc(6).color('blue')).gridView();
 
-await Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView();
+Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView();
 
-await Assembly(Box(5), Arc(6))
+Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
   .gridView();
 
-await Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView();
+Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView();
 
-await Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView();
+Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView();
 
-await Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView();
+Assembly(Box(10).as('a'), Arc(6).as('b')).drop(getNot('a')).gridView();
 
-await Box(10).material('copper').gridView();
+Box(10).material('copper').gridView();
 
-await Box(10).move(1, 2, 3).gridView();
-await Box(10).to(Point(1, 2, 3)).gridView();
-await Box(10).move(1, 2, 3).to(center()).gridView();
+Box(10).move(1, 2, 3).gridView();
+Box(10).to(Point(1, 2, 3)).gridView();
+Box(10).move(1, 2, 3).to(center()).gridView();
 
 // I don't know what this example is supposed to do.
-// await Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
+// Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
 // Let's simplify it for now.
-await Box(10, 10, 10).view();
+Box(10, 10, 10).view();
 
-await Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
+Assembly(Box(5), Arc(5.5).void()).noVoid().gridView();
 
-await Box(5).offset(1).gridView();
+Box(5).offset(1).gridView();
 
-await Box(5).op(color('green')).gridView();
+Box(5).op(color('green')).gridView();
 
-await Line([10])
+Line([10])
   .orient({ at: [40, 50, 0] })
   .gridView();
 
-await Group(seq(Arc, { from: 1, to: 20 }))
+Group(seq(Arc, { from: 1, to: 20 }))
   .pack()
   .gridView();
 
-await Box(1, 2, 3)
+Box(1, 2, 3)
   .rx(1 / 8)
   .gridView();
 
-await Box(1, 2, 3)
+Box(1, 2, 3)
   .ry(1 / 8)
   .gridView();
 
-await Box(1, 2, 3)
+Box(1, 2, 3)
   .rz(1 / 8)
   .gridView();
 
-await Box(5).scale(1, 2).gridView();
+Box(5).scale(1, 2).gridView();
 // Box(5).rotate(45).gridView(24);
 
-await Box(5)
+Box(5)
   .cut(Arc(4.9).align('x>'))
   .scale(1, 1)
   .gridView();
 
-await Box(5)
+Box(5)
   .cut(Arc(4.9).align('x>'))
   .scale(-1, 1)
   .gridView();
 
-await Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => note(`length ${length}x${width}x${height}`));
+Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => note(`length ${length}x${width}x${height}`));
 
-await Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
+Box(2, 2, 2).color('red').and(Box(1, 1, 1).sketch()).view();
 
-await Box(1)
+Box(1)
   .as('box')
   .tags((tags) => note(`${tags}`));
 
-await Box(5, 5, 5).gridView();
+Box(5, 5, 5).gridView();
 
-await Box(5).tool('laser').gridView();
+Box(5).tool('laser').gridView();
 
-await Assembly(Box(5), Arc(6).void()).gridView();
+Assembly(Box(5), Arc(6).void()).gridView();
 
-await Box(5).fitTo(Arc(6)).gridView();
+Box(5).fitTo(Arc(6)).gridView();
 
-await Box(5).x(1).gridView();
-await Box(5).y(1).gridView();
-await Box(5).z(1).gridView();
+Box(5).x(1).gridView();
+Box(5).y(1).gridView();
+Box(5).z(1).gridView();
 
-await Arc(10)
+Arc(10)
   .op((s) => s.offset(1).fitTo(s.void()))
   .ez([5])
   .view();
 
-await Box(10)
+Box(10)
   .ez([10])
   .color('green')
   .and(faces().n(4).extrudeAlong(normal(), [1]).tint('red'))
   .view();
 
-await Arc(10).color('blue').color('red').view();
+Arc(10).color('blue').color('red').view();
 
-await Arc(10).color('blue').tint('red').view();
+Arc(10).color('blue').tint('red').view();
 
-await Segments(
+Segments(
   seq(
     (y) => (s) => [[-10, y, 0], [10, y, 0]],
     {
@@ -132,7 +132,7 @@ await Segments(
   .clip(Arc(5).cut(Arc(2)).ez([1, -1]))
   .gridView();
 
-const b = await Box(5)
+const b = Box(5)
   .ez([5])
   .and(
     Hershey('A', 3)
@@ -142,13 +142,13 @@ const b = await Box(5)
   .material('glass')
   .y(10);
 
-await b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
+b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 
-await b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
+b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
 
-await Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
+Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
-await Arc(2)
+Arc(2)
   .ez([5])
   .cut(
     Box(5)
@@ -159,9 +159,9 @@ await Arc(2)
   .simplify({ ratio: 0.1, eps: 0.01 })
   .view();
 
-await Triangle(14).svg('triangle');
+Triangle(14).svg('triangle');
 
-await Box(10)
+Box(10)
   .ez([50, -50])
   .rx(0, 1 / 4)
   .fuse()
@@ -170,7 +170,7 @@ await Box(10)
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view();
 
-await Box(20, 20, 20)
+Box(20, 20, 20)
   .view(1, 'wireframe')
   .md('Original mesh')
   .remesh()
@@ -183,7 +183,7 @@ await Box(20, 20, 20)
   .view(4, 'wireframe')
   .md('Cleaned mesh');
 
-await Arc(4)
+Arc(4)
   .x(5)
   .seq({ by: 1 / 8 }, rz, Join)
   .material('glass')
@@ -191,11 +191,11 @@ await Arc(4)
   // .and(toolpath())
   .view();
 
-await Box(10).cut(Arc(6).x(6, -6), Box(1, 10))
+Box(10).cut(Arc(6).x(6, -6), Box(1, 10))
   // .and(toolpath())
   .view(54);
 
-await Box(20, 20, 20)
+Box(20, 20, 20)
   .join(Box(10, 10, 40))
   .rx(1 / 16)
   .material('glass')
@@ -204,7 +204,7 @@ await Box(20, 20, 20)
 
 md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area((v) => (s) => v.toFixed(2))}`;
 
-await Box(2)
+Box(2)
   .cut(Box(1))
   .area((v) => (s) => s.md(`Area is ${v.toFixed(2)}`));
 
@@ -212,31 +212,31 @@ md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area((v) => (s) => v.toFixed(2))}`;
 
 md`Volume of Box(2, 3, 4) is ${Box(2, 3, 4).volume((v) => (s) => v.toFixed(2))}`;
 
-const c = await Box(10)
+const c = Box(10)
   .rx(1 / 8)
   .view();
 
-await c.by(origin()).view();
-await c.by(origin()).and(Box(5, 5, 5)).view();
-await c.by(origin()).cut(Box(5, 5, 5)).view();
+c.by(origin()).view();
+c.by(origin()).and(Box(5, 5, 5)).view();
+c.by(origin()).cut(Box(5, 5, 5)).view();
 
-await Triangle(4)
+Triangle(4)
   .x(5)
   .at(origin(), rz(1 / 16))
   .view();
 
-await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
 
-await Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
 
-await Box(5, 5, 20)
+Box(5, 5, 20)
   .rx(1 / 4, 1 / 32)
   .wrap(1, 0.1)
   .view();
 
-await Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView();
+Box(100).image('https://jsxcad.js.org/png/cooper_2.png').log().topView();
 
-await Segments(
+Segments(
   [
     [-18.15, 40.34, 0.0],
     [-9.82, 45.66, 0.0],
@@ -325,37 +325,37 @@ await Segments(
   .fill()
   .topView();
 
-await Arc(37).cut(inset(2)).ez([2]).remesh(1).smooth(Box(50, 10, 20)).view();
+Arc(37).cut(inset(2)).ez([2]).remesh(1).smooth(Box(50, 10, 20)).view();
 
-await Box(4, 4, 4).cutOut(X(0)).view();
+Box(4, 4, 4).cutOut(X(0)).view();
 
-await Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
-await Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
+Box(4, 4, 4).cut('open', Box(2, 2, 8)).view();
+Box(4, 4, 4).clip('open', Box(2, 2, 8)).view();
 
-await Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
-await Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
+Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
+Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 
-await Orb(5, 5, 5, { zag: 5 })
+Orb(5, 5, 5, { zag: 5 })
   .eachEdge((e, l) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to)
   .view();
 
-await Box(4).fit(Arc(6).void()).ez([1]).view();
+Box(4).fit(Arc(6).void()).ez([1]).view();
 
-await Box(4).fit(Arc(6).void()).ez([1], 'noVoid').view();
+Box(4).fit(Arc(6).void()).ez([1], 'noVoid').view();
 
-await Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
 
-await Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();
+Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();
 
-await Box(4).fitTo(Arc(3).void()).join(Box(1, 5)).clean().view();
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5)).clean().view();
 
-await Box(4).fitTo(Arc(3).void()).join(Box(1, 5), 'noVoid').clean().view();
+Box(4).fitTo(Arc(3).void()).join(Box(1, 5), 'noVoid').clean().view();
 
-await Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
 
-await Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
+Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 
-await Box(10, 10, 10)
+Box(10, 10, 10)
   .and(
     eachEdge(
       (e, l) => Box([0, 1.5], 0, [0, l])
@@ -368,7 +368,7 @@ await Box(10, 10, 10)
   )
   .view();
 
-await Arc(10, 10, 10, { sides: 7 })
+Arc(10, 10, 10, { sides: 7 })
   .cut(
     eachEdge({ select: Box(10, [-4, 10], [5, 10]) }, (e, l) =>
       Box(2, 2, [0, l])

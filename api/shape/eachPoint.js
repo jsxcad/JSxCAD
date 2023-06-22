@@ -9,7 +9,6 @@ export const eachPoint = Shape.registerMethod2(
   ['input', 'function', 'function'],
   async (input, pointOp = (point) => (shape) => point, groupOp = Group) => {
     const coordinates = [];
-    let nth = 0;
     eachPointOfGeometry(await input.toGeometry(), ([x = 0, y = 0, z = 0]) =>
       coordinates.push([x, y, z])
     );
@@ -17,15 +16,11 @@ export const eachPoint = Shape.registerMethod2(
     for (const [x, y, z] of coordinates) {
       const point = await Point();
       const moved = await move(x, y, z)(point);
-      const operated = await pointOp(Shape.chain(moved), nth++);
+      const operated = await Shape.apply(input, pointOp, moved);
       points.push(operated);
     }
-    const grouped = groupOp(...points);
-    if (Shape.isFunction(grouped)) {
-      return grouped(input);
-    } else {
-      return grouped;
-    }
+    console.log(`QQ/Points: ${JSON.stringify(points)}`);
+    return groupOp(...points)(input);
   }
 );
 

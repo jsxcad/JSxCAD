@@ -220,7 +220,20 @@ export const isChainFunction = (value) =>
   value instanceof Function && value.isChain !== undefined;
 Shape.isChainFunction = isChainFunction;
 
-export const isFunction = (value) => value instanceof Function;
+// Complete chains are Shapes waiting for an input.
+export const isPendingInput = (value) =>
+  value instanceof Function &&
+  (value.isChain === 'complete' || value.isChain === 'root');
+Shape.isPendingInput = isPendingInput;
+
+export const isPendingArguments = (value) =>
+  value instanceof Function && value.isChain === 'incomplete';
+Shape.isPendingArguments = isPendingArguments;
+
+// Incomplete chains are ordinary functions waiting for arguments.
+export const isFunction = (value) =>
+  value instanceof Function &&
+  (value.isChain === undefined || value.isChain === 'incomplete');
 Shape.isFunction = isFunction;
 
 export const isArray = (value) => value instanceof Array;
@@ -283,6 +296,27 @@ export const isSegment = (value) => isArray(value) && value.every(isCoordinate);
 Shape.isSegment = isSegment;
 
 Shape.chain = chain;
+
+export const apply = async (input, op, value) => {
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
+    op = op(value);
+  }
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  if (Shape.isPendingInput(op)) {
+    op = op(input);
+  }
+  if (op instanceof Promise) {
+    op = await op;
+  }
+  return op;
+};
+
+Shape.apply = apply;
 
 export const registerMethod = (names, op) => {
   if (typeof names === 'string') {
