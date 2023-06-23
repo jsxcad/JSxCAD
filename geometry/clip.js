@@ -17,7 +17,11 @@ const filter = (noVoid, onlyGraph) => (geometry) =>
   (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry))) &&
   (!onlyGraph || geometry.type === 'graph');
 
-export const clip = (geometry, geometries, { open, exact, noVoid, noGhost, onlyGraph }) => {
+export const clip = (
+  geometry,
+  geometries,
+  { open, exact, noVoid, noGhost, onlyGraph }
+) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter(noVoid, onlyGraph), inputs);
@@ -40,10 +44,14 @@ export const clip = (geometry, geometries, { open, exact, noVoid, noGhost, onlyG
   );
 };
 
-export const clipFrom = (clipBy, clipFrom, modes) => clip(clipFrom, [clipBy], modes);
+export const clipFrom = (clipBy, clipFrom, modes) =>
+  clip(clipFrom, [clipBy], modes);
 
 export const commonVolume = (geometry, modes) => {
-  const inputs = linearize(geometry, filter(modes.noVoid, { ...modes, onlyGraph: true }));
+  const inputs = linearize(
+    geometry,
+    filter(modes.noVoid, { ...modes, onlyGraph: true })
+  );
   switch (inputs.length) {
     case 0: {
       return taggedGroup({});
@@ -56,4 +64,4 @@ export const commonVolume = (geometry, modes) => {
       return clip(first, rest, modes);
     }
   }
-}
+};

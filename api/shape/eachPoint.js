@@ -19,7 +19,6 @@ export const eachPoint = Shape.registerMethod2(
       const operated = await Shape.apply(input, pointOp, moved);
       points.push(operated);
     }
-    console.log(`QQ/Points: ${JSON.stringify(points)}`);
     return groupOp(...points)(input);
   }
 );

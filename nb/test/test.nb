@@ -1,3 +1,6 @@
-Box(10, 10, 20)
-  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
-  .view();
+Box(10)
+  .ez([10])
+  .unfold()
+  .on(get('unfold:faces'), color('blue').ez([0.1]))
+  .and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))
+  .view()

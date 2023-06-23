@@ -23,7 +23,7 @@ export const extrudeAlong = Shape.registerMethod2(
             await input.toGeometry(),
             await Point().moveAlong(vector, height).toGeometry(),
             await Point().moveAlong(vector, depth).toGeometry(),
-            noVoid,
+            noVoid
           )
         )
       );

@@ -19,7 +19,12 @@ export const shell = (
   sizingFallback = 1,
   approxFallback = 0.1,
   { protect = false },
-  { angle = 30 / 360, sizing = sizingFallback, approx = approxFallback, edgeLength = 1 }
+  {
+    angle = 30 / 360,
+    sizing = sizingFallback,
+    approx = approxFallback,
+    edgeLength = 1,
+  }
 ) => {
   const [innerOffset = 0, outerOffset = 0] = interval;
   const concreteGeometry = toConcreteGeometry(geometry);

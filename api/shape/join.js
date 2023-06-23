@@ -10,5 +10,5 @@ export const Join = Shape.registerMethod3(
 export const join = Shape.registerMethod3(
   ['add', 'fuse', 'join'],
   ['inputGeometry', 'geometries', 'modes:exact,noVoid'],
-  joinGeometry,
+  joinGeometry
 );

@@ -7,7 +7,12 @@ import Shape from './Shape.js';
 export const Curve = Shape.registerMethod2(
   'Curve',
   ['coordinates', 'number', 'options', 'modes:closed'],
-  (coordinates, implicitSteps = 20, { steps = implicitSteps } = {}, { closed }) => {
+  (
+    coordinates,
+    implicitSteps = 20,
+    { steps = implicitSteps } = {},
+    { closed }
+  ) => {
     const interpolator = new CurveInterpolator(coordinates, {
       closed,
       tension: 0.2,

@@ -52,10 +52,10 @@ export const cut = (
   );
 };
 
-export const Cut = ([first, ...rest], modes) =>
-  cut(first, rest, modes);
+export const cutFrom = (toClip, toCut, options) =>
+  cut(toCut, [toClip], options);
 
-export const cutFrom = (toClip, toCut, options) => cut(toCut, [toClip], options);
-
-export const cutOut = (cutGeometry, clipGeometry, modes) =>
-  [cut(cutGeometry, [clipGeometry], { ...modes, noGhost: true }), clip(cutGeometry, [clipGeometry], { ...modes, noGhost: true })]
+export const cutOut = (cutGeometry, clipGeometry, modes) => [
+  cut(cutGeometry, [clipGeometry], { ...modes, noGhost: true }),
+  clip(cutGeometry, [clipGeometry], { ...modes, noGhost: true }),
+];

@@ -16,9 +16,8 @@ export const Link = (geometries, { close = false, reverse = false }) => {
   return taggedGroup({}, ...outputs);
 };
 
-export const link = (geometry, geometries, mode) => Link([geometry, ...geometries], mode);
+export const link = (geometry, geometries, mode) =>
+  Link([geometry, ...geometries], mode);
 
-export const Loop = (geometries, { reverse = false }) =>
-  Link(geometries, { reverse, close: true });
-
-export const loop = (geometry, geometries, { reverse = false }) => Link([geometry, ...geometries], { reverse, close: true });
+export const loop = (geometry, geometries, mode) =>
+  Link([geometry, ...geometries], { ...mode, close: true });

@@ -9,13 +9,13 @@ Unfolds a solid into a set of flat faces and edges suitable for folding back int
 The faces are tagged with 'unfold:faces' and each fold edge is tagged with 'fold:edge'.
 `;
 
-await Box(10)
+Box(10)
   .ez([10])
   .unfold()
   .view()
   .note('Box(10).ez([10]).unfold()');
 
-await Box(10)
+Box(10)
   .ez([10])
   .unfold()
   .on(get('unfold:faces'), color('blue').ez([0.1]))

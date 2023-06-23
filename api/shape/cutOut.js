@@ -13,6 +13,12 @@ export const cutOut = Shape.registerMethod3(
     'function',
   ],
   cutOutOp,
-  ([cutShape, clippedShape], [,,,cutOp = (shape) => shape, clipOp = (shape) => shape, groupOp = Group]) =>
-    Group(cutOp(Shape.fromGeometry(cutShape)), clipOp(Shape.fromGeometry(clippedShape)))
+  (
+    [cutShape, clippedShape],
+    [, , , cutOp = (shape) => shape, clipOp = (shape) => shape, groupOp = Group]
+  ) =>
+    Group(
+      cutOp(Shape.fromGeometry(cutShape)),
+      clipOp(Shape.fromGeometry(clippedShape))
+    )
 );

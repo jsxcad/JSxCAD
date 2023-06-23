@@ -24,4 +24,5 @@ export const Loft = (geometries, { open = false }) => {
   return taggedGroup({}, ...outputs);
 };
 
-export const loft = (geometry, geometries, mode) => Loft([geometry, ...geometries], mode);
+export const loft = (geometry, geometries, mode) =>
+  Loft([geometry, ...geometries], mode);

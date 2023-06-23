@@ -1,11 +1,10 @@
-import { Link as LinkOp, link as linkOp } from '@jsxcad/geometry';
-
 import Shape from './Shape.js';
+import { link as linkOp } from '@jsxcad/geometry';
 
 export const Link = Shape.registerMethod3(
   'Link',
-  ['geometries', 'modes:close,reverse'],
-  LinkOp,
+  ['geometry', 'geometries', 'modes:close,reverse'],
+  linkOp
 );
 
 export default Link;

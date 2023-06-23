@@ -82,7 +82,9 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
           output.push(undefined);
         } else {
           if (!Shape.isGeometry(input.geometry)) {
-            throw Error(`Expected geometry but received ${JSON.stringify(input.geometry)}`);
+            throw Error(
+              `Expected geometry but received ${JSON.stringify(input.geometry)}`
+            );
           }
           output.push(input.geometry);
         }
@@ -256,9 +258,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'strings': {
         const out = [];
         for (const arg of args) {
-          if (
-            typeof arg === 'string'
-          ) {
+          if (typeof arg === 'string') {
             out.push(arg);
           } else {
             rest.push(arg);

@@ -8,24 +8,25 @@ import { transform as transformOp } from './transform.js';
 
 export const on = Shape.registerMethod2(
   'on',
-  ['inputGeometry', 'shape', 'function'],
+  ['inputGeometry', 'geometry', 'function'],
   async (geometry, selection, op = noOp) => {
     const entries = [];
     entries.push({ selection, op });
     const inputLeafs = [];
     const outputLeafs = [];
     for (const { selection, op } of entries) {
-      const leafs = getLeafs(await selection.toGeometry());
-      inputLeafs.push(...leafs);
-      for (const geometry of leafs) {
-        const global = geometry.matrix;
+      const leafs = getLeafs(selection);
+      for (const inputLeaf of leafs) {
+        const global = inputLeaf.matrix;
         const local = invertTransform(global);
-        const target = Shape.fromGeometry(geometry);
+        const target = Shape.fromGeometry(inputLeaf);
         // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
         const a = await transformOp(local)(target);
         const b = await opOp(op)(a);
         const r = await transformOp(global)(b);
-        outputLeafs.push(await r.toGeometry());
+        const outputLeaf = await r.toGeometry();
+        inputLeafs.push(inputLeaf);
+        outputLeafs.push(outputLeaf);
       }
     }
     const result = Shape.fromGeometry(

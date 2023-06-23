@@ -210,7 +210,11 @@ export const isShape = (value) =>
   (value !== undefined && value !== null && value.isChain !== undefined);
 Shape.isShape = isShape;
 
-export const isGeometry = (value) => value && value instanceof Object && value.type !== undefined && value.geometry === undefined;
+export const isGeometry = (value) =>
+  value &&
+  value instanceof Object &&
+  value.type !== undefined &&
+  value.geometry === undefined;
 Shape.isGeometry = isGeometry;
 
 export const isOp = (value) =>
@@ -390,7 +394,12 @@ Shape.fromGeometry = (geometry, context) => {
   return new Shape(geometry, context);
 };
 
-export const registerMethod3 = (names, signature, op, postOp = async (geometry) => Shape.fromGeometry(await geometry)) => {
+export const registerMethod3 = (
+  names,
+  signature,
+  op,
+  postOp = async (geometry) => Shape.fromGeometry(await geometry)
+) => {
   const method =
     (...args) =>
     async (shape) => {
@@ -405,8 +414,29 @@ export const registerMethod3 = (names, signature, op, postOp = async (geometry) 
           args,
           ...signature
         );
-        if (parameters.some((s) => Shape.isShape(s) && !Shape.isFunction(s) && !Shape.isChainFunction(s))) {
-          throw Error(`die: Some parameters are shapes: json=${JSON.stringify(parameters.filter((s) => Shape.isShape(s) && !Shape.isFunction(s) && !Shape.isChainFunction(s)))} raw=${parameters.filter((s) => Shape.isShape(s) && !Shape.isFunction(s) && !Shape.isChainFunction(s))}`);
+        if (
+          parameters.some(
+            (s) =>
+              Shape.isShape(s) &&
+              !Shape.isFunction(s) &&
+              !Shape.isChainFunction(s)
+          )
+        ) {
+          throw Error(
+            `die: Some parameters are shapes: json=${JSON.stringify(
+              parameters.filter(
+                (s) =>
+                  Shape.isShape(s) &&
+                  !Shape.isFunction(s) &&
+                  !Shape.isChainFunction(s)
+              )
+            )} raw=${parameters.filter(
+              (s) =>
+                Shape.isShape(s) &&
+                !Shape.isFunction(s) &&
+                !Shape.isChainFunction(s)
+            )}`
+          );
         }
         const r1 = op(...parameters);
         const r2 = await postOp(r1, parameters);

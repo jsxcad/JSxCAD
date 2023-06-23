@@ -40,5 +40,4 @@ export const fit = (geometry, geometries, modes) =>
 export const fitTo = (geometry, geometries, modes) =>
   Disjoint([geometry, ...geometries], modes);
 
-export const disjoint = (geometry, modes) =>
-  Disjoint([geometry], modes);
+export const disjoint = (geometry, modes) => Disjoint([geometry], modes);

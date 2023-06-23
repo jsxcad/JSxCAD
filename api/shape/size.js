@@ -26,7 +26,11 @@ const Z = 2;
 
 export const size = Shape.registerMethod2(
   'size',
-  ['input', 'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius', 'function'],
+  [
+    'input',
+    'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius',
+    'function',
+  ],
   async (input, modes, op = (value) => async (shape) => value) => {
     const geometry = await input.toGeometry();
     const bounds = measureBoundingBox(geometry);
@@ -34,24 +38,44 @@ export const size = Shape.registerMethod2(
     if (bounds !== undefined) {
       const [min, max] = bounds;
       if (modes.max) {
-            args.push(max);
+        args.push(max);
       }
       if (modes.min) {
-            args.push(min);
+        args.push(min);
       }
-      if (modes.right) { args.push(max[X]); }
-      if (modes.left) { args.push(min[X]); }
-      if (modes.front) { args.push(min[Y]); }
-      if (modes.back) { args.push(max[Y]); }
-      if (modes.top) { args.push(max[Z]); }
-      if (modes.bottom) { args.push(min[Z]); }
-      if (modes.length) { args.push(max[X] - min[X]); }
-      if (modes.width) { args.push(max[Y] - min[Y]); }
-      if (modes.height) { args.push(max[Z] - min[Z]); }
-      if (modes.center) { args.push(scale(0.5, add(min, max))); }
+      if (modes.right) {
+        args.push(max[X]);
+      }
+      if (modes.left) {
+        args.push(min[X]);
+      }
+      if (modes.front) {
+        args.push(min[Y]);
+      }
+      if (modes.back) {
+        args.push(max[Y]);
+      }
+      if (modes.top) {
+        args.push(max[Z]);
+      }
+      if (modes.bottom) {
+        args.push(min[Z]);
+      }
+      if (modes.length) {
+        args.push(max[X] - min[X]);
+      }
+      if (modes.width) {
+        args.push(max[Y] - min[Y]);
+      }
+      if (modes.height) {
+        args.push(max[Z] - min[Z]);
+      }
+      if (modes.center) {
+        args.push(scale(0.5, add(min, max)));
+      }
       if (modes.radius) {
-            const center = scale(0.5, add(min, max));
-            args.push(distance(center, max));
+        const center = scale(0.5, add(min, max));
+        args.push(distance(center, max));
       }
     }
     return op(...args)(input);

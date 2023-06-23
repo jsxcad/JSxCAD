@@ -1,4 +1,4 @@
-import { Link, taggedPoints } from '@jsxcad/geometry';
+import { link, taggedPoints } from '@jsxcad/geometry';
 
 import MarchingSquares from 'marchingsquares/dist/marchingsquares.js';
 
@@ -11,7 +11,7 @@ export const fromRaster = async (raster, bands) => {
     const high = bands[nth + 1];
     const paths = [];
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
-      result.push(Link([taggedPoints({}, band)], /* close= */ true));
+      result.push(link(taggedPoints({}, band), [], /* close= */ true));
     }
     if (paths.length > 0) {
       result.push(paths);

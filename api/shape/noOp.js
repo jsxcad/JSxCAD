@@ -1,6 +1,10 @@
 import Shape from './Shape.js';
 
-export const noOp = Shape.registerMethod3(['input', 'noOp', 'self'], ['inputGeometry'], (geometry) => geometry);
+export const noOp = Shape.registerMethod3(
+  ['input', 'noOp', 'self'],
+  ['inputGeometry'],
+  (geometry) => geometry
+);
 export const input = noOp;
 export const self = noOp;
 
