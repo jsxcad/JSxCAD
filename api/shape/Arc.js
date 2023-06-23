@@ -8,6 +8,7 @@ import {
 import Point from './Point.js';
 import Shape from './Shape.js';
 import Spiral from './Spiral.js';
+import { absolute } from './absolute.js';
 
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
@@ -97,7 +98,7 @@ const reifyArc =
       }
     }
 
-    return spiral.absolute();
+    return absolute()(spiral);
   };
 
 const reifyArcZ = reifyArc(Z);
@@ -160,26 +161,27 @@ const ArcOp =
         break;
     }
     const [c1, c2] = await buildCorners(x, y, z)(null);
-    const result = reify({ c1, c2, start, end, sides, zag });
-    return result;
+    const result = await reify({ c1, c2, start, end, sides, zag });
+    const geometry = await result.toGeometry();
+    return geometry;
   };
 
-export const Arc = Shape.registerMethod2(
+export const Arc = Shape.registerMethod3(
   'Arc',
   ['intervals', 'options'],
   ArcOp('Arc')
 );
-export const ArcX = Shape.registerMethod2(
+export const ArcX = Shape.registerMethod3(
   'ArcX',
   ['intervals', 'options'],
   ArcOp('ArcX')
 );
-export const ArcY = Shape.registerMethod2(
+export const ArcY = Shape.registerMethod3(
   'ArcY',
   ['intervals', 'options'],
   ArcOp('ArcY')
 );
-export const ArcZ = Shape.registerMethod2(
+export const ArcZ = Shape.registerMethod3(
   'ArcZ',
   ['intervals', 'options'],
   ArcOp('ArcZ')

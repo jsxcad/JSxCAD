@@ -69,8 +69,8 @@ export const tagGeometry = (geometry, tags) => {
   return rewrite(geometry, op);
 };
 
-export const tag = Shape.registerMethod2(
+export const tag = Shape.registerMethod3(
   'tag',
   ['inputGeometry', 'strings'],
-  (geometry, tags) => Shape.fromGeometry(tagGeometry(geometry, tags))
+  tagGeometry
 );

@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
-import { cut } from './cut.js';
+import { cutFrom as op } from '@jsxcad/geometry';
 
-export const cutFrom = Shape.registerMethod2(
+export const cutFrom = Shape.registerMethod3(
   'cutFrom',
-  ['input', 'shape', 'modes:open,exact,noVoid,noGhost'],
-  (input, other, modes) => cut(input, ...modes)(other)
+  ['inputGeometry', 'geometry', 'modes:open,exact,noVoid,noGhost'],
+  op
 );

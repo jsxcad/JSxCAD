@@ -655,35 +655,35 @@ export const Pulley = (profile, teeth) => {
 # Supported belt profiles:
 
 '''js
-Pulley(MXL, 20).md('MXL').view();
+Pulley(MXL, 20).note('MXL').view();
 
-Pulley(DP40, 20).md('DP40').view();
+Pulley(DP40, 20).note('DP40').view();
 
-Pulley(XL, 20).md('XL').view();
+Pulley(XL, 20).note('XL').view();
 
-Pulley(H, 20).md('H').view();
+Pulley(H, 20).note('H').view();
 
-Pulley(T2_5, 20).md('T2 5mm').view();
+Pulley(T2_5, 20).note('T2 5mm').view();
 
-Pulley(T5, 20).md('T5').view();
+Pulley(T5, 20).note('T5').view();
 
-Pulley(T10, 20).md('T10').view();
+Pulley(T10, 20).note('T10').view();
 
-Pulley(AT5, 20).md('AT 5mm').view();
+Pulley(AT5, 20).note('AT 5mm').view();
 
-Pulley(HTD_3mm, 20).md('HTD 3mm').view();
+Pulley(HTD_3mm, 20).note('HTD 3mm').view();
 
-Pulley(HTD_5mm, 20).md('HTD 5mm').view();
+Pulley(HTD_5mm, 20).note('HTD 5mm').view();
 
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+Pulley(GT2_5mm, 20).note('GT2 5mm').view();
 
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+Pulley(GT2_5mm, 20).note('GT2 5mm').view();
 
-Pulley(HTD_8mm, 20).md('HTD 8mm').view();
+Pulley(HTD_8mm, 20).note('HTD 8mm').view();
 
-Pulley(GT2_2mm, 20).md('GT2 2mm').view();
+Pulley(GT2_2mm, 20).note('GT2 2mm').view();
 
-Pulley(GT2_3mm, 20).md('GT2 3mm').view();
+Pulley(GT2_3mm, 20).note('GT2 3mm').view();
 
-Pulley(GT2_5mm, 20).md('GT2 5mm').view();
+Pulley(GT2_5mm, 20).note('GT2 5mm').view();
 '''

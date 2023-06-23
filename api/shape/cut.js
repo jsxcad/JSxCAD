@@ -1,34 +1,14 @@
 import Shape from './Shape.js';
-import { cut as cutGeometry } from '@jsxcad/geometry';
+import { Cut as CutOp, cut as cutOp } from '@jsxcad/geometry';
 
-export const Cut = Shape.registerMethod2(
+export const Cut = Shape.registerMethod3(
   'Cut',
-  ['geometry', 'geometries', 'modes:open,exact,noVoid,noGhost'],
-  (first, rest, modes) =>
-    Shape.fromGeometry(
-      cutGeometry(
-        first,
-        rest,
-        modes.includes('open'),
-        modes.includes('exact'),
-        modes.includes('noVoid'),
-        modes.includes('noGhost')
-      )
-    )
+  ['geometries', 'modes:open,exact,noVoid,noGhost'],
+  CutOp,
 );
 
-export const cut = Shape.registerMethod2(
+export const cut = Shape.registerMethod3(
   'cut',
   ['inputGeometry', 'geometries', 'modes:open,exact,noVoid,noGhost'],
-  async (geometry, geometries, modes) =>
-    Shape.fromGeometry(
-      cutGeometry(
-        geometry,
-        geometries,
-        modes.includes('open'),
-        modes.includes('exact'),
-        modes.includes('noVoid'),
-        modes.includes('noGhost')
-      )
-    )
+  cutOp,
 );

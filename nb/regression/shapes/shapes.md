@@ -5,7 +5,7 @@ Arc(5).angle(45/360, 270/360)
 ```JavaScript
 await Arc(5, { start: 45 / 360, end: 270 / 360 })
   .gridView()
-  .md(`Arc(5).angle(45/360, 270/360)`);
+  .note(`Arc(5).angle(45/360, 270/360)`);
 ```
 
 ![Image](shapes.md.$2.png)
@@ -16,7 +16,7 @@ Assembly(Box(10), Arc(8), Triangle(5))
 await Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView(undefined, { size: 801, triangles: false, wireframe: false })
-  .md(`Assembly(Box(10), Arc(8), Triangle(5))`);
+  .note(`Assembly(Box(10), Arc(8), Triangle(5))`);
 ```
 
 ![Image](shapes.md.$3.png)
@@ -24,7 +24,7 @@ await Assembly(Box(10), Arc(8), Triangle(5))
 Box(5, 7, 8)
 
 ```JavaScript
-await Box(5, 7, 8).view().md(`Box(5, 7, 8)`);
+await Box(5, 7, 8).view().note(`Box(5, 7, 8)`);
 ```
 
 ![Image](shapes.md.$4.png)
@@ -34,13 +34,13 @@ ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
 ```JavaScript
 await ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
-  .md(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
+  .note(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 ```
 
 Empty()
 
 ```JavaScript
-await Empty().view().md(`Empty()`);
+await Empty().view().note(`Empty()`);
 ```
 
 ![Image](shapes.md.$6.png)
@@ -51,7 +51,7 @@ Group(Box(10), Arc(8), Triangle(5))
 await Group(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView()
-  .md(`Group(Box(10), Arc(8), Triangle(5))`);
+  .note(`Group(Box(10), Arc(8), Triangle(5))`);
 ```
 
 ![Image](shapes.md.$7.png)
@@ -62,7 +62,7 @@ Hershey(10)('Hershey').align('xy')
 await Hershey('Hershey', 10)
   .align('xy')
   .gridView()
-  .md(`Hershey(10)('Hershey').align('xy')`);
+  .note(`Hershey(10)('Hershey').align('xy')`);
 ```
 
 ![Image](shapes.md.$8.png)
@@ -70,7 +70,7 @@ await Hershey('Hershey', 10)
 Hexagon(10)
 
 ```JavaScript
-await Hexagon(10).gridView().md(`Hexagon(10)`);
+await Hexagon(10).gridView().note(`Hexagon(10)`);
 ```
 
 ![Image](shapes.md.$9.png)
@@ -78,7 +78,7 @@ await Hexagon(10).gridView().md(`Hexagon(10)`);
 Hull(Arc(5), Box(5).z(5))
 
 ```JavaScript
-await Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
+await Hull(Arc(5), Box(5).z(5)).view().note(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
 ![Image](shapes.md.$10.png)
@@ -86,7 +86,7 @@ await Hull(Arc(5), Box(5).z(5)).view().md(`Hull(Arc(5), Box(5).z(5))`);
 Icosahedron(5)
 
 ```JavaScript
-await Icosahedron(5).view().md(`Icosahedron(5)`);
+await Icosahedron(5).view().note(`Icosahedron(5)`);
 ```
 
 ```JavaScript
@@ -117,7 +117,7 @@ const torusFn = (x, y, z) => {
 Implicit(2, torusFn
 
 ```JavaScript
-await Implicit(2, torusFn).view({ withGrid: false }).md('Implicit(2, torusFn');
+await Implicit(2, torusFn).view({ withGrid: false }).note('Implicit(2, torusFn');
 ```
 
 ![Image](shapes.md.$12.png)
@@ -125,7 +125,7 @@ await Implicit(2, torusFn).view({ withGrid: false }).md('Implicit(2, torusFn');
 Line([5, -1])
 
 ```JavaScript
-await Line([5, -1]).rz(45).gridView().md(`Line([5, -1])`);
+await Line([5, -1]).rz(45).gridView().note(`Line([5, -1])`);
 ```
 
 ![Image](shapes.md.$13.png)
@@ -133,7 +133,7 @@ await Line([5, -1]).rz(45).gridView().md(`Line([5, -1])`);
 Octagon(5)
 
 ```JavaScript
-await Octagon(5).gridView().md(`Octagon(5)`);
+await Octagon(5).gridView().note(`Octagon(5)`);
 ```
 
 ![Image](shapes.md.$14.png)
@@ -141,7 +141,7 @@ await Octagon(5).gridView().md(`Octagon(5)`);
 Orb(1)
 
 ```JavaScript
-await Orb(1).view().md(`Orb(1)`);
+await Orb(1).view().note(`Orb(1)`);
 ```
 
 ![Image](shapes.md.$15.png)
@@ -152,7 +152,7 @@ Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 await Link(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
-  .md(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
+  .note(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 ```
 
 ![Image](shapes.md.$16.png)
@@ -160,7 +160,7 @@ await Link(Point(0), Point(5), Point(5, 5), Point(0))
 Pentagon(5)
 
 ```JavaScript
-await Pentagon(5).gridView().md(`Pentagon(5)`);
+await Pentagon(5).gridView().note(`Pentagon(5)`);
 ```
 
 ![Image](shapes.md.$17.png)
@@ -168,7 +168,7 @@ await Pentagon(5).gridView().md(`Pentagon(5)`);
 Point(0.5, 0.5)
 
 ```JavaScript
-await Point(0.5, 0.5).gridView().md(`Point(0.5, 0.5)`);
+await Point(0.5, 0.5).gridView().note(`Point(0.5, 0.5)`);
 ```
 
 ![Image](shapes.md.$18.png)
@@ -178,7 +178,7 @@ Points([0.5, 0.5], [-0.5, -0.5])
 ```JavaScript
 await Points([0.5, 0.5], [-0.5, -0.5])
   .gridView()
-  .md(`Points([0.5, 0.5], [-0.5, -0.5])`);
+  .note(`Points([0.5, 0.5], [-0.5, -0.5])`);
 ```
 
 ![Image](shapes.md.$19.png)
@@ -189,7 +189,7 @@ Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
 await Polygon(Point(0), Point(5), Point(5, 5))
   .rz(1 / 16)
   .gridView()
-  .md(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
+  .note(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
 ```
 
 ![Image](shapes.md.$20.png)
@@ -217,7 +217,7 @@ await Polyhedron(
   ]
 )
   .view()
-  .md(
+  .note(
     `Polyhedron(  
       [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],  
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])`
@@ -229,7 +229,7 @@ await Polyhedron(
 Septagon(5)
 
 ```JavaScript
-await Arc(5, { sides: 7 }).gridView().md(`Septagon(5)`);
+await Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 ```
 
 ![Image](shapes.md.$22.png)
@@ -237,7 +237,7 @@ await Arc(5, { sides: 7 }).gridView().md(`Septagon(5)`);
 Spiral()
 
 ```JavaScript
-await Spiral().gridView().md(`Spiral()`);
+await Spiral().gridView().note(`Spiral()`);
 ```
 
 ![Image](shapes.md.$23.png)
@@ -245,7 +245,7 @@ await Spiral().gridView().md(`Spiral()`);
 Triangle(5)
 
 ```JavaScript
-await Triangle(5).gridView().md(`Triangle(5)`);
+await Triangle(5).gridView().note(`Triangle(5)`);
 ```
 
 ![Image](shapes.md.$24.png)
@@ -256,7 +256,7 @@ Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 await Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
   .align('xy')
   .gridView()
-  .md(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
+  .note(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 ```
 
 ![Image](shapes.md.$25.png)
@@ -267,7 +267,7 @@ Group(Arc(5).x(-1), Box(5).x(1)).fill()
 await Group(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
-  .md(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
+  .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
 ```
 
 ```JavaScript

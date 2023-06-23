@@ -1,7 +1,7 @@
-import { disjoint } from '@jsxcad/geometry';
+import { Disjoint } from '@jsxcad/geometry';
 import { fromGeometry } from './Shape.js';
 
-export const assemble = async (modes, ...shapes) => {
+export const assemble = async ({ exact }, ...shapes) => {
   const geometries = [];
   for (const shape of shapes) {
     if (shape === undefined) {
@@ -9,7 +9,7 @@ export const assemble = async (modes, ...shapes) => {
     }
     geometries.push(await shape.toGeometry());
   }
-  return fromGeometry(disjoint(geometries, undefined, modes.includes('exact')));
+  return fromGeometry(Disjoint(geometries, { exact }));
 };
 
 export default assemble;

@@ -80,7 +80,7 @@ The clock face
 ![Image](clock.md.$5.png)
 
 ```JavaScript
-Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
+Face({ axleRadius, faceRadius, fontSize }).note('The clock face').gridView();
 ```
 
 ![Image](clock.md.$6.png)

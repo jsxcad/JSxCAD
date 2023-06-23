@@ -17,7 +17,7 @@ Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))
 Box(5, 5, 5)
   .cutFrom(eachPoint((p) => s => Orb(3).to(p)))
   .view()
-  .md('Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))');
+  .note('Box(5, 5, 5).cutFrom(eachPoint((p) => s => Orb(3).to(p)))');
 ```
 
 ![Image](eachPoint.md.$3.png)
@@ -29,5 +29,5 @@ Box(5, 5, 5)
   .outline()
   .and(eachPoint(Arc(4)))
   .view()
-  .md('Box(5, 5, 5).outline().and(eachPoint(Arc(4)))');
+  .note('Box(5, 5, 5).outline().and(eachPoint(Arc(4)))');
 ```

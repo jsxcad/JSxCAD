@@ -38,8 +38,8 @@ And one of these
 ```JavaScript
 const bearing_10_7 = await Bearing(10.7)
   .view(material('glass'))
-  .md(`You'll need to print two of these`)
+  .note(`You'll need to print two of these`)
   .stl('bearing_10_7_top', get('top'))
-  .md(`And one of these`)
+  .note(`And one of these`)
   .stl('bearing_10_7_pin', get('pin'));
 ```

@@ -1,19 +1,11 @@
-import { Shape, fromGeometry } from './Shape.js';
-
-import Group from './Group.js';
 import { Join } from './join.js';
-import { fuse as fuseGeometry } from '@jsxcad/geometry';
+import Shape from './Shape.js';
+import { fuse as op } from '@jsxcad/geometry';
 
 export const Fuse = Join;
 
-export const fuse = Shape.registerMethod2(
+export const fuse = Shape.registerMethod3(
   'fuse',
-  ['input', 'shapes', 'modes:exact'],
-  async (input, shapes, modes) =>
-    fromGeometry(
-      fuseGeometry(
-        await Group(input, ...shapes).toGeometry(),
-        modes.includes('exact')
-      )
-    )
+  ['inputGeometry', 'geometries', 'modes:exact'],
+  op
 );

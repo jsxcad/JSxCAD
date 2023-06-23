@@ -1,11 +1,8 @@
 import Shape from './Shape.js';
-import { disjoint } from '@jsxcad/geometry';
+import { fitTo as op } from '@jsxcad/geometry';
 
-export const fitTo = Shape.registerMethod2(
-  'fitTo',
+export const fitTo = Shape.registerMethod3(
+  ['Assembly', 'fitTo'],
   ['inputGeometry', 'geometries', 'modes:exact'],
-  (geometry, geometries, modes) =>
-    Shape.fromGeometry(
-      disjoint([geometry, ...geometries], undefined, modes.includes('exact'))
-    )
+  op
 );

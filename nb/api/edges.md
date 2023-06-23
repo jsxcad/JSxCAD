@@ -15,7 +15,7 @@ See: [eachEdge](../../nb/api/eachEdge.md)
 Box(5, 5, 5).edges()
 
 ```JavaScript
-Box(5, 5, 5).edges().view().md('Box(5, 5, 5).edges()');
+Box(5, 5, 5).edges().view().note('Box(5, 5, 5).edges()');
 ```
 
 ![Image](edges.md.$3.png)
@@ -27,5 +27,5 @@ Box(5, 5, 5)
   .remesh()
   .edges(Box(5, 5, [0, 2.5]))
   .view()
-  .md('Box(5, 5, 5).remesh().edges(Box(5, 5, [0, 2.5]))');
+  .note('Box(5, 5, 5).remesh().edges(Box(5, 5, [0, 2.5]))');
 ```

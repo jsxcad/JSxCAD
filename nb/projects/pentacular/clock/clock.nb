@@ -51,7 +51,7 @@ const Face = ({ axleRadius, faceRadius, fontSize }) =>
       )
     );
 
-Face({ axleRadius, faceRadius, fontSize }).md('The clock face').gridView();
+Face({ axleRadius, faceRadius, fontSize }).note('The clock face').gridView();
 
 Hand(hourHand).topView();
 md`The hour hand.`;

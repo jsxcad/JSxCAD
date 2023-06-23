@@ -14,18 +14,16 @@ const filter = (geometry) =>
 
 export const separate = (
   geometry,
-  keepShapes = true,
-  keepHolesInShapes = true,
-  keepHolesAsShapes = false
+  { noShapes, noHoles, holesAsShapes }
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = separateWithCgal(
     inputs,
-    keepShapes,
-    keepHolesInShapes,
-    keepHolesAsShapes
+    !noShapes,
+    !noHoles,
+    holesAsShapes
   );
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);

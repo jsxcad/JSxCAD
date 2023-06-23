@@ -1,9 +1,12 @@
 import Shape from './Shape.js';
 
-export const noOp = Shape.registerMethod2('noOp', ['input'], (input) => input);
+export const noOp = Shape.registerMethod3(['input', 'noOp', 'self'], ['inputGeometry'], (geometry) => geometry);
+export const input = noOp;
+export const self = noOp;
 
-export const value = Shape.registerMethod2(
+export const value = Shape.registerMethod3(
   'value',
   ['value'],
+  (value) => value,
   (value) => value
 );

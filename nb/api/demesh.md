@@ -19,8 +19,8 @@ Box(5, 5, 5).remesh(1).demesh() produces the required facets.
 Box(5, 5, 5)
   .remesh(1)
   .view(1, 'wireframe')
-  .md('Box(5, 5, 5).remesh(1) produces these facets.')
+  .note('Box(5, 5, 5).remesh(1) produces these facets.')
   .demesh()
   .view(2, 'wireframe')
-  .md('Box(5, 5, 5).remesh(1).demesh() produces the required facets.');
+  .note('Box(5, 5, 5).remesh(1).demesh() produces the required facets.');
 ```

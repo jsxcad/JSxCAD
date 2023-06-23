@@ -2,12 +2,12 @@ import { Block, SocketBoard } from './lego.nb';
 
 export const socketBoard16x16x2 = await SocketBoard(2, 2, 2)
   .as('SocketBoard 16x16x2')
-  .md('SocketBoard 16x16x2')
+  .note('SocketBoard 16x16x2')
   .view();
 
 export const socketBoard32x8x3_2 = await SocketBoard(4, 1, 3.2)
   .as('SocketBoard 32x32x3.2')
-  .md('SocketBoard 32x32x3.2')
+  .note('SocketBoard 32x32x3.2')
   .view();
 
 export const axleHole = await Arc({ apothem: 5.2 })
@@ -65,12 +65,12 @@ export const AxleProfile = () => {
   return bar.add(bar.rz(90 / 360));
 };
 
-export const axleProfile = await AxleProfile().md('Axle Profile').topView();
+export const axleProfile = await AxleProfile().note('Axle Profile').topView();
 
 export const AxleJoiner = (length) => Arc(8).cut(axleProfile).ez([length]);
 
 export const axleJoiner16 = await AxleJoiner(16)
-  .md('Axle Joiner 16mm')
+  .note('Axle Joiner 16mm')
   .stl('AxleJoiner16');
 
 const box = await Box(8, 3.2 * 4).y(3.2 * 2);

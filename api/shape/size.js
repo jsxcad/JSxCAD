@@ -26,62 +26,32 @@ const Z = 2;
 
 export const size = Shape.registerMethod2(
   'size',
-  ['input', 'modes', 'function'],
+  ['input', 'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius', 'function'],
   async (input, modes, op = (value) => async (shape) => value) => {
     const geometry = await input.toGeometry();
     const bounds = measureBoundingBox(geometry);
     const args = [];
-    if (bounds === undefined) {
-      for (let nth = 0; nth < modes.length; nth++) {
-        args.push(undefined);
-      }
-    } else {
+    if (bounds !== undefined) {
       const [min, max] = bounds;
-      for (const mode of modes) {
-        switch (mode) {
-          case 'max':
+      if (modes.max) {
             args.push(max);
-            break;
-          case 'min':
+      }
+      if (modes.min) {
             args.push(min);
-            break;
-          case 'right':
-            args.push(max[X]);
-            break;
-          case 'left':
-            args.push(min[X]);
-            break;
-          case 'front':
-            args.push(min[Y]);
-            break;
-          case 'back':
-            args.push(max[Y]);
-            break;
-          case 'top':
-            args.push(max[Z]);
-            break;
-          case 'bottom':
-            args.push(min[Z]);
-            break;
-          case 'length':
-            args.push(max[X] - min[X]);
-            break;
-          case 'width':
-            args.push(max[Y] - min[Y]);
-            break;
-          case 'height':
-            args.push(max[Z] - min[Z]);
-            break;
-          case 'center':
-            args.push(scale(0.5, add(min, max)));
-            break;
-          case 'radius':
+      }
+      if (modes.right) { args.push(max[X]); }
+      if (modes.left) { args.push(min[X]); }
+      if (modes.front) { args.push(min[Y]); }
+      if (modes.back) { args.push(max[Y]); }
+      if (modes.top) { args.push(max[Z]); }
+      if (modes.bottom) { args.push(min[Z]); }
+      if (modes.length) { args.push(max[X] - min[X]); }
+      if (modes.width) { args.push(max[Y] - min[Y]); }
+      if (modes.height) { args.push(max[Z] - min[Z]); }
+      if (modes.center) { args.push(scale(0.5, add(min, max))); }
+      if (modes.radius) {
             const center = scale(0.5, add(min, max));
             args.push(distance(center, max));
-            break;
-          default:
-            throw Error(`Unknown size option ${mode}`);
-        }
       }
     }
     return op(...args)(input);

@@ -8,8 +8,8 @@ import { normal } from './normal.js';
 // This interface is a bit awkward.
 export const extrudeAlong = Shape.registerMethod2(
   'extrudeAlong',
-  ['input', 'coordinate', 'modes', 'intervals'],
-  async (input, vector, modes, intervals) => {
+  ['input', 'coordinate', 'modes:noVoid', 'intervals'],
+  async (input, vector, { noVoid }, intervals) => {
     const extrusions = [];
     for (const [depth, height] of intervals) {
       if (height === depth) {
@@ -23,7 +23,7 @@ export const extrudeAlong = Shape.registerMethod2(
             await input.toGeometry(),
             await Point().moveAlong(vector, height).toGeometry(),
             await Point().moveAlong(vector, depth).toGeometry(),
-            modes.includes('noVoid')
+            noVoid,
           )
         )
       );

@@ -1,23 +1,17 @@
-import Shape from './Shape.js';
-import { link as linkGeometry } from '@jsxcad/geometry';
+import { Link as LinkOp, link as linkOp } from '@jsxcad/geometry';
 
-export const Link = Shape.registerMethod2(
+import Shape from './Shape.js';
+
+export const Link = Shape.registerMethod3(
   'Link',
-  ['geometries', 'modes'],
-  (geometries, modes) =>
-    Shape.fromGeometry(
-      linkGeometry(
-        geometries,
-        modes.includes('close'),
-        modes.includes('reverse')
-      )
-    )
+  ['geometries', 'modes:close,reverse'],
+  LinkOp,
 );
 
 export default Link;
 
-export const link = Shape.registerMethod2(
+export const link = Shape.registerMethod3(
   'link',
-  ['input', 'rest'],
-  (input, rest) => Link(input, ...rest)(input)
+  ['inputGeometry', 'geometries', 'modes:close,reverse'],
+  linkOp
 );

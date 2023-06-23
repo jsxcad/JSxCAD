@@ -9,6 +9,7 @@ import {
   isTypeVoid,
 } from './tagged/type.js';
 
+import { clip } from './clip.js';
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -25,19 +26,16 @@ const filterRemoves = (noVoid) => (geometry) =>
   filterTargets(noVoid)(geometry) && isNotTypeMasked(geometry);
 
 export const cut = (
-  geometry,
-  geometries,
-  open = false,
-  exact,
-  noVoid,
-  noGhost
+  toCut,
+  toClips,
+  { open = false, exact, noVoid, noGhost }
 ) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
+  const concreteGeometry = toConcreteGeometry(toCut);
   const inputs = [];
   linearize(concreteGeometry, filterTargets(noVoid), inputs);
   const count = inputs.length;
-  for (const geometry of geometries) {
-    linearize(geometry, filterRemoves(noVoid), inputs);
+  for (const toClip of toClips) {
+    linearize(toClip, filterRemoves(noVoid), inputs);
   }
   const outputs = cutWithCgal(inputs, count, open, exact);
   const ghosts = [];
@@ -53,3 +51,11 @@ export const cut = (
     ...ghosts
   );
 };
+
+export const Cut = ([first, ...rest], modes) =>
+  cut(first, rest, modes);
+
+export const cutFrom = (toClip, toCut, options) => cut(toCut, [toClip], options);
+
+export const cutOut = (cutGeometry, clipGeometry, modes) =>
+  [cut(cutGeometry, [clipGeometry], { ...modes, noGhost: true }), clip(cutGeometry, [clipGeometry], { ...modes, noGhost: true })]

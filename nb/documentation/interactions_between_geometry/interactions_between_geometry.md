@@ -74,7 +74,7 @@ Arc(10, 10, 5)
   .color('blue')
   .clip(Box(5, 5, 5).move(3, 0, 2).color('red'))
   .view()
-  .md(`The result is blue since the blue shape was clipped`);
+  .note(`The result is blue since the blue shape was clipped`);
 ```
 
 ![Image](interactions_between_geometry.md.$12.png)
@@ -86,7 +86,7 @@ Arc(10, 10, 5)
   .color('blue')
   .clipFrom(Box(5, 5, 5).move(3, 0, 2).color('red'))
   .view()
-  .md(`The result is red since the red shape was clipped from.`);
+  .note(`The result is red since the red shape was clipped from.`);
 ```
 
 ---
@@ -102,7 +102,7 @@ Arc(10, 10, 5)
   .color('blue')
   .cut(Box(5, 5, 5).move(3, 0, 2).color('red'))
   .view()
-  .md(`The result is blue since the blue shape was cut.`);
+  .note(`The result is blue since the blue shape was cut.`);
 ```
 
 ![Image](interactions_between_geometry.md.$15.png)
@@ -113,7 +113,7 @@ The result is red since the red shape was cut from.
 Arc(10, 10, 5)
   .cutFrom(Box(5, 5, 5).move(3, 0, 2))
   .view()
-  .md(`The result is red since the red shape was cut from.`);
+  .note(`The result is red since the red shape was cut from.`);
 ```
 
 ---

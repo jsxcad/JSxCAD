@@ -20,10 +20,10 @@ const makeUnitSphere = Cached('orb', (tolerance) =>
 
 export const Orb = Shape.registerMethod2(
   'Orb',
-  ['input', 'modes', 'intervals', 'options'],
+  ['input', 'modes:occt', 'intervals', 'options'],
   async (
     input,
-    modes,
+    { occt },
     [x = 1, y = x, z = x],
     { zag = DEFAULT_ORB_ZAG } = {}
   ) => {
@@ -35,7 +35,7 @@ export const Orb = Shape.registerMethod2(
     if (
       scale[X] === scale[Y] &&
       scale[Y] === scale[Z] &&
-      modes.includes('occt')
+      occt
     ) {
       // Occt can't handle non-uniform scaling at present.
       return Geometry(makeOcctSphere(scale[X])).move(middle);

@@ -15,7 +15,7 @@ const filter = (geometry) =>
   ) &&
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
-export const disjoint = (geometries, mode, exact) => {
+export const Disjoint = (geometries, { backward, exact }) => {
   const concreteGeometries = geometries.map((geometry) =>
     toConcreteGeometry(geometry)
   );
@@ -24,7 +24,7 @@ export const disjoint = (geometries, mode, exact) => {
     linearize(concreteGeometry, filter, inputs);
   }
   // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
-  const outputs = disjointWithCgal(inputs, mode, exact);
+  const outputs = disjointWithCgal(inputs, backward, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
   for (const concreteGeometry of concreteGeometries) {
@@ -33,3 +33,12 @@ export const disjoint = (geometries, mode, exact) => {
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...disjointGeometries);
 };
+
+export const fit = (geometry, geometries, modes) =>
+  Disjoint([...geometries, geometry], modes);
+
+export const fitTo = (geometry, geometries, modes) =>
+  Disjoint([geometry, ...geometries], modes);
+
+export const disjoint = (geometry, modes) =>
+  Disjoint([geometry], modes);

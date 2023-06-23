@@ -2,8 +2,9 @@ import Shape from './Shape.js';
 import { oneOfTagMatcher } from './tag.js';
 import { rewrite } from '@jsxcad/geometry';
 
-export const untagGeometry = (geometry, tags) => {
-  const isMatch = oneOfTagMatcher(tags, 'user');
+export const retagOp = (geometry, oldTags, newTags) => {
+  const isOldTagMatch = oneOfTagMatcher(oldTags, 'user');
+  const isNewTagMatch = oneOfTagMatcher(newTags, 'user');
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'group':
@@ -13,19 +14,28 @@ export const untagGeometry = (geometry, tags) => {
         const { tags = [] } = geometry;
         const remaining = [];
         for (const tag of tags) {
-          if (!isMatch(tag)) {
+          if (!isOldTagMatch(tag)) {
             remaining.push(tag);
+          }
+        }
+        for (const newTag of newTags) {
+          if (!remaining.includes(newTag)) {
+            remaining.push(newTag);
           }
         }
         return descend({ tags: remaining });
       }
     }
   };
-  return rewrite(geometry, op);
+  const result = rewrite(geometry, op);
+  return result;
 };
 
-export const untag = Shape.registerMethod2(
+export const untagOp = (geometry, oldTags) => retagOp(geometry, oldTags, []);
+export const tagOp = (geometry, newTags) => retagOp(geometry, [], newTags);
+
+export const untag = Shape.registerMethod3(
   'untag',
   ['inputGeometry', 'strings'],
-  (geometry, tags) => Shape.fromGeometry(untagGeometry(geometry, tags))
+  untagOp
 );

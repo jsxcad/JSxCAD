@@ -28,7 +28,7 @@ Box(10, 10, 1).view().note('Box(10, 10, 1)');
 align()
 
 ```JavaScript
-Box(10, 10, 1).align().and(origin).view().md('align()');
+Box(10, 10, 1).align().and(origin).view().note('align()');
 ```
 
 ![Image](align.md.$4.png)
@@ -36,7 +36,7 @@ Box(10, 10, 1).align().and(origin).view().md('align()');
 align('x>')
 
 ```JavaScript
-Box(10, 10, 1).align('x>').and(origin).view().md("align('x>')");
+Box(10, 10, 1).align('x>').and(origin).view().note("align('x>')");
 ```
 
 ![Image](align.md.$5.png)
@@ -44,7 +44,7 @@ Box(10, 10, 1).align('x>').and(origin).view().md("align('x>')");
 align('x<')
 
 ```JavaScript
-Box(10, 10, 1).align('x<').and(origin).view().md("align('x<')");
+Box(10, 10, 1).align('x<').and(origin).view().note("align('x<')");
 ```
 
 ![Image](align.md.$6.png)
@@ -52,7 +52,7 @@ Box(10, 10, 1).align('x<').and(origin).view().md("align('x<')");
 align('x')
 
 ```JavaScript
-Box(10, 10, 1).align('x').and(origin).view().md("align('x')");
+Box(10, 10, 1).align('x').and(origin).view().note("align('x')");
 ```
 
 ![Image](align.md.$7.png)
@@ -60,5 +60,5 @@ Box(10, 10, 1).align('x').and(origin).view().md("align('x')");
 align('x>y>z<')
 
 ```JavaScript
-Box(10, 10, 1).align('x>y>z<').and(origin).view().md("align('x>y>z<')");
+Box(10, 10, 1).align('x>y>z<').and(origin).view().note("align('x>y>z<')");
 ```

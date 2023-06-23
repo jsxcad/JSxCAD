@@ -10,9 +10,9 @@ zMargin|yMargin|Number of mm to add on the x axis.
 Produces an axis-aligned bounding box dilated by the specified margin.
 `;
 
-Orb(5).and(bb(0).material('glass')).view().md('A minimal bounding box.');
+Orb(5).and(bb(0).material('glass')).view().note('A minimal bounding box.');
 
 Orb(5)
   .and(bb(1).material('glass'))
   .view()
-  .md('A bounding box with a margin of 1.');
+  .note('A bounding box with a margin of 1.');

@@ -6,7 +6,7 @@ message||String of markdown to display
 
 Displays markdown text in the notebook.
 
-See: [md](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Assembly.md).
+See: [md](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/Assembly.note).
 
 ![Image](note.md.$2.png)
 

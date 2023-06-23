@@ -9,7 +9,7 @@ SocketBoard 16x16x2
 ```JavaScript
 export const socketBoard16x16x2 = await SocketBoard(2, 2, 2)
   .as('SocketBoard 16x16x2')
-  .md('SocketBoard 16x16x2')
+  .note('SocketBoard 16x16x2')
   .view();
 ```
 
@@ -20,7 +20,7 @@ SocketBoard 32x32x3.2
 ```JavaScript
 export const socketBoard32x8x3_2 = await SocketBoard(4, 1, 3.2)
   .as('SocketBoard 32x32x3.2')
-  .md('SocketBoard 32x32x3.2')
+  .note('SocketBoard 32x32x3.2')
   .view();
 ```
 
@@ -140,7 +140,7 @@ Axle Profile
 ![Image](examples.md.axleProfile.png)
 
 ```JavaScript
-export const axleProfile = await AxleProfile().md('Axle Profile').topView();
+export const axleProfile = await AxleProfile().note('Axle Profile').topView();
 ```
 
 ```JavaScript
@@ -155,7 +155,7 @@ Axle Joiner 16mm
 
 ```JavaScript
 export const axleJoiner16 = await AxleJoiner(16)
-  .md('Axle Joiner 16mm')
+  .note('Axle Joiner 16mm')
   .stl('AxleJoiner16');
 ```
 

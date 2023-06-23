@@ -1,17 +1,16 @@
 import Shape from './Shape.js';
-import { link as linkGeometry } from '@jsxcad/geometry';
+import { Loop as LoopOp, loop as loopOp } from '@jsxcad/geometry';
 
-export const Loop = Shape.registerMethod2(
+export const Loop = Shape.registerMethod3(
   'Loop',
-  ['geometries'],
-  (geometries) =>
-    Shape.fromGeometry(linkGeometry(geometries, /* close= */ true))
+  ['geometries', 'modes:close'],
+  LoopOp
 );
 
-export const loop = Shape.registerMethod2(
+export const loop = Shape.registerMethod3(
   'loop',
-  ['input', 'shapes'],
-  (input, shapes) => Loop(input, ...shapes)
+  ['inputGeometry', 'geometries', 'modes:close'],
+  loopOp
 );
 
 export default Loop;

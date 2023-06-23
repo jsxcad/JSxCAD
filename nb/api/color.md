@@ -20,7 +20,7 @@ Group(
 )
   .pack()
   .view()
-  .md(
+  .note(
     "Group(Box(3).color('red'), Box(3).color('chartreuse'), Box(3).color('#0000ff'), Box(3).color('cyan')).pack()"
   );
 ```
@@ -45,8 +45,8 @@ Box(10)
       .color('#0000ff')
   )
   .view(1)
-  .md('These have various colors')
+  .note('These have various colors')
   .color('pink')
   .view(2)
-  .md("Now color('pink') makes them are all pink.");
+  .note("Now color('pink') makes them are all pink.");
 ```

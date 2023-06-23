@@ -25,15 +25,15 @@ By repacking the objects we can see how disjoint() has fitted them together.
 Box(10, 10, [0, -5])
   .and(Icosahedron(10))
   .view(1)
-  .md('Box(10, 10, [0, -5]).and(Icosahedron(10))')
+  .note('Box(10, 10, [0, -5]).and(Icosahedron(10))')
   .view(2, pack())
-  .md("Repacking shows the shapes aren't disjoint yet")
+  .note("Repacking shows the shapes aren't disjoint yet")
   .disjoint()
   .view(3)
-  .md('disjoint() leaves the fitted pieces in place.')
+  .note('disjoint() leaves the fitted pieces in place.')
   .pack()
   .view(4)
-  .md(
+  .note(
     'By repacking the objects we can see how disjoint() has fitted them together.'
   );
 ```

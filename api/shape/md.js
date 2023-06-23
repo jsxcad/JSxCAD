@@ -10,6 +10,7 @@ export const md = (strings, ...placeholders) => {
   return md;
 };
 
+/*
 export const mdMethod = Shape.registerMethod2(
   'md',
   ['input', 'rest'],
@@ -27,3 +28,4 @@ export const mdMethod = Shape.registerMethod2(
     return input;
   }
 );
+*/

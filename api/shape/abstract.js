@@ -29,7 +29,7 @@ const render = (abstract, shape) => {
 
   graph.push('```');
 
-  return shape.md(graph.join('\n'));
+  return shape.note(graph.join('\n'));
 };
 
 export const abstract = Shape.registerMethod2(

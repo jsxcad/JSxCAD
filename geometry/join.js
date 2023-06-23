@@ -15,7 +15,7 @@ const filter = (noVoid) => (geometry) =>
 const filterAdds = (noVoid) => (geometry) =>
   filter(geometry) && isNotTypeGhost(geometry);
 
-export const join = (geometry, geometries, exact, noVoid) => {
+export const join = (geometry, geometries, { exact, noVoid }) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter(noVoid), inputs);

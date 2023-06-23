@@ -2,6 +2,7 @@ import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 import {
   fromPolygons,
   taggedGraph,
+  taggedGroup,
   taggedPoints,
   taggedSegments,
 } from '@jsxcad/geometry';
@@ -209,6 +210,9 @@ export const isShape = (value) =>
   (value !== undefined && value !== null && value.isChain !== undefined);
 Shape.isShape = isShape;
 
+export const isGeometry = (value) => value && value instanceof Object && value.type !== undefined && value.geometry === undefined;
+Shape.isGeometry = isGeometry;
+
 export const isOp = (value) =>
   value !== undefined &&
   value !== null &&
@@ -376,7 +380,50 @@ export const registerMethod2 = (names, signature, op) => {
 
 Shape.registerMethod2 = registerMethod2;
 
-Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
+Shape.fromGeometry = (geometry, context) => {
+  if (geometry === undefined) {
+    return new Shape(taggedGroup({}));
+  }
+  if (!Shape.isGeometry(geometry)) {
+    throw Error(`die: not geometry: ${JSON.stringify(geometry)}`);
+  }
+  return new Shape(geometry, context);
+};
+
+export const registerMethod3 = (names, signature, op, postOp = async (geometry) => Shape.fromGeometry(await geometry)) => {
+  const method =
+    (...args) =>
+    async (shape) => {
+      try {
+        // console.log(`QQ/method3: ${names} shape=${shape} args=${args}`);
+        if (signature.includes('shape') || signature.includes('input')) {
+          throw Error('die');
+        }
+        const parameters = await Shape.destructure2(
+          names,
+          shape,
+          args,
+          ...signature
+        );
+        if (parameters.some((s) => Shape.isShape(s) && !Shape.isFunction(s) && !Shape.isChainFunction(s))) {
+          throw Error(`die: Some parameters are shapes: json=${JSON.stringify(parameters.filter((s) => Shape.isShape(s) && !Shape.isFunction(s) && !Shape.isChainFunction(s)))} raw=${parameters.filter((s) => Shape.isShape(s) && !Shape.isFunction(s) && !Shape.isChainFunction(s))}`);
+        }
+        const r1 = op(...parameters);
+        const r2 = await postOp(r1, parameters);
+        // console.log(`QQ/method3/done: ${names}`);
+        return r2;
+      } catch (error) {
+        console.log(
+          `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
+        );
+        throw error;
+      }
+    };
+  return registerMethod(names, method);
+};
+
+Shape.registerMethod3 = registerMethod3;
+
 Shape.fromGraph = (graph, context) =>
   new Shape(taggedGraph({}, graph), context);
 Shape.fromClosedPath = (path, context) => {

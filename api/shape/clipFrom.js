@@ -1,7 +1,8 @@
 import { Shape } from './Shape.js';
+import { clipFrom as clipFromOp } from '@jsxcad/geometry';
 
-export const clipFrom = Shape.registerMethod2(
+export const clipFrom = Shape.registerMethod3(
   'clipFrom',
-  ['input', 'shape', 'modes'],
-  (input, shape, modes) => shape.clip(input, ...modes)
+  ['inputGeometry', 'geometry', 'modes:open,exact,noVoid,noGhost,onlyGraph'],
+  clipFromOp
 );

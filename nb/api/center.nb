@@ -13,7 +13,7 @@ Triangle(5)
   .join(Arc(4).y(2).x(2))
   .and(center())
   .view()
-  .md(
+  .note(
     'Triangle(5).join(Arc(4).y(2).x(2)).and(center()) shows the centroid move as we change the shape.'
   );
 
