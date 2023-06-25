@@ -3,10 +3,9 @@ import {
   fromRotateYToTransform,
   fromRotateZToTransform,
   fromScaleToTransform,
-  fromTranslateToTransform,
 } from '@jsxcad/algorithm-cgal';
 
-import { transform } from './tagged/transform.js';
+import { transform } from './transform.js';
 
 export const rotateX = (turn, geometry) =>
   transform(fromRotateXToTransform(turn), geometry);
@@ -14,14 +13,15 @@ export const rotateY = (turn, geometry) =>
   transform(fromRotateYToTransform(turn), geometry);
 export const rotateZ = (turn, geometry) =>
   transform(fromRotateZToTransform(turn), geometry);
-export const translate = (vector, geometry) =>
-  transform(fromTranslateToTransform(...vector), geometry);
 export const scale = (vector, geometry) =>
   transform(fromScaleToTransform(...vector), geometry);
 
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
+export { abstract } from './abstract.js';
+export { align } from './align.js';
+export { alignment } from './alignment.js';
 export { approximate } from './approximate.js';
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
@@ -49,6 +49,7 @@ export { eachPoint } from './eachPoint.js';
 export { eachSegment } from './eachSegment.js';
 export { eachTriangle } from './eachTriangle.js';
 export { eagerTransform } from './eagerTransform.js';
+export { emitNote, note } from './note.js';
 export { extrude } from './extrude.js';
 export { fix } from './fix.js';
 export { fresh } from './tagged/fresh.js';
@@ -133,7 +134,7 @@ export {
   typeReference,
   typeVoid,
 } from './tagged/type.js';
-export { join } from './join.js';
+export { join, joinTo } from './join.js';
 export { keep } from './tagged/keep.js';
 export { linearize } from './tagged/linearize.js';
 export { link, loop } from './link.js';
@@ -174,6 +175,7 @@ export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { transformCoordinate, transformingCoordinates } from './transform.js';
+export { translate } from './translate.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 export { toDisplayGeometry } from './tagged/toDisplayGeometry.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';

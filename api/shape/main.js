@@ -40,7 +40,7 @@ export { absolute } from './absolute.js';
 export { and } from './and.js';
 export { addTo } from './addTo.js';
 export { align } from './align.js';
-export { aligned } from './aligned.js';
+// export { aligned } from './aligned.js';
 export { alignment } from './alignment.js';
 export { area } from './area.js';
 export { as } from './as.js';

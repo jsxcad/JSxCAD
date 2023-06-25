@@ -1,7 +1,7 @@
 import { computeHash, emit, generateUniqueId } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import { emitNote } from './note.js';
+import { emitNote } from '@jsxcad/geometry';
 
 export const table = Shape.registerMethod2(
   'table',

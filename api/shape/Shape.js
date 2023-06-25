@@ -406,7 +406,7 @@ export const registerMethod3 = (
       try {
         // console.log(`QQ/method3: ${names} shape=${shape} args=${args}`);
         if (signature.includes('shape') || signature.includes('input')) {
-          throw Error('die');
+          throw Error('Received unexpected Shape');
         }
         const parameters = await Shape.destructure2(
           names,

@@ -1,10 +1,11 @@
-![Image](test.md.$1.png)
+```JavaScript
+const r = Random();
+```
+
+![Image](test.md.$1_1.png)
+
+![Image](test.md.$1_2.png)
 
 ```JavaScript
-Box(10)
-  .ez([10])
-  .unfold()
-  .on(get('unfold:faces'), color('blue').ez([0.1]))
-  .and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))
-  .view()
+Box(10, 10, 10).seq({ to: 32 }, (t) => ry(r.in(0, 1)).rz(r.in(0, 1)).x(r.in(-50, 50)), Group).view(1).disjoint().pack().view(2)
 ```

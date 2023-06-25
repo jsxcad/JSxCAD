@@ -2510,11 +2510,11 @@ const fromDxf = async (data) => {
         const { radius = 1 } = entity;
         assembly.push(
           translate(
-            [x, y, z],
             scale([radius, radius, radius], {
               ...buildRegularPolygon(32),
               tags,
-            })
+            }),
+            [x, y, z]
           )
         );
         break;

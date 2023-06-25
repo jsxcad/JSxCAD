@@ -1,3 +1,13 @@
+import Shape from './Shape.js';
+import { alignment as op } from '@jsxcad/geometry';
+
+export const alignment = Shape.registerMethod3(
+  'alignment',
+  ['inputGeometry', 'string', 'coordinate'],
+  op
+);
+
+/*
 import Point from './Point.js';
 import Shape from './Shape.js';
 import { size } from './size.js';
@@ -96,3 +106,4 @@ export const alignment = Shape.registerMethod2(
 );
 
 export default alignment;
+*/

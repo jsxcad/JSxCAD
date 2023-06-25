@@ -2955,6 +2955,9 @@ const toDomElement = (notebook = [], {
       const markup = document.createElement('div');
       // Use ''' and '' instead of ``` and `` to avoid escaping.
       // FIX: Do this in a more principled fashion.
+      if (typeof note.md !== 'string') {
+        throw Error(`Expected note.md to be string but received: ${note.md} json=${JSON.stringify(note.md)}`);
+      }
       const data = note.md.replace(/'''/g, '```').replace(/''/g, '``');
       markup.classList.add('note', 'markdown');
       markup.innerHTML = marked(data);

@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 import alignment from './alignment.js';
 import and from './and.js';
@@ -11,3 +12,4 @@ export const aligned = Shape.registerMethod2(
 );
 
 export default aligned;
+*/

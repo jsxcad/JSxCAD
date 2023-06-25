@@ -326,7 +326,7 @@ const pack = (
         maxPoint
       );
       const transformed = toTransformedGeometry(
-        translate([xo, yo, -minZ], geometry)
+        translate(geometry, [xo, yo, -minZ])
       );
       packedGeometries.push(transformed);
     } else {

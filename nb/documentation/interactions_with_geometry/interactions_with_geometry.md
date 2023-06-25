@@ -392,11 +392,7 @@ We can generate an abstract view of the geometry to be displayed as a graph.
 
 ```mermaid
 graph LR;
-  0[group<br>]
-  0 --> 1;
-  1[item<br>item:box]
-  0 --> 2;
-  2[item<br>item:bar]
+  0[undefined<br>]
 ```
 
 ```JavaScript

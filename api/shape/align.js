@@ -1,11 +1,10 @@
 import Shape from './Shape.js';
-import alignment from './alignment.js';
-import by from './by.js';
+import { align as op } from '@jsxcad/geometry';
 
-export const align = Shape.registerMethod2(
+export const align = Shape.registerMethod3(
   'align',
-  ['input', 'rest'],
-  async (input, rest) => by(alignment(...rest)(input))(input)
+  ['inputGeometry', 'string', 'coordinate'],
+  op
 );
 
 export default align;

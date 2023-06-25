@@ -27,3 +27,6 @@ export const join = (geometry, geometries, { exact, noVoid }) => {
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
+
+export const joinTo = (geometry, other, modes) =>
+  join(other, [geometry], modes);
