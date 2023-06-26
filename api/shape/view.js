@@ -134,7 +134,7 @@ export const gridView = Shape.registerMethod2(
     } = {},
     viewId
   ) => {
-    const options = { skin, outline, wireframe, width, height, position };
+    const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
     return baseView(viewId, op, options)(shape);
   }
@@ -158,7 +158,7 @@ export const frontView = Shape.registerMethod2(
     } = {},
     viewId
   ) => {
-    const options = { skin, outline, wireframe, width, height, position };
+    const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
     return baseView(viewId, op, options)(shape);
   }
@@ -182,7 +182,7 @@ export const sideView = Shape.registerMethod2(
     } = {},
     viewId
   ) => {
-    const options = { skin, outline, wireframe, width, height, position };
+    const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
     return baseView(viewId, op, options)(shape);
   }

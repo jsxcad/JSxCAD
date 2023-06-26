@@ -29,8 +29,8 @@ export const eachEdge = Shape.registerMethod2(
   async (
     input,
     geometry,
-    edgeOp = (e, l, o) => (s) => e,
-    faceOp = (es, f) => (s) => es,
+    edgeOp = (e, _l, _o) => (_s) => e,
+    faceOp = (es, _f) => (_s) => es,
     groupOp = Group,
     { select } = {}
   ) => {

@@ -1,4 +1,5 @@
 import { rewrite } from './tagged/visit.js';
+import { taggedItem } from './tagged/taggedItem.js';
 
 export const qualifyTag = (tag, namespace = 'user') => {
   if (tag.includes(':')) {
@@ -81,3 +82,9 @@ export const retag = (geometry, oldTags, newTags) => {
 export const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
 
 export const tag = (geometry, newTags) => retag(geometry, [], newTags);
+
+export const as = (geometry, names) =>
+  taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry);
+
+export const asPart = (geometry, names) =>
+  taggedItem({ tags: names.map((name) => `part:${name}`) }, geometry);

@@ -25,6 +25,7 @@ export { alignment } from './alignment.js';
 export { approximate } from './approximate.js';
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
+export { at } from './at.js';
 export { bend } from './bend.js';
 export { cached } from './tagged/cached.js';
 export { cast } from './cast.js';
@@ -151,7 +152,15 @@ export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
-export { oneOfTagMatcher, retag, tag, tagMatcher, untag } from './tag.js';
+export {
+  as,
+  asPart,
+  oneOfTagMatcher,
+  retag,
+  tag,
+  tagMatcher,
+  untag,
+} from './tag.js';
 export { rewriteTags } from './tagged/rewriteTags.js';
 export { seam } from './seam.js';
 export { section } from './section.js';

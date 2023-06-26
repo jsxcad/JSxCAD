@@ -8,7 +8,7 @@ export const getTag = Shape.registerMethod2(
   (
     input,
     tags,
-    op = (...values) =>
+    op = (..._values) =>
       (shape) =>
         shape
   ) => {

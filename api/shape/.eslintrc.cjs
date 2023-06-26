@@ -5,6 +5,17 @@ module.exports = {
     'max-len': [1, 120, 2],
     semi: [2, 'always'],
     'no-new-func': 0,
+    'no-unused-vars': [
+      'error',
+      {
+        varsIgnorePattern: '^_',
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^',
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: false,
+      },
+    ],
     indent: [
       0,
       2,

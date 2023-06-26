@@ -31,6 +31,8 @@ export const LoadStl = Shape.registerMethod2(
     let format = 'binary';
     if (ascii) {
       format = 'ascii';
+    } else if (binary) {
+      format = 'binary';
     }
     return Shape.fromGeometry(
       await fromStl(data, {
@@ -48,10 +50,10 @@ export const LoadStl = Shape.registerMethod2(
 
 export const Stl = Shape.registerMethod2(
   'Stl',
-  ['string', 'modes:ascii,wrap', 'options'],
+  ['string', 'modes:wrap', 'options'],
   async (
     text,
-    { ascii, wrap },
+    { wrap },
     {
       wrapAbsoluteAlpha,
       wrapAbsoluteOffset,

@@ -10,7 +10,7 @@ export const Wave = Shape.registerMethod2(
     let particles = [];
     for (const xDistance of await seq(
       options,
-      (distance) => (shape) => distance,
+      (distance) => (_shape) => distance,
       (...numbers) => numbers
     )(input)) {
       particles.push(particle(xDistance).x(xDistance));

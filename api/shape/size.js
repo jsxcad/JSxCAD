@@ -31,7 +31,7 @@ export const size = Shape.registerMethod2(
     'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius',
     'function',
   ],
-  async (input, modes, op = (value) => async (shape) => value) => {
+  async (input, modes, op = (value) => (_shape) => value) => {
     const geometry = await input.toGeometry();
     const bounds = measureBoundingBox(geometry);
     const args = [];

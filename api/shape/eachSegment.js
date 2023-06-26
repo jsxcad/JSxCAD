@@ -8,7 +8,7 @@ export const eachSegment = Shape.registerMethod2(
   ['input', 'function', 'function'],
   async (
     input,
-    segmentOp = (segment) => (shape) => segment,
+    segmentOp = (segment) => (_shape) => segment,
     groupOp = Group
   ) => {
     const inputs = linearize(

@@ -432,8 +432,6 @@ const blue = await Box(10).x(10).color('blue');
 await blue.fitTo(red.to(blue)).view();
 ```
 
-![Image](shapes.md.$39.png)
-
 ```JavaScript
 await red.at(blue, cut(Box([10, 20], 20))).view();
 ```

@@ -330,8 +330,6 @@ const b = Box(5)
   .y(10);
 ```
 
-![Image](shape.md.$47.png)
-
 ```JavaScript
 b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 ```
@@ -450,8 +448,6 @@ Box(20, 20, 20)
 
 Area of Box(2).cut(Box(1)) is function () { [native code] }
 
-Area is 4.00
-
 ```JavaScript
 Box(2)
   .cut(Box(1))
@@ -487,8 +483,6 @@ c.by(origin()).and(Box(5, 5, 5)).view();
 ```JavaScript
 c.by(origin()).cut(Box(5, 5, 5)).view();
 ```
-
-![Image](shape.md.$64.png)
 
 ```JavaScript
 Triangle(4)

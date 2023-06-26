@@ -210,7 +210,7 @@ export const getScale = (geometry) => {
   ];
 };
 
-export const buildCorners = (x, y, z) => async (shape) => {
+export const buildCorners = (x, y, z) => async () => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {

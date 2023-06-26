@@ -14,7 +14,7 @@ test('simple', (t) => {
       // Received a shape.
       return target(...args);
     },
-    get(target, prop, receiver) {
+    get(target, prop, _receiver) {
       return new Proxy(
         (...args) =>
           (s) =>

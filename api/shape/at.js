@@ -1,18 +1,14 @@
 import Shape from './Shape.js';
-import { getInverseMatrices } from '@jsxcad/geometry';
-import { transform } from './transform.js';
+import { at as atOp } from '@jsxcad/geometry';
+import { op } from './op.js';
 
 export const at = Shape.registerMethod2(
   'at',
-  ['input', 'inputGeometry', 'geometry', 'functions'],
-  async (input, geometry, selection, ops) => {
-    const { local, global } = getInverseMatrices(geometry);
-    const { local: selectionLocal, global: selectionGlobal } =
-      getInverseMatrices(selection);
-    return transform(local)
-      .transform(selectionGlobal)
-      .op(...ops)
-      .transform(selectionLocal)
-      .transform(global)(input);
+  ['inputGeometry', 'geometry', 'functions'],
+  atOp,
+  async ([localGeometry, toGlobal], _geometry, _selector, ops) => {
+    const localShape = Shape.fromGeometry(localGeometry);
+    const resultShape = op(...ops)(localShape);
+    return Shape.fromGeometry(toGlobal(await resultShape.toGeometry()));
   }
 );

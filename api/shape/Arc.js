@@ -43,7 +43,7 @@ const reifyArc =
     let spiral;
 
     if (end - start === 1) {
-      spiral = Spiral((t) => Point(0.5), {
+      spiral = Spiral((_t) => Point(0.5), {
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
@@ -51,7 +51,7 @@ const reifyArc =
         .loop()
         .fill();
     } else {
-      spiral = Spiral((t) => Point(0.5), {
+      spiral = Spiral((_t) => Point(0.5), {
         from: start - 1 / 4,
         to: end - 1 / 4,
         by: effectiveStep,

@@ -10,7 +10,7 @@ export const nth = Shape.registerMethod2(
     const candidates = await each(
       (leaf) => leaf,
       (...leafs) =>
-        (shape) =>
+        (_shape) =>
           leafs
     )(input);
     const group = [];
