@@ -18,7 +18,7 @@ export const LoadStl = Shape.registerMethod2(
   ['string', 'modes:binary,ascii,wrap', 'options'],
   async (
     path,
-    modes,
+    { binary, ascii, wrap },
     {
       wrapAbsoluteAlpha,
       wrapAbsoluteOffset,
@@ -29,13 +29,15 @@ export const LoadStl = Shape.registerMethod2(
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
     let format = 'binary';
-    if (modes.includes('ascii')) {
+    if (ascii) {
       format = 'ascii';
+    } else if (binary) {
+      format = 'binary';
     }
     return Shape.fromGeometry(
       await fromStl(data, {
         format,
-        wrapAlways: modes.includes('wrap'),
+        wrapAlways: wrap,
         wrapAbsoluteAlpha,
         wrapAbsoluteOffset,
         wrapRelativeAlpha,
@@ -48,10 +50,10 @@ export const LoadStl = Shape.registerMethod2(
 
 export const Stl = Shape.registerMethod2(
   'Stl',
-  ['string', 'modes:binary,ascii,wrap', 'options'],
+  ['string', 'modes:wrap', 'options'],
   async (
     text,
-    modes,
+    { wrap },
     {
       wrapAbsoluteAlpha,
       wrapAbsoluteOffset,
@@ -63,7 +65,7 @@ export const Stl = Shape.registerMethod2(
     return Shape.fromGeometry(
       await fromStl(new TextEncoder('utf8').encode(text), {
         format: 'ascii',
-        wrapAlways: modes.includes('wrap'),
+        wrapAlways: wrap,
         wrapAbsoluteAlpha,
         wrapAbsoluteOffset,
         wrapRelativeAlpha,

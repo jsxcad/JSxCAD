@@ -15,7 +15,7 @@ const maybeApply = (value, input) => {
 export const seq = Shape.registerMethod2(
   'seq',
   ['input', 'function', 'function', 'objects'],
-  async (input, op = (n) => (s) => s, groupOp = Group, specs) => {
+  async (input, op = (_n) => (s) => s, groupOp = Group, specs) => {
     const indexes = [];
     for (const spec of specs) {
       const { from = 0, to = 1, upto, downto, by = 1 } = spec;

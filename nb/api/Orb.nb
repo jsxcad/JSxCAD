@@ -15,17 +15,17 @@ See: [hasZag](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/has
 
 `;
 
-Orb(5).and(Box(5, 5, 5).material('glass')).view().md('Orb(5)');
+Orb(5).and(Box(5, 5, 5).material('glass')).view().note('Orb(5)');
 
 Orb(3, 4, [0, 5])
   .and(Box(3, 4, [0, 5]).material('glass'))
   .view()
-  .md('Orb(3, 4, [0, 5])');
+  .note('Orb(3, 4, [0, 5])');
 
 Orb(5)
   .view(1)
-  .md('Orb(5) is rough with an tolerance of 1 mm');
+  .note('Orb(5) is rough with an tolerance of 1 mm');
 
 Orb(5, { zag: 0.1 })
   .view(2)
-  .md('Orb(5).hasZag(0.1) is much smoother with a tolerance of 0.1 mm');
+  .note('Orb(5).hasZag(0.1) is much smoother with a tolerance of 0.1 mm');

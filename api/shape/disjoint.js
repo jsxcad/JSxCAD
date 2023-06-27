@@ -1,15 +1,8 @@
 import Shape from './Shape.js';
-import { disjoint as disjointGeometry } from '@jsxcad/geometry';
+import { disjoint as op } from '@jsxcad/geometry';
 
-export const disjoint = Shape.registerMethod2(
+export const disjoint = Shape.registerMethod3(
   'disjoint',
   ['inputGeometry', 'modes:backward,exact'],
-  (geometry, modes) =>
-    Shape.fromGeometry(
-      disjointGeometry(
-        [geometry],
-        modes.includes('backward') ? 0 : 1,
-        modes.includes('exact')
-      )
-    )
+  op
 );

@@ -1,21 +1,13 @@
-import { computeHash, emit } from '@jsxcad/sys';
+import { emitNote, note as op } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-export const Note = (md) => {
-  if (Array.isArray(md)) {
-    md = md.join(', ');
-  }
-  emit({ md, hash: computeHash(md) });
-};
+export const Note = emitNote;
 
-export const note = Shape.registerMethod2(
-  ['note', 'md'],
-  ['input', 'string'],
-  (input, md) => {
-    Note(md);
-    return input;
-  }
+export const note = Shape.registerMethod3(
+  'note',
+  ['inputGeometry', 'string'],
+  op
 );
 
 export default note;

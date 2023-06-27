@@ -23,5 +23,5 @@ Box(10)
   .cutOut(Arc(12), color('red'), color('blue'))
   .clean()
   .view()
-  .md("Box(10).cutOut(Arc(12), color('red'), color('blue'))");
+  .note("Box(10).cutOut(Arc(12), color('red'), color('blue'))");
 ```

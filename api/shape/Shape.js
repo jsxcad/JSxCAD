@@ -2,6 +2,7 @@ import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 import {
   fromPolygons,
   taggedGraph,
+  taggedGroup,
   taggedPoints,
   taggedSegments,
 } from '@jsxcad/geometry';
@@ -23,7 +24,7 @@ incomplete = {
     }
     return new Proxy(result, complete);
   },
-  get(target, prop, receiver) {
+  get(target, prop, _receiver) {
     if (prop === 'sync') {
       // console.log(`QQ/incomplete/sync`);
       return target;
@@ -44,7 +45,7 @@ complete = {
   apply(target, obj, args) {
     return target.apply(obj, args);
   },
-  get(target, prop, receiver) {
+  get(target, prop, _receiver) {
     if (prop === 'sync') {
       // console.log(`QQ/complete/sync`);
       return target;
@@ -53,7 +54,7 @@ complete = {
       return 'complete';
     }
     if (prop === 'then') {
-      return async (resolve, reject) => {
+      return async (resolve, _reject) => {
         // This should only happen at the end of a chain.
         // But since target() is async, it returns it as a promise, which will end up getting then'd by the await,
         // and so on, which won't be this when.
@@ -111,12 +112,12 @@ chain = (value) => {
   const shape = value;
 
   const root = {
-    apply(target, obj, args) {
+    apply(_target, _obj, _args) {
       // This is wrong -- the chain root should be the constructor, which requires application.
       // console.log(`QQ/root/terminal: ${JSON.stringify(target)}`);
       return this;
     },
-    get(target, prop, receiver) {
+    get(target, prop, _receiver) {
       // console.log(`QQ/root/get: ${prop.toString()}`);
       if (prop === 'sync') {
         // console.log(`QQ/root/sync: ${JSON.stringify(target)}`);
@@ -190,17 +191,12 @@ const chainable = (op) => {
 export { chain, chainable, incomplete, complete };
 
 export class Shape {
-  constructor(geometry = { type: 'Group', tags: [], content: [] }, context) {
+  constructor(geometry = { type: 'Group', tags: [], content: [] }) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }
     this.geometry = geometry;
-    this.context = context;
     return this;
-  }
-
-  getContext(symbol) {
-    return this.context[symbol];
   }
 }
 
@@ -208,6 +204,13 @@ export const isShape = (value) =>
   value instanceof Shape ||
   (value !== undefined && value !== null && value.isChain !== undefined);
 Shape.isShape = isShape;
+
+export const isGeometry = (value) =>
+  value &&
+  value instanceof Object &&
+  value.type !== undefined &&
+  value.geometry === undefined;
+Shape.isGeometry = isGeometry;
 
 export const isOp = (value) =>
   value !== undefined &&
@@ -376,10 +379,79 @@ export const registerMethod2 = (names, signature, op) => {
 
 Shape.registerMethod2 = registerMethod2;
 
-Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
-Shape.fromGraph = (graph, context) =>
-  new Shape(taggedGraph({}, graph), context);
-Shape.fromClosedPath = (path, context) => {
+Shape.fromGeometry = (geometry) => {
+  if (geometry === undefined) {
+    return new Shape(taggedGroup({}));
+  }
+  if (!Shape.isGeometry(geometry)) {
+    throw Error(`die: not geometry: ${JSON.stringify(geometry)}`);
+  }
+  return new Shape(geometry);
+};
+
+export const registerMethod3 = (
+  names,
+  signature,
+  op,
+  postOp = async (geometry) => Shape.fromGeometry(await geometry)
+) => {
+  const method =
+    (...args) =>
+    async (shape) => {
+      try {
+        // console.log(`QQ/method3: ${names} shape=${shape} args=${args}`);
+        if (signature.includes('shape') || signature.includes('input')) {
+          throw Error('Received unexpected Shape');
+        }
+        const parameters = await Shape.destructure2(
+          names,
+          shape,
+          args,
+          ...signature
+        );
+        if (
+          parameters.some(
+            (s) =>
+              Shape.isShape(s) &&
+              !Shape.isFunction(s) &&
+              !Shape.isChainFunction(s)
+          )
+        ) {
+          throw Error(
+            `die: Some parameters are shapes: json=${JSON.stringify(
+              parameters.filter(
+                (s) =>
+                  Shape.isShape(s) &&
+                  !Shape.isFunction(s) &&
+                  !Shape.isChainFunction(s)
+              )
+            )} raw=${parameters.filter(
+              (s) =>
+                Shape.isShape(s) &&
+                !Shape.isFunction(s) &&
+                !Shape.isChainFunction(s)
+            )}`
+          );
+        }
+        const r1 = op(...parameters);
+        const r2 = await postOp(r1, parameters);
+        // console.log(`QQ/method3/done: ${names}`);
+        return r2;
+      } catch (error) {
+        console.log(
+          `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
+        );
+        throw error;
+      }
+    };
+  return registerMethod(names, method);
+};
+
+Shape.registerMethod3 = registerMethod3;
+
+Shape.fromGraph = (graph) => new Shape(taggedGraph({}, graph));
+
+Shape.fromClosedPath = (path) => {
   const segments = [];
   let first;
   let last;
@@ -400,7 +472,7 @@ Shape.fromClosedPath = (path, context) => {
   }
   return Shape.fromSegments(segments);
 };
-Shape.fromOpenPath = (path, context) => {
+Shape.fromOpenPath = (path) => {
   const segments = [];
   let last;
   for (const point of path) {
@@ -415,12 +487,9 @@ Shape.fromOpenPath = (path, context) => {
   return Shape.fromSegments(segments);
 };
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
-Shape.fromPoint = (point, context) =>
-  fromGeometry(taggedPoints({}, [point]), context);
-Shape.fromPoints = (points, context) =>
-  fromGeometry(taggedPoints({}, points), context);
-Shape.fromPolygons = (polygons, context) =>
-  fromGeometry(fromPolygons(polygons), context);
+Shape.fromPoint = (point) => fromGeometry(taggedPoints({}, [point]));
+Shape.fromPoints = (points) => fromGeometry(taggedPoints({}, points));
+Shape.fromPolygons = (polygons) => fromGeometry(fromPolygons(polygons));
 
 Shape.registerMethod = registerMethod;
 

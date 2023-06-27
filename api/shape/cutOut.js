@@ -1,29 +1,24 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { clip } from './clip.js';
-import { cut } from './cut.js';
-import { op } from './op.js';
+import { cutOut as cutOutOp } from '@jsxcad/geometry';
 
-export const cutOut = Shape.registerMethod2(
+export const cutOut = Shape.registerMethod3(
   'cutOut',
   [
-    'input',
-    'shape',
-    'function',
-    'function',
-    'function',
+    'inputGeometry',
+    'geometry',
     'modes:open,exact,noGhost,noVoid',
+    'function',
+    'function',
+    'function',
   ],
-  async (
-    input,
-    other,
-    cutOp = (shape) => shape,
-    clipOp = (shape) => shape,
-    groupOp = Group,
-    modes
-  ) => {
-    const cutShape = await cut(other, ...modes, 'noGhost')(input);
-    const clipShape = await clip(other, ...modes, 'noGhost')(input);
-    return groupOp(await op(cutOp)(cutShape), await op(clipOp)(clipShape));
-  }
+  cutOutOp,
+  (
+    [cutShape, clippedShape],
+    [, , , cutOp = (shape) => shape, clipOp = (shape) => shape, groupOp = Group]
+  ) =>
+    groupOp(
+      cutOp(Shape.fromGeometry(cutShape)),
+      clipOp(Shape.fromGeometry(clippedShape))
+    )
 );

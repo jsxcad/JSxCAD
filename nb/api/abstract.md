@@ -7,7 +7,7 @@ _Consider deprecating this operator._
 
 ```mermaid
 graph LR;
-  0[group<br>]
+  0[undefined<br>]
 ```
 
 Box().x(3, 6).seq({ by: 1 / 2 }, rz).abstract()

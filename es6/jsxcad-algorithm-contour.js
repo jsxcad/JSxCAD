@@ -3445,7 +3445,7 @@ const fromRaster = async (raster, bands) => {
     const high = bands[nth + 1];
     const paths = [];
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
-      result.push(link([taggedPoints({}, band)], /* close= */ true));
+      result.push(link(taggedPoints({}, band), [], /* close= */ true));
     }
     if (paths.length > 0) {
       result.push(paths);

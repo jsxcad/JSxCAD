@@ -78,17 +78,14 @@ export const Page = Shape.registerMethod2(
   ['geometries', 'modes:pack,center,a4,individual', 'options'],
   async (
     geometries,
-    modes,
+    { pack, center, a4, individual },
     { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
   ) => {
-    let pack = modes.includes('pack');
-    const center = modes.includes('center');
-
-    if (modes.includes('a4')) {
+    if (a4) {
       size = [210, 297];
     }
 
-    if (modes.includes('individual')) {
+    if (individual) {
       pack = true;
       itemsPerPage = 1;
     }

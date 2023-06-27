@@ -3,10 +3,9 @@ import {
   fromRotateYToTransform,
   fromRotateZToTransform,
   fromScaleToTransform,
-  fromTranslateToTransform,
 } from '@jsxcad/algorithm-cgal';
 
-import { transform } from './tagged/transform.js';
+import { transform } from './transform.js';
 
 export const rotateX = (turn, geometry) =>
   transform(fromRotateXToTransform(turn), geometry);
@@ -14,20 +13,23 @@ export const rotateY = (turn, geometry) =>
   transform(fromRotateYToTransform(turn), geometry);
 export const rotateZ = (turn, geometry) =>
   transform(fromRotateZToTransform(turn), geometry);
-export const translate = (vector, geometry) =>
-  transform(fromTranslateToTransform(...vector), geometry);
 export const scale = (vector, geometry) =>
   transform(fromScaleToTransform(...vector), geometry);
 
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
+export { And, and } from './and.js';
+export { abstract } from './abstract.js';
+export { align } from './align.js';
+export { alignment } from './alignment.js';
 export { approximate } from './approximate.js';
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
+export { at } from './at.js';
 export { bend } from './bend.js';
 export { cached } from './tagged/cached.js';
 export { cast } from './cast.js';
-export { clip } from './clip.js';
+export { clip, clipFrom, commonVolume } from './clip.js';
 export { computeCentroid } from './computeCentroid.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
@@ -35,11 +37,11 @@ export { computeOrientedBoundingBox } from './computeOrientedBoundingBox.js';
 export { computeToolpath } from './computeToolpath.js';
 export { convexHull } from './convexHull.js';
 export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
-export { cut } from './cut.js';
+export { cut, cutFrom, cutOut } from './cut.js';
 export { deform } from './deform.js';
 export { demesh } from './demesh.js';
 export { dilateXY } from './dilateXY.js';
-export { disjoint } from './disjoint.js';
+export { Disjoint, disjoint, fit, fitTo } from './disjoint.js';
 export { disorientSegment } from './disorientSegment.js';
 export { drop } from './tagged/drop.js';
 export { eachFaceEdges } from './eachFaceEdges.js';
@@ -48,6 +50,7 @@ export { eachPoint } from './eachPoint.js';
 export { eachSegment } from './eachSegment.js';
 export { eachTriangle } from './eachTriangle.js';
 export { eagerTransform } from './eagerTransform.js';
+export { emitNote, note } from './note.js';
 export { extrude } from './extrude.js';
 export { fix } from './fix.js';
 export { fresh } from './tagged/fresh.js';
@@ -61,7 +64,7 @@ export {
   fromScaleToTransform,
   fromTranslateToTransform,
 } from '@jsxcad/algorithm-cgal';
-export { fuse } from './fuse.js';
+export { Fuse, fuse } from './fuse.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
@@ -132,10 +135,10 @@ export {
   typeReference,
   typeVoid,
 } from './tagged/type.js';
-export { join } from './join.js';
+export { join, joinTo } from './join.js';
 export { keep } from './tagged/keep.js';
 export { linearize } from './tagged/linearize.js';
-export { link } from './link.js';
+export { link, loop } from './link.js';
 export { load, loadNonblocking } from './tagged/load.js';
 export { loft } from './loft.js';
 export { makeAbsolute } from './makeAbsolute.js';
@@ -149,6 +152,15 @@ export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
+export {
+  as,
+  asPart,
+  oneOfTagMatcher,
+  retag,
+  tag,
+  tagMatcher,
+  untag,
+} from './tag.js';
 export { rewriteTags } from './tagged/rewriteTags.js';
 export { seam } from './seam.js';
 export { section } from './section.js';
@@ -172,6 +184,7 @@ export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { transformCoordinate, transformingCoordinates } from './transform.js';
+export { translate } from './translate.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 export { toDisplayGeometry } from './tagged/toDisplayGeometry.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';

@@ -12,7 +12,7 @@ The faces are tagged with 'unfold:faces' and each fold edge is tagged with 'fold
 Box(10).ez([10]).unfold()
 
 ```JavaScript
-await Box(10)
+Box(10)
   .ez([10])
   .unfold()
   .view()
@@ -24,7 +24,7 @@ await Box(10)
 Box(10).ez([10]).unfold().on(get('unfold:faces'), color('blue').ez([0.1])).and(on(get('unfold:edge'), (e) => Box(1).ez([e.diameter()]).color('white')))
 
 ```JavaScript
-await Box(10)
+Box(10)
   .ez([10])
   .unfold()
   .on(get('unfold:faces'), color('blue').ez([0.1]))

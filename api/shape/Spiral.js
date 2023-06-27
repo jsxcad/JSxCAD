@@ -10,7 +10,7 @@ export const Spiral = Shape.registerMethod2(
     let particles = [];
     const turns = await Seq(
       options,
-      (distance) => (shape) => distance,
+      (distance) => (_shape) => distance,
       (...numbers) => numbers
     );
     for (const turn of turns) {

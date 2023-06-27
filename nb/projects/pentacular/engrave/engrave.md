@@ -19,7 +19,7 @@ const model = await Text(unYetGul, text, 25)
   .align('xy')
   .cutFrom(Box(30, 26))
   .view()
-  .md('Model');
+  .note('Model');
 ```
 
 ![Image](engrave.md.inset.png)
@@ -27,5 +27,5 @@ const model = await Text(unYetGul, text, 25)
 Section Inset
 
 ```JavaScript
-const inset = await model.inset(0.5).gridView().md('Section Inset');
+const inset = await model.inset(0.5).gridView().note('Section Inset');
 ```

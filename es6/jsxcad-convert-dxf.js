@@ -2510,11 +2510,11 @@ const fromDxf = async (data) => {
         const { radius = 1 } = entity;
         assembly.push(
           translate(
-            [x, y, z],
             scale([radius, radius, radius], {
               ...buildRegularPolygon(32),
               tags,
-            })
+            }),
+            [x, y, z]
           )
         );
         break;
@@ -4011,7 +4011,7 @@ var dxfWriter = Drawing_1;
 const toDxf = async (baseGeometry, options = {}) => {
   const drawing = new dxfWriter();
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
-  const geometry = disjoint([sectioned]);
+  const geometry = disjoint(sectioned, {});
   for (const { matrix, segments } of linearize(
     geometry,
     (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)

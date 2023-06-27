@@ -23,11 +23,11 @@ export const toSvg = async (
   { padding = 0, definitions } = {}
 ) => {
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
-  const disjointed = disjoint([sectioned]);
+  const disjointed = disjoint(sectioned, {});
   // svg reverses the Y axis.
   const scaled = scale([1, -1, 1], disjointed);
   const [baseMin] = measureBoundingBox(scaled);
-  const translated = translate([-baseMin[X], -baseMin[Y], 0], disjointed);
+  const translated = translate(disjointed, [-baseMin[X], -baseMin[Y], 0]);
   const geometry = makeAbsolute(translated);
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];

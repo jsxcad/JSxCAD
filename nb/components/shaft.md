@@ -57,7 +57,7 @@ Flat({ diameter: 5, length: 5, thickness: 3 })
 
 ```mermaid
 graph LR;
-  0[item<br>item:flat]
+  0[undefined<br>]
 ```
 
 ```JavaScript
@@ -78,11 +78,6 @@ import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb
 
 Shaft({ diameter: 5, length: 10, play: 0.2 })
 
-```mermaid
-graph LR;
-  0[item<br>item:shaft]
-```
-
 ```JavaScript
 await Shaft({ diameter, length, play })
   .view()
@@ -96,15 +91,6 @@ await Shaft({ diameter, length, play })
 import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
 
 FlatShaft({ diameter: 5, length: 10, flatLength: 5, flatThickness: 3, play: 0.2 })
-
-```mermaid
-graph LR;
-  0[item<br>item:shaft]
-  0 --> 1;
-  1[item<br>item:flat<br>type:void<br>type:ghost]
-  0 --> 2;
-  2[item<br>item:flat<br>type:masked]
-```
 
 ```JavaScript
 await FlatShaft({

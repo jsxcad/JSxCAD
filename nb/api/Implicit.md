@@ -19,7 +19,7 @@ Implicit(2, (x, y, z) => x * x + y * y + z * z - 1) produces a sphere of radius 
 ```JavaScript
 Implicit(2, (x, y, z) => x * x + y * y + z * z - 1)
   .view({ withGrid: false })
-  .md(
+  .note(
     'Implicit(2, (x, y, z) => x * x + y * y + z * z - 1) produces a sphere of radius 1.'
   );
 ```

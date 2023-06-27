@@ -1,7 +1,7 @@
+import { getLeafs, tagMatcher } from '@jsxcad/geometry';
+
 import { Shape } from './Shape.js';
-import { getLeafs } from '@jsxcad/geometry';
 import { note } from './note.js';
-import { tagMatcher } from './tag.js';
 
 export const tags = Shape.registerMethod2(
   'tags',

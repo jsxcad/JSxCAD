@@ -30,8 +30,6 @@ await Group(a, b, b.to(a.alignment('<x'))).view();
 ### At
 Performs an operation on a shape at a particular location.
 
-![Image](reference_geometry.md.$7.png)
-
 ```JavaScript
 await b.and(a.at(b, cut(b))).view(); //Moves a to b, makes the cut, then moves a back to it's original location
 ```

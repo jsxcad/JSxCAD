@@ -8,7 +8,7 @@ Produces an icosahedron that fits the bounding dimensions.
 Icosahedron(3)
 
 ```JavaScript
-Icosahedron(3).and(Box(3, 3, 3).material('glass')).view().md('Icosahedron(3)');
+Icosahedron(3).and(Box(3, 3, 3).material('glass')).view().note('Icosahedron(3)');
 ```
 
 ![Image](Icosahedron.md.$3.png)
@@ -19,5 +19,5 @@ Icosahedron(1, 2, [0, 3])
 Icosahedron(1, 2, [0, 3])
   .and(Box(1, 2, [0, 3]).material('glass'))
   .view()
-  .md('Icosahedron(1, 2, [0, 3])');
+  .note('Icosahedron(1, 2, [0, 3])');
 ```

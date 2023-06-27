@@ -14,22 +14,22 @@ const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
 
 const applyModes = async (shape, options, modes) => {
-  if (modes.includes('wireframe')) {
+  if (modes.wireframe) {
     shape = await shape.tag('show:wireframe');
   }
-  if (modes.includes('noWireframe')) {
+  if (modes.noWireframe) {
     shape = await shape.tag('show:noWireframe');
   }
-  if (modes.includes('skin')) {
+  if (modes.skin) {
     shape = await shape.tag('show:skin');
   }
-  if (modes.includes('noSkin')) {
+  if (modes.noSkin) {
     shape = await shape.tag('show:noSkin');
   }
-  if (modes.includes('Outline')) {
+  if (modes.outline) {
     shape = await shape.tag('show:outline');
   }
-  if (modes.includes('noOutline')) {
+  if (modes.noOutline) {
     shape = await shape.tag('show:noOutline');
   }
   return shape;
@@ -134,7 +134,7 @@ export const gridView = Shape.registerMethod2(
     } = {},
     viewId
   ) => {
-    const options = { skin, outline, wireframe, width, height, position };
+    const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
     return baseView(viewId, op, options)(shape);
   }
@@ -158,7 +158,7 @@ export const frontView = Shape.registerMethod2(
     } = {},
     viewId
   ) => {
-    const options = { skin, outline, wireframe, width, height, position };
+    const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
     return baseView(viewId, op, options)(shape);
   }
@@ -182,7 +182,7 @@ export const sideView = Shape.registerMethod2(
     } = {},
     viewId
   ) => {
-    const options = { skin, outline, wireframe, width, height, position };
+    const options = { size, skin, outline, wireframe, width, height, position };
     const shape = await applyModes(input, options, modes);
     return baseView(viewId, op, options)(shape);
   }
@@ -193,27 +193,27 @@ export const view = Shape.registerMethod2(
   ['input', MODES, 'function', 'options', 'value'],
   async (input, modes, op = (x) => x, options, viewId) => {
     const shape = await applyModes(input, options, modes);
-    if (modes.includes('grid')) {
+    if (modes.grid) {
       options.style = 'grid';
     }
-    if (modes.includes('none')) {
+    if (modes.none) {
       options.style = 'none';
     }
-    if (modes.includes('side')) {
+    if (modes.side) {
       options.style = 'side';
     }
-    if (modes.includes('top')) {
+    if (modes.top) {
       options.style = 'top';
     }
     switch (options.style) {
       case 'grid':
-        return shape.gridView(viewId, op, options, ...modes);
+        return shape.gridView(viewId, op, options, modes);
       case 'none':
         return shape;
       case 'side':
-        return shape.sideView(viewId, op, options, ...modes);
+        return shape.sideView(viewId, op, options, modes);
       case 'top':
-        return shape.topView(viewId, op, options, ...modes);
+        return shape.topView(viewId, op, options, modes);
       default:
         return baseView(viewId, op, options)(shape);
     }

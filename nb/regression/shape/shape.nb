@@ -172,16 +172,16 @@ Box(10)
 
 Box(20, 20, 20)
   .view(1, 'wireframe')
-  .md('Original mesh')
+  .note('Original mesh')
   .remesh()
   .view(2, 'wireframe')
-  .md('Isotropic remeshing')
+  .note('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
   .view(3, 'wireframe')
-  .md('Cut')
+  .note('Cut')
   .demesh()
   .view(4, 'wireframe')
-  .md('Cleaned mesh');
+  .note('Cleaned mesh');
 
 Arc(4)
   .x(5)
@@ -206,7 +206,7 @@ md`Area of Box(2).cut(Box(1)) is ${Box(2).cut(Box(1)).area((v) => (s) => v.toFix
 
 Box(2)
   .cut(Box(1))
-  .area((v) => (s) => s.md(`Area is ${v.toFixed(2)}`));
+  .area((v) => (s) => s.note(`Area is ${v.toFixed(2)}`));
 
 md`Area of Box(2, 3, 4) is ${Box(2, 3, 4).area((v) => (s) => v.toFixed(2))}`;
 

@@ -120,7 +120,7 @@ aDesign
   .in()
   .pack()
   .view()
-  .md(
+  .note(
     `We need to get into the 'design' item in order to get at 'box' and 'bolt'`
   );
 ```
@@ -146,7 +146,7 @@ Box(10)
   // .cut(Box(5))
   .seq(
     { from: 1 / 128, by: 1 / 8 },
-    (a) => (s) => s.scale(Math.pow(a, 3)).z(a * 10),
+    (a) => scale(Math.pow(a, 3)).z(a * 10),
     Loft
   )
   .view();
@@ -227,7 +227,7 @@ Box(157, 20)
   .remesh(10)
   .op((s) => s.bend(25).and(s.outline()))
   .gridView()
-  .md('A rectangle bent into a ring with a central radius of 25');
+  .note('A rectangle bent into a ring with a central radius of 25');
 ```
 
 ---
@@ -314,7 +314,7 @@ Move the shape along by its length
 ```JavaScript
 aRectangle
   .x(size('length'))
-  .md(`Move the shape along by its length`);
+  .note(`Move the shape along by its length`);
 ```
 
 ---
@@ -379,11 +379,11 @@ Group(
   Arc(10).as('arc').color('red').material('brick')
 )
   .view(1, get('*').pack())
-  .md('All items.')
+  .note('All items.')
   .view(2, get('color:green'))
-  .md('All green things.')
+  .note('All green things.')
   .view(3, getNot('material:copper'))
-  .md('All non-copper things.');
+  .note('All non-copper things.');
 ```
 
 ---
@@ -392,11 +392,7 @@ We can generate an abstract view of the geometry to be displayed as a graph.
 
 ```mermaid
 graph LR;
-  0[group<br>]
-  0 --> 1;
-  1[item<br>item:box]
-  0 --> 2;
-  2[item<br>item:bar]
+  0[undefined<br>]
 ```
 
 ```JavaScript
@@ -417,5 +413,5 @@ Box(11)
   .rx(-1 / 8)
   .op((s) => s.voxels(1).color('green').and(s.outline().sketch().color('red')))
   .view()
-  .md('Produce a voxel representation with a 1mm resolution');
+  .note('Produce a voxel representation with a 1mm resolution');
 ```

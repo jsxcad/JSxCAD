@@ -54,7 +54,7 @@ Clearance adds play to the gear tips
 await Gear({ teeth: 8 })
   .and(Gear({ teeth, clearance: 0.5 }).color('red'))
   .gridView()
-  .md(`Clearance adds play to the gear tips`);
+  .note(`Clearance adds play to the gear tips`);
 ```
 
 ![Image](examples.md.$3.png)
@@ -65,7 +65,7 @@ Backlash adds play to the gear sides
 await Gear({ teeth: 8 })
   .and(Gear({ teeth, backlash: 1 }).color('red'))
   .gridView()
-  .md(`Backlash adds play to the gear sides`);
+  .note(`Backlash adds play to the gear sides`);
 ```
 
 ![Image](examples.md.$4.png)
@@ -80,7 +80,7 @@ await Gear({ teeth: 8 })
   )
   .material('glass')
   .gridView()
-  .md(`Pressure Angle makes the tip sharper or blunter`);
+  .note(`Pressure Angle makes the tip sharper or blunter`);
 ```
 
 ### Planetary Gears
@@ -88,7 +88,7 @@ await Gear({ teeth: 8 })
 Our base involute gear.
 
 ```JavaScript
-const planetary = await Gear({teeth: 8 }).fill().md(`Our base involute gear.`);
+const planetary = await Gear({teeth: 8 }).fill().note(`Our base involute gear.`);
 ```
 
 ![Image](examples.md.planetaryFootprint.png)
@@ -99,7 +99,7 @@ We'll use an offset template to cut the other gears
 const planetaryFootprint = await planetary
   .offset(0.2)
   .view()
-  .md(`We'll use an offset template to cut the other gears`);
+  .note(`We'll use an offset template to cut the other gears`);
 ```
 
 ![Image](examples.md.ring.png)
@@ -123,7 +123,7 @@ const ring = await Arc(50, { start: -1 / 64, end: 1 / 64 })
   .clean()
   .seq({ by: 1 / 32 }, rz)
   .gridView()
-  .md(
+  .note(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
   );
 ```
@@ -147,7 +147,7 @@ const solar = await Arc(20, { start: -1 / 30, end: 1 / 30 })
   .seq({ by: 1 / 16 }, rz)
   .fuse()
   .gridView()
-  .md(
+  .note(
     `We simulate the gear motion to cut a single tooth, then rotate it around.`
   )
   .clean();
@@ -171,7 +171,7 @@ const rack = await Box(20, Math.PI)
   )
   .seq({ to: 10 }, (a) => y(a * Math.PI))
   .gridView()
-  .md(`We can do the same thing to cut a rack.`)
+  .note(`We can do the same thing to cut a rack.`)
   .clean();
 ```
 

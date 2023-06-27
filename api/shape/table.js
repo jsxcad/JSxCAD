@@ -1,7 +1,7 @@
 import { computeHash, emit, generateUniqueId } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import { md } from './md.js';
+import { emitNote } from '@jsxcad/geometry';
 
 export const table = Shape.registerMethod2(
   'table',
@@ -15,7 +15,7 @@ export const table = Shape.registerMethod2(
         cell = cell(input);
       }
       if (typeof cell === 'string') {
-        md(cell);
+        emitNote(cell);
       }
     }
     const close = { close: { type: 'table', rows, columns, uniqueId } };

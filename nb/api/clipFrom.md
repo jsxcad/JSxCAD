@@ -19,7 +19,7 @@ Box(10)
   .color('blue')
   .clipFrom(Arc(12).color('red'))
   .view()
-  .md("Box(10).color('blue').clipFrom(Arc(12).color('red'))");
+  .note("Box(10).color('blue').clipFrom(Arc(12).color('red'))");
 ```
 
 ![Image](clipFrom.md.$3.png)
@@ -31,5 +31,5 @@ Box(10)
   .color('blue')
   .clip(Arc(12).color('red'))
   .view()
-  .md("Box(10).color('blue').clip(Arc(12).color('red'))");
+  .note("Box(10).color('blue').clip(Arc(12).color('red'))");
 ```

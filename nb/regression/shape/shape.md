@@ -330,8 +330,6 @@ const b = Box(5)
   .y(10);
 ```
 
-![Image](shape.md.$47.png)
-
 ```JavaScript
 b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 ```
@@ -405,16 +403,16 @@ Cleaned mesh
 ```JavaScript
 Box(20, 20, 20)
   .view(1, 'wireframe')
-  .md('Original mesh')
+  .note('Original mesh')
   .remesh()
   .view(2, 'wireframe')
-  .md('Isotropic remeshing')
+  .note('Isotropic remeshing')
   .cut('exact', Box([0, 10], [0, -10], [0, 10]))
   .view(3, 'wireframe')
-  .md('Cut')
+  .note('Cut')
   .demesh()
   .view(4, 'wireframe')
-  .md('Cleaned mesh');
+  .note('Cleaned mesh');
 ```
 
 ![Image](shape.md.$54.png)
@@ -450,12 +448,10 @@ Box(20, 20, 20)
 
 Area of Box(2).cut(Box(1)) is function () { [native code] }
 
-Area is 4.00
-
 ```JavaScript
 Box(2)
   .cut(Box(1))
-  .area((v) => (s) => s.md(`Area is ${v.toFixed(2)}`));
+  .area((v) => (s) => s.note(`Area is ${v.toFixed(2)}`));
 ```
 
 Area of Box(2, 3, 4) is function () { [native code] }
@@ -487,8 +483,6 @@ c.by(origin()).and(Box(5, 5, 5)).view();
 ```JavaScript
 c.by(origin()).cut(Box(5, 5, 5)).view();
 ```
-
-![Image](shape.md.$64.png)
 
 ```JavaScript
 Triangle(4)

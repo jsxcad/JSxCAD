@@ -1,7 +1,7 @@
+import { oneOfTagMatcher, visit } from '@jsxcad/geometry';
+
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { oneOfTagMatcher } from './tag.js';
-import { visit } from '@jsxcad/geometry';
 
 export const getNot = Shape.registerMethod2(
   ['getNot', 'gn'],

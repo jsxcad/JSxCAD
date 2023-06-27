@@ -12,21 +12,11 @@ const filter = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-export const separate = (
-  geometry,
-  keepShapes = true,
-  keepHolesInShapes = true,
-  keepHolesAsShapes = false
-) => {
+export const separate = (geometry, { noShapes, noHoles, holesAsShapes }) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = separateWithCgal(
-    inputs,
-    keepShapes,
-    keepHolesInShapes,
-    keepHolesAsShapes
-  );
+  const outputs = separateWithCgal(inputs, !noShapes, !noHoles, holesAsShapes);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

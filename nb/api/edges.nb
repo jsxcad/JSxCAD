@@ -12,10 +12,10 @@ Extracts edges into a collection of unoriented segments.
 See: [eachEdge](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/eachEdge.nb)
 `;
 
-Box(5, 5, 5).edges().view().md('Box(5, 5, 5).edges()');
+Box(5, 5, 5).edges().view().note('Box(5, 5, 5).edges()');
 
 Box(5, 5, 5)
   .remesh()
   .edges(Box(5, 5, [0, 2.5]))
   .view()
-  .md('Box(5, 5, 5).remesh().edges(Box(5, 5, [0, 2.5]))');
+  .note('Box(5, 5, 5).remesh().edges(Box(5, 5, [0, 2.5]))');

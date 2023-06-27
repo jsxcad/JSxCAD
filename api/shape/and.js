@@ -1,14 +1,16 @@
 import Shape from './Shape.js';
-import { taggedGroup } from '@jsxcad/geometry';
+import { and as andOp } from '@jsxcad/geometry';
 
-export const And = Shape.registerMethod2('And', ['geometries'], (geometries) =>
-  Shape.fromGeometry(taggedGroup({}, ...geometries))
+export const And = Shape.registerMethod3(
+  'And',
+  ['geometry', 'geometries'],
+  andOp
 );
 
-export const and = Shape.registerMethod2(
+export const and = Shape.registerMethod3(
   'and',
-  ['input', 'shapes'],
-  (input, shapes) => And(input, ...shapes)(input)
+  ['inputGeometry', 'geometries'],
+  andOp
 );
 
 export default and;

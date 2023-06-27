@@ -1,11 +1,6 @@
+import { And as AndOp } from '@jsxcad/geometry';
 import Shape from './Shape.js';
 
-import { taggedGroup } from '@jsxcad/geometry';
-
-export const Group = Shape.registerMethod2(
-  'Group',
-  ['geometries'],
-  (geometries) => Shape.fromGeometry(taggedGroup({}, ...geometries))
-);
+export const Group = Shape.registerMethod3('Group', ['geometries'], AndOp);
 
 export default Group;

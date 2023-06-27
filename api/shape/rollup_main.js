@@ -20,7 +20,7 @@ export default {
     globals(),
     nodeResolve({ preferBuiltins: true }),
     {
-      transform(code, id) {
+      transform(code, _id) {
         return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
       },
     },

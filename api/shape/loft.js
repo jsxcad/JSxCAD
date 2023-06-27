@@ -1,20 +1,16 @@
 import Shape from './Shape.js';
-import { loft as loftGeometry } from '@jsxcad/geometry';
+import { loft as loftOp } from '@jsxcad/geometry';
 
-export const Loft = Shape.registerMethod2(
+export const Loft = Shape.registerMethod3(
   'Loft',
-  ['geometries', 'modes'],
-  (geometries, modes) =>
-    Shape.fromGeometry(loftGeometry(geometries, !modes.includes('open')))
+  ['geometry', 'geometries', 'modes:open'],
+  loftOp
 );
 
-export const loft = Shape.registerMethod2(
+export const loft = Shape.registerMethod3(
   'loft',
-  ['inputGeometry', 'geometries', 'modes'],
-  (geometry, geometries, modes) =>
-    Shape.fromGeometry(
-      loftGeometry([geometry, ...geometries], !modes.includes('open'))
-    )
+  ['inputGeometry', 'geometries', 'modes:open'],
+  loftOp
 );
 
 export default Loft;

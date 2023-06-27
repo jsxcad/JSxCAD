@@ -7,6 +7,7 @@ import Geometry from './Geometry.js';
 import Loop from './Loop.js';
 import Point from './Point.js';
 import Shape from './Shape.js';
+import { absolute } from './absolute.js';
 import { buildCorners } from './Plan.js';
 import { makeOcctBox } from '@jsxcad/algorithm-cgal';
 
@@ -108,16 +109,16 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
     }
   };
 
-  return (await build()).absolute();
+  return absolute()(await build());
 };
 
 export const Box = Shape.registerMethod2(
   'Box',
-  ['input', 'modes', 'intervals', 'options'],
-  async (input, modes, [x = 1, y = x, z = 0], options) => {
+  ['input', 'modes:occt', 'intervals', 'options'],
+  async (input, { occt }, [x = 1, y = x, z = 0], options) => {
     const [computedC1, computedC2] = await buildCorners(x, y, z)(input);
     let { c1 = computedC1, c2 = computedC2 } = options;
-    return reifyBox(c1, c2, modes.includes('occt'));
+    return reifyBox(c1, c2, occt);
   }
 );
 

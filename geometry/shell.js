@@ -15,14 +15,18 @@ const filter = (geometry, parent) =>
 
 export const shell = (
   geometry,
-  innerOffset = 0,
-  outerOffset = 0,
-  protect = false,
-  angle = 30 / 360,
-  sizing = 1,
-  approx = 0.1,
-  edgeLength = 1
+  interval = [1 / -2, 1 / 2],
+  sizingFallback = 1,
+  approxFallback = 0.1,
+  { protect = false },
+  {
+    angle = 30 / 360,
+    sizing = sizingFallback,
+    approx = approxFallback,
+    edgeLength = 1,
+  }
 ) => {
+  const [innerOffset = 0, outerOffset = 0] = interval;
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);

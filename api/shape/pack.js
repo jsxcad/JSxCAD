@@ -8,7 +8,7 @@ export const pack = Shape.registerMethod2(
   ['input', 'function', 'options'],
   async (
     input,
-    adviseSize = (min, max) => {},
+    adviseSize = (_min, _max) => {},
     { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity } = {}
   ) => {
     if (perLayout === 0) {

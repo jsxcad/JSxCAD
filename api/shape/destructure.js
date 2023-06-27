@@ -71,6 +71,9 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
     switch (spec) {
       case 'input': {
         output.push(input);
+        if (input && input.geometry.geometry) {
+          throw Error(`QQ: malformedGeometry`);
+        }
         rest.push(...args);
         break;
       }
@@ -78,6 +81,11 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
         if (input === undefined) {
           output.push(undefined);
         } else {
+          if (!Shape.isGeometry(input.geometry)) {
+            throw Error(
+              `Expected geometry but received ${JSON.stringify(input.geometry)}`
+            );
+          }
           output.push(input.geometry);
         }
         rest.push(...args);
@@ -208,6 +216,9 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
           let value = await resolve(input, arg);
           if (result === undefined && Shape.isShape(value)) {
             result = await value.toGeometry();
+            if (!Shape.isGeometry(result)) {
+              throw Error('die');
+            }
           } else {
             rest.push(arg);
           }
@@ -244,15 +255,23 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
         output.push(options);
         break;
       }
-      case 'strings':
-      case 'modes': {
+      case 'strings': {
         const out = [];
         for (const arg of args) {
-          if (
-            typeof arg === 'string' &&
-            (modes === undefined || modes.includes(arg))
-          ) {
+          if (typeof arg === 'string') {
             out.push(arg);
+          } else {
+            rest.push(arg);
+          }
+        }
+        output.push(out);
+        break;
+      }
+      case 'modes': {
+        const out = {};
+        for (const arg of args) {
+          if (typeof arg === 'string' && modes && modes.includes(arg)) {
+            out[arg] = true;
           } else {
             rest.push(arg);
           }
@@ -326,10 +345,18 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
         for (const arg of args) {
           let value = await resolve(input, arg);
           if (Shape.isShape(value)) {
-            out.push(await value.toGeometry());
+            const result = await value.toGeometry();
+            out.push(result);
+            if (!Shape.isGeometry(result)) {
+              throw Error('die');
+            }
           } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
             for (const element of value) {
-              out.push(await element.toGeometry());
+              const result = await element.toGeometry();
+              out.push(result);
+              if (!Shape.isGeometry(result)) {
+                throw Error('die');
+              }
             }
           } else {
             rest.push(arg);

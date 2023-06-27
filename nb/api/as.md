@@ -24,8 +24,8 @@ as('plate') means nth(0) is the whole item.
 Box(10)
   .and(Arc(2, 2, [0, 2]))
   .view(1, n(0))
-  .md('Given Box(10).and(Arc(2, 2, [0, 2])) n(0) is the box.')
+  .note('Given Box(10).and(Arc(2, 2, [0, 2])) n(0) is the box.')
   .as('plate')
   .view(2, n(0))
-  .md("as('plate') means nth(0) is the whole item.");
+  .note("as('plate') means nth(0) is the whole item.");
 ```

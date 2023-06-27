@@ -2,7 +2,7 @@ import { addPending, emit, writeFile } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 
-export const prepareShape = (shape, name, options = {}) => {
+export const prepareShape = (shape, name) => {
   let index = 0;
   const entries = [];
   entries.push({
@@ -20,7 +20,7 @@ const downloadShapeMethod = function (...args) {
 };
 Shape.prototype.downloadShape = downloadShapeMethod;
 
-export const writeShape = (shape, name, options = {}) => {
+export const writeShape = (shape, name) => {
   for (const { data, filename } of prepareShape(shape, name, {})) {
     addPending(writeFile({ doSerialize: false }, `output/${filename}`, data));
   }

@@ -15,7 +15,7 @@ const filter = (noVoid) => (geometry) =>
 const filterAdds = (noVoid) => (geometry) =>
   filter(geometry) && isNotTypeGhost(geometry);
 
-export const join = (geometry, geometries, exact, noVoid) => {
+export const join = (geometry, geometries, { exact, noVoid }) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter(noVoid), inputs);
@@ -27,3 +27,6 @@ export const join = (geometry, geometries, exact, noVoid) => {
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, count)(concreteGeometry);
 };
+
+export const joinTo = (geometry, other, modes) =>
+  join(other, [geometry], modes);

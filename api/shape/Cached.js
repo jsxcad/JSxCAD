@@ -3,7 +3,7 @@ import { loadGeometry } from './loadGeometry.js';
 import { saveGeometry } from './saveGeometry.js';
 
 // This generates anonymous shape methods.
-export const Cached = (name, op, enable = true) =>
+export const Cached = (name, op) =>
   Shape.registerMethod2([], ['rest'], async (args) => {
     const path = `cached/${name}/${JSON.stringify(args)}`;
     // The first time we hit this, we'll schedule a read and throw, then wait for the read to complete, and retry.

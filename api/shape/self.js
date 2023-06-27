@@ -1,3 +1,4 @@
+/*
 import Shape from './Shape.js';
 
 export const self = Shape.registerMethod2(
@@ -7,3 +8,4 @@ export const self = Shape.registerMethod2(
 );
 
 export const input = self;
+*/

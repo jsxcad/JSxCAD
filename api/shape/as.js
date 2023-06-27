@@ -1,14 +1,6 @@
 import Shape from './Shape.js';
-import { taggedItem } from '@jsxcad/geometry';
+import { as as op } from '@jsxcad/geometry';
 
-// Constructs an item from the designator.
-export const as = Shape.registerMethod2(
-  'as',
-  ['inputGeometry', 'strings'],
-  (geometry, names) =>
-    Shape.fromGeometry(
-      taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry)
-    )
-);
+export const as = Shape.registerMethod3('as', ['inputGeometry', 'strings'], op);
 
 export default as;
