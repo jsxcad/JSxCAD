@@ -1,12 +1,7 @@
-import {
-  deletePendingSurfaceMeshes,
-  makeAbsolute as makeAbsoluteWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
+import { makeAbsolute as makeAbsoluteWithCgal } from '@jsxcad/algorithm-cgal';
 import { replacer } from './tagged/visit.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
@@ -14,10 +9,7 @@ const filter = (geometry) =>
   ) && isNotTypeGhost(geometry);
 
 export const makeAbsolute = (geometry, tags = []) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
+  const inputs = linearize(geometry, filter);
   const outputs = makeAbsoluteWithCgal(inputs);
-  deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs)(concreteGeometry);
+  return replacer(inputs, outputs)(geometry);
 };

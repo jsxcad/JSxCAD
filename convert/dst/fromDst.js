@@ -24,7 +24,7 @@ import {
   Y_SUB_9,
 } from './dst.js';
 
-import { scale, taggedSegments } from '@jsxcad/geometry';
+import { Segments, scale } from '@jsxcad/geometry';
 
 export const createByteFetcher = (bytes) => {
   const bytesLength = bytes.length;
@@ -166,8 +166,5 @@ export const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
 export const fromDst = async (data, options = {}) => {
   const fetcher = createByteFetcher(data);
   const header = fetchHeader({}, fetcher);
-  return scale(
-    [0.1, 0.1, 0.1],
-    taggedSegments({}, fetchStitches(header, fetcher))
-  );
+  return scale(Segments(fetchStitches(header, fetcher)), [0.1, 0.1, 0.1]);
 };

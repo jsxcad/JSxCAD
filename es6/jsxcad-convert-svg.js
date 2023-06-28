@@ -1,5 +1,5 @@
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, taggedSegments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, Segments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 function unwrapExports (x) {
@@ -3875,9 +3875,9 @@ const fromSvgPath$1 = (svgPath, options = {}) => {
     )
   );
   if (options.normalizeCoordinateSystem) {
-    return scale([1, -1, 1], taggedSegments({}, segments));
+    return scale(Segments(segments), [1, -1, 1]);
   } else {
-    return taggedSegments({}, segments);
+    return Segments(segments);
   }
 };
 
@@ -4156,7 +4156,7 @@ const toSvg = async (
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
   const disjointed = disjoint(sectioned, {});
   // svg reverses the Y axis.
-  const scaled = scale([1, -1, 1], disjointed);
+  const scaled = scale(disjointed, [1, -1, 1]);
   const [baseMin] = measureBoundingBox(scaled);
   const translated = translate(disjointed, [-baseMin[X], -baseMin[Y], 0]);
   const geometry = makeAbsolute(translated);

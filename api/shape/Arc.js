@@ -1,3 +1,4 @@
+/*
 import {
   buildCorners,
   computeMiddle,
@@ -165,26 +166,36 @@ const ArcOp =
     const geometry = await result.toGeometry();
     return geometry;
   };
+*/
+
+import {
+  Arc as ArcOp,
+  ArcX as ArcXOp,
+  ArcY as ArcYOp,
+  ArcZ as ArcZOp,
+} from '@jsxcad/geometry';
+
+import Shape from './Shape.js';
 
 export const Arc = Shape.registerMethod3(
   'Arc',
   ['intervals', 'options'],
-  ArcOp('Arc')
+  ArcOp
 );
 export const ArcX = Shape.registerMethod3(
   'ArcX',
   ['intervals', 'options'],
-  ArcOp('ArcX')
+  ArcXOp
 );
 export const ArcY = Shape.registerMethod3(
   'ArcY',
   ['intervals', 'options'],
-  ArcOp('ArcY')
+  ArcYOp
 );
 export const ArcZ = Shape.registerMethod3(
   'ArcZ',
   ['intervals', 'options'],
-  ArcOp('ArcZ')
+  ArcZOp
 );
 
 export default Arc;

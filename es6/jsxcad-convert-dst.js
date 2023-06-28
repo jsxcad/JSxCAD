@@ -1,4 +1,4 @@
-import { scale, taggedSegments } from './jsxcad-geometry.js';
+import { scale, Segments } from './jsxcad-geometry.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
@@ -2136,10 +2136,7 @@ const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
 const fromDst = async (data, options = {}) => {
   const fetcher = createByteFetcher(data);
   const header = fetchHeader({}, fetcher);
-  return scale(
-    [0.1, 0.1, 0.1],
-    taggedSegments({}, fetchStitches(header, fetcher))
-  );
+  return scale(Segments(fetchStitches(header, fetcher)), [0.1, 0.1, 0.1]);
 };
 
 export { fromDst };

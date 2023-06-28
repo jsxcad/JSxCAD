@@ -1,3 +1,15 @@
+import Shape from './Shape.js';
+import { rotateXs as op } from '@jsxcad/geometry';
+
+export const rx = Shape.registerMethod3(
+  ['rotateX', 'rx'],
+  ['inputGeometry', 'numbers'],
+  op
+);
+
+export const rotateX = rx;
+
+/*
 import Group from './Group.js';
 import Shape from './Shape.js';
 import { fromRotateXToTransform } from '@jsxcad/algorithm-cgal';
@@ -17,3 +29,4 @@ export const rx = Shape.registerMethod2(
 );
 
 export const rotateX = rx;
+*/

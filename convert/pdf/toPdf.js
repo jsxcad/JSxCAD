@@ -90,7 +90,7 @@ export const toPdf = async (
     { type: 'points', tags: [] },
   ]);
   const disjoint = disjointGeometry(section, {});
-  const prepared = scaleGeometry([scale, scale, scale], disjoint);
+  const prepared = scaleGeometry(disjoint, [scale, scale, scale]);
 
   for (const { matrix, tags, polygonsWithHoles } of linearize(
     prepared,

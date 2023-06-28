@@ -1,9 +1,10 @@
 import Shape from './Shape.js';
+import { Point as op } from '@jsxcad/geometry';
 
-export const Point = Shape.registerMethod2(
+export const Point = Shape.registerMethod3(
   'Point',
-  ['coordinate', 'number', 'number', 'number'],
-  (coordinate, x = 0, y = 0, z = 0) => Shape.fromPoint(coordinate || [x, y, z])
+  ['number', 'number', 'number', 'coordinate'],
+  op
 );
 
 export default Point;

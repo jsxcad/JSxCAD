@@ -1,24 +1,22 @@
-import {
-  fromRotateXToTransform,
-  fromRotateYToTransform,
-  fromRotateZToTransform,
-  fromScaleToTransform,
-} from '@jsxcad/algorithm-cgal';
-
-import { transform } from './transform.js';
-
-export const rotateX = (turn, geometry) =>
-  transform(fromRotateXToTransform(turn), geometry);
-export const rotateY = (turn, geometry) =>
-  transform(fromRotateYToTransform(turn), geometry);
-export const rotateZ = (turn, geometry) =>
-  transform(fromRotateZToTransform(turn), geometry);
-export const scale = (vector, geometry) =>
-  transform(fromScaleToTransform(...vector), geometry);
+export {
+  rotateX,
+  rotateXs,
+  rotateY,
+  rotateYs,
+  rotateZ,
+  rotateZs,
+} from './rotate.js';
+export { scale } from './scale.js';
 
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
+export { Arc, ArcX, ArcY, ArcZ } from './Arc.js';
+export { Box } from './Box.js';
+export { Edge } from './Edge.js';
+export { Group } from './Group.js';
+export { Point, Points } from './Point.js';
+export { Segments } from './Segments.js';
 export { abstract } from './abstract.js';
 export { align } from './align.js';
 export { alignment } from './alignment.js';
@@ -51,7 +49,14 @@ export { eachSegment } from './eachSegment.js';
 export { eachTriangle } from './eachTriangle.js';
 export { eagerTransform } from './eagerTransform.js';
 export { emitNote, note } from './note.js';
-export { extrude } from './extrude.js';
+export {
+  extrude,
+  extrudeAlong,
+  extrudeAlongX,
+  extrudeAlongY,
+  extrudeAlongZ,
+  extrudeAlongNormal,
+} from './extrude.js';
 export { fix } from './fix.js';
 export { fresh } from './tagged/fresh.js';
 export { fromPolygons } from './fromPolygons.js';
@@ -145,6 +150,7 @@ export { makeAbsolute } from './makeAbsolute.js';
 export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureVolume } from './tagged/measureVolume.js';
+export { moveAlong, moveAlongNormal } from './moveAlong.js';
 export { noGhost } from './noGhost.js';
 export { offset } from './offset.js';
 export { op } from './tagged/op.js';

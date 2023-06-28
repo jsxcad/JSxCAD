@@ -1,9 +1,9 @@
 import {
+  Group,
   fromPolygons,
   read as readGeometry,
   rotateX,
   scale,
-  taggedGroup,
   transformCoordinate,
   transform as transformGeometry,
   write as writeGeometry,
@@ -229,7 +229,7 @@ const fromCodeToPolygons = async (
         if (partContent) {
           content.push(
             ...partContent.map((geometry) =>
-              transformGeometry(matrix, geometry)
+              transformGeometry(geometry, matrix)
             )
           );
         }
@@ -311,7 +311,7 @@ export const fromLDrawPart = async (
       })
     );
   }
-  return rotateX(-1 / 4, scale([0.4, 0.4, 0.4], taggedGroup({}, ...content)));
+  return rotateX(scale(Group(content), [0.4, 0.4, 0.4]), -1 / 4);
 };
 
 export const fromLDraw = async (
@@ -337,5 +337,5 @@ export const fromLDraw = async (
       })
     );
   }
-  return rotateX(-1 / 4, scale([0.4, 0.4, 0.4], taggedGroup({}, ...content)));
+  return rotateX(scale(Group(content), [0.4, 0.4, 0.4]), -1 / 4);
 };

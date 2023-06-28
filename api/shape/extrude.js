@@ -1,30 +1,31 @@
-import Point from './Point.js';
-import Shape from './Shape.js';
-import extrudeAlong from './extrudeAlong.js';
+import {
+  extrudeAlongX as xOp,
+  extrudeAlongY as yOp,
+  extrudeAlongZ as zOp,
+} from '@jsxcad/geometry';
 
-export const extrudeX = Shape.registerMethod2(
+import Shape from './Shape.js';
+
+export const extrudeX = Shape.registerMethod3(
   ['extrudeX', 'ex'],
-  ['input', 'intervals', 'strings'],
-  (input, extents, modes) =>
-    extrudeAlong(Point(1, 0, 0), ...extents, ...modes)(input)
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  xOp
 );
 
 export const ex = extrudeX;
 
-export const extrudeY = Shape.registerMethod2(
+export const extrudeY = Shape.registerMethod3(
   ['extrudeY', 'ey'],
-  ['input', 'intervals', 'strings'],
-  (input, extents, modes) =>
-    extrudeAlong(Point(0, 1, 0), ...extents, ...modes)(input)
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  yOp
 );
 
 export const ey = extrudeY;
 
-export const extrudeZ = Shape.registerMethod2(
+export const extrudeZ = Shape.registerMethod3(
   ['extrudeZ', 'ez'],
-  ['input', 'intervals', 'strings'],
-  (input, extents, modes) =>
-    extrudeAlong(Point(0, 0, 1), ...extents, ...modes)(input)
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  zOp
 );
 
 export const ez = extrudeZ;

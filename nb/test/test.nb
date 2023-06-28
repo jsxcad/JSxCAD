@@ -1,2 +1,6 @@
-const r = Random();
-Box(10, 10, 10).seq({ to: 32 }, (t) => ry(r.in(0, 1)).rz(r.in(0, 1)).x(r.in(-50, 50)), Group).view(1).disjoint().pack().view(2)
+/*
+Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge),
+                      (edges, face) => s => edges.and(face.cut(inset(1)).e([0.2])))
+*/
+
+Box(5, 5, 5).faces(cut(inset(1).e([0.002]))).view();

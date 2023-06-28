@@ -1,3 +1,4 @@
+/*
 import './extrude.js';
 import './rx.js';
 import './ry.js';
@@ -111,15 +112,11 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
 
   return absolute()(await build());
 };
+*/
 
-export const Box = Shape.registerMethod2(
-  'Box',
-  ['input', 'modes:occt', 'intervals', 'options'],
-  async (input, { occt }, [x = 1, y = x, z = 0], options) => {
-    const [computedC1, computedC2] = await buildCorners(x, y, z)(input);
-    let { c1 = computedC1, c2 = computedC2 } = options;
-    return reifyBox(c1, c2, occt);
-  }
-);
+import Shape from './Shape.js';
+import { Box as op } from '@jsxcad/geometry';
+
+export const Box = Shape.registerMethod3('Box', ['intervals', 'options'], op);
 
 export default Box;

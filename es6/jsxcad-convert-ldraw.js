@@ -1,4 +1,4 @@
-import { fromPolygons, rotateX, scale, taggedGroup, read, write, transform as transform$1, transformCoordinate } from './jsxcad-geometry.js';
+import { fromPolygons, rotateX, scale, Group, read, write, transform as transform$1, transformCoordinate } from './jsxcad-geometry.js';
 import { read as read$1 } from './jsxcad-sys.js';
 
 const transform = (matrix, polygons) =>
@@ -219,7 +219,7 @@ const fromCodeToPolygons = async (
         if (partContent) {
           content.push(
             ...partContent.map((geometry) =>
-              transform$1(matrix, geometry)
+              transform$1(geometry, matrix)
             )
           );
         }
@@ -293,7 +293,7 @@ const fromLDrawPart = async (
       })
     );
   }
-  return rotateX(-1 / 4, scale([0.4, 0.4, 0.4], taggedGroup({}, ...content)));
+  return rotateX(scale(Group(content), [0.4, 0.4, 0.4]), -1 / 4);
 };
 
 const fromLDraw = async (
@@ -319,7 +319,7 @@ const fromLDraw = async (
       })
     );
   }
-  return rotateX(-1 / 4, scale([0.4, 0.4, 0.4], taggedGroup({}, ...content)));
+  return rotateX(scale(Group(content), [0.4, 0.4, 0.4]), -1 / 4);
 };
 
 export { fromLDraw, fromLDrawPart };

@@ -1,4 +1,4 @@
-import { fill, scale, taggedGroup } from '@jsxcad/geometry';
+import { Group, fill, scale } from '@jsxcad/geometry';
 
 import OpenTypeJs from 'opentype.js/dist/opentype.js';
 import { fromSvgPath } from '@jsxcad/convert-svg';
@@ -36,9 +36,9 @@ export const toFont = (options = {}, data) => {
         curveSegments,
       })
     )) {
-      group.push(fill(scale([factor, -factor, factor], geometry)));
+      group.push(fill(scale(geometry, [factor, -factor, factor])));
     }
-    return taggedGroup({}, ...group);
+    return Group(group);
   };
 
   return font;

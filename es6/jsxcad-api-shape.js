@@ -1,9 +1,8 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read, log as log$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, hasTypeReference, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, computeNormal, extrude, transform as transform$1, transformCoordinate, loop as loop$1, taggedPlan, measureBoundingBox, bend as bend$1, oneOfTagMatcher, visit, note as note$1, emitNote, getLeafs, getInverseMatrices, computeCentroid, convexHull, Fuse as Fuse$1, join as join$1, noGhost, clip as clip$1, clipFrom as clipFrom$1, retag, commonVolume as commonVolume$1, link as link$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, toPoints, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, linearize, eagerTransform as eagerTransform$1, fill as fill$2, fit as fit$1, fitTo as fitTo$1, fix as fix$1, hash, fuse as fuse$1, hasTypeVoid, grow as grow$1, untag as untag$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, offset as offset$1, outline as outline$1, taggedItem, remesh as remesh$1, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, tag as tag$1, tagMatcher, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, Disjoint, computeImplicitVolume } from './jsxcad-geometry.js';
-import { fromRotateXToTransform, fromRotateYToTransform, fromSegmentToInverseTransform, invertTransform, makeOcctBox, fromTranslateToTransform, fromRotateZToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
-import { zag } from './jsxcad-api-v1-math.js';
+import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, Point as Point$1, hasTypeReference, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, Box as Box$1, measureBoundingBox, bend as bend$1, oneOfTagMatcher, visit, note as note$1, emitNote, transform as transform$1, getLeafs, getInverseMatrices, computeCentroid, convexHull, Fuse as Fuse$1, join as join$1, noGhost, clip as clip$1, clipFrom as clipFrom$1, retag, commonVolume as commonVolume$1, link as link$1, loop as loop$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, toPoints, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, replacer, toDisplayGeometry as toDisplayGeometry$1, taggedLayout, getLayouts, eachFaceEdges, disorientSegment, eachPoint as eachPoint$1, linearize, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, fill as fill$2, fit as fit$1, fitTo as fitTo$1, fix as fix$1, hash, fuse as fuse$1, hasTypeVoid, grow as grow$1, untag as untag$1, inset as inset$1, involute as involute$1, load as load$1, read as read$1, loft as loft$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, offset as offset$1, outline as outline$1, taggedItem, remesh as remesh$1, rotateXs, rotateYs, rotateZs, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, tag as tag$1, tagMatcher, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, taggedPlan, Disjoint, Edge as Edge$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
+import { invertTransform, fromTranslateToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
@@ -11,6 +10,7 @@ import { toPdf } from './jsxcad-convert-pdf.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
+import { zag } from './jsxcad-api-v1-math.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
 
@@ -1045,10 +1045,10 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-const Point = Shape.registerMethod2(
+const Point = Shape.registerMethod3(
   'Point',
-  ['coordinate', 'number', 'number', 'number'],
-  (coordinate, x = 0, y = 0, z = 0) => Shape.fromPoint(coordinate || [x, y, z])
+  ['number', 'number', 'number', 'coordinate'],
+  Point$1
 );
 
 const ref = Shape.registerMethod2('ref', ['inputGeometry'], (geometry) =>
@@ -1064,9 +1064,9 @@ const Ref = Shape.registerMethod2(
   }
 );
 
-const X$9 = (x = 0) => Ref().x(x);
-const Y$9 = (y = 0) => Ref().y(y);
-const Z$8 = (z = 0) => Ref().z(z);
+const X$7 = (x = 0) => Ref().x(x);
+const Y$7 = (y = 0) => Ref().y(y);
+const Z$6 = (z = 0) => Ref().z(z);
 const XY = (z = 0) => Ref().z(z);
 const YX = (z = 0) =>
   Ref()
@@ -1156,7 +1156,7 @@ const area = Shape.registerMethod3(
   'area',
   ['inputGeometry', 'function'],
   measureArea,
-  (result, geometry, op = (area) => (_shape) => area) =>
+  (result, [geometry, op = (area) => (_shape) => area]) =>
     op(result)(Shape.fromGeometry(geometry))
 );
 
@@ -1177,392 +1177,41 @@ const op = Shape.registerMethod2(
   async (input, functions = []) => {
     const results = [];
     for (const fun of functions) {
-      results.push(await fun(Shape.chain(input)));
+      const result = await fun(Shape.chain(input));
+      results.push(result);
     }
     return Group(...results);
   }
 );
 
-const at = Shape.registerMethod2(
+const at = Shape.registerMethod3(
   'at',
   ['inputGeometry', 'geometry', 'functions'],
   at$1,
-  async ([localGeometry, toGlobal], _geometry, _selector, ops) => {
+  async ([localGeometry, toGlobal], [_geometry, _selector, ops]) => {
     const localShape = Shape.fromGeometry(localGeometry);
-    const resultShape = op(...ops)(localShape);
+    const resultShape = await op(...ops)(localShape);
     return Shape.fromGeometry(toGlobal(await resultShape.toGeometry()));
   }
 );
 
-const normal = Shape.registerMethod2(
-  'normal',
-  ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(computeNormal(geometry))
-);
+/*
+import './extrude.js';
+import './rx.js';
+import './ry.js';
 
-const scale$3 = (amount, [x = 0, y = 0, z = 0]) => [
-  x * amount,
-  y * amount,
-  z * amount,
-];
+import Edge from './Edge.js';
+import Geometry from './Geometry.js';
+import Loop from './Loop.js';
+import Point from './Point.js';
+import Shape from './Shape.js';
+import { absolute } from './absolute.js';
+import { buildCorners } from './Plan.js';
+import { makeOcctBox } from './jsxcad-algorithm-cgal.js';
 
-const moveAlong = Shape.registerMethod2(
-  'moveAlong',
-  ['input', 'coordinate', 'numbers'],
-  async (input, direction, deltas) => {
-    const moves = [];
-    for (const delta of deltas) {
-      moves.push(await input.move(scale$3(delta, direction)));
-    }
-    return Group(...moves);
-  }
-);
-
-const m = Shape.registerMethod2(
-  'm',
-  ['input', 'numbers'],
-  (input, offsets) => input.moveAlong(normal(), ...offsets)
-);
-
-// This interface is a bit awkward.
-const extrudeAlong = Shape.registerMethod2(
-  'extrudeAlong',
-  ['input', 'coordinate', 'modes:noVoid', 'intervals'],
-  async (input, vector, { noVoid }, intervals) => {
-    const extrusions = [];
-    for (const [depth, height] of intervals) {
-      if (height === depth) {
-        // Return unextruded geometry at this height, instead.
-        extrusions.push(await moveAlong(vector, height)(input));
-        continue;
-      }
-      extrusions.push(
-        Shape.fromGeometry(
-          extrude(
-            await input.toGeometry(),
-            await Point().moveAlong(vector, height).toGeometry(),
-            await Point().moveAlong(vector, depth).toGeometry(),
-            noVoid
-          )
-        )
-      );
-    }
-    return Group(...extrusions)();
-  }
-);
-
-// Note that the operator is applied to each leaf geometry by default.
-const e = Shape.registerMethod2(
-  'e',
-  ['input', 'intervals'],
-  (input, extents) => extrudeAlong(normal(), ...extents)(input)
-);
-
-const extrudeX = Shape.registerMethod2(
-  ['extrudeX', 'ex'],
-  ['input', 'intervals', 'strings'],
-  (input, extents, modes) =>
-    extrudeAlong(Point(1, 0, 0), ...extents, ...modes)(input)
-);
-
-const ex = extrudeX;
-
-const extrudeY = Shape.registerMethod2(
-  ['extrudeY', 'ey'],
-  ['input', 'intervals', 'strings'],
-  (input, extents, modes) =>
-    extrudeAlong(Point(0, 1, 0), ...extents, ...modes)(input)
-);
-
-const ey = extrudeY;
-
-const extrudeZ = Shape.registerMethod2(
-  ['extrudeZ', 'ez'],
-  ['input', 'intervals', 'strings'],
-  (input, extents, modes) =>
-    extrudeAlong(Point(0, 0, 1), ...extents, ...modes)(input)
-);
-
-const ez = extrudeZ;
-
-const transform = Shape.registerMethod2(
-  'transform',
-  ['inputGeometry', 'value'],
-  (geometry, matrix) => Shape.fromGeometry(transform$1(matrix, geometry))
-);
-
-// rx is in terms of turns -- 1/2 is a half turn.
-const rx = Shape.registerMethod2(
-  ['rotateX', 'rx'],
-  ['input', 'numbers'],
-  async (input, turns) => {
-    const rotated = [];
-    for (const turn of turns) {
-      rotated.push(await transform(fromRotateXToTransform(turn))(input));
-    }
-    return Group(...rotated);
-  }
-);
-
-const rotateX = rx;
-
-// ry is in terms of turns -- 1/2 is a half turn.
-const ry = Shape.registerMethod2(
-  ['rotateY', 'ry'],
-  ['input', 'numbers'],
-  async (input, turns) => {
-    const rotated = [];
-    for (const turn of turns) {
-      rotated.push(await transform(fromRotateYToTransform(turn))(input));
-    }
-    return Group(...rotated);
-  }
-);
-
-const rotateY = ry;
-
-const Edge = Shape.registerMethod2(
-  'Edge',
-  ['coordinate', 'coordinate', 'coordinate'],
-  (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
-    const inverse = fromSegmentToInverseTransform([s, t], n);
-    const baseSegment = [
-      transformCoordinate(s, inverse),
-      transformCoordinate(t, inverse),
-    ];
-    const matrix = invertTransform(inverse);
-    return Shape.fromGeometry(taggedSegments({ matrix }, [baseSegment]));
-  }
-);
-
-const Geometry = Shape.registerMethod2(
-  'Geometry',
-  ['rest'],
-  ([geometry]) => Shape.chain(Shape.fromGeometry(geometry))
-);
-
-const Loop = Shape.registerMethod3(
-  'Loop',
-  ['geometry', 'geometries', 'modes:close'],
-  loop$1
-);
-
-const loop = Shape.registerMethod3(
-  'loop',
-  ['inputGeometry', 'geometries', 'modes:close'],
-  loop$1
-);
-
-const X$8 = 0;
-const Y$8 = 1;
-const Z$7 = 2;
-
-const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
-const subtract$1 = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
-
-const computeScale = (
-  [ax = 0, ay = 0, az = 0],
-  [bx = 0, by = 0, bz = 0]
-) => [ax - bx, ay - by, az - bz];
-
-const computeMiddle = (c1, c2) => [
-  (c1[X$8] + c2[X$8]) * 0.5,
-  (c1[Y$8] + c2[Y$8]) * 0.5,
-  (c1[Z$7] + c2[Z$7]) * 0.5,
-];
-
-const computeSides = (c1, c2, sides, zag$1 = 0.01) => {
-  if (sides) {
-    return sides;
-  }
-  if (zag$1) {
-    const diameter = Math.max(...abs(subtract$1(c1, c2)));
-    return zag(diameter, zag$1);
-  }
-  return 32;
-};
-
-const zagSides = Shape.registerMethod2(
-  'zagSides',
-  ['number', 'number'],
-  (diameter = 1, zag$1 = 0.01) => zag(diameter, zag$1)
-);
-const zagSteps = Shape.registerMethod2(
-  'zagSteps',
-  ['number', 'number'],
-  (diameter = 1, zag$1 = 0.25) => 1 / zag(diameter, zag$1)
-);
-
-Shape.registerMethod(
-  'updatePlan',
-  (...updates) =>
-    (shape) => {
-      const geometry = shape.toGeometry();
-      if (geometry.type !== 'plan') {
-        throw Error(`Shape is not a plan: ${JSON.stringify(geometry)}`);
-      }
-      return Shape.fromGeometry(
-        taggedPlan(
-          { tags: geometry.tags },
-          {
-            ...geometry.plan,
-            history: [...(geometry.plan.history || []), ...updates],
-          }
-        )
-      );
-    }
-);
-
-Shape.registerMethod(
-  'hasAngle',
-  (start = 0, end = 0) =>
-    (shape) =>
-      shape
-        .updatePlan({ angle: { start: start, end: end } })
-        .setTag('plan:angle/start', start)
-        .setTag('plan:angle/end', end)
-);
-Shape.registerMethod(
-  ['hasC1', 'hasCorner1'],
-  (x = 0, y = x, z = 0) =>
-    (shape) => {
-      return shape.updatePlan({ corner1: [x, y, z] });
-    }
-);
-Shape.registerMethod(
-  ['hasC2', 'hasCorner2'],
-  (x = 0, y = x, z = 0) =>
-    (shape) =>
-      shape.updatePlan({
-        corner2: [x, y, z],
-      })
-);
-Shape.registerMethod(
-  'hasDiameter',
-  (x = 1, y = x, z = 0) =>
-    (shape) =>
-      shape.updatePlan(
-        { corner1: [x / 2, y / 2, z / 2] },
-        { corner2: [x / -2, y / -2, z / -2] }
-      )
-);
-Shape.registerMethod(
-  'hasRadius',
-  (x = 1, y = x, z = 0) =>
-    (shape) =>
-      shape.updatePlan(
-        {
-          corner1: [x, y, z],
-        },
-        {
-          corner2: [-x, -y, -z],
-        }
-      )
-);
-Shape.registerMethod(
-  'hasApothem',
-  (x = 1, y = x, z = 0) =>
-    (shape) =>
-      shape.updatePlan(
-        {
-          corner1: [x, y, z],
-        },
-        {
-          corner2: [-x, -y, -z],
-        },
-        { apothem: [x, y, z] }
-      )
-);
-Shape.registerMethod(
-  'hasSides',
-  (sides = 1) =>
-    (shape) =>
-      shape.updatePlan({ sides }).setTag('plan:sides', sides)
-);
-Shape.registerMethod(
-  'hasZag',
-  (zag) => (shape) => shape.updatePlan({ zag }).setTag('plan:zag', zag)
-);
-
-const eachEntry = (geometry, op, otherwise) => {
-  if (geometry.plan.history) {
-    for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
-      const result = op(geometry.plan.history[nth]);
-      if (result !== undefined) {
-        return result;
-      }
-    }
-  }
-  return otherwise;
-};
-
-const find = (geometry, key, otherwise) =>
-  eachEntry(
-    geometry,
-    (entry) => {
-      return entry[key];
-    },
-    otherwise
-  );
-
-const ofPlan = find;
-
-const buildCorners = (x, y, z) => async () => {
-  const c1 = [0, 0, 0];
-  const c2 = [0, 0, 0];
-  if (x instanceof Array) {
-    while (x.length < 2) {
-      x.push(0);
-    }
-    if (x[0] < x[1]) {
-      c1[X$8] = x[1];
-      c2[X$8] = x[0];
-    } else {
-      c1[X$8] = x[0];
-      c2[X$8] = x[1];
-    }
-  } else {
-    c1[X$8] = x / 2;
-    c2[X$8] = x / -2;
-  }
-  if (y instanceof Array) {
-    while (y.length < 2) {
-      y.push(0);
-    }
-    if (y[0] < y[1]) {
-      c1[Y$8] = y[1];
-      c2[Y$8] = y[0];
-    } else {
-      c1[Y$8] = y[0];
-      c2[Y$8] = y[1];
-    }
-  } else {
-    c1[Y$8] = y / 2;
-    c2[Y$8] = y / -2;
-  }
-  if (z instanceof Array) {
-    while (z.length < 2) {
-      z.push(0);
-    }
-    if (z[0] < z[1]) {
-      c1[Z$7] = z[1];
-      c2[Z$7] = z[0];
-    } else {
-      c1[Z$7] = z[0];
-      c2[Z$7] = z[1];
-    }
-  } else {
-    c1[Z$7] = z / 2;
-    c2[Z$7] = z / -2;
-  }
-  return [c1, c2];
-};
-
-const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
-
-const X$7 = 0;
-const Y$7 = 1;
-const Z$6 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 let fundamentalShapes;
 
@@ -1597,14 +1246,14 @@ const buildFs = async () => {
 const reifyBox = async (corner1, corner2, isOcct = false) => {
   const build = async () => {
     const fs = await buildFs();
-    const left = corner2[X$7];
-    const right = corner1[X$7];
+    const left = corner2[X];
+    const right = corner1[X];
 
-    const front = corner2[Y$7];
-    const back = corner1[Y$7];
+    const front = corner2[Y];
+    const back = corner1[Y];
 
-    const bottom = corner2[Z$6];
-    const top = corner1[Z$6];
+    const bottom = corner2[Z];
+    const top = corner1[Z];
 
     if (top === bottom) {
       if (left === right) {
@@ -1660,16 +1309,9 @@ const reifyBox = async (corner1, corner2, isOcct = false) => {
 
   return absolute()(await build());
 };
+*/
 
-const Box = Shape.registerMethod2(
-  'Box',
-  ['input', 'modes:occt', 'intervals', 'options'],
-  async (input, { occt }, [x = 1, y = x, z = 0], options) => {
-    const [computedC1, computedC2] = await buildCorners(x, y, z)(input);
-    let { c1 = computedC1, c2 = computedC2 } = options;
-    return reifyBox(c1, c2, occt);
-  }
-);
+const Box = Shape.registerMethod3('Box', ['intervals', 'options'], Box$1);
 
 const Empty = Shape.registerMethod2('Empty', [], () =>
   Shape.fromGeometry(taggedGroup({}))
@@ -1750,6 +1392,12 @@ const billOfMaterials = Shape.registerMethod2(
   ['input', 'function'],
   (input, op = (...list) => note(`Materials: ${list.join(', ')}`)) =>
     get('part:*').tags('part', op)(input)
+);
+
+const transform = Shape.registerMethod3(
+  'transform',
+  ['inputGeometry', 'value'],
+  transform$1
 );
 
 const by = Shape.registerMethod2(
@@ -1893,6 +1541,18 @@ const link = Shape.registerMethod3(
   'link',
   ['inputGeometry', 'geometries', 'modes:close,reverse'],
   link$1
+);
+
+const Loop = Shape.registerMethod3(
+  'Loop',
+  ['geometry', 'geometries', 'modes:close'],
+  loop$1
+);
+
+const loop = Shape.registerMethod3(
+  'loop',
+  ['inputGeometry', 'geometries', 'modes:close'],
+  loop$1
 );
 
 const Curve = Shape.registerMethod2(
@@ -4044,6 +3704,44 @@ const edges = Shape.registerMethod2(
   }
 );
 
+const extrudeX = Shape.registerMethod3(
+  ['extrudeX', 'ex'],
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  extrudeAlongX
+);
+
+const ex = extrudeX;
+
+const extrudeY = Shape.registerMethod3(
+  ['extrudeY', 'ey'],
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  extrudeAlongY
+);
+
+const ey = extrudeY;
+
+const extrudeZ = Shape.registerMethod3(
+  ['extrudeZ', 'ez'],
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  extrudeAlongZ
+);
+
+const ez = extrudeZ;
+
+// This interface is a bit awkward.
+const extrudeAlong = Shape.registerMethod3(
+  'extrudeAlong',
+  ['inputGeometry', 'coordinate', 'intervals', 'modes:noVoid'],
+  extrudeAlong$1
+);
+
+// Note that the operator is applied to each leaf geometry by default.
+const e = Shape.registerMethod3(
+  ['e', 'extrudeAlongNormal'],
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  extrudeAlongNormal
+);
+
 const faces = Shape.registerMethod2(
   'faces',
   ['input', 'function', 'function'],
@@ -4056,11 +3754,7 @@ const faces = Shape.registerMethod2(
   }
 );
 
-const fill = Shape.registerMethod2(
-  ['fill', 'f'],
-  ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(fill$2(geometry))
-);
+const fill = Shape.registerMethod3(['fill', 'f'], ['inputGeometry'], fill$2);
 
 const fit = Shape.registerMethod3(
   'fit',
@@ -4634,6 +4328,20 @@ const material = Shape.registerMethod2(
   (geometry, name) => Shape.fromGeometry(hasMaterial(geometry, name))
 );
 
+const moveAlong = Shape.registerMethod3(
+  'moveAlong',
+  ['inputGeometry', 'coordinate', 'numbers'],
+  moveAlong$1
+);
+
+const m = Shape.registerMethod3(
+  ['moveAlongNormal', 'm'],
+  ['inputGeometry', 'numbers'],
+  moveAlongNormal
+);
+
+const normal = Shape.registerMethod3('normal', ['inputGeometry'], computeNormal);
+
 const noVoid = Shape.registerMethod2(
   ['noVoid', 'noGap'],
   ['input'],
@@ -4893,19 +4601,70 @@ const remesh = Shape.registerMethod2(
     )
 );
 
-// rz is in terms of turns -- 1/2 is a half turn.
-const rz = Shape.registerMethod2(
-  ['rotateZ', 'rz'],
+const rx = Shape.registerMethod3(
+  ['rotateX', 'rx'],
   ['inputGeometry', 'numbers'],
-  async (geometry, turns) => {
+  rotateXs
+);
+
+const rotateX = rx;
+
+/*
+import Group from './Group.js';
+import Shape from './Shape.js';
+import { fromRotateXToTransform } from './jsxcad-algorithm-cgal.js';
+import { transform } from './transform.js';
+
+// rx is in terms of turns -- 1/2 is a half turn.
+export const rx = Shape.registerMethod2(
+  ['rotateX', 'rx'],
+  ['input', 'numbers'],
+  async (input, turns) => {
     const rotated = [];
     for (const turn of turns) {
-      rotated.push(
-        Shape.fromGeometry(transform$1(fromRotateZToTransform(turn), geometry))
-      );
+      rotated.push(await transform(fromRotateXToTransform(turn))(input));
     }
     return Group(...rotated);
   }
+);
+
+export const rotateX = rx;
+*/
+
+const ry = Shape.registerMethod3(
+  ['rotateY', 'ry'],
+  ['inputGeometry', 'numbers'],
+  rotateYs
+);
+
+const rotateY = ry;
+
+/*
+import Group from './Group.js';
+import Shape from './Shape.js';
+import { fromRotateYToTransform } from './jsxcad-algorithm-cgal.js';
+import { transform } from './transform.js';
+
+// ry is in terms of turns -- 1/2 is a half turn.
+export const ry = Shape.registerMethod2(
+  ['rotateY', 'ry'],
+  ['input', 'numbers'],
+  async (input, turns) => {
+    const rotated = [];
+    for (const turn of turns) {
+      rotated.push(await transform(fromRotateYToTransform(turn))(input));
+    }
+    return Group(...rotated);
+  }
+);
+
+export const rotateY = ry;
+*/
+
+const rz = Shape.registerMethod3(
+  ['rotateZ', 'rz'],
+  ['inputGeometry', 'numbers'],
+  rotateZs
 );
 
 const rotateZ = rz;
@@ -5406,6 +5165,9 @@ const LoadStl = Shape.registerMethod2(
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
+    if (data === undefined) {
+      throw Error(`LoadStl cannot read: "${path}"`);
+    }
     let format = 'binary';
     if (ascii) {
       format = 'ascii';
@@ -5479,33 +5241,28 @@ const stl = Shape.registerMethod2(
   }
 );
 
-const Spiral = Shape.registerMethod2(
-  'Spiral',
-  ['function', 'options'],
-  async (particle = Point, options) => {
-    let particles = [];
-    const turns = await Seq(
-      options,
-      (distance) => (_shape) => distance,
-      (...numbers) => numbers
-    );
-    for (const turn of turns) {
-      particles.push(await particle(turn).rz(turn));
-    }
-    const result = await Link(...particles);
-    return result;
-  }
-);
+/*
+import {
+  buildCorners,
+  computeMiddle,
+  computeScale,
+  computeSides,
+} from './Plan.js';
+
+import Point from './Point.js';
+import Shape from './Shape.js';
+import Spiral from './Spiral.js';
+import { absolute } from './absolute.js';
 
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 const reifyArc =
-  (axis = Z$2) =>
+  (axis = Z) =>
   async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
     while (start > end) {
       start -= 1;
@@ -5514,14 +5271,14 @@ const reifyArc =
     const scale = computeScale(c1, c2);
     const middle = computeMiddle(c1, c2);
 
-    const left = c1[X$2];
-    const right = c2[X$2];
+    const left = c1[X];
+    const right = c2[X];
 
-    const front = c1[Y$2];
-    const back = c2[Y$2];
+    const front = c1[Y];
+    const back = c2[Y];
 
-    const bottom = c1[Z$2];
-    const top = c2[Z$2];
+    const bottom = c1[Z];
+    const top = c2[Z];
 
     const step = 1 / computeSides(c1, c2, sides, zag);
     const steps = Math.ceil((end - start) / step);
@@ -5544,42 +5301,42 @@ const reifyArc =
         by: effectiveStep,
       });
       if (
-        (axis === X$2 && left !== right) ||
-        (axis === Y$2 && front !== back) ||
-        (axis === Z$2 && top !== bottom)
+        (axis === X && left !== right) ||
+        (axis === Y && front !== back) ||
+        (axis === Z && top !== bottom)
       ) {
         spiral = spiral.loop().fill();
       }
     }
 
     switch (axis) {
-      case X$2: {
-        scale[X$2] = 1;
+      case X: {
+        scale[X] = 1;
         spiral = spiral
           .ry(-1 / 4)
           .scale(scale)
           .move(middle);
         if (left !== right) {
-          spiral = spiral.ex([left - middle[X$2], right - middle[X$2]]);
+          spiral = spiral.ex([left - middle[X], right - middle[X]]);
         }
         break;
       }
-      case Y$2: {
-        scale[Y$2] = 1;
+      case Y: {
+        scale[Y] = 1;
         spiral = spiral
           .rx(-1 / 4)
           .scale(scale)
           .move(middle);
         if (front !== back) {
-          spiral = spiral.ey([front - middle[Y$2], back - middle[Y$2]]);
+          spiral = spiral.ey([front - middle[Y], back - middle[Y]]);
         }
         break;
       }
-      case Z$2: {
-        scale[Z$2] = 1;
+      case Z: {
+        scale[Z] = 1;
         spiral = spiral.scale(scale).move(middle);
         if (top !== bottom) {
-          spiral = spiral.ez([top - middle[Z$2], bottom - middle[Z$2]]);
+          spiral = spiral.ez([top - middle[Z], bottom - middle[Z]]);
         }
         break;
       }
@@ -5588,9 +5345,9 @@ const reifyArc =
     return absolute()(spiral);
   };
 
-const reifyArcZ = reifyArc(Z$2);
-const reifyArcX = reifyArc(X$2);
-const reifyArcY = reifyArc(Y$2);
+const reifyArcZ = reifyArc(Z);
+const reifyArcX = reifyArc(X);
+const reifyArcY = reifyArc(Y);
 
 const ArcOp =
   (type) =>
@@ -5652,26 +5409,27 @@ const ArcOp =
     const geometry = await result.toGeometry();
     return geometry;
   };
+*/
 
 const Arc = Shape.registerMethod3(
   'Arc',
   ['intervals', 'options'],
-  ArcOp('Arc')
+  Arc$1
 );
 const ArcX = Shape.registerMethod3(
   'ArcX',
   ['intervals', 'options'],
-  ArcOp('ArcX')
+  ArcX$1
 );
 const ArcY = Shape.registerMethod3(
   'ArcY',
   ['intervals', 'options'],
-  ArcOp('ArcY')
+  ArcY$1
 );
 const ArcZ = Shape.registerMethod3(
   'ArcZ',
   ['intervals', 'options'],
-  ArcOp('ArcZ')
+  ArcZ$1
 );
 
 const Stroke = Shape.registerMethod2(
@@ -5864,9 +5622,9 @@ const volume = Shape.registerMethod2(
     op(measureVolume(await input.toGeometry()))(input)
 );
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
 
 const floor = (value, resolution) =>
   Math.floor(value / resolution) * resolution;
@@ -5899,11 +5657,11 @@ const voxels = Shape.registerMethod2(
       (query) => {
         const isInteriorPoint = (x, y, z) =>
           query.isIntersectingPointApproximate(x, y, z);
-        for (let x = min[X$1] - offset; x <= max[X$1] + offset; x += resolution) {
-          for (let y = min[Y$1] - offset; y <= max[Y$1] + offset; y += resolution) {
+        for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
+          for (let y = min[Y$2] - offset; y <= max[Y$2] + offset; y += resolution) {
             for (
-              let z = min[Z$1] - offset;
-              z <= max[Z$1] + offset;
+              let z = min[Z$2] - offset;
+              z <= max[Z$2] + offset;
               z += resolution
             ) {
               const state = isInteriorPoint(x, y, z);
@@ -5954,18 +5712,18 @@ const Voxels = Shape.registerMethod2(
     let min = [Infinity, Infinity, Infinity];
     for (const [x, y, z] of coordinates) {
       index.add(key(x, y, z));
-      max[X$1] = Math.max(x + 1, max[X$1]);
-      max[Y$1] = Math.max(y + 1, max[Y$1]);
-      max[Z$1] = Math.max(z + 1, max[Z$1]);
-      min[X$1] = Math.min(x - 1, min[X$1]);
-      min[Y$1] = Math.min(y - 1, min[Y$1]);
-      min[Z$1] = Math.min(z - 1, min[Z$1]);
+      max[X$2] = Math.max(x + 1, max[X$2]);
+      max[Y$2] = Math.max(y + 1, max[Y$2]);
+      max[Z$2] = Math.max(z + 1, max[Z$2]);
+      min[X$2] = Math.min(x - 1, min[X$2]);
+      min[Y$2] = Math.min(y - 1, min[Y$2]);
+      min[Z$2] = Math.min(z - 1, min[Z$2]);
     }
     const isInteriorPoint = (x, y, z) => index.has(key(x, y, z));
     const polygons = [];
-    for (let x = min[X$1]; x <= max[X$1]; x++) {
-      for (let y = min[Y$1]; y <= max[Y$1]; y++) {
-        for (let z = min[Z$1]; z <= max[Z$1]; z++) {
+    for (let x = min[X$2]; x <= max[X$2]; x++) {
+      for (let y = min[Y$2]; y <= max[Y$2]; y++) {
+        for (let z = min[Z$2]; z <= max[Z$2]; z++) {
           const state = isInteriorPoint(x, y, z);
           if (state !== isInteriorPoint(x + 1, y, z)) {
             const face = [
@@ -6071,6 +5829,199 @@ const z = Shape.registerMethod2(
   }
 );
 
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
+
+const computeScale = (
+  [ax = 0, ay = 0, az = 0],
+  [bx = 0, by = 0, bz = 0]
+) => [ax - bx, ay - by, az - bz];
+
+const computeMiddle = (c1, c2) => [
+  (c1[X$1] + c2[X$1]) * 0.5,
+  (c1[Y$1] + c2[Y$1]) * 0.5,
+  (c1[Z$1] + c2[Z$1]) * 0.5,
+];
+
+const zagSides = Shape.registerMethod2(
+  'zagSides',
+  ['number', 'number'],
+  (diameter = 1, zag$1 = 0.01) => zag(diameter, zag$1)
+);
+const zagSteps = Shape.registerMethod2(
+  'zagSteps',
+  ['number', 'number'],
+  (diameter = 1, zag$1 = 0.25) => 1 / zag(diameter, zag$1)
+);
+
+Shape.registerMethod(
+  'updatePlan',
+  (...updates) =>
+    (shape) => {
+      const geometry = shape.toGeometry();
+      if (geometry.type !== 'plan') {
+        throw Error(`Shape is not a plan: ${JSON.stringify(geometry)}`);
+      }
+      return Shape.fromGeometry(
+        taggedPlan(
+          { tags: geometry.tags },
+          {
+            ...geometry.plan,
+            history: [...(geometry.plan.history || []), ...updates],
+          }
+        )
+      );
+    }
+);
+
+Shape.registerMethod(
+  'hasAngle',
+  (start = 0, end = 0) =>
+    (shape) =>
+      shape
+        .updatePlan({ angle: { start: start, end: end } })
+        .setTag('plan:angle/start', start)
+        .setTag('plan:angle/end', end)
+);
+Shape.registerMethod(
+  ['hasC1', 'hasCorner1'],
+  (x = 0, y = x, z = 0) =>
+    (shape) => {
+      return shape.updatePlan({ corner1: [x, y, z] });
+    }
+);
+Shape.registerMethod(
+  ['hasC2', 'hasCorner2'],
+  (x = 0, y = x, z = 0) =>
+    (shape) =>
+      shape.updatePlan({
+        corner2: [x, y, z],
+      })
+);
+Shape.registerMethod(
+  'hasDiameter',
+  (x = 1, y = x, z = 0) =>
+    (shape) =>
+      shape.updatePlan(
+        { corner1: [x / 2, y / 2, z / 2] },
+        { corner2: [x / -2, y / -2, z / -2] }
+      )
+);
+Shape.registerMethod(
+  'hasRadius',
+  (x = 1, y = x, z = 0) =>
+    (shape) =>
+      shape.updatePlan(
+        {
+          corner1: [x, y, z],
+        },
+        {
+          corner2: [-x, -y, -z],
+        }
+      )
+);
+Shape.registerMethod(
+  'hasApothem',
+  (x = 1, y = x, z = 0) =>
+    (shape) =>
+      shape.updatePlan(
+        {
+          corner1: [x, y, z],
+        },
+        {
+          corner2: [-x, -y, -z],
+        },
+        { apothem: [x, y, z] }
+      )
+);
+Shape.registerMethod(
+  'hasSides',
+  (sides = 1) =>
+    (shape) =>
+      shape.updatePlan({ sides }).setTag('plan:sides', sides)
+);
+Shape.registerMethod(
+  'hasZag',
+  (zag) => (shape) => shape.updatePlan({ zag }).setTag('plan:zag', zag)
+);
+
+const eachEntry = (geometry, op, otherwise) => {
+  if (geometry.plan.history) {
+    for (let nth = geometry.plan.history.length - 1; nth >= 0; nth--) {
+      const result = op(geometry.plan.history[nth]);
+      if (result !== undefined) {
+        return result;
+      }
+    }
+  }
+  return otherwise;
+};
+
+const find = (geometry, key, otherwise) =>
+  eachEntry(
+    geometry,
+    (entry) => {
+      return entry[key];
+    },
+    otherwise
+  );
+
+const ofPlan = find;
+
+const buildCorners = (x, y, z) => async () => {
+  const c1 = [0, 0, 0];
+  const c2 = [0, 0, 0];
+  if (x instanceof Array) {
+    while (x.length < 2) {
+      x.push(0);
+    }
+    if (x[0] < x[1]) {
+      c1[X$1] = x[1];
+      c2[X$1] = x[0];
+    } else {
+      c1[X$1] = x[0];
+      c2[X$1] = x[1];
+    }
+  } else {
+    c1[X$1] = x / 2;
+    c2[X$1] = x / -2;
+  }
+  if (y instanceof Array) {
+    while (y.length < 2) {
+      y.push(0);
+    }
+    if (y[0] < y[1]) {
+      c1[Y$1] = y[1];
+      c2[Y$1] = y[0];
+    } else {
+      c1[Y$1] = y[0];
+      c2[Y$1] = y[1];
+    }
+  } else {
+    c1[Y$1] = y / 2;
+    c2[Y$1] = y / -2;
+  }
+  if (z instanceof Array) {
+    while (z.length < 2) {
+      z.push(0);
+    }
+    if (z[0] < z[1]) {
+      c1[Z$1] = z[1];
+      c2[Z$1] = z[0];
+    } else {
+      c1[Z$1] = z[0];
+      c2[Z$1] = z[1];
+    }
+  } else {
+    c1[Z$1] = z / 2;
+    c2[Z$1] = z / -2;
+  }
+  return [c1, c2];
+};
+
+const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
+
 const Assembly = Shape.registerMethod3(
   'Assembly',
   ['geometries', 'modes:backward,exact'],
@@ -6093,6 +6044,12 @@ const Cached = (name, op) =>
     return constructedShape;
   });
 
+const Edge = Shape.registerMethod3(
+  'Edge',
+  ['coordinate', 'coordinate', 'coordinate'],
+  Edge$1
+);
+
 const Polygon = Shape.registerMethod2(
   ['Face', 'Polygon'],
   ['coordinates'],
@@ -6100,6 +6057,12 @@ const Polygon = Shape.registerMethod2(
 );
 
 const Face = Polygon;
+
+const Geometry = Shape.registerMethod2(
+  'Geometry',
+  ['rest'],
+  ([geometry]) => Shape.chain(Shape.fromGeometry(geometry))
+);
 
 const Hexagon = Shape.registerMethod2(
   'Hexagon',
@@ -6357,6 +6320,24 @@ const Segments = Shape.registerMethod2(
   (segments) => Shape.fromSegments(segments)
 );
 
+const Spiral = Shape.registerMethod2(
+  'Spiral',
+  ['function', 'options'],
+  async (particle = Point, options) => {
+    let particles = [];
+    const turns = await Seq(
+      options,
+      (distance) => (_shape) => distance,
+      (...numbers) => numbers
+    );
+    for (const turn of turns) {
+      particles.push(await particle(turn).rz(turn));
+    }
+    const result = await Link(...particles);
+    return result;
+  }
+);
+
 const SurfaceMesh = (
   serializedSurfaceMesh,
   { isClosed = true, matrix } = {}
@@ -6392,4 +6373,4 @@ const Wave = Shape.registerMethod2(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$9 as X, XY, XZ, Y$9 as Y, YX, YZ, Z$8 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Plan, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$7 as X, XY, XZ, Y$7 as Y, YX, YZ, Z$6 as Z, ZX, ZY, absolute, abstract, add$2 as add, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, center, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ensurePages, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, getTags, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, ofPlan, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, points$1 as points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, sectionProfile, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, testMode, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

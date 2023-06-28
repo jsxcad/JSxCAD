@@ -1,3 +1,15 @@
+import Shape from './Shape.js';
+import { rotateYs as op } from '@jsxcad/geometry';
+
+export const ry = Shape.registerMethod3(
+  ['rotateY', 'ry'],
+  ['inputGeometry', 'numbers'],
+  op
+);
+
+export const rotateY = ry;
+
+/*
 import Group from './Group.js';
 import Shape from './Shape.js';
 import { fromRotateYToTransform } from '@jsxcad/algorithm-cgal';
@@ -17,3 +29,4 @@ export const ry = Shape.registerMethod2(
 );
 
 export const rotateY = ry;
+*/

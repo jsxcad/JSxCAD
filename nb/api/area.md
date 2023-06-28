@@ -8,6 +8,8 @@ Calls op(value)(shape) with the computed surface area of the shape.
 
 ![Image](area.md.$2.png)
 
+Box(2).area() gives 4.000000000000002
+
 ```JavaScript
 Box(2)
   .view()
@@ -15,6 +17,8 @@ Box(2)
 ```
 
 ![Image](area.md.$3.png)
+
+Box(2, 2, 2).area() gives 24.000000000000014
 
 ```JavaScript
 Box(2, 2, 2)
