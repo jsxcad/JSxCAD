@@ -13891,6 +13891,9 @@ var AppConfig = /** @class */ (function () {
         messages = value;
     };
     AppConfig.prototype.nls = function (string, params) {
+        if (messages && !messages[string]) {
+            warn("No message found for '" + string + "' in the provided messages, falling back to default English message.");
+        }
         var translated = messages && messages[string] || string;
         if (params) {
             translated = translated.replace(/\$(\$|[\d]+)/g, function (_, name) {
@@ -13910,13 +13913,13 @@ exports.AppConfig = AppConfig;
 
 });
 
-ace.define("ace/theme/textmate.css",["require","exports","module"], function(require, exports, module){module.exports = ".ace-tm .ace_gutter {\n  background: #f0f0f0;\n  color: #333;\n}\n\n.ace-tm .ace_print-margin {\n  width: 1px;\n  background: #e8e8e8;\n}\n\n.ace-tm .ace_fold {\n    background-color: #6B72E6;\n}\n\n.ace-tm {\n  background-color: #FFFFFF;\n  color: black;\n}\n\n.ace-tm .ace_cursor {\n  color: black;\n}\n        \n.ace-tm .ace_invisible {\n  color: rgb(191, 191, 191);\n}\n\n.ace-tm .ace_storage,\n.ace-tm .ace_keyword {\n  color: blue;\n}\n\n.ace-tm .ace_constant {\n  color: rgb(197, 6, 11);\n}\n\n.ace-tm .ace_constant.ace_buildin {\n  color: rgb(88, 72, 246);\n}\n\n.ace-tm .ace_constant.ace_language {\n  color: rgb(88, 92, 246);\n}\n\n.ace-tm .ace_constant.ace_library {\n  color: rgb(6, 150, 14);\n}\n\n.ace-tm .ace_invalid {\n  background-color: rgba(255, 0, 0, 0.1);\n  color: red;\n}\n\n.ace-tm .ace_support.ace_function {\n  color: rgb(60, 76, 114);\n}\n\n.ace-tm .ace_support.ace_constant {\n  color: rgb(6, 150, 14);\n}\n\n.ace-tm .ace_support.ace_type,\n.ace-tm .ace_support.ace_class {\n  color: rgb(109, 121, 222);\n}\n\n.ace-tm .ace_keyword.ace_operator {\n  color: rgb(104, 118, 135);\n}\n\n.ace-tm .ace_string {\n  color: rgb(3, 106, 7);\n}\n\n.ace-tm .ace_comment {\n  color: rgb(76, 136, 107);\n}\n\n.ace-tm .ace_comment.ace_doc {\n  color: rgb(0, 102, 255);\n}\n\n.ace-tm .ace_comment.ace_doc.ace_tag {\n  color: rgb(128, 159, 191);\n}\n\n.ace-tm .ace_constant.ace_numeric {\n  color: rgb(0, 0, 205);\n}\n\n.ace-tm .ace_variable {\n  color: rgb(49, 132, 149);\n}\n\n.ace-tm .ace_xml-pe {\n  color: rgb(104, 104, 91);\n}\n\n.ace-tm .ace_entity.ace_name.ace_function {\n  color: #0000A2;\n}\n\n\n.ace-tm .ace_heading {\n  color: rgb(12, 7, 255);\n}\n\n.ace-tm .ace_list {\n  color:rgb(185, 6, 144);\n}\n\n.ace-tm .ace_meta.ace_tag {\n  color:rgb(0, 22, 142);\n}\n\n.ace-tm .ace_string.ace_regex {\n  color: rgb(255, 0, 0)\n}\n\n.ace-tm .ace_marker-layer .ace_selection {\n  background: rgb(181, 213, 255);\n}\n.ace-tm.ace_multiselect .ace_selection.ace_start {\n  box-shadow: 0 0 3px 0px white;\n}\n.ace-tm .ace_marker-layer .ace_step {\n  background: rgb(252, 255, 0);\n}\n\n.ace-tm .ace_marker-layer .ace_stack {\n  background: rgb(164, 229, 101);\n}\n\n.ace-tm .ace_marker-layer .ace_bracket {\n  margin: -1px 0 0 -1px;\n  border: 1px solid rgb(192, 192, 192);\n}\n\n.ace-tm .ace_marker-layer .ace_active-line {\n  background: rgba(0, 0, 0, 0.07);\n}\n\n.ace-tm .ace_gutter-active-line {\n    background-color : #dcdcdc;\n}\n\n.ace-tm .ace_marker-layer .ace_selected-word {\n  background: rgb(250, 250, 255);\n  border: 1px solid rgb(200, 200, 250);\n}\n\n.ace-tm .ace_indent-guide {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bLly//BwAmVgd1/w11/gAAAABJRU5ErkJggg==\") right repeat-y;\n}\n\n.ace-tm .ace_indent-guide-active {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAAZSURBVHjaYvj///9/hivKyv8BAAAA//8DACLqBhbvk+/eAAAAAElFTkSuQmCC\") right repeat-y;\n}\n";
+ace.define("ace/theme/textmate-css",["require","exports","module"], function(require, exports, module){module.exports = ".ace-tm .ace_gutter {\n  background: #f0f0f0;\n  color: #333;\n}\n\n.ace-tm .ace_print-margin {\n  width: 1px;\n  background: #e8e8e8;\n}\n\n.ace-tm .ace_fold {\n    background-color: #6B72E6;\n}\n\n.ace-tm {\n  background-color: #FFFFFF;\n  color: black;\n}\n\n.ace-tm .ace_cursor {\n  color: black;\n}\n        \n.ace-tm .ace_invisible {\n  color: rgb(191, 191, 191);\n}\n\n.ace-tm .ace_storage,\n.ace-tm .ace_keyword {\n  color: blue;\n}\n\n.ace-tm .ace_constant {\n  color: rgb(197, 6, 11);\n}\n\n.ace-tm .ace_constant.ace_buildin {\n  color: rgb(88, 72, 246);\n}\n\n.ace-tm .ace_constant.ace_language {\n  color: rgb(88, 92, 246);\n}\n\n.ace-tm .ace_constant.ace_library {\n  color: rgb(6, 150, 14);\n}\n\n.ace-tm .ace_invalid {\n  background-color: rgba(255, 0, 0, 0.1);\n  color: red;\n}\n\n.ace-tm .ace_support.ace_function {\n  color: rgb(60, 76, 114);\n}\n\n.ace-tm .ace_support.ace_constant {\n  color: rgb(6, 150, 14);\n}\n\n.ace-tm .ace_support.ace_type,\n.ace-tm .ace_support.ace_class {\n  color: rgb(109, 121, 222);\n}\n\n.ace-tm .ace_keyword.ace_operator {\n  color: rgb(104, 118, 135);\n}\n\n.ace-tm .ace_string {\n  color: rgb(3, 106, 7);\n}\n\n.ace-tm .ace_comment {\n  color: rgb(76, 136, 107);\n}\n\n.ace-tm .ace_comment.ace_doc {\n  color: rgb(0, 102, 255);\n}\n\n.ace-tm .ace_comment.ace_doc.ace_tag {\n  color: rgb(128, 159, 191);\n}\n\n.ace-tm .ace_constant.ace_numeric {\n  color: rgb(0, 0, 205);\n}\n\n.ace-tm .ace_variable {\n  color: rgb(49, 132, 149);\n}\n\n.ace-tm .ace_xml-pe {\n  color: rgb(104, 104, 91);\n}\n\n.ace-tm .ace_entity.ace_name.ace_function {\n  color: #0000A2;\n}\n\n\n.ace-tm .ace_heading {\n  color: rgb(12, 7, 255);\n}\n\n.ace-tm .ace_list {\n  color:rgb(185, 6, 144);\n}\n\n.ace-tm .ace_meta.ace_tag {\n  color:rgb(0, 22, 142);\n}\n\n.ace-tm .ace_string.ace_regex {\n  color: rgb(255, 0, 0)\n}\n\n.ace-tm .ace_marker-layer .ace_selection {\n  background: rgb(181, 213, 255);\n}\n.ace-tm.ace_multiselect .ace_selection.ace_start {\n  box-shadow: 0 0 3px 0px white;\n}\n.ace-tm .ace_marker-layer .ace_step {\n  background: rgb(252, 255, 0);\n}\n\n.ace-tm .ace_marker-layer .ace_stack {\n  background: rgb(164, 229, 101);\n}\n\n.ace-tm .ace_marker-layer .ace_bracket {\n  margin: -1px 0 0 -1px;\n  border: 1px solid rgb(192, 192, 192);\n}\n\n.ace-tm .ace_marker-layer .ace_active-line {\n  background: rgba(0, 0, 0, 0.07);\n}\n\n.ace-tm .ace_gutter-active-line {\n    background-color : #dcdcdc;\n}\n\n.ace-tm .ace_marker-layer .ace_selected-word {\n  background: rgb(250, 250, 255);\n  border: 1px solid rgb(200, 200, 250);\n}\n\n.ace-tm .ace_indent-guide {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bLly//BwAmVgd1/w11/gAAAABJRU5ErkJggg==\") right repeat-y;\n}\n\n.ace-tm .ace_indent-guide-active {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAAZSURBVHjaYvj///9/hivKyv8BAAAA//8DACLqBhbvk+/eAAAAAElFTkSuQmCC\") right repeat-y;\n}\n";
 
 });
 
-ace.define("ace/theme/textmate",["require","exports","module","ace/theme/textmate.css","ace/lib/dom"], function(require, exports, module){exports.isDark = false;
+ace.define("ace/theme/textmate",["require","exports","module","ace/theme/textmate-css","ace/lib/dom"], function(require, exports, module){exports.isDark = false;
 exports.cssClass = "ace-tm";
-exports.cssText = require("./textmate.css");
+exports.cssText = require("./textmate-css");
 exports.$id = "ace/theme/textmate";
 var dom = require("../lib/dom");
 dom.importCssString(exports.cssText, exports.cssClass, false);
@@ -13988,15 +13991,19 @@ exports.setModuleUrl = function (name, subst) {
 var loader = function (moduleName, cb) {
     if (moduleName === "ace/theme/textmate" || moduleName === "./theme/textmate")
         return cb(null, require("./theme/textmate"));
-    return console.error("loader is not configured");
+    if (customLoader)
+        return customLoader(moduleName, cb);
+    console.error("loader is not configured");
 };
+var customLoader;
 exports.setLoader = function (cb) {
-    loader = cb;
+    customLoader = cb;
 };
 exports.dynamicModules = Object.create(null);
 exports.$loading = {};
+exports.$loaded = {};
 exports.loadModule = function (moduleName, onLoad) {
-    var module, moduleType;
+    var loadedModule, moduleType;
     if (Array.isArray(moduleName)) {
         moduleType = moduleName[0];
         moduleName = moduleName[1];
@@ -14011,6 +14018,8 @@ exports.loadModule = function (moduleName, onLoad) {
             return;
         var afterLoad = function () {
             loader(moduleName, function (err, module) {
+                if (module)
+                    exports.$loaded[moduleName] = module;
                 exports._emit("load.module", { name: moduleName, module: module });
                 var listeners = exports.$loading[moduleName];
                 exports.$loading[moduleName] = null;
@@ -14036,10 +14045,16 @@ exports.loadModule = function (moduleName, onLoad) {
     }
     else {
         try {
-            module = require(moduleName);
+            loadedModule = this.$require(moduleName);
         }
         catch (e) { }
-        load(module);
+        load(loadedModule || exports.$loaded[moduleName]);
+    }
+};
+exports.$require = function (moduleName) {
+    if (typeof module.require == "function") {
+        var req = "require";
+        return module[req](moduleName);
     }
 };
 exports.setModuleLoader = function (moduleName, onLoad) {
@@ -14053,7 +14068,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.21.1";
+exports.version = "1.23.1";
 
 });
 
@@ -14073,6 +14088,7 @@ var global = (function() {
 
 module.exports = function(ace) {
     config.init = init;
+    config.$require = require;
     ace.require = require;
 };
 init(true);function init(packaged) {
@@ -14489,6 +14505,7 @@ var Keys = (function () {
     return ret;
 })();
 oop.mixin(exports, Keys);
+exports.default = exports;
 exports.keyCodeToString = function (keyCode) {
     var keyString = Keys[keyCode];
     if (typeof keyString != "string")
@@ -16153,8 +16170,7 @@ function GutterHandler(mouseHandler) {
         if (tooltipTimeout)
             tooltipTimeout = clearTimeout(tooltipTimeout);
         if (tooltip.isOpen) {
-            tooltip.hide();
-            editor._signal("hideGutterTooltip", tooltip);
+            tooltip.hideTooltip();
             editor.off("mousewheel", hideTooltip);
         }
     }
@@ -16268,13 +16284,18 @@ var GutterTooltip = /** @class */ (function (_super) {
         }
         var tooltipContent = [].concat(annotationMessages.error, annotationMessages.warning, annotationMessages.info).join("<br>");
         this.setHtml(tooltipContent);
-        this.setClassName("ace_gutter-tooltip");
         this.$element.setAttribute("aria-live", "polite");
         if (!this.isOpen) {
             this.setTheme(this.editor.renderer.theme);
+            this.setClassName("ace_gutter-tooltip");
         }
-        this.editor._signal("showGutterTooltip", this);
         this.show();
+        this.editor._signal("showGutterTooltip", this);
+    };
+    GutterTooltip.prototype.hideTooltip = function () {
+        this.$element.removeAttribute("aria-live");
+        this.hide();
+        this.editor._signal("hideGutterTooltip", this);
     };
     GutterTooltip.annotationsToSummaryString = function (annotations) {
         var e_1, _a;
@@ -21421,7 +21442,7 @@ function Folding() {
         if (token && /^comment|string/.test(type)) {
             type = type.match(/comment|string/)[0];
             if (type == "comment")
-                type += "|doc-start";
+                type += "|doc-start|\\.doc";
             var re = new RegExp(type);
             var range = new Range();
             if (dir != 1) {
@@ -23882,30 +23903,43 @@ exports.Search = Search;
 
 });
 
-ace.define("ace/keyboard/hash_handler",["require","exports","module","ace/lib/keys","ace/lib/useragent"], function(require, exports, module){var keyUtil = require("../lib/keys");
+ace.define("ace/keyboard/hash_handler",["require","exports","module","ace/lib/keys","ace/lib/useragent"], function(require, exports, module){var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var keyUtil = require("../lib/keys");
 var useragent = require("../lib/useragent");
 var KEY_MODS = keyUtil.KEY_MODS;
-function HashHandler(config, platform) {
-    this.platform = platform || (useragent.isMac ? "mac" : "win");
-    this.commands = {};
-    this.commandKeyBinding = {};
-    this.addCommands(config);
-    this.$singleCommand = true;
-}
-function MultiHashHandler(config, platform) {
-    HashHandler.call(this, config, platform);
-    this.$singleCommand = false;
-}
-MultiHashHandler.prototype = HashHandler.prototype;
-(function () {
-    this.addCommand = function (command) {
+var MultiHashHandler = /** @class */ (function () {
+    function MultiHashHandler(config, platform) {
+        this.$init(config, platform, false);
+    }
+    MultiHashHandler.prototype.$init = function (config, platform, $singleCommand) {
+        this.platform = platform || (useragent.isMac ? "mac" : "win");
+        this.commands = {};
+        this.commandKeyBinding = {};
+        this.addCommands(config);
+        this.$singleCommand = $singleCommand;
+    };
+    MultiHashHandler.prototype.addCommand = function (command) {
         if (this.commands[command.name])
             this.removeCommand(command);
         this.commands[command.name] = command;
         if (command.bindKey)
             this._buildKeyHash(command);
     };
-    this.removeCommand = function (command, keepCommand) {
+    MultiHashHandler.prototype.removeCommand = function (command, keepCommand) {
         var name = command && (typeof command === 'string' ? command : command.name);
         command = this.commands[name];
         if (!keepCommand)
@@ -23926,7 +23960,7 @@ MultiHashHandler.prototype = HashHandler.prototype;
             }
         }
     };
-    this.bindKey = function (key, command, position) {
+    MultiHashHandler.prototype.bindKey = function (key, command, position) {
         if (typeof key == "object" && key) {
             if (position == undefined)
                 position = key.position;
@@ -23954,12 +23988,7 @@ MultiHashHandler.prototype = HashHandler.prototype;
             this._addCommandToBinding(chain + id, command, position);
         }, this);
     };
-    function getPosition(command) {
-        return typeof command == "object" && command.bindKey
-            && command.bindKey.position
-            || (command.isDefault ? -100 : 0);
-    }
-    this._addCommandToBinding = function (keyId, command, position) {
+    MultiHashHandler.prototype._addCommandToBinding = function (keyId, command, position) {
         var ckb = this.commandKeyBinding, i;
         if (!command) {
             delete ckb[keyId];
@@ -23987,7 +24016,7 @@ MultiHashHandler.prototype = HashHandler.prototype;
             commands.splice(i, 0, command);
         }
     };
-    this.addCommands = function (commands) {
+    MultiHashHandler.prototype.addCommands = function (commands) {
         commands && Object.keys(commands).forEach(function (name) {
             var command = commands[name];
             if (!command)
@@ -24003,20 +24032,20 @@ MultiHashHandler.prototype = HashHandler.prototype;
             this.addCommand(command);
         }, this);
     };
-    this.removeCommands = function (commands) {
+    MultiHashHandler.prototype.removeCommands = function (commands) {
         Object.keys(commands).forEach(function (name) {
             this.removeCommand(commands[name]);
         }, this);
     };
-    this.bindKeys = function (keyList) {
+    MultiHashHandler.prototype.bindKeys = function (keyList) {
         Object.keys(keyList).forEach(function (key) {
             this.bindKey(key, keyList[key]);
         }, this);
     };
-    this._buildKeyHash = function (command) {
+    MultiHashHandler.prototype._buildKeyHash = function (command) {
         this.bindKey(command.bindKey, command);
     };
-    this.parseKeys = function (keys) {
+    MultiHashHandler.prototype.parseKeys = function (keys) {
         var parts = keys.toLowerCase().split(/[\-\+]([\-\+])?/).filter(function (x) { return x; });
         var key = parts.pop();
         var keyCode = keyUtil[key];
@@ -24038,11 +24067,11 @@ MultiHashHandler.prototype = HashHandler.prototype;
         }
         return { key: key, hashId: hashId };
     };
-    this.findKeyCommand = function findKeyCommand(hashId, keyString) {
+    MultiHashHandler.prototype.findKeyCommand = function (hashId, keyString) {
         var key = KEY_MODS[hashId] + keyString;
         return this.commandKeyBinding[key];
     };
-    this.handleKeyboard = function (data, hashId, keyString, keyCode) {
+    MultiHashHandler.prototype.handleKeyboard = function (data, hashId, keyString, keyCode) {
         if (keyCode < 0)
             return;
         var key = KEY_MODS[hashId] + keyString;
@@ -24065,10 +24094,31 @@ MultiHashHandler.prototype = HashHandler.prototype;
         }
         return { command: command };
     };
-    this.getStatusText = function (editor, data) {
+    MultiHashHandler.prototype.getStatusText = function (editor, data) {
         return data.$keyChain || "";
     };
-}).call(HashHandler.prototype);
+    return MultiHashHandler;
+}());
+function getPosition(command) {
+    return typeof command == "object" && command.bindKey
+        && command.bindKey.position
+        || (command.isDefault ? -100 : 0);
+}
+var HashHandler = /** @class */ (function (_super) {
+    __extends(HashHandler, _super);
+    function HashHandler(config, platform) {
+        var _this = _super.call(this, config, platform) || this;
+        _this.$singleCommand = true;
+        return _this;
+    }
+    return HashHandler;
+}(MultiHashHandler));
+HashHandler.call = function (thisArg, config, platform) {
+    MultiHashHandler.prototype.$init.call(thisArg, config, platform, true);
+};
+MultiHashHandler.call = function (thisArg, config, platform) {
+    MultiHashHandler.prototype.$init.call(thisArg, config, platform, false);
+};
 exports.HashHandler = HashHandler;
 exports.MultiHashHandler = MultiHashHandler;
 
@@ -25401,7 +25451,7 @@ var GutterKeyboardHandler = /** @class */ (function () {
         if (this.annotationTooltip.isOpen) {
             e.preventDefault();
             if (e.keyCode === keys["escape"])
-                this.annotationTooltip.hide();
+                this.annotationTooltip.hideTooltip();
             return;
         }
         if (e.target === this.element) {
@@ -25445,6 +25495,12 @@ var GutterKeyboardHandler = /** @class */ (function () {
             }.bind(this), 10);
             return;
         }
+        this.$handleGutterKeyboardInteraction(e);
+        setTimeout(function () {
+            this.editor._signal("gutterkeydown", new GutterKeyboardEvent(e, this));
+        }.bind(this), 10);
+    };
+    GutterKeyboardHandler.prototype.$handleGutterKeyboardInteraction = function (e) {
         if (e.keyCode === keys["tab"]) {
             e.preventDefault();
             return;
@@ -25483,10 +25539,12 @@ var GutterKeyboardHandler = /** @class */ (function () {
         if (e.keyCode === keys["left"]) {
             e.preventDefault();
             this.$switchLane("annotation");
+            return;
         }
         if (e.keyCode === keys["right"]) {
             e.preventDefault();
             this.$switchLane("fold");
+            return;
         }
         if (e.keyCode === keys["enter"] || e.keyCode === keys["space"]) {
             e.preventDefault();
@@ -25532,7 +25590,7 @@ var GutterKeyboardHandler = /** @class */ (function () {
             }
         }
         if (this.annotationTooltip.isOpen)
-            this.annotationTooltip.hide();
+            this.annotationTooltip.hideTooltip();
         return;
     };
     GutterKeyboardHandler.prototype.$isFoldWidgetVisible = function (index) {
@@ -25593,7 +25651,6 @@ var GutterKeyboardHandler = /** @class */ (function () {
             return;
         var annotation = this.$getAnnotation(index);
         annotation.classList.add(this.editor.renderer.keyboardFocusClassName);
-        annotation.setAttribute("role", "button");
         annotation.focus();
     };
     GutterKeyboardHandler.prototype.$blurFoldWidget = function (index) {
@@ -25604,7 +25661,6 @@ var GutterKeyboardHandler = /** @class */ (function () {
     GutterKeyboardHandler.prototype.$blurAnnotation = function (index) {
         var annotation = this.$getAnnotation(index);
         annotation.classList.remove(this.editor.renderer.keyboardFocusClassName);
-        annotation.removeAttribute("role");
         annotation.blur();
     };
     GutterKeyboardHandler.prototype.$moveFoldWidgetUp = function () {
@@ -25707,6 +25763,26 @@ var GutterKeyboardHandler = /** @class */ (function () {
     return GutterKeyboardHandler;
 }());
 exports.GutterKeyboardHandler = GutterKeyboardHandler;
+var GutterKeyboardEvent = /** @class */ (function () {
+    function GutterKeyboardEvent(domEvent, gutterKeyboardHandler) {
+        this.gutterKeyboardHandler = gutterKeyboardHandler;
+        this.domEvent = domEvent;
+    }
+    GutterKeyboardEvent.prototype.getKey = function () {
+        return keys.keyCodeToString(this.domEvent.keyCode);
+    };
+    GutterKeyboardEvent.prototype.getRow = function () {
+        return this.gutterKeyboardHandler.$rowIndexToRow(this.gutterKeyboardHandler.activeRowIndex);
+    };
+    GutterKeyboardEvent.prototype.isInAnnotationLane = function () {
+        return this.gutterKeyboardHandler.activeLane === "annotation";
+    };
+    GutterKeyboardEvent.prototype.isInFoldLane = function () {
+        return this.gutterKeyboardHandler.activeLane === "fold";
+    };
+    return GutterKeyboardEvent;
+}());
+exports.GutterKeyboardEvent = GutterKeyboardEvent;
 
 });
 
@@ -28528,18 +28604,17 @@ var Gutter = /** @class */ (function () {
             className += decorations[row];
         if (this.$annotations[row] && row !== foldStart)
             className += this.$annotations[row].className;
-        if (element.className != className)
-            element.className = className;
         if (foldWidgets) {
             var c = foldWidgets[row];
             if (c == null)
                 c = foldWidgets[row] = session.getFoldWidget(row);
         }
         if (c) {
-            var className = "ace_fold-widget ace_" + c;
-            if (c == "start" && row == foldStart && row < fold.end.row) {
-                className += " ace_closed";
-                var foldAnnotationClass;
+            var foldClass = "ace_fold-widget ace_" + c;
+            var isClosedFold = c == "start" && row == foldStart && row < fold.end.row;
+            if (isClosedFold) {
+                foldClass += " ace_closed";
+                var foldAnnotationClass = '';
                 var annotationInFold = false;
                 for (var i = row + 1; i <= fold.end.row; i++) {
                     if (!this.$annotations[i])
@@ -28555,23 +28630,31 @@ var Gutter = /** @class */ (function () {
                         continue;
                     }
                 }
-                element.className += foldAnnotationClass;
+                className += foldAnnotationClass;
             }
             else
-                className += " ace_open";
-            if (foldWidget.className != className)
-                foldWidget.className = className;
+                foldClass += " ace_open";
+            if (foldWidget.className != foldClass)
+                foldWidget.className = foldClass;
             dom.setStyle(foldWidget.style, "height", lineHeight);
             dom.setStyle(foldWidget.style, "display", "inline-block");
             foldWidget.setAttribute("role", "button");
             foldWidget.setAttribute("tabindex", "-1");
-            var fold = session.getFoldLine(rowText - 1);
-            if (fold) {
-                foldWidget.setAttribute("aria-label", nls("Unfold rows $0 to $1", [rowText, fold.end.row + 1]));
+            var foldRange = session.getFoldWidgetRange(row);
+            if (foldRange)
+                foldWidget.setAttribute("aria-label", nls("Toggle code folding, rows $0 through $1", [foldRange.start.row + 1, foldRange.end.row + 1]));
+            else {
+                if (fold)
+                    foldWidget.setAttribute("aria-label", nls("Toggle code folding, rows $0 through $1", [fold.start.row + 1, fold.end.row + 1]));
+                else
+                    foldWidget.setAttribute("aria-label", nls("Toggle code folding, row $0", [row + 1]));
+            }
+            if (isClosedFold) {
+                foldWidget.setAttribute("aria-expanded", "false");
                 foldWidget.setAttribute("title", nls("Unfold code"));
             }
             else {
-                foldWidget.setAttribute("aria-label", nls("Fold at row $0", [rowText]));
+                foldWidget.setAttribute("aria-expanded", "true");
                 foldWidget.setAttribute("title", nls("Fold code"));
             }
         }
@@ -28592,6 +28675,7 @@ var Gutter = /** @class */ (function () {
             dom.setStyle(annotationNode.style, "height", lineHeight);
             annotationNode.setAttribute("aria-label", nls("Read annotations row $0", [rowText]));
             annotationNode.setAttribute("tabindex", "-1");
+            annotationNode.setAttribute("role", "button");
         }
         else if (this.$annotations[row]) {
             annotationNode.className = "ace_gutter_annotation";
@@ -28605,15 +28689,19 @@ var Gutter = /** @class */ (function () {
             dom.setStyle(annotationNode.style, "height", lineHeight);
             annotationNode.setAttribute("aria-label", nls("Read annotations row $0", [rowText]));
             annotationNode.setAttribute("tabindex", "-1");
+            annotationNode.setAttribute("role", "button");
         }
         else {
             dom.setStyle(annotationNode.style, "display", "none");
             annotationNode.removeAttribute("aria-label");
+            annotationNode.removeAttribute("role");
             annotationNode.setAttribute("tabindex", "0");
         }
         if (rowText !== textNode.data) {
             textNode.data = rowText;
         }
+        if (element.className != className)
+            element.className = className;
         dom.setStyle(cell.element.style, "height", this.$lines.computeLineHeight(row, config, session) + "px");
         dom.setStyle(cell.element.style, "top", this.$lines.computeLineTop(row, config, session) + "px");
         cell.text = rowText;
@@ -28870,11 +28958,12 @@ exports.Marker = Marker;
 
 });
 
-ace.define("ace/layer/text",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/layer/lines","ace/lib/event_emitter"], function(require, exports, module){var oop = require("../lib/oop");
+ace.define("ace/layer/text",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/layer/lines","ace/lib/event_emitter","ace/config"], function(require, exports, module){var oop = require("../lib/oop");
 var dom = require("../lib/dom");
 var lang = require("../lib/lang");
 var Lines = require("./lines").Lines;
 var EventEmitter = require("../lib/event_emitter").EventEmitter;
+var nls = require("../config").nls;
 var Text = /** @class */ (function () {
     function Text(parentEl) {
         this.dom = dom;
@@ -29175,7 +29264,7 @@ var Text = /** @class */ (function () {
             var span = this.dom.createElement("span");
             if (token.type == "fold") {
                 span.style.width = (token.value.length * this.config.characterWidth) + "px";
-                span.setAttribute("title", "Unfold code");
+                span.setAttribute("title", nls("Unfold code"));
             }
             span.className = classes;
             span.appendChild(valueFragment);
@@ -30291,7 +30380,7 @@ exports.FontMetrics = FontMetrics;
 
 });
 
-ace.define("ace/css/editor.css",["require","exports","module"], function(require, exports, module){/*
+ace.define("ace/css/editor-css",["require","exports","module"], function(require, exports, module){/*
 styles = []
 for (var i = 1; i < 16; i++) {
     styles.push(".ace_br" + i + "{" + (
@@ -30426,7 +30515,7 @@ exports.Decorator = Decorator;
 
 });
 
-ace.define("ace/virtual_renderer",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/config","ace/layer/gutter","ace/layer/marker","ace/layer/text","ace/layer/cursor","ace/scrollbar","ace/scrollbar","ace/scrollbar_custom","ace/scrollbar_custom","ace/renderloop","ace/layer/font_metrics","ace/lib/event_emitter","ace/css/editor.css","ace/layer/decorators","ace/lib/useragent"], function(require, exports, module){var oop = require("./lib/oop");
+ace.define("ace/virtual_renderer",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/config","ace/layer/gutter","ace/layer/marker","ace/layer/text","ace/layer/cursor","ace/scrollbar","ace/scrollbar","ace/scrollbar_custom","ace/scrollbar_custom","ace/renderloop","ace/layer/font_metrics","ace/lib/event_emitter","ace/css/editor-css","ace/layer/decorators","ace/lib/useragent"], function(require, exports, module){var oop = require("./lib/oop");
 var dom = require("./lib/dom");
 var lang = require("./lib/lang");
 var config = require("./config");
@@ -30441,7 +30530,7 @@ var VScrollBarCustom = require("./scrollbar_custom").VScrollBar;
 var RenderLoop = require("./renderloop").RenderLoop;
 var FontMetrics = require("./layer/font_metrics").FontMetrics;
 var EventEmitter = require("./lib/event_emitter").EventEmitter;
-var editorCss = require("./css/editor.css");
+var editorCss = require("./css/editor-css");
 var Decorator = require("./layer/decorators").Decorator;
 var useragent = require("./lib/useragent");
 dom.importCssString(editorCss, "ace_editor.css", false);
@@ -31973,6 +32062,9 @@ var WorkerClient = function(worker) {
         this._signal("terminate", {});
         this.deltaQueue = null;
         this.$worker.terminate();
+        this.$worker.onerror = function(e) {
+            e.preventDefault();
+        };
         this.$worker = null;
         if (this.$doc)
             this.$doc.off("change", this.changeListener);
@@ -41238,14 +41330,14 @@ function onClick(e) {
 var extSearchbox = {exports: {}};
 
 (function (module, exports) {
-ace.define("ace/ext/searchbox.css",["require","exports","module"], function(require, exports, module){module.exports = "\n\n/* ------------------------------------------------------------------------------------------\n * Editor Search Form\n * --------------------------------------------------------------------------------------- */\n.ace_search {\n    background-color: #ddd;\n    color: #666;\n    border: 1px solid #cbcbcb;\n    border-top: 0 none;\n    overflow: hidden;\n    margin: 0;\n    padding: 4px 6px 0 4px;\n    position: absolute;\n    top: 0;\n    z-index: 99;\n    white-space: normal;\n}\n.ace_search.left {\n    border-left: 0 none;\n    border-radius: 0px 0px 5px 0px;\n    left: 0;\n}\n.ace_search.right {\n    border-radius: 0px 0px 0px 5px;\n    border-right: 0 none;\n    right: 0;\n}\n\n.ace_search_form, .ace_replace_form {\n    margin: 0 20px 4px 0;\n    overflow: hidden;\n    line-height: 1.9;\n}\n.ace_replace_form {\n    margin-right: 0;\n}\n.ace_search_form.ace_nomatch {\n    outline: 1px solid red;\n}\n\n.ace_search_field {\n    border-radius: 3px 0 0 3px;\n    background-color: white;\n    color: black;\n    border: 1px solid #cbcbcb;\n    border-right: 0 none;\n    outline: 0;\n    padding: 0;\n    font-size: inherit;\n    margin: 0;\n    line-height: inherit;\n    padding: 0 6px;\n    min-width: 17em;\n    vertical-align: top;\n    min-height: 1.8em;\n    box-sizing: content-box;\n}\n.ace_searchbtn {\n    border: 1px solid #cbcbcb;\n    line-height: inherit;\n    display: inline-block;\n    padding: 0 6px;\n    background: #fff;\n    border-right: 0 none;\n    border-left: 1px solid #dcdcdc;\n    cursor: pointer;\n    margin: 0;\n    position: relative;\n    color: #666;\n}\n.ace_searchbtn:last-child {\n    border-radius: 0 3px 3px 0;\n    border-right: 1px solid #cbcbcb;\n}\n.ace_searchbtn:disabled {\n    background: none;\n    cursor: default;\n}\n.ace_searchbtn:hover {\n    background-color: #eef1f6;\n}\n.ace_searchbtn.prev, .ace_searchbtn.next {\n     padding: 0px 0.7em\n}\n.ace_searchbtn.prev:after, .ace_searchbtn.next:after {\n     content: \"\";\n     border: solid 2px #888;\n     width: 0.5em;\n     height: 0.5em;\n     border-width:  2px 0 0 2px;\n     display:inline-block;\n     transform: rotate(-45deg);\n}\n.ace_searchbtn.next:after {\n     border-width: 0 2px 2px 0 ;\n}\n.ace_searchbtn_close {\n    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAcCAYAAABRVo5BAAAAZ0lEQVR42u2SUQrAMAhDvazn8OjZBilCkYVVxiis8H4CT0VrAJb4WHT3C5xU2a2IQZXJjiQIRMdkEoJ5Q2yMqpfDIo+XY4k6h+YXOyKqTIj5REaxloNAd0xiKmAtsTHqW8sR2W5f7gCu5nWFUpVjZwAAAABJRU5ErkJggg==) no-repeat 50% 0;\n    border-radius: 50%;\n    border: 0 none;\n    color: #656565;\n    cursor: pointer;\n    font: 16px/16px Arial;\n    padding: 0;\n    height: 14px;\n    width: 14px;\n    top: 9px;\n    right: 7px;\n    position: absolute;\n}\n.ace_searchbtn_close:hover {\n    background-color: #656565;\n    background-position: 50% 100%;\n    color: white;\n}\n\n.ace_button {\n    margin-left: 2px;\n    cursor: pointer;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -o-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    overflow: hidden;\n    opacity: 0.7;\n    border: 1px solid rgba(100,100,100,0.23);\n    padding: 1px;\n    box-sizing:    border-box!important;\n    color: black;\n}\n\n.ace_button:hover {\n    background-color: #eee;\n    opacity:1;\n}\n.ace_button:active {\n    background-color: #ddd;\n}\n\n.ace_button.checked {\n    border-color: #3399ff;\n    opacity:1;\n}\n\n.ace_search_options{\n    margin-bottom: 3px;\n    text-align: right;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -o-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    clear: both;\n}\n\n.ace_search_counter {\n    float: left;\n    font-family: arial;\n    padding: 0 8px;\n}";
+ace.define("ace/ext/searchbox-css",["require","exports","module"], function(require, exports, module){module.exports = "\n\n/* ------------------------------------------------------------------------------------------\n * Editor Search Form\n * --------------------------------------------------------------------------------------- */\n.ace_search {\n    background-color: #ddd;\n    color: #666;\n    border: 1px solid #cbcbcb;\n    border-top: 0 none;\n    overflow: hidden;\n    margin: 0;\n    padding: 4px 6px 0 4px;\n    position: absolute;\n    top: 0;\n    z-index: 99;\n    white-space: normal;\n}\n.ace_search.left {\n    border-left: 0 none;\n    border-radius: 0px 0px 5px 0px;\n    left: 0;\n}\n.ace_search.right {\n    border-radius: 0px 0px 0px 5px;\n    border-right: 0 none;\n    right: 0;\n}\n\n.ace_search_form, .ace_replace_form {\n    margin: 0 20px 4px 0;\n    overflow: hidden;\n    line-height: 1.9;\n}\n.ace_replace_form {\n    margin-right: 0;\n}\n.ace_search_form.ace_nomatch {\n    outline: 1px solid red;\n}\n\n.ace_search_field {\n    border-radius: 3px 0 0 3px;\n    background-color: white;\n    color: black;\n    border: 1px solid #cbcbcb;\n    border-right: 0 none;\n    outline: 0;\n    padding: 0;\n    font-size: inherit;\n    margin: 0;\n    line-height: inherit;\n    padding: 0 6px;\n    min-width: 17em;\n    vertical-align: top;\n    min-height: 1.8em;\n    box-sizing: content-box;\n}\n.ace_searchbtn {\n    border: 1px solid #cbcbcb;\n    line-height: inherit;\n    display: inline-block;\n    padding: 0 6px;\n    background: #fff;\n    border-right: 0 none;\n    border-left: 1px solid #dcdcdc;\n    cursor: pointer;\n    margin: 0;\n    position: relative;\n    color: #666;\n}\n.ace_searchbtn:last-child {\n    border-radius: 0 3px 3px 0;\n    border-right: 1px solid #cbcbcb;\n}\n.ace_searchbtn:disabled {\n    background: none;\n    cursor: default;\n}\n.ace_searchbtn:hover {\n    background-color: #eef1f6;\n}\n.ace_searchbtn.prev, .ace_searchbtn.next {\n     padding: 0px 0.7em\n}\n.ace_searchbtn.prev:after, .ace_searchbtn.next:after {\n     content: \"\";\n     border: solid 2px #888;\n     width: 0.5em;\n     height: 0.5em;\n     border-width:  2px 0 0 2px;\n     display:inline-block;\n     transform: rotate(-45deg);\n}\n.ace_searchbtn.next:after {\n     border-width: 0 2px 2px 0 ;\n}\n.ace_searchbtn_close {\n    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAcCAYAAABRVo5BAAAAZ0lEQVR42u2SUQrAMAhDvazn8OjZBilCkYVVxiis8H4CT0VrAJb4WHT3C5xU2a2IQZXJjiQIRMdkEoJ5Q2yMqpfDIo+XY4k6h+YXOyKqTIj5REaxloNAd0xiKmAtsTHqW8sR2W5f7gCu5nWFUpVjZwAAAABJRU5ErkJggg==) no-repeat 50% 0;\n    border-radius: 50%;\n    border: 0 none;\n    color: #656565;\n    cursor: pointer;\n    font: 16px/16px Arial;\n    padding: 0;\n    height: 14px;\n    width: 14px;\n    top: 9px;\n    right: 7px;\n    position: absolute;\n}\n.ace_searchbtn_close:hover {\n    background-color: #656565;\n    background-position: 50% 100%;\n    color: white;\n}\n\n.ace_button {\n    margin-left: 2px;\n    cursor: pointer;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -o-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    overflow: hidden;\n    opacity: 0.7;\n    border: 1px solid rgba(100,100,100,0.23);\n    padding: 1px;\n    box-sizing:    border-box!important;\n    color: black;\n}\n\n.ace_button:hover {\n    background-color: #eee;\n    opacity:1;\n}\n.ace_button:active {\n    background-color: #ddd;\n}\n\n.ace_button.checked {\n    border-color: #3399ff;\n    opacity:1;\n}\n\n.ace_search_options{\n    margin-bottom: 3px;\n    text-align: right;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -o-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    clear: both;\n}\n\n.ace_search_counter {\n    float: left;\n    font-family: arial;\n    padding: 0 8px;\n}";
 
 });
 
-ace.define("ace/ext/searchbox",["require","exports","module","ace/lib/dom","ace/lib/lang","ace/lib/event","ace/ext/searchbox.css","ace/keyboard/hash_handler","ace/lib/keys","ace/config"], function(require, exports, module){var dom = require("../lib/dom");
+ace.define("ace/ext/searchbox",["require","exports","module","ace/lib/dom","ace/lib/lang","ace/lib/event","ace/ext/searchbox-css","ace/keyboard/hash_handler","ace/lib/keys","ace/config"], function(require, exports, module){var dom = require("../lib/dom");
 var lang = require("../lib/lang");
 var event = require("../lib/event");
-var searchboxCss = require("./searchbox.css");
+var searchboxCss = require("./searchbox-css");
 var HashHandler = require("../keyboard/hash_handler").HashHandler;
 var keyUtil = require("../lib/keys");
 var nls = require("../config").nls;
@@ -41589,7 +41681,7 @@ var JsDocCommentHighlightRules = function () {
     this.$rules = {
         "start": [
             {
-                token: ["comment.doc.tag", "text", "lparen.doc"],
+                token: ["comment.doc.tag", "comment.doc.text", "lparen.doc"],
                 regex: "(@(?:param|member|typedef|property|namespace|var|const|callback))(\\s*)({)",
                 push: [
                     {
@@ -41605,7 +41697,7 @@ var JsDocCommentHighlightRules = function () {
                             }
                         ]
                     }, {
-                        token: ["rparen.doc", "text", "variable.parameter.doc", "lparen.doc", "variable.parameter.doc", "rparen.doc"],
+                        token: ["rparen.doc", "text.doc", "variable.parameter.doc", "lparen.doc", "variable.parameter.doc", "rparen.doc"],
                         regex: /(})(\s*)(?:([\w=:\/\.]+)|(?:(\[)([\w=:\/\.]+)(\])))/,
                         next: "pop"
                     }, {
@@ -41615,11 +41707,11 @@ var JsDocCommentHighlightRules = function () {
                     }, {
                         include: "doc-syntax"
                     }, {
-                        defaultToken: "text"
+                        defaultToken: "text.doc"
                     }
                 ]
             }, {
-                token: ["comment.doc.tag", "text", "lparen.doc"],
+                token: ["comment.doc.tag", "text.doc", "lparen.doc"],
                 regex: "(@(?:returns?|yields|type|this|suppress|public|protected|private|package|modifies|"
                     + "implements|external|exception|throws|enum|define|extends))(\\s*)({)",
                 push: [
@@ -41642,17 +41734,17 @@ var JsDocCommentHighlightRules = function () {
                     }, {
                         include: "doc-syntax"
                     }, {
-                        defaultToken: "text"
+                        defaultToken: "text.doc"
                     }
                 ]
             }, {
-                token: ["comment.doc.tag", "text", "variable.parameter.doc"],
+                token: ["comment.doc.tag", "text.doc", "variable.parameter.doc"],
                 regex: "(@(?:alias|memberof|instance|module|name|lends|namespace|external|this|template|"
                     + "requires|param|implements|function|extends|typedef|mixes|constructor|var|"
                     + "memberof\\!|event|listens|exports|class|constructs|interface|emits|fires|"
                     + "throws|const|callback|borrows|augments))(\\s+)(\\w[\\w#\.:\/~\"\\-]*)?"
             }, {
-                token: ["comment.doc.tag", "text", "variable.parameter.doc"],
+                token: ["comment.doc.tag", "text.doc", "variable.parameter.doc"],
                 regex: "(@method)(\\s+)(\\w[\\w\.\\(\\)]*)"
             }, {
                 token: "comment.doc.tag",
@@ -42467,13 +42559,13 @@ exports.Mode = Mode;
 var themeGithub = {exports: {}};
 
 (function (module, exports) {
-ace.define("ace/theme/github.css",["require","exports","module"], function(require, exports, module){module.exports = "/* CSS style content from github's default pygments highlighter template.\n   Cursor and selection styles from textmate.css. */\n.ace-github .ace_gutter {\n  background: #e8e8e8;\n  color: #AAA;\n}\n\n.ace-github  {\n  background: #fff;\n  color: #000;\n}\n\n.ace-github .ace_keyword {\n  font-weight: bold;\n}\n\n.ace-github .ace_string {\n  color: #D14;\n}\n\n.ace-github .ace_variable.ace_class {\n  color: teal;\n}\n\n.ace-github .ace_constant.ace_numeric {\n  color: #099;\n}\n\n.ace-github .ace_constant.ace_buildin {\n  color: #0086B3;\n}\n\n.ace-github .ace_support.ace_function {\n  color: #0086B3;\n}\n\n.ace-github .ace_comment {\n  color: #998;\n  font-style: italic;\n}\n\n.ace-github .ace_variable.ace_language  {\n  color: #0086B3;\n}\n\n.ace-github .ace_paren {\n  font-weight: bold;\n}\n\n.ace-github .ace_boolean {\n  font-weight: bold;\n}\n\n.ace-github .ace_string.ace_regexp {\n  color: #009926;\n  font-weight: normal;\n}\n\n.ace-github .ace_variable.ace_instance {\n  color: teal;\n}\n\n.ace-github .ace_constant.ace_language {\n  font-weight: bold;\n}\n\n.ace-github .ace_cursor {\n  color: black;\n}\n\n.ace-github.ace_focus .ace_marker-layer .ace_active-line {\n  background: rgb(255, 255, 204);\n}\n.ace-github .ace_marker-layer .ace_active-line {\n  background: rgb(245, 245, 245);\n}\n\n.ace-github .ace_marker-layer .ace_selection {\n  background: rgb(181, 213, 255);\n}\n\n.ace-github.ace_multiselect .ace_selection.ace_start {\n  box-shadow: 0 0 3px 0px white;\n}\n/* bold keywords cause cursor issues for some fonts */\n/* this disables bold style for editor and keeps for static highlighter */\n.ace-github.ace_nobold .ace_line > span {\n    font-weight: normal !important;\n}\n\n.ace-github .ace_marker-layer .ace_step {\n  background: rgb(252, 255, 0);\n}\n\n.ace-github .ace_marker-layer .ace_stack {\n  background: rgb(164, 229, 101);\n}\n\n.ace-github .ace_marker-layer .ace_bracket {\n  margin: -1px 0 0 -1px;\n  border: 1px solid rgb(192, 192, 192);\n}\n\n.ace-github .ace_gutter-active-line {\n    background-color : rgba(0, 0, 0, 0.07);\n}\n\n.ace-github .ace_marker-layer .ace_selected-word {\n  background: rgb(250, 250, 255);\n  border: 1px solid rgb(200, 200, 250);\n}\n\n.ace-github .ace_invisible {\n  color: #BFBFBF\n}\n\n.ace-github .ace_print-margin {\n  width: 1px;\n  background: #e8e8e8;\n}\n\n.ace-github .ace_indent-guide {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bLly//BwAmVgd1/w11/gAAAABJRU5ErkJggg==\") right repeat-y;\n}\n\n.ace-github .ace_indent-guide-active {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAAZSURBVHjaYvj///9/hivKyv8BAAAA//8DACLqBhbvk+/eAAAAAElFTkSuQmCC\") right repeat-y;\n}\n";
+ace.define("ace/theme/github-css",["require","exports","module"], function(require, exports, module){module.exports = "/* CSS style content from github's default pygments highlighter template.\n   Cursor and selection styles from textmate.css. */\n.ace-github .ace_gutter {\n  background: #e8e8e8;\n  color: #AAA;\n}\n\n.ace-github  {\n  background: #fff;\n  color: #000;\n}\n\n.ace-github .ace_keyword {\n  font-weight: bold;\n}\n\n.ace-github .ace_string {\n  color: #D14;\n}\n\n.ace-github .ace_variable.ace_class {\n  color: teal;\n}\n\n.ace-github .ace_constant.ace_numeric {\n  color: #099;\n}\n\n.ace-github .ace_constant.ace_buildin {\n  color: #0086B3;\n}\n\n.ace-github .ace_support.ace_function {\n  color: #0086B3;\n}\n\n.ace-github .ace_comment {\n  color: #998;\n  font-style: italic;\n}\n\n.ace-github .ace_variable.ace_language  {\n  color: #0086B3;\n}\n\n.ace-github .ace_paren {\n  font-weight: bold;\n}\n\n.ace-github .ace_boolean {\n  font-weight: bold;\n}\n\n.ace-github .ace_string.ace_regexp {\n  color: #009926;\n  font-weight: normal;\n}\n\n.ace-github .ace_variable.ace_instance {\n  color: teal;\n}\n\n.ace-github .ace_constant.ace_language {\n  font-weight: bold;\n}\n\n.ace-github .ace_cursor {\n  color: black;\n}\n\n.ace-github.ace_focus .ace_marker-layer .ace_active-line {\n  background: rgb(255, 255, 204);\n}\n.ace-github .ace_marker-layer .ace_active-line {\n  background: rgb(245, 245, 245);\n}\n\n.ace-github .ace_marker-layer .ace_selection {\n  background: rgb(181, 213, 255);\n}\n\n.ace-github.ace_multiselect .ace_selection.ace_start {\n  box-shadow: 0 0 3px 0px white;\n}\n/* bold keywords cause cursor issues for some fonts */\n/* this disables bold style for editor and keeps for static highlighter */\n.ace-github.ace_nobold .ace_line > span {\n    font-weight: normal !important;\n}\n\n.ace-github .ace_marker-layer .ace_step {\n  background: rgb(252, 255, 0);\n}\n\n.ace-github .ace_marker-layer .ace_stack {\n  background: rgb(164, 229, 101);\n}\n\n.ace-github .ace_marker-layer .ace_bracket {\n  margin: -1px 0 0 -1px;\n  border: 1px solid rgb(192, 192, 192);\n}\n\n.ace-github .ace_gutter-active-line {\n    background-color : rgba(0, 0, 0, 0.07);\n}\n\n.ace-github .ace_marker-layer .ace_selected-word {\n  background: rgb(250, 250, 255);\n  border: 1px solid rgb(200, 200, 250);\n}\n\n.ace-github .ace_invisible {\n  color: #BFBFBF\n}\n\n.ace-github .ace_print-margin {\n  width: 1px;\n  background: #e8e8e8;\n}\n\n.ace-github .ace_indent-guide {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bLly//BwAmVgd1/w11/gAAAABJRU5ErkJggg==\") right repeat-y;\n}\n\n.ace-github .ace_indent-guide-active {\n  background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAAZSURBVHjaYvj///9/hivKyv8BAAAA//8DACLqBhbvk+/eAAAAAElFTkSuQmCC\") right repeat-y;\n}\n";
 
 });
 
-ace.define("ace/theme/github",["require","exports","module","ace/theme/github.css","ace/lib/dom"], function(require, exports, module){exports.isDark = false;
+ace.define("ace/theme/github",["require","exports","module","ace/theme/github-css","ace/lib/dom"], function(require, exports, module){exports.isDark = false;
 exports.cssClass = "ace-github";
-exports.cssText = require("./github.css");
+exports.cssText = require("./github-css");
 var dom = require("../lib/dom");
 dom.importCssString(exports.cssText, exports.cssClass, false);
 
@@ -42570,16 +42662,16 @@ function date(dateFormat) {
     var str = new Date().toLocaleString("en-us", dateFormat);
     return str.length == 1 ? "0" + str : str;
 }
-var SnippetManager = function () {
-    this.snippetMap = {};
-    this.snippetNameMap = {};
-};
-(function () {
-    oop.implement(this, EventEmitter);
-    this.getTokenizer = function () {
+var SnippetManager = /** @class */ (function () {
+    function SnippetManager() {
+        this.snippetMap = {};
+        this.snippetNameMap = {};
+        this.variables = VARIABLES;
+    }
+    SnippetManager.prototype.getTokenizer = function () {
         return SnippetManager.$tokenizer || this.createTokenizer();
     };
-    this.createTokenizer = function () {
+    SnippetManager.prototype.createTokenizer = function () {
         function TabstopToken(str) {
             str = str.substr(1);
             if (/^\d+$/.test(str))
@@ -42699,12 +42791,12 @@ var SnippetManager = function () {
         });
         return SnippetManager.$tokenizer;
     };
-    this.tokenizeTmSnippet = function (str, startState) {
+    SnippetManager.prototype.tokenizeTmSnippet = function (str, startState) {
         return this.getTokenizer().getLineTokens(str, startState).tokens.map(function (x) {
             return x.value || x;
         });
     };
-    this.getVariableValue = function (editor, name, indentation) {
+    SnippetManager.prototype.getVariableValue = function (editor, name, indentation) {
         if (/^\d+$/.test(name))
             return (this.variables.__ || {})[name] || "";
         if (/^[A-Z]\d+$/.test(name))
@@ -42717,8 +42809,7 @@ var SnippetManager = function () {
             value = this.variables[name](editor, name, indentation);
         return value == null ? "" : value;
     };
-    this.variables = VARIABLES;
-    this.tmStrFormat = function (str, ch, editor) {
+    SnippetManager.prototype.tmStrFormat = function (str, ch, editor) {
         if (!ch.fmt)
             return str;
         var flag = ch.flag || "";
@@ -42761,14 +42852,14 @@ var SnippetManager = function () {
         });
         return formatted;
     };
-    this.tmFormatFunction = function (str, ch, editor) {
+    SnippetManager.prototype.tmFormatFunction = function (str, ch, editor) {
         if (ch.formatFunction == "upcase")
             return str.toUpperCase();
         if (ch.formatFunction == "downcase")
             return str.toLowerCase();
         return str;
     };
-    this.resolveVariables = function (snippet, editor) {
+    SnippetManager.prototype.resolveVariables = function (snippet, editor) {
         var result = [];
         var indentation = "";
         var afterNewLine = true;
@@ -42827,126 +42918,11 @@ var SnippetManager = function () {
         }
         return result;
     };
-    var processSnippetText = function (editor, snippetText, options) {
-        if (options === void 0) { options = {}; }
-        var cursor = editor.getCursorPosition();
-        var line = editor.session.getLine(cursor.row);
-        var tabString = editor.session.getTabString();
-        var indentString = line.match(/^\s*/)[0];
-        if (cursor.column < indentString.length)
-            indentString = indentString.slice(0, cursor.column);
-        snippetText = snippetText.replace(/\r/g, "");
-        var tokens = this.tokenizeTmSnippet(snippetText);
-        tokens = this.resolveVariables(tokens, editor);
-        tokens = tokens.map(function (x) {
-            if (x == "\n" && !options.excludeExtraIndent)
-                return x + indentString;
-            if (typeof x == "string")
-                return x.replace(/\t/g, tabString);
-            return x;
-        });
-        var tabstops = [];
-        tokens.forEach(function (p, i) {
-            if (typeof p != "object")
-                return;
-            var id = p.tabstopId;
-            var ts = tabstops[id];
-            if (!ts) {
-                ts = tabstops[id] = [];
-                ts.index = id;
-                ts.value = "";
-                ts.parents = {};
-            }
-            if (ts.indexOf(p) !== -1)
-                return;
-            if (p.choices && !ts.choices)
-                ts.choices = p.choices;
-            ts.push(p);
-            var i1 = tokens.indexOf(p, i + 1);
-            if (i1 === -1)
-                return;
-            var value = tokens.slice(i + 1, i1);
-            var isNested = value.some(function (t) { return typeof t === "object"; });
-            if (isNested && !ts.value) {
-                ts.value = value;
-            }
-            else if (value.length && (!ts.value || typeof ts.value !== "string")) {
-                ts.value = value.join("");
-            }
-        });
-        tabstops.forEach(function (ts) { ts.length = 0; });
-        var expanding = {};
-        function copyValue(val) {
-            var copy = [];
-            for (var i = 0; i < val.length; i++) {
-                var p = val[i];
-                if (typeof p == "object") {
-                    if (expanding[p.tabstopId])
-                        continue;
-                    var j = val.lastIndexOf(p, i - 1);
-                    p = copy[j] || { tabstopId: p.tabstopId };
-                }
-                copy[i] = p;
-            }
-            return copy;
-        }
-        for (var i = 0; i < tokens.length; i++) {
-            var p = tokens[i];
-            if (typeof p != "object")
-                continue;
-            var id = p.tabstopId;
-            var ts = tabstops[id];
-            var i1 = tokens.indexOf(p, i + 1);
-            if (expanding[id]) {
-                if (expanding[id] === p) {
-                    delete expanding[id];
-                    Object.keys(expanding).forEach(function (parentId) {
-                        ts.parents[parentId] = true;
-                    });
-                }
-                continue;
-            }
-            expanding[id] = p;
-            var value = ts.value;
-            if (typeof value !== "string")
-                value = copyValue(value);
-            else if (p.fmt)
-                value = this.tmStrFormat(value, p, editor);
-            tokens.splice.apply(tokens, [i + 1, Math.max(0, i1 - i)].concat(value, p));
-            if (ts.indexOf(p) === -1)
-                ts.push(p);
-        }
-        var row = 0, column = 0;
-        var text = "";
-        tokens.forEach(function (t) {
-            if (typeof t === "string") {
-                var lines = t.split("\n");
-                if (lines.length > 1) {
-                    column = lines[lines.length - 1].length;
-                    row += lines.length - 1;
-                }
-                else
-                    column += t.length;
-                text += t;
-            }
-            else if (t) {
-                if (!t.start)
-                    t.start = { row: row, column: column };
-                else
-                    t.end = { row: row, column: column };
-            }
-        });
-        return {
-            text: text,
-            tabstops: tabstops,
-            tokens: tokens
-        };
-    };
-    this.getDisplayTextForSnippet = function (editor, snippetText) {
+    SnippetManager.prototype.getDisplayTextForSnippet = function (editor, snippetText) {
         var processedSnippet = processSnippetText.call(this, editor, snippetText);
         return processedSnippet.text;
     };
-    this.insertSnippetForSelection = function (editor, snippetText, options) {
+    SnippetManager.prototype.insertSnippetForSelection = function (editor, snippetText, options) {
         if (options === void 0) { options = {}; }
         var processedSnippet = processSnippetText.call(this, editor, snippetText, options);
         var range = editor.getSelectionRange();
@@ -42958,7 +42934,7 @@ var SnippetManager = function () {
         var selectionId = editor.inVirtualSelectionMode && editor.selection.index;
         tabstopManager.addTabstops(processedSnippet.tabstops, range.start, end, selectionId);
     };
-    this.insertSnippet = function (editor, snippetText, options) {
+    SnippetManager.prototype.insertSnippet = function (editor, snippetText, options) {
         if (options === void 0) { options = {}; }
         var self = this;
         if (options.range && !(options.range instanceof Range))
@@ -42971,7 +42947,7 @@ var SnippetManager = function () {
         if (editor.tabstopManager)
             editor.tabstopManager.tabNext();
     };
-    this.$getScope = function (editor) {
+    SnippetManager.prototype.$getScope = function (editor) {
         var scope = editor.session.$mode.$id || "";
         scope = scope.split("/").pop();
         if (scope === "html" || scope === "php") {
@@ -42993,7 +42969,7 @@ var SnippetManager = function () {
         }
         return scope;
     };
-    this.getActiveScopes = function (editor) {
+    SnippetManager.prototype.getActiveScopes = function (editor) {
         var scope = this.$getScope(editor);
         var scopes = [scope];
         var snippetMap = this.snippetMap;
@@ -43003,7 +42979,7 @@ var SnippetManager = function () {
         scopes.push("_");
         return scopes;
     };
-    this.expandWithTab = function (editor, options) {
+    SnippetManager.prototype.expandWithTab = function (editor, options) {
         var self = this;
         var result = editor.forEachSelection(function () {
             return self.expandSnippetForSelection(editor, options);
@@ -43012,7 +42988,7 @@ var SnippetManager = function () {
             editor.tabstopManager.tabNext();
         return result;
     };
-    this.expandSnippetForSelection = function (editor, options) {
+    SnippetManager.prototype.expandSnippetForSelection = function (editor, options) {
         var cursor = editor.getCursorPosition();
         var line = editor.session.getLine(cursor.row);
         var before = line.substring(0, cursor.column);
@@ -43036,7 +43012,7 @@ var SnippetManager = function () {
         this.variables.M__ = this.variables.T__ = null;
         return true;
     };
-    this.findMatchingSnippet = function (snippetList, before, after) {
+    SnippetManager.prototype.findMatchingSnippet = function (snippetList, before, after) {
         for (var i = snippetList.length; i--;) {
             var s = snippetList[i];
             if (s.startRe && !s.startRe.test(before))
@@ -43052,9 +43028,7 @@ var SnippetManager = function () {
             return s;
         }
     };
-    this.snippetMap = {};
-    this.snippetNameMap = {};
-    this.register = function (snippets, scope) {
+    SnippetManager.prototype.register = function (snippets, scope) {
         var snippetMap = this.snippetMap;
         var snippetNameMap = this.snippetNameMap;
         var self = this;
@@ -43122,7 +43096,7 @@ var SnippetManager = function () {
         }
         this._signal("registerSnippets", { scope: scope });
     };
-    this.unregister = function (snippets, scope) {
+    SnippetManager.prototype.unregister = function (snippets, scope) {
         var snippetMap = this.snippetMap;
         var snippetNameMap = this.snippetNameMap;
         function removeSnippet(s) {
@@ -43140,7 +43114,7 @@ var SnippetManager = function () {
         else if (Array.isArray(snippets))
             snippets.forEach(removeSnippet);
     };
-    this.parseSnippetFile = function (str) {
+    SnippetManager.prototype.parseSnippetFile = function (str) {
         str = str.replace(/\r/g, "");
         var list = [], snippet = {};
         var re = /^#.*|^({[\s\S]*})\s*$|^(\S+) (.*)$|^((?:\n*\t.*)+)/gm;
@@ -43179,7 +43153,7 @@ var SnippetManager = function () {
         }
         return list;
     };
-    this.getSnippetByName = function (name, editor) {
+    SnippetManager.prototype.getSnippetByName = function (name, editor) {
         var snippetMap = this.snippetNameMap;
         var snippet;
         this.getActiveScopes(editor).some(function (scope) {
@@ -43190,49 +43164,168 @@ var SnippetManager = function () {
         }, this);
         return snippet;
     };
-}).call(SnippetManager.prototype);
-var TabstopManager = function (editor) {
-    if (editor.tabstopManager)
-        return editor.tabstopManager;
-    editor.tabstopManager = this;
-    this.$onChange = this.onChange.bind(this);
-    this.$onChangeSelection = lang.delayedCall(this.onChangeSelection.bind(this)).schedule;
-    this.$onChangeSession = this.onChangeSession.bind(this);
-    this.$onAfterExec = this.onAfterExec.bind(this);
-    this.attach(editor);
+    return SnippetManager;
+}());
+oop.implement(SnippetManager.prototype, EventEmitter);
+var processSnippetText = function (editor, snippetText, options) {
+    if (options === void 0) { options = {}; }
+    var cursor = editor.getCursorPosition();
+    var line = editor.session.getLine(cursor.row);
+    var tabString = editor.session.getTabString();
+    var indentString = line.match(/^\s*/)[0];
+    if (cursor.column < indentString.length)
+        indentString = indentString.slice(0, cursor.column);
+    snippetText = snippetText.replace(/\r/g, "");
+    var tokens = this.tokenizeTmSnippet(snippetText);
+    tokens = this.resolveVariables(tokens, editor);
+    tokens = tokens.map(function (x) {
+        if (x == "\n" && !options.excludeExtraIndent)
+            return x + indentString;
+        if (typeof x == "string")
+            return x.replace(/\t/g, tabString);
+        return x;
+    });
+    var tabstops = [];
+    tokens.forEach(function (p, i) {
+        if (typeof p != "object")
+            return;
+        var id = p.tabstopId;
+        var ts = tabstops[id];
+        if (!ts) {
+            ts = tabstops[id] = [];
+            ts.index = id;
+            ts.value = "";
+            ts.parents = {};
+        }
+        if (ts.indexOf(p) !== -1)
+            return;
+        if (p.choices && !ts.choices)
+            ts.choices = p.choices;
+        ts.push(p);
+        var i1 = tokens.indexOf(p, i + 1);
+        if (i1 === -1)
+            return;
+        var value = tokens.slice(i + 1, i1);
+        var isNested = value.some(function (t) { return typeof t === "object"; });
+        if (isNested && !ts.value) {
+            ts.value = value;
+        }
+        else if (value.length && (!ts.value || typeof ts.value !== "string")) {
+            ts.value = value.join("");
+        }
+    });
+    tabstops.forEach(function (ts) { ts.length = 0; });
+    var expanding = {};
+    function copyValue(val) {
+        var copy = [];
+        for (var i = 0; i < val.length; i++) {
+            var p = val[i];
+            if (typeof p == "object") {
+                if (expanding[p.tabstopId])
+                    continue;
+                var j = val.lastIndexOf(p, i - 1);
+                p = copy[j] || { tabstopId: p.tabstopId };
+            }
+            copy[i] = p;
+        }
+        return copy;
+    }
+    for (var i = 0; i < tokens.length; i++) {
+        var p = tokens[i];
+        if (typeof p != "object")
+            continue;
+        var id = p.tabstopId;
+        var ts = tabstops[id];
+        var i1 = tokens.indexOf(p, i + 1);
+        if (expanding[id]) {
+            if (expanding[id] === p) {
+                delete expanding[id];
+                Object.keys(expanding).forEach(function (parentId) {
+                    ts.parents[parentId] = true;
+                });
+            }
+            continue;
+        }
+        expanding[id] = p;
+        var value = ts.value;
+        if (typeof value !== "string")
+            value = copyValue(value);
+        else if (p.fmt)
+            value = this.tmStrFormat(value, p, editor);
+        tokens.splice.apply(tokens, [i + 1, Math.max(0, i1 - i)].concat(value, p));
+        if (ts.indexOf(p) === -1)
+            ts.push(p);
+    }
+    var row = 0, column = 0;
+    var text = "";
+    tokens.forEach(function (t) {
+        if (typeof t === "string") {
+            var lines = t.split("\n");
+            if (lines.length > 1) {
+                column = lines[lines.length - 1].length;
+                row += lines.length - 1;
+            }
+            else
+                column += t.length;
+            text += t;
+        }
+        else if (t) {
+            if (!t.start)
+                t.start = { row: row, column: column };
+            else
+                t.end = { row: row, column: column };
+        }
+    });
+    return {
+        text: text,
+        tabstops: tabstops,
+        tokens: tokens
+    };
 };
-(function () {
-    this.attach = function (editor) {
+var TabstopManager = /** @class */ (function () {
+    function TabstopManager(editor) {
         this.index = 0;
         this.ranges = [];
         this.tabstops = [];
+        if (editor.tabstopManager)
+            return editor.tabstopManager;
+        editor.tabstopManager = this;
+        this.$onChange = this.onChange.bind(this);
+        this.$onChangeSelection = lang.delayedCall(this.onChangeSelection.bind(this)).schedule;
+        this.$onChangeSession = this.onChangeSession.bind(this);
+        this.$onAfterExec = this.onAfterExec.bind(this);
+        this.attach(editor);
+    }
+    TabstopManager.prototype.attach = function (editor) {
         this.$openTabstops = null;
         this.selectedTabstop = null;
         this.editor = editor;
+        this.session = editor.session;
         this.editor.on("change", this.$onChange);
         this.editor.on("changeSelection", this.$onChangeSelection);
         this.editor.on("changeSession", this.$onChangeSession);
         this.editor.commands.on("afterExec", this.$onAfterExec);
         this.editor.keyBinding.addKeyboardHandler(this.keyboardHandler);
     };
-    this.detach = function () {
+    TabstopManager.prototype.detach = function () {
         this.tabstops.forEach(this.removeTabstopMarkers, this);
-        this.ranges = null;
-        this.tabstops = null;
+        this.ranges.length = 0;
+        this.tabstops.length = 0;
         this.selectedTabstop = null;
-        this.editor.removeListener("change", this.$onChange);
-        this.editor.removeListener("changeSelection", this.$onChangeSelection);
-        this.editor.removeListener("changeSession", this.$onChangeSession);
-        this.editor.commands.removeListener("afterExec", this.$onAfterExec);
+        this.editor.off("change", this.$onChange);
+        this.editor.off("changeSelection", this.$onChangeSelection);
+        this.editor.off("changeSession", this.$onChangeSession);
+        this.editor.commands.off("afterExec", this.$onAfterExec);
         this.editor.keyBinding.removeKeyboardHandler(this.keyboardHandler);
         this.editor.tabstopManager = null;
+        this.session = null;
         this.editor = null;
     };
-    this.onChange = function (delta) {
+    TabstopManager.prototype.onChange = function (delta) {
         var isRemove = delta.action[0] == "r";
         var selectedTabstop = this.selectedTabstop || {};
         var parents = selectedTabstop.parents || {};
-        var tabstops = (this.tabstops || []).slice();
+        var tabstops = this.tabstops.slice();
         for (var i = 0; i < tabstops.length; i++) {
             var ts = tabstops[i];
             var active = ts == selectedTabstop || parents[ts.index];
@@ -43249,16 +43342,16 @@ var TabstopManager = function (editor) {
             }
             ts.rangeList.$onChange(delta);
         }
-        var session = this.editor.session;
+        var session = this.session;
         if (!this.$inChange && isRemove && session.getLength() == 1 && !session.getValue())
             this.detach();
     };
-    this.updateLinkedFields = function () {
+    TabstopManager.prototype.updateLinkedFields = function () {
         var ts = this.selectedTabstop;
         if (!ts || !ts.hasLinkedRanges || !ts.firstNonLinked)
             return;
         this.$inChange = true;
-        var session = this.editor.session;
+        var session = this.session;
         var text = session.getTextRange(ts.firstNonLinked);
         for (var i = 0; i < ts.length; i++) {
             var range = ts[i];
@@ -43270,11 +43363,11 @@ var TabstopManager = function (editor) {
         }
         this.$inChange = false;
     };
-    this.onAfterExec = function (e) {
+    TabstopManager.prototype.onAfterExec = function (e) {
         if (e.command && !e.command.readOnly)
             this.updateLinkedFields();
     };
-    this.onChangeSelection = function () {
+    TabstopManager.prototype.onChangeSelection = function () {
         if (!this.editor)
             return;
         var lead = this.editor.selection.lead;
@@ -43290,10 +43383,10 @@ var TabstopManager = function (editor) {
         }
         this.detach();
     };
-    this.onChangeSession = function () {
+    TabstopManager.prototype.onChangeSession = function () {
         this.detach();
     };
-    this.tabNext = function (dir) {
+    TabstopManager.prototype.tabNext = function (dir) {
         var max = this.tabstops.length;
         var index = this.index + (dir || 1);
         index = Math.min(Math.max(index, 1), max);
@@ -43303,7 +43396,7 @@ var TabstopManager = function (editor) {
         if (index === 0)
             this.detach();
     };
-    this.selectTabstop = function (index) {
+    TabstopManager.prototype.selectTabstop = function (index) {
         this.$openTabstops = null;
         var ts = this.tabstops[this.index];
         if (ts)
@@ -43332,7 +43425,7 @@ var TabstopManager = function (editor) {
         if (this.selectedTabstop && this.selectedTabstop.choices)
             this.editor.execCommand("startAutocomplete", { matches: this.selectedTabstop.choices });
     };
-    this.addTabstops = function (tabstops, start, end) {
+    TabstopManager.prototype.addTabstops = function (tabstops, start, end) {
         var useLink = this.useLink || !this.editor.getOption("enableMultiselect");
         if (!this.$openTabstops)
             this.$openTabstops = [];
@@ -43384,21 +43477,21 @@ var TabstopManager = function (editor) {
             this.tabstops.splice.apply(this.tabstops, arg);
         }
     };
-    this.addTabstopMarkers = function (ts) {
-        var session = this.editor.session;
+    TabstopManager.prototype.addTabstopMarkers = function (ts) {
+        var session = this.session;
         ts.forEach(function (range) {
             if (!range.markerId)
                 range.markerId = session.addMarker(range, "ace_snippet-marker", "text");
         });
     };
-    this.removeTabstopMarkers = function (ts) {
-        var session = this.editor.session;
+    TabstopManager.prototype.removeTabstopMarkers = function (ts) {
+        var session = this.session;
         ts.forEach(function (range) {
             session.removeMarker(range.markerId);
             range.markerId = null;
         });
     };
-    this.removeRange = function (range) {
+    TabstopManager.prototype.removeRange = function (range) {
         var i = range.tabstop.indexOf(range);
         if (i != -1)
             range.tabstop.splice(i, 1);
@@ -43408,7 +43501,7 @@ var TabstopManager = function (editor) {
         i = range.tabstop.rangeList.ranges.indexOf(range);
         if (i != -1)
             range.tabstop.splice(i, 1);
-        this.editor.session.removeMarker(range.markerId);
+        this.session.removeMarker(range.markerId);
         if (!range.tabstop.length) {
             i = this.tabstops.indexOf(range.tabstop);
             if (i != -1)
@@ -43417,23 +43510,24 @@ var TabstopManager = function (editor) {
                 this.detach();
         }
     };
-    this.keyboardHandler = new HashHandler();
-    this.keyboardHandler.bindKeys({
-        "Tab": function (editor) {
-            if (exports.snippetManager && exports.snippetManager.expandWithTab(editor))
-                return;
-            editor.tabstopManager.tabNext(1);
-            editor.renderer.scrollCursorIntoView();
-        },
-        "Shift-Tab": function (editor) {
-            editor.tabstopManager.tabNext(-1);
-            editor.renderer.scrollCursorIntoView();
-        },
-        "Esc": function (editor) {
-            editor.tabstopManager.detach();
-        }
-    });
-}).call(TabstopManager.prototype);
+    return TabstopManager;
+}());
+TabstopManager.prototype.keyboardHandler = new HashHandler();
+TabstopManager.prototype.keyboardHandler.bindKeys({
+    "Tab": function (editor) {
+        if (exports.snippetManager && exports.snippetManager.expandWithTab(editor))
+            return;
+        editor.tabstopManager.tabNext(1);
+        editor.renderer.scrollCursorIntoView();
+    },
+    "Shift-Tab": function (editor) {
+        editor.tabstopManager.tabNext(-1);
+        editor.renderer.scrollCursorIntoView();
+    },
+    "Esc": function (editor) {
+        editor.tabstopManager.detach();
+    }
+});
 var movePoint = function (point, diff) {
     if (point.row == 0)
         point.column += diff.column;
@@ -43571,6 +43665,7 @@ var AcePopup = /** @class */ (function () {
                 selected.setAttribute("aria-label", popup.getData(row).value);
                 selected.setAttribute("aria-setsize", popup.data.length);
                 selected.setAttribute("aria-posinset", row);
+                selected.setAttribute("aria-describedby", "doc-tooltip");
             }
         });
         var hideHoverMarker = function () { setHoverMarker(-1); };
@@ -43784,7 +43879,7 @@ var AcePopup = /** @class */ (function () {
     }
     return AcePopup;
 }());
-dom.importCssString("\n.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {\n    background-color: #CAD6FA;\n    z-index: 1;\n}\n.ace_dark.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {\n    background-color: #3a674e;\n}\n.ace_editor.ace_autocomplete .ace_line-hover {\n    border: 1px solid #abbffe;\n    margin-top: -1px;\n    background: rgba(233,233,253,0.4);\n    position: absolute;\n    z-index: 2;\n}\n.ace_dark.ace_editor.ace_autocomplete .ace_line-hover {\n    border: 1px solid rgba(109, 150, 13, 0.8);\n    background: rgba(58, 103, 78, 0.62);\n}\n.ace_completion-meta {\n    opacity: 0.5;\n    margin: 0 0.9em;\n}\n.ace_completion-message {\n    color: blue;\n}\n.ace_editor.ace_autocomplete .ace_completion-highlight{\n    color: #2d69c7;\n}\n.ace_dark.ace_editor.ace_autocomplete .ace_completion-highlight{\n    color: #93ca12;\n}\n.ace_editor.ace_autocomplete {\n    width: 300px;\n    z-index: 200000;\n    border: 1px lightgray solid;\n    position: fixed;\n    box-shadow: 2px 3px 5px rgba(0,0,0,.2);\n    line-height: 1.4;\n    background: #fefefe;\n    color: #111;\n}\n.ace_dark.ace_editor.ace_autocomplete {\n    border: 1px #484747 solid;\n    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.51);\n    line-height: 1.4;\n    background: #25282c;\n    color: #c1c1c1;\n}\n.ace_autocomplete_right .ace_text-layer  {\n    width: calc(100% - 8px);\n}\n.ace_autocomplete_right .ace_line {\n    display: flex;\n}\n.ace_autocomplete_right .ace_completion-spacer {\n    flex: 1;\n}\n", "autocompletion.css", false);
+dom.importCssString("\n.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {\n    background-color: #CAD6FA;\n    z-index: 1;\n}\n.ace_dark.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {\n    background-color: #3a674e;\n}\n.ace_editor.ace_autocomplete .ace_line-hover {\n    border: 1px solid #abbffe;\n    margin-top: -1px;\n    background: rgba(233,233,253,0.4);\n    position: absolute;\n    z-index: 2;\n}\n.ace_dark.ace_editor.ace_autocomplete .ace_line-hover {\n    border: 1px solid rgba(109, 150, 13, 0.8);\n    background: rgba(58, 103, 78, 0.62);\n}\n.ace_completion-meta {\n    opacity: 0.5;\n    margin-left: 0.9em;\n}\n.ace_completion-message {\n    color: blue;\n}\n.ace_editor.ace_autocomplete .ace_completion-highlight{\n    color: #2d69c7;\n}\n.ace_dark.ace_editor.ace_autocomplete .ace_completion-highlight{\n    color: #93ca12;\n}\n.ace_editor.ace_autocomplete {\n    width: 300px;\n    z-index: 200000;\n    border: 1px lightgray solid;\n    position: fixed;\n    box-shadow: 2px 3px 5px rgba(0,0,0,.2);\n    line-height: 1.4;\n    background: #fefefe;\n    color: #111;\n}\n.ace_dark.ace_editor.ace_autocomplete {\n    border: 1px #484747 solid;\n    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.51);\n    line-height: 1.4;\n    background: #25282c;\n    color: #c1c1c1;\n}\n.ace_autocomplete .ace_text-layer  {\n    width: calc(100% - 8px);\n}\n.ace_autocomplete .ace_line {\n    display: flex;\n    align-items: center;\n}\n.ace_autocomplete .ace_line > * {\n    min-width: 0;\n    flex: 0 0 auto;\n}\n.ace_autocomplete .ace_line .ace_ {\n    flex: 0 1 auto;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis;\n}\n.ace_autocomplete .ace_completion-spacer {\n    flex: 1;\n}\n", "autocompletion.css", false);
 exports.AcePopup = AcePopup;
 exports.$singleLineEditor = $singleLineEditor;
 exports.getAriaId = getAriaId;
@@ -43932,6 +44027,7 @@ var Autocomplete = /** @class */ (function () {
         this.changeListener = this.changeListener.bind(this);
         this.mousedownListener = this.mousedownListener.bind(this);
         this.mousewheelListener = this.mousewheelListener.bind(this);
+        this.onLayoutChange = this.onLayoutChange.bind(this);
         this.changeTimer = lang.delayedCall(function () {
             this.updateCompletions(true);
         }.bind(this));
@@ -43975,6 +44071,35 @@ var Autocomplete = /** @class */ (function () {
             this.$updatePopupPosition();
         }
         this.tooltipTimer.call(null, null);
+    };
+    Autocomplete.prototype.observeLayoutChanges = function () {
+        if (this.$elements || !this.editor)
+            return;
+        window.addEventListener("resize", this.onLayoutChange, { passive: true });
+        window.addEventListener("wheel", this.mousewheelListener);
+        var el = this.editor.container.parentNode;
+        var elements = [];
+        while (el) {
+            elements.push(el);
+            el.addEventListener("scroll", this.onLayoutChange, { passive: true });
+            el = el.parentNode;
+        }
+        this.$elements = elements;
+    };
+    Autocomplete.prototype.unObserveLayoutChanges = function () {
+        var _this = this;
+        window.removeEventListener("resize", this.onLayoutChange, { passive: true });
+        window.removeEventListener("wheel", this.mousewheelListener);
+        this.$elements && this.$elements.forEach(function (el) {
+            el.removeEventListener("scroll", _this.onLayoutChange, { passive: true });
+        });
+        this.$elements = null;
+    };
+    Autocomplete.prototype.onLayoutChange = function () {
+        if (!this.popup.isOpen)
+            return this.unObserveLayoutChanges();
+        this.$updatePopupPosition();
+        this.updateDocTooltip();
     };
     Autocomplete.prototype.$updatePopupPosition = function () {
         var editor = this.editor;
@@ -44030,6 +44155,7 @@ var Autocomplete = /** @class */ (function () {
             this.detach();
         }
         this.changeTimer.cancel();
+        this.observeLayoutChanges();
     };
     Autocomplete.prototype.detach = function () {
         if (this.editor) {
@@ -44050,6 +44176,7 @@ var Autocomplete = /** @class */ (function () {
             this.base.detach();
         this.activated = false;
         this.completionProvider = this.completions = this.base = null;
+        this.unObserveLayoutChanges();
     };
     Autocomplete.prototype.changeListener = function (e) {
         var cursor = this.editor.selection.lead;
@@ -44208,6 +44335,8 @@ var Autocomplete = /** @class */ (function () {
             this.tooltipNode.tabIndex = -1;
             this.tooltipNode.onblur = this.blurListener.bind(this);
             this.tooltipNode.onclick = this.onTooltipClick.bind(this);
+            this.tooltipNode.id = "doc-tooltip";
+            this.tooltipNode.setAttribute("role", "tooltip");
         }
         var theme = this.editor.renderer.theme;
         this.tooltipNode.className = "ace_tooltip ace_doc-tooltip " +
@@ -44408,6 +44537,7 @@ var CompletionProvider = /** @class */ (function () {
         var pos = editor.getCursorPosition();
         var prefix = util.getCompletionPrefix(editor);
         var matches = [];
+        this.completers = editor.completers;
         var total = editor.completers.length;
         editor.completers.forEach(function (completer, i) {
             completer.getCompletions(editor, session, pos, prefix, function (err, results) {
@@ -44463,6 +44593,11 @@ var CompletionProvider = /** @class */ (function () {
     };
     CompletionProvider.prototype.detach = function () {
         this.active = false;
+        this.completers && this.completers.forEach(function (completer) {
+            if (typeof completer.cancel === "function") {
+                completer.cancel();
+            }
+        });
     };
     return CompletionProvider;
 }());
@@ -44717,14 +44852,29 @@ var doLiveAutocomplete = function (e) {
         if (hasCompleter && !util.getCompletionPrefix(editor))
             editor.completer.detach();
     }
-    else if (e.command.name === "insertstring") {
-        var prefix = util.getCompletionPrefix(editor);
-        var triggerAutocomplete = util.triggerAutocomplete(editor);
-        if ((prefix || triggerAutocomplete) && !hasCompleter) {
-            var completer = Autocomplete.for(editor);
-            completer.autoShown = true;
-            completer.showPopup(editor);
+    else if (e.command.name === "insertstring" && !hasCompleter) {
+        lastExecEvent = e;
+        var delay = e.editor.$liveAutocompletionDelay;
+        if (delay) {
+            liveAutocompleteTimer.delay(delay);
         }
+        else {
+            showLiveAutocomplete(e);
+        }
+    }
+};
+var lastExecEvent;
+var liveAutocompleteTimer = lang.delayedCall(function () {
+    showLiveAutocomplete(lastExecEvent);
+}, 0);
+var showLiveAutocomplete = function (e) {
+    var editor = e.editor;
+    var prefix = util.getCompletionPrefix(editor);
+    var triggerAutocomplete = util.triggerAutocomplete(editor);
+    if ((prefix || triggerAutocomplete) && prefix.length >= editor.$liveAutocompletionThreshold) {
+        var completer = Autocomplete.for(editor);
+        completer.autoShown = true;
+        completer.showPopup(editor);
     }
 };
 var Editor = require("../editor").Editor;
@@ -44750,10 +44900,16 @@ require("../config").defineOptions(Editor.prototype, "editor", {
                 this.commands.on('afterExec', doLiveAutocomplete);
             }
             else {
-                this.commands.removeListener('afterExec', doLiveAutocomplete);
+                this.commands.off('afterExec', doLiveAutocomplete);
             }
         },
         value: false
+    },
+    liveAutocompletionDelay: {
+        initialValue: 0
+    },
+    liveAutocompletionThreshold: {
+        initialValue: 0
     },
     enableSnippets: {
         set: function (val) {

@@ -7,7 +7,7 @@
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,babel-eslint'",
+    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,@babel/*'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
@@ -29,8 +29,8 @@
   "devDependencies": {
     "ava": "^4.3.0",
     "depcheck": "^1.4.1",
-    "eslint": "^7.0.0",
-    "babel-eslint": "^10.0.1",
+    "eslint": "^8.43.0",
+    "@babel/eslint-parser": "^7.22.5",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-node": "^8.0.1",

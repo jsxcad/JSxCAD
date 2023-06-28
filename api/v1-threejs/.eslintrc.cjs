@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['standard', 'plugin:react/recommended'],
-  parser: 'babel-eslint',
+  parser: '@babel/eslint-parser',
   rules: {
     'max-len': [1, 120, 2],
     semi: [2, 'always'],
