@@ -448,7 +448,7 @@ const extrudeAlong = (geometry, vector, intervals, { noVoid } = {}) => {
 const extrudeAlongNormal = (geometry, intervals, options) => {
   const normal = makeAbsolute(computeNormal(geometry)).points[0];
   // This is not safe.
-  extrudeAlong(geometry, normal, intervals, options);
+  return extrudeAlong(geometry, normal, intervals, options);
 };
 
 const extrudeAlongX = (geometry, intervals, options) =>
@@ -2210,14 +2210,15 @@ const filter$d = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-const inset = (geometry, ...args) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$d, inputs);
-  const outputs = inset$1(inputs, ...args);
-  // Put the inner insets first.
-  deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+const inset = (
+  geometry,
+  initial = 1,
+  { segments = 16, step, limit } = {}
+) => {
+  const inputs = linearize(geometry, filter$d);
+  const outputs = inset$1(inputs, initial, step, limit, segments);
+  // Inner insets should come first.
+  return Group(outputs);
 };
 
 const hasNotShow = (geometry, show) =>
@@ -2337,13 +2338,14 @@ const filter$8 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-const offset = (geometry, ...args) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$8, inputs);
-  const outputs = offset$1(inputs, ...args);
-  deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+const offset = (
+  geometry,
+  initial = 1,
+  { segments = 16, step, limit } = {}
+) => {
+  const inputs = linearize(geometry, filter$8);
+  const outputs = offset$1(inputs, initial, step, limit, segments);
+  return Group(outputs);
 };
 
 const doNothing = (geometry) => geometry;

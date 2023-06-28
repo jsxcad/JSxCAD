@@ -4187,11 +4187,10 @@ const image = Shape.registerMethod2(
   (input, url) => untag('image:*').tag(`image:${url}`)(input)
 );
 
-const inset = Shape.registerMethod2(
+const inset = Shape.registerMethod3(
   'inset',
   ['inputGeometry', 'number', 'options'],
-  (geometry, initial = 1, { segments = 16, step, limit } = {}) =>
-    Shape.fromGeometry(inset$1(geometry, initial, step, limit, segments))
+  inset$1
 );
 
 const involute = Shape.registerMethod2(
@@ -4377,11 +4376,10 @@ const nth = Shape.registerMethod2(
 
 const n = nth;
 
-const offset = Shape.registerMethod2(
+const offset = Shape.registerMethod3(
   'offset',
   ['inputGeometry', 'number', 'options'],
-  (geometry, initial = 1, { segments = 16, step, limit } = {}) =>
-    Shape.fromGeometry(offset$1(geometry, initial, step, limit, segments))
+  offset$1
 );
 
 const outline = Shape.registerMethod2(
@@ -4609,28 +4607,6 @@ const rx = Shape.registerMethod3(
 
 const rotateX = rx;
 
-/*
-import Group from './Group.js';
-import Shape from './Shape.js';
-import { fromRotateXToTransform } from './jsxcad-algorithm-cgal.js';
-import { transform } from './transform.js';
-
-// rx is in terms of turns -- 1/2 is a half turn.
-export const rx = Shape.registerMethod2(
-  ['rotateX', 'rx'],
-  ['input', 'numbers'],
-  async (input, turns) => {
-    const rotated = [];
-    for (const turn of turns) {
-      rotated.push(await transform(fromRotateXToTransform(turn))(input));
-    }
-    return Group(...rotated);
-  }
-);
-
-export const rotateX = rx;
-*/
-
 const ry = Shape.registerMethod3(
   ['rotateY', 'ry'],
   ['inputGeometry', 'numbers'],
@@ -4638,28 +4614,6 @@ const ry = Shape.registerMethod3(
 );
 
 const rotateY = ry;
-
-/*
-import Group from './Group.js';
-import Shape from './Shape.js';
-import { fromRotateYToTransform } from './jsxcad-algorithm-cgal.js';
-import { transform } from './transform.js';
-
-// ry is in terms of turns -- 1/2 is a half turn.
-export const ry = Shape.registerMethod2(
-  ['rotateY', 'ry'],
-  ['input', 'numbers'],
-  async (input, turns) => {
-    const rotated = [];
-    for (const turn of turns) {
-      rotated.push(await transform(fromRotateYToTransform(turn))(input));
-    }
-    return Group(...rotated);
-  }
-);
-
-export const rotateY = ry;
-*/
 
 const rz = Shape.registerMethod3(
   ['rotateZ', 'rz'],
