@@ -1,42 +1,22 @@
-import Group from './Group.js';
-import Point from './Point.js';
+import {
+  extrudeAlongNormal as extrudeAlongNormalOp,
+  extrudeAlong as extrudeAlongOp,
+} from '@jsxcad/geometry';
+
 import Shape from './Shape.js';
-import { extrude as extrudeGeometry } from '@jsxcad/geometry';
-import { moveAlong } from './moveAlong.js';
-import { normal } from './normal.js';
 
 // This interface is a bit awkward.
-export const extrudeAlong = Shape.registerMethod2(
+export const extrudeAlong = Shape.registerMethod3(
   'extrudeAlong',
-  ['input', 'coordinate', 'modes:noVoid', 'intervals'],
-  async (input, vector, { noVoid }, intervals) => {
-    const extrusions = [];
-    for (const [depth, height] of intervals) {
-      if (height === depth) {
-        // Return unextruded geometry at this height, instead.
-        extrusions.push(await moveAlong(vector, height)(input));
-        continue;
-      }
-      extrusions.push(
-        Shape.fromGeometry(
-          extrudeGeometry(
-            await input.toGeometry(),
-            await Point().moveAlong(vector, height).toGeometry(),
-            await Point().moveAlong(vector, depth).toGeometry(),
-            noVoid
-          )
-        )
-      );
-    }
-    return Group(...extrusions)();
-  }
+  ['inputGeometry', 'coordinate', 'intervals', 'modes:noVoid'],
+  extrudeAlongOp
 );
 
 // Note that the operator is applied to each leaf geometry by default.
-export const e = Shape.registerMethod2(
-  'e',
-  ['input', 'intervals'],
-  (input, extents) => extrudeAlong(normal(), ...extents)(input)
+export const e = Shape.registerMethod3(
+  ['e', 'extrudeAlongNormal'],
+  ['inputGeometry', 'intervals', 'modes:noVoid'],
+  extrudeAlongNormalOp
 );
 
 export default extrudeAlong;

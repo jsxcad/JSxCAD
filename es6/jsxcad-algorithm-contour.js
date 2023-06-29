@@ -1,4 +1,4 @@
-import { link, taggedPoints } from './jsxcad-geometry.js';
+import { link, Points } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3445,7 +3445,7 @@ const fromRaster = async (raster, bands) => {
     const high = bands[nth + 1];
     const paths = [];
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
-      result.push(link(taggedPoints({}, band), [], /* close= */ true));
+      result.push(link(Points(band), [], /* close= */ true));
     }
     if (paths.length > 0) {
       result.push(paths);

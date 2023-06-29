@@ -25,7 +25,7 @@ export const toSvg = async (
   const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
   const disjointed = disjoint(sectioned, {});
   // svg reverses the Y axis.
-  const scaled = scale([1, -1, 1], disjointed);
+  const scaled = scale(disjointed, [1, -1, 1]);
   const [baseMin] = measureBoundingBox(scaled);
   const translated = translate(disjointed, [-baseMin[X], -baseMin[Y], 0]);
   const geometry = makeAbsolute(translated);

@@ -2257,8 +2257,8 @@ const smooth = (
   resolution = 1,
   steps = 1,
   time = 1,
-  remesh_iterations = 1,
-  remesh_relaxation_steps = 1
+  remeshIterations = 1,
+  remeshRelaxationSteps = 1
 ) =>
   withCgalGeometry('smooth', inputs, (cgalGeometry, g) => {
     const status = g.Smooth(
@@ -2267,8 +2267,8 @@ const smooth = (
       resolution,
       steps,
       time,
-      remesh_iterations,
-      remesh_relaxation_steps
+      remeshIterations,
+      remeshRelaxationSteps
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

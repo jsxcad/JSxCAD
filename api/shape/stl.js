@@ -28,6 +28,9 @@ export const LoadStl = Shape.registerMethod2(
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
+    if (data === undefined) {
+      throw Error(`LoadStl cannot read: "${path}"`);
+    }
     let format = 'binary';
     if (ascii) {
       format = 'ascii';

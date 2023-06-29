@@ -5,6 +5,6 @@ export const area = Shape.registerMethod3(
   'area',
   ['inputGeometry', 'function'],
   op,
-  (result, geometry, op = (area) => (_shape) => area) =>
+  (result, [geometry, op = (area) => (_shape) => area]) =>
     op(result)(Shape.fromGeometry(geometry))
 );

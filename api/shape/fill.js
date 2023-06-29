@@ -1,11 +1,7 @@
 import { Shape } from './Shape.js';
-import { fill as fillGeometry } from '@jsxcad/geometry';
+import { fill as op } from '@jsxcad/geometry';
 
-export const fill = Shape.registerMethod2(
-  ['fill', 'f'],
-  ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(fillGeometry(geometry))
-);
+export const fill = Shape.registerMethod3(['fill', 'f'], ['inputGeometry'], op);
 
 export const f = fill;
 

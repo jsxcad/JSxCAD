@@ -1,10 +1,6 @@
 import Shape from './Shape.js';
-import { computeNormal } from '@jsxcad/geometry';
+import { computeNormal as op } from '@jsxcad/geometry';
 
-export const normal = Shape.registerMethod2(
-  'normal',
-  ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(computeNormal(geometry))
-);
+export const normal = Shape.registerMethod3('normal', ['inputGeometry'], op);
 
 export default normal;

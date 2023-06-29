@@ -1,19 +1,10 @@
-import Group from './Group.js';
 import Shape from './Shape.js';
-import { fromRotateYToTransform } from '@jsxcad/algorithm-cgal';
-import { transform } from './transform.js';
+import { rotateYs as op } from '@jsxcad/geometry';
 
-// ry is in terms of turns -- 1/2 is a half turn.
-export const ry = Shape.registerMethod2(
+export const ry = Shape.registerMethod3(
   ['rotateY', 'ry'],
-  ['input', 'numbers'],
-  async (input, turns) => {
-    const rotated = [];
-    for (const turn of turns) {
-      rotated.push(await transform(fromRotateYToTransform(turn))(input));
-    }
-    return Group(...rotated);
-  }
+  ['inputGeometry', 'numbers'],
+  op
 );
 
 export const rotateY = ry;

@@ -1,4 +1,4 @@
-import { scale, taggedSegments } from '@jsxcad/geometry';
+import { Segments, scale } from '@jsxcad/geometry';
 
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve.js';
@@ -74,8 +74,8 @@ export const fromSvgPath = (svgPath, options = {}) => {
     )
   );
   if (options.normalizeCoordinateSystem) {
-    return scale([1, -1, 1], taggedSegments({}, segments));
+    return scale(Segments(segments), [1, -1, 1]);
   } else {
-    return taggedSegments({}, segments);
+    return Segments(segments);
   }
 };
