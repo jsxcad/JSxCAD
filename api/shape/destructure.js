@@ -1,6 +1,6 @@
 import Shape from './Shape.js';
 
-const resolve = async (input, value) => {
+const resolve = async (input, value, specOptions = {}) => {
   while (value instanceof Promise) {
     value = await value;
   }
@@ -22,7 +22,25 @@ const resolve = async (input, value) => {
   } else if (Shape.isObject(value)) {
     const resolvedObject = {};
     for (const key of Object.keys(value)) {
-      resolvedObject[key] = await resolve(input, value[key]);
+      switch (specOptions[key]) {
+        case 'geometries': {
+          // This should be better integrated with destructuring.
+          const geometries = [];
+          const values = await resolve(input, value[key]);
+          if (Shape.isShape(values)) {
+            geometries.push(await values.toGeometry());
+          } else if (Shape.isArray(values)) {
+            for (const value of values) {
+              geometries.push(await value.toGeometry());
+            }
+          }
+          resolvedObject[key] = geometries;
+          break;
+        }
+        default: {
+          resolvedObject[key] = await resolve(input, value[key]);
+        }
+      }
     }
     return resolvedObject;
   } else {
@@ -61,13 +79,20 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
-  for (let spec of specs) {
-    const rest = [];
-    let modes;
-    if (spec.startsWith('modes:')) {
-      modes = spec.substring('modes:'.length).split(',');
-      spec = 'modes';
+  for (const baseSpec of specs) {
+    const [spec, specOptionText] = baseSpec.split(':');
+    const specOptions = {};
+    if (specOptionText !== undefined) {
+      for (const chunk of specOptionText.split(',')) {
+        const [key, value] = chunk.split('=');
+        if (value === undefined) {
+          specOptions[key] = true;
+        } else {
+          specOptions[key] = value;
+        }
+      }
     }
+    const rest = [];
     switch (spec) {
       case 'input': {
         output.push(input);
@@ -99,7 +124,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
             rest.push(arg);
             continue;
           }
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isObject(value)) {
             out.push(value);
           } else {
@@ -112,7 +137,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'number': {
         let number;
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (number === undefined && Shape.isNumber(value)) {
             number = value;
           } else {
@@ -125,7 +150,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'value': {
         let number;
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (number === undefined && Shape.isValue(value)) {
             number = value;
           } else {
@@ -138,7 +163,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'numbers': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isNumber(value)) {
             out.push(value);
           } else {
@@ -151,7 +176,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'string': {
         let string;
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (string === undefined && Shape.isString(value)) {
             string = value;
           } else {
@@ -200,7 +225,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'shape': {
         let result;
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (result === undefined && Shape.isShape(value)) {
             result = value;
           } else {
@@ -213,7 +238,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'geometry': {
         let result;
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (result === undefined && Shape.isShape(value)) {
             result = await value.toGeometry();
             if (!Shape.isGeometry(result)) {
@@ -230,7 +255,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
         let result;
         for (const arg of args) {
           if (result === undefined) {
-            let value = await resolve(input, arg);
+            let value = await resolve(input, arg, specOptions);
             result = await getCoordinate(value);
             if (result === undefined) {
               rest.push(arg);
@@ -245,7 +270,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'options': {
         const options = {};
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isObject(value)) {
             Object.assign(options, value);
           } else {
@@ -270,7 +295,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'modes': {
         const out = {};
         for (const arg of args) {
-          if (typeof arg === 'string' && modes && modes.includes(arg)) {
+          if (typeof arg === 'string' && specOptions[arg] === true) {
             out[arg] = true;
           } else {
             rest.push(arg);
@@ -282,7 +307,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'values': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isValue(value)) {
             out.push(value);
           } else {
@@ -295,7 +320,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'interval': {
         let interval;
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (interval === undefined && Shape.isIntervalLike(value)) {
             interval = Shape.normalizeInterval(value);
           } else {
@@ -308,7 +333,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'intervals': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isIntervalLike(value)) {
             out.push(Shape.normalizeInterval(value));
           } else if (
@@ -328,7 +353,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'shapes': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isShape(value)) {
             out.push(value);
           } else if (Shape.isArray(value) && value.every(Shape.isShape)) {
@@ -343,7 +368,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'geometries': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isShape(value)) {
             const result = await value.toGeometry();
             out.push(result);
@@ -368,7 +393,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'coordinates': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isShape(value)) {
             const coordinates = await getCoordinates(value);
             if (coordinates.length > 0) {
@@ -388,7 +413,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'coordinateLists': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isShape(value)) {
             const coordinates = await getCoordinates(value);
             if (coordinates.length > 0) {
@@ -408,7 +433,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'segments': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg);
+          let value = await resolve(input, arg, specOptions);
           if (Shape.isSegment(value)) {
             out.push(value);
           } else if (Shape.isArray(value) && value.every(Shape.isSegment)) {

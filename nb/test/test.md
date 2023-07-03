@@ -1,5 +1,9 @@
 ![Image](test.md.$1.png)
 
 ```JavaScript
-Box(5, 5, 5).faces(cut(inset(1).e([0.002]))).view();
+Box(10, 10, 10)
+  .cut(faces(Box(4, 4, 4).to))
+  .clean()
+  .faces(face => shape => face.cut(inset(1)))
+  .view();
 ```

@@ -12,5 +12,5 @@ export const computeNormal = (geometry) =>
   Group(computeNormalWithCgal(linearize(geometry, filter)));
 
 // TODO: Make this more robust.
-export const computeNormalCoordinates = (geometry) =>
+export const computeNormalCoordinate = (geometry) =>
   transformCoordinate([0, 0, 0], computeNormal(geometry).matrix);

@@ -113,7 +113,7 @@ Box(10).to(Point(1, 2, 3)).gridView();
 ![Image](shape.md.$19.png)
 
 ```JavaScript
-Box(10).move(1, 2, 3).to(center()).gridView();
+Box(10).move(1, 2, 3).to(centroid()).gridView();
 ```
 
 ![Image](shape.md.$20.png)
@@ -652,8 +652,6 @@ Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```JavaScript
 Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
-
-![Image](shape.md.$76.png)
 
 ```JavaScript
 Orb(5, 5, 5, { zag: 5 })

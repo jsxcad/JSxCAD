@@ -1,3 +1,4 @@
+import { getLeafs } from './tagged/getLeafs.js';
 import { rewrite } from './tagged/visit.js';
 import { taggedItem } from './tagged/taggedItem.js';
 
@@ -82,6 +83,19 @@ export const retag = (geometry, oldTags, newTags) => {
 export const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
 
 export const tag = (geometry, newTags) => retag(geometry, [], newTags);
+
+export const tags = (geometry, tag) => {
+  const isMatchingTag = tagMatcher(tag, 'user');
+  const collected = [];
+  for (const { tags } of getLeafs(geometry)) {
+    for (const tag of tags) {
+      if (isMatchingTag(tag)) {
+        collected.push(tag);
+      }
+    }
+  }
+  return collected;
+};
 
 export const as = (geometry, names) =>
   taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry);

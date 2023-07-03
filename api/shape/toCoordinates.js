@@ -1,10 +1,11 @@
 import Shape from './Shape.js';
-import { toPoints as toPointsGeometry } from '@jsxcad/geometry';
+import { toCoordinates as op } from '@jsxcad/geometry';
 
-export const toCoordinates = Shape.registerMethod2(
+export const toCoordinates = Shape.registerMethod3(
   'toCoordinates',
   ['inputGeometry'],
-  (inputGeometry) => toPointsGeometry(inputGeometry).points
+  op,
+  (result) => result
 );
 
 export default toCoordinates;

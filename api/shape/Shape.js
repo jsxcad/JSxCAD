@@ -300,21 +300,21 @@ Shape.isSegment = isSegment;
 
 Shape.chain = chain;
 
-export const apply = async (input, op, value) => {
+export const apply = async (input, op, ...args) => {
   if (op instanceof Promise) {
     op = await op;
   }
   if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
-    op = op(value);
-  }
-  if (op instanceof Promise) {
-    op = await op;
+    op = op(...args);
+    if (op instanceof Promise) {
+      op = await op;
+    }
   }
   if (Shape.isPendingInput(op)) {
     op = op(input);
-  }
-  if (op instanceof Promise) {
-    op = await op;
+    if (op instanceof Promise) {
+      op = await op;
+    }
   }
   return op;
 };

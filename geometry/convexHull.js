@@ -1,20 +1,30 @@
-import {
-  convexHull as convexHullWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
+import { Fuse } from './fuse.js';
+import { Group } from './Group.js';
+import { convexHull as convexHullWithCgal } from '@jsxcad/algorithm-cgal';
 import { linearize } from './tagged/linearize.js';
-import { taggedGroup } from './tagged/taggedGroup.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
 
-export const convexHull = (geometries) => {
+export const ConvexHull = (geometries) => {
   const inputs = [];
   for (const geometry of geometries) {
-    linearize(toConcreteGeometry(geometry), filter, inputs);
+    linearize(geometry, filter, inputs);
   }
   const outputs = convexHullWithCgal(inputs);
-  deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+  return Group(outputs);
 };
+
+export const convexHull = (geometry, geometries) =>
+  ConvexHull([geometry, ...geometries]);
+
+export const ChainConvexHull = (geometries) => {
+  const chain = [];
+  for (let nth = 1; nth < geometries.length; nth++) {
+    chain.push(ConvexHull([geometries[nth - 1], geometries[nth]]));
+  }
+  return Fuse(chain);
+};
+
+export const chainConvexHull = (geometry, geometries) =>
+  ChainConvexHull([geometry, ...geometries]);

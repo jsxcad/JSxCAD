@@ -1,23 +1,23 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { getLeafs } from '@jsxcad/geometry';
+import { each as op } from '@jsxcad/geometry';
 
-export const each = Shape.registerMethod2(
+export const each = Shape.registerMethod3(
   'each',
-  ['input', 'function', 'function'],
-  async (input, leafOp = (l) => l, groupOp = Group) => {
+  ['inputGeometry', 'function', 'function'],
+  op,
+  async (
+    leafs,
+    [geometry, leafOp = (leaf) => (_shape) => leaf, groupOp = Group]
+  ) => {
+    console.log(`QQ/each/leafOp: ${leafOp}`);
     const leafShapes = [];
-    const leafGeometries = getLeafs(await input.toGeometry());
-    for (const leafGeometry of leafGeometries) {
+    const input = Shape.fromGeometry(geometry);
+    for (const leaf of leafs) {
       leafShapes.push(
-        await leafOp(Shape.chain(Shape.fromGeometry(leafGeometry)))
+        await Shape.apply(input, leafOp, Shape.chain(Shape.fromGeometry(leaf)))
       );
     }
-    const grouped = await groupOp(...leafShapes);
-    if (Shape.isFunction(grouped)) {
-      return grouped(input);
-    } else {
-      return grouped;
-    }
+    return groupOp(...leafShapes)(input);
   }
 );

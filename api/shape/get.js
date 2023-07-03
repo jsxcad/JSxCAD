@@ -1,35 +1,19 @@
-import { oneOfTagMatcher, visit } from '@jsxcad/geometry';
-
 import Group from './Group.js';
 import Shape from './Shape.js';
+import { get as op } from '@jsxcad/geometry';
 
-export const get = Shape.registerMethod2(
+export const get = Shape.registerMethod3(
   ['get', 'g'],
   ['inputGeometry', 'strings', 'function'],
-  (geometry, tags, groupOp = Group) => {
-    const isMatch = oneOfTagMatcher(tags, 'item');
-    const picks = [];
-    const walk = (geometry, descend) => {
-      const { tags, type } = geometry;
-      if (type === 'group') {
-        return descend();
-      }
-      if (isMatch(`type:${geometry.type}`)) {
-        picks.push(Shape.fromGeometry(geometry));
-      } else {
-        for (const tag of tags) {
-          if (isMatch(tag)) {
-            picks.push(Shape.fromGeometry(geometry));
-            break;
-          }
-        }
-      }
-      if (type !== 'item') {
-        return descend();
-      }
-    };
-    visit(geometry, walk);
-    return groupOp(...picks);
+  op,
+  async (results, [geometry, _tags, groupOp = Group]) => {
+    const input = Shape.fromGeometry(geometry);
+    const leafShapes = [];
+    for (const result of results) {
+      leafShapes.push(Shape.fromGeometry(result));
+    }
+    console.log(`QQ/groupOp: ${groupOp}`);
+    return Shape.apply(input, groupOp, ...leafShapes);
   }
 );
 

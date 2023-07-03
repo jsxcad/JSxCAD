@@ -1,11 +1,10 @@
 import Shape from './Shape.js';
-import { eagerTransform as eagerTransformGeometry } from '@jsxcad/geometry';
+import { eagerTransform as op } from '@jsxcad/geometry';
 
-export const eagerTransform = Shape.registerMethod2(
+export const eagerTransform = Shape.registerMethod3(
   'eagerTransform',
   ['inputGeometry', 'value'],
-  (geometry, matrix) =>
-    Shape.fromGeometry(eagerTransformGeometry(matrix, geometry))
+  op
 );
 
 export default eagerTransform;

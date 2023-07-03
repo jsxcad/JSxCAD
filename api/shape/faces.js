@@ -1,16 +1,26 @@
 import { Group } from './Group.js';
 import { Shape } from './Shape.js';
-import { eachEdge } from './eachEdge.js';
+import { toFaceEdgesList as op } from '@jsxcad/geometry';
 
-export const faces = Shape.registerMethod2(
+export const faces = Shape.registerMethod3(
   'faces',
-  ['input', 'function', 'function'],
-  (input, faceOp = (face) => (_shape) => face, groupOp = Group) => {
-    return eachEdge(
-      (e, _l, _o) => (_s) => e,
-      (_e, f) => faceOp(f),
-      groupOp
-    )(input);
+  ['inputGeometry', 'options', 'function', 'function'],
+  op,
+  async (
+    faceEdgesList,
+    [geometry, _options, faceOp = (face) => (_s) => face, groupOp = Group]
+  ) => {
+    const input = Shape.fromGeometry(geometry);
+    const results = [];
+    for (const { face } of faceEdgesList) {
+      const faceShape = await Shape.apply(
+        input,
+        faceOp,
+        Shape.chain(Shape.fromGeometry(face)),
+      );
+      results.push(faceShape);
+    }
+    return Shape.apply(input, groupOp, ...results);
   }
 );
 

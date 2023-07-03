@@ -1,11 +1,11 @@
 import Shape from './Shape.js';
-import { get } from './get.js';
 import note from './note.js';
+import { tags } from '@jsxcad/geometry';
 
-// Is this better than s.get('part:*').tags('part')?
-export const billOfMaterials = Shape.registerMethod2(
+export const billOfMaterials = Shape.registerMethod3(
   ['billOfMaterials', 'bom'],
-  ['input', 'function'],
-  (input, op = (...list) => note(`Materials: ${list.join(', ')}`)) =>
-    get('part:*').tags('part', op)(input)
+  ['inputGeometry', 'function'],
+  (geometry) => tags(geometry, 'part:*'),
+  (tags, [geometry, op = (...list) => note(`Materials: ${list.join(', ')}`)]) =>
+    op(...tags)(Shape.fromGeometry(geometry))
 );

@@ -7,7 +7,7 @@ export const times = Shape.registerMethod2('times', ['numbers'], (numbers) =>
   numbers.reduce((a, b) => a * b, 1)
 );
 
-// e.g., a.x(add(diameter(), -2))
-export const add = Shape.registerMethod2('add', ['numbers'], (numbers) =>
+// e.g., a.x(plus(diameter(), -2))
+export const plus = Shape.registerMethod2('plus', ['numbers'], (numbers) =>
   numbers.reduce((a, b) => a + b, 0)
 );

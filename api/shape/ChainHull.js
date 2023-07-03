@@ -1,23 +1,17 @@
-import { Hull } from './Hull.js';
-import { Join } from './join.js';
+import { ChainConvexHull, chainConvexHull } from '@jsxcad/geometry';
+
 import Shape from './Shape.js';
 
-export const ChainHull = Shape.registerMethod2(
+export const ChainHull = Shape.registerMethod3(
   'ChainHull',
-  ['input', 'shapes'],
-  async (input, shapes) => {
-    const chain = [];
-    for (let nth = 1; nth < shapes.length; nth++) {
-      chain.push(await Hull(shapes[nth - 1], shapes[nth])(input));
-    }
-    return Join(...chain);
-  }
+  ['geometries'],
+  ChainConvexHull
 );
 
-export const chainHull = Shape.registerMethod2(
+export const chainHull = Shape.registerMethod3(
   'chainHull',
-  ['input', 'shapes'],
-  (input, shapes) => ChainHull(input, ...shapes)(input)
+  ['inputGeometry', 'geometries'],
+  chainConvexHull
 );
 
 export default ChainHull;

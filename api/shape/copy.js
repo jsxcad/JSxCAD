@@ -1,14 +1,8 @@
-import Group from './Group.js';
 import Shape from './Shape.js';
+import { copy as op } from '@jsxcad/geometry';
 
-export const copy = Shape.registerMethod2(
+export const copy = Shape.registerMethod3(
   'copy',
-  ['input', 'number'],
-  (input, count) => {
-    const copies = [];
-    for (let nth = 0; nth < count; nth++) {
-      copies.push(input);
-    }
-    return Group(...copies);
-  }
+  ['inputGeometry', 'number'],
+  op
 );
