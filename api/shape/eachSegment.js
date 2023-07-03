@@ -13,7 +13,13 @@ export const eachSegment = Shape.registerMethod3(
     const input = Shape.fromGeometry(geometry);
     const shapes = [];
     for (const segment of segments) {
-      shapes.push(await Shape.apply(input, segmentOp, Shape.chain(Shape.fromGeometry(segment))));
+      shapes.push(
+        await Shape.apply(
+          input,
+          segmentOp,
+          Shape.chain(Shape.fromGeometry(segment))
+        )
+      );
     }
     return Shape.apply(input, groupOp, ...shapes);
   }

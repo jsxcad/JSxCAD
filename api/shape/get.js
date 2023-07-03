@@ -12,7 +12,6 @@ export const get = Shape.registerMethod3(
     for (const result of results) {
       leafShapes.push(Shape.fromGeometry(result));
     }
-    console.log(`QQ/groupOp: ${groupOp}`);
     return Shape.apply(input, groupOp, ...leafShapes);
   }
 );

@@ -4,7 +4,13 @@ import { toOrientedFaceEdgesList as op } from '@jsxcad/geometry';
 
 export const eachEdge = Shape.registerMethod3(
   'eachEdge',
-  ['inputGeometry', 'function', 'function', 'function', 'options:select=geometries'],
+  [
+    'inputGeometry',
+    'function',
+    'function',
+    'function',
+    'options:select=geometries',
+  ],
   op,
   async (
     faceEdgesList,

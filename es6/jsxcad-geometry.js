@@ -434,6 +434,8 @@ const subtract = ([ax, ay, az], [bx, by, bz]) => [
   az - bz,
 ];
 
+const distance$1 = (a, b) => length(subtract(a, b));
+
 const translate = (geometry, vector) =>
   transform(geometry, fromTranslateToTransform(...vector));
 
@@ -1036,7 +1038,12 @@ const Curve = (
   { steps = implicitSteps } = {},
   { closed }
 ) => {
-  const interpolator = new CurveInterpolator(coordinates, {
+  const approximateCoordinates = coordinates.map(([x = 0, y = 0, z = 0]) => [
+    x,
+    y,
+    z,
+  ]);
+  const interpolator = new CurveInterpolator(approximateCoordinates, {
     closed,
     tension: 0.2,
     alpha: 0.5,
@@ -1748,7 +1755,7 @@ const computeGeneralizedDiameter = (geometry) => {
   let maximumDiameter = 0;
   for (let a of coordinates) {
     for (let b of coordinates) {
-      const diameter = length(a);
+      const diameter = distance$1(a, b);
       if (diameter > maximumDiameter) {
         maximumDiameter = diameter;
       }
@@ -1827,7 +1834,7 @@ const copy = (geometry, count) => {
   for (let nth = 0; nth < count; nth++) {
     copies.push(geometry);
   }
-  return Group(...copies);
+  return Group(copies);
 };
 
 const filter$o = () => (geometry) =>
@@ -1876,7 +1883,7 @@ const cut = (
       ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
     }
   }
-  return taggedGroup({}, replacer(inputs, outputs, count)(toCut), ...ghosts);
+  return Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
 };
 
 const cutFrom = (toClip, toCut, options) =>
@@ -1991,10 +1998,6 @@ const drop = (tags, geometry) =>
 
 const each = (geometry) => getLeafs(geometry);
 
-const Segment = (segment) => taggedSegments({}, [segment]);
-
-const Segments = (segments) => taggedSegments({}, segments);
-
 const filter$l = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
@@ -2004,6 +2007,9 @@ const eachFaceEdges = (
   { select = [] } = {},
   emitFaceEdges
 ) => {
+  if (!(select instanceof Array)) {
+    select = [select];
+  }
   const inputs = linearize(geometry, filter$l);
   const count = inputs.length;
   for (const selection of select) {
@@ -2048,16 +2054,16 @@ const toOrientedFaceEdgesList = (
     const { matrix, segments, normals } = edges;
     if (segments) {
       for (let nth = 0; nth < segments.length; nth++) {
-        const segment = segments[nth];
-        const [, backward] = disorientSegment(
-          segment,
+        const baseSegment = segments[nth];
+        const [forward, backward] = disorientSegment(
+          baseSegment,
           matrix,
           normals ? normals[nth] : undefined
         );
         edgeResults.push({
-          segment: Segment(segment),
-          length: length(segment[SOURCE], segment[TARGET]),
-          backward: Segment(backward),
+          segment: forward,
+          length: distance$1(baseSegment[SOURCE], baseSegment[TARGET]),
+          backward,
         });
       }
     }
@@ -2082,6 +2088,10 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
+const Segment = (segment) => taggedSegments({}, [segment]);
+
+const Segments = (segments) => taggedSegments({}, segments);
+
 const filter$k = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
@@ -2102,6 +2112,9 @@ const outline = (geometry, selections) => {
 const filter$j = ({ type }) => type === 'segments';
 
 const eachSegment = (geometry, emit, selections = []) => {
+  if (!(selections instanceof Array)) {
+    selections = [selections];
+  }
   for (const { matrix, segments, normals, faces } of linearize(
     outline(geometry, selections),
     filter$j
@@ -2128,6 +2141,16 @@ const toSegments = (geometry, selections) => {
   const segments = [];
   eachSegment(geometry, (segment) => segments.push(segment), selections);
   return Segments(segments);
+};
+
+const toSegmentList = (geometry, selections) => {
+  const segments = [];
+  eachSegment(
+    geometry,
+    (segment) => segments.push(Segment(segment)),
+    selections
+  );
+  return segments;
 };
 
 const filterTargets$1 = (geometry) =>
@@ -2697,6 +2720,11 @@ const op =
     return method(toConcreteGeometry(geometry), walk);
   };
 
+const origin = (geometry) => {
+  const { local } = getInverseMatrices(geometry);
+  return transform(Point(), local);
+};
+
 const filter$7 = (geometry) => ['graph'].includes(geometry.type);
 
 const remesh = (
@@ -3018,6 +3046,15 @@ const taggedTriangles = (
   return { type: 'triangles', tags, matrix, provenance, triangles };
 };
 
+const to = (geometry, references) => {
+  const atOrigin = by(geometry, [origin(geometry)]);
+  const collected = [];
+  for (const reference of references) {
+    collected.push(by(atOrigin, [reference]));
+  }
+  return Group(collected);
+};
+
 const toDisplayGeometry = (
   geometry,
   { triangles, outline = true, skin, wireframe = false } = {}
@@ -3140,4 +3177,4 @@ const wrap = (geometries, offset, alpha) => {
   return taggedGroup({}, ...outputs);
 };
 
-export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Fuse, Group, Point, Points, Segments$1 as Segments, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, fresh, fromPolygonSoup, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, get, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, loop, makeAbsolute, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, offset, oneOfTagMatcher, op, outline, read, readNonblocking, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, scale$1 as scale, seam, section, separate, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegments, toTransformedGeometry, toTriangleArray, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Fuse, Group, Point, Points, Segments$1 as Segments, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, fresh, fromPolygonSoup, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, get, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getPlans, getPoints, getTags, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, loop, makeAbsolute, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, offset, oneOfTagMatcher, op, origin, outline, read, readNonblocking, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, scale$1 as scale, seam, section, separate, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };

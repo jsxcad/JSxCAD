@@ -1,6 +1,17 @@
-Box(10, 10, 10)
-  .cut(faces(Box(4, 4, 4).to))
-  .clean()
-  .faces(face => shape => face.cut(inset(1)))
-  .view();
+md`### Bear model sliced`;
 
+const url = control('url', 'https://jsxcad.js.org/stl/bear.stl', 'input');
+const height = control('height', 200, 'input');
+const spacing = control('spacing', 2, 'input');
+
+const a = await LoadStl(url).align('z>');
+
+await a.stl('bear').note('This is a low-poly model of a bear.');
+
+await a.section(seq({ to: height, by: spacing }, XY, Group))
+  .note(`Stl sliced each ${spacing}mm up to ${height}mm.`)
+  .view()
+  .note('Laid out on a single sheet for cutting.')
+  // .view('slices', each(flat()).page('pack'));
+  // .view('slices', each(leaf => shape => leaf.flat()))
+  .view('slices2', each(flat()));

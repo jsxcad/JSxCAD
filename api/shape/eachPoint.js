@@ -13,7 +13,13 @@ export const eachPoint = Shape.registerMethod3(
     const input = Shape.fromGeometry(geometry);
     const shapes = [];
     for (const point of pointList) {
-      shapes.push(await Shape.apply(input, pointOp, Shape.chain(Shape.fromGeometry(point))));
+      shapes.push(
+        await Shape.apply(
+          input,
+          pointOp,
+          Shape.chain(Shape.fromGeometry(point))
+        )
+      );
     }
     return Shape.apply(Shape.chain(input), groupOp, ...shapes);
   }

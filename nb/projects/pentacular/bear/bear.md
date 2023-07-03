@@ -32,6 +32,10 @@ Stl sliced each 2mm up to 200mm.
 
 Laid out on a single sheet for cutting.
 
+![Image](bear.md.$3_slices.png)
+
+[slices.pdf](bear.slices.pdf)
+
 ```JavaScript
 await a.section(seq({ to: height, by: spacing }, XY, Group))
   .note(`Stl sliced each ${spacing}mm up to ${height}mm.`)

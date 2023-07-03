@@ -7,8 +7,6 @@ Parameter|Default|Type
 
 Produces each facet as a separate surface.
 
-![Image](faces.md.$2.png)
-
 Box(5, 5, 5).faces().n(5, 2) selects two faces of the box
 
 ```JavaScript

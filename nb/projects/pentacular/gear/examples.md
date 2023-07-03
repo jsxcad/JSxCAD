@@ -237,10 +237,6 @@ const planetaryDesign4 = await planetaryDesign4c.color('green').as('solar');
 
 [ring.stl](examples.ring.stl)
 
-![Image](examples.md.planetaryDesign_planetary.png)
-
-[planetary.stl](examples.planetary.stl)
-
 ![Image](examples.md.planetaryDesign_solar.png)
 
 [solar.stl](examples.solar.stl)

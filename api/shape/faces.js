@@ -16,7 +16,7 @@ export const faces = Shape.registerMethod3(
       const faceShape = await Shape.apply(
         input,
         faceOp,
-        Shape.chain(Shape.fromGeometry(face)),
+        Shape.chain(Shape.fromGeometry(face))
       );
       results.push(faceShape);
     }

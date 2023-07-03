@@ -304,6 +304,12 @@ export const apply = async (input, op, ...args) => {
   if (op instanceof Promise) {
     op = await op;
   }
+  if (Shape.isPendingInput(op)) {
+    op = op(...args);
+    if (op instanceof Promise) {
+      op = await op;
+    }
+  }
   if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
     op = op(...args);
     if (op instanceof Promise) {

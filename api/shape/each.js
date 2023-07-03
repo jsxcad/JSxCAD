@@ -10,14 +10,13 @@ export const each = Shape.registerMethod3(
     leafs,
     [geometry, leafOp = (leaf) => (_shape) => leaf, groupOp = Group]
   ) => {
-    console.log(`QQ/each/leafOp: ${leafOp}`);
-    const leafShapes = [];
     const input = Shape.fromGeometry(geometry);
+    const leafShapes = [];
     for (const leaf of leafs) {
       leafShapes.push(
         await Shape.apply(input, leafOp, Shape.chain(Shape.fromGeometry(leaf)))
       );
     }
-    return groupOp(...leafShapes)(input);
+    return Shape.apply(input, groupOp, ...leafShapes);
   }
 );

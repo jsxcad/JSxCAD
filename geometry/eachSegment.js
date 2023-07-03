@@ -39,6 +39,10 @@ export const toSegments = (geometry, selections) => {
 
 export const toSegmentList = (geometry, selections) => {
   const segments = [];
-  eachSegment(geometry, (segment) => segments.push(Segment(segment)), selections);
+  eachSegment(
+    geometry,
+    (segment) => segments.push(Segment(segment)),
+    selections
+  );
   return segments;
 };
