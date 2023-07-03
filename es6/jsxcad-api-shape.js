@@ -309,13 +309,23 @@ const apply = async (input, op, ...args) => {
     op = await op;
   }
   if (Shape.isPendingInput(op)) {
-    op = op(...args);
+    // Need to write up a proper schema for how this is supposed to work.
+    if (args.length > 0) {
+      op = op(...args);
+    } else {
+      op = op(input);
+    }
     if (op instanceof Promise) {
       op = await op;
     }
   }
   if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
+    // (v) => (s) => (s)
     op = op(...args);
+    if (Shape.isFunction(op)) {
+      // (s) => (s)
+      op = op(input);
+    }
     if (op instanceof Promise) {
       op = await op;
     }
@@ -4526,13 +4536,13 @@ const pdf = Shape.registerMethod2(
   async (
     input,
     name,
-    op = (s) => s,
+    op = (_v) => (s) => s,
     { lineWidth = 0.096, size = [210, 297], definitions } = {}
   ) => {
     const options = { lineWidth, size, definitions };
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    for (const entry of await ensurePages(await op(input))) {
+    for (const entry of await ensurePages(await Shape.apply(input, op))) {
       const pdfPath = `download/pdf/${path}/${id}/${viewId}`;
       await write(pdfPath, await toPdf(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;
@@ -5164,10 +5174,12 @@ const Stl = Shape.registerMethod2(
 const stl = Shape.registerMethod2(
   'stl',
   ['input', 'string', 'function', 'options'],
-  async (input, name, op = (s) => s, options = {}) => {
+  async (input, name, op = (_v) => (s) => s, options = {}) => {
     const { path } = getSourceLocation();
     let index = 0;
-    for (const entry of await ensurePages(await op(Shape.chain(input)))) {
+    for (const entry of await ensurePages(
+      await Shape.apply(Shape.chain(input), op)
+    )) {
       const stlPath = `download/stl/${path}/${generateUniqueId()}`;
       await write(stlPath, await toStl(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;

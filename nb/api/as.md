@@ -12,7 +12,11 @@ It can be extracted using shape.get(id).
 
 See: [get](../../nb/api/get.nb), [nth](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/nth.md).
 
+![Image](as.md.$2_1.png)
+
 Given Box(10).and(Arc(2, 2, [0, 2])) n(0) is the box.
+
+![Image](as.md.$2_2.png)
 
 as('plate') means nth(0) is the whole item.
 

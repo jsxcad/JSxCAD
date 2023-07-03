@@ -13,13 +13,13 @@ export const pdf = Shape.registerMethod2(
   async (
     input,
     name,
-    op = (s) => s,
+    op = (_v) => (s) => s,
     { lineWidth = 0.096, size = [210, 297], definitions } = {}
   ) => {
     const options = { lineWidth, size, definitions };
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    for (const entry of await ensurePages(await op(input))) {
+    for (const entry of await ensurePages(await Shape.apply(input, op))) {
       const pdfPath = `download/pdf/${path}/${id}/${viewId}`;
       await write(pdfPath, await toPdf(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;

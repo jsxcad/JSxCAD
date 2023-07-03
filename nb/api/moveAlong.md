@@ -20,6 +20,10 @@ Box()
   );
 ```
 
+![Image](moveAlong.md.$3.png)
+
+Box(5, 5, 5).and(faces().n(2).moveAlong(normal(), 5)) copies one face of a box and moves it 5 along its normal.
+
 ```JavaScript
 Box(5, 5, 5)
   .and(faces().n(2).moveAlong(normal(), 5))

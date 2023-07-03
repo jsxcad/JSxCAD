@@ -82,10 +82,12 @@ export const Stl = Shape.registerMethod2(
 export const stl = Shape.registerMethod2(
   'stl',
   ['input', 'string', 'function', 'options'],
-  async (input, name, op = (s) => s, options = {}) => {
+  async (input, name, op = (_v) => (s) => s, options = {}) => {
     const { path } = getSourceLocation();
     let index = 0;
-    for (const entry of await ensurePages(await op(Shape.chain(input)))) {
+    for (const entry of await ensurePages(
+      await Shape.apply(Shape.chain(input), op)
+    )) {
       const stlPath = `download/stl/${path}/${generateUniqueId()}`;
       await write(stlPath, await toStl(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;

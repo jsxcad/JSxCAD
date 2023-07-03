@@ -1,17 +1,8 @@
-md`### Bear model sliced`;
+export const verticalConnector = await Arc(4.8)
+  .ez([8])
+  .add(Arc(5.8).ez([0.8 - 0.2]))
+  .add(Arc(5.5).ez([8 - 0.4, 8]))
+  .cut(Box(10, 1, [8, 1]))
+  .material('plastic')
+  .stl('verticalConnector');
 
-const url = control('url', 'https://jsxcad.js.org/stl/bear.stl', 'input');
-const height = control('height', 200, 'input');
-const spacing = control('spacing', 2, 'input');
-
-const a = await LoadStl(url).align('z>');
-
-await a.stl('bear').note('This is a low-poly model of a bear.');
-
-await a.section(seq({ to: height, by: spacing }, XY, Group))
-  .note(`Stl sliced each ${spacing}mm up to ${height}mm.`)
-  .view()
-  .note('Laid out on a single sheet for cutting.')
-  // .view('slices', each(flat()).page('pack'));
-  // .view('slices', each(leaf => shape => leaf.flat()))
-  .view('slices2', each(flat()));

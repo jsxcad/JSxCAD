@@ -80,6 +80,8 @@ Assembly(Box(5), Arc(6))
 Group(Box(5).color('red'), Arc(6).color('blue')).fuse().gridView();
 ```
 
+![Image](shape.md.$14.png)
+
 ```JavaScript
 Box(10).inset(0.5, { step: 0.5 }).disjoint().n(0, 2, 4, 6, 8).gridView();
 ```
@@ -274,6 +276,8 @@ Arc(10)
   .ez([5])
   .view();
 ```
+
+![Image](shape.md.$43.png)
 
 ```JavaScript
 Box(10)
@@ -648,6 +652,8 @@ Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```JavaScript
 Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
+
+![Image](shape.md.$76.png)
 
 ```JavaScript
 Orb(5, 5, 5, { zag: 5 })
