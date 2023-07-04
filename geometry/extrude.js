@@ -2,8 +2,9 @@ import { isNotTypeGhost, isTypeVoid } from './tagged/type.js';
 
 import { Group } from './Group.js';
 import { Point } from './Point.js';
-import { computeNormal } from './computeNormal.js';
+import { computeNormalCoordinate } from './computeNormal.js';
 import { extrude as extrudeWithCgal } from '@jsxcad/algorithm-cgal';
+import { getLeafs } from './tagged/getLeafs.js';
 import { linearize } from './tagged/linearize.js';
 import { makeAbsolute } from './makeAbsolute.js';
 import { moveAlong } from './moveAlong.js';
@@ -44,9 +45,14 @@ export const extrudeAlong = (geometry, vector, intervals, { noVoid } = {}) => {
 };
 
 export const extrudeAlongNormal = (geometry, intervals, options) => {
-  const normal = makeAbsolute(computeNormal(geometry)).points[0];
-  // This is not safe.
-  return extrudeAlong(geometry, normal, intervals, options);
+  const inputs = [];
+  const outputs = [];
+  for (const leaf of getLeafs(geometry)) {
+    inputs.push(leaf);
+    const normal = makeAbsolute(computeNormalCoordinate(leaf));
+    outputs.push(extrudeAlong(leaf, normal, intervals, options));
+  }
+  return replacer(inputs, outputs)(geometry);
 };
 
 export const extrudeAlongX = (geometry, intervals, options) =>

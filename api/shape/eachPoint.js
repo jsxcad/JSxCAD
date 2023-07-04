@@ -1,25 +1,27 @@
 import Group from './Group.js';
-import Point from './Point.js';
 import Shape from './Shape.js';
-import { eachPoint as eachPointOfGeometry } from '@jsxcad/geometry';
-import { move } from './move.js';
+import { toPointList as op } from '@jsxcad/geometry';
 
-export const eachPoint = Shape.registerMethod2(
+export const eachPoint = Shape.registerMethod3(
   'eachPoint',
-  ['input', 'function', 'function'],
-  async (input, pointOp = (point) => (_shape) => point, groupOp = Group) => {
-    const coordinates = [];
-    eachPointOfGeometry(await input.toGeometry(), ([x = 0, y = 0, z = 0]) =>
-      coordinates.push([x, y, z])
-    );
-    const points = [];
-    for (const [x, y, z] of coordinates) {
-      const point = await Point();
-      const moved = await move(x, y, z)(point);
-      const operated = await Shape.apply(input, pointOp, moved);
-      points.push(operated);
+  ['inputGeometry', 'function', 'function'],
+  op,
+  async (
+    pointList,
+    [geometry, pointOp = (point) => (_shape) => point, groupOp = Group]
+  ) => {
+    const input = Shape.fromGeometry(geometry);
+    const shapes = [];
+    for (const point of pointList) {
+      shapes.push(
+        await Shape.apply(
+          input,
+          pointOp,
+          Shape.chain(Shape.fromGeometry(point))
+        )
+      );
     }
-    return groupOp(...points)(input);
+    return Shape.apply(Shape.chain(input), groupOp, ...shapes);
   }
 );
 

@@ -36,7 +36,7 @@ Box(10).material('copper').gridView();
 
 Box(10).move(1, 2, 3).gridView();
 Box(10).to(Point(1, 2, 3)).gridView();
-Box(10).move(1, 2, 3).to(center()).gridView();
+Box(10).move(1, 2, 3).to(centroid()).gridView();
 
 // I don't know what this example is supposed to do.
 // Box(10, 10, 10).move(faces().sort('z>').n(0)).view();

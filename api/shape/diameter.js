@@ -1,26 +1,10 @@
 import Shape from './Shape.js';
-import { toCoordinates } from './toCoordinates.js';
+import { computeGeneralizedDiameter } from '@jsxcad/geometry';
 
-const square = (a) => a * a;
-
-const distance = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) =>
-  Math.sqrt(square(ax - bx) + square(ay - by) + square(az - bz));
-
-// This is not efficient.
-export const diameter = Shape.registerMethod2(
+export const diameter = Shape.registerMethod3(
   'diameter',
-  ['input', 'function'],
-  async (input, op = (diameter) => (_shape) => diameter) => {
-    const points = await toCoordinates()(input);
-    let maximumDiameter = 0;
-    for (let a of points) {
-      for (let b of points) {
-        const diameter = distance(a, b);
-        if (diameter > maximumDiameter) {
-          maximumDiameter = diameter;
-        }
-      }
-    }
-    return op(maximumDiameter)(input);
-  }
+  ['inputGeometry', 'function'],
+  computeGeneralizedDiameter,
+  (diameter, [geometry, op = (diameter) => (_shape) => diameter]) =>
+    op(diameter)(Shape.fromGeometry(geometry))
 );

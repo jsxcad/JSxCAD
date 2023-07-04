@@ -300,21 +300,37 @@ Shape.isSegment = isSegment;
 
 Shape.chain = chain;
 
-export const apply = async (input, op, value) => {
-  if (op instanceof Promise) {
-    op = await op;
-  }
-  if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
-    op = op(value);
-  }
+export const apply = async (input, op, ...args) => {
   if (op instanceof Promise) {
     op = await op;
   }
   if (Shape.isPendingInput(op)) {
-    op = op(input);
+    // Need to write up a proper schema for how this is supposed to work.
+    if (args.length > 0) {
+      op = op(...args);
+    } else {
+      op = op(input);
+    }
+    if (op instanceof Promise) {
+      op = await op;
+    }
   }
-  if (op instanceof Promise) {
-    op = await op;
+  if (Shape.isFunction(op) || Shape.isPendingArguments(op)) {
+    // (v) => (s) => (s)
+    op = op(...args);
+    if (Shape.isFunction(op)) {
+      // (s) => (s)
+      op = op(input);
+    }
+    if (op instanceof Promise) {
+      op = await op;
+    }
+  }
+  if (Shape.isPendingInput(op)) {
+    op = op(input);
+    if (op instanceof Promise) {
+      op = await op;
+    }
   }
   return op;
 };

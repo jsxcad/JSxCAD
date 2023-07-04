@@ -11,6 +11,9 @@ export const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   if (content.some((value) => value.then)) {
     throw Error(`Group content is a promise`);
   }
+  if (content.some((value) => typeof value === 'function')) {
+    throw Error(`Group content is a function`);
+  }
   if (content.length === 1) {
     return content[0];
   }

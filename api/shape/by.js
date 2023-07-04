@@ -1,24 +1,10 @@
-import { getInverseMatrices, getLeafs } from '@jsxcad/geometry';
-
-import Group from './Group.js';
 import Shape from './Shape.js';
-import { transform } from './transform.js';
+import { by as op } from '@jsxcad/geometry';
 
-export const by = Shape.registerMethod2(
+export const by = Shape.registerMethod3(
   'by',
-  ['input', 'geometries'],
-  async (input, selections) => {
-    const placed = [];
-    for (const selection of selections) {
-      for (const leaf of getLeafs(selection)) {
-        const { global } = getInverseMatrices(leaf);
-        // Perform the operation then place the
-        // result in the global frame of the reference.
-        placed.push(await transform(global)(input));
-      }
-    }
-    return Group(...placed);
-  }
+  ['inputGeometry', 'geometries'],
+  op
 );
 
 export default by;

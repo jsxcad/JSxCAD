@@ -85,7 +85,7 @@ Box(8, 12)
 
 ```JavaScript
 Box(10)
-  .and(Arc(add(diameter(), 1)))
+  .and(Arc(plus(diameter(), 1)))
   .fill()
   .view();
 ```

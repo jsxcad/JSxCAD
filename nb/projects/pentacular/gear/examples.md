@@ -39,7 +39,7 @@ const toothResolution = control('toothResolution', 5, 'input');
 [gear_16.stl](examples.gear_16.stl)
 
 ```JavaScript
-await Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash, toothResolution })
+Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash, toothResolution })
   .fill()
   .ez([thickness])
   .material('wood')
@@ -51,7 +51,7 @@ await Gear({ teeth, mmPerTooth, hiddenTeeth, pressureAngle, clearance, backlash,
 Clearance adds play to the gear tips
 
 ```JavaScript
-await Gear({ teeth: 8 })
+Gear({ teeth: 8 })
   .and(Gear({ teeth, clearance: 0.5 }).color('red'))
   .gridView()
   .note(`Clearance adds play to the gear tips`);
@@ -62,7 +62,7 @@ await Gear({ teeth: 8 })
 Backlash adds play to the gear sides
 
 ```JavaScript
-await Gear({ teeth: 8 })
+Gear({ teeth: 8 })
   .and(Gear({ teeth, backlash: 1 }).color('red'))
   .gridView()
   .note(`Backlash adds play to the gear sides`);
@@ -73,7 +73,7 @@ await Gear({ teeth: 8 })
 Pressure Angle makes the tip sharper or blunter
 
 ```JavaScript
-await Gear({ teeth: 8 })
+Gear({ teeth: 8 })
   .and(
     Gear({ teeth: 8, pressureAngle: 30 }).color('red'),
     Gear({ teeth: 8, pressureAngle: 10 }).color('blue')
@@ -88,7 +88,7 @@ await Gear({ teeth: 8 })
 Our base involute gear.
 
 ```JavaScript
-const planetary = await Gear({teeth: 8 }).fill().note(`Our base involute gear.`);
+const planetary = Gear({teeth: 8 }).fill().note(`Our base involute gear.`);
 ```
 
 ![Image](examples.md.planetaryFootprint.png)
@@ -96,7 +96,7 @@ const planetary = await Gear({teeth: 8 }).fill().note(`Our base involute gear.`)
 We'll use an offset template to cut the other gears
 
 ```JavaScript
-const planetaryFootprint = await planetary
+const planetaryFootprint = planetary
   .offset(0.2)
   .view()
   .note(`We'll use an offset template to cut the other gears`);
@@ -107,7 +107,7 @@ const planetaryFootprint = await planetary
 We simulate the gear motion to cut a single tooth, then rotate it around.
 
 ```JavaScript
-const ring = await Arc(50, { start: -1 / 64, end: 1 / 64 })
+const ring = Arc(50, { start: -1 / 64, end: 1 / 64 })
   .hull(noOp(), Point())
   .cut(Arc(30))
   .cut(
@@ -131,7 +131,7 @@ const ring = await Arc(50, { start: -1 / 64, end: 1 / 64 })
 ![Image](examples.md.solar.png)
 
 ```JavaScript
-const solar = await Arc(20, { start: -1 / 30, end: 1 / 30 })
+const solar = Arc(20, { start: -1 / 30, end: 1 / 30 })
   .hull(noOp(), Point())
   .cut(
     seq(
@@ -158,7 +158,7 @@ const solar = await Arc(20, { start: -1 / 30, end: 1 / 30 })
 We can do the same thing to cut a rack.
 
 ```JavaScript
-const rack = await Box(20, Math.PI)
+const rack = Box(20, Math.PI)
   .align('x<')
   .cut(
     seq(
@@ -176,7 +176,7 @@ const rack = await Box(20, Math.PI)
 ```
 
 ```JavaScript
-const planetaryDesign1 = await Arc(44)
+const planetaryDesign1 = Arc(44)
   .ez([-4])
   .as('hoop')
   .fitTo(Octagon(42).ez([-2, -4]))
@@ -184,7 +184,7 @@ const planetaryDesign1 = await Arc(44)
 ```
 
 ```JavaScript
-const planetaryDesign2 = await planetaryDesign1
+const planetaryDesign2 = planetaryDesign1
   .cut(Octagon(42).ez([-2]))
   .and(ring.clip(Octagon(42)).ez([-2]))
   .cut(Arc(24).ez([-2, -4]))
@@ -194,7 +194,7 @@ const planetaryDesign2 = await planetaryDesign1
 ```
 
 ```JavaScript
-const planetaryDesign3 = await planetaryDesign2
+const planetaryDesign3 = planetaryDesign2
   .and(
     planetary
       .ez([-2])
@@ -208,15 +208,15 @@ const planetaryDesign3 = await planetaryDesign2
 ```
 
 ```JavaScript
-const planetaryDesign4a = await solar.ez([-2]);
+const planetaryDesign4a = solar.ez([-2]);
 ```
 
 ```JavaScript
-const planetaryDesign4b = await planetaryDesign4a.and(Arc(23.5).ez([-2, -4]));
+const planetaryDesign4b = planetaryDesign4a.and(Arc(23.5).ez([-2, -4]));
 ```
 
 ```JavaScript
-const planetaryDesignAxle = await Octagon(12)
+const planetaryDesignAxle = Octagon(12)
   .fitTo(Arc(8).void())
   .ez([-4])
   .color('orange')
@@ -224,11 +224,11 @@ const planetaryDesignAxle = await Octagon(12)
 ```
 
 ```JavaScript
-const planetaryDesign4c = await planetaryDesign4b.fitTo(planetaryDesignAxle);
+const planetaryDesign4c = planetaryDesign4b.fitTo(planetaryDesignAxle);
 ```
 
 ```JavaScript
-const planetaryDesign4 = await planetaryDesign4c.color('green').as('solar');
+const planetaryDesign4 = planetaryDesign4c.color('green').as('solar');
 ```
 
 ![Image](examples.md.planetaryDesign.png)
@@ -246,7 +246,7 @@ const planetaryDesign4 = await planetaryDesign4c.color('green').as('solar');
 [solar.stl](examples.solar.stl)
 
 ```JavaScript
-const planetaryDesign = await planetaryDesign3
+const planetaryDesign = planetaryDesign3
   .and(planetaryDesign4)
   .gridView()
   .stl(

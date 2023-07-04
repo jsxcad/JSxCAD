@@ -13,7 +13,7 @@ const filterTargets = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
 
 // CHECK: We should pass in reference geometry rather than a matrix.
-export const eagerTransform = (matrix, geometry, noVoid) => {
+export const eagerTransform = (geometry, matrix, { noVoid } = {}) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterTargets(noVoid), inputs);

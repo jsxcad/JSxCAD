@@ -13,6 +13,13 @@ export { replacer, rewrite, visit } from './tagged/visit.js';
 export { And, and } from './and.js';
 export { Arc, ArcX, ArcY, ArcZ } from './Arc.js';
 export { Box } from './Box.js';
+export {
+  ChainConvexHull,
+  ConvexHull,
+  chainConvexHull,
+  convexHull,
+} from './convexHull.js';
+export { Curve, curve } from './Curve.js';
 export { Edge } from './Edge.js';
 export { Group } from './Group.js';
 export { Point, Points } from './Point.js';
@@ -24,16 +31,19 @@ export { approximate } from './approximate.js';
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
 export { at } from './at.js';
+export { bb } from './bb.js';
 export { bend } from './bend.js';
+export { by } from './by.js';
 export { cached } from './tagged/cached.js';
 export { cast } from './cast.js';
 export { clip, clipFrom, commonVolume } from './clip.js';
 export { computeCentroid } from './computeCentroid.js';
+export { computeGeneralizedDiameter } from './computeGeneralizedDiameter.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
 export { computeOrientedBoundingBox } from './computeOrientedBoundingBox.js';
 export { computeToolpath } from './computeToolpath.js';
-export { convexHull } from './convexHull.js';
+export { copy } from './copy.js';
 export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
 export { cut, cutFrom, cutOut } from './cut.js';
 export { deform } from './deform.js';
@@ -42,9 +52,10 @@ export { dilateXY } from './dilateXY.js';
 export { Disjoint, disjoint, fit, fitTo } from './disjoint.js';
 export { disorientSegment } from './disorientSegment.js';
 export { drop } from './tagged/drop.js';
-export { eachFaceEdges } from './eachFaceEdges.js';
+export { each } from './each.js';
+export { toOrientedFaceEdgesList } from './eachEdge.js';
+export { eachFaceEdges, toFaceEdgesList } from './eachFaceEdges.js';
 export { eachItem } from './tagged/eachItem.js';
-export { eachPoint } from './eachPoint.js';
 export { eachSegment } from './eachSegment.js';
 export { eachTriangle } from './eachTriangle.js';
 export { eagerTransform } from './eagerTransform.js';
@@ -72,6 +83,7 @@ export {
 export { Fuse, fuse } from './fuse.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
+export { get } from './get.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';
 export { getInverseMatrices } from './tagged/getInverseMatrices.js';
@@ -154,6 +166,7 @@ export { moveAlong, moveAlongNormal } from './moveAlong.js';
 export { noGhost } from './noGhost.js';
 export { offset } from './offset.js';
 export { op } from './tagged/op.js';
+export { origin } from './origin.js';
 export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
 export { reify } from './tagged/reify.js';
@@ -164,6 +177,7 @@ export {
   oneOfTagMatcher,
   retag,
   tag,
+  tags,
   tagMatcher,
   untag,
 } from './tag.js';
@@ -191,10 +205,13 @@ export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { transformCoordinate, transformingCoordinates } from './transform.js';
 export { translate } from './translate.js';
+export { to } from './to.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
+export { toCoordinates } from './eachPoint.js';
 export { toDisplayGeometry } from './tagged/toDisplayGeometry.js';
+export { toSegments, toSegmentList } from './eachSegment.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';
-export { toPoints } from './toPoints.js';
+export { toPoints, toPointList } from './toPoints.js';
 export { toTriangleArray } from './tagged/toTriangleArray.js';
 export { transform } from './tagged/transform.js';
 export { twist } from './twist.js';

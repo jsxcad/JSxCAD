@@ -1,22 +1,11 @@
-import {
-  computeCentroid as computeCentroidWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { Group } from './Group.js';
+import { computeCentroid as computeCentroidWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
-import { replacer } from './tagged/visit.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-export const computeCentroid = (geometry, top, bottom) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
-  const outputs = computeCentroidWithCgal(inputs, top, bottom);
-  deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs)(concreteGeometry);
-};
+export const computeCentroid = (geometry, top, bottom) =>
+  Group(computeCentroidWithCgal(linearize(geometry, filter)));

@@ -113,7 +113,7 @@ Box(10).to(Point(1, 2, 3)).gridView();
 ![Image](shape.md.$19.png)
 
 ```JavaScript
-Box(10).move(1, 2, 3).to(center()).gridView();
+Box(10).move(1, 2, 3).to(centroid()).gridView();
 ```
 
 ![Image](shape.md.$20.png)

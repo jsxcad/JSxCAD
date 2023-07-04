@@ -1,19 +1,11 @@
-import {
-  bend as bendWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { bend as bendWithCgal } from '@jsxcad/algorithm-cgal';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) => ['graph'].includes(geometry.type);
 
-export const bend = (geometry, radius) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
+export const bend = (geometry, radius = 100) => {
+  const inputs = linearize(geometry, filter);
   const outputs = bendWithCgal(inputs, radius);
-  deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs)(concreteGeometry);
+  return replacer(inputs, outputs)(geometry);
 };

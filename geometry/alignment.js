@@ -1,18 +1,8 @@
+import { add, scale, subtract } from './vector.js';
+
 import { measureBoundingBox } from './measureBoundingBox.js';
 import { taggedPoints } from './tagged/taggedPoints.js';
 import { translate } from './translate.js';
-
-const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
-  ax + bx,
-  ay + by,
-  az + bz,
-];
-
-const scale = (amount, [x = 0, y = 0, z = 0]) => [
-  x * amount,
-  y * amount,
-  z * amount,
-];
 
 const X = 0;
 const Y = 1;
@@ -20,8 +10,6 @@ const Z = 2;
 
 const MIN = 0;
 const MAX = 1;
-
-const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 // Round to the nearest 0.001 mm
 

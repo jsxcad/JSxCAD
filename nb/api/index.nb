@@ -55,7 +55,7 @@ md`
 * [bend](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bend.nb)
 * [bom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/bom.nb)
 * [by](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/by.nb)
-* [center](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/center.nb)
+* [centroid](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/centroid.nb)
 * [clean](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clean.nb)
 * [clip](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clip.nb)
 * [clipFrom](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/clipFrom.nb)

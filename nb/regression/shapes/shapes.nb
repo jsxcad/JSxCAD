@@ -1,35 +1,35 @@
-await Arc(5, { start: 45 / 360, end: 270 / 360 })
+Arc(5, { start: 45 / 360, end: 270 / 360 })
   .gridView()
   .note(`Arc(5).angle(45/360, 270/360)`);
 
-await Assembly(Box(10), Arc(8), Triangle(5))
+Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .note(`Assembly(Box(10), Arc(8), Triangle(5))`);
 
-await Box(5, 7, 8).view().note(`Box(5, 7, 8)`);
+Box(5, 7, 8).view().note(`Box(5, 7, 8)`);
 
-await ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
+ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
   .note(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 
-await Empty().view().note(`Empty()`);
+Empty().view().note(`Empty()`);
 
-await Group(Box(10), Arc(8), Triangle(5))
+Group(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView()
   .note(`Group(Box(10), Arc(8), Triangle(5))`);
 
-await Hershey('Hershey', 10)
+Hershey('Hershey', 10)
   .align('xy')
   .gridView()
   .note(`Hershey(10)('Hershey').align('xy')`);
 
-await Hexagon(10).gridView().note(`Hexagon(10)`);
+Hexagon(10).gridView().note(`Hexagon(10)`);
 
-await Hull(Arc(5), Box(5).z(5)).view().note(`Hull(Arc(5), Box(5).z(5))`);
+Hull(Arc(5), Box(5).z(5)).view().note(`Hull(Arc(5), Box(5).z(5))`);
 
-await Icosahedron(5).view().note(`Icosahedron(5)`);
+Icosahedron(5).view().note(`Icosahedron(5)`);
 
 const torusFn = (x, y, z) => {
   const x2 = x * x,
@@ -53,33 +53,33 @@ const torusFn = (x, y, z) => {
 };
 
 // Determine why Implicit seems non-deterministic.
-await Implicit(2, torusFn).view({ withGrid: false }).note('Implicit(2, torusFn');
+Implicit(2, torusFn).view({ withGrid: false }).note('Implicit(2, torusFn');
 
-await Line([5, -1]).rz(45).gridView().note(`Line([5, -1])`);
+Line([5, -1]).rz(45).gridView().note(`Line([5, -1])`);
 
-await Octagon(5).gridView().note(`Octagon(5)`);
+Octagon(5).gridView().note(`Octagon(5)`);
 
-await Orb(1).view().note(`Orb(1)`);
+Orb(1).view().note(`Orb(1)`);
 
-await Link(Point(0), Point(5), Point(5, 5), Point(0))
+Link(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
   .note(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
 
-await Pentagon(5).gridView().note(`Pentagon(5)`);
+Pentagon(5).gridView().note(`Pentagon(5)`);
 
-await Point(0.5, 0.5).gridView().note(`Point(0.5, 0.5)`);
+Point(0.5, 0.5).gridView().note(`Point(0.5, 0.5)`);
 
-await Points([0.5, 0.5], [-0.5, -0.5])
+Points([0.5, 0.5], [-0.5, -0.5])
   .gridView()
   .note(`Points([0.5, 0.5], [-0.5, -0.5])`);
 
-await Polygon(Point(0), Point(5), Point(5, 5))
+Polygon(Point(0), Point(5), Point(5, 5))
   .rz(1 / 16)
   .gridView()
   .note(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
 
-await Polyhedron(
+Polyhedron(
   [
     [10, 10, 0],
     [10, -10, 0],
@@ -103,18 +103,18 @@ await Polyhedron(
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])`
   );
 
-await Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
+Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 
-await Spiral().gridView().note(`Spiral()`);
+Spiral().gridView().note(`Spiral()`);
 
-await Triangle(5).gridView().note(`Triangle(5)`);
+Triangle(5).gridView().note(`Triangle(5)`);
 
-await Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
+Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
   .align('xy')
   .gridView()
   .note(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
 
-await Group(Arc(4).x(-1), Box(5).x(1))
+Group(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
   .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
@@ -136,33 +136,33 @@ const extentsC = [
   [-2, 2],
   [-2, -1],
 ];
-const q = await Group(
+const q = Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
   ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
 ).view().note(`Boxes and Arcs from extents`);
 
-await Line([15, -15])
+Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
   .view();
 
-await Line([15, -15])
+Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 
-await Line([-15, 15])
+Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)))
   .view();
 
-await Line([-15, 15])
+Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 
-await Box(12)
+Box(12)
   .cut(
     Arc(3)
       .y(3)
@@ -172,7 +172,7 @@ await Box(12)
   .fit(separate().offset(1).fuse().color('yellow'))
   .view();
 
-await Box(12)
+Box(12)
   .cut(
     Arc(3)
       .y(3)
@@ -182,63 +182,63 @@ await Box(12)
   .fit(separate('noHoles').offset(1).fuse().color('yellow'))
   .view();
 
-await Group(Box(1), Box(1).rx(1 / 4))
+Group(Box(1), Box(1).rx(1 / 4))
   .each(e([2]))
   .view();
 
-await Orb(10)
+Orb(10)
   .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
   .align('z>')
   .view(1);
 
 // Show a section with a hole in it.
-await Box(10).cut(Box(5)).ez([1, -1]).section().view();
+Box(10).cut(Box(5)).ez([1, -1]).section().view();
 
-await Box(10, 10, 20)
+Box(10, 10, 20)
   .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
   .view();
 
-await Box(10, 10, 20)
+Box(10, 10, 20)
   .grow(2, Box(10, 10, [7, 10]))
   .view(3);
 
-await Box(10, 10, 20)
+Box(10, 10, 20)
   .seam(Box(10, 10, [6, 11]))
   .grow(1, Box(10, 10, [7, 10]))
   .view(3, rx(1 / 2).align('z>'));
 
-const red = await Arc(2).color('red');
-const blue = await Box(10).x(10).color('blue');
+const red = Arc(2).color('red');
+const blue = Box(10).x(10).color('blue');
 
-await blue.fitTo(red.to(blue)).view();
-await red.at(blue, cut(Box([10, 20], 20))).view();
-await red.by(blue).view();
+blue.fitTo(red.to(blue)).view();
+red.at(blue, cut(Box([10, 20], 20))).view();
+red.by(blue).view();
 
-await Box(5)
+Box(5)
   .as('b')
   .and(Triangle(5).as('t'))
   .on(get('b'), rz(1 / 8))
   .view();
 
-await Box(10).cut(Box(5, 50, 5)).view();
+Box(10).cut(Box(5, 50, 5)).view();
 
-await Box(10).clip(Box(5, 50, 5)).view();
+Box(10).clip(Box(5, 50, 5)).view();
 
-await Box(10).join(Box(5, 50, 5)).view();
+Box(10).join(Box(5, 50, 5)).view();
 
-await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
+Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 
-await Box(10)
+Box(10)
   .rz(1 / 8)
   .cut(eachPoint(Arc(5).to))
   .view();
 
-await Triangle(10)
+Triangle(10)
   .cut(inset(2))
   .cut(eachPoint(Arc(1).to))
   .view();
 
-await Triangle(10)
+Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
   .cut(eachPoint(Arc(5).to))
@@ -246,36 +246,37 @@ await Triangle(10)
 
 /*
 FIX: Getting empty results from Loft.
-await Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
+Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
   .eachEdge(ArcX(0, 10, { sides: 6 }).to, Loft)
   .view();
 
-await Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
+Curve(Point(0, 0), Point(10, 0), Point(10, 10), Point(20, 10))
   .rx(1 / 4)
   .eachPoint(ArcX(0, 10, { sides: 6 }).to, Loft)
   .view();
 */
 
-await Orb(6, { zag: 2 })
-  .faces(cut(inset(0.2)))
+Orb(6, { zag: 2 })
+  .faces(face => shape => face.cut(inset(0.2)))
   .view();
 
-await Box(10, 10, 10)
+Box(10, 10, 10)
   .cut(faces(Box(4, 4, 4).to))
-  .faces(cut(inset(1)))
+  .clean()
+  .faces(face => shape => face.cut(inset(1)))
   .view();
 
-await Box(10).cut(Triangle(11)).view(1);
+Box(10).cut(Triangle(11)).view(1);
 
-await Box(10).cut(Triangle(11)).clean().view(2);
+Box(10).cut(Triangle(11)).clean().view(2);
 
-await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
+Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 
 /*
 // Grow is producing self-intersections here.
 // We need a new implementation.
-await Box(10)
+Box(10)
   .cut(Arc(5))
   .ez([5])
   .grow(1, 'xy', Box(8).ez([1, 4]))
@@ -283,17 +284,17 @@ await Box(10)
   .view();
 */
 
-await Box(10, 10, [0, 3])
+Box(10, 10, [0, 3])
   .smooth(1, Box(11).cut(Box(5)).ez([1.5, 3.1]), { iterations: 1, time: 1 })
   .view();
 
-await Box(5, 5, 20)
+Box(5, 5, 20)
   .rx(0 / 4, 1 / 6)
   .fuse()
   .smooth(1, ArcX(5, 16, 16))
   .view();
 
-await Box(10)
+Box(10)
   .cut(Box(5).cut(Box(3).cut(Box(1))))
   .ez([3])
   .section()

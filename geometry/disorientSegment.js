@@ -3,24 +3,12 @@ import {
   invertTransform,
 } from '@jsxcad/algorithm-cgal';
 
+import { subtract } from './vector.js';
 import { taggedSegments } from './tagged/taggedSegments.js';
 import { transformCoordinate } from './transform.js';
 
 const SOURCE = 0;
 const TARGET = 1;
-
-export const length = ([ax, ay, az], [bx, by, bz]) => {
-  const x = bx - ax;
-  const y = by - ay;
-  const z = bz - az;
-  return Math.sqrt(x * x + y * y + z * z);
-};
-
-export const subtract = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
 
 export const disorientSegment = (segment, matrix, normal) => {
   const absoluteSegment = [

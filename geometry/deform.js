@@ -17,7 +17,11 @@ const filterSelection = (geometry) =>
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-export const deform = (geometry, selections, iterations, tolerance, alpha) => {
+export const deform = (
+  geometry,
+  selections,
+  { iterations, tolerance, alpha } = {}
+) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filterShape, inputs);

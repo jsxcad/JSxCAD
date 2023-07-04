@@ -26,6 +26,7 @@
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-material": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
+    "curve-interpolator": "^3.1.1",
     "kdbush": "^3.0.0",
     "rollup": "^2.51.2",
     "rollup-plugin-commonjs": "^9.3.4",

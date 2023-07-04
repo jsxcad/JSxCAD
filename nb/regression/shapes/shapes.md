@@ -3,7 +3,7 @@
 Arc(5).angle(45/360, 270/360)
 
 ```JavaScript
-await Arc(5, { start: 45 / 360, end: 270 / 360 })
+Arc(5, { start: 45 / 360, end: 270 / 360 })
   .gridView()
   .note(`Arc(5).angle(45/360, 270/360)`);
 ```
@@ -13,7 +13,7 @@ await Arc(5, { start: 45 / 360, end: 270 / 360 })
 Assembly(Box(10), Arc(8), Triangle(5))
 
 ```JavaScript
-await Assembly(Box(10), Arc(8), Triangle(5))
+Assembly(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView(undefined, { size: 801, triangles: false, wireframe: false })
   .note(`Assembly(Box(10), Arc(8), Triangle(5))`);
@@ -24,7 +24,7 @@ await Assembly(Box(10), Arc(8), Triangle(5))
 Box(5, 7, 8)
 
 ```JavaScript
-await Box(5, 7, 8).view().note(`Box(5, 7, 8)`);
+Box(5, 7, 8).view().note(`Box(5, 7, 8)`);
 ```
 
 ![Image](shapes.md.$4.png)
@@ -32,7 +32,7 @@ await Box(5, 7, 8).view().note(`Box(5, 7, 8)`);
 ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
 
 ```JavaScript
-await ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
+ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .view()
   .note(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 ```
@@ -40,7 +40,7 @@ await ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
 Empty()
 
 ```JavaScript
-await Empty().view().note(`Empty()`);
+Empty().view().note(`Empty()`);
 ```
 
 ![Image](shapes.md.$6.png)
@@ -48,7 +48,7 @@ await Empty().view().note(`Empty()`);
 Group(Box(10), Arc(8), Triangle(5))
 
 ```JavaScript
-await Group(Box(10), Arc(8), Triangle(5))
+Group(Box(10), Arc(8), Triangle(5))
   .pack()
   .gridView()
   .note(`Group(Box(10), Arc(8), Triangle(5))`);
@@ -59,7 +59,7 @@ await Group(Box(10), Arc(8), Triangle(5))
 Hershey(10)('Hershey').align('xy')
 
 ```JavaScript
-await Hershey('Hershey', 10)
+Hershey('Hershey', 10)
   .align('xy')
   .gridView()
   .note(`Hershey(10)('Hershey').align('xy')`);
@@ -70,7 +70,7 @@ await Hershey('Hershey', 10)
 Hexagon(10)
 
 ```JavaScript
-await Hexagon(10).gridView().note(`Hexagon(10)`);
+Hexagon(10).gridView().note(`Hexagon(10)`);
 ```
 
 ![Image](shapes.md.$9.png)
@@ -78,7 +78,7 @@ await Hexagon(10).gridView().note(`Hexagon(10)`);
 Hull(Arc(5), Box(5).z(5))
 
 ```JavaScript
-await Hull(Arc(5), Box(5).z(5)).view().note(`Hull(Arc(5), Box(5).z(5))`);
+Hull(Arc(5), Box(5).z(5)).view().note(`Hull(Arc(5), Box(5).z(5))`);
 ```
 
 ![Image](shapes.md.$10.png)
@@ -86,7 +86,7 @@ await Hull(Arc(5), Box(5).z(5)).view().note(`Hull(Arc(5), Box(5).z(5))`);
 Icosahedron(5)
 
 ```JavaScript
-await Icosahedron(5).view().note(`Icosahedron(5)`);
+Icosahedron(5).view().note(`Icosahedron(5)`);
 ```
 
 ```JavaScript
@@ -117,7 +117,7 @@ const torusFn = (x, y, z) => {
 Implicit(2, torusFn
 
 ```JavaScript
-await Implicit(2, torusFn).view({ withGrid: false }).note('Implicit(2, torusFn');
+Implicit(2, torusFn).view({ withGrid: false }).note('Implicit(2, torusFn');
 ```
 
 ![Image](shapes.md.$12.png)
@@ -125,7 +125,7 @@ await Implicit(2, torusFn).view({ withGrid: false }).note('Implicit(2, torusFn')
 Line([5, -1])
 
 ```JavaScript
-await Line([5, -1]).rz(45).gridView().note(`Line([5, -1])`);
+Line([5, -1]).rz(45).gridView().note(`Line([5, -1])`);
 ```
 
 ![Image](shapes.md.$13.png)
@@ -133,7 +133,7 @@ await Line([5, -1]).rz(45).gridView().note(`Line([5, -1])`);
 Octagon(5)
 
 ```JavaScript
-await Octagon(5).gridView().note(`Octagon(5)`);
+Octagon(5).gridView().note(`Octagon(5)`);
 ```
 
 ![Image](shapes.md.$14.png)
@@ -141,7 +141,7 @@ await Octagon(5).gridView().note(`Octagon(5)`);
 Orb(1)
 
 ```JavaScript
-await Orb(1).view().note(`Orb(1)`);
+Orb(1).view().note(`Orb(1)`);
 ```
 
 ![Image](shapes.md.$15.png)
@@ -149,7 +149,7 @@ await Orb(1).view().note(`Orb(1)`);
 Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)
 
 ```JavaScript
-await Link(Point(0), Point(5), Point(5, 5), Point(0))
+Link(Point(0), Point(5), Point(5, 5), Point(0))
   .rz(45 / 2)
   .gridView()
   .note(`Link(Point(0), Point(5), Point(5, 5), Point(0)).rz(45 / 2)`);
@@ -160,7 +160,7 @@ await Link(Point(0), Point(5), Point(5, 5), Point(0))
 Pentagon(5)
 
 ```JavaScript
-await Pentagon(5).gridView().note(`Pentagon(5)`);
+Pentagon(5).gridView().note(`Pentagon(5)`);
 ```
 
 ![Image](shapes.md.$17.png)
@@ -168,7 +168,7 @@ await Pentagon(5).gridView().note(`Pentagon(5)`);
 Point(0.5, 0.5)
 
 ```JavaScript
-await Point(0.5, 0.5).gridView().note(`Point(0.5, 0.5)`);
+Point(0.5, 0.5).gridView().note(`Point(0.5, 0.5)`);
 ```
 
 ![Image](shapes.md.$18.png)
@@ -176,7 +176,7 @@ await Point(0.5, 0.5).gridView().note(`Point(0.5, 0.5)`);
 Points([0.5, 0.5], [-0.5, -0.5])
 
 ```JavaScript
-await Points([0.5, 0.5], [-0.5, -0.5])
+Points([0.5, 0.5], [-0.5, -0.5])
   .gridView()
   .note(`Points([0.5, 0.5], [-0.5, -0.5])`);
 ```
@@ -186,7 +186,7 @@ await Points([0.5, 0.5], [-0.5, -0.5])
 Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)
 
 ```JavaScript
-await Polygon(Point(0), Point(5), Point(5, 5))
+Polygon(Point(0), Point(5), Point(5, 5))
   .rz(1 / 16)
   .gridView()
   .note(`Polygon(Point(0), Point(5), Point(5, 5)).rz(1 / 16)`);
@@ -199,7 +199,7 @@ Polyhedron(
       [[4, 1, 0], [4, 2, 1], [4, 3, 2], [4, 0, 3], [3, 0, 1], [3, 1, 2]])
 
 ```JavaScript
-await Polyhedron(
+Polyhedron(
   [
     [10, 10, 0],
     [10, -10, 0],
@@ -229,7 +229,7 @@ await Polyhedron(
 Septagon(5)
 
 ```JavaScript
-await Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
+Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 ```
 
 ![Image](shapes.md.$22.png)
@@ -237,7 +237,7 @@ await Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 Spiral()
 
 ```JavaScript
-await Spiral().gridView().note(`Spiral()`);
+Spiral().gridView().note(`Spiral()`);
 ```
 
 ![Image](shapes.md.$23.png)
@@ -245,7 +245,7 @@ await Spiral().gridView().note(`Spiral()`);
 Triangle(5)
 
 ```JavaScript
-await Triangle(5).gridView().note(`Triangle(5)`);
+Triangle(5).gridView().note(`Triangle(5)`);
 ```
 
 ![Image](shapes.md.$24.png)
@@ -253,7 +253,7 @@ await Triangle(5).gridView().note(`Triangle(5)`);
 Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 
 ```JavaScript
-await Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
+Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
   .align('xy')
   .gridView()
   .note(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
@@ -264,7 +264,7 @@ await Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
 Group(Arc(5).x(-1), Box(5).x(1)).fill()
 
 ```JavaScript
-await Group(Arc(4).x(-1), Box(5).x(1))
+Group(Arc(4).x(-1), Box(5).x(1))
   .fill()
   .gridView()
   .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
@@ -299,7 +299,7 @@ const extentsC = [
 Boxes and Arcs from extents
 
 ```JavaScript
-const q = await Group(
+const q = Group(
   ArcY(...extentsA).and(Box(...extentsA).material('glass')),
   ArcX(...extentsB).and(Box(...extentsB).material('glass')),
   ArcZ(...extentsC).and(Box(...extentsC).material('glass'))
@@ -309,7 +309,7 @@ const q = await Group(
 ![Image](shapes.md.$26.png)
 
 ```JavaScript
-await Line([15, -15])
+Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
   .view();
@@ -318,7 +318,7 @@ await Line([15, -15])
 ![Image](shapes.md.$27.png)
 
 ```JavaScript
-await Line([15, -15])
+Line([15, -15])
   .seq({ from: -10, to: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
@@ -327,7 +327,7 @@ await Line([15, -15])
 ![Image](shapes.md.$28.png)
 
 ```JavaScript
-await Line([-15, 15])
+Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)))
   .view();
@@ -336,7 +336,7 @@ await Line([-15, 15])
 ![Image](shapes.md.$29.png)
 
 ```JavaScript
-await Line([-15, 15])
+Line([-15, 15])
   .seq({ from: -15, to: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();
@@ -345,7 +345,7 @@ await Line([-15, 15])
 ![Image](shapes.md.$30.png)
 
 ```JavaScript
-await Box(12)
+Box(12)
   .cut(
     Arc(3)
       .y(3)
@@ -359,7 +359,7 @@ await Box(12)
 ![Image](shapes.md.$31.png)
 
 ```JavaScript
-await Box(12)
+Box(12)
   .cut(
     Arc(3)
       .y(3)
@@ -373,7 +373,7 @@ await Box(12)
 ![Image](shapes.md.$32.png)
 
 ```JavaScript
-await Group(Box(1), Box(1).rx(1 / 4))
+Group(Box(1), Box(1).rx(1 / 4))
   .each(e([2]))
   .view();
 ```
@@ -381,7 +381,7 @@ await Group(Box(1), Box(1).rx(1 / 4))
 ![Image](shapes.md.$33_1.png)
 
 ```JavaScript
-await Orb(10)
+Orb(10)
   .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
   .align('z>')
   .view(1);
@@ -390,13 +390,13 @@ await Orb(10)
 ![Image](shapes.md.$34.png)
 
 ```JavaScript
-await Box(10).cut(Box(5)).ez([1, -1]).section().view();
+Box(10).cut(Box(5)).ez([1, -1]).section().view();
 ```
 
 ![Image](shapes.md.$35.png)
 
 ```JavaScript
-await Box(10, 10, 20)
+Box(10, 10, 20)
   .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
   .view();
 ```
@@ -404,7 +404,7 @@ await Box(10, 10, 20)
 ![Image](shapes.md.$36_3.png)
 
 ```JavaScript
-await Box(10, 10, 20)
+Box(10, 10, 20)
   .grow(2, Box(10, 10, [7, 10]))
   .view(3);
 ```
@@ -412,42 +412,42 @@ await Box(10, 10, 20)
 ![Image](shapes.md.$37_3.png)
 
 ```JavaScript
-await Box(10, 10, 20)
+Box(10, 10, 20)
   .seam(Box(10, 10, [6, 11]))
   .grow(1, Box(10, 10, [7, 10]))
   .view(3, rx(1 / 2).align('z>'));
 ```
 
 ```JavaScript
-const red = await Arc(2).color('red');
+const red = Arc(2).color('red');
 ```
 
 ```JavaScript
-const blue = await Box(10).x(10).color('blue');
+const blue = Box(10).x(10).color('blue');
 ```
 
 ![Image](shapes.md.$38.png)
 
 ```JavaScript
-await blue.fitTo(red.to(blue)).view();
+blue.fitTo(red.to(blue)).view();
 ```
 
 ![Image](shapes.md.$39.png)
 
 ```JavaScript
-await red.at(blue, cut(Box([10, 20], 20))).view();
+red.at(blue, cut(Box([10, 20], 20))).view();
 ```
 
 ![Image](shapes.md.$40.png)
 
 ```JavaScript
-await red.by(blue).view();
+red.by(blue).view();
 ```
 
 ![Image](shapes.md.$41.png)
 
 ```JavaScript
-await Box(5)
+Box(5)
   .as('b')
   .and(Triangle(5).as('t'))
   .on(get('b'), rz(1 / 8))
@@ -457,31 +457,31 @@ await Box(5)
 ![Image](shapes.md.$42.png)
 
 ```JavaScript
-await Box(10).cut(Box(5, 50, 5)).view();
+Box(10).cut(Box(5, 50, 5)).view();
 ```
 
 ![Image](shapes.md.$43.png)
 
 ```JavaScript
-await Box(10).clip(Box(5, 50, 5)).view();
+Box(10).clip(Box(5, 50, 5)).view();
 ```
 
 ![Image](shapes.md.$44.png)
 
 ```JavaScript
-await Box(10).join(Box(5, 50, 5)).view();
+Box(10).join(Box(5, 50, 5)).view();
 ```
 
 ![Image](shapes.md.$45.png)
 
 ```JavaScript
-await Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
+Box(10).and(Box(5, 50, 5)).disjoint().pack().view();
 ```
 
 ![Image](shapes.md.$46.png)
 
 ```JavaScript
-await Box(10)
+Box(10)
   .rz(1 / 8)
   .cut(eachPoint(Arc(5).to))
   .view();
@@ -490,7 +490,7 @@ await Box(10)
 ![Image](shapes.md.$47.png)
 
 ```JavaScript
-await Triangle(10)
+Triangle(10)
   .cut(inset(2))
   .cut(eachPoint(Arc(1).to))
   .view();
@@ -499,7 +499,7 @@ await Triangle(10)
 ![Image](shapes.md.$48.png)
 
 ```JavaScript
-await Triangle(10)
+Triangle(10)
   .cut(inset(4))
   .rz(1 / 8)
   .cut(eachPoint(Arc(5).to))
@@ -509,42 +509,43 @@ await Triangle(10)
 ![Image](shapes.md.$49.png)
 
 ```JavaScript
-await Orb(6, { zag: 2 })
-  .faces(cut(inset(0.2)))
+Orb(6, { zag: 2 })
+  .faces(face => shape => face.cut(inset(0.2)))
   .view();
 ```
 
 ![Image](shapes.md.$50.png)
 
 ```JavaScript
-await Box(10, 10, 10)
+Box(10, 10, 10)
   .cut(faces(Box(4, 4, 4).to))
-  .faces(cut(inset(1)))
+  .clean()
+  .faces(face => shape => face.cut(inset(1)))
   .view();
 ```
 
 ![Image](shapes.md.$51_1.png)
 
 ```JavaScript
-await Box(10).cut(Triangle(11)).view(1);
+Box(10).cut(Triangle(11)).view(1);
 ```
 
 ![Image](shapes.md.$52_2.png)
 
 ```JavaScript
-await Box(10).cut(Triangle(11)).clean().view(2);
+Box(10).cut(Triangle(11)).clean().view(2);
 ```
 
 ![Image](shapes.md.$53_5.png)
 
 ```JavaScript
-await Triangle(11).eachPoint(Arc(5).to, cut).view(5);
+Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 ```
 
 ![Image](shapes.md.$54.png)
 
 ```JavaScript
-await Box(10, 10, [0, 3])
+Box(10, 10, [0, 3])
   .smooth(1, Box(11).cut(Box(5)).ez([1.5, 3.1]), { iterations: 1, time: 1 })
   .view();
 ```
@@ -552,7 +553,7 @@ await Box(10, 10, [0, 3])
 ![Image](shapes.md.$55.png)
 
 ```JavaScript
-await Box(5, 5, 20)
+Box(5, 5, 20)
   .rx(0 / 4, 1 / 6)
   .fuse()
   .smooth(1, ArcX(5, 16, 16))
@@ -562,7 +563,7 @@ await Box(5, 5, 20)
 ![Image](shapes.md.$56.png)
 
 ```JavaScript
-await Box(10)
+Box(10)
   .cut(Box(5).cut(Box(3).cut(Box(1))))
   .ez([3])
   .section()

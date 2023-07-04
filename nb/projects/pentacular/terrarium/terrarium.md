@@ -172,10 +172,10 @@ const terrarium = await Terrarium(
         s
           .ghost()
           .and(
-            Edge(s.center(), s.center().moveAlong(s.center(), 1)).color(
+            Edge(s.centroid(), s.centroid().moveAlong(s.centroid(), 1)).color(
               'green'
             ),
-            s.moveAlong(s.center(), 1)
+            s.moveAlong(s.centroid(), 1)
           )
       )
   );

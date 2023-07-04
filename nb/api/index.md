@@ -51,7 +51,7 @@
 * [bend](../../nb/api/bend.md)
 * [bom](../../nb/api/bom.md)
 * [by](../../nb/api/by.md)
-* [center](../../nb/api/center.md)
+* [centroid](../../nb/api/centroid.md)
 * [clean](../../nb/api/clean.md)
 * [clip](../../nb/api/clip.md)
 * [clipFrom](../../nb/api/clipFrom.md)
