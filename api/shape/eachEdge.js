@@ -26,7 +26,6 @@ export const eachEdge = Shape.registerMethod3(
     for (const { face, edges } of faceEdgesList) {
       const edgeShapes = [];
       for (const { segment, length, backward } of edges) {
-        console.log(`QQ/segment: ${JSON.stringify(segment)}`);
         edgeShapes.push(
           await Shape.apply(
             input,
