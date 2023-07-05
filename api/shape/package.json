@@ -36,8 +36,7 @@
     "@jsxcad/convert-svg": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
-    "@jsxcad/ui-threejs": "^0.0.79",
-    "parse-number": "^1.0.1"
+    "@jsxcad/ui-threejs": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^4.3.0",

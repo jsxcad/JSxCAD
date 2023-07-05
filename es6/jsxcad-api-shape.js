@@ -1,10 +1,11 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read, log as log$1 } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
-import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, Point as Point$1, hasTypeReference, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, hasTypeGhost, transform as transform$1, getLeafs, replacer, Box as Box$1, oneOfTagMatcher, visit, toDisplayGeometry as toDisplayGeometry$1, measureBoundingBox, taggedLayout, getLayouts, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, to as to$1, hash, getInverseMatrices, Fuse as Fuse$1, join as join$1, fuse as fuse$1, get as get$1, hasTypeVoid, grow as grow$1, ConvexHull, convexHull, untag as untag$1, inset as inset$1, involute as involute$1, link as link$1, load as load$1, read as read$1, loft as loft$1, loop as loop$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, offset as offset$1, outline as outline$1, taggedItem, toPoints, remesh as remesh$1, rotateXs, rotateYs, rotateZs, linearize, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, tag as tag$1, tagMatcher, toCoordinates as toCoordinates$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, taggedPlan, Disjoint, Edge as Edge$1, computeImplicitVolume } from './jsxcad-geometry.js';
+import * as g$1 from './jsxcad-geometry.js';
+import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, Box as Box$1, getNot as getNot$1, toDisplayGeometry as toDisplayGeometry$1, getLeafs, measureBoundingBox, taggedLayout, getLayouts, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, hash, Point as Point$1, getInverseMatrices, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, hasTypeGhost, hasTypeVoid, oneOfTagMatcher, visit, getValue, ghost as ghost$1, grow as grow$1, ConvexHull, convexHull, untag as untag$1, inset as inset$1, involute as involute$1, link as link$1, load as load$1, read as read$1, loft as loft$1, loop as loop$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, hasTypeMasked, hasMaterial, transform as transform$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, Empty as Empty$1, offset as offset$1, onPre, onPost, outline as outline$1, taggedItem, toPoints, hasTypeReference, remesh as remesh$1, rotateXs, rotateYs, rotateZs, linearize, store, write as write$1, fromScaleToTransform, seam as seam$1, section as section$1, separate as separate$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, taggedSketch, smooth as smooth$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, twist as twist$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, wrap as wrap$1, taggedPlan, Disjoint, Edge as Edge$1, Hexagon as Hexagon$1, computeImplicitVolume } from './jsxcad-geometry.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { invertTransform, fromTranslateToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
+import { fromTranslateToTransform, setTestMode, makeOcctSphere, makeUnitSphere as makeUnitSphere$1 } from './jsxcad-algorithm-cgal.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
@@ -1086,52 +1087,18 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-const Point = Shape.registerMethod3(
-  'Point',
-  ['number', 'number', 'number', 'coordinate'],
-  Point$1
-);
-
-const ref = Shape.registerMethod2('ref', ['inputGeometry'], (geometry) =>
-  Shape.fromGeometry(hasTypeReference(geometry))
-);
-
-const Ref = Shape.registerMethod2(
-  'Ref',
-  ['input', 'rest'],
-  async (input, rest) => {
-    const point = await Point(...rest)(input);
-    return ref()(point);
-  }
-);
-
-const X$7 = (x = 0) => Ref().x(x);
-const Y$7 = (y = 0) => Ref().y(y);
-const Z$6 = (z = 0) => Ref().z(z);
-const XY = (z = 0) => Ref().z(z);
-const YX = (z = 0) =>
-  Ref()
-    .rx(1 / 2)
-    .z(z);
-const XZ = (y = 0) =>
-  Ref()
-    .rx(-1 / 4)
-    .y(y);
-const ZX = (y = 0) =>
-  Ref()
-    .rx(1 / 4)
-    .y(y);
-const YZ = (x = 0) =>
-  Ref()
-    .ry(-1 / 4)
-    .x(x);
-const ZY = (x = 0) =>
-  Ref()
-    .ry(1 / 4)
-    .x(x);
-const RX = (t = 0) => Ref().rx(t);
-const RY = (t = 0) => Ref().ry(t);
-const RZ = (t = 0) => Ref().rz(t);
+const X$7 = Shape.registerMethod3('X', ['number'], g$1.X);
+const Y$7 = Shape.registerMethod3('Y', ['number'], g$1.Y);
+const Z$6 = Shape.registerMethod3('Z', ['number'], g$1.Z);
+const XY = Shape.registerMethod3('XY', ['number'], g$1.XY);
+const YX = Shape.registerMethod3('YX', ['number'], g$1.YX);
+const XZ = Shape.registerMethod3('XZ', ['number'], g$1.XZ);
+const ZX = Shape.registerMethod3('ZX', ['number'], g$1.ZX);
+const YZ = Shape.registerMethod3('YZ', ['number'], g$1.YZ);
+const ZY = Shape.registerMethod3('ZY', ['number'], g$1.ZY);
+const RX = Shape.registerMethod3('RX', ['number'], g$1.RX);
+const RY = Shape.registerMethod3('RY', ['number'], g$1.RY);
+const RZ = Shape.registerMethod3('RZ', ['number'], g$1.RZ);
 
 const abstract = Shape.registerMethod3(
   'abstract',
@@ -1319,43 +1286,6 @@ const copy = Shape.registerMethod3(
   copy$1
 );
 
-/*
-import { CurveInterpolator } from 'curve-interpolator';
-import Link from './Link.js';
-import Loop from './Loop.js';
-import Point from './Point.js';
-import Shape from './Shape.js';
-
-export const Curve = Shape.registerMethod2(
-  'Curve',
-  ['coordinates', 'number', 'options', 'modes:closed'],
-  (
-    coordinates,
-    implicitSteps = 20,
-    { steps = implicitSteps } = {},
-    { closed }
-  ) => {
-    const interpolator = new CurveInterpolator(coordinates, {
-      closed,
-      tension: 0.2,
-      alpha: 0.5,
-    });
-    const points = interpolator.getPoints(steps);
-    if (closed) {
-      return Loop(...points.map((point) => Point(point)));
-    } else {
-      return Link(...points.map((point) => Point(point)));
-    }
-  }
-);
-
-export const curve = Shape.registerMethod2(
-  'curve',
-  ['input', 'rest'],
-  (input, rest) => Curve(input, ...rest)
-);
-*/
-
 const Curve = Shape.registerMethod3(
   'Curve',
   ['coordinates', 'number', 'options', 'modes:closed'],
@@ -1435,67 +1365,10 @@ const disjoint = Shape.registerMethod3(
   disjoint$1
 );
 
-const ghost = Shape.registerMethod2(
-  'ghost',
-  ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(hasTypeGhost(geometry))
-);
-
-const noOp = Shape.registerMethod3(
-  ['input', 'noOp', 'self'],
-  ['inputGeometry'],
-  (geometry) => geometry
-);
-const input = noOp;
-const self = noOp;
-
-Shape.registerMethod3(
-  'value',
-  ['value'],
-  (value) => value,
-  (value) => value
-);
-
-const transform = Shape.registerMethod3(
-  'transform',
-  ['inputGeometry', 'value'],
-  transform$1
-);
-
-const on = Shape.registerMethod2(
-  'on',
-  ['inputGeometry', 'geometry', 'function'],
-  async (geometry, selection, op$1 = noOp) => {
-    const entries = [];
-    entries.push({ selection, op: op$1 });
-    const inputLeafs = [];
-    const outputLeafs = [];
-    for (const { selection, op: op$1 } of entries) {
-      const leafs = getLeafs(selection);
-      for (const inputLeaf of leafs) {
-        const global = inputLeaf.matrix;
-        const local = invertTransform(global);
-        const target = Shape.fromGeometry(inputLeaf);
-        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
-        const a = await transform(local)(target);
-        const b = await op(op$1)(a);
-        const r = await transform(global)(b);
-        const outputLeaf = await r.toGeometry();
-        inputLeafs.push(inputLeaf);
-        outputLeafs.push(outputLeaf);
-      }
-    }
-    const result = Shape.fromGeometry(
-      replacer(inputLeafs, outputLeafs)(geometry)
-    );
-    return result;
-  }
-);
-
-const drop = Shape.registerMethod2(
+const drop = Shape.registerMethod3(
   'drop',
-  ['input', 'shape'],
-  (input, selector) => on(selector, ghost())(input)
+  ['inputGeometry', 'geometry'],
+  drop$1
 );
 
 const List = (...shapes) => shapes;
@@ -3080,44 +2953,10 @@ const Hershey = Shape.registerMethod2(
   (text, size) => toSegments(text).scale(size)
 );
 
-const getNot = Shape.registerMethod2(
+const getNot = Shape.registerMethod3(
   ['getNot', 'gn'],
   ['inputGeometry', 'strings'],
-  (geometry, tags) => {
-    const isMatch = oneOfTagMatcher(tags, 'item');
-    const picks = [];
-    const walk = (geometry, descend) => {
-      const { tags, type } = geometry;
-      if (type === 'group') {
-        return descend();
-      }
-      let discard = false;
-      if (isMatch(`type:${geometry.type}`)) {
-        discard = true;
-      } else {
-        for (const tag of tags) {
-          if (isMatch(tag)) {
-            discard = true;
-            break;
-          }
-        }
-      }
-      if (!discard) {
-        picks.push(Shape.fromGeometry(geometry));
-      }
-      if (type !== 'item') {
-        return descend();
-      }
-    };
-    if (geometry.type === 'item') {
-      // FIX: Can we make this less magical?
-      // This allows constructions like s.get('a').get('b')
-      visit(geometry.content[0], walk);
-    } else {
-      visit(geometry, walk);
-    }
-    return Group(...picks);
-  }
+  getNot$1
 );
 
 const gn = getNot;
@@ -3499,47 +3338,6 @@ const eachSegment = Shape.registerMethod3(
   }
 );
 
-/*
-import { disorientSegment, linearize } from './jsxcad-geometry.js';
-
-import Group from './Group.js';
-import Shape from './Shape.js';
-
-export const eachSegment = Shape.registerMethod2(
-  'eachSegment',
-  ['input', 'function', 'function'],
-  async (
-    input,
-    segmentOp = (segment) => (_shape) => segment,
-    groupOp = Group
-  ) => {
-    const inputs = linearize(
-      await input.toGeometry(),
-      ({ type }) => type === 'segments'
-    );
-    const output = [];
-    for (const { matrix, segments, normals } of inputs) {
-      for (let nth = 0; nth < segments.length; nth++) {
-        const [segment] = disorientSegment(
-          segments[nth],
-          matrix,
-          normals ? normals[nth] : undefined
-        );
-        output.push(
-          await segmentOp(Shape.chain(Shape.fromGeometry(segment)))(input)
-        );
-      }
-    }
-    const grouped = groupOp(...output);
-    if (Shape.isFunction(grouped)) {
-      return grouped(input);
-    } else {
-      return grouped;
-    }
-  }
-);
-*/
-
 const eagerTransform = Shape.registerMethod3(
   'eagerTransform',
   ['inputGeometry', 'value'],
@@ -3568,51 +3366,6 @@ const edges = Shape.registerMethod3(
     return Shape.apply(input, groupOp, ...shapes);
   }
 );
-
-/*
-import Group from './Group.js';
-import Shape from './Shape.js';
-import { eachFaceEdges } from './jsxcad-geometry.js';
-
-// TODO: Add an option to include a virtual segment at the target of the last
-// edge.
-
-export const length = ([ax, ay, az], [bx, by, bz]) => {
-  const x = bx - ax;
-  const y = by - ay;
-  const z = bz - az;
-  return Math.sqrt(x * x + y * y + z * z);
-};
-
-export const subtract = ([ax, ay, az], [bx, by, bz]) => [
-  ax - bx,
-  ay - by,
-  az - bz,
-];
-
-export const edges = Shape.registerMethod2(
-  'edges',
-  ['input', 'geometries', 'function', 'function'],
-  async (input, selections, edgesOp = (edges) => edges, groupOp = Group) => {
-    const edges = [];
-    eachFaceEdges(
-      await input.toGeometry(),
-      selections,
-      (faceGeometry, edgeGeometry) => {
-        if (edgeGeometry) {
-          edges.push(edgesOp(Shape.chain(Shape.fromGeometry(edgeGeometry))));
-        }
-      }
-    );
-    const grouped = groupOp(...edges);
-    if (grouped instanceof Function) {
-      return grouped(input);
-    } else {
-      return grouped;
-    }
-  }
-);
-*/
 
 const extrudeX = Shape.registerMethod3(
   ['extrudeX', 'ex'],
@@ -3688,19 +3441,9 @@ const fitTo = Shape.registerMethod3(
   fitTo$1
 );
 
-const fix = Shape.registerMethod2('fix', ['inputGeometry'], (geometry) =>
-  Shape.fromGeometry(fix$1(geometry, /* removeSelfIntersections= */ true))
-);
+const fix = Shape.registerMethod3('fix', ['inputGeometry'], fix$1);
 
-const to = Shape.registerMethod3(
-  'to',
-  ['inputGeometry', 'geometries'],
-  to$1
-);
-
-const flat = Shape.registerMethod2('flat', ['input'], (input) =>
-  to(XY())(input)
-);
+const flat = Shape.registerMethod3('flat', ['inputGeometry'], flat$1);
 
 const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
@@ -3922,7 +3665,7 @@ const gcode = Shape.registerMethod2(
     const options = { speed, feedrate, jumpHeight };
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    for (const entry of await ensurePages(op(input))) {
+    for (const entry of await ensurePages(await Shape.apply(input, op))) {
       const gcodePath = `download/gcode/${path}/${id}/${viewId}`;
       await write(gcodePath, await toGcode(entry, {}, options));
 
@@ -3940,6 +3683,12 @@ const gcode = Shape.registerMethod2(
     }
     return input;
   }
+);
+
+const Point = Shape.registerMethod3(
+  'Point',
+  ['number', 'number', 'number', 'coordinate'],
+  Point$1
 );
 
 const origin = Shape.registerMethod2(
@@ -3976,7 +3725,7 @@ const fuse = Shape.registerMethod3(
 const get = Shape.registerMethod3(
   ['get', 'g'],
   ['inputGeometry', 'strings', 'function'],
-  get$1,
+  getList,
   async (results, [geometry, _tags, groupOp = Group]) => {
     const input = Shape.fromGeometry(geometry);
     const leafShapes = [];
@@ -4027,55 +3776,12 @@ const getAll = Shape.registerMethod2(
   }
 );
 
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var parseNumber = createCommonjsModule(function (module) {
-/**
- * More correct array check
- */
-var parser = module.exports = function(str) {
-  if (Array.isArray(str)) return NaN;
-  return parser.str(str);
-};
-
-/**
- * Simple check, assumes non-array inputs
- */
-parser.str = function(str) {
-  if (str == null || str === "") return NaN;
-  return +str;
-};
-});
-
-const getTag = Shape.registerMethod2(
-  'getTag',
-  ['input', 'strings', 'function'],
-  (
-    input,
-    tags,
-    op = (..._values) =>
-      (shape) =>
-        shape
-  ) => {
-    const values = [];
-    for (const tag of tags) {
-      const tags = input.tags(`${tag}=*`, list);
-      if (tags.length === 0) {
-        values.push(undefined);
-        continue;
-      }
-      const [, value] = tags[0].split('=');
-      const number = parseNumber(value);
-      if (isFinite(number)) {
-        values.push(value);
-        continue;
-      }
-      values.push(value);
-    }
-    return op(...values)(input);
-  }
+const getTag = Shape.registerMethod3(
+  ['getTag', 'getValue'],
+  ['inputGeometry', 'strings', 'function'],
+  getValue,
+  (values, [input, _tags, valuesOp = (value) => (_shape) => value]) =>
+    Shape.apply(input, valuesOp, ...values)
 );
 
 // This should take an op.
@@ -4088,6 +3794,8 @@ const getTags = Shape.registerMethod2(
     return tags;
   }
 );
+
+const ghost = Shape.registerMethod3('ghost', ['inputGeometry'], ghost$1);
 
 const grow = Shape.registerMethod2(
   'grow',
@@ -4301,6 +4009,12 @@ const material = Shape.registerMethod2(
   (geometry, name) => Shape.fromGeometry(hasMaterial(geometry, name))
 );
 
+const transform = Shape.registerMethod3(
+  'transform',
+  ['inputGeometry', 'value'],
+  transform$1
+);
+
 // TODO: Fix toCoordinates.
 const move = Shape.registerMethod2(
   ['move', 'xyz'],
@@ -4333,11 +4047,24 @@ const m = Shape.registerMethod3(
   moveAlongNormal
 );
 
+const noOp = Shape.registerMethod3(
+  ['input', 'noOp', 'self'],
+  ['inputGeometry'],
+  (geometry) => geometry
+);
+const input = noOp;
+const self = noOp;
+
+Shape.registerMethod3(
+  'value',
+  ['value'],
+  (value) => value,
+  (value) => value
+);
+
 const normal = Shape.registerMethod3('normal', ['inputGeometry'], computeNormal);
 
-const Empty = Shape.registerMethod2('Empty', [], () =>
-  Shape.fromGeometry(taggedGroup({}))
-);
+const Empty = Shape.registerMethod3('Empty', [], Empty$1);
 
 const noVoid = Shape.registerMethod2(
   ['noVoid', 'noGap'],
@@ -4379,6 +4106,74 @@ const offset = Shape.registerMethod3(
   ['inputGeometry', 'number', 'options'],
   offset$1
 );
+
+const toGeometry = Shape.registerMethod3(
+  'toGeometry',
+  ['inputGeometry'],
+  (geometry) => geometry,
+  (geometry) => geometry
+);
+
+const on = Shape.registerMethod3(
+  'on',
+  ['inputGeometry', 'geometry', 'function'],
+  onPre,
+  async (preResults, [geometry, _selector, op = (_v) => (s) => s]) => {
+    const results = [];
+    const input = Shape.chain(Shape.fromGeometry(geometry));
+    for (const { inputLeaf, localInputLeaf, global } of preResults) {
+      const localOutputShape = await Shape.apply(
+        input,
+        op,
+        Shape.chain(Shape.fromGeometry(localInputLeaf))
+      );
+      const localOutputLeaf = await toGeometry()(localOutputShape);
+      results.push({ inputLeaf, localOutputLeaf, global });
+    }
+    const rewritten = onPost(geometry, results);
+    return Shape.fromGeometry(rewritten);
+  }
+);
+
+/*
+import { getLeafs, replacer } from './jsxcad-geometry.js';
+
+import Shape from './Shape.js';
+import { invertTransform } from './jsxcad-algorithm-cgal.js';
+import { noOp } from './noOp.js';
+import { op as opOp } from './op.js';
+import { transform as transformOp } from './transform.js';
+
+export const on = Shape.registerMethod2(
+  'on',
+  ['inputGeometry', 'geometry', 'function'],
+  async (geometry, selection, op = noOp) => {
+    const entries = [];
+    entries.push({ selection, op });
+    const inputLeafs = [];
+    const outputLeafs = [];
+    for (const { selection, op } of entries) {
+      const leafs = getLeafs(selection);
+      for (const inputLeaf of leafs) {
+        const global = inputLeaf.matrix;
+        const local = invertTransform(global);
+        const target = Shape.fromGeometry(inputLeaf);
+        // Switch to the local coordinate space, perform the operation, and come back to the global coordinate space.
+        const a = await transformOp(local)(target);
+        const b = await opOp(op)(a);
+        const r = await transformOp(global)(b);
+        const outputLeaf = await r.toGeometry();
+        inputLeafs.push(inputLeaf);
+        outputLeafs.push(outputLeaf);
+      }
+    }
+    const result = Shape.fromGeometry(
+      replacer(inputLeafs, outputLeafs)(geometry)
+    );
+    return result;
+  }
+);
+*/
 
 const outline = Shape.registerMethod2(
   'outline',
@@ -4577,6 +4372,19 @@ const put = Shape.registerMethod2(
   'put',
   ['input', 'shapes'],
   (input$1, shapes) => on(input(), shapes)(input$1)
+);
+
+const ref = Shape.registerMethod2('ref', ['inputGeometry'], (geometry) =>
+  Shape.fromGeometry(hasTypeReference(geometry))
+);
+
+const Ref = Shape.registerMethod2(
+  'Ref',
+  ['input', 'rest'],
+  async (input, rest) => {
+    const point = await Point(...rest)(input);
+    return ref()(point);
+  }
 );
 
 const remesh = Shape.registerMethod2(
@@ -5197,176 +5005,6 @@ const stl = Shape.registerMethod2(
   }
 );
 
-/*
-import {
-  buildCorners,
-  computeMiddle,
-  computeScale,
-  computeSides,
-} from './Plan.js';
-
-import Point from './Point.js';
-import Shape from './Shape.js';
-import Spiral from './Spiral.js';
-import { absolute } from './absolute.js';
-
-const toDiameterFromApothem = (apothem, sides = 32) =>
-  apothem / Math.cos(Math.PI / sides);
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const reifyArc =
-  (axis = Z) =>
-  async ({ c1, c2, start = 0, end = 1, zag, sides }) => {
-    while (start > end) {
-      start -= 1;
-    }
-
-    const scale = computeScale(c1, c2);
-    const middle = computeMiddle(c1, c2);
-
-    const left = c1[X];
-    const right = c2[X];
-
-    const front = c1[Y];
-    const back = c2[Y];
-
-    const bottom = c1[Z];
-    const top = c2[Z];
-
-    const step = 1 / computeSides(c1, c2, sides, zag);
-    const steps = Math.ceil((end - start) / step);
-    const effectiveStep = (end - start) / steps;
-
-    let spiral;
-
-    if (end - start === 1) {
-      spiral = Spiral((_t) => Point(0.5), {
-        from: start - 1 / 4,
-        upto: end - 1 / 4,
-        by: effectiveStep,
-      })
-        .loop()
-        .fill();
-    } else {
-      spiral = Spiral((_t) => Point(0.5), {
-        from: start - 1 / 4,
-        to: end - 1 / 4,
-        by: effectiveStep,
-      });
-      if (
-        (axis === X && left !== right) ||
-        (axis === Y && front !== back) ||
-        (axis === Z && top !== bottom)
-      ) {
-        spiral = spiral.loop().fill();
-      }
-    }
-
-    switch (axis) {
-      case X: {
-        scale[X] = 1;
-        spiral = spiral
-          .ry(-1 / 4)
-          .scale(scale)
-          .move(middle);
-        if (left !== right) {
-          spiral = spiral.ex([left - middle[X], right - middle[X]]);
-        }
-        break;
-      }
-      case Y: {
-        scale[Y] = 1;
-        spiral = spiral
-          .rx(-1 / 4)
-          .scale(scale)
-          .move(middle);
-        if (front !== back) {
-          spiral = spiral.ey([front - middle[Y], back - middle[Y]]);
-        }
-        break;
-      }
-      case Z: {
-        scale[Z] = 1;
-        spiral = spiral.scale(scale).move(middle);
-        if (top !== bottom) {
-          spiral = spiral.ez([top - middle[Z], bottom - middle[Z]]);
-        }
-        break;
-      }
-    }
-
-    return absolute()(spiral);
-  };
-
-const reifyArcZ = reifyArc(Z);
-const reifyArcX = reifyArc(X);
-const reifyArcY = reifyArc(Y);
-
-const ArcOp =
-  (type) =>
-  async (
-    [x, y, z],
-    { apothem, diameter, radius, start, end, sides, zag } = {}
-  ) => {
-    if (apothem !== undefined) {
-      diameter = toDiameterFromApothem(apothem, sides);
-    }
-    if (radius !== undefined) {
-      diameter = radius * 2;
-    }
-    if (diameter !== undefined) {
-      x = diameter;
-    }
-    let reify;
-    switch (type) {
-      case 'Arc':
-      case 'ArcZ':
-        if (x === undefined) {
-          x = 1;
-        }
-        if (y === undefined) {
-          y = x;
-        }
-        if (z === undefined) {
-          z = 0;
-        }
-        reify = reifyArcZ;
-        break;
-      case 'ArcX':
-        if (y === undefined) {
-          y = 1;
-        }
-        if (z === undefined) {
-          z = y;
-        }
-        if (x === undefined) {
-          x = 0;
-        }
-        reify = reifyArcX;
-        break;
-      case 'ArcY':
-        if (x === undefined) {
-          x = 1;
-        }
-        if (z === undefined) {
-          z = x;
-        }
-        if (y === undefined) {
-          y = 0;
-        }
-        reify = reifyArcY;
-        break;
-    }
-    const [c1, c2] = await buildCorners(x, y, z)(null);
-    const result = await reify({ c1, c2, start, end, sides, zag });
-    const geometry = await result.toGeometry();
-    return geometry;
-  };
-*/
-
 const Arc = Shape.registerMethod3(
   'Arc',
   ['intervals', 'options'],
@@ -5513,6 +5151,12 @@ const tint = Shape.registerMethod2(
   (input, name) => tag(...toTagsFromName(name))(input)
 );
 
+const to = Shape.registerMethod3(
+  'to',
+  ['inputGeometry', 'geometries'],
+  to$1
+);
+
 const toCoordinates = Shape.registerMethod3(
   'toCoordinates',
   ['inputGeometry'],
@@ -5563,11 +5207,10 @@ const toolpath = Shape.registerMethod2(
     )
 );
 
-const twist = Shape.registerMethod2(
+const twist = Shape.registerMethod3(
   'twist',
-  ['input', 'number'],
-  (input, turnsPerMm = 1) =>
-    Shape.fromGeometry(twist$1(input.toGeometry(), turnsPerMm))
+  ['inputGeometry', 'number'],
+  twist$1
 );
 
 const upperEnvelope = Shape.registerMethod2(
@@ -5734,11 +5377,6 @@ const testMode = Shape.registerMethod(
         setTestMode(false);
       }
     }
-);
-
-const toGeometry = Shape.registerMethod(
-  'toGeometry',
-  () => (shape) => shape.geometry
 );
 
 const Wrap = Shape.registerMethod2(
@@ -6026,17 +5664,13 @@ const Polygon = Shape.registerMethod2(
 
 const Face = Polygon;
 
-const Geometry = Shape.registerMethod2(
+const Geometry = Shape.registerMethod3(
   'Geometry',
   ['rest'],
-  ([geometry]) => Shape.chain(Shape.fromGeometry(geometry))
+  ([geometry]) => geometry
 );
 
-const Hexagon = Shape.registerMethod2(
-  'Hexagon',
-  ['interval', 'interval', 'interval'],
-  (x, y, z) => Arc(x, y, z, { sides: 6 })
-);
+const Hexagon = Shape.registerMethod3('Hexagon', ['intervals'], Hexagon$1);
 
 const fromPointsAndPaths = (points = [], paths = []) => {
   const polygons = [];

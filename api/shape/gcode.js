@@ -18,7 +18,7 @@ export const gcode = Shape.registerMethod2(
     const options = { speed, feedrate, jumpHeight };
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    for (const entry of await ensurePages(op(input))) {
+    for (const entry of await ensurePages(await Shape.apply(input, op))) {
       const gcodePath = `download/gcode/${path}/${id}/${viewId}`;
       await write(gcodePath, await toGcode(entry, {}, options));
 

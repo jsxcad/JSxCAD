@@ -1,29 +1,16 @@
-import Ref from './Ref.js';
+import * as g from '@jsxcad/geometry';
 
-export const X = (x = 0) => Ref().x(x);
-export const Y = (y = 0) => Ref().y(y);
-export const Z = (z = 0) => Ref().z(z);
-export const XY = (z = 0) => Ref().z(z);
-export const YX = (z = 0) =>
-  Ref()
-    .rx(1 / 2)
-    .z(z);
-export const XZ = (y = 0) =>
-  Ref()
-    .rx(-1 / 4)
-    .y(y);
-export const ZX = (y = 0) =>
-  Ref()
-    .rx(1 / 4)
-    .y(y);
-export const YZ = (x = 0) =>
-  Ref()
-    .ry(-1 / 4)
-    .x(x);
-export const ZY = (x = 0) =>
-  Ref()
-    .ry(1 / 4)
-    .x(x);
-export const RX = (t = 0) => Ref().rx(t);
-export const RY = (t = 0) => Ref().ry(t);
-export const RZ = (t = 0) => Ref().rz(t);
+import Shape from './Shape.js';
+
+export const X = Shape.registerMethod3('X', ['number'], g.X);
+export const Y = Shape.registerMethod3('Y', ['number'], g.Y);
+export const Z = Shape.registerMethod3('Z', ['number'], g.Z);
+export const XY = Shape.registerMethod3('XY', ['number'], g.XY);
+export const YX = Shape.registerMethod3('YX', ['number'], g.YX);
+export const XZ = Shape.registerMethod3('XZ', ['number'], g.XZ);
+export const ZX = Shape.registerMethod3('ZX', ['number'], g.ZX);
+export const YZ = Shape.registerMethod3('YZ', ['number'], g.YZ);
+export const ZY = Shape.registerMethod3('ZY', ['number'], g.ZY);
+export const RX = Shape.registerMethod3('RX', ['number'], g.RX);
+export const RY = Shape.registerMethod3('RY', ['number'], g.RY);
+export const RZ = Shape.registerMethod3('RZ', ['number'], g.RZ);

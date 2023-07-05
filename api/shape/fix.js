@@ -1,6 +1,4 @@
 import Shape from './Shape.js';
-import { fix as fixGeometry } from '@jsxcad/geometry';
+import { fix as op } from '@jsxcad/geometry';
 
-export const fix = Shape.registerMethod2('fix', ['inputGeometry'], (geometry) =>
-  Shape.fromGeometry(fixGeometry(geometry, /* removeSelfIntersections= */ true))
-);
+export const fix = Shape.registerMethod3('fix', ['inputGeometry'], op);

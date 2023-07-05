@@ -11,7 +11,7 @@ export { scale } from './scale.js';
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
-export { Arc, ArcX, ArcY, ArcZ } from './Arc.js';
+export { Arc, ArcX, ArcY, ArcZ, Hexagon } from './Arc.js';
 export { Box } from './Box.js';
 export {
   ChainConvexHull,
@@ -21,6 +21,7 @@ export {
 } from './convexHull.js';
 export { Curve, curve } from './Curve.js';
 export { Edge } from './Edge.js';
+export { Empty } from './Empty.js';
 export { Group } from './Group.js';
 export { Point, Points } from './Point.js';
 export { Segments } from './Segments.js';
@@ -51,7 +52,7 @@ export { demesh } from './demesh.js';
 export { dilateXY } from './dilateXY.js';
 export { Disjoint, disjoint, fit, fitTo } from './disjoint.js';
 export { disorientSegment } from './disorientSegment.js';
-export { drop } from './tagged/drop.js';
+export { drop } from './drop.js';
 export { each } from './each.js';
 export { toOrientedFaceEdgesList } from './eachEdge.js';
 export { eachFaceEdges, toFaceEdgesList } from './eachFaceEdges.js';
@@ -69,6 +70,7 @@ export {
   extrudeAlongNormal,
 } from './extrude.js';
 export { fix } from './fix.js';
+export { flat } from './flat.js';
 export { fresh } from './tagged/fresh.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
@@ -83,7 +85,7 @@ export {
 export { Fuse, fuse } from './fuse.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
-export { get } from './get.js';
+export { get, getAll, getList, getNot } from './get.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';
 export { getInverseMatrices } from './tagged/getInverseMatrices.js';
@@ -94,6 +96,8 @@ export { getGraphs } from './tagged/getGraphs.js';
 export { getPlans } from './tagged/getPlans.js';
 export { getPoints } from './tagged/getPoints.js';
 export { getTags } from './tagged/getTags.js';
+export { getValue } from './tag.js';
+export { ghost } from './ghost.js';
 export { grow } from './grow.js';
 export { hasMaterial } from './hasMaterial.js';
 export { hash } from './tagged/hash.js';
@@ -165,10 +169,27 @@ export { measureVolume } from './tagged/measureVolume.js';
 export { moveAlong, moveAlongNormal } from './moveAlong.js';
 export { noGhost } from './noGhost.js';
 export { offset } from './offset.js';
+export { on, onPre, onPost } from './on.js';
 export { op } from './tagged/op.js';
 export { origin } from './origin.js';
 export { outline } from './outline.js';
 export { read, readNonblocking } from './tagged/read.js';
+export {
+  Ref,
+  X,
+  Y,
+  Z,
+  XY,
+  YX,
+  XZ,
+  ZX,
+  YZ,
+  ZY,
+  RX,
+  RY,
+  RZ,
+  ref,
+} from './Ref.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
 export {

@@ -1,10 +1,6 @@
-import { Arc } from './Arc.js';
 import Shape from './Shape.js';
+import { Hexagon as op } from '@jsxcad/geometry';
 
-export const Hexagon = Shape.registerMethod2(
-  'Hexagon',
-  ['interval', 'interval', 'interval'],
-  (x, y, z) => Arc(x, y, z, { sides: 6 })
-);
+export const Hexagon = Shape.registerMethod3('Hexagon', ['intervals'], op);
 
 export default Hexagon;

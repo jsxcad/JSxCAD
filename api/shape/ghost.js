@@ -1,8 +1,4 @@
 import Shape from './Shape.js';
-import { hasTypeGhost } from '@jsxcad/geometry';
+import { ghost as op } from '@jsxcad/geometry';
 
-export const ghost = Shape.registerMethod2(
-  'ghost',
-  ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(hasTypeGhost(geometry))
-);
+export const ghost = Shape.registerMethod3('ghost', ['inputGeometry'], op);

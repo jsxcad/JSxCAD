@@ -164,3 +164,5 @@ export const ArcY = ArcOp('ArcY');
 export const ArcZ = ArcOp('ArcZ');
 
 export default Arc;
+
+export const Hexagon = ([x, y, z]) => Arc([x, y, z], { sides: 6 });
