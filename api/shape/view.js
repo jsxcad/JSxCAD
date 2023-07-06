@@ -8,7 +8,7 @@ import {
 
 import Shape from './Shape.js';
 import { dataUrl } from '@jsxcad/ui-threejs';
-import { ensurePages } from './Page.js';
+import { ensurePages } from '@jsxcad/geometry';
 
 const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
@@ -66,11 +66,7 @@ export const baseView =
     }
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     const displayGeometry = await viewShape.toDisplayGeometry();
-    for (const pageGeometry of await ensurePages(
-      Shape.fromGeometry(displayGeometry),
-      0,
-      viewId
-    )) {
+    for (const pageGeometry of await ensurePages(displayGeometry, 0, viewId)) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();
       const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;

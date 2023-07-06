@@ -1,6 +1,6 @@
 import { Group } from './Group.js';
 import { Segments } from './Segments.js';
-import { scale } from './scale.js';
+import { scaleUniformly } from './scale.js';
 import { translate } from './translate.js';
 
 // Hershey simplex one line font.
@@ -1448,9 +1448,9 @@ export const toSegments = (letters) => {
     }
     xOffset += hersheyWidth[code] || 0;
   }
-  return scale(Group(rendered), 1 / 28);
+  return scaleUniformly(Group(rendered), 1 / 28);
 };
 
-export const Hershey = (text, size) => scale(toSegments(text), size);
+export const Hershey = (text, size) => scaleUniformly(toSegments(text), size);
 
 export default Hershey;

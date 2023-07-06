@@ -12,7 +12,7 @@ const filter = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-export const outline = (geometry, selections) => {
+export const outline = (geometry, selections = []) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);

@@ -1,7 +1,8 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, link as link$1, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, deletePendingSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, fuse as fuse$1, convexHull as convexHull$1, eachPoint, computeBoundingBox, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, eagerTransform as eagerTransform$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, involute as involute$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, link as link$1, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, deletePendingSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, fuse as fuse$1, convexHull as convexHull$1, eachPoint, computeBoundingBox, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, eagerTransform as eagerTransform$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, involute as involute$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
+import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
-import { toTagsFromName } from './jsxcad-algorithm-material.js';
+import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 
 const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   if (content.some((value) => !value)) {
@@ -195,6 +196,9 @@ const rotateZs = (geometry, turns) =>
 const scale$1 = (geometry, vector) =>
   transform(geometry, fromScaleToTransform(...vector));
 
+const scaleUniformly = (geometry, amount) =>
+  transform(geometry, fromScaleToTransform(amount, amount, amount));
+
 const And = (geometries) => taggedGroup({}, ...geometries);
 
 const and = (geometry, geometries) =>
@@ -293,9 +297,9 @@ const loop = (geometry, geometries, mode = {}) =>
 const Loop = (geometries, mode = {}) =>
   Link(geometries, { ...mode, close: true });
 
-const X$4 = 0;
-const Y$4 = 1;
-const Z$4 = 2;
+const X$6 = 0;
+const Y$6 = 1;
+const Z$5 = 2;
 
 const buildCorners = (x, y, z) => {
   const c1 = [0, 0, 0];
@@ -305,45 +309,45 @@ const buildCorners = (x, y, z) => {
       x.push(0);
     }
     if (x[0] < x[1]) {
-      c1[X$4] = x[1];
-      c2[X$4] = x[0];
+      c1[X$6] = x[1];
+      c2[X$6] = x[0];
     } else {
-      c1[X$4] = x[0];
-      c2[X$4] = x[1];
+      c1[X$6] = x[0];
+      c2[X$6] = x[1];
     }
   } else {
-    c1[X$4] = x / 2;
-    c2[X$4] = x / -2;
+    c1[X$6] = x / 2;
+    c2[X$6] = x / -2;
   }
   if (y instanceof Array) {
     while (y.length < 2) {
       y.push(0);
     }
     if (y[0] < y[1]) {
-      c1[Y$4] = y[1];
-      c2[Y$4] = y[0];
+      c1[Y$6] = y[1];
+      c2[Y$6] = y[0];
     } else {
-      c1[Y$4] = y[0];
-      c2[Y$4] = y[1];
+      c1[Y$6] = y[0];
+      c2[Y$6] = y[1];
     }
   } else {
-    c1[Y$4] = y / 2;
-    c2[Y$4] = y / -2;
+    c1[Y$6] = y / 2;
+    c2[Y$6] = y / -2;
   }
   if (z instanceof Array) {
     while (z.length < 2) {
       z.push(0);
     }
     if (z[0] < z[1]) {
-      c1[Z$4] = z[1];
-      c2[Z$4] = z[0];
+      c1[Z$5] = z[1];
+      c2[Z$5] = z[0];
     } else {
-      c1[Z$4] = z[0];
-      c2[Z$4] = z[1];
+      c1[Z$5] = z[0];
+      c2[Z$5] = z[1];
     }
   } else {
-    c1[Z$4] = z / 2;
-    c2[Z$4] = z / -2;
+    c1[Z$5] = z / 2;
+    c2[Z$5] = z / -2;
   }
   return [c1, c2];
 };
@@ -354,9 +358,9 @@ const computeScale = (
 ) => [ax - bx, ay - by, az - bz];
 
 const computeMiddle = (c1, c2) => [
-  (c1[X$4] + c2[X$4]) * 0.5,
-  (c1[Y$4] + c2[Y$4]) * 0.5,
-  (c1[Z$4] + c2[Z$4]) * 0.5,
+  (c1[X$6] + c2[X$6]) * 0.5,
+  (c1[Y$6] + c2[Y$6]) * 0.5,
+  (c1[Z$5] + c2[Z$5]) * 0.5,
 ];
 
 const taggedPoints = (
@@ -421,6 +425,18 @@ const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
 
 const length = ([x = 0, y = 0, z = 0]) =>
   Math.sqrt(x * x + y * y + z * z);
+
+const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];
+
+const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];
 
 const scale = (amount, [x = 0, y = 0, z = 0]) => [
   x * amount,
@@ -657,12 +673,12 @@ const seq = (...specs) => {
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
 
-const X$3 = 0;
-const Y$3 = 1;
-const Z$3 = 2;
+const X$5 = 0;
+const Y$5 = 1;
+const Z$4 = 2;
 
 const makeArc =
-  (axis = Z$3) =>
+  (axis = Z$4) =>
   ({ c1, c2, start = 0, end = 1, zag, sides }) => {
     while (start > end) {
       start -= 1;
@@ -671,14 +687,14 @@ const makeArc =
     const scale = computeScale(c1, c2);
     const middle = computeMiddle(c1, c2);
 
-    const left = c1[X$3];
-    const right = c2[X$3];
+    const left = c1[X$5];
+    const right = c2[X$5];
 
-    const front = c1[Y$3];
-    const back = c2[Y$3];
+    const front = c1[Y$5];
+    const back = c2[Y$5];
 
-    const bottom = c1[Z$3];
-    const top = c2[Z$3];
+    const bottom = c1[Z$4];
+    const top = c2[Z$4];
 
     const step = 1 / computeSides(c1, c2, sides, zag);
     const steps = Math.ceil((end - start) / step);
@@ -694,40 +710,40 @@ const makeArc =
 
     if (
       end - start === 1 ||
-      (axis === X$3 && left !== right) ||
-      (axis === Y$3 && front !== back) ||
-      (axis === Z$3 && top !== bottom)
+      (axis === X$5 && left !== right) ||
+      (axis === Y$5 && front !== back) ||
+      (axis === Z$4 && top !== bottom)
     ) {
       spiral = fill$1(Loop([spiral]));
     }
 
     switch (axis) {
-      case X$3: {
-        scale[X$3] = 1;
+      case X$5: {
+        scale[X$5] = 1;
         spiral = translate(scale$1(rotateY(spiral, -1 / 4), scale), middle);
         if (left !== right) {
           spiral = extrudeAlongX(spiral, [
-            [left - middle[X$3], right - middle[X$3]],
+            [left - middle[X$5], right - middle[X$5]],
           ]);
         }
         break;
       }
-      case Y$3: {
-        scale[Y$3] = 1;
+      case Y$5: {
+        scale[Y$5] = 1;
         spiral = translate(scale$1(rotateX(spiral, -1 / 4), scale), middle);
         if (front !== back) {
           spiral = extrudeAlongY(spiral, [
-            [front - middle[Y$3], back - middle[Y$3]],
+            [front - middle[Y$5], back - middle[Y$5]],
           ]);
         }
         break;
       }
-      case Z$3: {
-        scale[Z$3] = 1;
+      case Z$4: {
+        scale[Z$4] = 1;
         spiral = translate(scale$1(spiral, scale), middle);
         if (top !== bottom) {
           spiral = extrudeAlongZ(spiral, [
-            [top - middle[Z$3], bottom - middle[Z$3]],
+            [top - middle[Z$4], bottom - middle[Z$4]],
           ]);
         }
         break;
@@ -740,9 +756,9 @@ const makeArc =
     return makeAbsolute(spiral);
   };
 
-const makeArcX = makeArc(X$3);
-const makeArcY = makeArc(Y$3);
-const makeArcZ = makeArc(Z$3);
+const makeArcX = makeArc(X$5);
+const makeArcY = makeArc(Y$5);
+const makeArcZ = makeArc(Z$4);
 
 const ArcOp =
   (type) =>
@@ -825,9 +841,9 @@ const Edge = (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
   return taggedSegments({ matrix }, [baseSegment]);
 };
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$4 = 0;
+const Y$4 = 1;
+const Z$3 = 2;
 
 let fundamentalShapes;
 
@@ -853,14 +869,14 @@ const buildFs = () => {
 const makeBox = (corner1, corner2) => {
   const build = () => {
     const fs = buildFs();
-    const left = corner2[X$2];
-    const right = corner1[X$2];
+    const left = corner2[X$4];
+    const right = corner1[X$4];
 
-    const front = corner2[Y$2];
-    const back = corner1[Y$2];
+    const front = corner2[Y$4];
+    const back = corner1[Y$4];
 
-    const bottom = corner2[Z$2];
-    const top = corner1[Z$2];
+    const bottom = corner2[Z$3];
+    const top = corner1[Z$3];
 
     if (top === bottom) {
       if (left === right) {
@@ -938,7 +954,7 @@ const makeBox = (corner1, corner2) => {
   return makeAbsolute(build());
 };
 
-const Box = ([x = 1, y = x, z = 0], options) => {
+const Box = ([x = 1, y = x, z = 0], options = {}) => {
   const [computedC1, computedC2] = buildCorners(x, y, z);
   const { c1 = computedC1, c2 = computedC2 } = options;
   return makeBox(c1, c2);
@@ -1068,7 +1084,2640 @@ const curve = (geometry, coordinates, implicitSteps, options, modes) =>
 
 const Empty = () => Group([]);
 
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var parseNumber = createCommonjsModule(function (module) {
+/**
+ * More correct array check
+ */
+var parser = module.exports = function(str) {
+  if (Array.isArray(str)) return NaN;
+  return parser.str(str);
+};
+
+/**
+ * Simple check, assumes non-array inputs
+ */
+parser.str = function(str) {
+  if (str == null || str === "") return NaN;
+  return +str;
+};
+});
+
+const taggedItem = ({ tags = [], matrix, provenance }, ...content) => {
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags: ${tags}`);
+  }
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined Item content`);
+  }
+  if (content.length !== 1) {
+    throw Error(`Item expects a single content geometry`);
+  }
+  return { type: 'item', tags, matrix, provenance, content };
+};
+
+const qualifyTag = (tag, namespace = 'user') => {
+  if (tag.includes(':')) {
+    return tag;
+  }
+  return `${namespace}:${tag}`;
+};
+
+const tagMatcher = (tag, namespace = 'user') => {
+  let qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith('=*')) {
+    const [base] = qualifiedTag.split('=');
+    const prefix = `${base}=`;
+    return (tag) => tag.startsWith(prefix);
+  } else if (qualifiedTag.endsWith(':*')) {
+    const [namespace] = qualifiedTag.split(':');
+    const prefix = `${namespace}:`;
+    return (tag) => tag.startsWith(prefix);
+  } else {
+    return (tag) => tag === qualifiedTag;
+  }
+};
+
+const oneOfTagMatcher = (tags, namespace = 'user') => {
+  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
+  const isMatch = (tag) => {
+    for (const matcher of matchers) {
+      if (matcher(tag)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return isMatch;
+};
+
+const retag = (geometry, oldTags, newTags) => {
+  oldTags = oldTags.map((tag) => qualifyTag(tag));
+  newTags = newTags.map((tag) => qualifyTag(tag));
+
+  const isOldTagMatch = oneOfTagMatcher(oldTags, 'user');
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+      case 'layout':
+        return descend();
+      default: {
+        const { tags = [] } = geometry;
+        const remaining = [];
+        for (const tag of tags) {
+          if (!isOldTagMatch(tag)) {
+            remaining.push(tag);
+          }
+        }
+        for (const newTag of newTags) {
+          if (!remaining.includes(newTag)) {
+            remaining.push(newTag);
+          }
+        }
+        return descend({ tags: remaining });
+      }
+    }
+  };
+  const result = rewrite(geometry, op);
+  return result;
+};
+
+const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
+
+const tag = (geometry, newTags) => retag(geometry, [], newTags);
+
+const tags = (geometry, tag) => {
+  const isMatchingTag = tagMatcher(tag, 'user');
+  const collected = [];
+  for (const { tags } of getLeafs(geometry)) {
+    for (const tag of tags) {
+      if (isMatchingTag(tag)) {
+        collected.push(tag);
+      }
+    }
+  }
+  return collected;
+};
+
+const as = (geometry, names) =>
+  taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry);
+
+const asPart = (geometry, names) =>
+  taggedItem({ tags: names.map((name) => `part:${name}`) }, geometry);
+
+const getValue = (geometry, tags) => {
+  const values = [];
+  for (const tag of tags) {
+    const matches = tags(geometry, `${tag}=*`);
+    if (matches.length === 0) {
+      values.push(undefined);
+      continue;
+    }
+    const [, value] = matches[0].split('=');
+    const number = parseNumber(value);
+    if (isFinite(number)) {
+      values.push(value);
+      continue;
+    }
+    values.push(value);
+  }
+  return values;
+};
+
+const getList = (geometry, tags, { inItem, not } = {}) => {
+  const isMatch = oneOfTagMatcher(tags, 'item');
+  const picks = [];
+  const walk = (geometry, descend) => {
+    const { tags, type } = geometry;
+    if (type === 'group') {
+      return descend();
+    }
+    let matched = false;
+    if (isMatch(`type:${geometry.type}`)) {
+      matched = true;
+    } else {
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          matched = true;
+          break;
+        }
+      }
+    }
+    if (not) {
+      if (!matched) {
+        picks.push(geometry);
+      }
+    } else {
+      if (matched) {
+        picks.push(geometry);
+      }
+    }
+    if (inItem || type !== 'item') {
+      return descend();
+    }
+  };
+  visit(geometry, walk);
+  return picks;
+};
+
+const get = (geometry, tags, options) =>
+  Group(getList(geometry, tags, options));
+
+const getAll = (geometry, tags) => get(geometry, tags, { inItem: true });
+
+const getNot = (geometry, tags) => get(geometry, tags, { not: true });
+
 const Segments$1 = (segments) => taggedSegments({}, segments);
+
+// Hershey simplex one line font.
+// See: http://paulbourke.net/dataformats/hershey/
+
+const hersheyPaths = {
+  32: [[null]],
+  33: [
+    [null, [5, 21, 0], [5, 7, 0]],
+    [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]],
+    [null],
+  ],
+  34: [
+    [null, [4, 21, 0], [4, 14, 0]],
+    [null, [12, 21, 0], [12, 14, 0]],
+    [null],
+  ],
+  35: [
+    [null, [11, 25, 0], [4, -7, 0]],
+    [null, [17, 25, 0], [10, -7, 0]],
+    [null, [4, 12, 0], [18, 12, 0]],
+    [null, [3, 6, 0], [17, 6, 0]],
+    [null],
+  ],
+  36: [
+    [null, [8, 25, 0], [8, -4, 0]],
+    [null, [12, 25, 0], [12, -4, 0]],
+    [
+      null,
+      [17, 18, 0],
+      [15, 20, 0],
+      [12, 21, 0],
+      [8, 21, 0],
+      [5, 20, 0],
+      [3, 18, 0],
+      [3, 16, 0],
+      [4, 14, 0],
+      [5, 13, 0],
+      [7, 12, 0],
+      [13, 10, 0],
+      [15, 9, 0],
+      [16, 8, 0],
+      [17, 6, 0],
+      [17, 3, 0],
+      [15, 1, 0],
+      [12, 0, 0],
+      [8, 0, 0],
+      [5, 1, 0],
+      [3, 3, 0],
+    ],
+    [null],
+  ],
+  37: [
+    [null, [21, 21, 0], [3, 0, 0]],
+    [
+      null,
+      [8, 21, 0],
+      [10, 19, 0],
+      [10, 17, 0],
+      [9, 15, 0],
+      [7, 14, 0],
+      [5, 14, 0],
+      [3, 16, 0],
+      [3, 18, 0],
+      [4, 20, 0],
+      [6, 21, 0],
+      [8, 21, 0],
+      [10, 20, 0],
+      [13, 19, 0],
+      [16, 19, 0],
+      [19, 20, 0],
+      [21, 21, 0],
+    ],
+    [
+      null,
+      [17, 7, 0],
+      [15, 6, 0],
+      [14, 4, 0],
+      [14, 2, 0],
+      [16, 0, 0],
+      [18, 0, 0],
+      [20, 1, 0],
+      [21, 3, 0],
+      [21, 5, 0],
+      [19, 7, 0],
+      [17, 7, 0],
+    ],
+    [null],
+  ],
+  38: [
+    [
+      null,
+      [23, 12, 0],
+      [23, 13, 0],
+      [22, 14, 0],
+      [21, 14, 0],
+      [20, 13, 0],
+      [19, 11, 0],
+      [17, 6, 0],
+      [15, 3, 0],
+      [13, 1, 0],
+      [11, 0, 0],
+      [7, 0, 0],
+      [5, 1, 0],
+      [4, 2, 0],
+      [3, 4, 0],
+      [3, 6, 0],
+      [4, 8, 0],
+      [5, 9, 0],
+      [12, 13, 0],
+      [13, 14, 0],
+      [14, 16, 0],
+      [14, 18, 0],
+      [13, 20, 0],
+      [11, 21, 0],
+      [9, 20, 0],
+      [8, 18, 0],
+      [8, 16, 0],
+      [9, 13, 0],
+      [11, 10, 0],
+      [16, 3, 0],
+      [18, 1, 0],
+      [20, 0, 0],
+      [22, 0, 0],
+      [23, 1, 0],
+      [23, 2, 0],
+    ],
+    [null],
+  ],
+  39: [
+    [
+      null,
+      [5, 19, 0],
+      [4, 20, 0],
+      [5, 21, 0],
+      [6, 20, 0],
+      [6, 18, 0],
+      [5, 16, 0],
+      [4, 15, 0],
+    ],
+    [null],
+  ],
+  40: [
+    [
+      null,
+      [11, 25, 0],
+      [9, 23, 0],
+      [7, 20, 0],
+      [5, 16, 0],
+      [4, 11, 0],
+      [4, 7, 0],
+      [5, 2, 0],
+      [7, -2, 0],
+      [9, -5, 0],
+      [11, -7, 0],
+    ],
+    [null],
+  ],
+  41: [
+    [
+      null,
+      [3, 25, 0],
+      [5, 23, 0],
+      [7, 20, 0],
+      [9, 16, 0],
+      [10, 11, 0],
+      [10, 7, 0],
+      [9, 2, 0],
+      [7, -2, 0],
+      [5, -5, 0],
+      [3, -7, 0],
+    ],
+    [null],
+  ],
+  42: [
+    [null, [8, 21, 0], [8, 9, 0]],
+    [null, [3, 18, 0], [13, 12, 0]],
+    [null, [13, 18, 0], [3, 12, 0]],
+    [null],
+  ],
+  43: [[null, [13, 18, 0], [13, 0, 0]], [null, [4, 9, 0], [22, 9, 0]], [null]],
+  44: [
+    [
+      null,
+      [6, 1, 0],
+      [5, 0, 0],
+      [4, 1, 0],
+      [5, 2, 0],
+      [6, 1, 0],
+      [6, -1, 0],
+      [5, -3, 0],
+      [4, -4, 0],
+    ],
+    [null],
+  ],
+  45: [[null, [4, 9, 0], [22, 9, 0]], [null]],
+  46: [[null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]], [null]],
+  47: [[null, [20, 25, 0], [2, -7, 0]], [null]],
+  48: [
+    [
+      null,
+      [9, 21, 0],
+      [6, 20, 0],
+      [4, 17, 0],
+      [3, 12, 0],
+      [3, 9, 0],
+      [4, 4, 0],
+      [6, 1, 0],
+      [9, 0, 0],
+      [11, 0, 0],
+      [14, 1, 0],
+      [16, 4, 0],
+      [17, 9, 0],
+      [17, 12, 0],
+      [16, 17, 0],
+      [14, 20, 0],
+      [11, 21, 0],
+      [9, 21, 0],
+    ],
+    [null],
+  ],
+  49: [[null, [6, 17, 0], [8, 18, 0], [11, 21, 0], [11, 0, 0]], [null]],
+  50: [
+    [
+      null,
+      [4, 16, 0],
+      [4, 17, 0],
+      [5, 19, 0],
+      [6, 20, 0],
+      [8, 21, 0],
+      [12, 21, 0],
+      [14, 20, 0],
+      [15, 19, 0],
+      [16, 17, 0],
+      [16, 15, 0],
+      [15, 13, 0],
+      [13, 10, 0],
+      [3, 0, 0],
+      [17, 0, 0],
+    ],
+    [null],
+  ],
+  51: [
+    [
+      null,
+      [5, 21, 0],
+      [16, 21, 0],
+      [10, 13, 0],
+      [13, 13, 0],
+      [15, 12, 0],
+      [16, 11, 0],
+      [17, 8, 0],
+      [17, 6, 0],
+      [16, 3, 0],
+      [14, 1, 0],
+      [11, 0, 0],
+      [8, 0, 0],
+      [5, 1, 0],
+      [4, 2, 0],
+      [3, 4, 0],
+    ],
+    [null],
+  ],
+  52: [
+    [null, [13, 21, 0], [3, 7, 0], [18, 7, 0]],
+    [null, [13, 21, 0], [13, 0, 0]],
+    [null],
+  ],
+  53: [
+    [
+      null,
+      [15, 21, 0],
+      [5, 21, 0],
+      [4, 12, 0],
+      [5, 13, 0],
+      [8, 14, 0],
+      [11, 14, 0],
+      [14, 13, 0],
+      [16, 11, 0],
+      [17, 8, 0],
+      [17, 6, 0],
+      [16, 3, 0],
+      [14, 1, 0],
+      [11, 0, 0],
+      [8, 0, 0],
+      [5, 1, 0],
+      [4, 2, 0],
+      [3, 4, 0],
+    ],
+    [null],
+  ],
+  54: [
+    [
+      null,
+      [16, 18, 0],
+      [15, 20, 0],
+      [12, 21, 0],
+      [10, 21, 0],
+      [7, 20, 0],
+      [5, 17, 0],
+      [4, 12, 0],
+      [4, 7, 0],
+      [5, 3, 0],
+      [7, 1, 0],
+      [10, 0, 0],
+      [11, 0, 0],
+      [14, 1, 0],
+      [16, 3, 0],
+      [17, 6, 0],
+      [17, 7, 0],
+      [16, 10, 0],
+      [14, 12, 0],
+      [11, 13, 0],
+      [10, 13, 0],
+      [7, 12, 0],
+      [5, 10, 0],
+      [4, 7, 0],
+    ],
+    [null],
+  ],
+  55: [[null, [17, 21, 0], [7, 0, 0]], [null, [3, 21, 0], [17, 21, 0]], [null]],
+  56: [
+    [
+      null,
+      [8, 21, 0],
+      [5, 20, 0],
+      [4, 18, 0],
+      [4, 16, 0],
+      [5, 14, 0],
+      [7, 13, 0],
+      [11, 12, 0],
+      [14, 11, 0],
+      [16, 9, 0],
+      [17, 7, 0],
+      [17, 4, 0],
+      [16, 2, 0],
+      [15, 1, 0],
+      [12, 0, 0],
+      [8, 0, 0],
+      [5, 1, 0],
+      [4, 2, 0],
+      [3, 4, 0],
+      [3, 7, 0],
+      [4, 9, 0],
+      [6, 11, 0],
+      [9, 12, 0],
+      [13, 13, 0],
+      [15, 14, 0],
+      [16, 16, 0],
+      [16, 18, 0],
+      [15, 20, 0],
+      [12, 21, 0],
+      [8, 21, 0],
+    ],
+    [null],
+  ],
+  57: [
+    [
+      null,
+      [16, 14, 0],
+      [15, 11, 0],
+      [13, 9, 0],
+      [10, 8, 0],
+      [9, 8, 0],
+      [6, 9, 0],
+      [4, 11, 0],
+      [3, 14, 0],
+      [3, 15, 0],
+      [4, 18, 0],
+      [6, 20, 0],
+      [9, 21, 0],
+      [10, 21, 0],
+      [13, 20, 0],
+      [15, 18, 0],
+      [16, 14, 0],
+      [16, 9, 0],
+      [15, 4, 0],
+      [13, 1, 0],
+      [10, 0, 0],
+      [8, 0, 0],
+      [5, 1, 0],
+      [4, 3, 0],
+    ],
+    [null],
+  ],
+  58: [
+    [null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]],
+    [null, [5, 2, 0], [4, 1, 0], [5, 0, 0], [6, 1, 0], [5, 2, 0]],
+    [null],
+  ],
+  59: [
+    [null, [5, 14, 0], [4, 13, 0], [5, 12, 0], [6, 13, 0], [5, 14, 0]],
+    [
+      null,
+      [6, 1, 0],
+      [5, 0, 0],
+      [4, 1, 0],
+      [5, 2, 0],
+      [6, 1, 0],
+      [6, -1, 0],
+      [5, -3, 0],
+      [4, -4, 0],
+    ],
+    [null],
+  ],
+  60: [[null, [20, 18, 0], [4, 9, 0], [20, 0, 0]], [null]],
+  61: [[null, [4, 12, 0], [22, 12, 0]], [null, [4, 6, 0], [22, 6, 0]], [null]],
+  62: [[null, [4, 18, 0], [20, 9, 0], [4, 0, 0]], [null]],
+  63: [
+    [
+      null,
+      [3, 16, 0],
+      [3, 17, 0],
+      [4, 19, 0],
+      [5, 20, 0],
+      [7, 21, 0],
+      [11, 21, 0],
+      [13, 20, 0],
+      [14, 19, 0],
+      [15, 17, 0],
+      [15, 15, 0],
+      [14, 13, 0],
+      [13, 12, 0],
+      [9, 10, 0],
+      [9, 7, 0],
+    ],
+    [null, [9, 2, 0], [8, 1, 0], [9, 0, 0], [10, 1, 0], [9, 2, 0]],
+    [null],
+  ],
+  64: [
+    [
+      null,
+      [18, 13, 0],
+      [17, 15, 0],
+      [15, 16, 0],
+      [12, 16, 0],
+      [10, 15, 0],
+      [9, 14, 0],
+      [8, 11, 0],
+      [8, 8, 0],
+      [9, 6, 0],
+      [11, 5, 0],
+      [14, 5, 0],
+      [16, 6, 0],
+      [17, 8, 0],
+    ],
+    [
+      null,
+      [12, 16, 0],
+      [10, 14, 0],
+      [9, 11, 0],
+      [9, 8, 0],
+      [10, 6, 0],
+      [11, 5, 0],
+    ],
+    [
+      null,
+      [18, 16, 0],
+      [17, 8, 0],
+      [17, 6, 0],
+      [19, 5, 0],
+      [21, 5, 0],
+      [23, 7, 0],
+      [24, 10, 0],
+      [24, 12, 0],
+      [23, 15, 0],
+      [22, 17, 0],
+      [20, 19, 0],
+      [18, 20, 0],
+      [15, 21, 0],
+      [12, 21, 0],
+      [9, 20, 0],
+      [7, 19, 0],
+      [5, 17, 0],
+      [4, 15, 0],
+      [3, 12, 0],
+      [3, 9, 0],
+      [4, 6, 0],
+      [5, 4, 0],
+      [7, 2, 0],
+      [9, 1, 0],
+      [12, 0, 0],
+      [15, 0, 0],
+      [18, 1, 0],
+      [20, 2, 0],
+      [21, 3, 0],
+    ],
+    [null, [19, 16, 0], [18, 8, 0], [18, 6, 0], [19, 5, 0]],
+  ],
+  65: [
+    [null, [9, 21, 0], [1, 0, 0]],
+    [null, [9, 21, 0], [17, 0, 0]],
+    [null, [4, 7, 0], [14, 7, 0]],
+    [null],
+  ],
+  66: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 21, 0],
+      [13, 21, 0],
+      [16, 20, 0],
+      [17, 19, 0],
+      [18, 17, 0],
+      [18, 15, 0],
+      [17, 13, 0],
+      [16, 12, 0],
+      [13, 11, 0],
+    ],
+    [
+      null,
+      [4, 11, 0],
+      [13, 11, 0],
+      [16, 10, 0],
+      [17, 9, 0],
+      [18, 7, 0],
+      [18, 4, 0],
+      [17, 2, 0],
+      [16, 1, 0],
+      [13, 0, 0],
+      [4, 0, 0],
+    ],
+    [null],
+  ],
+  67: [
+    [
+      null,
+      [18, 16, 0],
+      [17, 18, 0],
+      [15, 20, 0],
+      [13, 21, 0],
+      [9, 21, 0],
+      [7, 20, 0],
+      [5, 18, 0],
+      [4, 16, 0],
+      [3, 13, 0],
+      [3, 8, 0],
+      [4, 5, 0],
+      [5, 3, 0],
+      [7, 1, 0],
+      [9, 0, 0],
+      [13, 0, 0],
+      [15, 1, 0],
+      [17, 3, 0],
+      [18, 5, 0],
+    ],
+    [null],
+  ],
+  68: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 21, 0],
+      [11, 21, 0],
+      [14, 20, 0],
+      [16, 18, 0],
+      [17, 16, 0],
+      [18, 13, 0],
+      [18, 8, 0],
+      [17, 5, 0],
+      [16, 3, 0],
+      [14, 1, 0],
+      [11, 0, 0],
+      [4, 0, 0],
+    ],
+    [null],
+  ],
+  69: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [4, 21, 0], [17, 21, 0]],
+    [null, [4, 11, 0], [12, 11, 0]],
+    [null, [4, 0, 0], [17, 0, 0]],
+    [null],
+  ],
+  70: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [4, 21, 0], [17, 21, 0]],
+    [null, [4, 11, 0], [12, 11, 0]],
+    [null],
+  ],
+  71: [
+    [
+      null,
+      [18, 16, 0],
+      [17, 18, 0],
+      [15, 20, 0],
+      [13, 21, 0],
+      [9, 21, 0],
+      [7, 20, 0],
+      [5, 18, 0],
+      [4, 16, 0],
+      [3, 13, 0],
+      [3, 8, 0],
+      [4, 5, 0],
+      [5, 3, 0],
+      [7, 1, 0],
+      [9, 0, 0],
+      [13, 0, 0],
+      [15, 1, 0],
+      [17, 3, 0],
+      [18, 5, 0],
+      [18, 8, 0],
+    ],
+    [null, [13, 8, 0], [18, 8, 0]],
+    [null],
+  ],
+  72: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [18, 21, 0], [18, 0, 0]],
+    [null, [4, 11, 0], [18, 11, 0]],
+    [null],
+  ],
+  73: [[null, [4, 21, 0], [4, 0, 0]], [null]],
+  74: [
+    [
+      null,
+      [12, 21, 0],
+      [12, 5, 0],
+      [11, 2, 0],
+      [10, 1, 0],
+      [8, 0, 0],
+      [6, 0, 0],
+      [4, 1, 0],
+      [3, 2, 0],
+      [2, 5, 0],
+      [2, 7, 0],
+    ],
+    [null],
+  ],
+  75: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [18, 21, 0], [4, 7, 0]],
+    [null, [9, 12, 0], [18, 0, 0]],
+    [null],
+  ],
+  76: [[null, [4, 21, 0], [4, 0, 0]], [null, [4, 0, 0], [16, 0, 0]], [null]],
+  77: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [4, 21, 0], [12, 0, 0]],
+    [null, [20, 21, 0], [12, 0, 0]],
+    [null, [20, 21, 0], [20, 0, 0]],
+    [null],
+  ],
+  78: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [4, 21, 0], [18, 0, 0]],
+    [null, [18, 21, 0], [18, 0, 0]],
+    [null],
+  ],
+  79: [
+    [
+      null,
+      [9, 21, 0],
+      [7, 20, 0],
+      [5, 18, 0],
+      [4, 16, 0],
+      [3, 13, 0],
+      [3, 8, 0],
+      [4, 5, 0],
+      [5, 3, 0],
+      [7, 1, 0],
+      [9, 0, 0],
+      [13, 0, 0],
+      [15, 1, 0],
+      [17, 3, 0],
+      [18, 5, 0],
+      [19, 8, 0],
+      [19, 13, 0],
+      [18, 16, 0],
+      [17, 18, 0],
+      [15, 20, 0],
+      [13, 21, 0],
+      [9, 21, 0],
+    ],
+    [null],
+  ],
+  80: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 21, 0],
+      [13, 21, 0],
+      [16, 20, 0],
+      [17, 19, 0],
+      [18, 17, 0],
+      [18, 14, 0],
+      [17, 12, 0],
+      [16, 11, 0],
+      [13, 10, 0],
+      [4, 10, 0],
+    ],
+    [null],
+  ],
+  81: [
+    [
+      null,
+      [9, 21, 0],
+      [7, 20, 0],
+      [5, 18, 0],
+      [4, 16, 0],
+      [3, 13, 0],
+      [3, 8, 0],
+      [4, 5, 0],
+      [5, 3, 0],
+      [7, 1, 0],
+      [9, 0, 0],
+      [13, 0, 0],
+      [15, 1, 0],
+      [17, 3, 0],
+      [18, 5, 0],
+      [19, 8, 0],
+      [19, 13, 0],
+      [18, 16, 0],
+      [17, 18, 0],
+      [15, 20, 0],
+      [13, 21, 0],
+      [9, 21, 0],
+    ],
+    [null, [12, 4, 0], [18, -2, 0]],
+    [null],
+  ],
+  82: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 21, 0],
+      [13, 21, 0],
+      [16, 20, 0],
+      [17, 19, 0],
+      [18, 17, 0],
+      [18, 15, 0],
+      [17, 13, 0],
+      [16, 12, 0],
+      [13, 11, 0],
+      [4, 11, 0],
+    ],
+    [null, [11, 11, 0], [18, 0, 0]],
+    [null],
+  ],
+  83: [
+    [
+      null,
+      [17, 18, 0],
+      [15, 20, 0],
+      [12, 21, 0],
+      [8, 21, 0],
+      [5, 20, 0],
+      [3, 18, 0],
+      [3, 16, 0],
+      [4, 14, 0],
+      [5, 13, 0],
+      [7, 12, 0],
+      [13, 10, 0],
+      [15, 9, 0],
+      [16, 8, 0],
+      [17, 6, 0],
+      [17, 3, 0],
+      [15, 1, 0],
+      [12, 0, 0],
+      [8, 0, 0],
+      [5, 1, 0],
+      [3, 3, 0],
+    ],
+    [null],
+  ],
+  84: [[null, [8, 21, 0], [8, 0, 0]], [null, [1, 21, 0], [15, 21, 0]], [null]],
+  85: [
+    [
+      null,
+      [4, 21, 0],
+      [4, 6, 0],
+      [5, 3, 0],
+      [7, 1, 0],
+      [10, 0, 0],
+      [12, 0, 0],
+      [15, 1, 0],
+      [17, 3, 0],
+      [18, 6, 0],
+      [18, 21, 0],
+    ],
+    [null],
+  ],
+  86: [[null, [1, 21, 0], [9, 0, 0]], [null, [17, 21, 0], [9, 0, 0]], [null]],
+  87: [
+    [null, [2, 21, 0], [7, 0, 0]],
+    [null, [12, 21, 0], [7, 0, 0]],
+    [null, [12, 21, 0], [17, 0, 0]],
+    [null, [22, 21, 0], [17, 0, 0]],
+    [null],
+  ],
+  88: [[null, [3, 21, 0], [17, 0, 0]], [null, [17, 21, 0], [3, 0, 0]], [null]],
+  89: [
+    [null, [1, 21, 0], [9, 11, 0], [9, 0, 0]],
+    [null, [17, 21, 0], [9, 11, 0]],
+    [null],
+  ],
+  90: [
+    [null, [17, 21, 0], [3, 0, 0]],
+    [null, [3, 21, 0], [17, 21, 0]],
+    [null, [3, 0, 0], [17, 0, 0]],
+    [null],
+  ],
+  91: [
+    [null, [4, 25, 0], [4, -7, 0]],
+    [null, [5, 25, 0], [5, -7, 0]],
+    [null, [4, 25, 0], [11, 25, 0]],
+    [null, [4, -7, 0], [11, -7, 0]],
+    [null],
+  ],
+  92: [[null, [0, 21, 0], [14, -3, 0]], [null]],
+  93: [
+    [null, [9, 25, 0], [9, -7, 0]],
+    [null, [10, 25, 0], [10, -7, 0]],
+    [null, [3, 25, 0], [10, 25, 0]],
+    [null, [3, -7, 0], [10, -7, 0]],
+    [null],
+  ],
+  94: [
+    [null, [6, 15, 0], [8, 18, 0], [10, 15, 0]],
+    [null, [3, 12, 0], [8, 17, 0], [13, 12, 0]],
+    [null, [8, 17, 0], [8, 0, 0]],
+    [null],
+  ],
+  95: [[null, [0, -2, 0], [16, -2, 0]], [null]],
+  96: [
+    [
+      null,
+      [6, 21, 0],
+      [5, 20, 0],
+      [4, 18, 0],
+      [4, 16, 0],
+      [5, 15, 0],
+      [6, 16, 0],
+      [5, 17, 0],
+    ],
+    [null],
+  ],
+  97: [
+    [null, [15, 14, 0], [15, 0, 0]],
+    [
+      null,
+      [15, 11, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+    ],
+    [null],
+  ],
+  98: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 11, 0],
+      [6, 13, 0],
+      [8, 14, 0],
+      [11, 14, 0],
+      [13, 13, 0],
+      [15, 11, 0],
+      [16, 8, 0],
+      [16, 6, 0],
+      [15, 3, 0],
+      [13, 1, 0],
+      [11, 0, 0],
+      [8, 0, 0],
+      [6, 1, 0],
+      [4, 3, 0],
+    ],
+    [null],
+  ],
+  99: [
+    [
+      null,
+      [15, 11, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+    ],
+    [null],
+  ],
+  100: [
+    [null, [15, 21, 0], [15, 0, 0]],
+    [
+      null,
+      [15, 11, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+    ],
+    [null],
+  ],
+  101: [
+    [
+      null,
+      [3, 8, 0],
+      [15, 8, 0],
+      [15, 10, 0],
+      [14, 12, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+    ],
+    [null],
+  ],
+  102: [
+    [null, [10, 21, 0], [8, 21, 0], [6, 20, 0], [5, 17, 0], [5, 0, 0]],
+    [null, [2, 14, 0], [9, 14, 0]],
+    [null],
+  ],
+  103: [
+    [
+      null,
+      [15, 14, 0],
+      [15, -2, 0],
+      [14, -5, 0],
+      [13, -6, 0],
+      [11, -7, 0],
+      [8, -7, 0],
+      [6, -6, 0],
+    ],
+    [
+      null,
+      [15, 11, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+    ],
+    [null],
+  ],
+  104: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 10, 0],
+      [7, 13, 0],
+      [9, 14, 0],
+      [12, 14, 0],
+      [14, 13, 0],
+      [15, 10, 0],
+      [15, 0, 0],
+    ],
+    [null],
+  ],
+  105: [
+    [null, [3, 21, 0], [4, 20, 0], [5, 21, 0], [4, 22, 0], [3, 21, 0]],
+    [null, [4, 14, 0], [4, 0, 0]],
+    [null],
+  ],
+  106: [
+    [null, [5, 21, 0], [6, 20, 0], [7, 21, 0], [6, 22, 0], [5, 21, 0]],
+    [null, [6, 14, 0], [6, -3, 0], [5, -6, 0], [3, -7, 0], [1, -7, 0]],
+    [null],
+  ],
+  107: [
+    [null, [4, 21, 0], [4, 0, 0]],
+    [null, [14, 14, 0], [4, 4, 0]],
+    [null, [8, 8, 0], [15, 0, 0]],
+    [null],
+  ],
+  108: [[null, [4, 21, 0], [4, 0, 0]], [null]],
+  109: [
+    [null, [4, 14, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 10, 0],
+      [7, 13, 0],
+      [9, 14, 0],
+      [12, 14, 0],
+      [14, 13, 0],
+      [15, 10, 0],
+      [15, 0, 0],
+    ],
+    [
+      null,
+      [15, 10, 0],
+      [18, 13, 0],
+      [20, 14, 0],
+      [23, 14, 0],
+      [25, 13, 0],
+      [26, 10, 0],
+      [26, 0, 0],
+    ],
+    [null],
+  ],
+  110: [
+    [null, [4, 14, 0], [4, 0, 0]],
+    [
+      null,
+      [4, 10, 0],
+      [7, 13, 0],
+      [9, 14, 0],
+      [12, 14, 0],
+      [14, 13, 0],
+      [15, 10, 0],
+      [15, 0, 0],
+    ],
+    [null],
+  ],
+  111: [
+    [
+      null,
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+      [16, 6, 0],
+      [16, 8, 0],
+      [15, 11, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+    ],
+    [null],
+  ],
+  112: [
+    [null, [4, 14, 0], [4, -7, 0]],
+    [
+      null,
+      [4, 11, 0],
+      [6, 13, 0],
+      [8, 14, 0],
+      [11, 14, 0],
+      [13, 13, 0],
+      [15, 11, 0],
+      [16, 8, 0],
+      [16, 6, 0],
+      [15, 3, 0],
+      [13, 1, 0],
+      [11, 0, 0],
+      [8, 0, 0],
+      [6, 1, 0],
+      [4, 3, 0],
+    ],
+    [null],
+  ],
+  113: [
+    [null, [15, 14, 0], [15, -7, 0]],
+    [
+      null,
+      [15, 11, 0],
+      [13, 13, 0],
+      [11, 14, 0],
+      [8, 14, 0],
+      [6, 13, 0],
+      [4, 11, 0],
+      [3, 8, 0],
+      [3, 6, 0],
+      [4, 3, 0],
+      [6, 1, 0],
+      [8, 0, 0],
+      [11, 0, 0],
+      [13, 1, 0],
+      [15, 3, 0],
+    ],
+    [null],
+  ],
+  114: [
+    [null, [4, 14, 0], [4, 0, 0]],
+    [null, [4, 8, 0], [5, 11, 0], [7, 13, 0], [9, 14, 0], [12, 14, 0]],
+    [null],
+  ],
+  115: [
+    [
+      null,
+      [14, 11, 0],
+      [13, 13, 0],
+      [10, 14, 0],
+      [7, 14, 0],
+      [4, 13, 0],
+      [3, 11, 0],
+      [4, 9, 0],
+      [6, 8, 0],
+      [11, 7, 0],
+      [13, 6, 0],
+      [14, 4, 0],
+      [14, 3, 0],
+      [13, 1, 0],
+      [10, 0, 0],
+      [7, 0, 0],
+      [4, 1, 0],
+      [3, 3, 0],
+    ],
+    [null],
+  ],
+  116: [
+    [null, [5, 21, 0], [5, 4, 0], [6, 1, 0], [8, 0, 0], [10, 0, 0]],
+    [null, [2, 14, 0], [9, 14, 0]],
+    [null],
+  ],
+  117: [
+    [
+      null,
+      [4, 14, 0],
+      [4, 4, 0],
+      [5, 1, 0],
+      [7, 0, 0],
+      [10, 0, 0],
+      [12, 1, 0],
+      [15, 4, 0],
+    ],
+    [null, [15, 14, 0], [15, 0, 0]],
+    [null],
+  ],
+  118: [[null, [2, 14, 0], [8, 0, 0]], [null, [14, 14, 0], [8, 0, 0]], [null]],
+  119: [
+    [null, [3, 14, 0], [7, 0, 0]],
+    [null, [11, 14, 0], [7, 0, 0]],
+    [null, [11, 14, 0], [15, 0, 0]],
+    [null, [19, 14, 0], [15, 0, 0]],
+    [null],
+  ],
+  120: [[null, [3, 14, 0], [14, 0, 0]], [null, [14, 14, 0], [3, 0, 0]], [null]],
+  121: [
+    [null, [2, 14, 0], [8, 0, 0]],
+    [
+      null,
+      [14, 14, 0],
+      [8, 0, 0],
+      [6, -4, 0],
+      [4, -6, 0],
+      [2, -7, 0],
+      [1, -7, 0],
+    ],
+    [null],
+  ],
+  122: [
+    [null, [14, 14, 0], [3, 0, 0]],
+    [null, [3, 14, 0], [14, 14, 0]],
+    [null, [3, 0, 0], [14, 0, 0]],
+    [null],
+  ],
+  123: [
+    [
+      null,
+      [9, 25, 0],
+      [7, 24, 0],
+      [6, 23, 0],
+      [5, 21, 0],
+      [5, 19, 0],
+      [6, 17, 0],
+      [7, 16, 0],
+      [8, 14, 0],
+      [8, 12, 0],
+      [6, 10, 0],
+    ],
+    [
+      null,
+      [7, 24, 0],
+      [6, 22, 0],
+      [6, 20, 0],
+      [7, 18, 0],
+      [8, 17, 0],
+      [9, 15, 0],
+      [9, 13, 0],
+      [8, 11, 0],
+      [4, 9, 0],
+      [8, 7, 0],
+      [9, 5, 0],
+      [9, 3, 0],
+      [8, 1, 0],
+      [7, 0, 0],
+      [6, -2, 0],
+      [6, -4, 0],
+      [7, -6, 0],
+    ],
+    [
+      null,
+      [6, 8, 0],
+      [8, 6, 0],
+      [8, 4, 0],
+      [7, 2, 0],
+      [6, 1, 0],
+      [5, -1, 0],
+      [5, -3, 0],
+      [6, -5, 0],
+      [7, -6, 0],
+      [9, -7, 0],
+    ],
+    [null],
+  ],
+  124: [[null, [4, 25, 0], [4, -7, 0]], [null]],
+  125: [
+    [
+      null,
+      [5, 25, 0],
+      [7, 24, 0],
+      [8, 23, 0],
+      [9, 21, 0],
+      [9, 19, 0],
+      [8, 17, 0],
+      [7, 16, 0],
+      [6, 14, 0],
+      [6, 12, 0],
+      [8, 10, 0],
+    ],
+    [
+      null,
+      [7, 24, 0],
+      [8, 22, 0],
+      [8, 20, 0],
+      [7, 18, 0],
+      [6, 17, 0],
+      [5, 15, 0],
+      [5, 13, 0],
+      [6, 11, 0],
+      [10, 9, 0],
+      [6, 7, 0],
+      [5, 5, 0],
+      [5, 3, 0],
+      [6, 1, 0],
+      [7, 0, 0],
+      [8, -2, 0],
+      [8, -4, 0],
+      [7, -6, 0],
+    ],
+    [
+      null,
+      [8, 8, 0],
+      [6, 6, 0],
+      [6, 4, 0],
+      [7, 2, 0],
+      [8, 1, 0],
+      [9, -1, 0],
+      [9, -3, 0],
+      [8, -5, 0],
+      [7, -6, 0],
+      [5, -7, 0],
+    ],
+    [null],
+  ],
+  126: [
+    [
+      null,
+      [3, 6, 0],
+      [3, 8, 0],
+      [4, 11, 0],
+      [6, 12, 0],
+      [8, 12, 0],
+      [10, 11, 0],
+      [14, 8, 0],
+      [16, 7, 0],
+      [18, 7, 0],
+      [20, 8, 0],
+      [21, 10, 0],
+    ],
+    [
+      null,
+      [3, 8, 0],
+      [4, 10, 0],
+      [6, 11, 0],
+      [8, 11, 0],
+      [10, 10, 0],
+      [14, 7, 0],
+      [16, 6, 0],
+      [18, 6, 0],
+      [20, 7, 0],
+      [21, 10, 0],
+      [21, 12, 0],
+    ],
+    [null],
+  ],
+};
+
+const hersheyWidth = {
+  32: 16,
+  33: 10,
+  34: 16,
+  35: 21,
+  36: 20,
+  37: 24,
+  38: 26,
+  39: 10,
+  40: 14,
+  41: 14,
+  42: 16,
+  43: 26,
+  44: 10,
+  45: 26,
+  46: 10,
+  47: 22,
+  48: 20,
+  49: 20,
+  50: 20,
+  51: 20,
+  52: 20,
+  53: 20,
+  54: 20,
+  55: 20,
+  56: 20,
+  57: 20,
+  58: 10,
+  59: 10,
+  60: 24,
+  61: 26,
+  62: 24,
+  63: 18,
+  64: 27,
+  65: 18,
+  66: 21,
+  67: 21,
+  68: 21,
+  69: 19,
+  70: 18,
+  71: 21,
+  72: 22,
+  73: 8,
+  74: 16,
+  75: 21,
+  76: 17,
+  77: 24,
+  78: 22,
+  79: 22,
+  80: 21,
+  81: 22,
+  82: 21,
+  83: 20,
+  84: 16,
+  85: 22,
+  86: 18,
+  87: 24,
+  88: 20,
+  89: 18,
+  90: 20,
+  91: 14,
+  92: 14,
+  93: 14,
+  94: 16,
+  95: 16,
+  96: 10,
+  97: 19,
+  98: 19,
+  99: 18,
+  100: 19,
+  101: 18,
+  102: 12,
+  103: 19,
+  104: 19,
+  105: 8,
+  106: 10,
+  107: 17,
+  108: 8,
+  109: 30,
+  110: 19,
+  111: 19,
+  112: 19,
+  113: 19,
+  114: 13,
+  115: 17,
+  116: 12,
+  117: 19,
+  118: 16,
+  119: 22,
+  120: 17,
+  121: 16,
+  122: 17,
+  123: 14,
+  124: 8,
+  125: 14,
+  126: 24,
+};
+
+const hersheySegments = [];
+
+for (const key of Object.keys(hersheyPaths)) {
+  const segments = [];
+  hersheySegments[key] = segments;
+  for (const path of hersheyPaths[key]) {
+    let last;
+    for (const point of path) {
+      if (point === null) {
+        continue;
+      }
+      if (last) {
+        segments.push([last, point]);
+      }
+      last = point;
+    }
+  }
+}
+
+const toSegments$1 = (letters) => {
+  let xOffset = 0;
+  const rendered = [];
+  for (const letter of letters) {
+    const code = letter.charCodeAt(0);
+    const segments = hersheySegments[code];
+    if (segments) {
+      rendered.push(translate(Segments$1(segments), [xOffset, 0, 0]));
+    }
+    xOffset += hersheyWidth[code] || 0;
+  }
+  return scaleUniformly(Group(rendered), 1 / 28);
+};
+
+const Hershey = (text, size) => scaleUniformly(toSegments$1(text), size);
+
+const filter$y = (geometry) =>
+  isNotTypeGhost(geometry) &&
+  ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
+    ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
+
+const measureBoundingBox = (geometry) =>
+  computeBoundingBox(linearize(geometry, filter$y));
+
+const X$3 = 0;
+const Y$3 = 1;
+const Z$2 = 2;
+
+const MIN$1 = 0;
+const MAX$1 = 1;
+
+// Round to the nearest 0.001 mm
+
+const round = (v) => Math.round(v * 1000) / 1000;
+
+const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
+
+const computeOffset = (geometry, spec, origin) => {
+  const boundingBox = measureBoundingBox(geometry);
+  if (boundingBox === undefined) {
+    return [0, 0, 0];
+  }
+  const max = roundCoordinate(boundingBox[MAX$1]);
+  const min = roundCoordinate(boundingBox[MIN$1]);
+  const center = roundCoordinate(scale(0.5, add(min, max)));
+  const offset = [0, 0, 0];
+  let index = 0;
+  while (index < spec.length) {
+    switch (spec[index++]) {
+      case 'x': {
+        switch (spec[index]) {
+          case '>':
+            offset[X$3] = -min[X$3];
+            index += 1;
+            break;
+          case '<':
+            offset[X$3] = -max[X$3];
+            index += 1;
+            break;
+          default:
+            offset[X$3] = -center[X$3];
+        }
+        break;
+      }
+      case 'y': {
+        switch (spec[index]) {
+          case '>':
+            offset[Y$3] = -min[Y$3];
+            index += 1;
+            break;
+          case '<':
+            offset[Y$3] = -max[Y$3];
+            index += 1;
+            break;
+          default:
+            offset[Y$3] = -center[Y$3];
+        }
+        break;
+      }
+      case 'z': {
+        switch (spec[index]) {
+          case '>':
+            offset[Z$2] = -min[Z$2];
+            index += 1;
+            break;
+          case '<':
+            offset[Z$2] = -max[Z$2];
+            index += 1;
+            break;
+          default:
+            offset[Z$2] = -center[Z$2];
+        }
+        break;
+      }
+    }
+  }
+  if (!offset.every(isFinite)) {
+    throw Error(`Non-finite/offset: ${offset}`);
+  }
+  return offset;
+};
+
+const alignment = (geometry, spec = 'xyz', origin = [0, 0, 0]) => {
+  const offset = computeOffset(geometry, spec);
+  const reference = translate(
+    taggedPoints({}, [[0, 0, 0]]),
+    subtract(offset, origin)
+  );
+  return reference;
+};
+
+const getInverseMatrices = (geometry) => {
+  geometry = toConcreteGeometry(geometry);
+  switch (geometry.type) {
+    case 'plan': {
+      if (geometry.content.length === 1) {
+        return getInverseMatrices(geometry.content[0]);
+      }
+    }
+    // fallthrough
+    default: {
+      return {
+        global: geometry.matrix,
+        local: invertTransform(geometry.matrix),
+      };
+    }
+  }
+};
+
+const by = (geometry, selections) => {
+  const placed = [];
+  for (const selection of selections) {
+    for (const leaf of getLeafs(selection)) {
+      const { global } = getInverseMatrices(leaf);
+      // Perform the operation then place the
+      // result in the global frame of the reference.
+      placed.push(transform(geometry, global));
+    }
+  }
+  return Group(placed);
+};
+
+const eachItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'sketch': {
+        // Sketches aren't real.
+        return;
+      }
+      default: {
+        op(geometry);
+        return descend();
+      }
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getLayouts = (geometry) => {
+  const layouts = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'layout') {
+      layouts.push(item);
+    }
+  });
+  return layouts;
+};
+
+const ghost = (geometry) => hasTypeGhost(geometry);
+
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTags = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter((tag) => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+        return descend();
+      default:
+        const composedTags = composeTags(geometry.tags);
+        if (composedTags === undefined) {
+          const copy = { ...geometry };
+          delete copy.tags;
+          return copy;
+        }
+        if (composedTags === geometry.tags) {
+          return geometry;
+        } else {
+          return descend({ tags: composedTags });
+        }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
+const hasColor = (geometry, name) =>
+  rewriteTags(toTagsFromName(name), [], geometry);
+
+const filter$x = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  isNotTypeGhost(geometry);
+
+const outline = (geometry, selections = []) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter$x, inputs);
+  const count = inputs.length;
+  for (const selection of selections) {
+    linearize(toConcreteGeometry(selection), filter$x, inputs);
+  }
+  const outputs = outline$1(inputs, count);
+  deletePendingSurfaceMeshes();
+  return replacer(inputs, outputs)(concreteGeometry);
+};
+
+var binPacking = createCommonjsModule(function (module, exports) {
+(function (global, factory) {
+  factory(exports) ;
+}(commonjsGlobal, (function (exports) {
+/******************************************************************************
+
+This is a binary tree based bin packing algorithm that is more complex than
+the simple Packer (packer.js). Instead of starting off with a fixed width and
+height, it starts with the width and height of the first block passed and then
+grows as necessary to accomodate each subsequent block. As it grows it attempts
+to maintain a roughly square ratio by making 'smart' choices about whether to
+grow right or down.
+
+When growing, the algorithm can only grow to the right OR down. Therefore, if
+the new block is BOTH wider and taller than the current target then it will be
+rejected. This makes it very important to initialize with a sensible starting
+width and height. If you are providing sorted input (largest first) then this
+will not be an issue.
+
+A potential way to solve this limitation would be to allow growth in BOTH
+directions at once, but this requires maintaining a more complex tree
+with 3 children (down, right and center) and that complexity can be avoided
+by simply chosing a sensible starting block.
+
+Best results occur when the input blocks are sorted by height, or even better
+when sorted by max(width,height).
+
+Inputs:
+------
+
+  blocks: array of any objects that have .w and .h attributes
+
+Outputs:
+-------
+
+  marks each block that fits with a .fit attribute pointing to a
+  node with .x and .y coordinates
+
+Example:
+-------
+
+  var blocks = [
+    { w: 100, h: 100 },
+    { w: 100, h: 100 },
+    { w:  80, h:  80 },
+    { w:  80, h:  80 },
+    etc
+    etc
+  ];
+
+  var packer = new GrowingPacker();
+  packer.fit(blocks);
+
+  for(var n = 0 ; n < blocks.length ; n++) {
+    var block = blocks[n];
+    if (block.fit) {
+      Draw(block.fit.x, block.fit.y, block.w, block.h);
+    }
+  }
+
+
+******************************************************************************/
+
+function GrowingPacker() {}
+
+GrowingPacker.prototype = {
+
+  fit: function fit(blocks) {
+    var n,
+        node,
+        block,
+        len = blocks.length;
+    var w = len > 0 ? blocks[0].w : 0;
+    var h = len > 0 ? blocks[0].h : 0;
+    this.root = { x: 0, y: 0, w: w, h: h };
+    for (n = 0; n < len; n++) {
+      block = blocks[n];
+      if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);else block.fit = this.growNode(block.w, block.h);
+    }
+  },
+
+  findNode: function findNode(root, w, h) {
+    if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
+  },
+
+  splitNode: function splitNode(node, w, h) {
+    node.used = true;
+    node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+    node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
+    return node;
+  },
+
+  growNode: function growNode(w, h) {
+    var canGrowDown = w <= this.root.w;
+    var canGrowRight = h <= this.root.h;
+
+    var shouldGrowRight = canGrowRight && this.root.h >= this.root.w + w; // attempt to keep square-ish by growing right when height is much greater than width
+    var shouldGrowDown = canGrowDown && this.root.w >= this.root.h + h; // attempt to keep square-ish by growing down  when width  is much greater than height
+
+    if (shouldGrowRight) return this.growRight(w, h);else if (shouldGrowDown) return this.growDown(w, h);else if (canGrowRight) return this.growRight(w, h);else if (canGrowDown) return this.growDown(w, h);else return null; // need to ensure sensible root starting size to avoid this happening
+  },
+
+  growRight: function growRight(w, h) {
+    var node;
+    this.root = {
+      used: true,
+      x: 0,
+      y: 0,
+      w: this.root.w + w,
+      h: this.root.h,
+      down: this.root,
+      right: { x: this.root.w, y: 0, w: w, h: this.root.h }
+    };
+    if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
+  },
+
+  growDown: function growDown(w, h) {
+    var node;
+    this.root = {
+      used: true,
+      x: 0,
+      y: 0,
+      w: this.root.w,
+      h: this.root.h + h,
+      down: { x: 0, y: this.root.h, w: this.root.w, h: h },
+      right: this.root
+    };
+    if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
+  }
+
+};
+
+/******************************************************************************
+
+This is a very simple binary tree based bin packing algorithm that is initialized
+with a fixed width and height and will fit each block into the first node where
+it fits and then split that node into 2 parts (down and right) to track the
+remaining whitespace.
+
+Best results occur when the input blocks are sorted by height, or even better
+when sorted by max(width,height).
+
+Inputs:
+------
+
+  w:       width of target rectangle
+  h:      height of target rectangle
+  blocks: array of any objects that have .w and .h attributes
+
+Outputs:
+-------
+
+  marks each block that fits with a .fit attribute pointing to a
+  node with .x and .y coordinates
+
+Example:
+-------
+
+  var blocks = [
+    { w: 100, h: 100 },
+    { w: 100, h: 100 },
+    { w:  80, h:  80 },
+    { w:  80, h:  80 },
+    etc
+    etc
+  ];
+
+  var packer = new Packer(500, 500);
+  packer.fit(blocks);
+
+  for(var n = 0 ; n < blocks.length ; n++) {
+    var block = blocks[n];
+    if (block.fit) {
+      Draw(block.fit.x, block.fit.y, block.w, block.h);
+    }
+  }
+
+
+******************************************************************************/
+
+function Packer(w, h) {
+  this.init(w, h);
+}
+
+Packer.prototype = {
+
+  init: function init(w, h) {
+    this.root = { x: 0, y: 0, w: w, h: h };
+  },
+
+  fit: function fit(blocks) {
+    var n, node, block;
+    for (n = 0; n < blocks.length; n++) {
+      block = blocks[n];
+      if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);
+    }
+  },
+
+  findNode: function findNode(root, w, h) {
+    if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
+  },
+
+  splitNode: function splitNode(node, w, h) {
+    node.used = true;
+    node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
+    node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
+    return node;
+  }
+
+};
+
+exports.GrowingPacker = GrowingPacker;
+exports.Packer = Packer;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+
+});
+
+var BinPackingEs = unwrapExports(binPacking);
+
+const align = (geometry, spec, origin) =>
+  by(geometry, [alignment(geometry, spec, origin)]);
+
+const { GrowingPacker, Packer } = BinPackingEs;
+
+const X$2 = 0;
+const Y$2 = 1;
+const Z$1 = 2;
+
+const measureSize = (geometry) => {
+  const bounds = measureBoundingBox(geometry);
+  if (bounds === undefined) {
+    return;
+  }
+  const [min, max] = bounds;
+  const width = max[X$2] - min[X$2];
+  const height = max[Y$2] - min[Y$2];
+  return [width, height, min[Z$1]];
+};
+
+const measureOrigin = (geometry) => {
+  const [min] = measureBoundingBox(geometry);
+  const [x, y] = min;
+  return [x, y];
+};
+
+const measureOffsets = (size, pageMargin) => {
+  if (size) {
+    const [width, height] = size;
+
+    // Center the output to match pages.
+    const xOffset = width / -2;
+    const yOffset = height / -2;
+    const packer = new Packer(width - pageMargin * 2, height - pageMargin * 2);
+
+    return [xOffset, yOffset, packer];
+  } else {
+    const packer = new GrowingPacker();
+    return [0, 0, packer];
+  }
+};
+
+const packImpl = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
+  const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
+
+  const packedGeometries = [];
+  const unpackedGeometries = [];
+
+  const blocks = [];
+
+  for (const geometry of geometries) {
+    const size = measureSize(geometry);
+    if (size === undefined) {
+      continue;
+    }
+    const [width, height, minZ] = size;
+    if (!isFinite(width) || !isFinite(height)) {
+      continue;
+    }
+    const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
+    blocks.push({ w, h, minZ, geometry });
+  }
+
+  // Place largest cells first
+  blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
+
+  packer.fit(blocks);
+
+  let minPoint = [Infinity, Infinity, 0];
+  let maxPoint = [-Infinity, -Infinity, 0];
+
+  for (const { geometry, fit, minZ } of blocks) {
+    if (fit && fit.used) {
+      const [x, y] = measureOrigin(geometry);
+      const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
+      const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
+      minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
+      maxPoint = max(
+        [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
+        maxPoint
+      );
+      packedGeometries.push(translate(geometry, [xo, yo, -minZ]));
+    } else {
+      unpackedGeometries.push(geometry);
+    }
+  }
+
+  return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
+};
+
+const pack = (
+  geometry,
+  adviseSize = (_min, _max) => {},
+  { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity } = {}
+) => {
+  if (perLayout === 0) {
+    // Packing was disabled -- do nothing.
+    return geometry;
+  }
+
+  let todo = [];
+  for (const leaf of getLeafs(geometry)) {
+    todo.push(leaf);
+  }
+  const packedLayers = [];
+  while (todo.length > 0) {
+    const input = [];
+    while (todo.length > 0 && input.length < perLayout) {
+      input.push(todo.shift());
+    }
+    const [packed, unpacked, minPoint, maxPoint] = packImpl(
+      { size, pageMargin, itemMargin },
+      ...input
+    );
+    if (minPoint.every(isFinite) && maxPoint.every(isFinite)) {
+      // CHECK: Why is this being overwritten by each pass?
+      adviseSize(minPoint, maxPoint);
+      if (packed.length === 0) {
+        break;
+      } else {
+        packedLayers.push(taggedItem({ tags: ['pack:layout'] }, Group(packed)));
+      }
+      todo.unshift(...unpacked);
+    }
+  }
+  // CHECK: Can this distinguish between a set of packed paged, and a single
+  // page that's packed?
+  let packedGeometry = Group(packedLayers);
+  if (size === undefined) {
+    packedGeometry = align(packedGeometry, 'xy');
+  }
+  return packedGeometry;
+};
+
+const taggedLayout = (
+  { tags = [], matrix, provenance, size, margin, title },
+  ...content
+) => {
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined Layout content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Layout content is an array`);
+  }
+  if (content.some((value) => value.then)) {
+    throw Error(`Layout content is a promise`);
+  }
+  if (content.some((value) => value.geometry)) {
+    throw Error(`Likely Shape in Layout`);
+  }
+  return {
+    type: 'layout',
+    layout: { size, margin, title },
+    tags,
+    matrix,
+    provenance,
+    content,
+  };
+};
+
+const filter$w = () => (geometry) =>
+  ['polygonsWithHoles'].includes(geometry.type);
+
+const convertPolygonsToMeshes = (geometry) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter$w(), inputs);
+  if (inputs.length === 0) {
+    return geometry;
+  }
+  try {
+    const outputs = convertPolygonsToMeshes$1(inputs);
+    deletePendingSurfaceMeshes();
+    return replacer(inputs, outputs)(concreteGeometry);
+  } catch (e) {
+    console.log(e.stack);
+    throw e;
+  }
+};
+
+const filter$v = (geometry) =>
+  geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
+
+const serialize = (geometry) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter$v, inputs, /* includeSketches= */ true);
+  if (inputs.length === 0) {
+    return geometry;
+  }
+  serialize$1(inputs);
+  deletePendingSurfaceMeshes();
+  return geometry;
+};
+
+const soup = (geometry) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph': {
+        const { graph } = geometry;
+        if (graph.isEmpty) {
+          return taggedGroup({});
+        } else {
+          return geometry;
+        }
+      }
+      // Unreachable.
+      case 'polygonsWithHoles':
+        return geometry;
+      case 'segments':
+      case 'triangles':
+      case 'points':
+      case 'paths':
+        // Already soupy enough.
+        return geometry;
+      case 'toolpath':
+        // Drop toolpaths for now.
+        return taggedGroup({});
+      case 'displayGeometry':
+        // soup can handle displayGeometry.
+        return descend();
+      case 'layout':
+      case 'plan':
+      case 'item':
+      case 'sketch':
+      case 'group': {
+        return descend();
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(
+    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
+    op
+  );
+};
+
+const toDisplayGeometry = (
+  geometry,
+  { triangles, outline = true, skin, wireframe = false } = {}
+) => {
+  if (!geometry) {
+    throw Error('die');
+  }
+  if (skin === undefined) {
+    skin = triangles;
+  }
+  if (skin === undefined) {
+    skin = true;
+  }
+  return soup(toConcreteGeometry(geometry));
+};
+
+const MIN = 0;
+const MAX = 1;
+const X$1 = 0;
+const Y$1 = 1;
+
+const buildLayout = ({
+  layer,
+  pageWidth,
+  pageLength,
+  margin,
+  center = false,
+}) => {
+  /*
+  const itemNames = (await getNot('type:ghost').tags('item', list)(layer))
+    .filter((name) => name !== '')
+    .flatMap((name) => name)
+    .sort();
+    */
+  const itemNames = tags(getNot(layer, ['type:ghost']), ['item'])
+    .filter((name) => name !== '')
+    .flatMap((name) => name)
+    .sort();
+  const labelScale = 0.0125 * 10;
+  const size = [pageWidth, pageLength];
+  const r = (v) => Math.floor(v * 100) / 100;
+  const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
+  const title = [];
+  if (isFinite(pageWidth) && isFinite(pageLength)) {
+    // CHECK: Even when this is only called once we're getting a duplication of the
+    // 'x' at the start. If we replace it with 'abc', we get the 'b' at the start.
+    const text = `${r(pageWidth)} x ${r(pageLength)}`;
+    title.push(Hershey(text, fontHeight));
+  }
+  for (let nth = 0; nth < itemNames.length; nth++) {
+    title.push(
+      translate(Hershey(itemNames[nth], fontHeight), [
+        0,
+        (nth + 1) * fontHeight,
+        0,
+      ])
+    );
+  }
+  const visualization = ghost(
+    hasColor(
+      Group(
+        [
+          outline(
+            Box([Math.max(pageWidth, margin), Math.max(pageLength, margin)])
+          ),
+          translate(Group(title), [
+            pageWidth / -2,
+            (pageLength * (1 + labelScale)) / 2,
+          ]),
+        ])
+    )
+  );
+  /*
+  const visualization = Box(
+    Math.max(pageWidth, margin),
+    Math.max(pageLength, margin)
+  )
+    .outline()
+    .and(
+      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
+    )
+    .color('red')
+    .ghost();
+    */
+  let layout = taggedLayout(
+    { size, margin },
+    toDisplayGeometry(layer),
+    toDisplayGeometry(visualization)
+  );
+  if (center) {
+    layout = by(layout, alignment(layout));
+  }
+  return layout;
+};
+
+const Page = (
+  geometries,
+  { pack: pack$1, center, a4, individual },
+  { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
+) => {
+  if (a4) {
+    size = [210, 297];
+  }
+
+  if (individual) {
+    pack$1 = true;
+    itemsPerPage = 1;
+  }
+
+  const margin = itemMargin;
+  const layers = [];
+  for (const geometry of geometries) {
+    for (const leaf of getLeafs(geometry)) {
+      layers.push(leaf);
+    }
+  }
+  if (!pack$1 && size) {
+    const layer = Group(layers);
+    const [width, height] = size;
+    const packSize = [
+      [-width / 2, -height / 2, 0],
+      [width / 2, height / 2, 0],
+    ];
+    const pageWidth =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X$1] * 2),
+        Math.abs(packSize[MIN][X$1] * 2)
+      ) +
+      pageMargin * 2;
+    const pageLength =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y$1] * 2),
+        Math.abs(packSize[MIN][Y$1] * 2)
+      ) +
+      pageMargin * 2;
+    return buildLayout({
+      layer,
+      pageWidth,
+      pageLength,
+      margin,
+      center,
+    });
+  } else if (!pack$1 && !size) {
+    const layer = Group(layers);
+    const packSize = measureBoundingBox(layer);
+    if (packSize === undefined) {
+      return Group();
+    }
+    const pageWidth =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][X$1] * 2),
+        Math.abs(packSize[MIN][X$1] * 2)
+      ) +
+      pageMargin * 2;
+    const pageLength =
+      Math.max(
+        1,
+        Math.abs(packSize[MAX][Y$1] * 2),
+        Math.abs(packSize[MIN][Y$1] * 2)
+      ) +
+      pageMargin * 2;
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      return buildLayout({
+        layer,
+        pageWidth,
+        pageLength,
+        margin,
+        center,
+      });
+    } else {
+      return buildLayout({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+        center,
+      });
+    }
+  } else if (pack$1 && size) {
+    // Content fits to page size.
+    const packSize = [];
+    const content = pack(
+      Group(layers),
+      (min, max) => {
+        packSize[MIN] = min;
+        packSize[MAX] = max;
+      },
+      {
+        size,
+        pageMargin,
+        itemMargin,
+        perLayout: itemsPerPage,
+      }
+    );
+    if (packSize.length === 0) {
+      throw Error('Packing failed');
+    }
+    const pageWidth = Math.max(1, packSize[MAX][X$1] - packSize[MIN][X$1]);
+    const pageLength = Math.max(1, packSize[MAX][Y$1] - packSize[MIN][Y$1]);
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      const plans = [];
+      for (const layer of getList(content, 'pack:layout')) {
+        plans.push(
+          buildLayout({
+            layer,
+            pageWidth,
+            pageLength,
+            margin,
+            center,
+          })
+        );
+      }
+      return Group(plans);
+    } else {
+      const layer = Group(layers);
+      return buildLayout({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+        center,
+      });
+    }
+  } else if (pack$1 && !size) {
+    const packSize = [];
+    // Page fits to content size.
+    const contents = pack(
+      Group(layers),
+      (min, max) => {
+        packSize[MIN] = min;
+        packSize[MAX] = max;
+      },
+      {
+        pageMargin,
+        itemMargin,
+        perLayout: itemsPerPage,
+      }
+    );
+    if (packSize.length === 0) {
+      throw Error('Packing failed');
+    }
+    // FIX: Using content.size() loses the margin, which is a problem for repacking.
+    // Probably page plans should be generated by pack and count toward the size.
+    const pageWidth = packSize[MAX][X$1] - packSize[MIN][X$1];
+    const pageLength = packSize[MAX][Y$1] - packSize[MIN][Y$1];
+    if (isFinite(pageWidth) && isFinite(pageLength)) {
+      const plans = [];
+      for (const layer of getList(contents, 'pack:layout')) {
+        const layout = buildLayout({
+          layer,
+          packSize,
+          pageWidth,
+          pageLength,
+          margin,
+          center,
+        });
+        plans.push(layout);
+      }
+      return Group(plans);
+    } else {
+      const layer = Group(layers);
+      return buildLayout({
+        layer,
+        pageWidth: 0,
+        pageLength: 0,
+        margin,
+        center,
+      });
+    }
+  }
+};
+
+const page = (
+  geometry,
+  { pack, center, a4, individual },
+  { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
+) =>
+  Page(
+    [geometry],
+    { pack, center, a4, individual },
+    { size, pageMargin, itemMargin, itemsPerPage }
+  );
+
+const ensurePages = (geometry, depth = 0) => {
+  const pages = getLayouts(toDisplayGeometry(geometry));
+  if (pages.length === 0 && depth === 0) {
+    return ensurePages(Page([geometry], { pack: false }), depth + 1);
+  } else {
+    return pages;
+  }
+};
 
 const emitNote = (md) => emit({ md, hash: computeHash(md) });
 
@@ -1132,136 +3781,7 @@ const abstract = (geometry, types) => {
   return geometry;
 };
 
-const filter$y = (geometry) =>
-  isNotTypeGhost(geometry) &&
-  ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
-    ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
-
-const measureBoundingBox = (geometry) =>
-  computeBoundingBox(linearize(geometry, filter$y));
-
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-
-const MIN = 0;
-const MAX = 1;
-
-// Round to the nearest 0.001 mm
-
-const round = (v) => Math.round(v * 1000) / 1000;
-
-const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
-
-const computeOffset = (geometry, spec, origin) => {
-  const boundingBox = measureBoundingBox(geometry);
-  if (boundingBox === undefined) {
-    return [0, 0, 0];
-  }
-  const max = roundCoordinate(boundingBox[MAX]);
-  const min = roundCoordinate(boundingBox[MIN]);
-  const center = roundCoordinate(scale(0.5, add(min, max)));
-  const offset = [0, 0, 0];
-  let index = 0;
-  while (index < spec.length) {
-    switch (spec[index++]) {
-      case 'x': {
-        switch (spec[index]) {
-          case '>':
-            offset[X$1] = -min[X$1];
-            index += 1;
-            break;
-          case '<':
-            offset[X$1] = -max[X$1];
-            index += 1;
-            break;
-          default:
-            offset[X$1] = -center[X$1];
-        }
-        break;
-      }
-      case 'y': {
-        switch (spec[index]) {
-          case '>':
-            offset[Y$1] = -min[Y$1];
-            index += 1;
-            break;
-          case '<':
-            offset[Y$1] = -max[Y$1];
-            index += 1;
-            break;
-          default:
-            offset[Y$1] = -center[Y$1];
-        }
-        break;
-      }
-      case 'z': {
-        switch (spec[index]) {
-          case '>':
-            offset[Z$1] = -min[Z$1];
-            index += 1;
-            break;
-          case '<':
-            offset[Z$1] = -max[Z$1];
-            index += 1;
-            break;
-          default:
-            offset[Z$1] = -center[Z$1];
-        }
-        break;
-      }
-    }
-  }
-  if (!offset.every(isFinite)) {
-    throw Error(`Non-finite/offset: ${offset}`);
-  }
-  return offset;
-};
-
-const alignment = (geometry, spec = 'xyz', origin = [0, 0, 0]) => {
-  const offset = computeOffset(geometry, spec);
-  const reference = translate(
-    taggedPoints({}, [[0, 0, 0]]),
-    subtract(offset, origin)
-  );
-  return reference;
-};
-
-const getInverseMatrices = (geometry) => {
-  geometry = toConcreteGeometry(geometry);
-  switch (geometry.type) {
-    case 'plan': {
-      if (geometry.content.length === 1) {
-        return getInverseMatrices(geometry.content[0]);
-      }
-    }
-    // fallthrough
-    default: {
-      return {
-        global: geometry.matrix,
-        local: invertTransform(geometry.matrix),
-      };
-    }
-  }
-};
-
-const by = (geometry, selections) => {
-  const placed = [];
-  for (const selection of selections) {
-    for (const leaf of getLeafs(selection)) {
-      const { global } = getInverseMatrices(leaf);
-      // Perform the operation then place the
-      // result in the global frame of the reference.
-      placed.push(transform(geometry, global));
-    }
-  }
-  return Group(placed);
-};
-
-const align = (geometry, spec, origin) =>
-  by(geometry, [alignment(geometry, spec, origin)]);
-
-const filter$x = (geometry) => ['graph'].includes(geometry.type);
+const filter$u = (geometry) => ['graph'].includes(geometry.type);
 
 const approximate = (
   geometry,
@@ -1277,7 +3797,7 @@ const approximate = (
     maxNumberOfProxies,
   }
 ) => {
-  const inputs = linearize(geometry, filter$x);
+  const inputs = linearize(geometry, filter$u);
   const outputs = approximate$1(
     inputs,
     iterations,
@@ -1307,7 +3827,7 @@ const allTags = (geometry) => {
   return collectedTags;
 };
 
-const filter$w = (geometry) =>
+const filter$t = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
@@ -1319,7 +3839,7 @@ const Disjoint = (geometries, { backward, exact }) => {
   );
   const inputs = [];
   for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter$w, inputs);
+    linearize(concreteGeometry, filter$t, inputs);
   }
   // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
   const outputs = disjoint$1(inputs, backward, exact);
@@ -1381,27 +3901,12 @@ const bb = (
   }
 };
 
-const filter$v = (geometry) => ['graph'].includes(geometry.type);
+const filter$s = (geometry) => ['graph'].includes(geometry.type);
 
 const bend = (geometry, radius = 100) => {
-  const inputs = linearize(geometry, filter$v);
+  const inputs = linearize(geometry, filter$s);
   const outputs = bend$1(inputs, radius);
   return replacer(inputs, outputs)(geometry);
-};
-
-const filter$u = (geometry) =>
-  geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
-
-const serialize = (geometry) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$u, inputs, /* includeSketches= */ true);
-  if (inputs.length === 0) {
-    return geometry;
-  }
-  serialize$1(inputs);
-  deletePendingSurfaceMeshes();
-  return geometry;
 };
 
 const hash = (geometry) => {
@@ -1603,7 +4108,7 @@ const cached =
     return result;
   };
 
-const filter$t = (geometry) =>
+const filter$r = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -1619,77 +4124,16 @@ const cast = (planeReference, sourceReference, geometry) => {
   inputs.length = 1;
   linearize(toConcreteGeometry(sourceReference), filterReferences$1, inputs);
   inputs.length = 2;
-  linearize(concreteGeometry, filter$t, inputs);
+  linearize(concreteGeometry, filter$r, inputs);
   const outputs = cast$1(inputs);
   deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const rewriteTags = (
-  add,
-  remove,
-  geometry,
-  conditionTags,
-  conditionSpec
-) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return add.filter((tag) => !remove.includes(tag));
-      } else {
-        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-        return descend();
-      default:
-        const composedTags = composeTags(geometry.tags);
-        if (composedTags === undefined) {
-          const copy = { ...geometry };
-          delete copy.tags;
-          return copy;
-        }
-        if (composedTags === geometry.tags) {
-          return geometry;
-        } else {
-          return descend({ tags: composedTags });
-        }
-    }
-  };
-  return rewrite(geometry, op);
-};
-
 const hasMaterial = (geometry, name) =>
-  rewriteTags(toTagsFromName(name), [], geometry);
+  rewriteTags(toTagsFromName$1(name), [], geometry);
 
-const filter$s = (noVoid, onlyGraph) => (geometry) =>
+const filter$q = (noVoid, onlyGraph) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
@@ -1703,10 +4147,10 @@ const clip = (
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$s(noVoid, onlyGraph), inputs);
+  linearize(concreteGeometry, filter$q(noVoid, onlyGraph), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filter$s(noVoid), inputs);
+    linearize(geometry, filter$q(noVoid), inputs);
   }
   const outputs = clip$1(inputs, count, open, exact);
   const ghosts = [];
@@ -1729,7 +4173,7 @@ const clipFrom = (clipBy, clipFrom, modes) =>
 const commonVolume = (geometry, modes) => {
   const inputs = linearize(
     geometry,
-    filter$s(modes.noVoid, { ...modes, onlyGraph: true })
+    filter$q(modes.noVoid, { ...modes, onlyGraph: true })
   );
   switch (inputs.length) {
     case 0: {
@@ -1745,12 +4189,12 @@ const commonVolume = (geometry, modes) => {
   }
 };
 
-const filter$r = (geometry) =>
+const filter$p = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const computeCentroid = (geometry, top, bottom) =>
-  Group(computeCentroid$1(linearize(geometry, filter$r)));
+  Group(computeCentroid$1(linearize(geometry, filter$p)));
 
 const computeGeneralizedDiameter = (geometry) => {
   const coordinates = toCoordinates(geometry);
@@ -1786,7 +4230,7 @@ const computeImplicitVolume = (
   return taggedGroup({}, ...outputs);
 };
 
-const filter$q = (geometry) =>
+const filter$o = (geometry) =>
   isNotTypeGhost(geometry) &&
   ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
     ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
@@ -1794,13 +4238,13 @@ const filter$q = (geometry) =>
 const computeOrientedBoundingBox = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$q, inputs);
+  linearize(concreteGeometry, filter$o, inputs);
   const outputs = computeOrientedBoundingBox$1(inputs);
   deletePendingSurfaceMeshes();
   return outputs[0];
 };
 
-const filter$p = (geometry) =>
+const filter$n = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const computeToolpath = (
@@ -1814,9 +4258,9 @@ const computeToolpath = (
   annealingDecay
 ) => {
   const inputs = [];
-  linearize(geometry, filter$p, inputs);
+  linearize(geometry, filter$n, inputs);
   const materialStart = inputs.length;
-  linearize(material, filter$p, inputs);
+  linearize(material, filter$n, inputs);
   const outputs = computeToolpath$1(
     inputs,
     materialStart,
@@ -1837,26 +4281,6 @@ const copy = (geometry, count) => {
     copies.push(geometry);
   }
   return Group(copies);
-};
-
-const filter$o = () => (geometry) =>
-  ['polygonsWithHoles'].includes(geometry.type);
-
-const convertPolygonsToMeshes = (geometry) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$o(), inputs);
-  if (inputs.length === 0) {
-    return geometry;
-  }
-  try {
-    const outputs = convertPolygonsToMeshes$1(inputs);
-    deletePendingSurfaceMeshes();
-    return replacer(inputs, outputs)(concreteGeometry);
-  } catch (e) {
-    console.log(e.stack);
-    throw e;
-  }
 };
 
 const filterTargets$2 = (noVoid) => (geometry) =>
@@ -1922,24 +4346,24 @@ const deform = (
   return replacer(inputs, outputs, length)(concreteGeometry);
 };
 
-const filter$n = (geometry) => ['graph'].includes(geometry.type);
+const filter$m = (geometry) => ['graph'].includes(geometry.type);
 
 const demesh = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$n, inputs);
+  linearize(concreteGeometry, filter$m, inputs);
   const outputs = demesh$1(inputs);
   deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$m = (geometry, parent) =>
+const filter$l = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const dilateXY = (geometry, amount) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$m, inputs);
+  linearize(concreteGeometry, filter$l, inputs);
   const outputs = dilateXY$1(inputs, amount);
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {
@@ -1993,8 +4417,6 @@ const disorientSegment = (segment, matrix, normal) => {
   ];
 };
 
-const ghost = (geometry) => hasTypeGhost(geometry);
-
 // We split on into two phases to allow arbitrary operations to occur inbetween.
 
 const onPre = (geometry, selection, op = (_v) => (s) => s) => {
@@ -2014,7 +4436,6 @@ const onPost = (geometry, results) => {
   const outputLeafs = [];
   for (const { inputLeaf, localOutputLeaf, global } of results) {
     inputLeafs.push(inputLeaf);
-    console.log(`QQ/localOutputLeaf: ${JSON.stringify(localOutputLeaf)}`);
     outputLeafs.push(transform(localOutputLeaf, global));
   }
   return replacer(inputLeafs, outputLeafs)(geometry);
@@ -2037,7 +4458,7 @@ const drop = (geometry, selector) => on(geometry, selector, ghost);
 
 const each = (geometry) => getLeafs(geometry);
 
-const filter$l = (geometry) =>
+const filter$k = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -2049,10 +4470,10 @@ const eachFaceEdges = (
   if (!(select instanceof Array)) {
     select = [select];
   }
-  const inputs = linearize(geometry, filter$l);
+  const inputs = linearize(geometry, filter$k);
   const count = inputs.length;
   for (const selection of select) {
-    linearize(selection, filter$l, inputs);
+    linearize(selection, filter$k, inputs);
   }
   const outputs = faceEdges(inputs, count).filter(({ type }) =>
     ['polygonsWithHoles', 'segments'].includes(type)
@@ -2111,42 +4532,9 @@ const toOrientedFaceEdgesList = (
   return faces;
 };
 
-const eachItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'sketch': {
-        // Sketches aren't real.
-        return;
-      }
-      default: {
-        op(geometry);
-        return descend();
-      }
-    }
-  };
-  visit(geometry, walk);
-};
-
 const Segment = (segment) => taggedSegments({}, [segment]);
 
 const Segments = (segments) => taggedSegments({}, segments);
-
-const filter$k = (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
-
-const outline = (geometry, selections) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$k, inputs);
-  const count = inputs.length;
-  for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$k, inputs);
-  }
-  const outputs = outline$1(inputs, count);
-  deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs)(concreteGeometry);
-};
 
 const filter$j = ({ type }) => type === 'segments';
 
@@ -2335,192 +4723,6 @@ const generateUpperEnvelope = (geometry) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var parseNumber = createCommonjsModule(function (module) {
-/**
- * More correct array check
- */
-var parser = module.exports = function(str) {
-  if (Array.isArray(str)) return NaN;
-  return parser.str(str);
-};
-
-/**
- * Simple check, assumes non-array inputs
- */
-parser.str = function(str) {
-  if (str == null || str === "") return NaN;
-  return +str;
-};
-});
-
-const taggedItem = ({ tags = [], matrix, provenance }, ...content) => {
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags: ${tags}`);
-  }
-  if (content.some((value) => value === undefined)) {
-    throw Error(`Undefined Item content`);
-  }
-  if (content.length !== 1) {
-    throw Error(`Item expects a single content geometry`);
-  }
-  return { type: 'item', tags, matrix, provenance, content };
-};
-
-const qualifyTag = (tag, namespace = 'user') => {
-  if (tag.includes(':')) {
-    return tag;
-  }
-  return `${namespace}:${tag}`;
-};
-
-const tagMatcher = (tag, namespace = 'user') => {
-  let qualifiedTag = qualifyTag(tag, namespace);
-  if (qualifiedTag.endsWith('=*')) {
-    const [base] = qualifiedTag.split('=');
-    const prefix = `${base}=`;
-    return (tag) => tag.startsWith(prefix);
-  } else if (qualifiedTag.endsWith(':*')) {
-    const [namespace] = qualifiedTag.split(':');
-    const prefix = `${namespace}:`;
-    return (tag) => tag.startsWith(prefix);
-  } else {
-    return (tag) => tag === qualifiedTag;
-  }
-};
-
-const oneOfTagMatcher = (tags, namespace = 'user') => {
-  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
-  const isMatch = (tag) => {
-    for (const matcher of matchers) {
-      if (matcher(tag)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  return isMatch;
-};
-
-const retag = (geometry, oldTags, newTags) => {
-  oldTags = oldTags.map((tag) => qualifyTag(tag));
-  newTags = newTags.map((tag) => qualifyTag(tag));
-
-  const isOldTagMatch = oneOfTagMatcher(oldTags, 'user');
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-      case 'layout':
-        return descend();
-      default: {
-        const { tags = [] } = geometry;
-        const remaining = [];
-        for (const tag of tags) {
-          if (!isOldTagMatch(tag)) {
-            remaining.push(tag);
-          }
-        }
-        for (const newTag of newTags) {
-          if (!remaining.includes(newTag)) {
-            remaining.push(newTag);
-          }
-        }
-        return descend({ tags: remaining });
-      }
-    }
-  };
-  const result = rewrite(geometry, op);
-  return result;
-};
-
-const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
-
-const tag = (geometry, newTags) => retag(geometry, [], newTags);
-
-const tags = (geometry, tag) => {
-  const isMatchingTag = tagMatcher(tag, 'user');
-  const collected = [];
-  for (const { tags } of getLeafs(geometry)) {
-    for (const tag of tags) {
-      if (isMatchingTag(tag)) {
-        collected.push(tag);
-      }
-    }
-  }
-  return collected;
-};
-
-const as = (geometry, names) =>
-  taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry);
-
-const asPart = (geometry, names) =>
-  taggedItem({ tags: names.map((name) => `part:${name}`) }, geometry);
-
-const getValue = (geometry, tags) => {
-  const values = [];
-  for (const tag of tags) {
-    const matches = tags(geometry, `${tag}=*`);
-    if (matches.length === 0) {
-      values.push(undefined);
-      continue;
-    }
-    const [, value] = matches[0].split('=');
-    const number = parseNumber(value);
-    if (isFinite(number)) {
-      values.push(value);
-      continue;
-    }
-    values.push(value);
-  }
-  return values;
-};
-
-const getList = (geometry, tags, { inItem, not } = {}) => {
-  const isMatch = oneOfTagMatcher(tags, 'item');
-  const picks = [];
-  const walk = (geometry, descend) => {
-    const { tags, type } = geometry;
-    if (type === 'group') {
-      return descend();
-    }
-    let matched = false;
-    if (isMatch(`type:${geometry.type}`)) {
-      matched = true;
-    } else {
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          matched = true;
-          break;
-        }
-      }
-    }
-    if (not) {
-      if (!matched) {
-        picks.push(geometry);
-      }
-    } else {
-      if (matched) {
-        picks.push(geometry);
-      }
-    }
-    if (inItem || type !== 'item') {
-      return descend();
-    }
-  };
-  visit(geometry, walk);
-  return picks;
-};
-
-const get = (geometry, tags, options) =>
-  Group(getList(geometry, tags, options));
-
-const getAll = (geometry, tags) => get(geometry, tags, { inItem: true });
-
-const getNot = (geometry, tags) => get(geometry, tags, { not: true });
-
 const getAnySurfaces = (geometry) => {
   const surfaces = [];
   eachItem(geometry, (item) => {
@@ -2548,16 +4750,6 @@ const getItems = (geometry) => {
   };
   visit(geometry, op);
   return items;
-};
-
-const getLayouts = (geometry) => {
-  const layouts = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'layout') {
-      layouts.push(item);
-    }
-  });
-  return layouts;
 };
 
 // Retrieve leaf geometry.
@@ -3028,50 +5220,6 @@ const separate = (geometry, { noShapes, noHoles, holesAsShapes }) => {
   return taggedGroup({}, ...outputs);
 };
 
-const soup = (geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph': {
-        const { graph } = geometry;
-        if (graph.isEmpty) {
-          return taggedGroup({});
-        } else {
-          return geometry;
-        }
-      }
-      // Unreachable.
-      case 'polygonsWithHoles':
-        return geometry;
-      case 'segments':
-      case 'triangles':
-      case 'points':
-      case 'paths':
-        // Already soupy enough.
-        return geometry;
-      case 'toolpath':
-        // Drop toolpaths for now.
-        return taggedGroup({});
-      case 'displayGeometry':
-        // soup can handle displayGeometry.
-        return descend();
-      case 'layout':
-      case 'plan':
-      case 'item':
-      case 'sketch':
-      case 'group': {
-        return descend();
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(
-    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
-    op
-  );
-};
-
 const taggedDisplayGeometry = (
   { tags = [], matrix, provenance },
   ...content
@@ -3098,32 +5246,6 @@ const taggedGraph = ({ tags = [], matrix, provenance }, graph) => {
     graph,
     matrix,
     provenance,
-  };
-};
-
-const taggedLayout = (
-  { tags = [], matrix, provenance, size, margin, title },
-  ...content
-) => {
-  if (content.some((value) => value === undefined)) {
-    throw Error(`Undefined Layout content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Layout content is an array`);
-  }
-  if (content.some((value) => value.then)) {
-    throw Error(`Layout content is a promise`);
-  }
-  if (content.some((value) => value.geometry)) {
-    throw Error(`Likely Shape in Layout`);
-  }
-  return {
-    type: 'layout',
-    layout: { size, margin, title },
-    tags,
-    matrix,
-    provenance,
-    content,
   };
 };
 
@@ -3169,22 +5291,6 @@ const taggedTriangles = (
   triangles
 ) => {
   return { type: 'triangles', tags, matrix, provenance, triangles };
-};
-
-const toDisplayGeometry = (
-  geometry,
-  { triangles, outline = true, skin, wireframe = false } = {}
-) => {
-  if (!geometry) {
-    throw Error('die');
-  }
-  if (skin === undefined) {
-    skin = triangles;
-  }
-  if (skin === undefined) {
-    skin = true;
-  }
-  return soup(toConcreteGeometry(geometry));
 };
 
 const toTransformedGeometry = (geometry) => geometry;
@@ -3293,4 +5399,4 @@ const wrap = (geometries, offset, alpha) => {
   return taggedGroup({}, ...outputs);
 };
 
-export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hexagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, X, XY, XZ, Y, YX, YZ, Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getPlans, getPoints, getTags, getValue, ghost, grow, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, loop, makeAbsolute, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, offset, on, onPost, onPre, oneOfTagMatcher, op, origin, outline, read, readNonblocking, ref, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, scale$1 as scale, seam, section, separate, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hexagon, Page, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, X, XY, XZ, Y, YX, YZ, Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, loop, makeAbsolute, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, offset, on, onPost, onPre, oneOfTagMatcher, op, origin, outline, pack, page, read, readNonblocking, ref, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, scale$1 as scale, seam, section, separate, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };

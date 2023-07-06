@@ -22,7 +22,6 @@ export const onPost = (geometry, results) => {
   const outputLeafs = [];
   for (const { inputLeaf, localOutputLeaf, global } of results) {
     inputLeafs.push(inputLeaf);
-    console.log(`QQ/localOutputLeaf: ${JSON.stringify(localOutputLeaf)}`);
     outputLeafs.push(transform(localOutputLeaf, global));
   }
   return replacer(inputLeafs, outputLeafs)(geometry);

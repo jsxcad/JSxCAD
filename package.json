@@ -48,8 +48,8 @@
   "keywords": [],
   "license": "MIT",
   "devDependencies": {
-    "ava": "^4.3.0",
     "@babel/eslint-parser": "^7.22.5",
+    "ava": "^4.3.0",
     "eslint": "^8.43.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",

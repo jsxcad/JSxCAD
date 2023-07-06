@@ -9,6 +9,18 @@ export const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
 export const length = ([x = 0, y = 0, z = 0]) =>
   Math.sqrt(x * x + y * y + z * z);
 
+export const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];
+
+export const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];
+
 export const scale = (amount, [x = 0, y = 0, z = 0]) => [
   x * amount,
   y * amount,

@@ -23,6 +23,7 @@ export { Curve, curve } from './Curve.js';
 export { Edge } from './Edge.js';
 export { Empty } from './Empty.js';
 export { Group } from './Group.js';
+export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Segments } from './Segments.js';
 export { abstract } from './abstract.js';
@@ -99,6 +100,8 @@ export { getTags } from './tagged/getTags.js';
 export { getValue } from './tag.js';
 export { ghost } from './ghost.js';
 export { grow } from './grow.js';
+// Why are we using a has prefix here?
+export { hasColor } from './hasColor.js';
 export { hasMaterial } from './hasMaterial.js';
 export { hash } from './tagged/hash.js';
 export { involute } from './involute.js';
@@ -173,6 +176,7 @@ export { on, onPre, onPost } from './on.js';
 export { op } from './tagged/op.js';
 export { origin } from './origin.js';
 export { outline } from './outline.js';
+export { pack } from './pack.js';
 export { read, readNonblocking } from './tagged/read.js';
 export {
   Ref,

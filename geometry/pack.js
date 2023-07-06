@@ -1,24 +1,14 @@
-import {
-  measureBoundingBox,
-  toTransformedGeometry,
-  translate,
-} from '@jsxcad/geometry';
+import { max, min } from './vector.js';
 
 import BinPackingEs from 'bin-packing-es/build/bin-packing.js';
+import { Group } from './Group.js';
+import { align } from './align.js';
+import { getLeafs } from './tagged/getLeafs.js';
+import { measureBoundingBox } from './measureBoundingBox.js';
+import { taggedItem } from './tagged/taggedItem.js';
+import { translate } from './translate.js';
 
 const { GrowingPacker, Packer } = BinPackingEs;
-
-const max = ([ax, ay, az], [bx, by, bz]) => [
-  Math.max(ax, bx),
-  Math.max(ay, by),
-  Math.max(az, bz),
-];
-
-const min = ([ax, ay, az], [bx, by, bz]) => [
-  Math.min(ax, bx),
-  Math.min(ay, by),
-  Math.min(az, bz),
-];
 
 const X = 0;
 const Y = 1;
@@ -57,10 +47,7 @@ const measureOffsets = (size, pageMargin) => {
   }
 };
 
-export const pack = (
-  { size, itemMargin = 1, pageMargin = 5 },
-  ...geometries
-) => {
+const packImpl = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
   const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
 
   const packedGeometries = [];
@@ -99,10 +86,7 @@ export const pack = (
         [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
         maxPoint
       );
-      const transformed = toTransformedGeometry(
-        translate(geometry, [xo, yo, -minZ])
-      );
-      packedGeometries.push(transformed);
+      packedGeometries.push(translate(geometry, [xo, yo, -minZ]));
     } else {
       unpackedGeometries.push(geometry);
     }
@@ -111,4 +95,46 @@ export const pack = (
   return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
 };
 
-export default pack;
+export const pack = (
+  geometry,
+  adviseSize = (_min, _max) => {},
+  { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity } = {}
+) => {
+  if (perLayout === 0) {
+    // Packing was disabled -- do nothing.
+    return geometry;
+  }
+
+  let todo = [];
+  for (const leaf of getLeafs(geometry)) {
+    todo.push(leaf);
+  }
+  const packedLayers = [];
+  while (todo.length > 0) {
+    const input = [];
+    while (todo.length > 0 && input.length < perLayout) {
+      input.push(todo.shift());
+    }
+    const [packed, unpacked, minPoint, maxPoint] = packImpl(
+      { size, pageMargin, itemMargin },
+      ...input
+    );
+    if (minPoint.every(isFinite) && maxPoint.every(isFinite)) {
+      // CHECK: Why is this being overwritten by each pass?
+      adviseSize(minPoint, maxPoint);
+      if (packed.length === 0) {
+        break;
+      } else {
+        packedLayers.push(taggedItem({ tags: ['pack:layout'] }, Group(packed)));
+      }
+      todo.unshift(...unpacked);
+    }
+  }
+  // CHECK: Can this distinguish between a set of packed paged, and a single
+  // page that's packed?
+  let packedGeometry = Group(packedLayers);
+  if (size === undefined) {
+    packedGeometry = align(packedGeometry, 'xy');
+  }
+  return packedGeometry;
+};
