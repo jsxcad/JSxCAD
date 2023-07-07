@@ -1,8 +1,8 @@
 import { Shape } from './Shape.js';
-import { inFn } from './in.js';
+import { inItem as op } from '@jsxcad/geometry';
 
-export const hold = Shape.registerMethod2(
+export const hold = Shape.registerMethod3(
   'hold',
-  ['inputShape', 'shapes'],
-  (inputShape, shapes) => inputShape.on(inFn(), inFn().and(...shapes))
+  ['inputGeometry', 'geometries'],
+  op
 );

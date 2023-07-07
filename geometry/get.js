@@ -43,4 +43,10 @@ export const get = (geometry, tags, options) =>
 
 export const getAll = (geometry, tags) => get(geometry, tags, { inItem: true });
 
+export const getAllList = (geometry, tags) =>
+  getList(geometry, tags, { inItem: true });
+
 export const getNot = (geometry, tags) => get(geometry, tags, { not: true });
+
+export const getNotList = (geometry, tags) =>
+  getList(geometry, tags, { not: true });

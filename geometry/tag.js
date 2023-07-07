@@ -85,7 +85,7 @@ export const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
 
 export const tag = (geometry, newTags) => retag(geometry, [], newTags);
 
-export const tags = (geometry, tag) => {
+export const tags = (geometry, tag = '*') => {
   const isMatchingTag = tagMatcher(tag, 'user');
   const collected = [];
   for (const { tags } of getLeafs(geometry)) {

@@ -88,7 +88,7 @@ export { g, get } from './get.js';
 export { gap } from './void.js';
 export { getAll } from './getAll.js';
 export { getTag } from './getTag.js';
-export { getTags } from './getTags.js';
+// export { getTags } from './getTags.js';
 export { ghost } from './ghost.js';
 export { gn, getNot } from './getNot.js';
 export { gridView, view } from './view.js';

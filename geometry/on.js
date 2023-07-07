@@ -5,7 +5,7 @@ import { transform } from './transform.js';
 
 // We split on into two phases to allow arbitrary operations to occur inbetween.
 
-export const onPre = (geometry, selection, op = (_v) => (s) => s) => {
+export const onPre = (geometry, selection) => {
   const results = [];
   for (const inputLeaf of getLeafs(selection)) {
     const global = inputLeaf.matrix;
@@ -27,7 +27,7 @@ export const onPost = (geometry, results) => {
   return replacer(inputLeafs, outputLeafs)(geometry);
 };
 
-export const on = (geometry, selection, op = (_v) => (s) => s) => {
+export const on = (geometry, selection, op = (g) => g) => {
   const results = [];
   for (const { inputLeaf, localInputLeaf, global } of onPre(
     geometry,

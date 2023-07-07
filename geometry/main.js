@@ -23,6 +23,8 @@ export { Curve, curve } from './Curve.js';
 export { Edge } from './Edge.js';
 export { Empty } from './Empty.js';
 export { Group } from './Group.js';
+export { Hershey } from './Hershey.js';
+export { Icosahedron } from './Icosahedron.js';
 export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Segments } from './Segments.js';
@@ -86,7 +88,7 @@ export {
 export { Fuse, fuse } from './fuse.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
-export { get, getAll, getList, getNot } from './get.js';
+export { get, getAll, getAllList, getList, getNot, getNotList } from './get.js';
 export { getAnySurfaces } from './tagged/getAnySurfaces.js';
 export { getItems } from './tagged/getItems.js';
 export { getInverseMatrices } from './tagged/getInverseMatrices.js';
@@ -104,8 +106,10 @@ export { grow } from './grow.js';
 export { hasColor } from './hasColor.js';
 export { hasMaterial } from './hasMaterial.js';
 export { hash } from './tagged/hash.js';
+export { hold } from './hold.js';
 export { involute } from './involute.js';
 export { fill } from './fill.js';
+export { inItem } from './inItem.js';
 export { inset } from './inset.js';
 export {
   isNotShow,
@@ -243,5 +247,5 @@ export { twist } from './twist.js';
 export { update } from './tagged/update.js';
 export { unfold } from './unfold.js';
 export { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
-export { wrap } from './wrap.js';
+export { Wrap, wrap } from './wrap.js';
 export { write, writeNonblocking } from './tagged/write.js';

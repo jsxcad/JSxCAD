@@ -1,19 +1,17 @@
-import { Shape } from './Shape.js';
-import { wrap as wrapGeometry } from '@jsxcad/geometry';
+import { Wrap as WrapOp, wrap as wrapOp } from '@jsxcad/geometry';
 
-export const Wrap = Shape.registerMethod2(
+import { Shape } from './Shape.js';
+
+export const Wrap = Shape.registerMethod3(
   'Wrap',
-  ['input', 'number', 'number', 'geometries'],
-  async (input, offset = 1, alpha = 0.1, geometries) =>
-    Shape.fromGeometry(wrapGeometry(geometries, offset, alpha)).setTags(
-      ...(await input.getTags())
-    )
+  ['geometries', 'number', 'number'],
+  WrapOp
 );
 
-export const wrap = Shape.registerMethod2(
+export const wrap = Shape.registerMethod3(
   'wrap',
-  ['input', 'rest'],
-  (input, rest) => Wrap(input, ...rest)(input)
+  ['inputGeometry', 'geometries', 'number', 'number'],
+  wrapOp
 );
 
 export default wrap;
