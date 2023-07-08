@@ -2,7 +2,7 @@ import Shape from './Shape.js';
 
 import { computeImplicitVolume } from '@jsxcad/geometry';
 
-export const Implicit = Shape.registerMethod2(
+export const Implicit = Shape.registerMethod3(
   'Implicit',
   ['number', 'function', 'options'],
   (
@@ -15,15 +15,13 @@ export const Implicit = Shape.registerMethod2(
       errorBound = 0.001,
     } = {}
   ) =>
-    Shape.fromGeometry(
-      computeImplicitVolume(
-        op,
-        radius,
-        angularBound,
-        radiusBound,
-        distanceBound,
-        errorBound
-      )
+    computeImplicitVolume(
+      op,
+      radius,
+      angularBound,
+      radiusBound,
+      distanceBound,
+      errorBound
     )
 );
 

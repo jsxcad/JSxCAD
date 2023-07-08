@@ -86,10 +86,19 @@ export const orient = Shape.registerMethod2(
     ];
     // FIX: Move this to CGAL.
     lookAt.blessed = true;
+    const a = await input.transform(local);
+    console.log(`QQ/orient/a: ${JSON.stringify(a)}`);
+    const b = await a.transform(lookAt);
+    console.log(`QQ/orient/b: ${JSON.stringify(b)}`);
+    const c = await b.move(...at);
+    console.log(`QQ/orient/c: ${JSON.stringify(c)}`);
+    return c;
+    /*
     return input
       .transform(local)
       .transform(lookAt)
       .move(...at);
+    */
   }
 );
 

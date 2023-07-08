@@ -1,32 +1,10 @@
-import { computeHash, emit, log as sysLog } from '@jsxcad/sys';
-
 import Shape from './Shape.js';
+import { log as op } from '@jsxcad/geometry';
 
-/**
- *
- * # Log
- *
- * Writes a string to the console.
- *
- * ```
- * log("Hello, World")
- * ```
- *
- **/
-
-export const log = Shape.registerMethod2(
+export const log = Shape.registerMethod3(
   'log',
-  ['input', 'string'],
-  async (input, prefix = '') => {
-    const text = prefix + JSON.stringify(await input.toGeometry());
-    const level = 'serious';
-    const log = { text, level };
-    const hash = computeHash(log);
-    emit({ log, hash });
-    sysLog({ op: 'text', text });
-    console.log(text);
-    return input;
-  }
+  ['inputGeometry', 'string'],
+  op
 );
 
 export default log;

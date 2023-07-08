@@ -1,23 +1,19 @@
-import Group from './Group.js';
-import Shape from './Shape.js';
-import { fromTranslateToTransform } from '@jsxcad/algorithm-cgal';
-import { transform } from './transform.js';
+import { Group, translate } from '@jsxcad/geometry';
 
-// TODO: Fix toCoordinates.
-export const move = Shape.registerMethod2(
+import Shape from './Shape.js';
+
+export const move = Shape.registerMethod3(
   ['move', 'xyz'],
-  ['input', 'number', 'number', 'number', 'coordinates'],
-  async (input, x, y = 0, z = 0, coordinates = []) => {
+  ['inputGeometry', 'number', 'number', 'number', 'coordinates'],
+  (geometry, x, y = 0, z = 0, coordinates = []) => {
     const results = [];
     if (x !== undefined) {
       coordinates.push([x || 0, y, z]);
     }
     for (const coordinate of coordinates) {
-      results.push(
-        await transform(fromTranslateToTransform(...coordinate))(input)
-      );
+      results.push(translate(geometry, coordinate));
     }
-    return Group(...results);
+    return Group(results);
   }
 );
 

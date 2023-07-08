@@ -1,7 +1,7 @@
 import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, link as link$1, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, deletePendingSurfaceMeshes, fromSegmentToInverseTransform, invertTransform, fuse as fuse$1, convexHull as convexHull$1, eachPoint, computeBoundingBox, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, eagerTransform as eagerTransform$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, involute as involute$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, remesh as remesh$1, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending } from './jsxcad-sys.js';
+import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending, log as log$1 } from './jsxcad-sys.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 
 const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
@@ -823,6 +823,7 @@ const ArcY = ArcOp('ArcY');
 const ArcZ = ArcOp('ArcZ');
 
 const Hexagon = ([x, y, z]) => Arc([x, y, z], { sides: 6 });
+const Octagon = ([x, y, z]) => Arc([x, y, z], { sides: 8 });
 
 const taggedSegments = (
   { tags = [], matrix, provenance, orientation },
@@ -4726,6 +4727,8 @@ const fromPolygonSoup = (
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
 
+const gap = (geometry) => hasTypeGhost(hasTypeVoid(geometry));
+
 const filter$h = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
@@ -4979,6 +4982,28 @@ const Loft = (geometries, { open = false }) => {
 const loft = (geometry, geometries, mode) =>
   Loft([geometry, ...geometries], mode);
 
+const log = (geometry, prefix = '') => {
+  const text = prefix + JSON.stringify(geometry);
+  const level = 'serious';
+  const log = { text, level };
+  const hash = computeHash(log);
+  emit({ log, hash });
+  log$1({ op: 'text', text });
+  console.log(text);
+  return geometry;
+};
+
+const masked = (geometry, masks) => {
+  const gaps = [];
+  for (const mask of masks) {
+    gaps.push(gap(mask));
+  }
+  return Group([...gaps, hasTypeMasked(geometry)]);
+};
+
+const masking = (mask, masked) =>
+  Group([gap(mask), hasTypeMasked(masked)]);
+
 const filter$a = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   hasNotTypeVoid(geometry);
@@ -5006,6 +5031,22 @@ const noGhost = (geometry) => {
   const inputs = linearize(concreteGeometry, isTypeGhost);
   const outputs = inputs.map(removeIfGhost);
   return replacer(inputs, outputs)(concreteGeometry);
+};
+
+const nth = (geometry, nths) => {
+  const candidates = each(geometry);
+  const group = [];
+  for (let nth of nths) {
+    if (nth < 0) {
+      nth = candidates.length + nth;
+    }
+    let candidate = candidates[nth];
+    if (candidate === undefined) {
+      candidate = Empty();
+    }
+    group.push(candidate);
+  }
+  return Group(group);
 };
 
 const filter$8 = (geometry) =>
@@ -5436,4 +5477,4 @@ const Wrap = (geometries, offset = 1, alpha = 0.1) => {
 const wrap = (geometry, geometries, offset, alpha) =>
   tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
 
-export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Page, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Wrap, X, XY, XZ, Y, YX, YZ, Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, loop, makeAbsolute, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, offset, on, onPost, onPre, oneOfTagMatcher, op, origin, outline, pack, page, read, readNonblocking, ref, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, scale$1 as scale, seam, section, separate, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Octagon, Page, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Wrap, X, XY, XZ, Y, YX, YZ, Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, origin, outline, pack, page, read, readNonblocking, ref, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, scale$1 as scale, seam, section, separate, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };

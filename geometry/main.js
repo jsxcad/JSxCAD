@@ -11,7 +11,7 @@ export { scale } from './scale.js';
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
-export { Arc, ArcX, ArcY, ArcZ, Hexagon } from './Arc.js';
+export { Arc, ArcX, ArcY, ArcZ, Hexagon, Octagon } from './Arc.js';
 export { Box } from './Box.js';
 export {
   ChainConvexHull,
@@ -86,6 +86,7 @@ export {
   fromTranslateToTransform,
 } from '@jsxcad/algorithm-cgal';
 export { Fuse, fuse } from './fuse.js';
+export { gap } from './gap.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
 export { get, getAll, getAllList, getList, getNot, getNotList } from './get.js';
@@ -169,12 +170,16 @@ export { linearize } from './tagged/linearize.js';
 export { link, loop } from './link.js';
 export { load, loadNonblocking } from './tagged/load.js';
 export { loft } from './loft.js';
+export { log } from './log.js';
 export { makeAbsolute } from './makeAbsolute.js';
+export { masked } from './masked.js';
+export { masking } from './masking.js';
 export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureVolume } from './tagged/measureVolume.js';
 export { moveAlong, moveAlongNormal } from './moveAlong.js';
 export { noGhost } from './noGhost.js';
+export { nth } from './nth.js';
 export { offset } from './offset.js';
 export { on, onPre, onPost } from './on.js';
 export { op } from './tagged/op.js';
