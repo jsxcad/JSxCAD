@@ -11,7 +11,7 @@ export { scale } from './scale.js';
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
-export { Arc, ArcX, ArcY, ArcZ, Hexagon, Octagon } from './Arc.js';
+export { Arc, ArcX, ArcY, ArcZ, Hexagon, Octagon, Pentagon } from './Arc.js';
 export { Box } from './Box.js';
 export {
   ChainConvexHull,
@@ -25,6 +25,7 @@ export { Empty } from './Empty.js';
 export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';
 export { Icosahedron } from './Icosahedron.js';
+export { Orb } from './Orb.js';
 export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Segments } from './Segments.js';
@@ -184,6 +185,7 @@ export { offset } from './offset.js';
 export { on, onPre, onPost } from './on.js';
 export { op } from './tagged/op.js';
 export { origin } from './origin.js';
+export { orient } from './orient.js';
 export { outline } from './outline.js';
 export { pack } from './pack.js';
 export { read, readNonblocking } from './tagged/read.js';

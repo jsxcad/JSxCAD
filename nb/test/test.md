@@ -2,6 +2,6 @@
 
 ```JavaScript
 Line([10])
-  .orient({ at: [40, 50, 0] })
+  .orient([40, 50, 0])
   .gridView();
 ```
