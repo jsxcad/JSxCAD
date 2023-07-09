@@ -1,8 +1,9 @@
+/*
 import Shape from './Shape.js';
 
 // This should take an op.
 
-export const getTags = Shape.registerMethod2(
+export const getTags = Shape.registerMethodX(
   'getTags',
   ['inputGeometry'],
   (geometry) => {
@@ -12,3 +13,4 @@ export const getTags = Shape.registerMethod2(
 );
 
 export default getTags;
+*/

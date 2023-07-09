@@ -6,11 +6,10 @@ import {
   read,
   write,
 } from '@jsxcad/sys';
+import { ensurePages, hash as hashGeometry } from '@jsxcad/geometry';
 import { fromStl, toStl } from '@jsxcad/convert-stl';
 
 import Shape from './Shape.js';
-import { ensurePages } from './Page.js';
-import { hash as hashGeometry } from '@jsxcad/geometry';
 import { view } from './view.js';
 
 export const LoadStl = Shape.registerMethod2(
@@ -85,9 +84,8 @@ export const stl = Shape.registerMethod2(
   async (input, name, op = (_v) => (s) => s, options = {}) => {
     const { path } = getSourceLocation();
     let index = 0;
-    for (const entry of await ensurePages(
-      await Shape.apply(Shape.chain(input), op)
-    )) {
+    const updatedInput = await Shape.apply(input, op);
+    for (const entry of ensurePages(await updatedInput.toGeometry())) {
       const stlPath = `download/stl/${path}/${generateUniqueId()}`;
       await write(stlPath, await toStl(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;

@@ -1,4 +1,5 @@
 import { getLeafs } from './tagged/getLeafs.js';
+import parseNumber from 'parse-number';
 import { rewrite } from './tagged/visit.js';
 import { taggedItem } from './tagged/taggedItem.js';
 
@@ -84,7 +85,7 @@ export const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
 
 export const tag = (geometry, newTags) => retag(geometry, [], newTags);
 
-export const tags = (geometry, tag) => {
+export const tags = (geometry, tag = '*') => {
   const isMatchingTag = tagMatcher(tag, 'user');
   const collected = [];
   for (const { tags } of getLeafs(geometry)) {
@@ -102,3 +103,22 @@ export const as = (geometry, names) =>
 
 export const asPart = (geometry, names) =>
   taggedItem({ tags: names.map((name) => `part:${name}`) }, geometry);
+
+export const getValue = (geometry, tags) => {
+  const values = [];
+  for (const tag of tags) {
+    const matches = tags(geometry, `${tag}=*`);
+    if (matches.length === 0) {
+      values.push(undefined);
+      continue;
+    }
+    const [, value] = matches[0].split('=');
+    const number = parseNumber(value);
+    if (isFinite(number)) {
+      values.push(value);
+      continue;
+    }
+    values.push(value);
+  }
+  return values;
+};

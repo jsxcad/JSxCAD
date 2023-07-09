@@ -1,13 +1,7 @@
-![Image](test.md.verticalConnector_verticalConnector.png)
-
-[verticalConnector.stl](test.verticalConnector.stl)
+![Image](test.md.$1.png)
 
 ```JavaScript
-export const verticalConnector = await Arc(4.8)
-  .ez([8])
-  .add(Arc(5.8).ez([0.8 - 0.2]))
-  .add(Arc(5.5).ez([8 - 0.4, 8]))
-  .cut(Box(10, 1, [8, 1]))
-  .material('plastic')
-  .stl('verticalConnector');
+Line([10])
+  .orient([40, 50, 0])
+  .gridView();
 ```

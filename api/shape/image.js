@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
-import { untag } from './untag.js';
+import { retag } from '@jsxcad/geometry';
 
-export const image = Shape.registerMethod2(
+export const image = Shape.registerMethod3(
   'image',
-  ['input', 'string'],
-  (input, url) => untag('image:*').tag(`image:${url}`)(input)
+  ['inputGeometry', 'string'],
+  (geometry, url) => retag(geometry, ['image:*'], [`image:${url}`])
 );

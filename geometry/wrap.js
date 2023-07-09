@@ -1,25 +1,24 @@
-import {
-  deletePendingSurfaceMeshes,
-  wrap as wrapWithCgal,
-} from '@jsxcad/algorithm-cgal';
+import { tag, tags } from './tag.js';
 
+import { Group } from './Group.js';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
-import { taggedGroup } from './tagged/taggedGroup.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
+import { wrap as wrapWithCgal } from '@jsxcad/algorithm-cgal';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) && isNotTypeGhost(geometry);
 
-export const wrap = (geometries, offset, alpha) => {
+// These defaults need some rethinking.
+export const Wrap = (geometries, offset = 1, alpha = 0.1) => {
   const inputs = [];
   for (const geometry of geometries) {
-    const concreteGeometry = toConcreteGeometry(geometry);
-    linearize(concreteGeometry, filter, inputs);
+    linearize(geometry, filter, inputs);
   }
   const outputs = wrapWithCgal(inputs, offset, alpha);
-  deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs);
+  return Group(outputs);
 };
+
+export const wrap = (geometry, geometries, offset, alpha) =>
+  tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));

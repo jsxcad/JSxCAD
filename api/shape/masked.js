@@ -1,18 +1,10 @@
-import Group from './Group.js';
 import Shape from './Shape.js';
-import { gap } from './void.js';
-import { hasTypeMasked } from '@jsxcad/geometry';
+import { masked as op } from '@jsxcad/geometry';
 
-export const masked = Shape.registerMethod2(
+export const masked = Shape.registerMethod3(
   'masked',
-  ['inputGeometry', 'shapes'],
-  async (geometry, masks) => {
-    const shapes = [];
-    for (const mask of masks) {
-      shapes.push(await gap()(mask));
-    }
-    return Group(...shapes, Shape.fromGeometry(hasTypeMasked(geometry)));
-  }
+  ['inputGeometry', 'geometries'],
+  op
 );
 
 export default masked;

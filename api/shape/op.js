@@ -1,14 +1,15 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
 
-export const op = Shape.registerMethod2(
+export const op = Shape.registerMethod3(
   'op',
-  ['input', 'functions'],
-  async (input, functions = []) => {
+  ['inputGeometry', 'functions'],
+  (geometry) => geometry,
+  async (geometry, [_, functions]) => {
+    const input = Shape.chain(Shape.fromGeometry(geometry));
     const results = [];
     for (const fun of functions) {
-      const result = await fun(Shape.chain(input));
-      results.push(result);
+      results.push(await Shape.apply(input, fun, input));
     }
     return Group(...results);
   }

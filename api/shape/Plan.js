@@ -1,7 +1,23 @@
+import { Shape } from './Shape.js';
+import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
+
+export const zagSides = Shape.registerMethod3(
+  'zagSides',
+  ['number', 'number'],
+  (diameter = 1, zag = 0.01) => toSidesFromZag(diameter, zag),
+  (number) => number
+);
+export const zagSteps = Shape.registerMethod3(
+  'zagSteps',
+  ['number', 'number'],
+  (diameter = 1, zag = 0.25) => 1 / toSidesFromZag(diameter, zag),
+  (number) => number
+);
+
+/*
 import { identity, taggedPlan } from '@jsxcad/geometry';
 
 import { Shape } from './Shape.js';
-import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
 
 const X = 0;
 const Y = 1;
@@ -264,3 +280,4 @@ export const buildCorners = (x, y, z) => async () => {
 export const Plan = (type) => Shape.fromGeometry(taggedPlan({}, { type }));
 
 export default Plan;
+*/

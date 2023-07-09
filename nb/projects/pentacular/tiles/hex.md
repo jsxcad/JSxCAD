@@ -46,13 +46,6 @@ const hexTile = hex
   .inset(0.1)
   .ez([2, -1])
   .cut(hex.eachEdge(placeTab(tab)))
-  /*
-  .cut(
-    Hexagon(32).eachEdge(
-      (e, l, o) => (s) => s.at(e.origin(), s.by(o.origin()).get('tab'))
-    )
-  )
-  */
   .fuse()
   .clean();
 ```
@@ -562,7 +555,6 @@ const Tile = (...args) => {
     }
   }
 
-  console.log(`QQ/1`);
   const tileTerrain = {
     meadow: Meadow,
     hill: Hill,
@@ -576,7 +568,6 @@ const Tile = (...args) => {
   for (const [turn, nth] of turnSingles(trees)) {
     tile = tile.and(Forest(seed, turn, nth));
   }
-  console.log(`QQ/2`);
 
   const peakTurns = turnList(peaks);
   if (peakTurns.length > 0) {
@@ -599,7 +590,6 @@ const Tile = (...args) => {
         .clip(hex.ez([20]))
     );
   }
-  console.log(`QQ/3`);
 
   const swampTurns = turnList(swamp);
   const swamps = [];
@@ -607,7 +597,6 @@ const Tile = (...args) => {
     swamps.push(Swamp(seed, turn / 6, swamps.length));
   }
   if (swamps.length > 0) {
-    console.log(`QQ/Swamps: ${swamps.length}`);
     tile = tile.cut(...swamps);
   }
 
@@ -623,8 +612,6 @@ const Tile = (...args) => {
   for (const [to, from, nth] of turnPairs(river)) {
     tile = tile.cut(River(seed, to, from, nth));
   }
-
-  console.log(`QQ/4`);
 
   for (const [turn, nth] of turnSingles(buildings)) {
     tile = tile.and(Building(seed, turn, nth));
@@ -658,10 +645,6 @@ const Tile = (...args) => {
     tile = tile.and(Field(seed, turn, nth));
   }
 
-  console.log(`QQ/4a`);
-
-  console.log(`QQ/5`);
-
   const tunnels = [];
   for (const [from, to, nth] of turnPairs(tunnel)) {
     tunnels.push(Tunnel(seed, from, to, nth));
@@ -670,7 +653,6 @@ const Tile = (...args) => {
   if (tunnels.length > 0) {
     tile = tile.cut(...tunnels);
   }
-  console.log(`QQ/6`);
 
   tile = tile.cut(caveCut);
 
@@ -768,4 +750,10 @@ await Tile(seed4, {
   wall: wall,
   field: field2,
 }).stl('tile');
+```
+
+![Image](hex.md.$4_hexTile.png)
+
+```JavaScript
+hexTile.view('hexTile');
 ```

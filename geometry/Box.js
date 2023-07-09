@@ -123,7 +123,7 @@ const makeBox = (corner1, corner2) => {
   return makeAbsolute(build());
 };
 
-export const Box = ([x = 1, y = x, z = 0], options) => {
+export const Box = ([x = 1, y = x, z = 0], options = {}) => {
   const [computedC1, computedC2] = buildCorners(x, y, z);
   const { c1 = computedC1, c2 = computedC2 } = options;
   return makeBox(c1, c2);

@@ -144,7 +144,7 @@ Box(5).op(color('green')).gridView();
 
 ```JavaScript
 Line([10])
-  .orient({ at: [40, 50, 0] })
+  .orient([40, 50, 0])
   .gridView();
 ```
 

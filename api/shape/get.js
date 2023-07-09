@@ -1,6 +1,6 @@
 import Group from './Group.js';
 import Shape from './Shape.js';
-import { get as op } from '@jsxcad/geometry';
+import { getList as op } from '@jsxcad/geometry';
 
 export const get = Shape.registerMethod3(
   ['get', 'g'],

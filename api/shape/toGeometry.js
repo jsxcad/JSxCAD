@@ -1,6 +1,8 @@
 import Shape from './Shape.js';
 
-export const toGeometry = Shape.registerMethod(
+export const toGeometry = Shape.registerMethod3(
   'toGeometry',
-  () => (shape) => shape.geometry
+  ['inputGeometry'],
+  (geometry) => geometry,
+  (geometry) => geometry
 );

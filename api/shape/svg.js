@@ -1,10 +1,9 @@
 import { computeHash, emit, getSourceLocation, read, write } from '@jsxcad/sys';
+import { ensurePages, hash as hashGeometry } from '@jsxcad/geometry';
 import { fromSvg, toSvg } from '@jsxcad/convert-svg';
 import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';
-import { ensurePages } from './Page.js';
-import { hash as hashGeometry } from '@jsxcad/geometry';
 
 export const LoadSvg = Shape.registerMethod2(
   'LoadSvg',
@@ -36,10 +35,11 @@ export const Svg = Shape.registerMethod2(
 export const svg = Shape.registerMethod2(
   'svg',
   ['input', 'string', 'function', 'options'],
-  async (input, name, op = (s) => s, options = {}) => {
+  async (input, name, op = (_v) => (s) => s, options = {}) => {
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    for (const entry of await ensurePages(op(input))) {
+    const updatedInput = await Shape.apply(input, op);
+    for (const entry of ensurePages(await updatedInput.toGeometry())) {
       const svgPath = `download/svg/${path}/${id}/${viewId}`;
       await write(svgPath, await toSvg(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;

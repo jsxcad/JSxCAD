@@ -1,11 +1,11 @@
 import Shape from './Shape.js';
 
-import { hasMaterial } from '@jsxcad/geometry';
+import { hasMaterial as op } from '@jsxcad/geometry';
 
-export const material = Shape.registerMethod2(
+export const material = Shape.registerMethod3(
   'material',
   ['inputGeometry', 'string'],
-  (geometry, name) => Shape.fromGeometry(hasMaterial(geometry, name))
+  op
 );
 
 export default material;

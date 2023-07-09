@@ -1,7 +1,8 @@
+import { Group } from './Group.js';
 import { oneOfTagMatcher } from './tag.js';
 import { visit } from './tagged/visit.js';
 
-export const get = (geometry, tags) => {
+export const getList = (geometry, tags, { inItem, not } = {}) => {
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
   const walk = (geometry, descend) => {
@@ -9,20 +10,43 @@ export const get = (geometry, tags) => {
     if (type === 'group') {
       return descend();
     }
+    let matched = false;
     if (isMatch(`type:${geometry.type}`)) {
-      picks.push(geometry);
+      matched = true;
     } else {
       for (const tag of tags) {
         if (isMatch(tag)) {
-          picks.push(geometry);
+          matched = true;
           break;
         }
       }
     }
-    if (type !== 'item') {
+    if (not) {
+      if (!matched) {
+        picks.push(geometry);
+      }
+    } else {
+      if (matched) {
+        picks.push(geometry);
+      }
+    }
+    if (inItem || type !== 'item') {
       return descend();
     }
   };
   visit(geometry, walk);
   return picks;
 };
+
+export const get = (geometry, tags, options) =>
+  Group(getList(geometry, tags, options));
+
+export const getAll = (geometry, tags) => get(geometry, tags, { inItem: true });
+
+export const getAllList = (geometry, tags) =>
+  getList(geometry, tags, { inItem: true });
+
+export const getNot = (geometry, tags) => get(geometry, tags, { not: true });
+
+export const getNotList = (geometry, tags) =>
+  getList(geometry, tags, { not: true });

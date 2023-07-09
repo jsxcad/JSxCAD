@@ -1,9 +1,8 @@
 import Shape from './Shape.js';
-import { twist as twistGeometry } from '@jsxcad/geometry';
+import { twist as op } from '@jsxcad/geometry';
 
-export const twist = Shape.registerMethod2(
+export const twist = Shape.registerMethod3(
   'twist',
-  ['input', 'number'],
-  (input, turnsPerMm = 1) =>
-    Shape.fromGeometry(twistGeometry(input.toGeometry(), turnsPerMm))
+  ['inputGeometry', 'number'],
+  op
 );

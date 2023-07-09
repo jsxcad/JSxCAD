@@ -1,9 +1,8 @@
 import { Shape } from './Shape.js';
-import { ghost } from './ghost.js';
-import { on } from './on.js';
+import { drop as op } from '@jsxcad/geometry';
 
-export const drop = Shape.registerMethod2(
+export const drop = Shape.registerMethod3(
   'drop',
-  ['input', 'shape'],
-  (input, selector) => on(selector, ghost())(input)
+  ['inputGeometry', 'geometry'],
+  op
 );

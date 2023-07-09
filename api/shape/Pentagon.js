@@ -1,10 +1,6 @@
-import { Arc } from './Arc.js';
 import Shape from './Shape.js';
+import { Pentagon as op } from '@jsxcad/geometry';
 
-export const Pentagon = Shape.registerMethod2(
-  'Pentagon',
-  ['input', 'interval', 'interval', 'interval'],
-  (input, x, y, z) => Arc(x, y, z, { sides: 5 })(input)
-);
+export const Pentagon = Shape.registerMethod3('Pentagon', ['intervals'], op);
 
 export default Pentagon;

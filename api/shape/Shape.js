@@ -301,6 +301,7 @@ Shape.isSegment = isSegment;
 Shape.chain = chain;
 
 export const apply = async (input, op, ...args) => {
+  input = Shape.chain(input);
   if (op instanceof Promise) {
     op = await op;
   }
