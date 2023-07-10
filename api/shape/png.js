@@ -1,8 +1,8 @@
+import { Group } from '@jsxcad/geometry';
 import Shape from './Shape.js';
 import { fromPng } from '@jsxcad/convert-png';
 import { fromRaster } from '@jsxcad/algorithm-contour';
 import { read } from '@jsxcad/sys';
-import { taggedGroup } from '@jsxcad/geometry';
 
 const readPngAsRasta = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
@@ -13,7 +13,7 @@ const readPngAsRasta = async (path) => {
   return raster;
 };
 
-export const LoadPng = Shape.registerMethod2(
+export const LoadPng = Shape.registerMethod3(
   'LoadPng',
   ['string', 'numbers'],
   async (path, bands) => {
@@ -30,7 +30,7 @@ export const LoadPng = Shape.registerMethod2(
         data[y][x] = getPixel(x, y);
       }
     }
-    const contours = await fromRaster(data, bands);
-    return Shape.fromGeometry(taggedGroup({}, ...contours));
+    const contours = fromRaster(data, bands);
+    return Group(contours);
   }
 );

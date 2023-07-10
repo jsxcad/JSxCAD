@@ -1,6 +1,7 @@
 import Shape from './Shape.js';
+import { fromPolygons } from '@jsxcad/geometry';
 
-export const Polyhedron = Shape.registerMethod2(
+export const Polyhedron = Shape.registerMethod3(
   'Polyhedron',
   ['coordinateLists'],
   (coordinateLists) => {
@@ -8,7 +9,7 @@ export const Polyhedron = Shape.registerMethod2(
     for (const coordinates of coordinateLists) {
       out.push({ points: coordinates });
     }
-    return Shape.fromPolygons(out);
+    return fromPolygons(out);
   }
 );
 

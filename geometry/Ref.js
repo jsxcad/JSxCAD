@@ -6,7 +6,7 @@ import { translate } from './translate.js';
 
 export const ref = (geometry) => hasTypeReference(geometry);
 
-export const Ref = () => ref(Point());
+export const Ref = () => ref(Point([0, 0, 0]));
 
 export const X = (x = 0) => translate(Ref(), [x, 0, 0]);
 export const Y = (y = 0) => translate(Ref(), [0, y, 0]);

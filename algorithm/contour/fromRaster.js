@@ -2,7 +2,7 @@ import { Points, link } from '@jsxcad/geometry';
 
 import MarchingSquares from 'marchingsquares/dist/marchingsquares.js';
 
-export const fromRaster = async (raster, bands) => {
+export const fromRaster = (raster, bands) => {
   const preprocessedData = new MarchingSquares.QuadTree(raster);
 
   const result = [];

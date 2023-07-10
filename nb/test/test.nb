@@ -1,4 +1,2 @@
-Line([10])
-  .orient([40, 50, 0])
-  .gridView();
-
+const aRectangle = Box(5, 5, 15).view('base');
+aRectangle.scale(2).view('scaled');

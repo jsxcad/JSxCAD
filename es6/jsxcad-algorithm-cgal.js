@@ -628,7 +628,7 @@ const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
   }
 };
 
-const fromScaleToTransform = (x = 0, y = 0, z = 0) => {
+const fromScaleToTransform = (x = 1, y = 1, z = 1) => {
   try {
     return toJsTransformFromCgalTransform(
       getCgal().Transformation__scale(x, y, z)

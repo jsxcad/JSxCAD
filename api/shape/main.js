@@ -180,7 +180,6 @@ export { unfold } from './unfold.js';
 export { voidFn } from './gap.js';
 export { volume } from './volume.js';
 export { voxels } from './voxels.js';
-export { testMode } from './testMode.js';
 export { toGeometry } from './toGeometry.js';
 export { wrap } from './wrap.js';
 export { x } from './x.js';
