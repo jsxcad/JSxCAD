@@ -1,2 +1,1 @@
-const aRectangle = Box(5, 5, 15).view('base');
-aRectangle.scale(2).view('scaled');
+Box(10).cut(Box(5)).ez([1, -1]).section().view();

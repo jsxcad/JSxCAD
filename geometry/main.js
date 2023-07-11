@@ -6,7 +6,7 @@ export {
   rotateZ,
   rotateZs,
 } from './rotate.js';
-export { scale } from './scale.js';
+export { scale, scaleLazy, scaleToFit } from './scale.js';
 
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
@@ -220,6 +220,7 @@ export {
 export { rewriteTags } from './tagged/rewriteTags.js';
 export { seam } from './seam.js';
 export { section } from './section.js';
+export { seq } from './seq.js';
 export { serialize } from './serialize.js';
 export { shell } from './shell.js';
 export { simplify } from './simplify.js';

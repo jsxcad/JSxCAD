@@ -1,5 +1,9 @@
 import { computeHash, emit, getSourceLocation, write } from '@jsxcad/sys';
-import { ensurePages, hash as hashGeometry } from '@jsxcad/geometry';
+import {
+  ensurePages,
+  hash as hashGeometry,
+  toDisplayGeometry,
+} from '@jsxcad/geometry';
 import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';
@@ -17,7 +21,9 @@ export const pdf = Shape.registerMethod3(
     const options = { lineWidth, size, definitions };
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    const displayGeometry = await Shape.applyToGeometry(geometry, op);
+    const displayGeometry = toDisplayGeometry(
+      await Shape.applyToGeometry(geometry, op)
+    );
     for (const entry of ensurePages(displayGeometry)) {
       const pdfPath = `download/pdf/${path}/${id}/${viewId}`;
       await write(pdfPath, await toPdf(entry, options));

@@ -146,7 +146,7 @@ export { scaleY, sy } from './sy.js';
 export { scaleZ, sz } from './sz.js';
 export { scaleToFit } from './scaleToFit.js';
 export { seam } from './seam.js';
-export { section, sectionProfile } from './section.js';
+export { section } from './section.js';
 export { separate } from './separate.js';
 export { seq } from './seq.js';
 export { serialize } from './serialize.js';

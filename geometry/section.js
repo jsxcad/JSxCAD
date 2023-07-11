@@ -1,13 +1,10 @@
-import {
-  deletePendingSurfaceMeshes,
-  section as sectionWithCgal,
-} from '@jsxcad/algorithm-cgal';
 import { hasTypeGhost, isNotTypeGhost } from './tagged/type.js';
 
+import { Group } from './Group.js';
+import { Ref } from './Ref.js';
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
-import { taggedGroup } from './tagged/taggedGroup.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
+import { section as sectionWithCgal } from '@jsxcad/algorithm-cgal';
 
 const filterInputs = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
@@ -19,19 +16,21 @@ const filterReferences = (geometry) =>
     geometry.type
   );
 
-export const section = (inputGeometry, referenceGeometries) => {
-  const concreteGeometry = toConcreteGeometry(inputGeometry);
-  const inputs = [];
-  linearize(concreteGeometry, filterInputs, inputs);
+export const section = (inputGeometry, referenceGeometries = []) => {
+  const inputs = linearize(inputGeometry, filterInputs);
   const count = inputs.length;
-  for (const referenceGeometry of referenceGeometries) {
-    linearize(referenceGeometry, filterReferences, inputs);
+  if (referenceGeometries.length === 0) {
+    // Default to the Z(0) plane.
+    inputs.push(Ref());
+  } else {
+    for (const referenceGeometry of referenceGeometries) {
+      linearize(referenceGeometry, filterReferences, inputs);
+    }
   }
   const outputs = sectionWithCgal(inputs, count);
   const ghosts = [];
   for (let nth = 0; nth < count; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
-  deletePendingSurfaceMeshes();
-  return taggedGroup({}, ...outputs, ...ghosts);
+  return Group([...outputs, ...ghosts]);
 };
