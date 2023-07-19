@@ -1,7 +1,5 @@
 ![Image](test.md.$1.png)
 
 ```JavaScript
-Line([10])
-  .orient([40, 50, 0])
-  .gridView();
+Box(10).cut(Box(5)).ez([1, -1]).section().view();
 ```

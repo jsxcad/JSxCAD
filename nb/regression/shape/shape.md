@@ -673,13 +673,9 @@ Box(4).fit(Arc(6).void()).ez([1]).view();
 Box(4).fit(Arc(6).void()).ez([1], 'noVoid').view();
 ```
 
-![Image](shape.md.$79.png)
-
 ```JavaScript
 Box(4).fitTo(Arc(4).void()).cut(Hexagon(3)).clean().view();
 ```
-
-![Image](shape.md.$80.png)
 
 ```JavaScript
 Box(4).fitTo(Arc(4).void()).cut(Hexagon(3), 'noVoid').clean().view();

@@ -1997,7 +1997,6 @@ const staticDisplay = async (
     await buildMeshes({ datasets, geometry, scene, definitions, pageSize });
   } catch (e) {
     console.log(e.stack);
-    console.log(`QQQ/staticDisplay/geometry: ${JSON.stringify(geometry)}`);
     throw e;
   }
 

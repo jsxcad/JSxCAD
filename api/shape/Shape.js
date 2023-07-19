@@ -338,12 +338,17 @@ export const apply = async (input, op, ...args) => {
 
 Shape.apply = apply;
 
-export const applyToGeometry = async (geometry, op, ...args) => {
-  const result = await Shape.apply(Shape.fromGeometry(geometry), op, ...args);
+export const applyGeometryToValue = async (geometry, op, ...args) =>
+  Shape.apply(Shape.fromGeometry(geometry), op, ...args);
+
+export const applyGeometryToGeometry = async (geometry, op, ...args) => {
+  const result = Shape.apply(Shape.fromGeometry(geometry), op, ...args);
   return result.toGeometry();
 };
 
-Shape.applyToGeometry = applyToGeometry;
+Shape.applyToGeometry = applyGeometryToGeometry;
+Shape.applyGeometryToGeometry = applyGeometryToGeometry;
+Shape.applyGeometryToValue = applyGeometryToValue;
 
 export const registerMethod = (names, op) => {
   if (typeof names === 'string') {

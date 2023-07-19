@@ -3,29 +3,40 @@
 template <class Kernel, class Container>
 void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
   typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
-  std::cout << "[ " << P.size() << " vertices:";
-  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit)
-    std::cout << " (" << *vit << ')';
-  std::cout << " ]" << std::endl;
+  std::cout << "Polygon(";
+  for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit) {
+    if (vit != P.vertices_begin()) {
+      std::cout << ", ";
+    }
+    std::cout << "[" << vit->x() << ", " << vit->y() << "]";
+  }
+  std::cout << ")";
+}
+
+template <class Kernel, class Container>
+void print_polygon_nl(const CGAL::Polygon_2<Kernel, Container>& P) {
+  print_polygon(P);
+  std::cout << std::endl;
 }
 
 template <class Kernel, class Container>
 void print_polygon_with_holes(
     const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
   if (!pwh.is_unbounded()) {
-    std::cout << "{ Outer boundary = ";
-    print_polygon(pwh.outer_boundary());
-  } else
-    std::cout << "{ Unbounded polygon." << std::endl;
+    std::cout << "Polygon: " << std::endl;
+    print_polygon(pwh.outer_boundary()) << std::endl;
+  } else {
+    std::cout << "Unbounded polygon." << std::endl;
+  }
   typename CGAL::Polygon_with_holes_2<Kernel, Container>::Hole_const_iterator
       hit;
   unsigned int k = 1;
   std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
   for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
-    std::cout << " Hole #" << k << " = ";
+    std::cout << "Hole: ";
     print_polygon(*hit);
   }
-  std::cout << " }" << std::endl;
+  std::cout << std::endl;
 }
 
 template <class Kernel, class Container>

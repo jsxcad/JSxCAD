@@ -168,7 +168,7 @@ export {
 export { join, joinTo } from './join.js';
 export { keep } from './tagged/keep.js';
 export { linearize } from './tagged/linearize.js';
-export { link, loop } from './link.js';
+export { Link, Loop, link, loop } from './link.js';
 export { load, loadNonblocking } from './tagged/load.js';
 export { loft } from './loft.js';
 export { log } from './log.js';

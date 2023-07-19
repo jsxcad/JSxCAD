@@ -390,7 +390,6 @@ class Geometry {
       polygons.push_back(std::move(polygon));
     }
     plane(nth) = unitPlane(local_plane);
-    // plane(nth) = Plane(0, 0, 1, 0);
     pwh(nth) = std::move(polygons);
   }
 

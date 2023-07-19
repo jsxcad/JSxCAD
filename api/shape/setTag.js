@@ -1,10 +1,10 @@
 import Shape from './Shape.js';
-import { untag } from './untag.js';
+import { retag } from '@jsxcad/geometry';
 
-export const setTag = Shape.registerMethod2(
+export const setTag = Shape.registerMethod3(
   'setTag',
-  ['input', 'string', 'value'],
-  (input, tag, value) => untag(`${tag}=*`).tag(`${tag}=${value}`)(input)
+  ['inputGeometry', 'string', 'value'],
+  (geometry, tag, value) => retag(geometry, [`${tag}=*`], [`${tag}=${value}`])
 );
 
 export default setTag;
