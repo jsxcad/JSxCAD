@@ -1,6 +1,5 @@
 import { writeFileSync } from 'fs';
 
-// const timeout = 120000;
 const timeout = 240000;
 
 export const screenshot = async (html, { browser }) => {

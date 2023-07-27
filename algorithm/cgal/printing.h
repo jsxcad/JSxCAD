@@ -20,11 +20,24 @@ void print_polygon_nl(const CGAL::Polygon_2<Kernel, Container>& P) {
 }
 
 template <class Kernel, class Container>
+void print_polygons(const std::vector<CGAL::Polygon_2<Kernel, Container>>& Ps) {
+  for (const auto& P : Ps) {
+    print_polygon(P);
+  }
+}
+
+template <class Kernel, class Container>
+void print_polygons_nl(std::vector<CGAL::Polygon_2<Kernel, Container>>& P) {
+  print_polygons(P);
+  std::cout << std::endl;
+}
+
+template <class Kernel, class Container>
 void print_polygon_with_holes(
     const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
   if (!pwh.is_unbounded()) {
-    std::cout << "Polygon: " << std::endl;
-    print_polygon(pwh.outer_boundary()) << std::endl;
+    std::cout << "Polygon: ";
+    print_polygon_nl(pwh.outer_boundary());
   } else {
     std::cout << "Unbounded polygon." << std::endl;
   }

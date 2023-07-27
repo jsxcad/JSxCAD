@@ -342,8 +342,15 @@ export const applyGeometryToValue = async (geometry, op, ...args) =>
   Shape.apply(Shape.fromGeometry(geometry), op, ...args);
 
 export const applyGeometryToGeometry = async (geometry, op, ...args) => {
-  const result = Shape.apply(Shape.fromGeometry(geometry), op, ...args);
-  return result.toGeometry();
+  const result = await Shape.apply(Shape.fromGeometry(geometry), op, ...args);
+  try {
+    return result.geometry;
+  } catch (e) {
+    console.log(
+      `QQ/applyGeometryToGeometry: ${JSON.stringify(result)} op=${op}`
+    );
+    throw e;
+  }
 };
 
 Shape.applyToGeometry = applyGeometryToGeometry;

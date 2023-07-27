@@ -18,7 +18,6 @@ process.on('uncaughtException', (err) => {
 const server = express();
 const cwd = process.cwd();
 server.use(express.static('es6'));
-server.use(express.static('nb/documentation/interactions_with_geometry'));
 server.listen(5001);
 
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
@@ -40,6 +39,7 @@ const build = async (...args) => {
       '--disable-web-security',
       '--disable-features=IsolateOrigins',
       '--disable-site-isolation-trials',
+      '--js-flags="--experimental-wasm-eh"',
     ],
   });
   const notebookDurations = [];

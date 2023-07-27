@@ -134,11 +134,13 @@ const toHtmlFromNotebook = async (
   <script type='module'>
     import { Shape } from '${modulePath}/jsxcad-api-shape.js';
     import { dataUrl } from '${modulePath}/jsxcad-ui-threejs.js';
+    import { initCgal } from '${modulePath}/jsxcad-algorithm-cgal.js';
     import { toDomElement } from '${modulePath}/jsxcad-ui-notebook.js';
 
     const notebook = ${JSON.stringify(encodedNotebook, null, 2)};
 
     const prepareViews = async (notebook) => {
+      await initCgal();
       // Prepare the view urls in the browser.
       for (const note of notebook) {
         if (note.view && !note.url) {

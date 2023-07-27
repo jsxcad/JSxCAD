@@ -62,6 +62,7 @@ export const initCgal = async () => {
         return path;
       },
     });
+    console.log(`QQ/CGAL initialized: ${cgal}`);
   }
 };
 

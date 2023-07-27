@@ -71,6 +71,7 @@
   <script type='module'>
     import { Shape } from 'https://jsxcad.js.org/alpha/jsxcad-api-shape.js';
     import { dataUrl } from 'https://jsxcad.js.org/alpha/jsxcad-ui-threejs.js';
+    import { initCgal } from 'https://jsxcad.js.org/alpha/jsxcad-algorithm-cgal.js';
     import { toDomElement } from 'https://jsxcad.js.org/alpha/jsxcad-ui-notebook.js';
 
     const notebook = [
@@ -445,6 +446,7 @@
 ];
 
     const prepareViews = async (notebook) => {
+      await initCgal();
       // Prepare the view urls in the browser.
       for (const note of notebook) {
         if (note.view && !note.url) {
