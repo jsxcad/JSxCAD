@@ -12,7 +12,6 @@ bool inside_any(const Segment& segment,
 }
 
 int FaceEdges(Geometry* geometry, int count) {
-  std::cout << "QQ/FaceEdges/1" << std::endl;
   int size = geometry->size();
 
   geometry->copyInputSegmentsToOutputSegments();
@@ -27,14 +26,11 @@ int FaceEdges(Geometry* geometry, int count) {
   }
 
   for (int nth = 0; nth < count; nth++) {
-    std::cout << "QQ/FaceEdges/2: " << nth << std::endl;
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        std::cout << "QQ/FaceEdges/2/s" << std::endl;
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        std::cout << "QQ/FaceEdges/2/pwh" << std::endl;
         int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
         geometry->plane(face_target) = geometry->plane(nth);
         geometry->pwh(face_target) = geometry->pwh(nth);
@@ -68,7 +64,6 @@ int FaceEdges(Geometry* geometry, int count) {
         break;
       }
       case GEOMETRY_MESH: {
-        std::cout << "QQ/FaceEdges/2/m" << std::endl;
         const Surface_mesh& mesh = geometry->mesh(nth);
         int all_edge_target = geometry->add(GEOMETRY_EDGES);
 
@@ -163,9 +158,7 @@ int FaceEdges(Geometry* geometry, int count) {
             }
           }
           Polygons_with_holes_2 pwhs;
-          std::cout << "QQ/FaceEdges/2/m/1" << std::endl;
-          convertArrangementToPolygonsWithHolesNonZero(arrangement, pwhs, true);
-          std::cout << "QQ/FaceEdges/2/m/2" << std::endl;
+          convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs);
           geometry->pwh(face_target) = std::move(pwhs);
           geometry->copyTransform(edge_target, disorientation.inverse());
           geometry->copyTransform(face_target, disorientation.inverse());
@@ -176,14 +169,11 @@ int FaceEdges(Geometry* geometry, int count) {
         break;
       }
       default: {
-        std::cout << "QQ/FaceEdges/2/d" << std::endl;
         geometry->setType(nth, GEOMETRY_EMPTY);
         break;
       }
     }
-    std::cout << "QQ/FaceEdges/2/end" << std::endl;
   }
-  std::cout << "QQ/FaceEdges/3" << std::endl;
 
   geometry->transformToLocalFrame();
 

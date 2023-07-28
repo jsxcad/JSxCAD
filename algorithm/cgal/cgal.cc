@@ -863,28 +863,16 @@ void toPolygonsWithHolesFromBoundariesAndHoles(
   }
 }
 
-#if 1
-void convertArrangementToPolygonsWithHolesEvenOdd(
-    const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out);
+#if 0
+// TODO: Fix this
 
-void convertArrangementToPolygonsWithHolesNonZero(
-    const Arrangement_2& arrangement, Polygons_with_holes_2& out,
-    bool verbose = false) {
-  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, out);
-}
-#else
-void convertArrangementToPolygonsWithHolesNonZero(
-    const Arrangement_2& arrangement, Polygons_with_holes_2& out,
-    bool verbose = false) {
+void convertArrangementToPolygonsWithHolesNonZero(const Arrangement_2& arrangement, Polygons_with_holes_2& out) {
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign(
       CGAL::Sign::ZERO);
   std::queue<Arrangement_2::Face_const_handle> todo;
   face_sign[arrangement.unbounded_face()] = CGAL::Sign::NEGATIVE;
   todo.push(arrangement.unbounded_face());
 
-  if (verbose) {
-    std::cout << "QQ/cATPWHNZ/1" << std::endl;
-  }
   while (!todo.empty()) {
     Arrangement_2::Face_const_handle face = todo.front();
     CGAL::Sign sign = face_sign[face];
@@ -950,9 +938,6 @@ void convertArrangementToPolygonsWithHolesNonZero(
 
     todo.pop();
   }
-  if (verbose) {
-    std::cout << "QQ/cATPWHNZ/2" << std::endl;
-  }
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
@@ -990,9 +975,6 @@ void convertArrangementToPolygonsWithHolesNonZero(
 
     toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
                                               out);
-  }
-  if (verbose) {
-    std::cout << "QQ/cATPWHNZ/3" << std::endl;
   }
 }
 #endif
@@ -2227,7 +2209,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
       insert(arrangement, Segment_2(source, target));
     }
   }
-  convertArrangementToPolygonsWithHolesNonZero(arrangement, pwhs);
+  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs);
 }
 
 #include "Approximate.h"
