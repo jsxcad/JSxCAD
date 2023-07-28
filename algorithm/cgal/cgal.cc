@@ -863,15 +863,28 @@ void toPolygonsWithHolesFromBoundariesAndHoles(
   }
 }
 
-// What is the difference between this and converArrangementToPolygonsWithHoles?
-bool convertSimpleArrangementToPolygonsWithHoles(
-    const Arrangement_2& arrangement, Polygons_with_holes_2& out) {
+#if 1
+void convertArrangementToPolygonsWithHolesEvenOdd(
+    const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out);
+
+void convertArrangementToPolygonsWithHolesNonZero(
+    const Arrangement_2& arrangement, Polygons_with_holes_2& out,
+    bool verbose = false) {
+  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, out);
+}
+#else
+void convertArrangementToPolygonsWithHolesNonZero(
+    const Arrangement_2& arrangement, Polygons_with_holes_2& out,
+    bool verbose = false) {
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign(
       CGAL::Sign::ZERO);
   std::queue<Arrangement_2::Face_const_handle> todo;
   face_sign[arrangement.unbounded_face()] = CGAL::Sign::NEGATIVE;
   todo.push(arrangement.unbounded_face());
 
+  if (verbose) {
+    std::cout << "QQ/cATPWHNZ/1" << std::endl;
+  }
   while (!todo.empty()) {
     Arrangement_2::Face_const_handle face = todo.front();
     CGAL::Sign sign = face_sign[face];
@@ -937,17 +950,18 @@ bool convertSimpleArrangementToPolygonsWithHoles(
 
     todo.pop();
   }
+  if (verbose) {
+    std::cout << "QQ/cATPWHNZ/2" << std::endl;
+  }
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
-    if (face_sign[face] == CGAL::Sign::ZERO) {
-      std::cout << "Unreached face" << std::endl;
-    }
-    if (face_sign[face] == CGAL::Sign::NEGATIVE) {
+    if (face->number_of_outer_ccbs() != 1) {
       continue;
     }
-    if (face->is_unbounded()) {
-      std::cout << "Unbounded face" << std::endl;
+    if (face_sign[face] == CGAL::Sign::ZERO) {
+      std::cout << "Unreached face" << std::endl;
+    } else if (face_sign[face] == CGAL::Sign::NEGATIVE) {
       continue;
     }
     Polygon_2 polygon_boundary;
@@ -956,15 +970,8 @@ bool convertSimpleArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
-      const Point_2& point = edge->source()->point();
-      polygon_boundary.push_back(point);
+      polygon_boundary.push_back(edge->source()->point());
     } while (++edge != start);
-
-    if (polygon_boundary.size() < 3) {
-      std::cout << "Polygon is degenerate: ";
-      print_polygon_nl(polygon_boundary);
-      continue;
-    }
 
     simplifyPolygon(polygon_boundary, polygon_boundaries);
 
@@ -975,12 +982,7 @@ bool convertSimpleArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        if (edge->twin()->face() == edge->face()) {
-          // Skip antenna.
-          continue;
-        }
-        const Point_2& point = edge->source()->point();
-        polygon_hole.push_back(point);
+        polygon_hole.push_back(edge->source()->point());
       } while (++edge != start);
 
       simplifyPolygon(polygon_hole, polygon_holes);
@@ -989,18 +991,13 @@ bool convertSimpleArrangementToPolygonsWithHoles(
     toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
                                               out);
   }
-
-  return true;
+  if (verbose) {
+    std::cout << "QQ/cATPWHNZ/3" << std::endl;
+  }
 }
+#endif
 
-// What is the difference with convertSimpleArrangementToPolygonsWithHoles?
-#if 1
-void convertArrangementToPolygonsWithHoles(
-    const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
-  convertSimpleArrangementToPolygonsWithHoles(arrangement, out);
-}
-#else
-void convertArrangementToPolygonsWithHoles(
+void convertArrangementToPolygonsWithHolesEvenOdd(
     const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   std::queue<Arrangement_2::Face_const_handle> undecided;
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign;
@@ -1059,7 +1056,8 @@ void convertArrangementToPolygonsWithHoles(
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
-    if (face_sign[face] == CGAL::Sign::NEGATIVE) {
+    if (face_sign[face] == CGAL::Sign::NEGATIVE ||
+        face->number_of_outer_ccbs() != 1) {
       continue;
     }
     Polygon_2 polygon_boundary;
@@ -1067,27 +1065,11 @@ void convertArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
-      if (edge->twin()->face() == edge->face()) {
-        // Skip antenna.
-        continue;
-      }
-      const Point_2& point = edge->source()->point();
-      polygon_boundary.push_back(point);
+      polygon_boundary.push_back(edge->source()->point());
     } while (++edge != start);
 
-    // simplifyPolygon(polygon_boundary);
-
-    if (polygon_boundary.size() < 3) {
-      std::cout << "Polygon is degenerate: ";
-      print_polygon_nl(polygon_boundary);
-      continue;
-    }
-
-    if (!polygon_boundary.is_simple()) {
-      std::cout << "Polygon is not simple/3: " << std::endl;
-      print_polygon_nl(polygon_boundary);
-      continue;
-    }
+    std::vector<Polygon_2> polygon_boundaries;
+    simplifyPolygon(polygon_boundary, polygon_boundaries);
 
     std::vector<Polygon_2> polygon_holes;
     for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
@@ -1096,40 +1078,16 @@ void convertArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        if (edge->twin()->face() == edge->face()) {
-          // Skip antenna.
-          continue;
-        }
-        const Point_2& point = edge->source()->point();
-        polygon_hole.push_back(point);
+        polygon_hole.push_back(edge->source()->point());
       } while (++edge != start);
 
-      // simplifyPolygon(polygon_hole);
-
-      if (polygon_hole.size() < 3) {
-        std::cout << "Hole is degenerate: ";
-        print_polygon_nl(polygon_hole);
-        continue;
-      }
-
-      if (!polygon_hole.is_simple()) {
-        std::cout << "Hole is not simple/4: " << std::endl;
-        print_polygon_nl(polygon_hole);
-        continue;
-      }
-
-      if (polygon_hole.orientation() != CGAL::Sign::NEGATIVE) {
-        polygon_hole.reverse_orientation();
-      }
-      polygon_holes.push_back(polygon_hole);
+      simplifyPolygon(polygon_hole, polygon_holes);
     }
-    if (polygon_boundary.orientation() == CGAL::Sign::POSITIVE) {
-      out.push_back(Polygon_with_holes_2(
-          polygon_boundary, polygon_holes.begin(), polygon_holes.end()));
-    }
+
+    toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
+                                              out);
   }
 }
-#endif
 
 void PlanarSurfaceMeshToPolygonsWithHoles(
     const Plane& plane, const Surface_mesh& mesh,
@@ -1152,7 +1110,7 @@ void PlanarSurfaceMeshToPolygonsWithHoles(
         plane.to_2d(mesh.point(mesh.target(mesh.halfedge(edge))))};
     insert(arrangement, segment);
   }
-  convertArrangementToPolygonsWithHoles(arrangement, polygons);
+  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
 }
 
 void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
@@ -1191,7 +1149,7 @@ void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
     // The arrangement shouldn't produce polygons with holes, so this might be
     // simplified.
     std::vector<Polygon_with_holes_2> polygons;
-    convertArrangementToPolygonsWithHoles(arrangement, polygons);
+    convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
     for (const auto& polygon : polygons) {
       set.join(polygon);
     }
@@ -2269,9 +2227,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
       insert(arrangement, Segment_2(source, target));
     }
   }
-  if (!convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs)) {
-    std::cout << "Arrangement: " << arrangement;
-  }
+  convertArrangementToPolygonsWithHolesNonZero(arrangement, pwhs);
 }
 
 #include "Approximate.h"
