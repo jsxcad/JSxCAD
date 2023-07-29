@@ -3,7 +3,7 @@ import {
   isNotTypeGhost,
   linearize,
   measureBoundingBox,
-  scale as scaleGeometry,
+  scaleLazy as scaleGeometry,
   section as sectionGeometry,
   transformCoordinate,
   transformingCoordinates,
@@ -86,9 +86,7 @@ export const toPdf = async (
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const lines = [];
-  const section = sectionGeometry(await geometry, [
-    { type: 'points', tags: [] },
-  ]);
+  const section = sectionGeometry(await geometry);
   const disjoint = disjointGeometry(section, {});
   const prepared = scaleGeometry(disjoint, [scale, scale, scale]);
 

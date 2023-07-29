@@ -125,7 +125,8 @@ int Fill(Geometry* geometry) {
     geometry->setIdentityTransform(target);
     std::vector<Polygon_with_holes_2> polygons;
     Arrangement_2& arrangement = entry.second;
-    convertArrangementToPolygonsWithHoles(arrangement, geometry->pwh(target));
+    convertArrangementToPolygonsWithHolesEvenOdd(arrangement,
+                                                 geometry->pwh(target));
   }
 
   geometry->transformToLocalFrame();

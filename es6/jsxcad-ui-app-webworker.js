@@ -196,7 +196,9 @@ const bootstrap = async () => {
   self.ask = ask;
   self.tell = tell;
   // sys/log depends on ask, so set that up before we boot.
+  console.log(`QQ/bootstrap/pre`);
   await sys.boot();
+  console.log(`QQ/bootstrap/post`);
   sys.addOnEmitHandler(async notes => {
     if (notes.length === 0) {
       return;

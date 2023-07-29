@@ -804,13 +804,75 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
   return it->second;
 }
 
-void convertSimpleArrangementToPolygonsWithHoles(
-    const Arrangement_2& arrangement, Polygons_with_holes_2& out) {
+void simplifyPolygon(Polygon_2& polygon,
+                     std::vector<Polygon_2>& simple_polygons) {
+  for (auto a = polygon.begin(); a < polygon.end() - 2;) {
+    if (polygon.size() >= 3 && CGAL::collinear(a[0], a[1], a[2])) {
+      polygon.erase(a + 1);
+      continue;
+    }
+    ++a;
+  }
+  for (auto a = polygon.begin(); a < polygon.end() - 1;) {
+    if (a[0] == a[1]) {
+      polygon.erase(a + 1);
+      continue;
+    }
+    ++a;
+  }
+  std::set<Point_2> seen_points;
+  for (auto to = polygon.begin(); to != polygon.end(); ++to) {
+    auto [found, created] = seen_points.insert(*to);
+    if (!created) {
+      // This is a duplicate -- cut out the loop.
+      auto from = std::find(polygon.begin(), to, *to);
+      simple_polygons.emplace_back(from, to);
+      to = polygon.erase(from, to);
+      // Should we erase all points on the loop we cut?
+      seen_points.erase(found);
+    }
+  }
+  if (polygon.size() > 0) {
+    simple_polygons.push_back(polygon);
+  }
+}
+
+void toPolygonsWithHolesFromBoundariesAndHoles(
+    std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
+    Polygons_with_holes_2& pwhs) {
+  for (auto& boundary : boundaries) {
+    if (boundary.orientation() != CGAL::Sign::POSITIVE) {
+      boundary.reverse_orientation();
+    }
+    std::vector<Polygon_2> local_holes;
+    for (auto& hole : holes) {
+      if (hole.size() == 0) {
+        continue;
+      }
+      const Point_2& representative_point = hole[0];
+      if (boundary.has_on_positive_side(representative_point)) {
+        if (hole.orientation() != CGAL::Sign::NEGATIVE) {
+          hole.reverse_orientation();
+        }
+        // TODO: Consider destructively moving.
+        local_holes.push_back(hole);
+      }
+    }
+    pwhs.push_back(
+        Polygon_with_holes_2(boundary, local_holes.begin(), local_holes.end()));
+  }
+}
+
+#if 0
+// TODO: Fix this
+
+void convertArrangementToPolygonsWithHolesNonZero(const Arrangement_2& arrangement, Polygons_with_holes_2& out) {
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign(
       CGAL::Sign::ZERO);
   std::queue<Arrangement_2::Face_const_handle> todo;
   face_sign[arrangement.unbounded_face()] = CGAL::Sign::NEGATIVE;
   todo.push(arrangement.unbounded_face());
+
   while (!todo.empty()) {
     Arrangement_2::Face_const_handle face = todo.front();
     CGAL::Sign sign = face_sign[face];
@@ -879,54 +941,24 @@ void convertSimpleArrangementToPolygonsWithHoles(
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
+    if (face->number_of_outer_ccbs() != 1) {
+      continue;
+    }
     if (face_sign[face] == CGAL::Sign::ZERO) {
       std::cout << "Unreached face" << std::endl;
-    }
-    if (face_sign[face] == CGAL::Sign::NEGATIVE) {
+    } else if (face_sign[face] == CGAL::Sign::NEGATIVE) {
       continue;
     }
     Polygon_2 polygon_boundary;
+    std::vector<Polygon_2> polygon_boundaries;
 
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
-      if (edge->twin()->face() == edge->face()) {
-        // Skip antenna.
-        continue;
-      }
-      const Point_2& point = edge->source()->point();
-      if (point == edge->target()->point()) {
-        // Skip zero length edges.
-        continue;
-      }
-      if (polygon_boundary.size() >= 2 &&
-          CGAL::collinear(polygon_boundary.end()[-2],
-                          polygon_boundary.end()[-1], point)) {
-        // Skip colinear points.
-        polygon_boundary.end()[-1] = point;
-      } else {
-        polygon_boundary.push_back(point);
-      }
+      polygon_boundary.push_back(edge->source()->point());
     } while (++edge != start);
 
-    if (polygon_boundary.size() > 3 &&
-        CGAL::collinear(polygon_boundary.end()[-2], polygon_boundary.end()[-1],
-                        polygon_boundary[0])) {
-      // Skip colinear points.
-      polygon_boundary.resize(polygon_boundary.size() - 1);
-    }
-
-    if (!polygon_boundary.is_simple()) {
-      std::cout << "Polygon is not simple: " << std::endl;
-      print_polygon(polygon_boundary);
-      continue;
-    }
-
-    if (polygon_boundary.orientation() == CGAL::Sign::ZERO) {
-      continue;
-    } else if (polygon_boundary.orientation() == CGAL::Sign::NEGATIVE) {
-      polygon_boundary.reverse_orientation();
-    }
+    simplifyPolygon(polygon_boundary, polygon_boundaries);
 
     std::vector<Polygon_2> polygon_holes;
     for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
@@ -935,50 +967,19 @@ void convertSimpleArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        if (edge->twin()->face() == edge->face()) {
-          // Skip antenna.
-          continue;
-        }
-        const Point_2& point = edge->source()->point();
-        if (point == edge->target()->point()) {
-          // Skip zero length edges.
-          continue;
-        }
-        if (polygon_hole.size() >= 2 &&
-            CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
-                            point)) {
-          // Skip colinear points.
-          polygon_hole.end()[-1] = point;
-        } else {
-          polygon_hole.push_back(point);
-        }
+        polygon_hole.push_back(edge->source()->point());
       } while (++edge != start);
 
-      if (polygon_hole.size() > 3 &&
-          CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
-                          polygon_hole[0])) {
-        // Skip colinear points.
-        polygon_hole.resize(polygon_hole.size() - 1);
-      }
-      if (!polygon_hole.is_simple()) {
-        std::cout << "Hole is not simple: " << std::endl;
-        print_polygon(polygon_hole);
-        continue;
-      }
-
-      if (polygon_hole.orientation() == CGAL::Sign::ZERO) {
-        continue;
-      } else if (polygon_hole.orientation() == CGAL::Sign::POSITIVE) {
-        polygon_hole.reverse_orientation();
-      }
-      polygon_holes.push_back(polygon_hole);
+      simplifyPolygon(polygon_hole, polygon_holes);
     }
-    out.push_back(Polygon_with_holes_2(polygon_boundary, polygon_holes.begin(),
-                                       polygon_holes.end()));
+
+    toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
+                                              out);
   }
 }
+#endif
 
-void convertArrangementToPolygonsWithHoles(
+void convertArrangementToPolygonsWithHolesEvenOdd(
     const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   std::queue<Arrangement_2::Face_const_handle> undecided;
   CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign;
@@ -1037,7 +1038,8 @@ void convertArrangementToPolygonsWithHoles(
 
   for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
        face != arrangement.faces_end(); ++face) {
-    if (face_sign[face] == CGAL::Sign::NEGATIVE) {
+    if (face_sign[face] == CGAL::Sign::NEGATIVE ||
+        face->number_of_outer_ccbs() != 1) {
       continue;
     }
     Polygon_2 polygon_boundary;
@@ -1045,37 +1047,11 @@ void convertArrangementToPolygonsWithHoles(
     Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
     Arrangement_2::Ccb_halfedge_const_circulator edge = start;
     do {
-      if (edge->twin()->face() == edge->face()) {
-        // Skip antenna.
-        continue;
-      }
-      const Point_2& point = edge->source()->point();
-      if (point == edge->target()->point()) {
-        // Skip zero length edges.
-        continue;
-      }
-      if (polygon_boundary.size() >= 2 &&
-          CGAL::collinear(polygon_boundary.end()[-2],
-                          polygon_boundary.end()[-1], point)) {
-        // Skip colinear points.
-        polygon_boundary.end()[-1] = point;
-      } else {
-        polygon_boundary.push_back(point);
-      }
+      polygon_boundary.push_back(edge->source()->point());
     } while (++edge != start);
 
-    if (polygon_boundary.size() > 3 &&
-        CGAL::collinear(polygon_boundary.end()[-2], polygon_boundary.end()[-1],
-                        polygon_boundary[0])) {
-      // Skip colinear points.
-      polygon_boundary.resize(polygon_boundary.size() - 1);
-    }
-
-    if (!polygon_boundary.is_simple()) {
-      std::cout << "Polygon is not simple: " << std::endl;
-      print_polygon(polygon_boundary);
-      continue;
-    }
+    std::vector<Polygon_2> polygon_boundaries;
+    simplifyPolygon(polygon_boundary, polygon_boundaries);
 
     std::vector<Polygon_2> polygon_holes;
     for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
@@ -1084,46 +1060,14 @@ void convertArrangementToPolygonsWithHoles(
       Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
       Arrangement_2::Ccb_halfedge_const_circulator edge = start;
       do {
-        if (edge->twin()->face() == edge->face()) {
-          // Skip antenna.
-          continue;
-        }
-        const Point_2& point = edge->source()->point();
-        if (point == edge->target()->point()) {
-          // Skip zero length edges.
-          continue;
-        }
-        if (polygon_hole.size() >= 2 &&
-            CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
-                            point)) {
-          // Skip colinear points.
-          polygon_hole.end()[-1] = point;
-        } else {
-          polygon_hole.push_back(point);
-        }
+        polygon_hole.push_back(edge->source()->point());
       } while (++edge != start);
 
-      if (polygon_hole.size() > 3 &&
-          CGAL::collinear(polygon_hole.end()[-2], polygon_hole.end()[-1],
-                          polygon_hole[0])) {
-        // Skip colinear points.
-        polygon_hole.resize(polygon_hole.size() - 1);
-      }
-      if (!polygon_hole.is_simple()) {
-        std::cout << "Hole is not simple: " << std::endl;
-        print_polygon(polygon_hole);
-        continue;
-      }
+      simplifyPolygon(polygon_hole, polygon_holes);
+    }
 
-      if (polygon_hole.orientation() != CGAL::Sign::NEGATIVE) {
-        polygon_hole.reverse_orientation();
-      }
-      polygon_holes.push_back(polygon_hole);
-    }
-    if (polygon_boundary.orientation() == CGAL::Sign::POSITIVE) {
-      out.push_back(Polygon_with_holes_2(
-          polygon_boundary, polygon_holes.begin(), polygon_holes.end()));
-    }
+    toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
+                                              out);
   }
 }
 
@@ -1148,7 +1092,7 @@ void PlanarSurfaceMeshToPolygonsWithHoles(
         plane.to_2d(mesh.point(mesh.target(mesh.halfedge(edge))))};
     insert(arrangement, segment);
   }
-  convertArrangementToPolygonsWithHoles(arrangement, polygons);
+  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
 }
 
 void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
@@ -1187,7 +1131,7 @@ void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
     // The arrangement shouldn't produce polygons with holes, so this might be
     // simplified.
     std::vector<Polygon_with_holes_2> polygons;
-    convertArrangementToPolygonsWithHoles(arrangement, polygons);
+    convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
     for (const auto& polygon : polygons) {
       set.join(polygon);
     }
@@ -1726,7 +1670,7 @@ bool emitPolygonsWithHoles(const std::vector<P>& polygons,
 }
 
 template <typename P>
-bool admitPolygonWithHoles(P& polygon, emscripten::val fill_boundary,
+bool admitPolygonWithHoles(P& pwhs, emscripten::val fill_boundary,
                            emscripten::val fill_hole) {
   Polygon_2 boundary;
   Polygon_2* boundary_ptr = &boundary;
@@ -1734,18 +1678,8 @@ bool admitPolygonWithHoles(P& polygon, emscripten::val fill_boundary,
   if (boundary.size() == 0) {
     return false;
   }
-  if (!boundary.is_simple()) {
-    std::cout << "Boundary is not simple. size: " << boundary.size()
-              << std::endl;
-    for (const auto& p : boundary) {
-      std::cout << "p: " << p << std::endl;
-    }
-    return false;
-  }
-  if (boundary.orientation() == CGAL::Sign::NEGATIVE) {
-    boundary.reverse_orientation();
-  }
-
+  std::vector<Polygon_2> boundaries;
+  simplifyPolygon(boundary, boundaries);
   std::vector<Polygon_2> holes;
   for (;;) {
     Polygon_2 hole;
@@ -1754,30 +1688,19 @@ bool admitPolygonWithHoles(P& polygon, emscripten::val fill_boundary,
     if (hole.size() == 0) {
       break;
     }
-    if (!hole.is_simple()) {
-      std::cout << "Hole is not simple" << std::endl;
-      return false;
-    }
-    if (hole.orientation() == CGAL::Sign::POSITIVE) {
-      hole.reverse_orientation();
-    }
-    holes.push_back(hole);
+    simplifyPolygon(hole, holes);
   }
-
-  polygon = P(boundary, holes.begin(), holes.end());
+  toPolygonsWithHolesFromBoundariesAndHoles(boundaries, holes, pwhs);
   return true;
 }
 
 template <typename P>
-void admitPolygonsWithHoles(std::vector<P>& polygons,
-                            emscripten::val fill_boundary,
+void admitPolygonsWithHoles(P& pwhs, emscripten::val fill_boundary,
                             emscripten::val fill_hole) {
   for (;;) {
-    Polygon_with_holes_2 polygon;
-    if (!admitPolygonWithHoles(polygon, fill_boundary, fill_hole)) {
+    if (!admitPolygonWithHoles(pwhs, fill_boundary, fill_hole)) {
       return;
     }
-    polygons.push_back(polygon);
   }
 }
 
@@ -1876,6 +1799,7 @@ void offsetOfPolygonWithHoles(
         if (!hole->is_simple()) {
           std::cout << "OffsetOfPolygonWithHoles: hole is not simple"
                     << std::endl;
+          print_polygon_nl(*hole);
         }
         if (hole->orientation() == CGAL::Sign::NEGATIVE) {
           Polygon_2 boundary = *hole;
@@ -1966,6 +1890,7 @@ void insetOfPolygonWithHoles(
          hole != inset_boundary.holes_end(); ++hole) {
       if (!hole->is_simple()) {
         std::cout << "InsetOfPolygonWithHoles: hole is not simple" << std::endl;
+        print_polygon_nl(*hole);
       }
       if (hole->orientation() == CGAL::Sign::NEGATIVE) {
         Polygon_2 boundary = *hole;
@@ -2276,11 +2201,15 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
       continue;
     }
     for (std::size_t nth = 1; nth < length; nth++) {
-      insert(arrangement, Segment_2(plane.to_2d(polyline[nth - 1]),
-                                    plane.to_2d(polyline[nth])));
+      Point_2 source = plane.to_2d(polyline[nth - 1]);
+      Point_2 target = plane.to_2d(polyline[nth]);
+      if (source == target) {
+        continue;
+      }
+      insert(arrangement, Segment_2(source, target));
     }
   }
-  convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs);
+  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs);
 }
 
 #include "Approximate.h"
@@ -2368,6 +2297,7 @@ bool computeFitPolygon(const Polygon_with_holes_2& space,
     Polygon_2 hole = *it;
     if (!hole.is_simple()) {
       std::cout << "Hole is not simple" << std::endl;
+      print_polygon_nl(hole);
       continue;
     }
     if (hole.orientation() == CGAL::Sign::NEGATIVE) {
@@ -2386,6 +2316,7 @@ bool computeFitPolygon(const Polygon_with_holes_2& space,
        hole != inset_boundary.holes_end(); ++hole) {
     if (!hole->is_simple()) {
       std::cout << "fitPolygon: hole is not simple" << std::endl;
+      print_polygon_nl(*hole);
       continue;
     }
     if (hole->orientation() == CGAL::Sign::NEGATIVE) {

@@ -338,11 +338,35 @@ export const apply = async (input, op, ...args) => {
 
 Shape.apply = apply;
 
+export const applyGeometryToValue = async (geometry, op, ...args) =>
+  Shape.apply(Shape.fromGeometry(geometry), op, ...args);
+
+export const applyGeometryToGeometry = async (geometry, op, ...args) => {
+  const result = await Shape.apply(Shape.fromGeometry(geometry), op, ...args);
+  try {
+    return result.geometry;
+  } catch (e) {
+    console.log(
+      `QQ/applyGeometryToGeometry: ${JSON.stringify(result)} op=${op}`
+    );
+    throw e;
+  }
+};
+
+Shape.applyToGeometry = applyGeometryToGeometry;
+Shape.applyGeometryToGeometry = applyGeometryToGeometry;
+Shape.applyGeometryToValue = applyGeometryToValue;
+
 export const registerMethod = (names, op) => {
   if (typeof names === 'string') {
     names = [names];
   }
-  const path = getSourceLocation()?.path;
+
+  let path;
+  const sourceLocation = getSourceLocation();
+  if (sourceLocation) {
+    path = sourceLocation.path;
+  }
 
   for (const name of names) {
     if (Shape.prototype.hasOwnProperty(name)) {
@@ -410,7 +434,8 @@ export const registerMethod3 = (
   names,
   signature,
   op,
-  postOp = async (geometry) => Shape.fromGeometry(await geometry)
+  postOp = (geometry) => Shape.fromGeometry(geometry),
+  preOp = (...args) => args
 ) => {
   const method =
     (...args) =>
@@ -450,7 +475,8 @@ export const registerMethod3 = (
             )}`
           );
         }
-        const r1 = op(...parameters);
+        const processedParameters = await preOp(...parameters);
+        const r1 = await op(...processedParameters);
         const r2 = await postOp(r1, parameters);
         // console.log(`QQ/method3/done: ${names}`);
         return r2;
@@ -465,6 +491,11 @@ export const registerMethod3 = (
 };
 
 Shape.registerMethod3 = registerMethod3;
+
+export const registerMethod3Pre = (names, signature, preOp, op, postOp) =>
+  registerMethod3(names, signature, op, postOp, preOp);
+
+Shape.registerMethod3Pre = registerMethod3Pre;
 
 Shape.fromGraph = (graph) => new Shape(taggedGraph({}, graph));
 

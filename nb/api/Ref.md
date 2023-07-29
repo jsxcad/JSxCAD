@@ -11,7 +11,8 @@ Constructs a reference point.
 Ref(1, 2, 3).and((s) => Edge(Point(0, 0, 0), Point(1, 2, 3))) shows a reference point.
 
 ```JavaScript
-Ref(1, 2, 3)
+Ref()
+  .move(1, 2, 3)
   .and((s) => Edge(Point(0, 0, 0), Point(1, 2, 3)))
   .view()
   .note(

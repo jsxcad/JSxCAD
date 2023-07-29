@@ -3436,7 +3436,7 @@ var marchingsquares = createCommonjsModule(function (module, exports) {
 
 var MarchingSquares = unwrapExports(marchingsquares);
 
-const fromRaster = async (raster, bands) => {
+const fromRaster = (raster, bands) => {
   const preprocessedData = new MarchingSquares.QuadTree(raster);
 
   const result = [];

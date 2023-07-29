@@ -24,15 +24,14 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const size = Shape.registerMethod2(
+export const size = Shape.registerMethod3(
   'size',
   [
-    'input',
-    'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius',
+    'inputGeometry',
     'function',
+    'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius',
   ],
-  async (input, modes, op = (value) => (_shape) => value) => {
-    const geometry = await input.toGeometry();
+  async (geometry, _op, modes) => {
     const bounds = measureBoundingBox(geometry);
     const args = [];
     if (bounds !== undefined) {
@@ -78,6 +77,8 @@ export const size = Shape.registerMethod2(
         args.push(distance(center, max));
       }
     }
-    return op(...args)(input);
-  }
+    return args;
+  },
+  (args, [geometry, op = (value) => (_shape) => value, _modes]) =>
+    Shape.applyGeometryToValue(geometry, op, ...args)
 );

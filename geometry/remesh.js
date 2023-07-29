@@ -1,37 +1,27 @@
-import {
-  deletePendingSurfaceMeshes,
-  remesh as remeshWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
 import { linearize } from './tagged/linearize.js';
+import { remesh as remeshWithCgal } from '@jsxcad/algorithm-cgal';
 import { replacer } from './tagged/visit.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) => ['graph'].includes(geometry.type);
 
 export const remesh = (
   geometry,
+  resolution = 1,
   selections,
-  iterations,
-  relaxationSteps,
-  targetEdgeLength,
-  exact
+  { iterations = 1, relaxationSteps = 1, targetEdgeLength = resolution }
 ) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter, inputs);
+  linearize(geometry, filter, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter, inputs);
+    linearize(selection, filter, inputs);
   }
   const outputs = remeshWithCgal(
     inputs,
     count,
     iterations,
     relaxationSteps,
-    targetEdgeLength,
-    exact
+    targetEdgeLength
   );
-  deletePendingSurfaceMeshes();
-  return replacer(inputs, outputs)(concreteGeometry);
+  return replacer(inputs, outputs)(geometry);
 };

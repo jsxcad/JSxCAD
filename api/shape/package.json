@@ -23,7 +23,6 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-contour": "^0.0.79",
     "@jsxcad/algorithm-tool": "^0.0.79",

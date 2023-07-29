@@ -5,10 +5,10 @@ import {
   isNode,
   write,
 } from '@jsxcad/sys';
+import { ensurePages, toDisplayGeometry } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { dataUrl } from '@jsxcad/ui-threejs';
-import { ensurePages } from '@jsxcad/geometry';
 
 const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
@@ -65,7 +65,7 @@ export const baseView =
       console.log('No sourceLocation');
     }
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
-    const displayGeometry = await viewShape.toDisplayGeometry();
+    const displayGeometry = toDisplayGeometry(await viewShape.toGeometry());
     for (const pageGeometry of await ensurePages(displayGeometry, 0, viewId)) {
       const viewPath = `view/${path}/${id}/${viewId}.view`;
       const hash = generateUniqueId();

@@ -384,13 +384,9 @@ class Geometry {
     assert(is_local_frame());
     Plane local_plane;
     admitPlane(local_plane, fillPlane);
-    Polygon_with_holes_2 polygon;
     Polygons_with_holes_2 polygons;
-    while (admitPolygonWithHoles(polygon, fillBoundary, fillHole)) {
-      polygons.push_back(std::move(polygon));
-    }
+    admitPolygonsWithHoles(polygons, fillBoundary, fillHole);
     plane(nth) = unitPlane(local_plane);
-    // plane(nth) = Plane(0, 0, 1, 0);
     pwh(nth) = std::move(polygons);
   }
 

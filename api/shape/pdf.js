@@ -1,15 +1,19 @@
 import { computeHash, emit, getSourceLocation, write } from '@jsxcad/sys';
-import { ensurePages, hash as hashGeometry } from '@jsxcad/geometry';
+import {
+  ensurePages,
+  hash as hashGeometry,
+  toDisplayGeometry,
+} from '@jsxcad/geometry';
 import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';
 import { toPdf } from '@jsxcad/convert-pdf';
 
-export const pdf = Shape.registerMethod2(
+export const pdf = Shape.registerMethod3(
   'pdf',
-  ['input', 'string', 'function', 'options'],
+  ['inputGeometry', 'string', 'function', 'options'],
   async (
-    input,
+    geometry,
     name,
     op = (_v) => (s) => s,
     { lineWidth = 0.096, size = [210, 297], definitions } = {}
@@ -17,8 +21,10 @@ export const pdf = Shape.registerMethod2(
     const options = { lineWidth, size, definitions };
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    const updatedInput = await Shape.apply(input, op);
-    for (const entry of ensurePages(await updatedInput.toGeometry())) {
+    const displayGeometry = toDisplayGeometry(
+      await Shape.applyToGeometry(geometry, op)
+    );
+    for (const entry of ensurePages(displayGeometry)) {
       const pdfPath = `download/pdf/${path}/${id}/${viewId}`;
       await write(pdfPath, await toPdf(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;
@@ -32,6 +38,6 @@ export const pdf = Shape.registerMethod2(
       await gridView(name, options.view)(Shape.fromGeometry(entry));
       emit({ download: { entries: [record] }, hash });
     }
-    return input;
+    return geometry;
   }
 );

@@ -1,9 +1,9 @@
-import Shape from './Shape.js';
-import { input as inputOp } from './noOp.js';
-import { on } from './on.js';
+import { Group, on } from '@jsxcad/geometry';
 
-export const put = Shape.registerMethod2(
+import Shape from './Shape.js';
+
+export const put = Shape.registerMethod3(
   'put',
-  ['input', 'shapes'],
-  (input, shapes) => on(inputOp(), shapes)(input)
+  ['inputGeometry', 'geometries'],
+  (geometry, geometries) => on(geometry, geometry, () => Group(geometries))
 );

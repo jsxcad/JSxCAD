@@ -14068,7 +14068,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.23.1";
+exports.version = "1.23.4";
 
 });
 
@@ -14884,8 +14884,6 @@ var TextInput = function (parentNode, host) {
             return;
         host.onBlur(e);
         isFocused = false;
-        if (isMobile && !isIOS)
-            document.removeEventListener("selectionchange", detectSelectionChange);
     }, host);
     event.addListener(text, "focus", function (e) {
         if (ignoreFocusEvents)
@@ -14903,8 +14901,6 @@ var TextInput = function (parentNode, host) {
             setTimeout(resetSelection);
         else
             resetSelection();
-        if (isMobile && !isIOS)
-            document.addEventListener("selectionchange", detectSelectionChange);
     }, host);
     this.$focusScroll = false;
     this.focus = function () {
@@ -15072,27 +15068,6 @@ var TextInput = function (parentNode, host) {
             resetSelection();
         }
     };
-    function detectSelectionChange(e) {
-        if (!text || !text.parentNode)
-            document.removeEventListener("selectionchange", detectSelectionChange);
-        if (inComposition)
-            return;
-        if (text.selectionStart !== text.selectionEnd)
-            return;
-        var startDiff = text.selectionStart - lastSelectionStart;
-        var oldLenght = lastSelectionEnd - lastSelectionStart;
-        if (startDiff > 0) {
-            startDiff = Math.max(startDiff - oldLenght, 1);
-        }
-        else if (startDiff === 0 && oldLenght) {
-            startDiff = -1;
-        }
-        var repeat = Math.abs(startDiff);
-        var key = startDiff > 0 ? KEYS.right : KEYS.left;
-        for (var i = 0; i < repeat; i++) {
-            host.onCommandKey({}, 0, key);
-        }
-    }
     var inputHandler = null;
     this.setInputHandler = function (cb) { inputHandler = cb; };
     this.getInputHandler = function () { return inputHandler; };
@@ -16159,11 +16134,18 @@ function GutterHandler(mouseHandler) {
             moveTooltip(mouseEvent);
         }
         else {
-            var gutterElement = gutter.$lines.cells[row].element.querySelector("[class*=ace_icon]");
-            var rect = gutterElement.getBoundingClientRect();
-            var style = tooltip.getElement().style;
-            style.left = rect.right + "px";
-            style.top = rect.bottom + "px";
+            var gutterRow = mouseEvent.getGutterRow();
+            var gutterCell = gutter.$lines.get(gutterRow);
+            if (gutterCell) {
+                var gutterElement = gutterCell.element.querySelector(".ace_gutter_annotation");
+                var rect = gutterElement.getBoundingClientRect();
+                var style = tooltip.getElement().style;
+                style.left = rect.right + "px";
+                style.top = rect.bottom + "px";
+            }
+            else {
+                moveTooltip(mouseEvent);
+            }
         }
     }
     function hideTooltip() {
@@ -16355,6 +16337,12 @@ var MouseEvent = /** @class */ (function () {
             return this.$pos;
         this.$pos = this.editor.renderer.screenToTextCoordinates(this.clientX, this.clientY);
         return this.$pos;
+    };
+    MouseEvent.prototype.getGutterRow = function () {
+        var documentRow = this.getDocumentPosition().row;
+        var screenRow = this.editor.session.documentToScreenRow(documentRow, 0);
+        var screenTopRow = this.editor.session.documentToScreenRow(this.editor.renderer.$gutterLayer.$lines.get(0).row, 0);
+        return screenRow - screenTopRow;
     };
     MouseEvent.prototype.inSelection = function () {
         if (this.$inSelection !== null)
@@ -30823,7 +30811,7 @@ var VirtualRenderer = /** @class */ (function () {
     VirtualRenderer.prototype.getShowInvisibles = function () {
         return this.getOption("showInvisibles");
     };
-    VirtualRenderer.prototype.getDisplayIndentGuide = function () {
+    VirtualRenderer.prototype.getDisplayIndentGuides = function () {
         return this.getOption("displayIndentGuides");
     };
     VirtualRenderer.prototype.setDisplayIndentGuides = function (display) {
@@ -43584,8 +43572,9 @@ var AcePopup = /** @class */ (function () {
         el.style.display = "none";
         popup.renderer.content.style.cursor = "default";
         popup.renderer.setStyle("ace_autocomplete");
-        popup.renderer.container.setAttribute("role", "listbox");
-        popup.renderer.container.setAttribute("aria-label", nls("Autocomplete suggestions"));
+        popup.renderer.$textLayer.element.setAttribute("role", "listbox");
+        popup.renderer.$textLayer.element.setAttribute("aria-label", nls("Autocomplete suggestions"));
+        popup.renderer.textarea.setAttribute("aria-hidden", "true");
         popup.setOption("displayIndentGuides", false);
         popup.setOption("dragDelay", 150);
         var noop = function () { };
@@ -43659,12 +43648,12 @@ var AcePopup = /** @class */ (function () {
                 dom.addCssClass(selected, "ace_selected");
                 var ariaId = getAriaId(row);
                 selected.id = ariaId;
-                popup.renderer.container.setAttribute("aria-activedescendant", ariaId);
+                t.element.setAttribute("aria-activedescendant", ariaId);
                 el.setAttribute("aria-activedescendant", ariaId);
                 selected.setAttribute("role", "option");
                 selected.setAttribute("aria-label", popup.getData(row).value);
                 selected.setAttribute("aria-setsize", popup.data.length);
-                selected.setAttribute("aria-posinset", row);
+                selected.setAttribute("aria-posinset", row + 1);
                 selected.setAttribute("aria-describedby", "doc-tooltip");
             }
         });
@@ -44487,7 +44476,7 @@ var CompletionProvider = /** @class */ (function () {
         else {
             if (!this.completions)
                 return false;
-            if (this.completions.filterText) {
+            if (this.completions.filterText && !data.range) {
                 var ranges;
                 if (editor.selection.getAllRanges) {
                     ranges = editor.selection.getAllRanges();
@@ -45525,32 +45514,25 @@ function qsa(element, selector) {
  * return <button type="button" onClick={updateOnClick}>Hi there</button>
  * ```
  */
-
 function useForceUpdate() {
   // The toggling state value is designed to defeat React optimizations for skipping
-  // updates when they are stricting equal to the last state value
-  var _useReducer = p(function (state) {
-    return !state;
-  }, false),
-      dispatch = _useReducer[1];
-
+  // updates when they are strictly equal to the last state value
+  const [, dispatch] = p(state => !state, false);
   return dispatch;
 }
 
-var toFnRef = function toFnRef(ref) {
-  return !ref || typeof ref === 'function' ? ref : function (value) {
-    ref.current = value;
-  };
+const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
+  ref.current = value;
 };
-
 function mergeRefs(refA, refB) {
-  var a = toFnRef(refA);
-  var b = toFnRef(refB);
-  return function (value) {
+  const a = toFnRef(refA);
+  const b = toFnRef(refB);
+  return value => {
     if (a) a(value);
     if (b) b(value);
   };
 }
+
 /**
  * Create and returns a single callback ref composed from two other Refs.
  *
@@ -45567,11 +45549,8 @@ function mergeRefs(refA, refB) {
  * @param refB A Callback or mutable Ref
  * @category refs
  */
-
 function useMergedRefs(refA, refB) {
-  return d(function () {
-    return mergeRefs(refA, refB);
-  }, [refA, refB]);
+  return d(() => mergeRefs(refA, refB), [refA, refB]);
 }
 
 var NavContext = /*#__PURE__*/ReactDOM$3.createContext(null);
@@ -45705,19 +45684,18 @@ var AbstractNav$1 = AbstractNav;
  *
  * @param value The `Ref` value
  */
-
 function useCommittedRef(value) {
-  var ref = s(value);
-  y(function () {
+  const ref = s(value);
+  y(() => {
     ref.current = value;
   }, [value]);
   return ref;
 }
 
 function useEventCallback(fn) {
-  var ref = useCommittedRef(fn);
-  return A$1(function () {
-    return ref.current && ref.current.apply(ref, arguments);
+  const ref = useCommittedRef(fn);
+  return A$1(function (...args) {
+    return ref.current && ref.current(...args);
   }, [ref]);
 }
 

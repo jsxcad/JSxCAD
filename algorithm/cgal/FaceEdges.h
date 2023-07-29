@@ -158,7 +158,7 @@ int FaceEdges(Geometry* geometry, int count) {
             }
           }
           Polygons_with_holes_2 pwhs;
-          convertSimpleArrangementToPolygonsWithHoles(arrangement, pwhs);
+          convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs);
           geometry->pwh(face_target) = std::move(pwhs);
           geometry->copyTransform(edge_target, disorientation.inverse());
           geometry->copyTransform(face_target, disorientation.inverse());

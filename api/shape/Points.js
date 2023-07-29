@@ -1,20 +1,16 @@
 import Shape from './Shape.js';
+import { Points as op } from '@jsxcad/geometry';
 
-export const Points = Shape.registerMethod2(
+export const Points = Shape.registerMethod3Pre(
   'Points',
   ['coordinateLists', 'coordinates'],
-  (coordinateLists = [], coordinates = []) => {
-    const coords = [];
+  (coordinateLists, coordinates) => {
     for (const coordinateList of coordinateLists) {
-      for (const coordinate of coordinateList) {
-        coords.push(coordinate);
-      }
+      coordinates.push(...coordinateList);
     }
-    for (const coordinate of coordinates) {
-      coords.push(coordinate);
-    }
-    return Shape.fromPoints(coords);
-  }
+    return [coordinates];
+  },
+  op
 );
 
 export default Points;
