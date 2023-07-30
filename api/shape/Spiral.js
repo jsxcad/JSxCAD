@@ -1,22 +1,19 @@
-import Link from './Link.js';
+import { Link, rotateZ, seq } from '@jsxcad/geometry';
+
 import Point from './Point.js';
-import Seq from './seq.js';
 import Shape from './Shape.js';
 
-export const Spiral = Shape.registerMethod2(
+export const Spiral = Shape.registerMethod3(
   'Spiral',
-  ['function', 'options'],
-  async (particle = Point, options) => {
+  ['inputGeometry', 'function', 'options'],
+  async (geometry, particle = Point, options) => {
     let particles = [];
-    const turns = await Seq(
-      options,
-      (distance) => (_shape) => distance,
-      (...numbers) => numbers
-    );
-    for (const turn of turns) {
-      particles.push(await particle(turn).rz(turn));
+    for (const [turn] of seq(options)) {
+      particles.push(
+        rotateZ(await Shape.applyToGeometry(geometry, particle, turn), turn)
+      );
     }
-    const result = await Link(...particles);
+    const result = await Link(particles);
     return result;
   }
 );

@@ -1,10 +1,10 @@
 import Shape from './Shape.js';
-import { tag } from './tag.js';
+import { retag } from '@jsxcad/geometry';
 import { toTagsFromName } from '@jsxcad/algorithm-color';
 
 // Tint adds another color to the mix.
-export const tint = Shape.registerMethod2(
+export const tint = Shape.registerMethod3(
   'tint',
-  ['input', 'string'],
-  (input, name) => tag(...toTagsFromName(name))(input)
+  ['inputGeometry', 'string'],
+  (geometry, name) => retag(geometry, [], toTagsFromName(name))
 );

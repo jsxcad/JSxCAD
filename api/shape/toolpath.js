@@ -1,7 +1,7 @@
 import Shape from './Shape.js';
 import { computeToolpath } from '@jsxcad/geometry';
 
-export const toolpath = Shape.registerMethod2(
+export const toolpath = Shape.registerMethod3(
   'toolpath',
   [
     'inputGeometry',
@@ -23,16 +23,14 @@ export const toolpath = Shape.registerMethod2(
     annealingDecay,
     target
   ) =>
-    Shape.fromGeometry(
-      computeToolpath(
-        target,
-        geometry,
-        resolution,
-        toolSize,
-        toolCutDepth,
-        annealingMax,
-        annealingMin,
-        annealingDecay
-      )
+    computeToolpath(
+      target,
+      geometry,
+      resolution,
+      toolSize,
+      toolCutDepth,
+      annealingMax,
+      annealingMin,
+      annealingDecay
     )
 );

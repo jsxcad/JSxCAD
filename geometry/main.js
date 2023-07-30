@@ -11,7 +11,16 @@ export { scale, scaleLazy, scaleToFit } from './scale.js';
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
-export { Arc, ArcX, ArcY, ArcZ, Hexagon, Octagon, Pentagon } from './Arc.js';
+export {
+  Arc,
+  ArcX,
+  ArcY,
+  ArcZ,
+  Hexagon,
+  Octagon,
+  Pentagon,
+  Triangle,
+} from './Arc.js';
 export { Box } from './Box.js';
 export {
   ChainConvexHull,
@@ -29,6 +38,7 @@ export { Orb } from './Orb.js';
 export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Segments } from './Segments.js';
+export { Stroke } from './stroke.js';
 export { abstract } from './abstract.js';
 export { align } from './align.js';
 export { alignment } from './alignment.js';
@@ -250,6 +260,8 @@ export { toSegments, toSegmentList } from './eachSegment.js';
 export { toTransformedGeometry } from './tagged/toTransformedGeometry.js';
 export { toPoints, toPointList } from './toPoints.js';
 export { toTriangleArray } from './tagged/toTriangleArray.js';
+export { toVoxelsFromCoordinates } from './voxels.js';
+export { toVoxelsFromGeometry } from './voxels.js';
 export { transform } from './tagged/transform.js';
 export { twist } from './twist.js';
 export { update } from './tagged/update.js';

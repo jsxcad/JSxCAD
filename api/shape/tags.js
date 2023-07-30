@@ -3,15 +3,10 @@ import { getLeafs, tagMatcher } from '@jsxcad/geometry';
 import { Shape } from './Shape.js';
 import { note } from './note.js';
 
-export const tags = Shape.registerMethod2(
+export const tags = Shape.registerMethod3(
   'tags',
-  ['input', 'inputGeometry', 'string', 'function'],
-  async (
-    input,
-    geometry,
-    tag = '*',
-    op = (...tags) => note(`tags: ${tags}`)
-  ) => {
+  ['inputGeometry', 'string', 'function'],
+  async (geometry, tag = '*', op = (...tags) => note(`tags: ${tags}`)) => {
     const isMatchingTag = tagMatcher(tag, 'user');
     const collected = [];
     for (const { tags } of getLeafs(geometry)) {
@@ -21,7 +16,7 @@ export const tags = Shape.registerMethod2(
         }
       }
     }
-    const result = op(...collected)(input);
+    const result = Shape.applyToGeometry(geometry, op, ...collected);
     return result;
   }
 );

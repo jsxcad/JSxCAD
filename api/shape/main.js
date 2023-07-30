@@ -11,6 +11,7 @@ import './Shape.js';
 
 // We need these available via Shape.
 // eslint-disable-next-line sort-imports
+import './destructure.js';
 
 // eslint-disable-next-line sort-imports
 import './registerMethod.js';

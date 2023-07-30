@@ -1,21 +1,19 @@
-import { getLeafs, measureBoundingBox } from '@jsxcad/geometry';
+import { Group, getLeafs, measureBoundingBox } from '@jsxcad/geometry';
 
-import Group from './Group.js';
 import Shape from './Shape.js';
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const sort = Shape.registerMethod2(
+export const sort = Shape.registerMethod3(
   'sort',
   ['inputGeometry', 'string'],
-  async (geometry, spec = 'z<y<x<') => {
+  (geometry, spec = 'z<y<x<') => {
     let leafs = [];
     for (const leaf of getLeafs(geometry)) {
       const [min, max] = measureBoundingBox(leaf);
-      const shape = await Shape.fromGeometry(leaf);
-      leafs.push({ min, max, shape });
+      leafs.push({ min, max, leaf });
     }
     const ops = [];
     while (spec) {
@@ -24,10 +22,6 @@ export const sort = Shape.registerMethod2(
         throw Error(`Bad sort spec ${spec}`);
       }
       const [, dimension, order, limit, rest] = found;
-      // console.log(`dimension: ${dimension}`);
-      // console.log(`order: ${order}`);
-      // console.log(`limit: ${limit}`);
-      // console.log(`rest: ${rest}`);
       // We apply the sorting ops in reverse.
       ops.unshift({ dimension, order, limit });
       spec = rest;
@@ -64,7 +58,9 @@ export const sort = Shape.registerMethod2(
           break;
       }
     }
-    return Group(...leafs.map(({ shape }) => shape));
+    const result = Group(leafs.map(({ leaf }) => leaf));
+    console.log(`QQ/sort: result=${JSON.stringify(result)}`);
+    return result;
   }
 );
 

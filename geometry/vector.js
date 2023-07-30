@@ -52,3 +52,8 @@ export const normalize = (a) => {
     return a;
   }
 };
+
+export const equalsVector = (
+  [aX = 0, aY = 0, aZ = 0] = [],
+  [bX = 0, bY = 0, bZ = 0] = []
+) => aX === bX && aY === bY && aZ === bZ;

@@ -1,10 +1,9 @@
 import Shape from './Shape.js';
-import { rewriteTags } from '@jsxcad/geometry';
+import { retag } from '@jsxcad/geometry';
 import { toTagsFromName } from '@jsxcad/algorithm-tool';
 
-export const tool = Shape.registerMethod2(
+export const tool = Shape.registerMethod3(
   'tool',
   ['inputGeometry', 'string'],
-  (geometry, name) =>
-    Shape.fromGeometry(rewriteTags(toTagsFromName(name), [], geometry))
+  (geometry, name) => retag(geometry, [], toTagsFromName(name))
 );

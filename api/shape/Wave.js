@@ -1,21 +1,23 @@
-import Link from './Link.js';
+import { Link, seq, translate } from '@jsxcad/geometry';
+
 import Point from './Point.js';
 import Shape from './Shape.js';
-import { seq } from './seq.js';
 
-export const Wave = Shape.registerMethod2(
+export const Wave = Shape.registerMethod3(
   'Wave',
-  ['input', 'function', 'options'],
-  async (input, particle = Point, options) => {
+  ['inputGeometry', 'function', 'options'],
+  async (geometry, particle = Point, options) => {
     let particles = [];
-    for (const xDistance of await seq(
-      options,
-      (distance) => (_shape) => distance,
-      (...numbers) => numbers
-    )(input)) {
-      particles.push(particle(xDistance).x(xDistance));
+    for (const [xDistance] of seq(options)) {
+      particles.push(
+        translate(await Shape.applyToGeometry(geometry, particle, xDistance), [
+          xDistance,
+          0,
+          0,
+        ])
+      );
     }
-    return Link(...particles)(input);
+    return Link(particles);
   }
 );
 
