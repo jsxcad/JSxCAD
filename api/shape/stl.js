@@ -12,7 +12,7 @@ import { fromStl, toStl } from '@jsxcad/convert-stl';
 import Shape from './Shape.js';
 import { view } from './view.js';
 
-export const LoadStl = Shape.registerMethod2(
+export const LoadStl = Shape.registerMethod3(
   'LoadStl',
   ['string', 'modes:binary,ascii,wrap', 'options'],
   async (
@@ -36,21 +36,19 @@ export const LoadStl = Shape.registerMethod2(
     } else if (binary) {
       format = 'binary';
     }
-    return Shape.fromGeometry(
-      await fromStl(data, {
-        format,
-        wrapAlways: wrap,
-        wrapAbsoluteAlpha,
-        wrapAbsoluteOffset,
-        wrapRelativeAlpha,
-        wrapRelativeOffset,
-        cornerThreshold,
-      })
-    );
+    return fromStl(data, {
+      format,
+      wrapAlways: wrap,
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      cornerThreshold,
+    });
   }
 );
 
-export const Stl = Shape.registerMethod2(
+export const Stl = Shape.registerMethod3(
   'Stl',
   ['string', 'modes:wrap', 'options'],
   async (
@@ -63,29 +61,26 @@ export const Stl = Shape.registerMethod2(
       wrapRelativeOffset,
       cornerThreshold = 20 / 360,
     } = {}
-  ) => {
-    return Shape.fromGeometry(
-      await fromStl(new TextEncoder('utf8').encode(text), {
-        format: 'ascii',
-        wrapAlways: wrap,
-        wrapAbsoluteAlpha,
-        wrapAbsoluteOffset,
-        wrapRelativeAlpha,
-        wrapRelativeOffset,
-        cornerThreshold,
-      })
-    );
-  }
+  ) =>
+    fromStl(new TextEncoder('utf8').encode(text), {
+      format: 'ascii',
+      wrapAlways: wrap,
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      cornerThreshold,
+    })
 );
 
-export const stl = Shape.registerMethod2(
+export const stl = Shape.registerMethod3(
   'stl',
-  ['input', 'string', 'function', 'options'],
-  async (input, name, op = (_v) => (s) => s, options = {}) => {
+  ['inputGeometry', 'string', 'function', 'options'],
+  async (geometry, name, op = (_v) => (s) => s, options = {}) => {
     const { path } = getSourceLocation();
     let index = 0;
-    const updatedInput = await Shape.apply(input, op);
-    for (const entry of ensurePages(await updatedInput.toGeometry())) {
+    const updatedGeometry = await Shape.applyToGeometry(geometry, op);
+    for (const entry of ensurePages(updatedGeometry)) {
       const stlPath = `download/stl/${path}/${generateUniqueId()}`;
       await write(stlPath, await toStl(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;
@@ -100,6 +95,6 @@ export const stl = Shape.registerMethod2(
       await view(name, options.view)(Shape.fromGeometry(entry));
       emit({ download: { entries: [record] }, hash });
     }
-    return input;
+    return geometry;
   }
 );

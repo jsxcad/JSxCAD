@@ -31,13 +31,13 @@ export const eachSegment = (geometry, emit, selections = []) => {
   }
 };
 
-export const toSegments = (geometry, selections) => {
+export const toSegments = (geometry, selections = []) => {
   const segments = [];
   eachSegment(geometry, (segment) => segments.push(segment), selections);
   return Segments(segments);
 };
 
-export const toSegmentList = (geometry, selections) => {
+export const toSegmentList = (geometry, selections = []) => {
   const segments = [];
   eachSegment(
     geometry,
@@ -45,4 +45,10 @@ export const toSegmentList = (geometry, selections) => {
     selections
   );
   return segments;
+};
+
+export const toCoordinatePairList = (geometry, selections = []) => {
+  const coordinatesList = [];
+  eachSegment(geometry, (segment) => coordinatesList.push(segment), selections);
+  return coordinatesList;
 };

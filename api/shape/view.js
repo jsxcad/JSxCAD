@@ -5,7 +5,7 @@ import {
   isNode,
   write,
 } from '@jsxcad/sys';
-import { ensurePages, toDisplayGeometry } from '@jsxcad/geometry';
+import { ensurePages, retag, toDisplayGeometry } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { dataUrl } from '@jsxcad/ui-threejs';
@@ -13,26 +13,27 @@ import { dataUrl } from '@jsxcad/ui-threejs';
 const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
 
-const applyModes = async (shape, options, modes) => {
+const applyModes = (geometry, options, modes) => {
+  const tags = [];
   if (modes.wireframe) {
-    shape = await shape.tag('show:wireframe');
+    tags.push('show:wireframe');
   }
   if (modes.noWireframe) {
-    shape = await shape.tag('show:noWireframe');
+    tags.push('show:noWireframe');
   }
   if (modes.skin) {
-    shape = await shape.tag('show:skin');
+    tags.push('show:skin');
   }
   if (modes.noSkin) {
-    shape = await shape.tag('show:noSkin');
+    tags.push('show:noSkin');
   }
   if (modes.outline) {
-    shape = await shape.tag('show:outline');
+    tags.push('show:outline');
   }
   if (modes.noOutline) {
-    shape = await shape.tag('show:noOutline');
+    tags.push('show:noOutline');
   }
-  return shape;
+  return retag(geometry, [], tags);
 };
 
 export const qualifyViewId = (viewId, { id, path, nth }) => {
@@ -48,147 +49,154 @@ export const qualifyViewId = (viewId, { id, path, nth }) => {
 };
 
 // FIX: Avoid the extra read-write cycle.
-export const baseView =
-  (
-    name,
-    op = (x) => x,
-    { size = 512, inline, width, height, position = [100, -100, 100] } = {}
-  ) =>
-  async (shape) => {
-    if (size !== undefined) {
-      width = size;
-      height = size;
-    }
-    const viewShape = await op(shape);
-    const sourceLocation = getSourceLocation();
-    if (!sourceLocation) {
-      console.log('No sourceLocation');
-    }
-    const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
-    const displayGeometry = toDisplayGeometry(await viewShape.toGeometry());
-    for (const pageGeometry of await ensurePages(displayGeometry, 0, viewId)) {
-      const viewPath = `view/${path}/${id}/${viewId}.view`;
-      const hash = generateUniqueId();
-      const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
-      const view = {
-        viewId,
-        width,
-        height,
-        position,
-        inline,
-        needsThumbnail: isNode,
+export const baseViewOp = async (
+  geometry,
+  name,
+  op = (_x) => (s) => s,
+  { size = 512, inline, width, height, position = [100, -100, 100] } = {}
+) => {
+  if (size !== undefined) {
+    width = size;
+    height = size;
+  }
+  const viewGeometry = await Shape.applyToGeometry(geometry, op);
+  const sourceLocation = getSourceLocation();
+  if (!sourceLocation) {
+    console.log('No sourceLocation');
+  }
+  const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
+  const displayGeometry = toDisplayGeometry(viewGeometry);
+  for (const pageGeometry of await ensurePages(displayGeometry)) {
+    const viewPath = `view/${path}/${id}/${viewId}.view`;
+    const hash = generateUniqueId();
+    const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
+    const view = {
+      viewId,
+      width,
+      height,
+      position,
+      inline,
+      needsThumbnail: isNode,
+      thumbnailPath,
+    };
+    emit({ hash, path: viewPath, view });
+    await write(viewPath, pageGeometry);
+    if (!isNode) {
+      // FIX: dataUrl should operate on geometry.
+      await write(
         thumbnailPath,
-      };
-      emit({ hash, path: viewPath, view });
-      await write(viewPath, pageGeometry);
-      if (!isNode) {
-        await write(thumbnailPath, dataUrl(viewShape, view));
-      }
+        dataUrl(Shape.fromGeometry(viewGeometry), view)
+      );
     }
-    return shape;
-  };
+  }
+  return geometry;
+};
 
-export const topView = Shape.registerMethod2(
+const topViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = true,
+    width,
+    height,
+    position = [0, 0, 100],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+export const topView = Shape.registerMethod3(
   'topView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = true,
-      width,
-      height,
-      position = [0, 0, 100],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  topViewOp
 );
 
-export const gridView = Shape.registerMethod2(
+const gridViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    width,
+    height,
+    position = [0, 0, 100],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+export const gridView = Shape.registerMethod3(
   'gridView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      width,
-      height,
-      position = [0, 0, 100],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  gridViewOp
 );
 
-export const frontView = Shape.registerMethod2(
+const frontViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    width,
+    height,
+    position = [0, -100, 0],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+export const frontView = Shape.registerMethod3(
   'frontView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      width,
-      height,
-      position = [0, -100, 0],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  frontViewOp
 );
 
-export const sideView = Shape.registerMethod2(
+const sideViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    width,
+    height,
+    position = [100, 0, 0],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+export const sideView = Shape.registerMethod3(
   'sideView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      width,
-      height,
-      position = [100, 0, 0],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  sideViewOp
 );
 
-export const view = Shape.registerMethod2(
+export const view = Shape.registerMethod3(
   'view',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (input, modes, op = (x) => x, options, viewId) => {
-    const shape = await applyModes(input, options, modes);
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  (geometry, modes, op = (_x) => (s) => s, options, viewId) => {
+    geometry = applyModes(geometry, options, modes);
     if (modes.grid) {
       options.style = 'grid';
     }
@@ -203,15 +211,15 @@ export const view = Shape.registerMethod2(
     }
     switch (options.style) {
       case 'grid':
-        return shape.gridView(viewId, op, options, modes);
+        return gridViewOp(geometry, modes, op, options, viewId);
       case 'none':
-        return shape;
+        return geometry;
       case 'side':
-        return shape.sideView(viewId, op, options, modes);
+        return sideViewOp(geometry, modes, op, options, viewId);
       case 'top':
-        return shape.topView(viewId, op, options, modes);
+        return topViewOp(geometry, modes, op, options, viewId);
       default:
-        return baseView(viewId, op, options)(shape);
+        return baseViewOp(geometry, viewId, op, options);
     }
   }
 );

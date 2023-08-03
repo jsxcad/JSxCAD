@@ -1,8 +1,8 @@
 import Shape from './Shape.js';
 import { generateUpperEnvelope } from '@jsxcad/geometry';
 
-export const upperEnvelope = Shape.registerMethod2(
+export const upperEnvelope = Shape.registerMethod3(
   'upperEnvelope',
   ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(generateUpperEnvelope(geometry))
+  generateUpperEnvelope
 );

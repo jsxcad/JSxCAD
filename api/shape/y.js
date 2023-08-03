@@ -1,15 +1,15 @@
-import Group from './Group.js';
-import Shape from './Shape.js';
-import move from './move.js';
+import { Group, translate } from '@jsxcad/geometry';
 
-export const y = Shape.registerMethod2(
+import Shape from './Shape.js';
+
+export const y = Shape.registerMethod3(
   'y',
-  ['input', 'numbers'],
-  async (input, offsets) => {
+  ['inputGeometry', 'numbers'],
+  (geometry, offsets) => {
     const moved = [];
     for (const offset of offsets) {
-      moved.push(await move([0, offset, 0])(input));
+      moved.push(translate(geometry, [0, offset, 0]));
     }
-    return Group(...moved);
+    return Group(moved);
   }
 );

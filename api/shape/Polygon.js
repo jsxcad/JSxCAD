@@ -1,11 +1,10 @@
 import Shape from './Shape.js';
 import { fromPolygons as op } from '@jsxcad/geometry';
 
-export const Polygon = Shape.registerMethod3Pre(
+export const Polygon = Shape.registerMethod3(
   ['Face', 'Polygon'],
   ['coordinates'],
-  (coordinates) => [[{ points: coordinates }]],
-  op
+  (coordinates) => op([{ points: coordinates }])
 );
 
 export const Face = Polygon;

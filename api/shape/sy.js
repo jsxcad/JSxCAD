@@ -1,16 +1,16 @@
-import Group from './Group.js';
-import Shape from './Shape.js';
-import { scale } from './scale.js';
+import { Group, scale } from '@jsxcad/geometry';
 
-export const scaleY = Shape.registerMethod2(
+import Shape from './Shape.js';
+
+export const scaleY = Shape.registerMethod3(
   ['scaleY', 'sy'],
-  ['input', 'numbers'],
-  async (input, values) => {
+  ['inputGeometry', 'numbers'],
+  async (geometry, values) => {
     const scaled = [];
     for (const value of values) {
-      scaled.push(await scale(1, value, 1)(input));
+      scaled.push(scale(geometry, [1, value, 1]));
     }
-    return Group(...scaled);
+    return Group(scaled);
   }
 );
 

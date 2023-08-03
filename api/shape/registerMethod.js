@@ -1,3 +1,4 @@
+/*
 import { Shape, chainable, ops } from './Shape.js';
 import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 
@@ -44,3 +45,4 @@ export const registerMethod2 = (names, signature, baseOp) => {
 };
 
 // Shape.registerMethod2 = registerMethod2;
+*/

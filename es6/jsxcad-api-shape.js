@@ -1,7 +1,7 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import * as g$1 from './jsxcad-geometry.js';
-import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, hash, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, inItem, ConvexHull, convexHull, inset as inset$1, involute as involute$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, masked as masked$1, masking as masking$1, hasMaterial, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, pack as pack$1, Page as Page$1, page as page$1, toPoints, ref as ref$1, Ref as Ref$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, separate as separate$1, seq as seq$1, serialize as serialize$1, rewriteTags, cast, XY as XY$1, shell as shell$1, simplify as simplify$1, measureBoundingBox, taggedSketch, smooth as smooth$1, getLeafs, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, withAabbTreeQuery, Wrap as Wrap$1, wrap as wrap$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1 } from './jsxcad-geometry.js';
+import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, hash, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, inItem, ConvexHull, convexHull, inset as inset$1, involute as involute$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, masked as masked$1, masking as masking$1, hasMaterial, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, pack as pack$1, Page as Page$1, page as page$1, toPoints, ref as ref$1, Ref as Ref$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, separate as separate$1, seq as seq$1, serialize as serialize$1, rewriteTags, cast, XY as XY$1, shell as shell$1, simplify as simplify$1, measureBoundingBox, taggedSketch, smooth as smooth$1, getLeafs, Stroke as Stroke$1, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, Triangle as Triangle$1 } from './jsxcad-geometry.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
@@ -398,6 +398,7 @@ const registerMethod = (names, op) => {
   return chainable(op);
 };
 
+/*
 const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
@@ -420,8 +421,9 @@ const registerMethod2 = (names, signature, op) => {
     };
   return registerMethod(names, method);
 };
+*/
 
-Shape.registerMethod2 = registerMethod2;
+// Shape.registerMethod2 = registerMethod2;
 
 Shape.fromGeometry = (geometry) => {
   if (geometry === undefined) {
@@ -495,10 +497,8 @@ const registerMethod3 = (
 
 Shape.registerMethod3 = registerMethod3;
 
-const registerMethod3Pre = (names, signature, preOp, op, postOp) =>
-  registerMethod3(names, signature, op, postOp, preOp);
-
-Shape.registerMethod3Pre = registerMethod3Pre;
+// export const registerMethod3Pre = (names, signature, preOp, op, postOp) => registerMethod3(names, signature, op, postOp, preOp);
+// Shape.registerMethod3Pre = registerMethod3Pre;
 
 Shape.fromGraph = (graph) => new Shape(taggedGraph({}, graph));
 
@@ -1117,9 +1117,9 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-const X$3 = Shape.registerMethod3('X', ['number'], g$1.X);
-const Y$3 = Shape.registerMethod3('Y', ['number'], g$1.Y);
-const Z$3 = Shape.registerMethod3('Z', ['number'], g$1.Z);
+const X$2 = Shape.registerMethod3('X', ['number'], g$1.X);
+const Y$2 = Shape.registerMethod3('Y', ['number'], g$1.Y);
+const Z$2 = Shape.registerMethod3('Z', ['number'], g$1.Z);
 const XY = Shape.registerMethod3('XY', ['number'], g$1.XY);
 const YX = Shape.registerMethod3('YX', ['number'], g$1.YX);
 const XZ = Shape.registerMethod3('XZ', ['number'], g$1.XZ);
@@ -1295,13 +1295,10 @@ const clipFrom = Shape.registerMethod3(
   clipFrom$1
 );
 
-const colorOp = (geometry, name) =>
-  retag(geometry, ['color:*'], toTagsFromName(name));
-
 const color = Shape.registerMethod3(
   'color',
   ['inputGeometry', 'string'],
-  colorOp
+  (geometry, name) => retag(geometry, ['color:*'], toTagsFromName(name))
 );
 
 // The semantics here are not very clear -- this computes a volume that all volumes in the shape have in common.
@@ -1623,26 +1620,27 @@ const flat = Shape.registerMethod3('flat', ['inputGeometry'], flat$1);
 const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
 
-const applyModes = async (shape, options, modes) => {
+const applyModes = (geometry, options, modes) => {
+  const tags = [];
   if (modes.wireframe) {
-    shape = await shape.tag('show:wireframe');
+    tags.push('show:wireframe');
   }
   if (modes.noWireframe) {
-    shape = await shape.tag('show:noWireframe');
+    tags.push('show:noWireframe');
   }
   if (modes.skin) {
-    shape = await shape.tag('show:skin');
+    tags.push('show:skin');
   }
   if (modes.noSkin) {
-    shape = await shape.tag('show:noSkin');
+    tags.push('show:noSkin');
   }
   if (modes.outline) {
-    shape = await shape.tag('show:outline');
+    tags.push('show:outline');
   }
   if (modes.noOutline) {
-    shape = await shape.tag('show:noOutline');
+    tags.push('show:noOutline');
   }
-  return shape;
+  return retag(geometry, [], tags);
 };
 
 const qualifyViewId = (viewId, { id, path, nth }) => {
@@ -1658,147 +1656,154 @@ const qualifyViewId = (viewId, { id, path, nth }) => {
 };
 
 // FIX: Avoid the extra read-write cycle.
-const baseView =
-  (
-    name,
-    op = (x) => x,
-    { size = 512, inline, width, height, position = [100, -100, 100] } = {}
-  ) =>
-  async (shape) => {
-    if (size !== undefined) {
-      width = size;
-      height = size;
-    }
-    const viewShape = await op(shape);
-    const sourceLocation = getSourceLocation();
-    if (!sourceLocation) {
-      console.log('No sourceLocation');
-    }
-    const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
-    const displayGeometry = toDisplayGeometry$1(await viewShape.toGeometry());
-    for (const pageGeometry of await ensurePages(displayGeometry, 0, viewId)) {
-      const viewPath = `view/${path}/${id}/${viewId}.view`;
-      const hash = generateUniqueId();
-      const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
-      const view = {
-        viewId,
-        width,
-        height,
-        position,
-        inline,
-        needsThumbnail: isNode,
+const baseViewOp = async (
+  geometry,
+  name,
+  op = (_x) => (s) => s,
+  { size = 512, inline, width, height, position = [100, -100, 100] } = {}
+) => {
+  if (size !== undefined) {
+    width = size;
+    height = size;
+  }
+  const viewGeometry = await Shape.applyToGeometry(geometry, op);
+  const sourceLocation = getSourceLocation();
+  if (!sourceLocation) {
+    console.log('No sourceLocation');
+  }
+  const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
+  const displayGeometry = toDisplayGeometry$1(viewGeometry);
+  for (const pageGeometry of await ensurePages(displayGeometry)) {
+    const viewPath = `view/${path}/${id}/${viewId}.view`;
+    const hash = generateUniqueId();
+    const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
+    const view = {
+      viewId,
+      width,
+      height,
+      position,
+      inline,
+      needsThumbnail: isNode,
+      thumbnailPath,
+    };
+    emit({ hash, path: viewPath, view });
+    await write(viewPath, pageGeometry);
+    if (!isNode) {
+      // FIX: dataUrl should operate on geometry.
+      await write(
         thumbnailPath,
-      };
-      emit({ hash, path: viewPath, view });
-      await write(viewPath, pageGeometry);
-      if (!isNode) {
-        await write(thumbnailPath, dataUrl(viewShape, view));
-      }
+        dataUrl(Shape.fromGeometry(viewGeometry), view)
+      );
     }
-    return shape;
-  };
+  }
+  return geometry;
+};
 
-Shape.registerMethod2(
+const topViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = true,
+    width,
+    height,
+    position = [0, 0, 100],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+Shape.registerMethod3(
   'topView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = true,
-      width,
-      height,
-      position = [0, 0, 100],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  topViewOp
 );
 
-const gridView = Shape.registerMethod2(
+const gridViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    width,
+    height,
+    position = [0, 0, 100],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+const gridView = Shape.registerMethod3(
   'gridView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      width,
-      height,
-      position = [0, 0, 100],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  gridViewOp
 );
 
-Shape.registerMethod2(
+const frontViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    width,
+    height,
+    position = [0, -100, 0],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+Shape.registerMethod3(
   'frontView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      width,
-      height,
-      position = [0, -100, 0],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  frontViewOp
 );
 
-Shape.registerMethod2(
+const sideViewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  {
+    size = 512,
+    skin = true,
+    outline = true,
+    wireframe = false,
+    width,
+    height,
+    position = [100, 0, 0],
+  } = {},
+  viewId
+) => {
+  const options = { size, skin, outline, wireframe, width, height, position };
+  return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
+};
+
+Shape.registerMethod3(
   'sideView',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (
-    input,
-    modes,
-    op = (x) => x,
-    {
-      size = 512,
-      skin = true,
-      outline = true,
-      wireframe = false,
-      width,
-      height,
-      position = [100, 0, 0],
-    } = {},
-    viewId
-  ) => {
-    const options = { size, skin, outline, wireframe, width, height, position };
-    const shape = await applyModes(input, options, modes);
-    return baseView(viewId, op, options)(shape);
-  }
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  sideViewOp
 );
 
-const view = Shape.registerMethod2(
+const view = Shape.registerMethod3(
   'view',
-  ['input', MODES, 'function', 'options', 'value'],
-  async (input, modes, op = (x) => x, options, viewId) => {
-    const shape = await applyModes(input, options, modes);
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  (geometry, modes, op = (_x) => (s) => s, options, viewId) => {
+    geometry = applyModes(geometry, options, modes);
     if (modes.grid) {
       options.style = 'grid';
     }
@@ -1813,15 +1818,15 @@ const view = Shape.registerMethod2(
     }
     switch (options.style) {
       case 'grid':
-        return shape.gridView(viewId, op, options, modes);
+        return gridViewOp(geometry, modes, op, options, viewId);
       case 'none':
-        return shape;
+        return geometry;
       case 'side':
-        return shape.sideView(viewId, op, options, modes);
+        return sideViewOp(geometry, modes, op, options, viewId);
       case 'top':
-        return shape.topView(viewId, op, options, modes);
+        return topViewOp(geometry, modes, op, options, viewId);
       default:
-        return baseView(viewId, op, options)(shape);
+        return baseViewOp(geometry, viewId, op, options);
     }
   }
 );
@@ -2413,43 +2418,43 @@ const scale$1 = Shape.registerMethod3(
 
 const s = scale$1;
 
-const scaleX = Shape.registerMethod2(
+const scaleX = Shape.registerMethod3(
   ['scaleX', 'sx'],
-  ['input', 'numbers'],
-  async (input, values) => {
+  ['inputGeometry', 'numbers'],
+  async (geometry, values) => {
     const scaled = [];
     for (const value of values) {
-      scaled.push(await scale$1(value, 1, 1)(input));
+      scaled.push(scale$2(geometry, [value, 1, 1]));
     }
-    return Group(...scaled);
+    return Group$1(scaled);
   }
 );
 
 const sx = scaleX;
 
-const scaleY = Shape.registerMethod2(
+const scaleY = Shape.registerMethod3(
   ['scaleY', 'sy'],
-  ['input', 'numbers'],
-  async (input, values) => {
+  ['inputGeometry', 'numbers'],
+  async (geometry, values) => {
     const scaled = [];
     for (const value of values) {
-      scaled.push(await scale$1(1, value, 1)(input));
+      scaled.push(scale$2(geometry, [1, value, 1]));
     }
-    return Group(...scaled);
+    return Group$1(scaled);
   }
 );
 
 const sy = scaleY;
 
-const scaleZ = Shape.registerMethod2(
+const scaleZ = Shape.registerMethod3(
   ['scaleZ', 'sz'],
-  ['input', 'numbers'],
-  async (input, values) => {
+  ['inputGeometry', 'numbers'],
+  async (geometry, values) => {
     const scaled = [];
     for (const value of values) {
-      scaled.push(await scale$1(1, 1, value)(input));
+      scaled.push(scale$2(geometry, [1, 1, value]));
     }
-    return Group(...scaled);
+    return Group$1(scaled);
   }
 );
 
@@ -2567,9 +2572,9 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
   z * amount,
 ];
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const size = Shape.registerMethod3(
   'size',
@@ -2590,31 +2595,31 @@ const size = Shape.registerMethod3(
         args.push(min);
       }
       if (modes.right) {
-        args.push(max[X$2]);
+        args.push(max[X$1]);
       }
       if (modes.left) {
-        args.push(min[X$2]);
+        args.push(min[X$1]);
       }
       if (modes.front) {
-        args.push(min[Y$2]);
+        args.push(min[Y$1]);
       }
       if (modes.back) {
-        args.push(max[Y$2]);
+        args.push(max[Y$1]);
       }
       if (modes.top) {
-        args.push(max[Z$2]);
+        args.push(max[Z$1]);
       }
       if (modes.bottom) {
-        args.push(min[Z$2]);
+        args.push(min[Z$1]);
       }
       if (modes.length) {
-        args.push(max[X$2] - min[X$2]);
+        args.push(max[X$1] - min[X$1]);
       }
       if (modes.width) {
-        args.push(max[Y$2] - min[Y$2]);
+        args.push(max[Y$1] - min[Y$1]);
       }
       if (modes.height) {
-        args.push(max[Z$2] - min[Z$2]);
+        args.push(max[Z$1] - min[Z$1]);
       }
       if (modes.center) {
         args.push(scale(0.5, add(min, max)));
@@ -2630,13 +2635,13 @@ const size = Shape.registerMethod3(
     Shape.applyGeometryToValue(geometry, op, ...args)
 );
 
-const sketch = Shape.registerMethod2(
+const sketch = Shape.registerMethod3(
   'sketch',
   ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(taggedSketch({}, geometry))
+  (geometry) => taggedSketch({}, geometry)
 );
 
-const smooth = Shape.registerMethod2(
+const smooth = Shape.registerMethod3(
   'smooth',
   ['inputGeometry', 'number', 'options', 'geometries'],
   (
@@ -2650,32 +2655,29 @@ const smooth = Shape.registerMethod2(
     } = {},
     selections
   ) =>
-    Shape.fromGeometry(
-      smooth$1(
-        geometry,
-        selections,
-        resolution,
-        iterations,
-        time,
-        remeshIterations,
-        remeshRelaxationSteps
-      )
+    smooth$1(
+      geometry,
+      selections,
+      resolution,
+      iterations,
+      time,
+      remeshIterations,
+      remeshRelaxationSteps
     )
 );
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
-const sort = Shape.registerMethod2(
+const sort = Shape.registerMethod3(
   'sort',
   ['inputGeometry', 'string'],
-  async (geometry, spec = 'z<y<x<') => {
+  (geometry, spec = 'z<y<x<') => {
     let leafs = [];
     for (const leaf of getLeafs(geometry)) {
       const [min, max] = measureBoundingBox(leaf);
-      const shape = await Shape.fromGeometry(leaf);
-      leafs.push({ min, max, shape });
+      leafs.push({ min, max, leaf });
     }
     const ops = [];
     while (spec) {
@@ -2684,10 +2686,6 @@ const sort = Shape.registerMethod2(
         throw Error(`Bad sort spec ${spec}`);
       }
       const [, dimension, order, limit, rest] = found;
-      // console.log(`dimension: ${dimension}`);
-      // console.log(`order: ${order}`);
-      // console.log(`limit: ${limit}`);
-      // console.log(`rest: ${rest}`);
       // We apply the sorting ops in reverse.
       ops.unshift({ dimension, order, limit });
       spec = rest;
@@ -2696,13 +2694,13 @@ const sort = Shape.registerMethod2(
       let axis;
       switch (dimension) {
         case 'x':
-          axis = X$1;
+          axis = X;
           break;
         case 'y':
-          axis = Y$1;
+          axis = Y;
           break;
         case 'z':
-          axis = Z$1;
+          axis = Z;
           break;
       }
       if (limit !== undefined) {
@@ -2724,11 +2722,13 @@ const sort = Shape.registerMethod2(
           break;
       }
     }
-    return Group(...leafs.map(({ shape }) => shape));
+    const result = Group$1(leafs.map(({ leaf }) => leaf));
+    console.log(`QQ/sort: result=${JSON.stringify(result)}`);
+    return result;
   }
 );
 
-const LoadStl = Shape.registerMethod2(
+const LoadStl = Shape.registerMethod3(
   'LoadStl',
   ['string', 'modes:binary,ascii,wrap', 'options'],
   async (
@@ -2752,21 +2752,19 @@ const LoadStl = Shape.registerMethod2(
     } else if (binary) {
       format = 'binary';
     }
-    return Shape.fromGeometry(
-      await fromStl(data, {
-        format,
-        wrapAlways: wrap,
-        wrapAbsoluteAlpha,
-        wrapAbsoluteOffset,
-        wrapRelativeAlpha,
-        wrapRelativeOffset,
-        cornerThreshold,
-      })
-    );
+    return fromStl(data, {
+      format,
+      wrapAlways: wrap,
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      cornerThreshold,
+    });
   }
 );
 
-const Stl = Shape.registerMethod2(
+const Stl = Shape.registerMethod3(
   'Stl',
   ['string', 'modes:wrap', 'options'],
   async (
@@ -2779,29 +2777,26 @@ const Stl = Shape.registerMethod2(
       wrapRelativeOffset,
       cornerThreshold = 20 / 360,
     } = {}
-  ) => {
-    return Shape.fromGeometry(
-      await fromStl(new TextEncoder('utf8').encode(text), {
-        format: 'ascii',
-        wrapAlways: wrap,
-        wrapAbsoluteAlpha,
-        wrapAbsoluteOffset,
-        wrapRelativeAlpha,
-        wrapRelativeOffset,
-        cornerThreshold,
-      })
-    );
-  }
+  ) =>
+    fromStl(new TextEncoder('utf8').encode(text), {
+      format: 'ascii',
+      wrapAlways: wrap,
+      wrapAbsoluteAlpha,
+      wrapAbsoluteOffset,
+      wrapRelativeAlpha,
+      wrapRelativeOffset,
+      cornerThreshold,
+    })
 );
 
-const stl = Shape.registerMethod2(
+const stl = Shape.registerMethod3(
   'stl',
-  ['input', 'string', 'function', 'options'],
-  async (input, name, op = (_v) => (s) => s, options = {}) => {
+  ['inputGeometry', 'string', 'function', 'options'],
+  async (geometry, name, op = (_v) => (s) => s, options = {}) => {
     const { path } = getSourceLocation();
     let index = 0;
-    const updatedInput = await Shape.apply(input, op);
-    for (const entry of ensurePages(await updatedInput.toGeometry())) {
+    const updatedGeometry = await Shape.applyToGeometry(geometry, op);
+    for (const entry of ensurePages(updatedGeometry)) {
       const stlPath = `download/stl/${path}/${generateUniqueId()}`;
       await write(stlPath, await toStl(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;
@@ -2816,51 +2811,25 @@ const stl = Shape.registerMethod2(
       await view(name, options.view)(Shape.fromGeometry(entry));
       emit({ download: { entries: [record] }, hash: hash$1 });
     }
-    return input;
+    return geometry;
   }
 );
 
-const Arc = Shape.registerMethod3(
-  'Arc',
-  ['intervals', 'options'],
-  Arc$1
-);
-const ArcX = Shape.registerMethod3(
-  'ArcX',
-  ['intervals', 'options'],
-  ArcX$1
-);
-const ArcY = Shape.registerMethod3(
-  'ArcY',
-  ['intervals', 'options'],
-  ArcY$1
-);
-const ArcZ = Shape.registerMethod3(
-  'ArcZ',
-  ['intervals', 'options'],
-  ArcZ$1
-);
-
-const Stroke = Shape.registerMethod2(
+const Stroke = Shape.registerMethod3(
   'Stroke',
-  ['input', 'shapes', 'number', 'options'],
-  async (input, shapes, implicitWidth = 1, { width = implicitWidth } = {}) => {
-    return Fuse(
-      eachSegment(
-        (s) => s.eachPoint((p) => Arc(width).to(p)).hull(),
-        List
-      )(await Group(input, ...shapes))
-    );
-  }
+  ['geometries', 'number', 'options'],
+  (geometries, implicitWidth = 1, { width = implicitWidth } = {}) =>
+    Stroke$1(geometries, width)
 );
 
-const stroke = Shape.registerMethod2(
+const stroke = Shape.registerMethod3(
   'stroke',
-  ['input', 'rest'],
-  (input, rest) => Stroke(input, ...rest)
+  ['inputGeometry', 'geometries', 'number', 'options'],
+  (geometry, geometries, implicitWidth = 1, { width = implicitWidth } = {}) =>
+    Stroke$1([geometry, ...geometries], width)
 );
 
-const LoadSvg = Shape.registerMethod2(
+const LoadSvg = Shape.registerMethod3(
   'LoadSvg',
   ['string', 'options'],
   async (path, { fill = true, stroke = true } = {}) => {
@@ -2868,31 +2837,27 @@ const LoadSvg = Shape.registerMethod2(
     if (data === undefined) {
       throw Error(`Cannot read svg from ${path}`);
     }
-    return Shape.fromGeometry(
-      await fromSvg(data, { doFill: fill, doStroke: stroke })
-    );
+    return fromSvg(data, { doFill: fill, doStroke: stroke });
   }
 );
 
-const Svg = Shape.registerMethod2(
+const Svg = Shape.registerMethod3(
   'Svg',
   ['string', 'options'],
   async (svg, { fill = true, stroke = true } = {}) => {
     const data = new TextEncoder('utf8').encode(svg);
-    return Shape.fromGeometry(
-      await fromSvg(data, { doFill: fill, doStroke: stroke })
-    );
+    return fromSvg(data, { doFill: fill, doStroke: stroke });
   }
 );
 
-const svg = Shape.registerMethod2(
+const svg = Shape.registerMethod3(
   'svg',
-  ['input', 'string', 'function', 'options'],
-  async (input, name, op = (_v) => (s) => s, options = {}) => {
+  ['inputGeometry', 'string', 'function', 'options'],
+  async (geometry, name, op = (_v) => (s) => s, options = {}) => {
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    const updatedInput = await Shape.apply(input, op);
-    for (const entry of ensurePages(await updatedInput.toGeometry())) {
+    const updatedGeometry = await Shape.applyToGeometry(geometry, op);
+    for (const entry of ensurePages(updatedGeometry)) {
       const svgPath = `download/svg/${path}/${id}/${viewId}`;
       await write(svgPath, await toSvg(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;
@@ -2906,28 +2871,23 @@ const svg = Shape.registerMethod2(
       await gridView(name, options.view)(Shape.fromGeometry(entry));
       emit({ download: { entries: [record] }, hash: hash$1 });
     }
-    return input;
+    return geometry;
   }
 );
 
-const table = Shape.registerMethod2(
+const table = Shape.registerMethod3(
   'table',
-  ['input', 'number', 'number', 'strings'],
-  async (input, rows, columns, cells) => {
+  ['inputGeometry', 'number', 'number', 'strings'],
+  async (geometry, rows, columns, cells) => {
     const uniqueId = generateUniqueId;
     const open = { open: { type: 'table', rows, columns, uniqueId } };
     emit({ open, hash: computeHash(open) });
     for (let cell of cells) {
-      if (cell instanceof Function) {
-        cell = cell(input);
-      }
-      if (typeof cell === 'string') {
-        emitNote(cell);
-      }
+      emitNote(cell);
     }
     const close = { close: { type: 'table', rows, columns, uniqueId } };
     emit({ close, hash: computeHash(close) });
-    return input;
+    return geometry;
   }
 );
 
@@ -2937,15 +2897,10 @@ const tag = Shape.registerMethod3(
   tag$1
 );
 
-const tags = Shape.registerMethod2(
+const tags = Shape.registerMethod3(
   'tags',
-  ['input', 'inputGeometry', 'string', 'function'],
-  async (
-    input,
-    geometry,
-    tag = '*',
-    op = (...tags) => note(`tags: ${tags}`)
-  ) => {
+  ['inputGeometry', 'string', 'function'],
+  async (geometry, tag = '*', op = (...tags) => note(`tags: ${tags}`)) => {
     const isMatchingTag = tagMatcher(tag, 'user');
     const collected = [];
     for (const { tags } of getLeafs(geometry)) {
@@ -2955,16 +2910,16 @@ const tags = Shape.registerMethod2(
         }
       }
     }
-    const result = op(...collected)(input);
+    const result = Shape.applyToGeometry(geometry, op, ...collected);
     return result;
   }
 );
 
 // Tint adds another color to the mix.
-const tint = Shape.registerMethod2(
+const tint = Shape.registerMethod3(
   'tint',
-  ['input', 'string'],
-  (input, name) => tag(...toTagsFromName(name))(input)
+  ['inputGeometry', 'string'],
+  (geometry, name) => retag(geometry, [], toTagsFromName(name))
 );
 
 const to = Shape.registerMethod3(
@@ -2987,14 +2942,13 @@ const toDisplayGeometry = Shape.registerMethod3(
   (geometry) => geometry
 );
 
-const tool = Shape.registerMethod2(
+const tool = Shape.registerMethod3(
   'tool',
   ['inputGeometry', 'string'],
-  (geometry, name) =>
-    Shape.fromGeometry(rewriteTags(toTagsFromName$1(name), [], geometry))
+  (geometry, name) => retag(geometry, [], toTagsFromName$1(name))
 );
 
-const toolpath = Shape.registerMethod2(
+const toolpath = Shape.registerMethod3(
   'toolpath',
   [
     'inputGeometry',
@@ -3016,17 +2970,15 @@ const toolpath = Shape.registerMethod2(
     annealingDecay,
     target
   ) =>
-    Shape.fromGeometry(
-      computeToolpath(
-        target,
-        geometry,
-        resolution,
-        toolSize,
-        toolCutDepth,
-        annealingMax,
-        annealingMin,
-        annealingDecay
-      )
+    computeToolpath(
+      target,
+      geometry,
+      resolution,
+      toolSize,
+      toolCutDepth,
+      annealingMax,
+      annealingMin,
+      annealingDecay
     )
 );
 
@@ -3048,156 +3000,31 @@ const untag = Shape.registerMethod3(
   untag$1
 );
 
-const upperEnvelope = Shape.registerMethod2(
+const upperEnvelope = Shape.registerMethod3(
   'upperEnvelope',
   ['inputGeometry'],
-  (geometry) => Shape.fromGeometry(generateUpperEnvelope(geometry))
+  generateUpperEnvelope
 );
 
 const unfold = Shape.registerMethod3('unfold', ['inputGeometry'], unfold$1);
 
-const volume = Shape.registerMethod2(
+const volume = Shape.registerMethod3(
   'volume',
-  ['input', 'function'],
-  async (input, op = (value) => (_shape) => value) =>
-    op(measureVolume(await input.toGeometry()))(input)
+  ['inputGeometry', 'function'],
+  (geometry, op = (value) => (_shape) => value) =>
+    Shape.applyToGeometry(geometry, op, measureVolume(geometry))
 );
 
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const floor = (value, resolution) =>
-  Math.floor(value / resolution) * resolution;
-const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
-
-const floorPoint = ([x, y, z], resolution) => [
-  floor(x, resolution),
-  floor(y, resolution),
-  floor(z, resolution),
-];
-const ceilPoint = ([x, y, z], resolution) => [
-  ceil(x, resolution),
-  ceil(y, resolution),
-  ceil(z, resolution),
-];
-
-const voxels = Shape.registerMethod2(
+const voxels = Shape.registerMethod3(
   'voxels',
   ['inputGeometry', 'number'],
-  (geometry, resolution = 1) => {
-    const offset = resolution / 2;
-    const [boxMin, boxMax] = measureBoundingBox(geometry);
-    const min = floorPoint(boxMin, resolution);
-    const max = ceilPoint(boxMax, resolution);
-    const polygons = [];
-    withAabbTreeQuery(
-      linearize(geometry, ({ type }) =>
-        ['graph', 'polygonsWithHoles'].includes(type)
-      ),
-      (query) => {
-        const isInteriorPoint = (x, y, z) =>
-          query.isIntersectingPointApproximate(x, y, z);
-        for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
-          for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
-            for (
-              let z = min[Z] - offset;
-              z <= max[Z] + offset;
-              z += resolution
-            ) {
-              const state = isInteriorPoint(x, y, z);
-              if (state !== isInteriorPoint(x + resolution, y, z)) {
-                const face = [
-                  [x + offset, y - offset, z - offset],
-                  [x + offset, y + offset, z - offset],
-                  [x + offset, y + offset, z + offset],
-                  [x + offset, y - offset, z + offset],
-                ];
-                polygons.push({ points: state ? face : face.reverse() });
-              }
-              if (state !== isInteriorPoint(x, y + resolution, z)) {
-                const face = [
-                  [x - offset, y + offset, z - offset],
-                  [x + offset, y + offset, z - offset],
-                  [x + offset, y + offset, z + offset],
-                  [x - offset, y + offset, z + offset],
-                ];
-                polygons.push({ points: state ? face.reverse() : face });
-              }
-              if (state !== isInteriorPoint(x, y, z + resolution)) {
-                const face = [
-                  [x - offset, y - offset, z + offset],
-                  [x + offset, y - offset, z + offset],
-                  [x + offset, y + offset, z + offset],
-                  [x - offset, y + offset, z + offset],
-                ];
-                polygons.push({ points: state ? face : face.reverse() });
-              }
-            }
-          }
-        }
-      }
-    );
-    return Shape.fromPolygons(polygons);
-  }
+  toVoxelsFromGeometry
 );
 
-const Voxels = Shape.registerMethod2(
+const Voxels = Shape.registerMethod3(
   'Voxels',
   ['coordinates'],
-  async (coordinates) => {
-    const offset = 0.5;
-    const index = new Set();
-    const key = (x, y, z) => `${x},${y},${z}`;
-    let max = [-Infinity, -Infinity, -Infinity];
-    let min = [Infinity, Infinity, Infinity];
-    for (const [x, y, z] of coordinates) {
-      index.add(key(x, y, z));
-      max[X] = Math.max(x + 1, max[X]);
-      max[Y] = Math.max(y + 1, max[Y]);
-      max[Z] = Math.max(z + 1, max[Z]);
-      min[X] = Math.min(x - 1, min[X]);
-      min[Y] = Math.min(y - 1, min[Y]);
-      min[Z] = Math.min(z - 1, min[Z]);
-    }
-    const isInteriorPoint = (x, y, z) => index.has(key(x, y, z));
-    const polygons = [];
-    for (let x = min[X]; x <= max[X]; x++) {
-      for (let y = min[Y]; y <= max[Y]; y++) {
-        for (let z = min[Z]; z <= max[Z]; z++) {
-          const state = isInteriorPoint(x, y, z);
-          if (state !== isInteriorPoint(x + 1, y, z)) {
-            const face = [
-              [x + offset, y - offset, z - offset],
-              [x + offset, y + offset, z - offset],
-              [x + offset, y + offset, z + offset],
-              [x + offset, y - offset, z + offset],
-            ];
-            polygons.push({ points: state ? face : face.reverse() });
-          }
-          if (state !== isInteriorPoint(x, y + 1, z)) {
-            const face = [
-              [x - offset, y + offset, z - offset],
-              [x + offset, y + offset, z - offset],
-              [x + offset, y + offset, z + offset],
-              [x - offset, y + offset, z + offset],
-            ];
-            polygons.push({ points: state ? face.reverse() : face });
-          }
-          if (state !== isInteriorPoint(x, y, z + 1)) {
-            const face = [
-              [x - offset, y - offset, z + offset],
-              [x + offset, y - offset, z + offset],
-              [x + offset, y + offset, z + offset],
-              [x - offset, y + offset, z + offset],
-            ];
-            polygons.push({ points: state ? face : face.reverse() });
-          }
-        }
-      }
-    }
-    return Shape.fromPolygons(polygons).tag('editType:Voxels');
-  }
+  toVoxelsFromCoordinates
 );
 
 const Wrap = Shape.registerMethod3(
@@ -3212,39 +3039,39 @@ const wrap = Shape.registerMethod3(
   wrap$1
 );
 
-const x = Shape.registerMethod2(
+const x = Shape.registerMethod3(
   'x',
-  ['input', 'numbers'],
-  async (input, offsets) => {
+  ['inputGeometry', 'numbers'],
+  (geometry, offsets) => {
     const moved = [];
     for (const offset of offsets) {
-      moved.push(await move([offset, 0, 0])(input));
+      moved.push(translate(geometry, [offset, 0, 0]));
     }
-    return Group(...moved);
+    return Group$1(moved);
   }
 );
 
-const y = Shape.registerMethod2(
+const y = Shape.registerMethod3(
   'y',
-  ['input', 'numbers'],
-  async (input, offsets) => {
+  ['inputGeometry', 'numbers'],
+  (geometry, offsets) => {
     const moved = [];
     for (const offset of offsets) {
-      moved.push(await move([0, offset, 0])(input));
+      moved.push(translate(geometry, [0, offset, 0]));
     }
-    return Group(...moved);
+    return Group$1(moved);
   }
 );
 
-const z = Shape.registerMethod2(
+const z = Shape.registerMethod3(
   'z',
-  ['input', 'numbers'],
-  async (input, offsets) => {
+  ['inputGeometry', 'numbers'],
+  async (geometry, offsets) => {
     const moved = [];
     for (const offset of offsets) {
-      moved.push(await move([0, 0, offset])(input));
+      moved.push(translate(geometry, [0, 0, offset]));
     }
-    return Group(...moved);
+    return Group$1(moved);
   }
 );
 
@@ -3259,6 +3086,27 @@ const zagSteps = Shape.registerMethod3(
   ['number', 'number'],
   (diameter = 1, zag$1 = 0.25) => 1 / zag(diameter, zag$1),
   (number) => number
+);
+
+const Arc = Shape.registerMethod3(
+  'Arc',
+  ['intervals', 'options'],
+  Arc$1
+);
+const ArcX = Shape.registerMethod3(
+  'ArcX',
+  ['intervals', 'options'],
+  ArcX$1
+);
+const ArcY = Shape.registerMethod3(
+  'ArcY',
+  ['intervals', 'options'],
+  ArcY$1
+);
+const ArcZ = Shape.registerMethod3(
+  'ArcZ',
+  ['intervals', 'options'],
+  ArcZ$1
 );
 
 const Assembly = Shape.registerMethod3(
@@ -3298,11 +3146,10 @@ const Edge = Shape.registerMethod3(
 
 const Empty = Shape.registerMethod3('Empty', [], Empty$1);
 
-const Polygon = Shape.registerMethod3Pre(
+const Polygon = Shape.registerMethod3(
   ['Face', 'Polygon'],
   ['coordinates'],
-  (coordinates) => [[{ points: coordinates }]],
-  fromPolygons
+  (coordinates) => fromPolygons([{ points: coordinates }])
 );
 
 const Face = Polygon;
@@ -3433,16 +3280,15 @@ const Point = Shape.registerMethod3(
   Point$1
 );
 
-const Points = Shape.registerMethod3Pre(
+const Points = Shape.registerMethod3(
   'Points',
   ['coordinateLists', 'coordinates'],
   (coordinateLists, coordinates) => {
     for (const coordinateList of coordinateLists) {
       coordinates.push(...coordinateList);
     }
-    return [coordinates];
-  },
-  Points$1
+    return Points$1(coordinates);
+  }
 );
 
 const Polyhedron = Shape.registerMethod3(
@@ -3459,20 +3305,17 @@ const Polyhedron = Shape.registerMethod3(
 
 const Segments = Shape.registerMethod3('Segments', ['segments'], Segments$1);
 
-const Spiral = Shape.registerMethod2(
+const Spiral = Shape.registerMethod3(
   'Spiral',
-  ['function', 'options'],
-  async (particle = Point, options) => {
+  ['inputGeometry', 'function', 'options'],
+  async (geometry, particle = Point, options) => {
     let particles = [];
-    const turns = await Seq(
-      options,
-      (distance) => (_shape) => distance,
-      (...numbers) => numbers
-    );
-    for (const turn of turns) {
-      particles.push(await particle(turn).rz(turn));
+    for (const [turn] of seq$1(options)) {
+      particles.push(
+        rotateZ$1(await Shape.applyToGeometry(geometry, particle, turn), turn)
+      );
     }
-    const result = await Link(...particles);
+    const result = await Link$1(particles);
     return result;
   }
 );
@@ -3490,26 +3333,24 @@ const SurfaceMesh = (
   return Shape.fromGeometry(geometry);
 };
 
-const Triangle = Shape.registerMethod2(
-  'Triangle',
-  ['input', 'interval', 'interval', 'interval'],
-  (input, x, y, z) => Arc(x, y, z, { sides: 3 })(input)
-);
+const Triangle = Shape.registerMethod3('Triangle', ['intervals'], Triangle$1);
 
-const Wave = Shape.registerMethod2(
+const Wave = Shape.registerMethod3(
   'Wave',
-  ['input', 'function', 'options'],
-  async (input, particle = Point, options) => {
+  ['inputGeometry', 'function', 'options'],
+  async (geometry, particle = Point, options) => {
     let particles = [];
-    for (const xDistance of await seq(
-      options,
-      (distance) => (_shape) => distance,
-      (...numbers) => numbers
-    )(input)) {
-      particles.push(particle(xDistance).x(xDistance));
+    for (const [xDistance] of seq$1(options)) {
+      particles.push(
+        translate(await Shape.applyToGeometry(geometry, particle, xDistance), [
+          xDistance,
+          0,
+          0,
+        ])
+      );
     }
-    return Link(...particles)(input);
+    return Link$1(particles);
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, plus, points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, Line, LineX, LineY, LineZ, Link, List, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Orb, Page, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, plus, points, put, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

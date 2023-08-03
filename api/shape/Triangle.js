@@ -1,10 +1,6 @@
-import { Arc } from './Arc.js';
 import Shape from './Shape.js';
+import { Triangle as op } from '@jsxcad/geometry';
 
-export const Triangle = Shape.registerMethod2(
-  'Triangle',
-  ['input', 'interval', 'interval', 'interval'],
-  (input, x, y, z) => Arc(x, y, z, { sides: 3 })(input)
-);
+export const Triangle = Shape.registerMethod3('Triangle', ['intervals'], op);
 
 export default Triangle;

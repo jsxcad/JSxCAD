@@ -5,7 +5,7 @@ import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';
 
-export const LoadSvg = Shape.registerMethod2(
+export const LoadSvg = Shape.registerMethod3(
   'LoadSvg',
   ['string', 'options'],
   async (path, { fill = true, stroke = true } = {}) => {
@@ -13,33 +13,29 @@ export const LoadSvg = Shape.registerMethod2(
     if (data === undefined) {
       throw Error(`Cannot read svg from ${path}`);
     }
-    return Shape.fromGeometry(
-      await fromSvg(data, { doFill: fill, doStroke: stroke })
-    );
+    return fromSvg(data, { doFill: fill, doStroke: stroke });
   }
 );
 
 export default LoadSvg;
 
-export const Svg = Shape.registerMethod2(
+export const Svg = Shape.registerMethod3(
   'Svg',
   ['string', 'options'],
   async (svg, { fill = true, stroke = true } = {}) => {
     const data = new TextEncoder('utf8').encode(svg);
-    return Shape.fromGeometry(
-      await fromSvg(data, { doFill: fill, doStroke: stroke })
-    );
+    return fromSvg(data, { doFill: fill, doStroke: stroke });
   }
 );
 
-export const svg = Shape.registerMethod2(
+export const svg = Shape.registerMethod3(
   'svg',
-  ['input', 'string', 'function', 'options'],
-  async (input, name, op = (_v) => (s) => s, options = {}) => {
+  ['inputGeometry', 'string', 'function', 'options'],
+  async (geometry, name, op = (_v) => (s) => s, options = {}) => {
     const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
     let index = 0;
-    const updatedInput = await Shape.apply(input, op);
-    for (const entry of ensurePages(await updatedInput.toGeometry())) {
+    const updatedGeometry = await Shape.applyToGeometry(geometry, op);
+    for (const entry of ensurePages(updatedGeometry)) {
       const svgPath = `download/svg/${path}/${id}/${viewId}`;
       await write(svgPath, await toSvg(entry, options));
       const suffix = index++ === 0 ? '' : `_${index}`;
@@ -53,6 +49,6 @@ export const svg = Shape.registerMethod2(
       await gridView(name, options.view)(Shape.fromGeometry(entry));
       emit({ download: { entries: [record] }, hash });
     }
-    return input;
+    return geometry;
   }
 );

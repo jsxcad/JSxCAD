@@ -357,7 +357,7 @@ Shape.applyToGeometry = applyGeometryToGeometry;
 Shape.applyGeometryToGeometry = applyGeometryToGeometry;
 Shape.applyGeometryToValue = applyGeometryToValue;
 
-export const registerMethod = (names, op) => {
+const registerMethod = (names, op) => {
   if (typeof names === 'string') {
     names = [names];
   }
@@ -395,7 +395,8 @@ export const registerMethod = (names, op) => {
   return chainable(op);
 };
 
-export const registerMethod2 = (names, signature, op) => {
+/*
+const registerMethod2 = (names, signature, op) => {
   const method =
     (...args) =>
     async (shape) => {
@@ -417,8 +418,9 @@ export const registerMethod2 = (names, signature, op) => {
     };
   return registerMethod(names, method);
 };
+*/
 
-Shape.registerMethod2 = registerMethod2;
+// Shape.registerMethod2 = registerMethod2;
 
 Shape.fromGeometry = (geometry) => {
   if (geometry === undefined) {
@@ -492,10 +494,8 @@ export const registerMethod3 = (
 
 Shape.registerMethod3 = registerMethod3;
 
-export const registerMethod3Pre = (names, signature, preOp, op, postOp) =>
-  registerMethod3(names, signature, op, postOp, preOp);
-
-Shape.registerMethod3Pre = registerMethod3Pre;
+// export const registerMethod3Pre = (names, signature, preOp, op, postOp) => registerMethod3(names, signature, op, postOp, preOp);
+// Shape.registerMethod3Pre = registerMethod3Pre;
 
 Shape.fromGraph = (graph) => new Shape(taggedGraph({}, graph));
 

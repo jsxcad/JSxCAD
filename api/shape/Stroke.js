@@ -1,27 +1,16 @@
-import Arc from './Arc.js';
-import { Fuse } from './fuse.js';
-import Group from './Group.js';
-import List from './List.js';
-import Shape from './Shape.js';
-import { eachSegment } from './eachSegment.js';
+import { Shape } from './Shape.js';
+import { Stroke as op } from '@jsxcad/geometry';
 
-export const Stroke = Shape.registerMethod2(
+export const Stroke = Shape.registerMethod3(
   'Stroke',
-  ['input', 'shapes', 'number', 'options'],
-  async (input, shapes, implicitWidth = 1, { width = implicitWidth } = {}) => {
-    return Fuse(
-      eachSegment(
-        (s) => s.eachPoint((p) => Arc(width).to(p)).hull(),
-        List
-      )(await Group(input, ...shapes))
-    );
-  }
+  ['geometries', 'number', 'options'],
+  (geometries, implicitWidth = 1, { width = implicitWidth } = {}) =>
+    op(geometries, width)
 );
 
-export default Stroke;
-
-export const stroke = Shape.registerMethod2(
+export const stroke = Shape.registerMethod3(
   'stroke',
-  ['input', 'rest'],
-  (input, rest) => Stroke(input, ...rest)
+  ['inputGeometry', 'geometries', 'number', 'options'],
+  (geometry, geometries, implicitWidth = 1, { width = implicitWidth } = {}) =>
+    op([geometry, ...geometries], width)
 );
