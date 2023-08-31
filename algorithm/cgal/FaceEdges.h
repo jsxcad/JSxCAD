@@ -145,10 +145,11 @@ int FaceEdges(Geometry* geometry, int count) {
         for (auto& face_id : face_ids) {
           int face_target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           int edge_target = geometry->add(GEOMETRY_EDGES);
-          const Plane& plane = unitPlane(facet_to_plane[Face_index(face_id)]);
+          const Plane& plane =
+              unitPlane<Kernel>(facet_to_plane[Face_index(face_id)]);
           Transformation disorientation = disorient_plane_along_z(plane);
 
-          Arrangement_2 arrangement;
+          Arrangement_with_regions_2 arrangement;
           for (auto& edge : geometry->edges(all_edge_target)) {
             if (edge.face_id == face_id) {
               insert(arrangement,

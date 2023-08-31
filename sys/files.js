@@ -4,7 +4,6 @@ import { watchFileDeletion } from './watchers.js';
 const files = new Map();
 
 export const clearFileCache = () => {
-  console.log(`QQ/clearFileCache`);
   files.clear();
 };
 

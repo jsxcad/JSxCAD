@@ -1,9 +1,6 @@
-import {
-  deletePendingSurfaceMeshes,
-  dilateXY as dilateXYWithCgal,
-} from '@jsxcad/algorithm-cgal';
 import { hasTypeGhost, isNotTypeGhost } from './tagged/type.js';
 
+import { dilateXY as dilateXYWithCgal } from '@jsxcad/algorithm-cgal';
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -22,7 +19,6 @@ export const dilateXY = (geometry, amount) => {
   for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
-  deletePendingSurfaceMeshes();
   return taggedGroup(
     {},
     replacer(inputs, outputs)(concreteGeometry),

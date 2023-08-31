@@ -16,7 +16,7 @@ int Section(Geometry* geometry, int count) {
           SurfaceMeshSectionToPolygonsWithHoles(geometry->mesh(nth), plane,
                                                 pwhs);
           Transformation disorientation =
-              disorient_plane_along_z(unitPlane(plane));
+              disorient_plane_along_z(unitPlane<Kernel>(plane));
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->origin(target) = nth;
           geometry->copyTransform(target, disorientation.inverse());

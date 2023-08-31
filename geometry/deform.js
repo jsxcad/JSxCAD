@@ -1,8 +1,4 @@
-import {
-  deform as deformWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { deform as deformWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -30,6 +26,5 @@ export const deform = (
     linearize(toConcreteGeometry(selection), filterSelection, inputs);
   }
   const outputs = deformWithCgal(inputs, length, iterations, tolerance, alpha);
-  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs, length)(concreteGeometry);
 };

@@ -131,14 +131,15 @@ class Surface_mesh_explorer {
       if (mesh.is_removed(start)) {
         continue;
       }
-      const Plane facet_plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+      Plane facet_plane;
+      PlaneOfSurfaceMeshFacet(mesh, facet, facet_plane);
       std::int32_t face = mapFacetToFace(facet);
       Halfedge_index edge = start;
       do {
         const auto& opposite_facet = mesh.face(mesh.opposite(edge));
         if (opposite_facet != mesh.null_face()) {
-          const Plane opposite_facet_plane =
-              PlaneOfSurfaceMeshFacet(mesh, opposite_facet);
+          Plane opposite_facet_plane;
+          PlaneOfSurfaceMeshFacet(mesh, opposite_facet, opposite_facet_plane);
           if (facet_plane == opposite_facet_plane) {
             std::int32_t opposite_face = mapFacetToFace(opposite_facet);
             if (opposite_face < face) {
@@ -180,8 +181,8 @@ class Surface_mesh_explorer {
       if (face == -1 || facet != face) {
         continue;
       }
-      const Plane plane =
-          PlaneOfSurfaceMeshFacet(mesh, Surface_mesh::Face_index(facet));
+      Plane plane;
+      PlaneOfSurfaceMeshFacet(mesh, Surface_mesh::Face_index(facet), plane);
       const auto a = plane.a().exact();
       const auto b = plane.b().exact();
       const auto c = plane.c().exact();

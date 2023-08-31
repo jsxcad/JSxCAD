@@ -1,8 +1,4 @@
-import {
-  deletePendingSurfaceMeshes,
-  eachTriangle as eachTriangleWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
+import { eachTriangle as eachTriangleWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
@@ -15,5 +11,4 @@ export const eachTriangle = (geometry, emitTriangle) => {
   const inputs = [];
   linearize(concreteGeometry, filterTargets, inputs);
   eachTriangleWithCgal(inputs, emitTriangle);
-  deletePendingSurfaceMeshes();
 };

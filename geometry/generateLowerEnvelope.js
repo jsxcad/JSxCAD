@@ -1,8 +1,4 @@
-import {
-  deletePendingSurfaceMeshes,
-  generateEnvelope,
-} from '@jsxcad/algorithm-cgal';
-
+import { generateEnvelope } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -16,6 +12,5 @@ export const generateLowerEnvelope = (geometry) => {
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = generateEnvelope(inputs, /* envelopeType= */ 1);
-  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

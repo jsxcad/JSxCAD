@@ -1,7 +1,7 @@
 #include "simplify_util.h"
 
 int Simplify(Geometry* geometry, double corner_threshold, bool simplify_points,
-             double eps) {
+             double eps, bool use_bounded_normal_change_filter = false) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -13,7 +13,7 @@ int Simplify(Geometry* geometry, double corner_threshold, bool simplify_points,
     }
     Surface_mesh& mesh = geometry->mesh(nth);
 
-    simplify(corner_threshold, mesh);
+    simplify(corner_threshold, mesh, use_bounded_normal_change_filter);
 
     if (simplify_points) {
       for (const Vertex_index vertex : mesh.vertices()) {

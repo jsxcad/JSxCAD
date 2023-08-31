@@ -23,7 +23,7 @@ export const LoadStl = Shape.registerMethod3(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold = 20 / 360,
+      cornerThreshold = 0,
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
@@ -59,7 +59,7 @@ export const Stl = Shape.registerMethod3(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold = 20 / 360,
+      cornerThreshold = 0,
     } = {}
   ) =>
     fromStl(new TextEncoder('utf8').encode(text), {

@@ -47001,7 +47001,9 @@ class App extends ReactDOM$3.Component {
     this.View.click = ({
       object,
       ray
-    }) => {};
+    }) => {
+      console.log(`QQ/View/click: ${JSON.stringify(ray)}`);
+    };
     this.View.executeOperations = async () => {
       try {
         while (this.View.pendingOperations.length > 0) {

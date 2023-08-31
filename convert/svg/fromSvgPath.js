@@ -1,4 +1,4 @@
-import { Segments, scale } from '@jsxcad/geometry';
+import { Segments, distance, scale } from '@jsxcad/geometry';
 
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve.js';
@@ -6,15 +6,29 @@ import { curvify as curvifySvgPath } from './curvify-svg-path/index.js';
 import parseSvgPath from 'parse-svg-path';
 import simplifyPath from 'simplify-path';
 
+// FIX: Should LOOP_THRESHOLD be adaptive. Does not respect scale.
+const LOOP_THRESHOLD = 0.01;
+const SOURCE = 0;
+const TARGET = 1;
 const X = 0;
 const Y = 1;
 
 const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
   const segments = [];
+  let start = 0;
   let position;
 
   const newPath = () => {
+    if (segments.length > 2) {
+      const end = segments.length - 1;
+      const gap = distance(segments[start][SOURCE], segments[end][TARGET]);
+      if (gap > 0 && gap < LOOP_THRESHOLD) {
+        // This path looks like it ought to be a closed loop, so make it so.
+        segments.push([segments[end][TARGET], segments[start][SOURCE]]);
+      }
+    }
     position = undefined;
+    start = segments.length;
   };
 
   const appendPoint = (nextPosition) => {

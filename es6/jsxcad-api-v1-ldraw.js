@@ -2,31 +2,30 @@ import { fromLDraw, fromLDrawPart } from './jsxcad-convert-ldraw.js';
 import { Shape } from './jsxcad-api-shape.js';
 import { read } from './jsxcad-sys.js';
 
-const ReadLDraw = Shape.registerShapeMethod(
+const ReadLDraw = Shape.registerShapeMethod3(
   'ReadLDraw',
+  ['string', 'options'],
   async (path, { override, rebuild = false } = {}) => {
     const data = await read(`source/${path}`, { sources: [path] });
-    return Shape.fromGeometry(await fromLDraw(data, { override, rebuild }));
+    return fromLDraw(data, { override, rebuild });
   }
 );
 
-const LDrawPart = Shape.registerMethod(
+const LDrawPart = Shape.registerMethod3(
   'LDrawPart',
+  ['string', 'options'],
   (part, { override, rebuild = false } = {}) =>
-    async (shape) =>
-      Shape.fromGeometry(await fromLDrawPart(part, { override, rebuild }))
+      fromLDrawPart(part, { override, rebuild })
 );
 
-const LDraw = Shape.registerMethod(
+const LDraw = Shape.registerMethod3(
   'LDraw',
+  ['string', 'options'],
   (text, { override, rebuild = false } = {}) =>
-    async (shape) =>
-      Shape.fromGeometry(
-        await fromLDraw(new TextEncoder('utf8').encode(text), {
+        fromLDraw(new TextEncoder('utf8').encode(text), {
           override,
           rebuild,
         })
-      )
 );
 
 const api = { LDraw, LDrawPart, ReadLDraw };

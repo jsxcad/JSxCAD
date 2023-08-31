@@ -11,7 +11,9 @@ const split = (text) => text.match(/\S+/g) || [];
 const fromOffSync = (data) => {
   const text = new TextDecoder('utf8').decode(data);
   let line = 0;
-  const lines = text.split('\n').filter((line) => !line.startsWith('#'));
+  const lines = text
+    .split('\n')
+    .filter((line) => !line.startsWith('#') && /\S/.test(line));
   if (lines[line++] !== 'OFF') {
     throw Error('Not OFF');
   }

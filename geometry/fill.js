@@ -1,8 +1,4 @@
-import {
-  deletePendingSurfaceMeshes,
-  fill as fillWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
+import { fill as fillWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
@@ -17,6 +13,5 @@ export const fill = (geometry, tags = []) => {
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = fillWithCgal(inputs);
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

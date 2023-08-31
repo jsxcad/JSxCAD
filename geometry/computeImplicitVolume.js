@@ -1,8 +1,4 @@
-import {
-  computeImplicitVolume as computeImplicitVolumeWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { computeImplicitVolume as computeImplicitVolumeWithCgal } from '@jsxcad/algorithm-cgal';
 import { taggedGroup } from './tagged/taggedGroup.js';
 
 export const computeImplicitVolume = (
@@ -21,6 +17,5 @@ export const computeImplicitVolume = (
     distanceBound,
     errorBound
   );
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

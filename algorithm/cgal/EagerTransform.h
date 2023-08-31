@@ -33,7 +33,7 @@ int EagerTransform(Geometry* geometry, int count) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         Plane transformed_plane =
-            unitPlane(geometry->plane(nth).transform(transform));
+            unitPlane<Kernel>(geometry->plane(nth).transform(transform));
         transformPolygonsWithHoles(geometry->pwh(nth), geometry->plane(nth),
                                    transformed_plane, transform);
         geometry->plane(nth) = transformed_plane;

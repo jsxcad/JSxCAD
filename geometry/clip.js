@@ -1,9 +1,6 @@
-import {
-  clip as clipWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
 import { hasTypeGhost, isNotTypeGhost, isTypeVoid } from './tagged/type.js';
 
+import { clip as clipWithCgal } from '@jsxcad/algorithm-cgal';
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -36,7 +33,6 @@ export const clip = (
       ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
     }
   }
-  deletePendingSurfaceMeshes();
   return taggedGroup(
     {},
     replacer(inputs, outputs, count)(concreteGeometry),

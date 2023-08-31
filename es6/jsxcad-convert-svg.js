@@ -1,5 +1,5 @@
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, Segments, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, Segments, distance, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 function unwrapExports (x) {
@@ -3807,15 +3807,29 @@ var douglasPeucker = douglasPeucker$1;
 simplifyPath.radialDistance = radialDistance;
 simplifyPath.douglasPeucker = douglasPeucker;
 
+// FIX: Should LOOP_THRESHOLD be adaptive. Does not respect scale.
+const LOOP_THRESHOLD = 0.01;
+const SOURCE = 0;
+const TARGET = 1;
 const X$1 = 0;
 const Y$1 = 1;
 
 const toSegments = ({ curveSegments, tolerance = 0.01 }, svgPath) => {
   const segments = [];
+  let start = 0;
   let position;
 
   const newPath = () => {
+    if (segments.length > 2) {
+      const end = segments.length - 1;
+      const gap = distance(segments[start][SOURCE], segments[end][TARGET]);
+      if (gap > 0 && gap < LOOP_THRESHOLD) {
+        // This path looks like it ought to be a closed loop, so make it so.
+        segments.push([segments[end][TARGET], segments[start][SOURCE]]);
+      }
+    }
     position = undefined;
+    start = segments.length;
   };
 
   const appendPoint = (nextPosition) => {
@@ -4208,7 +4222,11 @@ const toSvg = async (
         );
         d.push('z');
       }
-      svg.push(`<path fill="${color}" stroke="${color}" d="${d.join(' ')}"/>`);
+      if (d.length > 0) {
+        svg.push(
+          `<path fill="${color}" stroke="${color}" d="${d.join(' ')}"/>`
+        );
+      }
     }
   }
 
@@ -4237,7 +4255,9 @@ const toSvg = async (
       d.pop();
       d.push('z');
     }
-    svg.push(`<path stroke="${color}" d="${d.join(' ')}"/>`);
+    if (d.length > 0) {
+      svg.push(`<path stroke="${color}" d="${d.join(' ')}"/>`);
+    }
   }
 
   svg.push('</svg>');

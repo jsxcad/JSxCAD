@@ -1,10 +1,6 @@
-import {
-  deletePendingSurfaceMeshes,
-  separate as separateWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
+import { separate as separateWithCgal } from '@jsxcad/algorithm-cgal';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
@@ -17,6 +13,5 @@ export const separate = (geometry, { noShapes, noHoles, holesAsShapes }) => {
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = separateWithCgal(inputs, !noShapes, !noHoles, holesAsShapes);
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

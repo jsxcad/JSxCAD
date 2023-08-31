@@ -1,8 +1,4 @@
-import {
-  convertPolygonsToMeshes as convertPolygonsToMeshesWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { convertPolygonsToMeshes as convertPolygonsToMeshesWithCgal } from '@jsxcad/algorithm-cgal';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
@@ -19,7 +15,6 @@ export const convertPolygonsToMeshes = (geometry) => {
   }
   try {
     const outputs = convertPolygonsToMeshesWithCgal(inputs);
-    deletePendingSurfaceMeshes();
     return replacer(inputs, outputs)(concreteGeometry);
   } catch (e) {
     console.log(e.stack);

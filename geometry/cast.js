@@ -1,8 +1,4 @@
-import {
-  cast as castWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { cast as castWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
@@ -26,6 +22,5 @@ export const cast = (planeReference, sourceReference, geometry) => {
   inputs.length = 2;
   linearize(concreteGeometry, filter, inputs);
   const outputs = castWithCgal(inputs);
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

@@ -77,7 +77,11 @@ export const toSvg = async (
         );
         d.push('z');
       }
-      svg.push(`<path fill="${color}" stroke="${color}" d="${d.join(' ')}"/>`);
+      if (d.length > 0) {
+        svg.push(
+          `<path fill="${color}" stroke="${color}" d="${d.join(' ')}"/>`
+        );
+      }
     }
   }
 
@@ -106,7 +110,9 @@ export const toSvg = async (
       d.pop();
       d.push('z');
     }
-    svg.push(`<path stroke="${color}" d="${d.join(' ')}"/>`);
+    if (d.length > 0) {
+      svg.push(`<path stroke="${color}" d="${d.join(' ')}"/>`);
+    }
   }
 
   svg.push('</svg>');

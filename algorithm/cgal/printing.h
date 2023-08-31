@@ -3,12 +3,14 @@
 template <class Kernel, class Container>
 void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
   typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
-  std::cout << "Polygon(";
+  std::cout << std::setprecision(20) << "Polygon(";
   for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit) {
     if (vit != P.vertices_begin()) {
       std::cout << ", ";
     }
-    std::cout << "[" << vit->x() << ", " << vit->y() << "]";
+    // std::cout << "{\"" << vit->x().exact() << "\", \"" << vit->y().exact() <<
+    // "\"}";
+    std::cout << "Point(" << vit->x() << ", " << vit->y() << ")";
   }
   std::cout << ")";
 }

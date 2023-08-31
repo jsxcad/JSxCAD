@@ -14,9 +14,11 @@
 
 #include <CGAL/Aff_transformation_3.h>
 #include <CGAL/Arr_conic_traits_2.h>
+#include <CGAL/Arr_extended_dcel.h>
 #include <CGAL/Arr_polyline_traits_2.h>
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Arrangement_2.h>
+#include <CGAL/Arrangement_with_history_2.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Bounded_kernel.h>
 #include <CGAL/CORE_algebraic_number_traits.h>
@@ -134,9 +136,13 @@ typedef Kernel::Triangle_3 Triangle;
 typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Vector_3 Vector;
 typedef Kernel::Direction_3 Direction;
+typedef Kernel::Direction_2 Direction_2;
 typedef Kernel::Aff_transformation_3 Transformation;
 typedef std::vector<Point> Points;
 typedef std::vector<Point_2> Point_2s;
+
+typedef Epick_kernel::Plane_3 Epick_plane;
+typedef Epick_kernel::Vector_3 Epick_vector;
 
 typedef CGAL::Surface_mesh<Point> Surface_mesh;
 
@@ -146,6 +152,15 @@ typedef Surface_mesh::Halfedge_index Halfedge_index;
 typedef Surface_mesh::Vertex_index Vertex_index;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
+typedef CGAL::Arrangement_with_history_2<Traits_2> Arrangement_with_history_2;
+// TODO: Figure out how to get Dcel_with_halfedge_regions to work instead of
+// Dcel_with_regions. typedef CGAL::Arr_extended_halfedge<Traits_2, size_t>
+// Dcel_with_halfedge_regions; typedef CGAL::Arrangement_2<Traits_2,
+// Dcel_with_halfedge_regions> Arrangement_with_halfedge_regions_2;
+typedef CGAL::Arr_extended_dcel<Traits_2, size_t, size_t, size_t>
+    Dcel_with_regions;
+typedef CGAL::Arrangement_2<Traits_2, Dcel_with_regions>
+    Arrangement_with_regions_2;
 typedef Traits_2::X_monotone_curve_2 Segment_2;
 typedef std::vector<Point> Polyline;
 typedef std::vector<Polyline> Polylines;
@@ -233,26 +248,29 @@ void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
                                         RT(1000));
 }
 
-Plane unitPlane(const Plane& p) {
-  Vector normal = p.orthogonal_vector();
+template <typename Kernel>
+typename Kernel::Plane_3 unitPlane(const typename Kernel::Plane_3& p) {
+  typedef typename Kernel::Plane_3 Plane_3;
+  typedef typename Kernel::Vector_3 Vector_3;
+  Vector_3 normal = p.orthogonal_vector();
   // We can handle the axis aligned planes exactly.
-  if (normal.direction() == Vector(0, 0, 1).direction()) {
-    return Plane(p.point(), Vector(0, 0, 1));
-  } else if (normal.direction() == Vector(0, 0, -1).direction()) {
-    return Plane(p.point(), Vector(0, 0, -1));
-  } else if (normal.direction() == Vector(0, 1, 0).direction()) {
-    return Plane(p.point(), Vector(0, 1, 0));
-  } else if (normal.direction() == Vector(0, -1, 0).direction()) {
-    return Plane(p.point(), Vector(0, -1, 0));
-  } else if (normal.direction() == Vector(1, 0, 0).direction()) {
-    return Plane(p.point(), Vector(1, 0, 0));
-  } else if (normal.direction() == Vector(-1, 0, 0).direction()) {
-    return Plane(p.point(), Vector(-1, 0, 0));
+  if (normal.direction() == Vector_3(0, 0, 1).direction()) {
+    return Plane_3(p.point(), Vector_3(0, 0, 1));
+  } else if (normal.direction() == Vector_3(0, 0, -1).direction()) {
+    return Plane_3(p.point(), Vector_3(0, 0, -1));
+  } else if (normal.direction() == Vector_3(0, 1, 0).direction()) {
+    return Plane_3(p.point(), Vector_3(0, 1, 0));
+  } else if (normal.direction() == Vector_3(0, -1, 0).direction()) {
+    return Plane_3(p.point(), Vector_3(0, -1, 0));
+  } else if (normal.direction() == Vector_3(1, 0, 0).direction()) {
+    return Plane_3(p.point(), Vector_3(1, 0, 0));
+  } else if (normal.direction() == Vector_3(-1, 0, 0).direction()) {
+    return Plane_3(p.point(), Vector_3(-1, 0, 0));
   } else {
     // But the general case requires an approximation.
-    Vector unit_normal =
+    Vector_3 unit_normal =
         normal / CGAL_NTS approximate_sqrt(normal.squared_length());
-    return Plane(p.point(), unit_normal);
+    return Plane_3(p.point(), unit_normal);
   }
 }
 
@@ -274,6 +292,25 @@ Vector unitVector(const Vector& vector) {
   } else {
     // But the general case requires an approximation.
     Vector unit_vector =
+        vector / CGAL_NTS approximate_sqrt(vector.squared_length());
+    return unit_vector;
+  }
+}
+
+template <typename Vector_2>
+Vector_2 unitVector2(const Vector_2& vector) {
+  // We can handle the axis aligned planes exactly.
+  if (vector.direction() == Vector_2(0, 1).direction()) {
+    return Vector_2(0, 1);
+  } else if (vector.direction() == Vector_2(0, -1).direction()) {
+    return Vector_2(0, -1);
+  } else if (vector.direction() == Vector_2(1, 0).direction()) {
+    return Vector_2(1, 0);
+  } else if (vector.direction() == Vector_2(-1, 0).direction()) {
+    return Vector_2(-1, 0);
+  } else {
+    // But the general case requires an approximation.
+    Vector_2 unit_vector =
         vector / CGAL_NTS approximate_sqrt(vector.squared_length());
     return unit_vector;
   }
@@ -457,17 +494,19 @@ Transformation computeInverseSegmentTransform(const Point& start,
   return Transformation(align * translate(zero - start));
 }
 
-Plane PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
+template <typename Surface_mesh, typename Face_index, typename Plane>
+void PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet,
+                             Plane& plane) {
   const auto h = mesh.halfedge(facet);
-  const Plane plane(mesh.point(mesh.source(h)),
-                    mesh.point(mesh.source(mesh.next(h))),
-                    mesh.point(mesh.source(mesh.next(mesh.next(h)))));
-  return plane;
+  plane =
+      Plane{mesh.point(mesh.source(h)), mesh.point(mesh.source(mesh.next(h))),
+            mesh.point(mesh.source(mesh.next(mesh.next(h))))};
 }
 
+template <typename Plane, typename Surface_mesh>
 bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
   for (const auto& facet : mesh.faces()) {
-    plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+    PlaneOfSurfaceMeshFacet(mesh, facet, plane);
     return true;
   }
   return false;
@@ -488,26 +527,9 @@ Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   return CGAL::NULL_VECTOR;
 }
 
+#include "convert.h"
 #include "polygon_util.h"
 #include "printing.h"
-
-#if 0
-struct Triple_array_traits {
-  struct Equal_3 {
-    bool operator()(const Triple& p, const Triple& q) const { return (p == q); }
-  };
-  struct Less_xyz_3 {
-    bool operator()(const Triple& p, const Triple& q) const {
-      return std::lexicographical_compare(p.begin(), p.end(), q.begin(),
-                                          q.end());
-    }
-  };
-  Equal_3 equal_3_object() const { return Equal_3(); }
-  Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
-};
-#endif
-
-#include "convert.h"
 
 template <typename Vector>
 Vector unitVector(const Vector& vector);
@@ -804,43 +826,129 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
   return it->second;
 }
 
-void simplifyPolygon(Polygon_2& polygon,
-                     std::vector<Polygon_2>& simple_polygons) {
-  for (auto a = polygon.begin(); a < polygon.end() - 2;) {
-    if (polygon.size() >= 3 && CGAL::collinear(a[0], a[1], a[2])) {
-      polygon.erase(a + 1);
-      continue;
-    }
-    ++a;
-  }
-  for (auto a = polygon.begin(); a < polygon.end() - 1;) {
-    if (a[0] == a[1]) {
-      polygon.erase(a + 1);
-      continue;
-    }
-    ++a;
-  }
-  std::set<Point_2> seen_points;
-  for (auto to = polygon.begin(); to != polygon.end(); ++to) {
-    auto [found, created] = seen_points.insert(*to);
-    if (!created) {
-      // This is a duplicate -- cut out the loop.
-      auto from = std::find(polygon.begin(), to, *to);
-      simple_polygons.emplace_back(from, to);
-      to = polygon.erase(from, to);
-      // Should we erase all points on the loop we cut?
-      seen_points.erase(found);
-    }
-  }
-  if (polygon.size() > 0) {
-    simple_polygons.push_back(polygon);
+void polygonToSegments(Polygon_2& polygon, Segments& segments) {
+  Plane base(0, 0, 1, 0);
+  for (size_t nth = 0, limit = polygon.size(); nth < limit; nth++) {
+    const Point_2& a = polygon[nth];
+    const Point_2& b = polygon[(nth + 1) % limit];
+    segments.emplace_back(base.to_3d(a), base.to_3d(b));
   }
 }
 
-void toPolygonsWithHolesFromBoundariesAndHoles(
+void removeRepeatedPointsInPolygon(Polygon_2& polygon) {
+  for (size_t nth = 0, limit = polygon.size(); nth < limit;) {
+    const Point_2& a = polygon[nth];
+    const Point_2& b = polygon[(nth + 1) % limit];
+    if (a == b) {
+      polygon.erase(polygon.begin() + nth);
+      limit--;
+    } else {
+      nth++;
+    }
+  }
+}
+
+void simplifyPolygon(Polygon_2& polygon,
+                     std::vector<Polygon_2>& simple_polygons,
+                     Segments& non_simple) {
+  if (polygon.size() < 3) {
+    polygonToSegments(polygon, non_simple);
+    polygon.clear();
+    return;
+  }
+
+  // Remove duplicate points.
+  for (size_t nth = 0, limit = polygon.size(); nth < limit;) {
+    const Point_2& a = polygon[nth];
+    const Point_2& b = polygon[(nth + 1) % limit];
+
+    if (a == b) {
+      polygon.erase(polygon.begin() + nth);
+      limit--;
+    } else {
+      nth++;
+    }
+  }
+
+  if (polygon.size() < 3) {
+    polygonToSegments(polygon, non_simple);
+    polygon.clear();
+    return;
+  }
+
+  if (polygon.is_simple()) {
+    simple_polygons.push_back(std::move(polygon));
+    polygon.clear();
+    return;
+  }
+
+  // Remove self intersections.
+  std::set<Point_2> seen_points;
+  for (auto to = polygon.begin(); to != polygon.end();) {
+    auto [found, created] = seen_points.insert(*to);
+    if (created) {
+      // Advance iterator to next position.
+      ++to;
+    } else {
+      // This is a duplicate -- cut out the loop.
+      auto from = std::find(polygon.begin(), to, *to);
+      if (from == to) {
+        std::cout << "QQ/Could not find seen point" << std::endl;
+      }
+      Polygon_2 cut(from, to);
+      std::cout << "QQ/Cut loop size=" << cut.size() << std::endl;
+      simplifyPolygon(cut, simple_polygons, non_simple);
+      if (cut.size() != 0) {
+        std::cout << "QQ/cut was not cleared" << std::endl;
+      }
+      for (auto it = from; it != to; ++it) {
+        seen_points.erase(*it);
+      }
+      // Erase advances the iterator to the new position.
+      to = polygon.erase(from, to);
+    }
+  }
+
+  if (polygon.size() < 3) {
+    polygonToSegments(polygon, non_simple);
+    polygon.clear();
+    return;
+  }
+
+  simplifyPolygon(polygon, simple_polygons, non_simple);
+
+  if (polygon.size() != 0) {
+    std::cout << "QQ/polygon was not cleared" << std::endl;
+  }
+
+  for (const auto simple_polygon : simple_polygons) {
+    if (!simple_polygon.is_simple()) {
+      std::cout
+          << "QQ/simplifyPolygon produced non-simple polygon in simple_polygons"
+          << std::endl;
+      print_polygon_nl(simple_polygon);
+    }
+  }
+}
+
+void simplifyPolygon(Polygon_2& polygon,
+                     std::vector<Polygon_2>& simple_polygons) {
+  Segments non_simple;
+  simplifyPolygon(polygon, simple_polygons, non_simple);
+}
+
+bool toPolygonsWithHolesFromBoundariesAndHoles(
     std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
     Polygons_with_holes_2& pwhs) {
   for (auto& boundary : boundaries) {
+    if (boundary.size() == 0) {
+      continue;
+    }
+    if (!boundary.is_simple()) {
+      std::cout << "PWHFBAH/1: ";
+      print_polygon_nl(boundary);
+      return false;
+    }
     if (boundary.orientation() != CGAL::Sign::POSITIVE) {
       boundary.reverse_orientation();
     }
@@ -848,6 +956,11 @@ void toPolygonsWithHolesFromBoundariesAndHoles(
     for (auto& hole : holes) {
       if (hole.size() == 0) {
         continue;
+      }
+      if (!hole.is_simple()) {
+        std::cout << "PWHFBAH/2: ";
+        print_polygon_nl(hole);
+        return false;
       }
       const Point_2& representative_point = hole[0];
       if (boundary.has_on_positive_side(representative_point)) {
@@ -861,214 +974,273 @@ void toPolygonsWithHolesFromBoundariesAndHoles(
     pwhs.push_back(
         Polygon_with_holes_2(boundary, local_holes.begin(), local_holes.end()));
   }
+  return true;
 }
 
-#if 0
-// TODO: Fix this
-
-void convertArrangementToPolygonsWithHolesNonZero(const Arrangement_2& arrangement, Polygons_with_holes_2& out) {
-  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign(
-      CGAL::Sign::ZERO);
-  std::queue<Arrangement_2::Face_const_handle> todo;
-  face_sign[arrangement.unbounded_face()] = CGAL::Sign::NEGATIVE;
-  todo.push(arrangement.unbounded_face());
-
-  while (!todo.empty()) {
-    Arrangement_2::Face_const_handle face = todo.front();
-    CGAL::Sign sign = face_sign[face];
-    switch (sign) {
-      case CGAL::Sign::POSITIVE: {
-        if (face->number_of_outer_ccbs() == 1) {
-          Arrangement_2::Ccb_halfedge_const_circulator start =
-              face->outer_ccb();
-          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-          do {
-            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
-            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
-              face_sign[neighbor] = CGAL::Sign::POSITIVE;
-              todo.push(neighbor);
-            }
-          } while (++edge != start);
-        }
-        for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-             hole != face->holes_end(); ++hole) {
-          Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-          do {
-            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
-            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
-              face_sign[neighbor] = CGAL::Sign::NEGATIVE;
-              todo.push(neighbor);
-            }
-          } while (++edge != start);
-        }
-        break;
-      }
-      case CGAL::Sign::NEGATIVE: {
-        if (face->number_of_outer_ccbs() == 1) {
-          Arrangement_2::Ccb_halfedge_const_circulator start =
-              face->outer_ccb();
-          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-          do {
-            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
-            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
-              face_sign[neighbor] = CGAL::Sign::NEGATIVE;
-              todo.push(neighbor);
-            }
-          } while (++edge != start);
-        }
-        for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-             hole != face->holes_end(); ++hole) {
-          Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-          Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-          do {
-            Arrangement_2::Face_const_handle neighbor = edge->twin()->face();
-            if (face_sign[neighbor] == CGAL::Sign::ZERO) {
-              face_sign[neighbor] = CGAL::Sign::POSITIVE;
-              todo.push(neighbor);
-            }
-          } while (++edge != start);
-        }
-        break;
-      }
-      case CGAL::Sign::ZERO: {
-        std::cout << "Face/zero" << std::endl;
-      }
-    }
-
-    todo.pop();
-  }
-
-  for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
-       face != arrangement.faces_end(); ++face) {
-    if (face->number_of_outer_ccbs() != 1) {
-      continue;
-    }
-    if (face_sign[face] == CGAL::Sign::ZERO) {
-      std::cout << "Unreached face" << std::endl;
-    } else if (face_sign[face] == CGAL::Sign::NEGATIVE) {
-      continue;
-    }
-    Polygon_2 polygon_boundary;
-    std::vector<Polygon_2> polygon_boundaries;
-
-    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-    do {
-      polygon_boundary.push_back(edge->source()->point());
-    } while (++edge != start);
-
-    simplifyPolygon(polygon_boundary, polygon_boundaries);
-
-    std::vector<Polygon_2> polygon_holes;
-    for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-         hole != face->holes_end(); ++hole) {
-      Polygon_2 polygon_hole;
-      Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+template <typename Arrangement_2>
+void analyzeCcb(typename Arrangement_2::Ccb_halfedge_circulator start,
+                size_t& region) {
+  size_t base_region = region;
+  typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+  std::map<typename Arrangement_2::Point_2,
+           typename Arrangement_2::Ccb_halfedge_circulator>
+      seen;
+  do {
+    auto [there, inserted] =
+        seen.insert(std::make_pair(edge->source()->point(), edge));
+    if (!inserted) {
+      // This forms a loop: retrace it with the next region id.
+      size_t subregion = ++region;
+      auto trace = there->second;
+      size_t superregion = trace->data();
       do {
-        polygon_hole.push_back(edge->source()->point());
-      } while (++edge != start);
-
-      simplifyPolygon(polygon_hole, polygon_holes);
+        if (trace->data() == superregion) {
+          trace->set_data(subregion);
+        }
+      } while (++trace != edge);
+      // Update the entry to refer to point replacing the loop.
+      there->second = edge;
     }
+    edge->set_data(base_region);
+  } while (++edge != start);
+}
 
-    toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
-                                              out);
+template <typename Arrangement_2>
+void printCcb(typename Arrangement_2::Ccb_halfedge_circulator start) {
+  typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+  do {
+    std::cout << "p=" << edge->source()->point() << " r=" << edge->data()
+              << std::endl;
+  } while (++edge != start);
+}
+
+template <typename Arrangement_2>
+void analyzeArrangementRegions(Arrangement_2& arrangement) {
+  // Region zero should cover the unbounded face.
+  for (auto edge = arrangement.halfedges_begin();
+       edge != arrangement.halfedges_end(); ++edge) {
+    edge->set_data(0);
+  }
+  size_t region = 0;
+  for (auto face = arrangement.faces_begin(); face != arrangement.faces_end();
+       ++face) {
+    if (face->number_of_outer_ccbs() == 1) {
+      region++;
+      analyzeCcb<Arrangement_2>(face->outer_ccb(), region);
+    }
+    for (auto hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+      region++;
+      analyzeCcb<Arrangement_2>(*hole, region);
+    }
   }
 }
-#endif
 
-void convertArrangementToPolygonsWithHolesEvenOdd(
-    const Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
-  std::queue<Arrangement_2::Face_const_handle> undecided;
-  CGAL::Unique_hash_map<Arrangement_2::Face_const_handle, CGAL::Sign> face_sign;
+template <typename Arrangement_2>
+bool convertArrangementToPolygonsWithHolesEvenOdd(
+    Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out,
+    Segments& non_simple) {
+  analyzeArrangementRegions(arrangement);
 
-  for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
-       face != arrangement.faces_end(); ++face) {
-    if (!face->has_outer_ccb()) {
-      face_sign[face] = CGAL::Sign::NEGATIVE;
-    } else {
-      face_sign[face] = CGAL::Sign::ZERO;
-      undecided.push(face);
-    }
+  bool ok = true;
+  std::map<size_t, CGAL::Sign> region_sign;
+
+  std::set<typename Arrangement_2::Face_handle> current;
+  std::set<typename Arrangement_2::Face_handle> next;
+
+  // FIX: Make this more efficient?
+  for (auto edge = arrangement.halfedges_begin();
+       edge != arrangement.halfedges_end(); ++edge) {
+    region_sign[edge->data()] = CGAL::Sign::ZERO;
   }
 
-  while (!undecided.empty()) {
-    Arrangement_2::Face_const_handle face = undecided.front();
-    undecided.pop();
-    CGAL::Sign sign = face_sign[face];
-    if (sign == CGAL::Sign::POSITIVE) {
-      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-           hole != face->holes_end(); ++hole) {
-        face_sign[(*hole)->twin()->face()] = CGAL::Sign::NEGATIVE;
-      }
-      continue;
-    } else if (sign == CGAL::Sign::NEGATIVE) {
-      for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-           hole != face->holes_end(); ++hole) {
-        face_sign[(*hole)->twin()->face()] = CGAL::Sign::POSITIVE;
-      }
-      continue;
-    }
-    bool decided = false;
-    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-    do {
-      if (face_sign[edge->twin()->face()] == CGAL::Sign::NEGATIVE) {
-        face_sign[face] = CGAL::Sign::POSITIVE;
-        decided = true;
-        break;
-      }
-    } while (++edge != start);
-    if (!decided) {
-      edge = start;
-      do {
-        if (face_sign[edge->twin()->face()] == CGAL::Sign::POSITIVE) {
-          face_sign[face] = CGAL::Sign::NEGATIVE;
-          decided = true;
-          break;
-        }
-      } while (++edge != start);
-    }
-    if (!decided) {
-      undecided.push(face);
-    }
+  // The unbounded faces all and only have region zero: seed these as negative.
+  region_sign[0] = CGAL::Sign::NEGATIVE;
+  // Set up an initial negative front expanding from the unbounded faces.
+  CGAL::Sign phase = CGAL::Sign::NEGATIVE;
+  CGAL::Sign unphase = CGAL::Sign::POSITIVE;
+  for (auto face = arrangement.unbounded_faces_begin();
+       face != arrangement.unbounded_faces_end(); ++face) {
+    current.insert(face);
   }
 
-  for (Arrangement_2::Face_const_iterator face = arrangement.faces_begin();
-       face != arrangement.faces_end(); ++face) {
-    if (face_sign[face] == CGAL::Sign::NEGATIVE ||
-        face->number_of_outer_ccbs() != 1) {
+  // Propagate the wavefront.
+  while (!current.empty()) {
+    for (auto& face : current) {
+      if (face->number_of_outer_ccbs() == 1) {
+        typename Arrangement_2::Ccb_halfedge_circulator start =
+            face->outer_ccb();
+        typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+        do {
+          const auto twin = edge->twin();
+          if (region_sign[twin->data()] == CGAL::Sign::ZERO) {
+            region_sign[twin->data()] = unphase;
+            next.insert(twin->face());
+          }
+        } while (++edge != start);
+      }
+
+      for (auto hole = face->holes_begin(); hole != face->holes_end(); ++hole) {
+        typename Arrangement_2::Ccb_halfedge_circulator start = *hole;
+        typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+        do {
+          auto twin = edge->twin();
+          if (edge->face() == twin->face()) {
+            // We can't step into degenerate antenna.
+            continue;
+          }
+          if (region_sign[twin->data()] == CGAL::Sign::ZERO) {
+            region_sign[twin->data()] = unphase;
+            next.insert(twin->face());
+          }
+        } while (++edge != start);
+      }
+    }
+    current = std::move(next);
+    next.clear();
+
+    CGAL::Sign next_phase = unphase;
+    unphase = phase;
+    phase = next_phase;
+  }
+
+  for (auto face = arrangement.faces_begin(); face != arrangement.faces_end();
+       ++face) {
+    if (face->is_unbounded() || face->number_of_outer_ccbs() != 1) {
       continue;
     }
-    Polygon_2 polygon_boundary;
-
-    Arrangement_2::Ccb_halfedge_const_circulator start = face->outer_ccb();
-    Arrangement_2::Ccb_halfedge_const_circulator edge = start;
+    std::map<size_t, Polygon_2> polygon_boundary_by_region;
+    typename Arrangement_2::Ccb_halfedge_circulator start = face->outer_ccb();
+    typename Arrangement_2::Ccb_halfedge_circulator edge = start;
     do {
-      polygon_boundary.push_back(edge->source()->point());
+      polygon_boundary_by_region[edge->data()].push_back(
+          edge->source()->point());
     } while (++edge != start);
 
     std::vector<Polygon_2> polygon_boundaries;
-    simplifyPolygon(polygon_boundary, polygon_boundaries);
-
-    std::vector<Polygon_2> polygon_holes;
-    for (Arrangement_2::Hole_const_iterator hole = face->holes_begin();
-         hole != face->holes_end(); ++hole) {
-      Polygon_2 polygon_hole;
-      Arrangement_2::Ccb_halfedge_const_circulator start = *hole;
-      Arrangement_2::Ccb_halfedge_const_circulator edge = start;
-      do {
-        polygon_hole.push_back(edge->source()->point());
-      } while (++edge != start);
-
-      simplifyPolygon(polygon_hole, polygon_holes);
+    for (auto& [region, polygon] : polygon_boundary_by_region) {
+      if (region_sign[region] != CGAL::Sign::POSITIVE) {
+        continue;
+      }
+      removeRepeatedPointsInPolygon(polygon);
+      if (polygon.size() < 3) {
+        continue;
+      }
+      polygon_boundaries.push_back(std::move(polygon));
     }
 
-    toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes,
-                                              out);
+    if (polygon_boundaries.empty()) {
+      continue;
+    }
+
+    std::map<size_t, Polygon_2> polygon_hole_by_region;
+    for (typename Arrangement_2::Hole_iterator hole = face->holes_begin();
+         hole != face->holes_end(); ++hole) {
+      typename Arrangement_2::Ccb_halfedge_circulator start = *hole;
+      typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+      do {
+        polygon_hole_by_region[edge->data()].push_back(edge->source()->point());
+      } while (++edge != start);
+    }
+
+    std::vector<Polygon_2> polygon_holes;
+    for (auto& [region, polygon] : polygon_hole_by_region) {
+      Polygon_2 original = polygon;
+      removeRepeatedPointsInPolygon(polygon);
+      if (polygon.size() < 3) {
+        continue;
+      }
+      polygon_holes.push_back(std::move(polygon));
+    }
+
+    if (!toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
+                                                   polygon_holes, out)) {
+      ok = false;
+    }
   }
+  return ok;
+}
+
+template <typename Arrangement_2>
+bool convertArrangementToPolygonsWithHolesEvenOdd(
+    Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
+  Segments non_simple;
+  return convertArrangementToPolygonsWithHolesEvenOdd(arrangement, out,
+                                                      non_simple);
+}
+
+// FIX: handle holes properly.
+template <typename Arrangement_2>
+bool convertArrangementToPolygonsWithHolesNonZero(
+    Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out,
+    Segments& non_simple) {
+  analyzeArrangementRegions(arrangement);
+
+  bool ok = true;
+
+  std::set<typename Arrangement_2::Face_handle> current;
+  std::set<typename Arrangement_2::Face_handle> next;
+
+  for (auto face = arrangement.faces_begin(); face != arrangement.faces_end();
+       ++face) {
+    if (face->is_unbounded() || face->number_of_outer_ccbs() != 1) {
+      continue;
+    }
+    std::map<size_t, Polygon_2> polygon_boundary_by_region;
+    typename Arrangement_2::Ccb_halfedge_circulator start = face->outer_ccb();
+    typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+    do {
+      polygon_boundary_by_region[edge->data()].push_back(
+          edge->source()->point());
+    } while (++edge != start);
+
+    std::vector<Polygon_2> polygon_boundaries;
+    for (auto& [region, polygon] : polygon_boundary_by_region) {
+      removeRepeatedPointsInPolygon(polygon);
+      if (polygon.size() < 3) {
+        continue;
+      }
+      polygon_boundaries.push_back(std::move(polygon));
+    }
+
+    if (polygon_boundaries.empty()) {
+      continue;
+    }
+
+    std::map<size_t, Polygon_2> polygon_hole_by_region;
+    for (typename Arrangement_2::Hole_iterator hole = face->holes_begin();
+         hole != face->holes_end(); ++hole) {
+      typename Arrangement_2::Ccb_halfedge_circulator start = *hole;
+      typename Arrangement_2::Ccb_halfedge_circulator edge = start;
+      do {
+        polygon_hole_by_region[edge->data()].push_back(edge->source()->point());
+      } while (++edge != start);
+    }
+
+    std::vector<Polygon_2> polygon_holes;
+    for (auto& [region, polygon] : polygon_hole_by_region) {
+      Polygon_2 original = polygon;
+      removeRepeatedPointsInPolygon(polygon);
+      if (polygon.size() < 3) {
+        continue;
+      }
+      polygon_holes.push_back(std::move(polygon));
+    }
+
+    if (!toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
+                                                   polygon_holes, out)) {
+      ok = false;
+    }
+  }
+
+  return ok;
+}
+
+template <typename Arrangement_2>
+bool convertArrangementToPolygonsWithHolesNonZero(
+    Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
+  Segments non_simple;
+  return convertArrangementToPolygonsWithHolesNonZero(arrangement, out,
+                                                      non_simple);
 }
 
 void PlanarSurfaceMeshToPolygonsWithHoles(
@@ -1078,7 +1250,7 @@ void PlanarSurfaceMeshToPolygonsWithHoles(
   typedef Traits_2::X_monotone_curve_2 Segment_2;
   typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
 
-  Arrangement_2 arrangement;
+  Arrangement_with_regions_2 arrangement;
 
   std::set<std::vector<Kernel::FT>> segments;
 
@@ -1120,7 +1292,7 @@ void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
       continue;
     }
     // Do we really need an arrangement here?
-    Arrangement_2 arrangement;
+    Arrangement_with_regions_2 arrangement;
     Halfedge_index edge = start;
     do {
       Segment_2 segment{plane.to_2d(mesh.point(mesh.source(edge))),
@@ -1930,12 +2102,14 @@ void insetOfPolygonWithHoles(
   }
 }
 
+template <typename Surface_mesh, typename Face_index, typename Plane>
 Plane ensureFacetPlane(const Surface_mesh& mesh,
                        std::unordered_map<Face_index, Plane>& facet_to_plane,
                        std::unordered_set<Plane>& planes, Face_index facet) {
   auto it = facet_to_plane.find(facet);
   if (it == facet_to_plane.end()) {
-    Plane facet_plane = PlaneOfSurfaceMeshFacet(mesh, facet);
+    Plane facet_plane;
+    PlaneOfSurfaceMeshFacet(mesh, facet, facet_plane);
     // We canonicalize the planes so that the 2d projections match.
     auto canonical_plane = planes.find(facet_plane);
     if (canonical_plane == planes.end()) {
@@ -1972,7 +2146,7 @@ void convertSurfaceMeshFacesToArrangements(
       continue;
     }
     if (use_unit_planes) {
-      facet_plane = unitPlane(facet_plane);
+      facet_plane = unitPlane<Kernel>(facet_plane);
     }
     Arrangement_2& arrangement = arrangements[facet_plane];
     Halfedge_index edge = start;
@@ -2188,11 +2362,11 @@ void unique_points(std::vector<Point>& points) {
   points.erase(std::unique(points.begin(), points.end()), points.end());
 }
 
-void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
+bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
                                            const Plane& plane,
                                            Polygons_with_holes_2& pwhs) {
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(mesh);
-  Arrangement_2 arrangement;
+  Arrangement_with_regions_2 arrangement;
   Polylines polylines;
   slicer(plane, std::back_inserter(polylines));
   for (const auto& polyline : polylines) {
@@ -2206,10 +2380,16 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
       if (source == target) {
         continue;
       }
-      insert(arrangement, Segment_2(source, target));
+      Segment_2 segment(source, target);
+      insert(arrangement, segment);
     }
   }
-  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs);
+  if (!convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs)) {
+    std::cout << "QQ/SurfaceMeshSectionToPolygonsWithHoles/failure: "
+              << std::setprecision(20) << std::endl;
+    return false;
+  }
+  return true;
 }
 
 #include "Approximate.h"
@@ -2252,6 +2432,7 @@ void SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "MakeUnitSphere.h"
 #include "Offset.h"
 #include "Outline.h"
+#include "Reconstruct.h"
 #include "Remesh.h"
 #include "Seam.h"
 #include "Section.h"
@@ -2603,6 +2784,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
+  emscripten::function("Reconstruct", &Reconstruct,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());

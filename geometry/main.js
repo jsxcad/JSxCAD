@@ -66,6 +66,7 @@ export { demesh } from './demesh.js';
 export { dilateXY } from './dilateXY.js';
 export { Disjoint, disjoint, fit, fitTo } from './disjoint.js';
 export { disorientSegment } from './disorientSegment.js';
+export { distance } from './vector.js';
 export { drop } from './drop.js';
 export { each } from './each.js';
 export { toOrientedFaceEdgesList } from './eachEdge.js';
@@ -215,6 +216,7 @@ export {
   RZ,
   ref,
 } from './Ref.js';
+export { reconstruct } from './reconstruct.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
 export {

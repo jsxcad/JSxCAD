@@ -28,6 +28,8 @@ int Fill(Geometry* geometry) {
   if (points.size() >= 3) {
     // Establish an initial support plane.
     Plane base(Point(0, 0, 0), Vector(0, 0, 1));
+#if 1
+    // TODO: Check what problem this solves.
     for (auto a = points.begin(); a != points.end(); ++a) {
       for (auto b = std::next(a); b != points.end(); ++b) {
         for (auto c = std::next(b); c != points.end(); ++c) {
@@ -42,6 +44,7 @@ int Fill(Geometry* geometry) {
         }
       }
     }
+#endif
     bool has_common_plane = true;
     for (auto p = points.begin(); p != points.end(); ++p) {
       if (!base.has_on(*p)) {
@@ -53,7 +56,7 @@ int Fill(Geometry* geometry) {
       // Generally we expect all of the segments to lie in a common plane.
       planes.insert(base);
     } else {
-      // This is very inefficient.
+      // TODO: Use efficient RANSAC.
       for (auto a = points.begin(); a != points.end(); ++a) {
         for (auto b = std::next(a); b != points.end(); ++b) {
           for (auto c = std::next(b); c != points.end(); ++c) {
@@ -65,7 +68,7 @@ int Fill(Geometry* geometry) {
               // Prefer upward facing planes.
               plane = plane.opposite();
             }
-            plane = unitPlane(plane);
+            plane = unitPlane<Kernel>(plane);
             planes.insert(plane);
           }
         }
@@ -75,39 +78,45 @@ int Fill(Geometry* geometry) {
 
   // The planes are induced -- construct the arrangements.
 
-  std::unordered_map<Plane, Arrangement_2> arrangements;
+  std::unordered_map<Plane, Arrangement_with_regions_2> arrangements;
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
+        std::vector<Segment_2> s2s;
         for (Segment s3 : geometry->segments(nth)) {
           if (s3.source() == s3.target()) {
             continue;
           }
           for (const auto& plane : planes) {
             if (plane.has_on(s3.source()) && plane.has_on(s3.target())) {
-              Arrangement_2& arrangement = arrangements[plane];
+              Arrangement_with_regions_2& arrangement = arrangements[plane];
               Segment_2 s2(plane.to_2d(s3.source()), plane.to_2d(s3.target()));
               if (s2.source() == s2.target()) {
                 continue;
               }
               insert(arrangement, s2);
+              s2s.push_back(s2);
             }
           }
         }
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        Arrangement_2& arrangement = arrangements[geometry->plane(nth)];
+        Arrangement_with_regions_2& arrangement =
+            arrangements[geometry->plane(nth)];
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
           for (auto it = polygon.outer_boundary().edges_begin();
                it != polygon.outer_boundary().edges_end(); ++it) {
-            insert(arrangement, *it);
+            // const CGAL::Segment_2<CGAL::Epeck>& edge = *it;
+            const Segment_2& edge = *it;
+            insert(arrangement, edge);
           }
           for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
                ++hole) {
             for (auto it = hole->edges_begin(); it != hole->edges_end(); ++it) {
-              insert(arrangement, *it);
+              const Segment_2& edge = *it;
+              insert(arrangement, edge);
             }
           }
         }
@@ -118,15 +127,16 @@ int Fill(Geometry* geometry) {
 
   // Convert the arrangements to polygons.
 
-  for (auto entry : arrangements) {
-    const Plane& plane = entry.first;
+  int non_simple_faces = geometry->add(GEOMETRY_SEGMENTS);
+
+  for (auto& [plane, arrangement] : arrangements) {
     int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
     geometry->plane(target) = plane;
     geometry->setIdentityTransform(target);
     std::vector<Polygon_with_holes_2> polygons;
-    Arrangement_2& arrangement = entry.second;
-    convertArrangementToPolygonsWithHolesEvenOdd(arrangement,
-                                                 geometry->pwh(target));
+    convertArrangementToPolygonsWithHolesEvenOdd(
+        arrangement, geometry->pwh(target),
+        geometry->segments(non_simple_faces));
   }
 
   geometry->transformToLocalFrame();
