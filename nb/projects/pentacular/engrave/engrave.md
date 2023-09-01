@@ -7,7 +7,7 @@ const unYetGul = 'https://jsxcad.js.org/ttf/UnYetgul.ttf';
 ```
 
 ```JavaScript
-const text = await control('Engraving', '輝');
+const text = control('Engraving', '輝');
 ```
 
 ![Image](engrave.md.model.png)
@@ -15,7 +15,7 @@ const text = await control('Engraving', '輝');
 Model
 
 ```JavaScript
-const model = await Text(unYetGul, text, 25)
+const model = Text(unYetGul, text, 25)
   .align('xy')
   .cutFrom(Box(30, 26))
   .view()
@@ -27,5 +27,5 @@ const model = await Text(unYetGul, text, 25)
 Section Inset
 
 ```JavaScript
-const inset = await model.inset(0.5).gridView().note('Section Inset');
+const inset = model.inset(0.5).gridView().note('Section Inset');
 ```

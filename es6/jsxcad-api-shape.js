@@ -448,7 +448,7 @@ const registerMethod3 = (
     (...args) =>
     async (shape) => {
       try {
-        console.log(`QQ/method3: ${names} shape=${shape} args=${args}`);
+        // console.log(`QQ/method3: ${names} shape=${shape} args=${args}`);
         if (signature.includes('shape') || signature.includes('input')) {
           throw Error('Received unexpected Shape');
         }

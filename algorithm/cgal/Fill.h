@@ -127,16 +127,13 @@ int Fill(Geometry* geometry) {
 
   // Convert the arrangements to polygons.
 
-  int non_simple_faces = geometry->add(GEOMETRY_SEGMENTS);
-
   for (auto& [plane, arrangement] : arrangements) {
     int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
     geometry->plane(target) = plane;
     geometry->setIdentityTransform(target);
     std::vector<Polygon_with_holes_2> polygons;
-    convertArrangementToPolygonsWithHolesEvenOdd(
-        arrangement, geometry->pwh(target),
-        geometry->segments(non_simple_faces));
+    convertArrangementToPolygonsWithHolesEvenOdd(arrangement,
+                                                 geometry->pwh(target));
   }
 
   geometry->transformToLocalFrame();

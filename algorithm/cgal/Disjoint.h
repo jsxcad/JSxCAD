@@ -1,26 +1,22 @@
 // This tries to make the largest disjoints first.
 int disjointBackward(Geometry* geometry, emscripten::val getIsMasked,
                      bool exact) {
-  std::cout << "QQ/disjointBackward/1" << std::endl;
   int size = geometry->size();
 
   std::vector<bool> is_masked;
   is_masked.resize(size);
 
-  geometry->removeEmptyMeshes();
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->removeEmptyMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
-  std::cout << "QQ/disjointBackward/2" << std::endl;
-
   for (int start = 0; start < size - 1; start++) {
     switch (geometry->type(start)) {
       case GEOMETRY_MESH: {
-        std::cout << "QQ/disjointBackward/3" << std::endl;
         if (geometry->is_empty_mesh(start)) {
           continue;
         }
@@ -154,7 +150,6 @@ int disjointBackward(Geometry* geometry, emscripten::val getIsMasked,
 // This tries to make the smallest disjoints.
 int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
                     bool exact) {
-  std::cout << "QQ/disjointForward/1" << std::endl;
   int size = geometry->size();
   if (size < 2) {
     // Already disjoint.
@@ -164,21 +159,17 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
   std::vector<bool> is_masked;
   is_masked.resize(size);
 
-  std::cout << "QQ/disjointForward/2" << std::endl;
-  geometry->removeEmptyMeshes();
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->removeEmptyMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
-  std::cout << "QQ/disjointForward/3" << std::endl;
   geometry->computeBounds();
-  std::cout << "QQ/disjointForward/4" << std::endl;
 
   for (int start = size - 2; start >= 0; start--) {
     switch (geometry->type(start)) {
       case GEOMETRY_MESH: {
-        std::cout << "QQ/disjointForward/5" << std::endl;
         for (int nth = start + 1; nth < size; nth++) {
           if (is_masked[nth]) {
             continue;
@@ -189,9 +180,7 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-              std::cout << "QQ/disjointForward/6" << std::endl;
               if (exact) {
-                std::cout << "QQ/disjointForward/6/exact" << std::endl;
                 Surface_mesh cutMeshCopy(geometry->mesh(nth));
                 if (!CGAL::Polygon_mesh_processing::
                         corefine_and_compute_difference(
@@ -203,7 +192,6 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
                   return STATUS_ZERO_THICKNESS;
                 }
               } else {
-                std::cout << "QQ/disjointForward/6/manifold" << std::endl;
                 // TODO: Optimize out unnecessary conversions.
                 manifold::Manifold target_manifold;
                 buildManifoldFromSurfaceMesh(geometry->mesh(start),
@@ -215,9 +203,7 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
                 buildSurfaceMeshFromManifold(target_manifold,
                                              geometry->mesh(start));
               }
-              std::cout << "QQ/disjointForward/7" << std::endl;
               geometry->updateBounds3(start);
-              std::cout << "QQ/disjointForward/8" << std::endl;
               break;
             }
             case GEOMETRY_SEGMENTS: {
@@ -231,12 +217,10 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
             }
           }
         }
-        std::cout << "QQ/disjointForward/9" << std::endl;
         demesh(geometry->mesh(start));
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        std::cout << "QQ/disjointForward/10" << std::endl;
         for (int nth = start + 1; nth < size; nth++) {
           if (is_masked[nth]) {
             continue;
@@ -266,7 +250,6 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
         break;
       }
       case GEOMETRY_SEGMENTS: {
-        std::cout << "QQ/disjointForward/11" << std::endl;
         for (int nth = start + 1; nth < size; nth++) {
           if (is_masked[nth]) {
             continue;
@@ -293,7 +276,6 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
         break;
       }
       case GEOMETRY_POINTS: {
-        std::cout << "QQ/disjointForward/12" << std::endl;
         // TODO: Support disjunction by volumes, segments, polygons.
         break;
       }
@@ -302,14 +284,12 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
         break;
       }
       case GEOMETRY_UNKNOWN: {
-        std::cout << "QQ/disjointForward/13" << std::endl;
         std::cout << "Unknown type for Disjoint at " << start << std::endl;
         return STATUS_INVALID_INPUT;
       }
     }
   }
 
-  std::cout << "QQ/disjointForward/14" << std::endl;
   geometry->removeEmptyMeshes();
   geometry->copyGeneralPolygonSetsToPolygonsWithHoles();
   geometry->transformToLocalFrame();
