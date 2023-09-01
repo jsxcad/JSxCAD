@@ -28,7 +28,7 @@ int Fill(Geometry* geometry) {
   if (points.size() >= 3) {
     // Establish an initial support plane.
     Plane base(Point(0, 0, 0), Vector(0, 0, 1));
-#if 1
+#if 0
     // TODO: Check what problem this solves.
     for (auto a = points.begin(); a != points.end(); ++a) {
       for (auto b = std::next(a); b != points.end(); ++b) {
@@ -108,7 +108,6 @@ int Fill(Geometry* geometry) {
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
           for (auto it = polygon.outer_boundary().edges_begin();
                it != polygon.outer_boundary().edges_end(); ++it) {
-            // const CGAL::Segment_2<CGAL::Epeck>& edge = *it;
             const Segment_2& edge = *it;
             insert(arrangement, edge);
           }
