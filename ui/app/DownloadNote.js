@@ -1,5 +1,3 @@
-/* global Blob */
-
 import * as PropTypes from 'prop-types';
 
 import React, { createRef } from 'react';

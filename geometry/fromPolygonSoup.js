@@ -1,8 +1,4 @@
-import {
-  deletePendingSurfaceMeshes,
-  fromPolygonSoup as fromPolygonSoupWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
+import { fromPolygonSoup as fromPolygonSoupWithCgal } from '@jsxcad/algorithm-cgal';
 import { taggedGroup } from './tagged/taggedGroup.js';
 
 export const fromPolygonSoup = (
@@ -29,6 +25,5 @@ export const fromPolygonSoup = (
     wrapAbsoluteOffset,
     cornerThreshold
   );
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

@@ -1,13 +1,10 @@
-import {
-  deletePendingSurfaceMeshes,
-  unfold as unfoldWithCgal,
-} from '@jsxcad/algorithm-cgal';
 import { hasTypeGhost, isNotTypeGhost } from './tagged/type.js';
 
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
+import { unfold as unfoldWithCgal } from '@jsxcad/algorithm-cgal';
 
 const filterInputs = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
@@ -22,6 +19,5 @@ export const unfold = (inputGeometry) => {
   for (let nth = 0; nth < count; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs, ...ghosts);
 };

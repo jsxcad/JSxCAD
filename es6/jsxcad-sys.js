@@ -1206,7 +1206,6 @@ const watchFileRead = async (thunk) => {
 const files = new Map();
 
 const clearFileCache = () => {
-  console.log(`QQ/clearFileCache`);
   files.clear();
 };
 

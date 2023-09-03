@@ -1,8 +1,4 @@
-import {
-  computeToolpath as computeToolpathWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { computeToolpath as computeToolpathWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
@@ -34,6 +30,5 @@ export const computeToolpath = (
     annealingMin,
     annealingDecay
   );
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };

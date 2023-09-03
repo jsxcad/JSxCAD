@@ -1,3 +1,4 @@
+/*
 import { getCgal } from './getCgal.js';
 
 const equals = ([ax, ay, az], [bx, by, bz]) =>
@@ -50,3 +51,4 @@ export const fromSurfaceMeshToGraph = (mesh) => {
     throw Error(error);
   }
 };
+*/

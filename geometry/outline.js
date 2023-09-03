@@ -1,10 +1,6 @@
-import {
-  deletePendingSurfaceMeshes,
-  outline as outlineWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
+import { outline as outlineWithCgal } from '@jsxcad/algorithm-cgal';
 import { replacer } from './tagged/visit.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
@@ -21,6 +17,5 @@ export const outline = (geometry, selections = []) => {
     linearize(toConcreteGeometry(selection), filter, inputs);
   }
   const outputs = outlineWithCgal(inputs, count);
-  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

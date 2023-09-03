@@ -7,6 +7,7 @@ int disjointBackward(Geometry* geometry, emscripten::val getIsMasked,
   is_masked.resize(size);
 
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->removeEmptyMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
@@ -159,6 +160,7 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
   is_masked.resize(size);
 
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->removeEmptyMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
@@ -168,9 +170,6 @@ int disjointForward(Geometry* geometry, emscripten::val getIsMasked,
   for (int start = size - 2; start >= 0; start--) {
     switch (geometry->type(start)) {
       case GEOMETRY_MESH: {
-        if (geometry->is_empty_mesh(start)) {
-          continue;
-        }
         for (int nth = start + 1; nth < size; nth++) {
           if (is_masked[nth]) {
             continue;

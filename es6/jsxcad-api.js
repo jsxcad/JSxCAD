@@ -470,11 +470,13 @@ registerDynamicModule(
   './jsxcad-api-v1-font.js',
   '../v1-font/main.js'
 );
+/*
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-ldraw',
   './jsxcad-api-v1-ldraw.js',
   '../v1-ldraw/main.js'
 );
+*/
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-math',
   './jsxcad-api-v1-math.js',

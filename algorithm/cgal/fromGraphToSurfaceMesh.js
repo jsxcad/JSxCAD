@@ -1,3 +1,4 @@
+/*
 import { getCgal } from './getCgal.js';
 
 const X = 0;
@@ -46,7 +47,7 @@ export const fromGraphToSurfaceMesh = (graph) => {
           points.push(graph.points[edgeNode.point]);
           return vertexIndex[edgeNode.point];
         });
-        if (faceIndex === 4294967295 /* -1 */) {
+        if (faceIndex === 4294967295 // -1 //) {
           throw Error(`Face could not be added: ${JSON.stringify(points)}`);
         }
       });
@@ -66,3 +67,4 @@ export const fromGraphToSurfaceMesh = (graph) => {
     throw Error(error);
   }
 };
+*/

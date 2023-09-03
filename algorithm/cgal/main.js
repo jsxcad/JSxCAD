@@ -26,9 +26,6 @@ export {
   STATUS_ZERO_THICKNESS,
   STATUS_UNCHANGED,
 } from './status.js';
-export {
-  deletePendingSurfaceMeshes /*, toSurfaceMesh */,
-} from './toSurfaceMesh.js';
 export { graphSymbol, surfaceMeshSymbol } from './symbols.js';
 export { cast } from './cast.js';
 export { clip } from './clip.js';
@@ -44,7 +41,6 @@ export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
 export { convexHull } from './convexHull.js';
 export { cut } from './cut.js';
 export { deform } from './deform.js';
-export { deleteSurfaceMesh } from './deleteSurfaceMesh.js';
 export { demesh } from './demesh.js';
 export { dilateXY } from './dilateXY.js';
 export { disjoint } from './disjoint.js';
@@ -58,7 +54,7 @@ export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
-export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
+// export { fromSurfaceMeshToGraph } from './fromSurfaceMeshToGraph.js';
 export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fuse } from './fuse.js';
 export { generateEnvelope } from './generateEnvelope.js';
@@ -76,6 +72,7 @@ export { makeOcctBox } from './occt.js';
 export { makeOcctSphere } from './occt.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
+export { reconstruct } from './reconstruct.js';
 export { remesh } from './remesh.js';
 export { seam } from './seam.js';
 export { section } from './section.js';

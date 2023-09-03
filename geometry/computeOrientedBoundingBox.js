@@ -1,8 +1,4 @@
-import {
-  computeOrientedBoundingBox as computeOrientedBoundingBoxWithCgal,
-  deletePendingSurfaceMeshes,
-} from '@jsxcad/algorithm-cgal';
-
+import { computeOrientedBoundingBox as computeOrientedBoundingBoxWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
@@ -17,6 +13,5 @@ export const computeOrientedBoundingBox = (geometry) => {
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = computeOrientedBoundingBoxWithCgal(inputs);
-  deletePendingSurfaceMeshes();
   return outputs[0];
 };

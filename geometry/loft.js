@@ -1,10 +1,6 @@
-import {
-  deletePendingSurfaceMeshes,
-  loft as loftWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
+import { loft as loftWithCgal } from '@jsxcad/algorithm-cgal';
 import { taggedGroup } from './tagged/taggedGroup.js';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
@@ -20,7 +16,6 @@ export const Loft = (geometries, { open = false }) => {
     linearize(toConcreteGeometry(geometry), filter, inputs);
   }
   const outputs = loftWithCgal(inputs, !open);
-  deletePendingSurfaceMeshes();
   return taggedGroup({}, ...outputs);
 };
 

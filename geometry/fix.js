@@ -1,8 +1,4 @@
-import {
-  deletePendingSurfaceMeshes,
-  fix as fixWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
+import { fix as fixWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
@@ -16,6 +12,5 @@ export const fix = (geometry, selfIntersection = true) => {
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
   const outputs = fixWithCgal(inputs, selfIntersection);
-  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };

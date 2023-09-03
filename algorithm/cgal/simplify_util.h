@@ -1,7 +1,7 @@
 #pragma once
 
 #include <CGAL/Simple_cartesian.h>
-// #include <CGAL/Polyhedron_3.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_filter.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
@@ -12,17 +12,6 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-
-// typedef CGAL::Simple_cartesian<double>                          Kernel;
-// typedef Kernel::Point_3                                         Point_3;
-// typedef CGAL::Polyhedron_3<Kernel>                              Surface_mesh;
-// typedef boost::graph_traits<Surface_mesh>::vertex_descriptor
-// vertex_descriptor; typedef
-// boost::graph_traits<Surface_mesh>::halfedge_descriptor  halfedge_descriptor;
-// typedef boost::graph_traits<Surface_mesh>::edge_descriptor edge_descriptor;
-// typedef boost::graph_traits<Surface_mesh>::edge_iterator edge_iterator;
-// namespace SMS = CGAL::Surface_mesh_simplification;
-// BGL property map which indicates whether an edge is marked as non-removable
 
 namespace {
 struct Constrained_edge_map {
@@ -47,7 +36,8 @@ struct Constrained_edge_map {
 };
 }  // namespace
 
-void simplify(double angle_threshold, Surface_mesh& mesh) {
+void simplify(double angle_threshold, Surface_mesh& mesh,
+              bool use_bounded_normal_change_filter = false) {
   boost::unordered_map<Vertex_index, Cartesian_surface_mesh::Vertex_index>
       vertex_map;
 
@@ -99,10 +89,20 @@ void simplify(double angle_threshold, Surface_mesh& mesh) {
   CGAL::get_default_random() = CGAL::Random(0);
   std::srand(0);
 
+  CGAL::Surface_mesh_simplification::Bounded_normal_change_filter<> filter;
+
+  auto parameters = CGAL::parameters::edge_is_constrained_map(constraints_map)
+                        .get_placement(placement);
+
+  auto bounded_normal_change_parameters =
+      CGAL::parameters::edge_is_constrained_map(constraints_map)
+          .get_placement(placement)
+          .filter(filter);
+
   const int nb_removed_edges = CGAL::Surface_mesh_simplification::edge_collapse(
       csm, stop,
-      CGAL::parameters::edge_is_constrained_map(constraints_map)
-          .get_placement(placement));
+      use_bounded_normal_change_filter ? bounded_normal_change_parameters
+                                       : parameters);
 
   mesh.clear();
   copy_face_graph(csm, mesh,

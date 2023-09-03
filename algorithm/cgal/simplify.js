@@ -9,7 +9,8 @@ export const simplify = (inputs, cornerThreshold, eps) =>
       cgalGeometry,
       cornerThreshold,
       eps !== undefined,
-      eps || 0
+      eps || 0,
+      false
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

@@ -2784,7 +2784,7 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 });
 });
 
-/* global Blob, alert */
+/* global alert */
 const downloadFile = async ({
   filename,
   path,

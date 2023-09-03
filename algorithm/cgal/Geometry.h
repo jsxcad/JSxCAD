@@ -198,6 +198,10 @@ class Geometry {
     return *epick_meshes_[nth];
   }
 
+  void copyEpickMeshToEpeckMesh(int nth) {
+    copy_face_graph(*epick_meshes_[nth], mesh(nth));
+  }
+
   bool has_aabb_tree(int nth) { return aabb_trees_[nth] != nullptr; }
 
   void update_aabb_tree(int nth) {
@@ -244,7 +248,7 @@ class Geometry {
 
   bool has_input_segments(int nth) { return input_segments_[nth] != nullptr; }
 
-  std::vector<Segment>& input_segments(int nth) {
+  Segments& input_segments(int nth) {
     if (!has_input_segments(nth)) {
       input_segments_[nth].reset(new Segments);
     }
@@ -386,7 +390,7 @@ class Geometry {
     admitPlane(local_plane, fillPlane);
     Polygons_with_holes_2 polygons;
     admitPolygonsWithHoles(polygons, fillBoundary, fillHole);
-    plane(nth) = unitPlane(local_plane);
+    plane(nth) = unitPlane<Kernel>(local_plane);
     pwh(nth) = std::move(polygons);
   }
 
@@ -395,7 +399,7 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_mesh(nth) && IsPlanarSurfaceMesh(plane(nth), mesh(nth))) {
         setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
-        plane(nth) = unitPlane(plane(nth));
+        plane(nth) = unitPlane<Kernel>(plane(nth));
         Polygons_with_holes_2 polygons_with_holes;
         PlanarSurfaceMeshToPolygonsWithHoles(plane(nth), mesh(nth),
                                              polygons_with_holes);
@@ -577,8 +581,8 @@ class Geometry {
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           Transformation local_to_absolute_transform = transform(nth);
           Plane local_plane = plane(nth);
-          Plane absolute_plane =
-              unitPlane(local_plane.transform(local_to_absolute_transform));
+          Plane absolute_plane = unitPlane<Kernel>(
+              local_plane.transform(local_to_absolute_transform));
           transformPolygonsWithHoles(pwh(nth), local_plane, absolute_plane,
                                      local_to_absolute_transform);
           plane(nth) = absolute_plane;
@@ -625,8 +629,8 @@ class Geometry {
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           Transformation absolute_to_local_transform = transform(nth).inverse();
           Plane absolute_plane = plane(nth);
-          Plane local_plane =
-              unitPlane(absolute_plane.transform(absolute_to_local_transform));
+          Plane local_plane = unitPlane<Kernel>(
+              absolute_plane.transform(absolute_to_local_transform));
           transformPolygonsWithHoles(pwh(nth), absolute_plane, local_plane,
                                      absolute_to_local_transform);
           plane(nth) = local_plane;
@@ -681,10 +685,16 @@ class Geometry {
   }
 
   void updateBounds3(int nth) {
+    if (mesh(nth).is_empty()) {
+      return;
+    }
     bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(mesh(nth));
   }
 
   void updateEpickBounds3(int nth) {
+    if (epick_mesh(nth).is_empty()) {
+      return;
+    }
     bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(epick_mesh(nth));
   }
 
@@ -692,6 +702,9 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       switch (type(nth)) {
         case GEOMETRY_MESH: {
+          if (mesh(nth).is_empty()) {
+            continue;
+          }
           updateBounds3(nth);
           break;
         }

@@ -1,11 +1,7 @@
-import {
-  deletePendingSurfaceMeshes,
-  seam as seamWithCgal,
-} from '@jsxcad/algorithm-cgal';
-
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
+import { seam as seamWithCgal } from '@jsxcad/algorithm-cgal';
 import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry, parent) =>
@@ -20,6 +16,5 @@ export const seam = (geometry, selections) => {
     linearize(toConcreteGeometry(selection), filter, inputs);
   }
   const outputs = seamWithCgal(inputs, count);
-  deletePendingSurfaceMeshes();
   return replacer(inputs, outputs)(concreteGeometry);
 };
