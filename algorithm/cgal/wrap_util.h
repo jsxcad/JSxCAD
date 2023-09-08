@@ -115,15 +115,3 @@ void wrap_epick(const Epick_points& points,
   }
   copy_face_graph(epick_mesh, output_mesh);
 }
-
-#if 0
-void wrap_epeck(const Points& points,
-                const std::vector<std::vector<size_t>>& faces, double alpha,
-                double offset, Surface_mesh& output_mesh) {
-  if (faces.empty()) {
-    alpha_wrap_3(points, alpha, offset, output_mesh);
-  } else {
-    alpha_wrap_3(points, faces, alpha, offset, output_mesh);
-  }
-}
-#endif
