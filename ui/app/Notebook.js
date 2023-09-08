@@ -253,7 +253,7 @@ export class Notebook extends React.PureComponent {
           />
         );
       }
-      if (child) {
+      if (children && child) {
         children.push(child);
       }
     }

@@ -1,3 +1,4 @@
+#define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 // #define CGAL_NO_UNCERTAIN_CONVERSION_OPERATOR
 // #define BOOST_DISABLE_THREADS
 
@@ -79,7 +80,9 @@
 #include <CGAL/Surface_mesh_deformation.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
+// #include
+// <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 #include <CGAL/Unique_hash_map.h>
 #include <CGAL/alpha_wrap_3.h>
@@ -207,6 +210,11 @@ using CGAL::Kernel_traits;
 
 #include "hash_util.h"
 #include "manifold_util.h"
+
+void MakeDeterministic() {
+  CGAL::get_default_random() = CGAL::Random(0);
+  std::srand(0);
+}
 
 FT to_FT(const std::string& v) {
   std::istringstream i(v);
@@ -589,9 +597,9 @@ class Demesh_cost {
  public:
   Demesh_cost() {}
   template <typename Profile>
-  boost::optional<typename Profile::FT> operator()(
+  std::optional<typename Profile::FT> operator()(
       const Profile& profile,
-      const boost::optional<typename Profile::Point>& placement) const {
+      const std::optional<typename Profile::Point>& placement) const {
     return typename Profile::FT(0);
   }
 };
@@ -601,7 +609,7 @@ class Demesh_safe_placement {
   Demesh_safe_placement() {}
 
   template <typename Profile>
-  boost::optional<typename Profile::Point> operator()(
+  std::optional<typename Profile::Point> operator()(
       const Profile& profile) const {
     const auto& m = profile.surface_mesh();
     const auto& p = profile.vertex_point_map();
@@ -612,16 +620,18 @@ class Demesh_safe_placement {
     } else if (is_safe_to_move(m, p, profile.v1_v0())) {
       return profile.p0();
     } else {
-      return boost::none;
+      return std::nullopt;
     }
   }
 };
 
 template <typename Surface_mesh>
 void demesh(Surface_mesh& mesh) {
-  CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
+  CGAL::Surface_mesh_simplification::Edge_count_stop_predicate<Surface_mesh>
+      stop(0);
   Demesh_cost cost;
   Demesh_safe_placement placement;
+  MakeDeterministic();
   CGAL::Surface_mesh_simplification::edge_collapse(
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
@@ -790,6 +800,7 @@ void computeNormalOfSurfaceMesh(Vector& normal, const Surface_mesh& mesh) {
   }
 }
 
+#if 0
 template <typename MAP>
 struct ProjectToPlane {
   ProjectToPlane(MAP map, bool enable, Vector vector, Plane plane)
@@ -814,6 +825,7 @@ struct ProjectToPlane {
   Vector vector;
   Plane plane;
 };
+#endif
 
 const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
                                 const Point& point) {
@@ -824,6 +836,18 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
     return new_vertex;
   }
   return it->second;
+}
+
+void removeCollinearPointsFromPolyline(Polyline& polyline) {
+  size_t limit = polyline.size();
+  for (size_t nth = 2; nth < limit;) {
+    if (CGAL::collinear(polyline[nth - 2], polyline[nth - 1], polyline[nth])) {
+      polyline.erase(polyline.begin() + nth - 1);
+      limit--;
+    } else {
+      nth++;
+    }
+  }
 }
 
 void polygonToSegments(Polygon_2& polygon, Segments& segments) {
@@ -1365,6 +1389,7 @@ FT max2(FT a, FT b) { return a > b ? a : b; }
 
 FT max3(FT a, FT b, FT c) { return max2(a, max2(b, c)); }
 
+#if 0
 class Strip {
  public:
   Strip(size_t nth_a, size_t nth_b, const Point& a, const Point& b,
@@ -1647,6 +1672,7 @@ bool PolylineToSurfaceMeshRoof(const Polyline& polyline, Surface_mesh& result,
   result.join(roof);
   return true;
 }
+#endif
 
 FT computeDihedralDeviation(const Surface_mesh& mesh) {
   FT sum = 0;
@@ -2203,7 +2229,7 @@ bool projectPointToEnvelope(const Edge& edge, const Face& face,
                       triangle.vertex(2));
     const auto result = CGAL::intersection(line, plane);
     if (result) {
-      if (const Point* p3 = boost::get<Point>(&*result)) {
+      if (const Point* p3 = std::get_if<Point>(&*result)) {
         projected = *p3;
         return true;
       }
@@ -2314,10 +2340,10 @@ void intersect_segment_with_volume(const Segment& segment, AABB_tree& tree,
     if (!intersection) {
       continue;
     }
-    if (const Point* point = boost::get<Point>(&intersection->first)) {
+    if (const Point* point = std::get_if<Point>(&intersection->first)) {
       points.push_back(*point);
     }
-    if (const Segment* segment = boost::get<Segment>(&intersection->first)) {
+    if (const Segment* segment = std::get_if<Segment>(&intersection->first)) {
       points.push_back(segment->source());
       points.push_back(segment->target());
     }

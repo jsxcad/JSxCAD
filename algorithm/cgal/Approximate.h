@@ -39,9 +39,7 @@ int Approximate(Geometry* geometry, bool has_iterations, size_t iterations,
     std::vector<Epick_kernel::Point_3> epick_anchors;
     std::vector<std::array<std::size_t, 3>> triangles;
 
-    // Make deterministic.
-    CGAL::get_default_random() = CGAL::Random(0);
-    std::srand(0);
+    MakeDeterministic();
     CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
         geometry->epick_mesh(nth),
         p.anchors(std::back_inserter(epick_anchors))

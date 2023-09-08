@@ -79,8 +79,7 @@ int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
       }
     }
 
-    CGAL::get_default_random() = CGAL::Random(0);
-    std::srand(0);
+    MakeDeterministic();
 
     // Maybe it does work -- it just doesn't try to build a curve ...
     CGAL::Polygon_mesh_processing::smooth_shape(

@@ -9,7 +9,7 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/property_map.h>
 
-#if 1
+#if 0
 namespace CGAL {
 
 template <typename Container>

@@ -24,8 +24,7 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
   geometry->transformToAbsoluteFrame();
   geometry->computeBounds();
 
-  // Work from a deterministic starting position.
-  std::srand(0);  // I guess we don't need this.
+  MakeDeterministic();
   CGAL::Random random(0);
 
   // We start with material, and then we cut the selection down to reveal the

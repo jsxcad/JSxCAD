@@ -187,6 +187,8 @@ export { y } from './y.js';
 export { z } from './z.js';
 export { zagSides } from './Plan.js';
 export { zagSteps } from './Plan.js';
+export { v } from './version.js';
+export { version } from './version.js';
 
 export { And } from './and.js';
 export { Arc, ArcX, ArcY, ArcZ } from './Arc.js';

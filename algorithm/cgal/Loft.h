@@ -1,3 +1,96 @@
+#if 0
+class Weight_min_max_dihedral_and_area {
+  template<class Weight_, class IsValid>
+  friend struct Weight_calculator;
+
+  template<class Weight_>
+  friend class Weight_incomplete;
+
+public:
+  // these two should not be used (used in test code)
+  std::pair<double,double> w;
+  Weight_min_max_dihedral_and_area(double angle, double area) : w(angle, area) { }
+
+// below required by Weight concept
+private:
+  template<class Point_3, class LookupTable>
+  Weight_min_max_dihedral_and_area(const std::vector<Point_3>& P,
+                                   const std::vector<Point_3>& Q,
+                                   int i, int j, int k,
+                                   const LookupTable& lambda)
+  {
+    CGAL_assertion(i < j);
+    CGAL_assertion(j < k);
+    int n = static_cast<int>(P.size()) -1; // because the first and last point are equal
+
+    // The CGAL::dihedral angle is measured between the oriented triangles, that is it goes from [-pi, pi]
+    // What we need is the angle between the normals of the triangles between [0, pi]
+    double ang_max = 0;
+
+    // Test each edge
+    int vertices[] = {i, j, k};
+    for(int e = 0; e < 3; ++e)
+    {
+      int v0      = vertices[e];
+      int v1      = vertices[(e+1)%3];
+      int v_other = vertices[(e+2)%3];
+      double angle = 0;
+      // check whether the edge is border
+      if( (v0 + 1 == v1 || (v0 == n-1 && v1 == 0) ) && !Q.empty() ) {
+        angle = 180 - CGAL::abs(
+           to_double(CGAL::approximate_dihedral_angle(P[v0],P[v1],P[v_other],Q[v0])) );
+      }
+      else {
+        if(e == 2) { continue; }
+        if(lambda.get(v0, v1) != -1){
+          const Point_3& p01 = P[lambda.get(v0, v1)];
+          angle = 180 - CGAL::abs(
+            to_double(CGAL::approximate_dihedral_angle(P[v0],P[v1],P[v_other],p01)) );
+        }
+      }
+      ang_max = (std::max)(ang_max, angle);
+    }
+
+    w = std::make_pair(ang_max, to_double(CGAL::approximate_sqrt(CGAL::squared_area(P[i],P[j],P[k]))));
+  }
+
+public:
+  Weight_min_max_dihedral_and_area operator+(const Weight_min_max_dihedral_and_area& w2) const
+  {
+    CGAL_assertion((*this) != NOT_VALID());
+    CGAL_assertion(w2 != NOT_VALID());
+
+    return Weight_min_max_dihedral_and_area((std::max)(w.first, w2.w.first), w.second + w2.w.second);
+  }
+
+  bool operator<(const Weight_min_max_dihedral_and_area& w2) const
+  {
+    CGAL_assertion((*this) != NOT_VALID());
+    CGAL_assertion(w2 != NOT_VALID());
+
+    if(w.first == w2.w.first)
+    { return w.second < w2.w.second; }
+    return w.first < w2.w.first;
+  }
+
+  bool operator==(const Weight_min_max_dihedral_and_area& w2) const
+  { return w.first == w2.w.first && w.second == w2.w.second; }
+
+  bool operator!=(const Weight_min_max_dihedral_and_area& w2) const
+  { return !(*this == w2); }
+
+  static const Weight_min_max_dihedral_and_area DEFAULT() // rule: x + DEFAULT() == x
+  { return Weight_min_max_dihedral_and_area(0,0); }
+  static const Weight_min_max_dihedral_and_area NOT_VALID()
+  { return Weight_min_max_dihedral_and_area(-1,-1); }
+
+  friend std::ostream& operator<<(std::ostream& out, const Weight_min_max_dihedral_and_area& w) {
+    out << "Max dihedral: " << w.w.first << ", Total area: " << w.w.second;
+    return out;
+  }
+};
+#endif
+
 // This weight calculator refuses weights for triangles within the same lofting
 // span.
 template <class Weight_>
@@ -18,18 +111,24 @@ struct Loft_weight_calculator {
   Weight operator()(const std::vector<Point_3>& P,
                     const std::vector<Point_3>& Q, int i, int j, int k,
                     const LookupTable& lambda) const {
+    std::cout << "LWC/1" << std::endl;
     if (CGAL::collinear(P[i], P[j], P[k])) {
       return Weight::NOT_VALID();
     }
+    std::cout << "LWC/2" << std::endl;
     int top_count = in_top(i) + in_top(j) + in_top(k);
     if (top_count >= 3) {
       return Weight::NOT_VALID();
     }
+    std::cout << "LWC/3" << std::endl;
     int bottom_count = in_bottom(i) + in_bottom(j) + in_bottom(k);
     if (bottom_count >= 3) {
       return Weight::NOT_VALID();
     }
-    return Weight(P, Q, i, j, k, lambda);
+    std::cout << "LWC/4" << std::endl;
+    auto result = Weight(P, Q, i, j, k, lambda);
+    std::cout << "LWC/5" << std::endl;
+    return result;
   }
 
   int top_start;
@@ -64,10 +163,12 @@ void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
   typedef CGAL::internal::Weight_min_max_dihedral_and_area Weight;
   typedef Loft_weight_calculator<Weight> WC;
 
+  std::cout << "LT/1" << std::endl;
   CGAL::Polygon_mesh_processing::triangulate_hole_polyline(
       joined, std::back_inserter(triangles),
       CGAL::parameters::use_2d_constrained_delaunay_triangulation(false)
           .weight_calculator(WC(top_start, top_end, bottom_start, bottom_end)));
+  std::cout << "LT/2" << std::endl;
   if (triangles.empty()) {
     std::cout << "QQ/triangulate_hole_polyline/non-productive" << std::endl;
   }
@@ -81,23 +182,30 @@ void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
 
 void buildMeshFromPolygons(Points& points, Polygons& polygons, bool close,
                            Surface_mesh& mesh) {
+  std::cout << "bMFP/1" << std::endl;
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       points, polygons, CGAL::parameters::all_default());
+  std::cout << "bMFP/2" << std::endl;
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
+  std::cout << "bMFP/3" << std::endl;
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
                                                               mesh);
+  std::cout << "bMFP/4" << std::endl;
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
   // Make an attempt to close holes.
   if (close) {
+    std::cout << "bMFP/5" << std::endl;
     bool failed = false;
     while (!failed && !CGAL::is_closed(mesh)) {
       for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
         if (mesh.is_border(edge)) {
           std::vector<Face_index> faces;
+          std::cout << "bMFP/6" << std::endl;
           CGAL::Polygon_mesh_processing::triangulate_hole(
               mesh, edge, std::back_inserter(faces),
               CGAL::parameters::use_2d_constrained_delaunay_triangulation(
                   false));
+          std::cout << "bMFP/7" << std::endl;
           if (faces.empty()) {
             failed = true;
           }
@@ -106,10 +214,14 @@ void buildMeshFromPolygons(Points& points, Polygons& polygons, bool close,
       }
     }
   }
+  std::cout << "bMFP/8" << std::endl;
   if (CGAL::is_closed(mesh)) {
+    std::cout << "bMFP/9" << std::endl;
     // Make sure it isn't inside out.
-    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
+    // CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
+    std::cout << "bMFP/10" << std::endl;
   }
+  std::cout << "bMFP/11" << std::endl;
   if (false && CGAL::Polygon_mesh_processing::does_self_intersect(
                    mesh, CGAL::parameters::all_default())) {
     std::cout << "Loft: self-intersection detected; attempting repair."
@@ -122,6 +234,7 @@ void buildMeshFromPolygons(Points& points, Polygons& polygons, bool close,
 }
 
 int Loft(Geometry* geometry, bool close) {
+  std::cout << "Loft/0" << std::endl;
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
@@ -248,17 +361,21 @@ int Loft(Geometry* geometry, bool close) {
   }
 
   std::unique_ptr<Surface_mesh> islands(new Surface_mesh);
+  std::cout << "Loft/1" << std::endl;
   buildMeshFromPolygons(points, polygons, close, *islands);
+  std::cout << "Loft/2" << std::endl;
 
   Surface_mesh holes;
   buildMeshFromPolygons(hole_points, hole_polygons, close, holes);
 
   if (close) {
+    std::cout << "Loft/3" << std::endl;
     if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
             *islands, holes, *islands, CGAL::parameters::all_default(),
             CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
       return STATUS_ZERO_THICKNESS;
     }
+    std::cout << "Loft/4" << std::endl;
   } else {
     islands->join(holes);
   }
@@ -267,6 +384,8 @@ int Loft(Geometry* geometry, bool close) {
   geometry->setIdentityTransform(target);
   geometry->setMesh(target, islands);
   // Clean up the mesh.
+  std::cout << "Loft/5" << std::endl;
   demesh(geometry->mesh(target));
+  std::cout << "Loft/6" << std::endl;
   return STATUS_OK;
 }

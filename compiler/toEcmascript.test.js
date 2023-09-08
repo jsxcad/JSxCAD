@@ -733,6 +733,65 @@ const c = await $run(async () => {
   );
 });
 
+test('Ordered Reference', async (t) => {
+  const imports = [];
+  const exports = [];
+  const updates = {};
+  const replays = {};
+  await toEcmascript('const a = 1; const b = () => a; const c = () => b();', {
+    imports,
+    exports,
+    updates,
+    replays,
+    noLines: true,
+  });
+  const dependencies = {};
+  for (const key of Object.keys(updates)) {
+    dependencies[key] = updates[key].dependencies;
+  }
+  t.deepEqual(dependencies, { a: [], b: ['a'], c: ['b'] });
+
+  const programs = {};
+  for (const key of Object.keys(updates)) {
+    programs[key] = updates[key].program;
+  }
+  t.deepEqual(programs, {
+    a: "\ntry {\nconst a = await $run(async () => {\n  const a = 1;\n  ;\n  return a;\n}, {\n  path: '',\n  id: 'a',\n  text: undefined,\n  sha: 'dbc35e3043908e15573c1657f1dc968d7411d028',\n  line: 1\n});\n\n\n} catch (error) { throw error; }\n",
+    b: "\ntry {\nconst a = await $run(async () => {\n  const a = 1;\n  ;\n  return a;\n}, {\n  path: '',\n  id: 'a',\n  text: undefined,\n  sha: 'dbc35e3043908e15573c1657f1dc968d7411d028',\n  line: 1\n});\n\nconst b = await $run(async () => {\n  const b = () => a;\n  ;\n  return b;\n}, {\n  path: '',\n  id: 'b',\n  text: undefined,\n  sha: 'a1c4d611f87b788313eda91ada2774a81e64e0bb',\n  line: 1\n});\n\n\n} catch (error) { throw error; }\n",
+    c: "\ntry {\nconst a = await $run(async () => {\n  const a = 1;\n  ;\n  return a;\n}, {\n  path: '',\n  id: 'a',\n  text: undefined,\n  sha: 'dbc35e3043908e15573c1657f1dc968d7411d028',\n  line: 1\n});\n\nconst b = await $run(async () => {\n  const b = () => a;\n  ;\n  return b;\n}, {\n  path: '',\n  id: 'b',\n  text: undefined,\n  sha: 'a1c4d611f87b788313eda91ada2774a81e64e0bb',\n  line: 1\n});\n\nconst c = await $run(async () => {\n  const c = () => b();\n  ;\n  return c;\n}, {\n  path: '',\n  id: 'c',\n  text: undefined,\n  sha: 'b6b2ce926049bb8b928989f1202cf963e041c2ed',\n  line: 1\n});\n\n\n} catch (error) { throw error; }\n",
+  });
+});
+
+test('Disordered Reference', async (t) => {
+  const imports = [];
+  const exports = [];
+  const updates = {};
+  const replays = {};
+  await toEcmascript('const b = () => a; const a = 1; const c = () => b();', {
+    imports,
+    exports,
+    updates,
+    replays,
+    noLines: true,
+  });
+  const dependencies = {};
+  for (const key of Object.keys(updates)) {
+    dependencies[key] = updates[key].dependencies;
+  }
+  t.deepEqual(dependencies, { b: ['a'], a: [], c: ['b'] });
+
+  const programs = {};
+  for (const key of Object.keys(updates)) {
+    programs[key] = updates[key].program;
+  }
+
+  t.deepEqual(programs, {
+    b: "\ntry {\nconst a = await $run(async () => {\n  const a = 1;\n  ;\n  return a;\n}, {\n  path: '',\n  id: 'a',\n  text: undefined,\n  sha: 'dbc35e3043908e15573c1657f1dc968d7411d028',\n  line: 1\n});\n\nconst b = await $run(async () => {\n  const b = () => a;\n  ;\n  return b;\n}, {\n  path: '',\n  id: 'b',\n  text: undefined,\n  sha: 'a1c4d611f87b788313eda91ada2774a81e64e0bb',\n  line: 1\n});\n\n\n} catch (error) { throw error; }\n",
+    a: "\ntry {\nconst a = await $run(async () => {\n  const a = 1;\n  ;\n  return a;\n}, {\n  path: '',\n  id: 'a',\n  text: undefined,\n  sha: 'dbc35e3043908e15573c1657f1dc968d7411d028',\n  line: 1\n});\n\n\n} catch (error) { throw error; }\n",
+    c: "\ntry {\nconst a = await $run(async () => {\n  const a = 1;\n  ;\n  return a;\n}, {\n  path: '',\n  id: 'a',\n  text: undefined,\n  sha: 'dbc35e3043908e15573c1657f1dc968d7411d028',\n  line: 1\n});\n\nconst b = await $run(async () => {\n  const b = () => a;\n  ;\n  return b;\n}, {\n  path: '',\n  id: 'b',\n  text: undefined,\n  sha: 'a1c4d611f87b788313eda91ada2774a81e64e0bb',\n  line: 1\n});\n\nconst c = await $run(async () => {\n  const c = () => b();\n  ;\n  return c;\n}, {\n  path: '',\n  id: 'c',\n  text: undefined,\n  sha: 'b6b2ce926049bb8b928989f1202cf963e041c2ed',\n  line: 1\n});\n\n\n} catch (error) { throw error; }\n",
+  });
+});
+
 test('Default Import', async (t) => {
   const imports = [];
   const exports = [];

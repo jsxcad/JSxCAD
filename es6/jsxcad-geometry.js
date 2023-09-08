@@ -404,7 +404,7 @@ const scaleLazy = (geometry, [x = 1, y = 1, z = 1]) => {
 const scaleUniformly = (geometry, amount) =>
   scale$1(geometry, [amount, amount, amount]);
 
-const scaleToFit = (geometry, [x = 1, y = x, z = y]) => {
+const scaleToFit = (geometry, [x, y, z]) => {
   const bounds = measureBoundingBox(geometry);
   if (bounds === undefined) {
     return geometry;
@@ -413,6 +413,15 @@ const scaleToFit = (geometry, [x = 1, y = x, z = y]) => {
   const length = max[X$9] - min[X$9];
   const width = max[Y$9] - min[Y$9];
   const height = max[Z$8] - min[Z$8];
+  if (x === undefined) {
+    x = length;
+  }
+  if (y === undefined) {
+    y = width;
+  }
+  if (z === undefined) {
+    z = height;
+  }
   const xFactor = x / length;
   const yFactor = y / width;
   const zFactor = z / height;
