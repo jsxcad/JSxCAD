@@ -53,6 +53,7 @@ export const execute = async (
     let importsDone = false;
     const scheduled = new Set();
     const completed = new Set();
+    const failed = new Set();
     for (;;) {
       const updates = {};
       const replays = {};
@@ -110,6 +111,7 @@ export const execute = async (
           const outstandingDependencies = entry.dependencies.filter(
             (dependency) =>
               !completed.has(dependency) &&
+              !failed.has(dependency) &&
               updates[dependency] &&
               dependency !== id
           );
@@ -120,10 +122,12 @@ export const execute = async (
             // For now, only do one thing at a time, and block the remaining updates.
             const task = async () => {
               try {
+                console.log(`Evaluating ${id}`);
                 await evaluate(updates[id].program, { path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {
+                failed.add(id);
                 // This should be reported via a note.
                 // throw error;
               }

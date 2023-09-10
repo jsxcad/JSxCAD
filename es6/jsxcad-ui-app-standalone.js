@@ -6241,7 +6241,7 @@ class Notebook extends ReactDOM$1.PureComponent {
           workspace: workspace
         });
       }
-      if (child) {
+      if (children && child) {
         children.push(child);
       }
     }

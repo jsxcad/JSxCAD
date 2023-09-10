@@ -138,7 +138,7 @@ class SurfaceMeshQuery {
         // Note: intersection->second is the intersected face index.
         // CHECK: We get doubles because we're intersecting with the
         // interior of the faces.
-        if (const Point* point = boost::get<Point>(&intersection->first)) {
+        if (const Point* point = std::get_if<Point>(&intersection->first)) {
           points.push_back(*point);
         }
       }
@@ -170,7 +170,7 @@ class SurfaceMeshQuery {
         }
         // Note: intersection->second is the intersected face index.
         if (const Segment* segment =
-                boost::get<Segment>(&intersection->first)) {
+                std::get_if<Segment>(&intersection->first)) {
           points.push_back(segment->source());
           points.push_back(segment->target());
         }

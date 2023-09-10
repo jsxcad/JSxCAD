@@ -73,6 +73,7 @@ void remesh(Surface_mesh& mesh, std::vector<const Surface_mesh*>& selections,
       constrained_vertices);
   CGAL::Boolean_property_map<std::set<Edge_index>> constrained_edge_map(
       constrained_edges);
+  MakeDeterministic();
   CGAL::Polygon_mesh_processing::isotropic_remeshing(
       unconstrained_faces, target_edge_length, mesh,
       CGAL::Polygon_mesh_processing::parameters::number_of_iterations(

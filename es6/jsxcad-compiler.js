@@ -29947,9 +29947,6 @@ const declareVariable = async (
   const dependencyShas = dependencies.map((dependency) =>
     fromIdToSha(dependency, { topLevel })
   );
-  // const definition = { code, dependencies, dependencyShas };
-
-  // const declarationSource = generate({ type: 'Program', body: declarator });
 
   const entry = {
     path,
@@ -30163,15 +30160,43 @@ const toEcmascript = async (
   const lines = noLines ? undefined : script.split('\n');
   const ast = parse(script, parseOptions);
 
+  // Start by loading the controls
+  const controls = (await read$1(`control/${path}`, { workspace })) || {};
+
+  // Do it twice, so that topLevel is populated.
+  // FIX: Don't actually do it twice -- just populate topLevel before calling generateCode.
+  {
+    // Keep these local for the first run.
+    let topLevelExpressionCount = 0;
+    const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
+
+    const out = [];
+    const exportNames = [];
+    const sideEffectors = [];
+
+    await processProgram(ast, {
+      lines,
+      out,
+      updates,
+      replays,
+      exportNames,
+      controls,
+      path,
+      topLevel,
+      nextTopLevelExpressionId,
+      sideEffectors,
+      exports,
+      imports,
+      indirectImports,
+    });
+  }
+
   let topLevelExpressionCount = 0;
   const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
 
   const out = [];
   const exportNames = [];
   const sideEffectors = [];
-
-  // Start by loading the controls
-  const controls = (await read$1(`control/${path}`, { workspace })) || {};
 
   await processProgram(ast, {
     lines,

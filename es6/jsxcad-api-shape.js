@@ -2472,8 +2472,7 @@ const sz = scaleZ;
 const scaleToFit = Shape.registerMethod3(
   ['scaleToFit'],
   ['inputGeometry', 'coordinate', 'number', 'number', 'number'],
-  (input, coordinate, dX = 1, dY = dX, dZ = dY) =>
-    scaleToFit$1(input, coordinate || [dX, dY, dZ])
+  (input, coordinate, dX, dY, dZ) => scaleToFit$1(input, coordinate || [dX, dY, dZ])
 );
 
 const seam = Shape.registerMethod3(
@@ -3097,6 +3096,15 @@ const zagSteps = Shape.registerMethod3(
   (number) => number
 );
 
+const version = Shape.registerMethod3(
+  ['version', 'v'],
+  ['inputGeometry', 'value'],
+  (geometry, version = 0) =>
+    retag(geometry, [`part:version=*`], [`part:version=${version}`])
+);
+
+const v = version;
+
 const Arc = Shape.registerMethod3(
   'Arc',
   ['intervals', 'options'],
@@ -3392,4 +3400,4 @@ const Wave = Shape.registerMethod3(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, LDraw, LDrawPart, Line, LineX, LineY, LineZ, Link, List, LoadLDraw, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Off, Orb, Page, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, plus, points, put, reconstruct, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, Assembly, Box, Cached, ChainHull, Clip, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Join, LDraw, LDrawPart, Line, LineX, LineY, LineZ, Link, List, LoadLDraw, LoadPng, LoadStl, LoadSvg, Loft, Loop, Note, Octagon, Off, Orb, Page, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Segments, Seq, Shape, Spiral, Stl, Stroke, SurfaceMesh, Svg, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fill, fit, fitTo, fix, flat, fuse, g, gap, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, hull, image, inFn, input, inset, involute, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, masked, masking, material, md, move, moveAlong, n, noGap, noOp, noVoid, normal, note, nth, o, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, plus, points, put, reconstruct, ref, remesh, rotateX, rotateY, rotateZ, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, sketch, smooth, sort, stl, stroke, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, twist, unfold, untag, upperEnvelope, v, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

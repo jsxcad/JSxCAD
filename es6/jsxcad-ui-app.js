@@ -6263,7 +6263,7 @@ class Notebook extends ReactDOM$3.PureComponent {
           workspace: workspace
         });
       }
-      if (child) {
+      if (children && child) {
         children.push(child);
       }
     }
@@ -46939,12 +46939,16 @@ class App extends ReactDOM$3.Component {
       const getCleanText = data => {
         if (NotebookPath.endsWith('.js') || NotebookPath.endsWith('.nb')) {
           // Just make a best attempt to reformat.
-          data = Prettier.format(NotebookText, {
-            trailingComma: 'es5',
-            singleQuote: true,
-            parser: 'babel',
-            plugins: [PrettierParserBabel]
-          });
+          try {
+            data = Prettier.format(NotebookText, {
+              trailingComma: 'es5',
+              singleQuote: true,
+              parser: 'babel',
+              plugins: [PrettierParserBabel]
+            });
+          } catch (error) {
+            console.log(error);
+          }
         }
         return data;
       };
@@ -47203,9 +47207,11 @@ class App extends ReactDOM$3.Component {
       const {
         View
       } = this.state;
-      await write('config/View', View, {
-        workspace
-      });
+      if (View) {
+        await write('config/View', View, {
+          workspace
+        });
+      }
     };
     this.View.restore = async () => {
       const {

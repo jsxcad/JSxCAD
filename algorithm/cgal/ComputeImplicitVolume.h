@@ -21,8 +21,7 @@ int ComputeImplicitVolume(Geometry* geometry, emscripten::val op, double radius,
                   .as<double>());
   };
 
-  CGAL::get_default_random() = CGAL::Random(0);
-  std::srand(0);
+  MakeDeterministic();
 
   Surface_3 surface(
       thunk,                                     // pointer to function

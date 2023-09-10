@@ -20,12 +20,12 @@ int Cast(Geometry* geometry) {
         auto& input_map = mesh.points();
         auto& output_map = projected_mesh.points();
         // Squash the mesh.
-        for (auto& vertex : mesh.vertices()) {
+        for (auto vertex : mesh.vertices()) {
           const Line line(get(input_map, vertex),
                           get(input_map, vertex) + reference_vector);
           auto result = CGAL::intersection(line, reference_plane);
           if (result) {
-            if (Point* point = boost::get<Point>(&*result)) {
+            if (Point* point = std::get_if<Point>(&*result)) {
               put(output_map, vertex, *point);
             }
           }

@@ -86,8 +86,7 @@ void simplify(double angle_threshold, Surface_mesh& mesh,
 
   CGAL::Surface_mesh_simplification::Count_stop_predicate<Surface_mesh> stop(0);
 
-  CGAL::get_default_random() = CGAL::Random(0);
-  std::srand(0);
+  MakeDeterministic();
 
   CGAL::Surface_mesh_simplification::Bounded_normal_change_filter<> filter;
 
