@@ -53,7 +53,7 @@ export const baseViewOp = async (
   geometry,
   name,
   op = (_x) => (s) => s,
-  { size = 512, inline, width, height, position = [100, -100, 100] } = {}
+  { size = 256, inline, width, height, position = [100, -100, 100] } = {}
 ) => {
   if (size !== undefined) {
     width = size;
@@ -97,7 +97,7 @@ const topViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
-    size = 512,
+    size = 256,
     skin = true,
     outline = true,
     wireframe = true,
@@ -122,7 +122,7 @@ const gridViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
-    size = 512,
+    size = 256,
     skin = true,
     outline = true,
     wireframe = false,
@@ -147,7 +147,7 @@ const frontViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
-    size = 512,
+    size = 256,
     skin = true,
     outline = true,
     wireframe = false,
@@ -172,7 +172,7 @@ const sideViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
-    size = 512,
+    size = 256,
     skin = true,
     outline = true,
     wireframe = false,

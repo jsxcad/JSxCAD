@@ -3532,472 +3532,109 @@ class DownloadNote extends ReactDOM$3.PureComponent {
   }
 }
 
-const globalWindow = window;
-function CodeJar(editor, highlight, opt = {}) {
-    const options = Object.assign({ tab: '\t', indentOn: /[({\[]$/, moveToNewLine: /^[)}\]]/, spellcheck: false, catchTab: true, preserveIdent: true, addClosing: true, history: true, window: globalWindow }, opt);
-    const window = options.window;
-    const document = window.document;
-    let listeners = [];
-    let history = [];
-    let at = -1;
-    let focus = false;
-    let callback;
-    let prev; // code content prior keydown event
-    editor.setAttribute('contenteditable', 'plaintext-only');
-    editor.setAttribute('spellcheck', options.spellcheck ? 'true' : 'false');
-    editor.style.outline = 'none';
-    editor.style.overflowWrap = 'break-word';
-    editor.style.overflowY = 'auto';
-    editor.style.whiteSpace = 'pre-wrap';
-    let isLegacy = false; // true if plaintext-only is not supported
-    highlight(editor);
-    if (editor.contentEditable !== 'plaintext-only')
-        isLegacy = true;
-    if (isLegacy)
-        editor.setAttribute('contenteditable', 'true');
-    const debounceHighlight = debounce(() => {
-        const pos = save();
-        highlight(editor, pos);
-        restore(pos);
-    }, 30);
-    let recording = false;
-    const shouldRecord = (event) => {
-        return !isUndo(event) && !isRedo(event)
-            && event.key !== 'Meta'
-            && event.key !== 'Control'
-            && event.key !== 'Alt'
-            && !event.key.startsWith('Arrow');
-    };
-    const debounceRecordHistory = debounce((event) => {
-        if (shouldRecord(event)) {
-            recordHistory();
-            recording = false;
-        }
-    }, 300);
-    const on = (type, fn) => {
-        listeners.push([type, fn]);
-        editor.addEventListener(type, fn);
-    };
-    on('keydown', event => {
-        if (event.defaultPrevented)
-            return;
-        prev = toString();
-        if (options.preserveIdent)
-            handleNewLine(event);
-        else
-            legacyNewLineFix(event);
-        if (options.catchTab)
-            handleTabCharacters(event);
-        if (options.addClosing)
-            handleSelfClosingCharacters(event);
-        if (options.history) {
-            handleUndoRedo(event);
-            if (shouldRecord(event) && !recording) {
-                recordHistory();
-                recording = true;
-            }
-        }
-        if (isLegacy && !isCopy(event))
-            restore(save());
-    });
-    on('keyup', event => {
-        if (event.defaultPrevented)
-            return;
-        if (event.isComposing)
-            return;
-        if (prev !== toString())
-            debounceHighlight();
-        debounceRecordHistory(event);
-        if (callback)
-            callback(toString());
-    });
-    on('focus', _event => {
-        focus = true;
-    });
-    on('blur', _event => {
-        focus = false;
-    });
-    on('paste', event => {
-        recordHistory();
-        handlePaste(event);
-        recordHistory();
-        if (callback)
-            callback(toString());
-    });
-    function save() {
-        const s = getSelection();
-        const pos = { start: 0, end: 0, dir: undefined };
-        let { anchorNode, anchorOffset, focusNode, focusOffset } = s;
-        if (!anchorNode || !focusNode)
-            throw 'error1';
-        // If the anchor and focus are the editor element, return either a full
-        // highlight or a start/end cursor position depending on the selection
-        if (anchorNode === editor && focusNode === editor) {
-            pos.start = (anchorOffset > 0 && editor.textContent) ? editor.textContent.length : 0;
-            pos.end = (focusOffset > 0 && editor.textContent) ? editor.textContent.length : 0;
-            pos.dir = (focusOffset >= anchorOffset) ? '->' : '<-';
-            return pos;
-        }
-        // Selection anchor and focus are expected to be text nodes,
-        // so normalize them.
-        if (anchorNode.nodeType === Node.ELEMENT_NODE) {
-            const node = document.createTextNode('');
-            anchorNode.insertBefore(node, anchorNode.childNodes[anchorOffset]);
-            anchorNode = node;
-            anchorOffset = 0;
-        }
-        if (focusNode.nodeType === Node.ELEMENT_NODE) {
-            const node = document.createTextNode('');
-            focusNode.insertBefore(node, focusNode.childNodes[focusOffset]);
-            focusNode = node;
-            focusOffset = 0;
-        }
-        visit(editor, el => {
-            if (el === anchorNode && el === focusNode) {
-                pos.start += anchorOffset;
-                pos.end += focusOffset;
-                pos.dir = anchorOffset <= focusOffset ? '->' : '<-';
-                return 'stop';
-            }
-            if (el === anchorNode) {
-                pos.start += anchorOffset;
-                if (!pos.dir) {
-                    pos.dir = '->';
-                }
-                else {
-                    return 'stop';
-                }
-            }
-            else if (el === focusNode) {
-                pos.end += focusOffset;
-                if (!pos.dir) {
-                    pos.dir = '<-';
-                }
-                else {
-                    return 'stop';
-                }
-            }
-            if (el.nodeType === Node.TEXT_NODE) {
-                if (pos.dir != '->')
-                    pos.start += el.nodeValue.length;
-                if (pos.dir != '<-')
-                    pos.end += el.nodeValue.length;
-            }
-        });
-        // collapse empty text nodes
-        editor.normalize();
-        return pos;
-    }
-    function restore(pos) {
-        const s = getSelection();
-        let startNode, startOffset = 0;
-        let endNode, endOffset = 0;
-        if (!pos.dir)
-            pos.dir = '->';
-        if (pos.start < 0)
-            pos.start = 0;
-        if (pos.end < 0)
-            pos.end = 0;
-        // Flip start and end if the direction reversed
-        if (pos.dir == '<-') {
-            const { start, end } = pos;
-            pos.start = end;
-            pos.end = start;
-        }
-        let current = 0;
-        visit(editor, el => {
-            if (el.nodeType !== Node.TEXT_NODE)
-                return;
-            const len = (el.nodeValue || '').length;
-            if (current + len > pos.start) {
-                if (!startNode) {
-                    startNode = el;
-                    startOffset = pos.start - current;
-                }
-                if (current + len > pos.end) {
-                    endNode = el;
-                    endOffset = pos.end - current;
-                    return 'stop';
-                }
-            }
-            current += len;
-        });
-        if (!startNode)
-            startNode = editor, startOffset = editor.childNodes.length;
-        if (!endNode)
-            endNode = editor, endOffset = editor.childNodes.length;
-        // Flip back the selection
-        if (pos.dir == '<-') {
-            [startNode, startOffset, endNode, endOffset] = [endNode, endOffset, startNode, startOffset];
-        }
-        s.setBaseAndExtent(startNode, startOffset, endNode, endOffset);
-    }
-    function beforeCursor() {
-        const s = getSelection();
-        const r0 = s.getRangeAt(0);
-        const r = document.createRange();
-        r.selectNodeContents(editor);
-        r.setEnd(r0.startContainer, r0.startOffset);
-        return r.toString();
-    }
-    function afterCursor() {
-        const s = getSelection();
-        const r0 = s.getRangeAt(0);
-        const r = document.createRange();
-        r.selectNodeContents(editor);
-        r.setStart(r0.endContainer, r0.endOffset);
-        return r.toString();
-    }
-    function handleNewLine(event) {
-        if (event.key === 'Enter') {
-            const before = beforeCursor();
-            const after = afterCursor();
-            let [padding] = findPadding(before);
-            let newLinePadding = padding;
-            // If last symbol is "{" ident new line
-            if (options.indentOn.test(before)) {
-                newLinePadding += options.tab;
-            }
-            // Preserve padding
-            if (newLinePadding.length > 0) {
-                preventDefault(event);
-                event.stopPropagation();
-                insert('\n' + newLinePadding);
-            }
-            else {
-                legacyNewLineFix(event);
-            }
-            // Place adjacent "}" on next line
-            if (newLinePadding !== padding && options.moveToNewLine.test(after)) {
-                const pos = save();
-                insert('\n' + padding);
-                restore(pos);
-            }
-        }
-    }
-    function legacyNewLineFix(event) {
-        // Firefox does not support plaintext-only mode
-        // and puts <div><br></div> on Enter. Let's help.
-        if (isLegacy && event.key === 'Enter') {
-            preventDefault(event);
-            event.stopPropagation();
-            if (afterCursor() == '') {
-                insert('\n ');
-                const pos = save();
-                pos.start = --pos.end;
-                restore(pos);
-            }
-            else {
-                insert('\n');
-            }
-        }
-    }
-    function handleSelfClosingCharacters(event) {
-        const open = `([{'"`;
-        const close = `)]}'"`;
-        const codeAfter = afterCursor();
-        const codeBefore = beforeCursor();
-        const escapeCharacter = codeBefore.substr(codeBefore.length - 1) === '\\';
-        const charAfter = codeAfter.substr(0, 1);
-        if (close.includes(event.key) && !escapeCharacter && charAfter === event.key) {
-            // We already have closing char next to cursor.
-            // Move one char to right.
-            const pos = save();
-            preventDefault(event);
-            pos.start = ++pos.end;
-            restore(pos);
-        }
-        else if (open.includes(event.key)
-            && !escapeCharacter
-            && (`"'`.includes(event.key) || ['', ' ', '\n'].includes(charAfter))) {
-            preventDefault(event);
-            const pos = save();
-            const wrapText = pos.start == pos.end ? '' : getSelection().toString();
-            const text = event.key + wrapText + close[open.indexOf(event.key)];
-            insert(text);
-            pos.start++;
-            pos.end++;
-            restore(pos);
-        }
-    }
-    function handleTabCharacters(event) {
-        if (event.key === 'Tab') {
-            preventDefault(event);
-            if (event.shiftKey) {
-                const before = beforeCursor();
-                let [padding, start,] = findPadding(before);
-                if (padding.length > 0) {
-                    const pos = save();
-                    // Remove full length tab or just remaining padding
-                    const len = Math.min(options.tab.length, padding.length);
-                    restore({ start, end: start + len });
-                    document.execCommand('delete');
-                    pos.start -= len;
-                    pos.end -= len;
-                    restore(pos);
-                }
-            }
-            else {
-                insert(options.tab);
-            }
-        }
-    }
-    function handleUndoRedo(event) {
-        if (isUndo(event)) {
-            preventDefault(event);
-            at--;
-            const record = history[at];
-            if (record) {
-                editor.innerHTML = record.html;
-                restore(record.pos);
-            }
-            if (at < 0)
-                at = 0;
-        }
-        if (isRedo(event)) {
-            preventDefault(event);
-            at++;
-            const record = history[at];
-            if (record) {
-                editor.innerHTML = record.html;
-                restore(record.pos);
-            }
-            if (at >= history.length)
-                at--;
-        }
-    }
-    function recordHistory() {
-        if (!focus)
-            return;
-        const html = editor.innerHTML;
-        const pos = save();
-        const lastRecord = history[at];
-        if (lastRecord) {
-            if (lastRecord.html === html
-                && lastRecord.pos.start === pos.start
-                && lastRecord.pos.end === pos.end)
-                return;
-        }
-        at++;
-        history[at] = { html, pos };
-        history.splice(at + 1);
-        const maxHistory = 300;
-        if (at > maxHistory) {
-            at = maxHistory;
-            history.splice(0, 1);
-        }
-    }
-    function handlePaste(event) {
-        preventDefault(event);
-        const text = (event.originalEvent || event)
-            .clipboardData
-            .getData('text/plain')
-            .replace(/\r/g, '');
-        const pos = save();
-        insert(text);
-        highlight(editor);
-        restore({
-            start: Math.min(pos.start, pos.end) + text.length,
-            end: Math.min(pos.start, pos.end) + text.length,
-            dir: '<-',
-        });
-    }
-    function visit(editor, visitor) {
-        const queue = [];
-        if (editor.firstChild)
-            queue.push(editor.firstChild);
-        let el = queue.pop();
-        while (el) {
-            if (visitor(el) === 'stop')
-                break;
-            if (el.nextSibling)
-                queue.push(el.nextSibling);
-            if (el.firstChild)
-                queue.push(el.firstChild);
-            el = queue.pop();
-        }
-    }
-    function isCtrl(event) {
-        return event.metaKey || event.ctrlKey;
-    }
-    function isUndo(event) {
-        return isCtrl(event) && !event.shiftKey && getKeyCode(event) === 'Z';
-    }
-    function isRedo(event) {
-        return isCtrl(event) && event.shiftKey && getKeyCode(event) === 'Z';
-    }
-    function isCopy(event) {
-        return isCtrl(event) && getKeyCode(event) === 'C';
-    }
-    function getKeyCode(event) {
-        let key = event.key || event.keyCode || event.which;
-        if (!key)
-            return undefined;
-        return (typeof key === 'string' ? key : String.fromCharCode(key)).toUpperCase();
-    }
-    function insert(text) {
-        text = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        document.execCommand('insertHTML', false, text);
-    }
-    function debounce(cb, wait) {
-        let timeout = 0;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = window.setTimeout(() => cb(...args), wait);
-        };
-    }
-    function findPadding(text) {
-        // Find beginning of previous line.
-        let i = text.length - 1;
-        while (i >= 0 && text[i] !== '\n')
-            i--;
-        i++;
-        // Find padding of the line.
-        let j = i;
-        while (j < text.length && /[ \t]/.test(text[j]))
-            j++;
-        return [text.substring(i, j) || '', i, j];
-    }
-    function toString() {
-        return editor.textContent || '';
-    }
-    function preventDefault(event) {
-        event.preventDefault();
-    }
-    function getSelection() {
-        var _a;
-        if (((_a = editor.parentNode) === null || _a === void 0 ? void 0 : _a.nodeType) == Node.DOCUMENT_FRAGMENT_NODE) {
-            return editor.parentNode.getSelection();
-        }
-        return window.getSelection();
-    }
-    return {
-        updateOptions(newOptions) {
-            Object.assign(options, newOptions);
-        },
-        updateCode(code) {
-            editor.textContent = code;
-            highlight(editor);
-        },
-        onUpdate(cb) {
-            callback = cb;
-        },
-        toString,
-        save,
-        restore,
-        recordHistory,
-        destroy() {
-            for (let [type, fn] of listeners) {
-                editor.removeEventListener(type, fn);
-            }
-        },
-    };
-}
+var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+  ...p,
+  ref: ref,
+  className: classNames(p.className, className)
+})));
+
+const CardImg = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  variant,
+  as: Component = 'img',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    ...props
+  });
+});
+CardImg.displayName = 'CardImg';
+var CardImg$1 = CardImg;
+
+const context = /*#__PURE__*/D$1(null);
+context.displayName = 'CardHeaderContext';
+var CardHeaderContext = context;
+
+const CardHeader = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
+  const contextValue = d(() => ({
+    cardHeaderBsPrefix: prefix
+  }), [prefix]);
+  return /*#__PURE__*/e(CardHeaderContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, prefix)
+    })
+  });
+});
+CardHeader.displayName = 'CardHeader';
+var CardHeader$1 = CardHeader;
+
+const DivStyledAsH5 = divWithClassName('h5');
+const DivStyledAsH6 = divWithClassName('h6');
+const CardBody = createWithBsPrefix('card-body');
+const CardTitle = createWithBsPrefix('card-title', {
+  Component: DivStyledAsH5
+});
+const CardSubtitle = createWithBsPrefix('card-subtitle', {
+  Component: DivStyledAsH6
+});
+const CardLink = createWithBsPrefix('card-link', {
+  Component: 'a'
+});
+const CardText = createWithBsPrefix('card-text', {
+  Component: 'p'
+});
+const CardFooter = createWithBsPrefix('card-footer');
+const CardImgOverlay = createWithBsPrefix('card-img-overlay');
+const Card = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  bg,
+  text,
+  border,
+  body = false,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
+    children: body ? /*#__PURE__*/e(CardBody, {
+      children: children
+    }) : children
+  });
+});
+Card.displayName = 'Card';
+var Card$1 = Object.assign(Card, {
+  Img: CardImg$1,
+  Title: CardTitle,
+  Subtitle: CardSubtitle,
+  Body: CardBody,
+  Link: CardLink,
+  Text: CardText,
+  Header: CardHeader$1,
+  Footer: CardFooter,
+  ImgOverlay: CardImgOverlay
+});
 
 class EditNote extends ReactDOM$3.Component {
   static get propTypes() {
@@ -4015,16 +3652,17 @@ class EditNote extends ReactDOM$3.Component {
   }
   async componentDidMount() {}
   async componentWillUnmount() {}
-  onChange(id, text) {
+  onChange(event) {
     const {
-      onChange
+      onChange,
+      note
     } = this.props;
-    if (onChange) {
-      onChange(text, id);
+    if (onChange && this.ref && this.ref.innerText !== note.sourceText) {
+      onChange(this.ref.innerText, note);
     }
   }
-  shouldComponentUpdate() {
-    return false;
+  shouldComponentUpdate(nextProps) {
+    return this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText;
   }
   render() {
     const {
@@ -4034,15 +3672,24 @@ class EditNote extends ReactDOM$3.Component {
     const {
       sourceText
     } = note;
-    return v$1("div", {
-      class: "note edit",
-      onkeydown: onKeyDown,
+    return v$1(Card$1, null, v$1("pre", {
+      style: {
+        padding: '1em',
+        outline: 'none'
+      },
+      contenteditable: true,
+      onKeyDown: onKeyDown,
+      onInput: event => this.onChange(event),
       ref: ref => {
-        if (ref) {
-          CodeJar(ref, () => {}).onUpdate(text => this.onChange(note, text));
+        if (this.ref === ref) {
+          return;
+        }
+        this.ref = ref;
+        if (ref !== null) {
+          ref.innerText = sourceText;
         }
       }
-    }, sourceText);
+    }, sourceText));
   }
 }
 
@@ -4100,8 +3747,8 @@ class IconNote extends ReactDOM$3.PureComponent {
     return v$1("img", {
       class: `note icon ${iconIdClass}`,
       style: {
-        height: '64px',
-        width: '64px',
+        height: '32px',
+        width: '32px',
         opacity: blur ? 0.5 : 1
       },
       src: note.url
@@ -7298,6 +6945,11 @@ const updateNotebookState = async (application, {
     };
     application.setState(op);
   };
+  if (notes.length === 0) {
+    console.log(`QQ/Notes are empty`);
+  } else {
+    console.log(`QQ/Notes are ${notes.length}`);
+  }
   for (const note of notes) {
     updateNote(note);
     if (note.view) {
@@ -7520,28 +7172,33 @@ class Notebook extends ReactDOM$3.PureComponent {
           errors.push(error);
         }
       }
-      if (!hasStub) {
-        // Append an empty editor.
-        const stub = {
-          hash: 'stub',
-          sourceText: '',
-          sourceLocation: {
-            path: notebookPath,
-            line: line + 1
-          }
-        };
-        ids.push({
-          id: '+',
-          children: [v$1(EditNote, {
-            key: stub.hash,
-            note: stub,
-            onChange: sourceText => onChange(stub, {
-              sourceText
-            }),
-            workspace: workspace
-          })]
-        });
-      }
+
+      /*
+            if (!hasStub) {
+              // Append an empty editor.
+              const stub = {
+                hash: 'stub',
+                sourceText: '',
+                sourceLocation: { path: notebookPath, line: line + 1, id: '+' },
+              };
+              ids.push({
+                id: '+',
+                downloads: [],
+                icons: [],
+                errors: [],
+                children: [
+                  <EditNote
+                    key={stub.hash}
+                    note={stub}
+                    onChange={(sourceText) => onChange(stub, { sourceText })}
+                    onKeyDown={onKeyDown}
+                    workspace={workspace}
+                  />,
+                ],
+              });
+            }
+      */
+
       y(() => mermaid.init(undefined, '.mermaid'));
       const sections = [];
       const compare = (a, b) => {
@@ -7563,12 +7220,13 @@ class Notebook extends ReactDOM$3.PureComponent {
         icons = []
       } of ids) {
         sections.push(v$1(Accordion$1, {
-          key: id
+          key: id,
+          defaultActiveKey: id
         }, v$1(Accordion$1.Item, {
           eventKey: id
-        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? '! &nbsp;&nbsp;' : '', ' ', icons, " \xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
+        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? errors[0] : '', ' ', icons, " \xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
           color: "#36d7b7",
-          size: "64"
+          size: "32"
         }) : ''), v$1(Accordion$1.Body, null, children))));
       }
       return v$1("div", {
@@ -7593,110 +7251,6 @@ class Notebook extends ReactDOM$3.PureComponent {
     }
   }
 }
-
-var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
-  ...p,
-  ref: ref,
-  className: classNames(p.className, className)
-})));
-
-const CardImg = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  bsPrefix,
-  className,
-  variant,
-  as: Component = 'img',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
-    ...props
-  });
-});
-CardImg.displayName = 'CardImg';
-var CardImg$1 = CardImg;
-
-const context = /*#__PURE__*/D$1(null);
-context.displayName = 'CardHeaderContext';
-var CardHeaderContext = context;
-
-const CardHeader = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
-  const contextValue = d(() => ({
-    cardHeaderBsPrefix: prefix
-  }), [prefix]);
-  return /*#__PURE__*/e(CardHeaderContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...props,
-      className: classNames(className, prefix)
-    })
-  });
-});
-CardHeader.displayName = 'CardHeader';
-var CardHeader$1 = CardHeader;
-
-const DivStyledAsH5 = divWithClassName('h5');
-const DivStyledAsH6 = divWithClassName('h6');
-const CardBody = createWithBsPrefix('card-body');
-const CardTitle = createWithBsPrefix('card-title', {
-  Component: DivStyledAsH5
-});
-const CardSubtitle = createWithBsPrefix('card-subtitle', {
-  Component: DivStyledAsH6
-});
-const CardLink = createWithBsPrefix('card-link', {
-  Component: 'a'
-});
-const CardText = createWithBsPrefix('card-text', {
-  Component: 'p'
-});
-const CardFooter = createWithBsPrefix('card-footer');
-const CardImgOverlay = createWithBsPrefix('card-img-overlay');
-const Card = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  bg,
-  text,
-  border,
-  body = false,
-  children,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    ...props,
-    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
-    children: body ? /*#__PURE__*/e(CardBody, {
-      children: children
-    }) : children
-  });
-});
-Card.displayName = 'Card';
-var Card$1 = Object.assign(Card, {
-  Img: CardImg$1,
-  Title: CardTitle,
-  Subtitle: CardSubtitle,
-  Body: CardBody,
-  Link: CardLink,
-  Text: CardText,
-  Header: CardHeader$1,
-  Footer: CardFooter,
-  ImgOverlay: CardImgOverlay
-});
 
 class DynamicView extends ReactDOM$3.PureComponent {
   static get propTypes() {
@@ -8733,13 +8287,13 @@ exports.CLASSES = void 0;
 
 }(Types));
 
-var Node$2 = {};
+var Node$1 = {};
 
-Object.defineProperty(Node$2, "__esModule", { value: true });
+Object.defineProperty(Node$1, "__esModule", { value: true });
 var DockLocation_1$6 = DockLocation$1;
 var Orientation_1$a = Orientation$1;
 var Rect_1$8 = Rect$1;
-var Node$1 = /** @class */ (function () {
+var Node = /** @class */ (function () {
     /** @hidden @internal */
     function Node(model) {
         /** @hidden @internal */
@@ -8957,7 +8511,7 @@ var Node$1 = /** @class */ (function () {
     };
     return Node;
 }());
-Node$2.default = Node$1;
+Node$1.default = Node;
 
 var SplitterNode$1 = {};
 
@@ -8979,7 +8533,7 @@ var __extends$9 = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 Object.defineProperty(SplitterNode$1, "__esModule", { value: true });
 var AttributeDefinitions_1$5 = AttributeDefinitions$1;
 var Orientation_1$9 = Orientation$1;
-var Node_1$4 = Node$2;
+var Node_1$4 = Node$1;
 var SplitterNode = /** @class */ (function (_super) {
     __extends$9(SplitterNode, _super);
     /** @hidden @internal */
@@ -9069,7 +8623,7 @@ var __extends$8 = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 Object.defineProperty(TabNode$1, "__esModule", { value: true });
 var Attribute_1$4 = Attribute$1;
 var AttributeDefinitions_1$4 = AttributeDefinitions$1;
-var Node_1$3 = Node$2;
+var Node_1$3 = Node$1;
 var TabNode = /** @class */ (function (_super) {
     __extends$8(TabNode, _super);
     /** @hidden @internal */
@@ -9282,7 +8836,7 @@ var Orientation_1$8 = Orientation$1;
 var Rect_1$7 = Rect$1;
 var Types_1$e = Types;
 var BorderNode_1$5 = BorderNode$1;
-var Node_1$2 = Node$2;
+var Node_1$2 = Node$1;
 var SplitterNode_1$2 = SplitterNode$1;
 var TabSetNode_1$6 = TabSetNode$1;
 var RowNode = /** @class */ (function (_super) {
@@ -9812,7 +9366,7 @@ var DropInfo_1$1 = DropInfo$1;
 var Orientation_1$7 = Orientation$1;
 var Rect_1$6 = Rect$1;
 var Types_1$d = Types;
-var Node_1$1 = Node$2;
+var Node_1$1 = Node$1;
 var RowNode_1$1 = RowNode$1;
 var TabNode_1$3 = TabNode$1;
 var Utils_1$2 = Utils;
@@ -10330,7 +9884,7 @@ var DropInfo_1 = DropInfo$1;
 var Orientation_1$6 = Orientation$1;
 var Rect_1$5 = Rect$1;
 var Types_1$c = Types;
-var Node_1 = Node$2;
+var Node_1 = Node$1;
 var SplitterNode_1$1 = SplitterNode$1;
 var TabNode_1$2 = TabNode$1;
 var Utils_1$1 = Utils;
@@ -14085,7 +13639,7 @@ var BorderSet_1 = BorderSet$1;
 exports.BorderSet = BorderSet_1.default;
 var Model_1 = Model$1;
 exports.Model = Model_1.default;
-var Node_1 = Node$2;
+var Node_1 = Node$1;
 exports.Node = Node_1.default;
 var RowNode_1 = RowNode$1;
 exports.RowNode = RowNode_1.default;
@@ -47529,7 +47083,7 @@ const defaultModelConfig = {
   borders: [{
     type: 'border',
     location: 'left',
-    weight: 50,
+    weight: 200,
     children: [{
       id: 'Workspace',
       type: 'tab',
@@ -47590,24 +47144,24 @@ const defaultModelConfig = {
     children: [{
       id: 'Notebooks',
       type: 'tabset',
-      weight: 100,
+      weight: 300,
       enableDeleteWhenEmpty: false,
       children: [{
-        id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/start.nb',
+        id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/index.nb',
         type: 'tab',
-        name: 'start.nb',
+        name: 'index.nb',
         component: 'Notebook'
       }]
     }, {
-      id: 'Clipboards',
+      id: 'Drafts',
       type: 'tabset',
       weight: 100,
       enableDeleteWhenEmpty: false,
       children: [{
-        id: 'Clipboard',
+        id: 'Draft',
         type: 'tab',
-        name: 'Clipboard',
-        component: 'Clipboard',
+        name: 'Draft',
+        component: 'Draft',
         enableClose: false,
         borderWidth: 1024
       }]
@@ -47671,29 +47225,32 @@ class App extends ReactDOM$3.Component {
     };
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
     this.layoutRef = /*#__PURE__*/ReactDOM$3.createRef();
-    this.Clipboard = {};
-    this.Clipboard.change = data => {
+    this.Draft = {};
+    this.Draft.change = data => {
       const {
-        Clipboard = {}
+        Draft = {}
       } = this.state;
-      this.setState({
-        Clipboard: {
-          ...Clipboard,
-          code: data
-        }
-      });
+      if (Draft.code !== data) {
+        console.log(`QQ/Draft.change: ${Draft.code} to ${data}`);
+        return this.setState({
+          Draft: {
+            ...Draft,
+            code: data
+          }
+        });
+      }
     };
-    this.Clipboard.getCode = data => {
+    this.Draft.getCode = data => {
       const {
-        Clipboard = {}
+        Draft = {}
       } = this.state;
       const {
         code = ''
-      } = Clipboard;
+      } = Draft;
       return code;
     };
-    this.Clipboard.run = () => {};
-    this.Clipboard.save = () => {};
+    this.Draft.run = () => {};
+    this.Draft.save = () => {};
     this.Config = {};
     this.Config.path = path => {
       const {
@@ -48144,7 +47701,8 @@ class App extends ReactDOM$3.Component {
       const {
         workspace
       } = this.props;
-      const NotebookText = this.Notebook.getText(path);
+      const NotebookText = this.Notebook.getText(path) + this.Draft.getCode();
+      await this.Draft.change('');
       // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;
@@ -48371,17 +47929,17 @@ class App extends ReactDOM$3.Component {
       switch (ops.length) {
         case 0:
           {
-            this.Clipboard.change(``);
+            this.Draft.change(``);
             break;
           }
         case 1:
           {
-            this.Clipboard.change(`const ${editId} = ${ops[0]};`);
+            this.Draft.change(`const ${editId} = ${ops[0]};`);
             break;
           }
         default:
           {
-            this.Clipboard.change(`const ${editId} = Group(${ops.join(', ')});`);
+            this.Draft.change(`const ${editId} = Group(${ops.join(', ')});`);
             break;
           }
       }
@@ -48655,6 +48213,16 @@ class App extends ReactDOM$3.Component {
       }
       await this.Workspace.store();
     };
+    const onCodeChange = (note, {
+      sourceText
+    }) => updateNotebookState(this, {
+      notes: [{
+        ...note,
+        sourceText
+      }],
+      sourceLocation: note.sourceLocation,
+      workspace
+    });
     this.factory = node => {
       switch (node.getComponent()) {
         case 'Workspace':
@@ -48767,23 +48335,13 @@ class App extends ReactDOM$3.Component {
               [`NotebookLine/${path}`]: NotebookLine
             } = this.state;
             const NotebookAdvice = this.Notebook.ensureAdvice(path);
-            const onChange = (note, {
-              sourceText
-            }) => updateNotebookState(this, {
-              notes: [{
-                ...note,
-                sourceText
-              }],
-              sourceLocation: note.sourceLocation,
-              workspace
-            });
             switch (NotebookMode) {
               case 'edit':
                 {
                   return v$1(SplitPane, null, v$1(Notebook, {
                     notebookPath: path,
                     notes: NotebookNotes,
-                    onChange: onChange,
+                    onChange: onCodeChange,
                     onClickView: this.Notebook.clickView,
                     onKeyDown: e => this.onKeyDown(e),
                     selectedLine: NotebookLine,
@@ -48809,7 +48367,7 @@ class App extends ReactDOM$3.Component {
                     notebookPath: path,
                     notes: NotebookNotes,
                     onClickView: this.Notebook.clickView,
-                    onChange: onChange,
+                    onChange: onCodeChange,
                     onKeyDown: e => this.onKeyDown(e),
                     selectedLine: NotebookLine,
                     workspace: workspace,
@@ -48818,19 +48376,27 @@ class App extends ReactDOM$3.Component {
                 }
             }
           }
-        case 'Clipboard':
+        case 'Draft':
           {
-            const {
-              Clipboard = {}
-            } = this.state;
-            const {
-              code = ''
-            } = Clipboard;
-            return v$1(JsEditorUi, {
-              onRun: () => this.Clipboard.run(),
-              onSave: () => this.Clipboard.save(),
-              onChange: data => this.Clipboard.change(data),
-              data: code
+            const path = this.Notebook.getSelectedPath();
+            const note = {
+              hash: '$Draft',
+              sourceText: this.Draft.getCode(),
+              sourceLocation: {
+                path,
+                line: 0,
+                id: '$Draft'
+              }
+            };
+            console.log(`QQ/Draft: ${note.sourceText}`);
+            return v$1(EditNote, {
+              isDraft: true,
+              notebookPath: path,
+              key: "$Draft",
+              note: note,
+              onChange: sourceText => this.Draft.change(sourceText),
+              onKeyDown: e => this.onKeyDown(e),
+              workspace: workspace
             });
           }
         case 'View':
@@ -49123,6 +48689,8 @@ const installUi = async ({
   sha,
   path
 }) => {
+  const isPersistent = await navigator.storage.persist();
+  console.log(`QQ/isPersistent: ${isPersistent}`);
   await boot();
   ReactDOM$3.render(v$1(App, {
     sha: 'master',

@@ -37,6 +37,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import DynamicView from './DynamicView.js';
+import EditNote from './EditNote.js';
 import FlexLayout from 'flexlayout-react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -83,7 +84,7 @@ const defaultModelConfig = {
     {
       type: 'border',
       location: 'left',
-      weight: 50,
+      weight: 200,
       children: [
         {
           id: 'Workspace',
@@ -155,28 +156,28 @@ const defaultModelConfig = {
       {
         id: 'Notebooks',
         type: 'tabset',
-        weight: 100,
+        weight: 300,
         enableDeleteWhenEmpty: false,
         children: [
           {
-            id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/start.nb',
+            id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/index.nb',
             type: 'tab',
-            name: 'start.nb',
+            name: 'index.nb',
             component: 'Notebook',
           },
         ],
       },
       {
-        id: 'Clipboards',
+        id: 'Drafts',
         type: 'tabset',
         weight: 100,
         enableDeleteWhenEmpty: false,
         children: [
           {
-            id: 'Clipboard',
+            id: 'Draft',
             type: 'tab',
-            name: 'Clipboard',
-            component: 'Clipboard',
+            name: 'Draft',
+            component: 'Draft',
             enableClose: false,
             borderWidth: 1024,
           },
@@ -237,22 +238,25 @@ class App extends React.Component {
 
     this.layoutRef = React.createRef();
 
-    this.Clipboard = {};
+    this.Draft = {};
 
-    this.Clipboard.change = (data) => {
-      const { Clipboard = {} } = this.state;
-      this.setState({ Clipboard: { ...Clipboard, code: data } });
+    this.Draft.change = (data) => {
+      const { Draft = {} } = this.state;
+      if (Draft.code !== data) {
+        console.log(`QQ/Draft.change: ${Draft.code} to ${data}`);
+        return this.setState({ Draft: { ...Draft, code: data } });
+      }
     };
 
-    this.Clipboard.getCode = (data) => {
-      const { Clipboard = {} } = this.state;
-      const { code = '' } = Clipboard;
+    this.Draft.getCode = (data) => {
+      const { Draft = {} } = this.state;
+      const { code = '' } = Draft;
       return code;
     };
 
-    this.Clipboard.run = () => {};
+    this.Draft.run = () => {};
 
-    this.Clipboard.save = () => {};
+    this.Draft.save = () => {};
 
     this.Config = {};
 
@@ -660,7 +664,8 @@ class App extends React.Component {
     this.Notebook.save = async (path) => {
       logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const { workspace } = this.props;
-      const NotebookText = this.Notebook.getText(path);
+      const NotebookText = this.Notebook.getText(path) + this.Draft.getCode();
+      await this.Draft.change('');
       // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;
@@ -870,15 +875,15 @@ class App extends React.Component {
       }
       switch (ops.length) {
         case 0: {
-          this.Clipboard.change(``);
+          this.Draft.change(``);
           break;
         }
         case 1: {
-          this.Clipboard.change(`const ${editId} = ${ops[0]};`);
+          this.Draft.change(`const ${editId} = ${ops[0]};`);
           break;
         }
         default: {
-          this.Clipboard.change(`const ${editId} = Group(${ops.join(', ')});`);
+          this.Draft.change(`const ${editId} = Group(${ops.join(', ')});`);
           break;
         }
       }
@@ -1104,6 +1109,13 @@ class App extends React.Component {
       await this.Workspace.store();
     };
 
+    const onCodeChange = (note, { sourceText }) =>
+      updateNotebookState(this, {
+        notes: [{ ...note, sourceText }],
+        sourceLocation: note.sourceLocation,
+        workspace,
+      });
+
     this.factory = (node) => {
       switch (node.getComponent()) {
         case 'Workspace': {
@@ -1303,12 +1315,6 @@ class App extends React.Component {
             [`NotebookLine/${path}`]: NotebookLine,
           } = this.state;
           const NotebookAdvice = this.Notebook.ensureAdvice(path);
-          const onChange = (note, { sourceText }) =>
-            updateNotebookState(this, {
-              notes: [{ ...note, sourceText }],
-              sourceLocation: note.sourceLocation,
-              workspace,
-            });
           switch (NotebookMode) {
             case 'edit': {
               return (
@@ -1316,7 +1322,7 @@ class App extends React.Component {
                   <Notebook
                     notebookPath={path}
                     notes={NotebookNotes}
-                    onChange={onChange}
+                    onChange={onCodeChange}
                     onClickView={this.Notebook.clickView}
                     onKeyDown={(e) => this.onKeyDown(e)}
                     selectedLine={NotebookLine}
@@ -1347,7 +1353,7 @@ class App extends React.Component {
                   notebookPath={path}
                   notes={NotebookNotes}
                   onClickView={this.Notebook.clickView}
-                  onChange={onChange}
+                  onChange={onCodeChange}
                   onKeyDown={(e) => this.onKeyDown(e)}
                   selectedLine={NotebookLine}
                   workspace={workspace}
@@ -1357,15 +1363,23 @@ class App extends React.Component {
             }
           }
         }
-        case 'Clipboard': {
-          const { Clipboard = {} } = this.state;
-          const { code = '' } = Clipboard;
+        case 'Draft': {
+          const path = this.Notebook.getSelectedPath();
+          const note = {
+            hash: '$Draft',
+            sourceText: this.Draft.getCode(),
+            sourceLocation: { path, line: 0, id: '$Draft' },
+          };
+          console.log(`QQ/Draft: ${note.sourceText}`);
           return (
-            <JsEditorUi
-              onRun={() => this.Clipboard.run()}
-              onSave={() => this.Clipboard.save()}
-              onChange={(data) => this.Clipboard.change(data)}
-              data={code}
+            <EditNote
+              isDraft={true}
+              notebookPath={path}
+              key='$Draft'
+              note={note}
+              onChange={(sourceText) => this.Draft.change(sourceText)}
+              onKeyDown={(e) => this.onKeyDown(e)}
+              workspace={workspace}
             />
           );
         }
@@ -1742,6 +1756,8 @@ class App extends React.Component {
 }
 
 export const installUi = async ({ document, workspace, sha, path }) => {
+  const isPersistent = await navigator.storage.persist();
+  console.log(`QQ/isPersistent: ${isPersistent}`);
   await boot();
   ReactDOM.render(
     <App sha={'master'} workspace={'JSxCAD'} path={path} />,

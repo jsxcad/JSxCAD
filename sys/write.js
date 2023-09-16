@@ -34,6 +34,10 @@ const getFileWriter = () => {
     };
   } else if (isBrowser || isWebWorker) {
     return async (qualifiedPath, data) => {
+      if (navigator.storage && navigator.storage.estimate) {
+        const { quota, usage } = await navigator.storage.estimate();
+        console.log(`QQ/quota: ${Number(usage / quota).toFixed(2) * 100}% ${usage} of ${quota}`);
+      }
       return db(qualifiedPath).setItemAndIncrementVersion(qualifiedPath, data);
     };
   }

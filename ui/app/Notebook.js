@@ -72,6 +72,12 @@ export const updateNotebookState = async (
     application.setState(op);
   };
 
+  if (notes.length === 0) {
+    console.log(`QQ/Notes are empty`);
+  } else {
+    console.log(`QQ/Notes are ${notes.length}`);
+  }
+
   for (const note of notes) {
     updateNote(note);
     if (note.view) {
@@ -287,25 +293,31 @@ export class Notebook extends React.PureComponent {
         }
       }
 
+/*
       if (!hasStub) {
         // Append an empty editor.
         const stub = {
           hash: 'stub',
           sourceText: '',
-          sourceLocation: { path: notebookPath, line: line + 1 },
+          sourceLocation: { path: notebookPath, line: line + 1, id: '+' },
         };
         ids.push({
           id: '+',
+          downloads: [],
+          icons: [],
+          errors: [],
           children: [
             <EditNote
               key={stub.hash}
               note={stub}
               onChange={(sourceText) => onChange(stub, { sourceText })}
+              onKeyDown={onKeyDown}
               workspace={workspace}
             />,
           ],
         });
       }
+*/
 
       useEffect(() => mermaid.init(undefined, '.mermaid'));
 
@@ -329,12 +341,12 @@ export class Notebook extends React.PureComponent {
         icons = [],
       } of ids) {
         sections.push(
-          <Accordion key={id}>
+          <Accordion key={id} defaultActiveKey={id}>
             <Accordion.Item eventKey={id}>
               <Accordion.Header>
-                {id} &nbsp;&nbsp; {errors.length > 0 ? '! &nbsp;&nbsp;' : ''}{' '}
+                {id} &nbsp;&nbsp; {errors.length > 0 ? errors[0] : ''}{' '}
                 {icons} &nbsp;&nbsp; {downloads}{' '}
-                {blur ? <SpinnerCircularSplit color="#36d7b7" size="64" /> : ''}
+                {blur ? <SpinnerCircularSplit color="#36d7b7" size="32" /> : ''}
               </Accordion.Header>
               <Accordion.Body>{children}</Accordion.Body>
             </Accordion.Item>
