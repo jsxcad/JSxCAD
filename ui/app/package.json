@@ -39,7 +39,7 @@
     "prismjs": "^1.17.1",
     "prop-types": "^15.7.2",
     "react-ace": "^9.5.0",
-    "react-bootstrap": "^1.0.0-beta.14",
+    "react-bootstrap": "^2.8.0",
     "react-multi-split-pane": "^0.3.3",
     "spinners-react": "^1.0.7"
   },

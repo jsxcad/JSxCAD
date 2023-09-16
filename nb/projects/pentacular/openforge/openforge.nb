@@ -6,9 +6,8 @@ const Base = (l = SIZE, w = SIZE) =>
 
 const magnet = Box([3], 6)
   .join(Arc(6))
-  .cutFrom(offset(1))
-  .ez([1, 6.1])
-  .and(Arc(4).Loft(z(0), z(1).offset(1)).gap())
+  .op(offset(1).ez([1]), cutFrom(offset(1)).ez([1, 6.1]))
+  .fitTo(Arc(4).Loft(z(0), z(1).offset(1)).gap())
   .x((SIZE - 8.2) / 2)
   .view(1);
 
@@ -34,13 +33,12 @@ const Connector = (play = 0.25) =>
 
 const base1x1 = Base(SIZE - 0.2)
   .fitTo(Core())
-  .stl('base1x1', fuse())
-  .view();
+  .stl('base1x1', fuse());
 
 const Core = (magnets = 'tlrb') =>
   Box(8.2)
     .op(
-      cutFrom(offset(1)).ez([1, 6 + 4]),
+      cutFrom(offset(1)).ez([0, 6 + 4]),
       ez([0, 6 + 4 + 0.25 - 0.15])
         .color('green')
         .gap()
@@ -54,7 +52,7 @@ const Core = (magnets = 'tlrb') =>
 
 const hole = Box(8).Loft(z(0), z(0.5), offset(0.5).z(1)).gap();
 
-const stoneFloorTile = tile
+const stoneFloorTile = tile1x1
   .join(stoneFloor.scaleToFit(SIZE - 1 - 0.2, SIZE - 1 - 0.2))
   .fuse()
   .stl('stone_floor_tile');
@@ -70,8 +68,7 @@ const tile1x1 = Box(SIZE - 0.2)
   .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
   .cut(base1x1.gap().z(-7.1), Connector(0.25))
   .z(-3)
-  .stl('tile1x1')
-  .v(1);
+  .stl('tile1x1');
 
 const connector = Connector(0.25).stl('connector');
 
@@ -118,6 +115,7 @@ Core().view().v(2);
 
 const tightHalfTile = tightTile
   .clip(Box(SIZE, [0.1, SIZE / 2], SIZE))
+  .y(SIZE / -4)
   .clean()
   .stl('tight_half_tile')
   .v(1);
@@ -153,7 +151,7 @@ const cobbleFanRoadTile = tile2x2
 
 const treeTrunkTile = tile2x2
   .and(
-    mud.scaleToFit((SIZE - 0.1) * 2, (SIZE - 0.1) * 2),
+    mud.scaleToFit(SIZE * 2 - 0.2, SIZE * 2 - 0.2),
     treeTrunk.scaleToFit(SIZE - 0.2, SIZE - 0.2, 50)
   )
   .stl('tree_trunk_tile');
@@ -169,7 +167,7 @@ const mud = LoadStl(
 const SIZE = 24;
 
 const spar = Box([3 + 2.2, -3 - 2, 2], 1)
-  .ez([1, 6.1])
+  .ez([0, 6.1])
   .x((SIZE - 8.2) / 2)
   .view(1);
 
@@ -202,4 +200,146 @@ const top3x3 = Top(SIZE * 3 - 0.2, SIZE * 3 - 0.2)
   .join(Connector().x(SIZE, 0, -SIZE).y(SIZE, 0, -SIZE))
   .cut(base3x3.z(-7.1))
   .stl('top3x3');
+
+const base4x4 = Base(SIZE * 4 - 0.2, SIZE * 4 - 0.2)
+  .fitTo(
+    Core('tr')
+      .x(SIZE * 1.5)
+      .y(SIZE * 1.5)
+      .rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
+    Core('r')
+      .x(SIZE * 1.5)
+      .y(SIZE * 0.5, SIZE * -0.5)
+      .rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
+    Core('')
+      .x(SIZE * 0.5, SIZE * -0.5)
+      .y(SIZE * 0.5, SIZE * -0.5)
+  )
+  .stl('base4x4', fuse());
+
+const top4x4 = Top(SIZE * 4 - 0.2, SIZE * 4 - 0.2)
+  .join(
+    Connector()
+      .x(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+  )
+  .cut(base4x4.z(-7.1))
+  .stl('top4x4');
+
+const base4x4bare = And(
+  Core('tr')
+    .x(SIZE * 1.5)
+    .y(SIZE * 1.5)
+    .rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
+  Core('r')
+    .x(SIZE * 1.5)
+    .y(SIZE * 0.5, SIZE * -0.5)
+    .rz(0 / 4, 1 / 4, 2 / 4, 3 / 4),
+  Core('')
+    .x(SIZE * 0.5, SIZE * -0.5)
+    .y(SIZE * 0.5, SIZE * -0.5)
+).stl('bare_base4x4', fuse());
+
+const base1x1bare = Core().stl('base1x1', fuse());
+
+const largeBrickFloor = LoadStl(
+  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/large_brick_floor.stl'
+).align('z>');
+
+const largeBrickFloorTile = tile1x1
+  .join(largeBrickFloor.align('xyz>').scaleToFit(SIZE - 0.2, SIZE - 0.2))
+  .fuse()
+  .stl('large_brick_floor_tile');
+
+const TopBare = (l = SIZE, w = SIZE) => Box(l, w).ez([-1]);
+
+const top4x4bare = TopBare(SIZE * 4 - 0.2, SIZE * 4 - 0.2)
+  .join(
+    Connector()
+      .x(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+  )
+  .cut(base4x4.z(-7.1))
+  .stl('top4x4bare');
+
+const mudTile = tile2x2
+  .and(mud.scaleToFit(SIZE * 2 - 0.2, SIZE * 2 - 0.2))
+  .stl('mud_tile');
+
+const stoneWall = LoadStl(
+  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/stone_wall.stl'
+).align('xyz>');
+
+const stoneWallTile = tightHalfTile
+  .and(stoneWall.scaleToFit(SIZE - 0.2, SIZE / 2 - 0.2))
+  .stl('stone_wall_tile', fuse());
+
+const cobbleRoad = LoadStl(
+  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/cobble_road.stl'
+).align('xyz>');
+
+const cobbleRoadTile = tile2x2
+  .join(cobbleRoad.scaleToFit((SIZE - 0.1) * 2, (SIZE - 0.1) * 2))
+  .fuse()
+  .stl('cobble_road_tile');
+
+const base6x4bare = And(
+  Core('lt')
+    .x(SIZE * -2.5)
+    .y(SIZE * 1.5),
+  Core('l')
+    .x(SIZE * -2.5)
+    .y(SIZE * 0.5, SIZE * -0.5),
+  Core('lb')
+    .x(SIZE * -2.5)
+    .y(SIZE * -1.5),
+  Core('t')
+    .x(SIZE * -1.5, SIZE * -0.5)
+    .y(SIZE * 1.5),
+  Core('')
+    .x(SIZE * -1.5, SIZE * -0.5)
+    .y(SIZE * 0.5, SIZE * -0.5),
+  Core('b')
+    .x(SIZE * -1.5, SIZE * -0.5)
+    .y(SIZE * -1.5)
+)
+  .sx(1, -1)
+  .stl('base6x4', fuse());
+
+const top6x4bare = TopBare(SIZE * 6 - 0.2, SIZE * 4 - 0.2)
+  .join(
+    Connector()
+      .x(
+        SIZE * 2.5,
+        SIZE * 1.5,
+        SIZE * 0.5,
+        SIZE * -0.5,
+        SIZE * -1.5,
+        SIZE * -2.5
+      )
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+  )
+  .cut(base6x4bare.z(-7.1))
+  .stl('top6x4bare');
+
+const stoneWallLong = LoadStl(
+  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/stone_wall_long.stl'
+).align('xyz>');
+
+const stoneWallLongTile = halfTile
+  .x(SIZE * -2, SIZE * -1, SIZE * 0, SIZE * 1, SIZE * 2)
+  .and(
+    stoneWallLong
+      .z(-1.5)
+      .cut(XY())
+      .scaleToFit(SIZE * 5 - 0.2, SIZE / 2 - 0.2, 50)
+  )
+  .stl('stone_wall_long_tile', fuse());
+
+const halfTile = tile1x1
+  .clip(Box(SIZE, [0.1, SIZE / 2], SIZE))
+  .y(SIZE / -4)
+  .clean()
+  .stl('half_tile')
+  .v(1);
 */

@@ -5,7 +5,7 @@ import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-bab
 import { execute } from './jsxcad-api.js';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
 
-var n,l$1,u$1,t$1,o$1,r$1,f$2,e$1={},c$1=[],s$1=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function a$1(n,l){for(var u in l)n[u]=l[u];return n}function h$1(n){var l=n.parentNode;l&&l.removeChild(n);}function v$1(l,u,i){var t,o,r,f={};for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return y$1(l,f,t,o,null)}function y$1(n,i,t,o,r){var f={type:n,props:i,key:t,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==r?++u$1:r};return null!=l$1.vnode&&l$1.vnode(f),f}function p$1(){return {current:null}}function d$1(n){return n.children}function _$1(n,l){this.props=n,this.context=l;}function k$2(n,l){if(null==l)return n.__?k$2(n.__,n.__.__k.indexOf(n)+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?k$2(n):null}function b$1(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return b$1(n)}}function m$1(n){(!n.__d&&(n.__d=!0)&&t$1.push(n)&&!g$2.__r++||r$1!==l$1.debounceRendering)&&((r$1=l$1.debounceRendering)||o$1)(g$2);}function g$2(){for(var n;g$2.__r=t$1.length;)n=t$1.sort(function(n,l){return n.__v.__b-l.__v.__b}),t$1=[],n.some(function(n){var l,u,i,t,o,r;n.__d&&(o=(t=(l=n).__v).__e,(r=l.__P)&&(u=[],(i=a$1({},t)).__v=t.__v+1,j$2(r,t,i,l.__n,void 0!==r.ownerSVGElement,null!=t.__h?[o]:null,u,null==o?k$2(t):o,t.__h),z$1(u,t),t.__e!=o&&b$1(t)));});}function w$2(n,l,u,i,t,o,r,f,s,a){var h,v,p,_,b,m,g,w=i&&i.__k||c$1,A=w.length;for(u.__k=[],h=0;h<l.length;h++)if(null!=(_=u.__k[h]=null==(_=l[h])||"boolean"==typeof _?null:"string"==typeof _||"number"==typeof _||"bigint"==typeof _?y$1(null,_,null,null,_):Array.isArray(_)?y$1(d$1,{children:_},null,null,null):_.__b>0?y$1(_.type,_.props,_.key,null,_.__v):_)){if(_.__=u,_.__b=u.__b+1,null===(p=w[h])||p&&_.key==p.key&&_.type===p.type)w[h]=void 0;else for(v=0;v<A;v++){if((p=w[v])&&_.key==p.key&&_.type===p.type){w[v]=void 0;break}p=null;}j$2(n,_,p=p||e$1,t,o,r,f,s,a),b=_.__e,(v=_.ref)&&p.ref!=v&&(g||(g=[]),p.ref&&g.push(p.ref,null,_),g.push(v,_.__c||b,_)),null!=b?(null==m&&(m=b),"function"==typeof _.type&&null!=_.__k&&_.__k===p.__k?_.__d=s=x$2(_,s,n):s=P$1(n,_,p,w,b,s),a||"option"!==u.type?"function"==typeof u.type&&(u.__d=s):n.value=""):s&&p.__e==s&&s.parentNode!=n&&(s=k$2(p));}for(u.__e=m,h=A;h--;)null!=w[h]&&("function"==typeof u.type&&null!=w[h].__e&&w[h].__e==u.__d&&(u.__d=k$2(i,h+1)),N$1(w[h],w[h]));if(g)for(h=0;h<g.length;h++)M$1(g[h],g[++h],g[++h]);}function x$2(n,l,u){var i,t;for(i=0;i<n.__k.length;i++)(t=n.__k[i])&&(t.__=n,l="function"==typeof t.type?x$2(t,l,u):P$1(u,t,t,n.__k,t.__e,l));return l}function A$2(n,l){return l=l||[],null==n||"boolean"==typeof n||(Array.isArray(n)?n.some(function(n){A$2(n,l);}):l.push(n)),l}function P$1(n,l,u,i,t,o){var r,f,e;if(void 0!==l.__d)r=l.__d,l.__d=void 0;else if(null==u||t!=o||null==t.parentNode)n:if(null==o||o.parentNode!==n)n.appendChild(t),r=null;else {for(f=o,e=0;(f=f.nextSibling)&&e<i.length;e+=2)if(f==t)break n;n.insertBefore(t,o),r=o;}return void 0!==r?r:t.nextSibling}function C$1(n,l,u,i,t){var o;for(o in u)"children"===o||"key"===o||o in l||H$1(n,o,null,u[o],i);for(o in l)t&&"function"!=typeof l[o]||"children"===o||"key"===o||"value"===o||"checked"===o||u[o]===l[o]||H$1(n,o,l[o],u[o],i);}function $$1(n,l,u){"-"===l[0]?n.setProperty(l,u):n[l]=null==u?"":"number"!=typeof u||s$1.test(l)?u:u+"px";}function H$1(n,l,u,i,t){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof i&&(n.style.cssText=i=""),i)for(l in i)u&&l in u||$$1(n.style,l,"");if(u)for(l in u)i&&u[l]===i[l]||$$1(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/Capture$/,"")),l=l.toLowerCase()in n?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?i||n.addEventListener(l,o?T$2:I$1,o):n.removeEventListener(l,o?T$2:I$1,o);else if("dangerouslySetInnerHTML"!==l){if(t)l=l.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==l&&"list"!==l&&"form"!==l&&"tabIndex"!==l&&"download"!==l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null!=u&&(!1!==u||"a"===l[0]&&"r"===l[1])?n.setAttribute(l,u):n.removeAttribute(l));}}function I$1(n){this.l[n.type+!1](l$1.event?l$1.event(n):n);}function T$2(n){this.l[n.type+!0](l$1.event?l$1.event(n):n);}function j$2(n,u,i,t,o,r,f,e,c){var s,h,v,y,p,k,b,m,g,x,A,P=u.type;if(void 0!==u.constructor)return null;null!=i.__h&&(c=i.__h,e=u.__e=i.__e,u.__h=null,r=[e]),(s=l$1.__b)&&s(u);try{n:if("function"==typeof P){if(m=u.props,g=(s=P.contextType)&&t[s.__c],x=s?g?g.props.value:s.__:t,i.__c?b=(h=u.__c=i.__c).__=h.__E:("prototype"in P&&P.prototype.render?u.__c=h=new P(m,x):(u.__c=h=new _$1(m,x),h.constructor=P,h.render=O$1),g&&g.sub(h),h.props=m,h.state||(h.state={}),h.context=x,h.__n=t,v=h.__d=!0,h.__h=[]),null==h.__s&&(h.__s=h.state),null!=P.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=a$1({},h.__s)),a$1(h.__s,P.getDerivedStateFromProps(m,h.__s))),y=h.props,p=h.state,v)null==P.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(null==P.getDerivedStateFromProps&&m!==y&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,x),!h.__e&&null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,x)||u.__v===i.__v){h.props=m,h.state=h.__s,u.__v!==i.__v&&(h.__d=!1),h.__v=u,u.__e=i.__e,u.__k=i.__k,u.__k.forEach(function(n){n&&(n.__=u);}),h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,x),null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(y,p,k);});}h.context=x,h.props=m,h.state=h.__s,(s=l$1.__r)&&s(u),h.__d=!1,h.__v=u,h.__P=n,s=h.render(h.props,h.state,h.context),h.state=h.__s,null!=h.getChildContext&&(t=a$1(a$1({},t),h.getChildContext())),v||null==h.getSnapshotBeforeUpdate||(k=h.getSnapshotBeforeUpdate(y,p)),A=null!=s&&s.type===d$1&&null==s.key?s.props.children:s,w$2(n,Array.isArray(A)?A:[A],u,i,t,o,r,f,e,c),h.base=u.__e,u.__h=null,h.__h.length&&f.push(h),b&&(h.__E=h.__=null),h.__e=!1;}else null==r&&u.__v===i.__v?(u.__k=i.__k,u.__e=i.__e):u.__e=L$1(i.__e,u,i,t,o,r,f,c);(s=l$1.diffed)&&s(u);}catch(n){u.__v=null,(c||null!=r)&&(u.__e=e,u.__h=!!c,r[r.indexOf(e)]=null),l$1.__e(n,u,i);}}function z$1(n,u){l$1.__c&&l$1.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$1.__e(n,u.__v);}});}function L$1(l,u,i,t,o,r,f,c){var s,a,v,y=i.props,p=u.props,d=u.type,_=0;if("svg"===d&&(o=!0),null!=r)for(;_<r.length;_++)if((s=r[_])&&(s===l||(d?s.localName==d:3==s.nodeType))){l=s,r[_]=null;break}if(null==l){if(null===d)return document.createTextNode(p);l=o?document.createElementNS("http://www.w3.org/2000/svg",d):document.createElement(d,p.is&&p),r=null,c=!1;}if(null===d)y===p||c&&l.data===p||(l.data=p);else {if(r=r&&n.call(l.childNodes),a=(y=i.props||e$1).dangerouslySetInnerHTML,v=p.dangerouslySetInnerHTML,!c){if(null!=r)for(y={},_=0;_<l.attributes.length;_++)y[l.attributes[_].name]=l.attributes[_].value;(v||a)&&(v&&(a&&v.__html==a.__html||v.__html===l.innerHTML)||(l.innerHTML=v&&v.__html||""));}if(C$1(l,p,y,o,c),v)u.__k=[];else if(_=u.props.children,w$2(l,Array.isArray(_)?_:[_],u,i,t,o&&"foreignObject"!==d,r,f,r?r[0]:i.__k&&k$2(i,0),c),null!=r)for(_=r.length;_--;)null!=r[_]&&h$1(r[_]);c||("value"in p&&void 0!==(_=p.value)&&(_!==l.value||"progress"===d&&!_)&&H$1(l,"value",_,y.value,!1),"checked"in p&&void 0!==(_=p.checked)&&_!==l.checked&&H$1(l,"checked",_,y.checked,!1));}return l}function M$1(n,u,i){try{"function"==typeof n?n(u):n.current=u;}catch(n){l$1.__e(n,i);}}function N$1(n,u,i){var t,o;if(l$1.unmount&&l$1.unmount(n),(t=n.ref)&&(t.current&&t.current!==n.__e||M$1(t,null,u)),null!=(t=n.__c)){if(t.componentWillUnmount)try{t.componentWillUnmount();}catch(n){l$1.__e(n,u);}t.base=t.__P=null;}if(t=n.__k)for(o=0;o<t.length;o++)t[o]&&N$1(t[o],u,"function"!=typeof n.type);i||null==n.__e||h$1(n.__e),n.__e=n.__d=void 0;}function O$1(n,l,u){return this.constructor(n,u)}function S$1(u,i,t){var o,r,f;l$1.__&&l$1.__(u,i),r=(o="function"==typeof t)?null:t&&t.__k||i.__k,f=[],j$2(i,u=(!o&&t||i).__k=v$1(d$1,null,[u]),r||e$1,e$1,void 0!==i.ownerSVGElement,!o&&t?[t]:r?null:i.firstChild?n.call(i.childNodes):null,f,!o&&t?t:r?r.__e:i.firstChild,o),z$1(f,u);}function q$2(n,l){S$1(n,l,q$2);}function B$1(l,u,i){var t,o,r,f=a$1({},l.props);for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];return arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),y$1(l.type,f,t||l.key,o||l.ref,null)}function D$1(n,l){var u={__c:l="__cC"+f$2++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,i;return this.getChildContext||(u=[],(i={})[l]=this,this.getChildContext=function(){return i},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.some(m$1);},this.sub=function(n){u.push(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u.splice(u.indexOf(n),1),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=c$1.slice,l$1={__e:function(n,l){for(var u,i,t;l=l.__;)if((u=l.__c)&&!u.__)try{if((i=u.constructor)&&null!=i.getDerivedStateFromError&&(u.setState(i.getDerivedStateFromError(n)),t=u.__d),null!=u.componentDidCatch&&(u.componentDidCatch(n),t=u.__d),t)return u.__E=u}catch(l){n=l;}throw n}},u$1=0,_$1.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=a$1({},this.state),"function"==typeof n&&(n=n(a$1({},u),this.props)),n&&a$1(u,n),null!=n&&this.__v&&(l&&this.__h.push(l),m$1(this));},_$1.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),m$1(this));},_$1.prototype.render=d$1,t$1=[],o$1="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,g$2.__r=0,f$2=0;
+var n,l$1,u$1,t$1,o$2,r$1,f$2,e$2={},c$1=[],s$1=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function a$1(n,l){for(var u in l)n[u]=l[u];return n}function h$1(n){var l=n.parentNode;l&&l.removeChild(n);}function v$1(l,u,i){var t,o,r,f={};for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return y$1(l,f,t,o,null)}function y$1(n,i,t,o,r){var f={type:n,props:i,key:t,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==r?++u$1:r};return null!=l$1.vnode&&l$1.vnode(f),f}function p$1(){return {current:null}}function d$1(n){return n.children}function _$1(n,l){this.props=n,this.context=l;}function k$2(n,l){if(null==l)return n.__?k$2(n.__,n.__.__k.indexOf(n)+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?k$2(n):null}function b$1(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return b$1(n)}}function m$1(n){(!n.__d&&(n.__d=!0)&&t$1.push(n)&&!g$2.__r++||r$1!==l$1.debounceRendering)&&((r$1=l$1.debounceRendering)||o$2)(g$2);}function g$2(){for(var n;g$2.__r=t$1.length;)n=t$1.sort(function(n,l){return n.__v.__b-l.__v.__b}),t$1=[],n.some(function(n){var l,u,i,t,o,r;n.__d&&(o=(t=(l=n).__v).__e,(r=l.__P)&&(u=[],(i=a$1({},t)).__v=t.__v+1,j$2(r,t,i,l.__n,void 0!==r.ownerSVGElement,null!=t.__h?[o]:null,u,null==o?k$2(t):o,t.__h),z$1(u,t),t.__e!=o&&b$1(t)));});}function w$2(n,l,u,i,t,o,r,f,s,a){var h,v,p,_,b,m,g,w=i&&i.__k||c$1,A=w.length;for(u.__k=[],h=0;h<l.length;h++)if(null!=(_=u.__k[h]=null==(_=l[h])||"boolean"==typeof _?null:"string"==typeof _||"number"==typeof _||"bigint"==typeof _?y$1(null,_,null,null,_):Array.isArray(_)?y$1(d$1,{children:_},null,null,null):_.__b>0?y$1(_.type,_.props,_.key,null,_.__v):_)){if(_.__=u,_.__b=u.__b+1,null===(p=w[h])||p&&_.key==p.key&&_.type===p.type)w[h]=void 0;else for(v=0;v<A;v++){if((p=w[v])&&_.key==p.key&&_.type===p.type){w[v]=void 0;break}p=null;}j$2(n,_,p=p||e$2,t,o,r,f,s,a),b=_.__e,(v=_.ref)&&p.ref!=v&&(g||(g=[]),p.ref&&g.push(p.ref,null,_),g.push(v,_.__c||b,_)),null!=b?(null==m&&(m=b),"function"==typeof _.type&&null!=_.__k&&_.__k===p.__k?_.__d=s=x$2(_,s,n):s=P$1(n,_,p,w,b,s),a||"option"!==u.type?"function"==typeof u.type&&(u.__d=s):n.value=""):s&&p.__e==s&&s.parentNode!=n&&(s=k$2(p));}for(u.__e=m,h=A;h--;)null!=w[h]&&("function"==typeof u.type&&null!=w[h].__e&&w[h].__e==u.__d&&(u.__d=k$2(i,h+1)),N$1(w[h],w[h]));if(g)for(h=0;h<g.length;h++)M$1(g[h],g[++h],g[++h]);}function x$2(n,l,u){var i,t;for(i=0;i<n.__k.length;i++)(t=n.__k[i])&&(t.__=n,l="function"==typeof t.type?x$2(t,l,u):P$1(u,t,t,n.__k,t.__e,l));return l}function A$2(n,l){return l=l||[],null==n||"boolean"==typeof n||(Array.isArray(n)?n.some(function(n){A$2(n,l);}):l.push(n)),l}function P$1(n,l,u,i,t,o){var r,f,e;if(void 0!==l.__d)r=l.__d,l.__d=void 0;else if(null==u||t!=o||null==t.parentNode)n:if(null==o||o.parentNode!==n)n.appendChild(t),r=null;else {for(f=o,e=0;(f=f.nextSibling)&&e<i.length;e+=2)if(f==t)break n;n.insertBefore(t,o),r=o;}return void 0!==r?r:t.nextSibling}function C$1(n,l,u,i,t){var o;for(o in u)"children"===o||"key"===o||o in l||H$1(n,o,null,u[o],i);for(o in l)t&&"function"!=typeof l[o]||"children"===o||"key"===o||"value"===o||"checked"===o||u[o]===l[o]||H$1(n,o,l[o],u[o],i);}function $$1(n,l,u){"-"===l[0]?n.setProperty(l,u):n[l]=null==u?"":"number"!=typeof u||s$1.test(l)?u:u+"px";}function H$1(n,l,u,i,t){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof i&&(n.style.cssText=i=""),i)for(l in i)u&&l in u||$$1(n.style,l,"");if(u)for(l in u)i&&u[l]===i[l]||$$1(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/Capture$/,"")),l=l.toLowerCase()in n?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?i||n.addEventListener(l,o?T$2:I$1,o):n.removeEventListener(l,o?T$2:I$1,o);else if("dangerouslySetInnerHTML"!==l){if(t)l=l.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==l&&"list"!==l&&"form"!==l&&"tabIndex"!==l&&"download"!==l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null!=u&&(!1!==u||"a"===l[0]&&"r"===l[1])?n.setAttribute(l,u):n.removeAttribute(l));}}function I$1(n){this.l[n.type+!1](l$1.event?l$1.event(n):n);}function T$2(n){this.l[n.type+!0](l$1.event?l$1.event(n):n);}function j$2(n,u,i,t,o,r,f,e,c){var s,h,v,y,p,k,b,m,g,x,A,P=u.type;if(void 0!==u.constructor)return null;null!=i.__h&&(c=i.__h,e=u.__e=i.__e,u.__h=null,r=[e]),(s=l$1.__b)&&s(u);try{n:if("function"==typeof P){if(m=u.props,g=(s=P.contextType)&&t[s.__c],x=s?g?g.props.value:s.__:t,i.__c?b=(h=u.__c=i.__c).__=h.__E:("prototype"in P&&P.prototype.render?u.__c=h=new P(m,x):(u.__c=h=new _$1(m,x),h.constructor=P,h.render=O$1),g&&g.sub(h),h.props=m,h.state||(h.state={}),h.context=x,h.__n=t,v=h.__d=!0,h.__h=[]),null==h.__s&&(h.__s=h.state),null!=P.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=a$1({},h.__s)),a$1(h.__s,P.getDerivedStateFromProps(m,h.__s))),y=h.props,p=h.state,v)null==P.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(null==P.getDerivedStateFromProps&&m!==y&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,x),!h.__e&&null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,x)||u.__v===i.__v){h.props=m,h.state=h.__s,u.__v!==i.__v&&(h.__d=!1),h.__v=u,u.__e=i.__e,u.__k=i.__k,u.__k.forEach(function(n){n&&(n.__=u);}),h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,x),null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(y,p,k);});}h.context=x,h.props=m,h.state=h.__s,(s=l$1.__r)&&s(u),h.__d=!1,h.__v=u,h.__P=n,s=h.render(h.props,h.state,h.context),h.state=h.__s,null!=h.getChildContext&&(t=a$1(a$1({},t),h.getChildContext())),v||null==h.getSnapshotBeforeUpdate||(k=h.getSnapshotBeforeUpdate(y,p)),A=null!=s&&s.type===d$1&&null==s.key?s.props.children:s,w$2(n,Array.isArray(A)?A:[A],u,i,t,o,r,f,e,c),h.base=u.__e,u.__h=null,h.__h.length&&f.push(h),b&&(h.__E=h.__=null),h.__e=!1;}else null==r&&u.__v===i.__v?(u.__k=i.__k,u.__e=i.__e):u.__e=L$1(i.__e,u,i,t,o,r,f,c);(s=l$1.diffed)&&s(u);}catch(n){u.__v=null,(c||null!=r)&&(u.__e=e,u.__h=!!c,r[r.indexOf(e)]=null),l$1.__e(n,u,i);}}function z$1(n,u){l$1.__c&&l$1.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$1.__e(n,u.__v);}});}function L$1(l,u,i,t,o,r,f,c){var s,a,v,y=i.props,p=u.props,d=u.type,_=0;if("svg"===d&&(o=!0),null!=r)for(;_<r.length;_++)if((s=r[_])&&(s===l||(d?s.localName==d:3==s.nodeType))){l=s,r[_]=null;break}if(null==l){if(null===d)return document.createTextNode(p);l=o?document.createElementNS("http://www.w3.org/2000/svg",d):document.createElement(d,p.is&&p),r=null,c=!1;}if(null===d)y===p||c&&l.data===p||(l.data=p);else {if(r=r&&n.call(l.childNodes),a=(y=i.props||e$2).dangerouslySetInnerHTML,v=p.dangerouslySetInnerHTML,!c){if(null!=r)for(y={},_=0;_<l.attributes.length;_++)y[l.attributes[_].name]=l.attributes[_].value;(v||a)&&(v&&(a&&v.__html==a.__html||v.__html===l.innerHTML)||(l.innerHTML=v&&v.__html||""));}if(C$1(l,p,y,o,c),v)u.__k=[];else if(_=u.props.children,w$2(l,Array.isArray(_)?_:[_],u,i,t,o&&"foreignObject"!==d,r,f,r?r[0]:i.__k&&k$2(i,0),c),null!=r)for(_=r.length;_--;)null!=r[_]&&h$1(r[_]);c||("value"in p&&void 0!==(_=p.value)&&(_!==l.value||"progress"===d&&!_)&&H$1(l,"value",_,y.value,!1),"checked"in p&&void 0!==(_=p.checked)&&_!==l.checked&&H$1(l,"checked",_,y.checked,!1));}return l}function M$1(n,u,i){try{"function"==typeof n?n(u):n.current=u;}catch(n){l$1.__e(n,i);}}function N$1(n,u,i){var t,o;if(l$1.unmount&&l$1.unmount(n),(t=n.ref)&&(t.current&&t.current!==n.__e||M$1(t,null,u)),null!=(t=n.__c)){if(t.componentWillUnmount)try{t.componentWillUnmount();}catch(n){l$1.__e(n,u);}t.base=t.__P=null;}if(t=n.__k)for(o=0;o<t.length;o++)t[o]&&N$1(t[o],u,"function"!=typeof n.type);i||null==n.__e||h$1(n.__e),n.__e=n.__d=void 0;}function O$1(n,l,u){return this.constructor(n,u)}function S$1(u,i,t){var o,r,f;l$1.__&&l$1.__(u,i),r=(o="function"==typeof t)?null:t&&t.__k||i.__k,f=[],j$2(i,u=(!o&&t||i).__k=v$1(d$1,null,[u]),r||e$2,e$2,void 0!==i.ownerSVGElement,!o&&t?[t]:r?null:i.firstChild?n.call(i.childNodes):null,f,!o&&t?t:r?r.__e:i.firstChild,o),z$1(f,u);}function q$2(n,l){S$1(n,l,q$2);}function B$1(l,u,i){var t,o,r,f=a$1({},l.props);for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];return arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),y$1(l.type,f,t||l.key,o||l.ref,null)}function D$1(n,l){var u={__c:l="__cC"+f$2++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,i;return this.getChildContext||(u=[],(i={})[l]=this,this.getChildContext=function(){return i},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.some(m$1);},this.sub=function(n){u.push(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u.splice(u.indexOf(n),1),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=c$1.slice,l$1={__e:function(n,l){for(var u,i,t;l=l.__;)if((u=l.__c)&&!u.__)try{if((i=u.constructor)&&null!=i.getDerivedStateFromError&&(u.setState(i.getDerivedStateFromError(n)),t=u.__d),null!=u.componentDidCatch&&(u.componentDidCatch(n),t=u.__d),t)return u.__E=u}catch(l){n=l;}throw n}},u$1=0,_$1.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=a$1({},this.state),"function"==typeof n&&(n=n(a$1({},u),this.props)),n&&a$1(u,n),null!=n&&this.__v&&(l&&this.__h.push(l),m$1(this));},_$1.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),m$1(this));},_$1.prototype.render=d$1,t$1=[],o$2="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,g$2.__r=0,f$2=0;
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -28,7 +28,7 @@ function getAugmentedNamespace(n) {
 	return a;
 }
 
-var propTypes$1 = {exports: {}};
+var propTypes$2 = {exports: {}};
 
 var reactIs = {exports: {}};
 
@@ -1043,83 +1043,10 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
   // By explicitly using `prop-types` you are opting into new development behavior.
   // http://fb.me/prop-types-in-prod
   var throwOnDirectAccess = true;
-  propTypes$1.exports = factoryWithTypeCheckers(ReactIs.isElement, throwOnDirectAccess);
+  propTypes$2.exports = factoryWithTypeCheckers(ReactIs.isElement, throwOnDirectAccess);
 }
 
-var PropTypes$3 = propTypes$1.exports;
-
-var t,u,r,o=0,i$2=[],c=l$1.__b,f$1=l$1.__r,e=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o||r),o=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o=5,d(function(){return {current:n}},[])}function _(n,t,u){o=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function q$1(n){var r=m(t++,10),o=l();return r.__=n,u.componentDidCatch||(u.componentDidCatch=function(n){r.__&&r.__(n),o[1](n);}),[o[0],function(){o[1](void 0);}]}function x$1(){i$2.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$2=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f$1&&f$1(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e&&e(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$2.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
-
-function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}},X="17.0.2";function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)},fn=d$1;var ReactDOM$3 = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
-
-var compat_module = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	'default': ReactDOM$3,
-	version: X,
-	Children: k,
-	render: z,
-	hydrate: B,
-	unmountComponentAtNode: rn,
-	createPortal: W,
-	createFactory: nn,
-	cloneElement: en,
-	isValidElement: tn,
-	findDOMNode: un,
-	PureComponent: E,
-	memo: g,
-	forwardRef: x,
-	flushSync: ln,
-	unstable_batchedUpdates: on,
-	StrictMode: fn,
-	Suspense: L,
-	SuspenseList: M,
-	lazy: F,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: Q,
-	createElement: v$1,
-	createContext: D$1,
-	createRef: p$1,
-	Fragment: d$1,
-	Component: _$1,
-	useState: l,
-	useReducer: p,
-	useEffect: y,
-	useLayoutEffect: h,
-	useRef: s,
-	useImperativeHandle: _,
-	useMemo: d,
-	useCallback: A$1,
-	useContext: F$1,
-	useDebugValue: T$1,
-	useErrorBoundary: q$1
-});
-
-function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-    return target;
-  };
-  return _extends.apply(this, arguments);
-}
-
-function _objectWithoutPropertiesLoose(source, excluded) {
-  if (source == null) return {};
-  var target = {};
-  var sourceKeys = Object.keys(source);
-  var key, i;
-  for (i = 0; i < sourceKeys.length; i++) {
-    key = sourceKeys[i];
-    if (excluded.indexOf(key) >= 0) continue;
-    target[key] = source[key];
-  }
-  return target;
-}
+var PropTypes$3 = propTypes$2.exports;
 
 var classnames = {exports: {}};
 
@@ -1182,411 +1109,1637 @@ var classnames = {exports: {}};
 
 var classNames = classnames.exports;
 
-var all = {exports: {}};
+var t,u,r,o$1=0,i$2=[],c=l$1.__b,f$1=l$1.__r,e$1=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o$1||r),o$1=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o$1=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o$1=5,d(function(){return {current:n}},[])}function _(n,t,u){o$1=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o$1=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function q$1(n){var r=m(t++,10),o=l();return r.__=n,u.componentDidCatch||(u.componentDidCatch=function(n){r.__&&r.__(n),o[1](n);}),[o[0],function(){o[1](void 0);}]}function x$1(){i$2.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$2=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f$1&&f$1(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e$1&&e$1(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$2.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
 
-var createChainableTypeChecker = {exports: {}};
+function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}},X="17.0.2";function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)},fn=d$1;var ReactDOM$3 = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
 
-(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
+var compat_module = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	'default': ReactDOM$3,
+	version: X,
+	Children: k,
+	render: z,
+	hydrate: B,
+	unmountComponentAtNode: rn,
+	createPortal: W,
+	createFactory: nn,
+	cloneElement: en,
+	isValidElement: tn,
+	findDOMNode: un,
+	PureComponent: E,
+	memo: g,
+	forwardRef: x,
+	flushSync: ln,
+	unstable_batchedUpdates: on,
+	StrictMode: fn,
+	Suspense: L,
+	SuspenseList: M,
+	lazy: F,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: Q,
+	createElement: v$1,
+	createContext: D$1,
+	createRef: p$1,
+	Fragment: d$1,
+	Component: _$1,
+	useState: l,
+	useReducer: p,
+	useEffect: y,
+	useLayoutEffect: h,
+	useRef: s,
+	useImperativeHandle: _,
+	useMemo: d,
+	useCallback: A$1,
+	useContext: F$1,
+	useDebugValue: T$1,
+	useErrorBoundary: q$1
 });
-exports.default = createChainableTypeChecker;
+
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+
+function _objectWithoutPropertiesLoose$3(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+
+function defaultKey(key) {
+  return 'default' + key.charAt(0).toUpperCase() + key.substr(1);
+}
+
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
+function useUncontrolledProp(propValue, defaultValue, handler) {
+  var wasPropRef = s(propValue !== undefined);
+
+  var _useState = l(defaultValue),
+      stateValue = _useState[0],
+      setState = _useState[1];
+
+  var isProp = propValue !== undefined;
+  var wasProp = wasPropRef.current;
+  wasPropRef.current = isProp;
+  /**
+   * If a prop switches from controlled to Uncontrolled
+   * reset its value to the defaultValue
+   */
+
+  if (!isProp && wasProp && stateValue !== defaultValue) {
+    setState(defaultValue);
+  }
+
+  return [isProp ? propValue : stateValue, A$1(function (value) {
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    if (handler) handler.apply(void 0, [value].concat(args));
+    setState(value);
+  }, [handler])];
+}
+function useUncontrolled(props, config) {
+  return Object.keys(config).reduce(function (result, fieldName) {
+    var _extends2;
+
+    var _ref = result,
+        defaultValue = _ref[defaultKey(fieldName)],
+        propsValue = _ref[fieldName],
+        rest = _objectWithoutPropertiesLoose$3(_ref, [defaultKey(fieldName), fieldName].map(_toPropertyKey));
+
+    var handlerName = config[fieldName];
+
+    var _useUncontrolledProp = useUncontrolledProp(propsValue, defaultValue, props[handlerName]),
+        value = _useUncontrolledProp[0],
+        handler = _useUncontrolledProp[1];
+
+    return _extends({}, rest, (_extends2 = {}, _extends2[fieldName] = value, _extends2[handlerName] = handler, _extends2));
+  }, props);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
+
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  _setPrototypeOf(subClass, superClass);
+}
+
+var o=0;function e(_,e,n,t,f){var l,s,u={};for(s in e)"ref"==s?l=e[s]:u[s]=e[s];var a={type:_,props:u,key:n,ref:l,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:--o,__source:t,__self:f};if("function"==typeof _&&(l=_.defaultProps))for(s in l)void 0===u[s]&&(u[s]=l[s]);return l$1.vnode&&l$1.vnode(a),a}
+
+const DEFAULT_BREAKPOINTS = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
+const DEFAULT_MIN_BREAKPOINT = 'xs';
+const ThemeContext = /*#__PURE__*/D$1({
+  prefixes: {},
+  breakpoints: DEFAULT_BREAKPOINTS,
+  minBreakpoint: DEFAULT_MIN_BREAKPOINT
+});
+function useBootstrapPrefix(prefix, defaultPrefix) {
+  const {
+    prefixes
+  } = F$1(ThemeContext);
+  return prefix || prefixes[defaultPrefix] || defaultPrefix;
+}
+function useBootstrapBreakpoints() {
+  const {
+    breakpoints
+  } = F$1(ThemeContext);
+  return breakpoints;
+}
+function useBootstrapMinBreakpoint() {
+  const {
+    minBreakpoint
+  } = F$1(ThemeContext);
+  return minBreakpoint;
+}
+
 /**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * Returns the owner document of a given element.
+ * 
+ * @param node the element
+ */
+function ownerDocument(node) {
+  return node && node.ownerDocument || document;
+}
+
+/**
+ * Returns the owner window of a given element.
+ * 
+ * @param node the element
  */
 
-// Mostly taken from ReactPropTypes.
+function ownerWindow(node) {
+  var doc = ownerDocument(node);
+  return doc && doc.defaultView || window;
+}
 
-function createChainableTypeChecker(validate) {
-  function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    var componentNameSafe = componentName || '<<anonymous>>';
-    var propFullNameSafe = propFullName || propName;
+/**
+ * Returns one or all computed style properties of an element.
+ * 
+ * @param node the element
+ * @param psuedoElement the style property
+ */
 
-    if (props[propName] == null) {
-      if (isRequired) {
-        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
+function getComputedStyle$1(node, psuedoElement) {
+  return ownerWindow(node).getComputedStyle(node, psuedoElement);
+}
+
+var rUpper = /([A-Z])/g;
+function hyphenate(string) {
+  return string.replace(rUpper, '-$1').toLowerCase();
+}
+
+/**
+ * Copyright 2013-2014, Facebook, Inc.
+ * All rights reserved.
+ * https://github.com/facebook/react/blob/2aeb8a2a6beb00617a4217f7f8284924fa2ad819/src/vendor/core/hyphenateStyleName.js
+ */
+var msPattern = /^ms-/;
+function hyphenateStyleName(string) {
+  return hyphenate(string).replace(msPattern, '-ms-');
+}
+
+var supportedTransforms = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i;
+function isTransform(value) {
+  return !!(value && supportedTransforms.test(value));
+}
+
+function style(node, property) {
+  var css = '';
+  var transforms = '';
+
+  if (typeof property === 'string') {
+    return node.style.getPropertyValue(hyphenateStyleName(property)) || getComputedStyle$1(node).getPropertyValue(hyphenateStyleName(property));
+  }
+
+  Object.keys(property).forEach(function (key) {
+    var value = property[key];
+
+    if (!value && value !== 0) {
+      node.style.removeProperty(hyphenateStyleName(key));
+    } else if (isTransform(key)) {
+      transforms += key + "(" + value + ") ";
+    } else {
+      css += hyphenateStyleName(key) + ": " + value + ";";
+    }
+  });
+
+  if (transforms) {
+    css += "transform: " + transforms + ";";
+  }
+
+  node.style.cssText += ";" + css;
+}
+
+var config = {
+  disabled: false
+};
+
+var timeoutsShape = PropTypes$3.oneOfType([PropTypes$3.number, PropTypes$3.shape({
+  enter: PropTypes$3.number,
+  exit: PropTypes$3.number,
+  appear: PropTypes$3.number
+}).isRequired]) ;
+PropTypes$3.oneOfType([PropTypes$3.string, PropTypes$3.shape({
+  enter: PropTypes$3.string,
+  exit: PropTypes$3.string,
+  active: PropTypes$3.string
+}), PropTypes$3.shape({
+  enter: PropTypes$3.string,
+  enterDone: PropTypes$3.string,
+  enterActive: PropTypes$3.string,
+  exit: PropTypes$3.string,
+  exitDone: PropTypes$3.string,
+  exitActive: PropTypes$3.string
+})]) ;
+
+var TransitionGroupContext = ReactDOM$3.createContext(null);
+
+var forceReflow = function forceReflow(node) {
+  return node.scrollTop;
+};
+
+var UNMOUNTED = 'unmounted';
+var EXITED = 'exited';
+var ENTERING = 'entering';
+var ENTERED = 'entered';
+var EXITING = 'exiting';
+/**
+ * The Transition component lets you describe a transition from one component
+ * state to another _over time_ with a simple declarative API. Most commonly
+ * it's used to animate the mounting and unmounting of a component, but can also
+ * be used to describe in-place transition states as well.
+ *
+ * ---
+ *
+ * **Note**: `Transition` is a platform-agnostic base component. If you're using
+ * transitions in CSS, you'll probably want to use
+ * [`CSSTransition`](https://reactcommunity.org/react-transition-group/css-transition)
+ * instead. It inherits all the features of `Transition`, but contains
+ * additional features necessary to play nice with CSS transitions (hence the
+ * name of the component).
+ *
+ * ---
+ *
+ * By default the `Transition` component does not alter the behavior of the
+ * component it renders, it only tracks "enter" and "exit" states for the
+ * components. It's up to you to give meaning and effect to those states. For
+ * example we can add styles to a component when it enters or exits:
+ *
+ * ```jsx
+ * import { Transition } from 'react-transition-group';
+ *
+ * const duration = 300;
+ *
+ * const defaultStyle = {
+ *   transition: `opacity ${duration}ms ease-in-out`,
+ *   opacity: 0,
+ * }
+ *
+ * const transitionStyles = {
+ *   entering: { opacity: 1 },
+ *   entered:  { opacity: 1 },
+ *   exiting:  { opacity: 0 },
+ *   exited:  { opacity: 0 },
+ * };
+ *
+ * const Fade = ({ in: inProp }) => (
+ *   <Transition in={inProp} timeout={duration}>
+ *     {state => (
+ *       <div style={{
+ *         ...defaultStyle,
+ *         ...transitionStyles[state]
+ *       }}>
+ *         I'm a fade Transition!
+ *       </div>
+ *     )}
+ *   </Transition>
+ * );
+ * ```
+ *
+ * There are 4 main states a Transition can be in:
+ *  - `'entering'`
+ *  - `'entered'`
+ *  - `'exiting'`
+ *  - `'exited'`
+ *
+ * Transition state is toggled via the `in` prop. When `true` the component
+ * begins the "Enter" stage. During this stage, the component will shift from
+ * its current transition state, to `'entering'` for the duration of the
+ * transition and then to the `'entered'` stage once it's complete. Let's take
+ * the following example (we'll use the
+ * [useState](https://reactjs.org/docs/hooks-reference.html#usestate) hook):
+ *
+ * ```jsx
+ * function App() {
+ *   const [inProp, setInProp] = useState(false);
+ *   return (
+ *     <div>
+ *       <Transition in={inProp} timeout={500}>
+ *         {state => (
+ *           // ...
+ *         )}
+ *       </Transition>
+ *       <button onClick={() => setInProp(true)}>
+ *         Click to Enter
+ *       </button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * When the button is clicked the component will shift to the `'entering'` state
+ * and stay there for 500ms (the value of `timeout`) before it finally switches
+ * to `'entered'`.
+ *
+ * When `in` is `false` the same thing happens except the state moves from
+ * `'exiting'` to `'exited'`.
+ */
+
+var Transition = /*#__PURE__*/function (_React$Component) {
+  _inheritsLoose(Transition, _React$Component);
+
+  function Transition(props, context) {
+    var _this;
+
+    _this = _React$Component.call(this, props, context) || this;
+    var parentGroup = context; // In the context of a TransitionGroup all enters are really appears
+
+    var appear = parentGroup && !parentGroup.isMounting ? props.enter : props.appear;
+    var initialStatus;
+    _this.appearStatus = null;
+
+    if (props.in) {
+      if (appear) {
+        initialStatus = EXITED;
+        _this.appearStatus = ENTERING;
+      } else {
+        initialStatus = ENTERED;
       }
+    } else {
+      if (props.unmountOnExit || props.mountOnEnter) {
+        initialStatus = UNMOUNTED;
+      } else {
+        initialStatus = EXITED;
+      }
+    }
 
+    _this.state = {
+      status: initialStatus
+    };
+    _this.nextCallback = null;
+    return _this;
+  }
+
+  Transition.getDerivedStateFromProps = function getDerivedStateFromProps(_ref, prevState) {
+    var nextIn = _ref.in;
+
+    if (nextIn && prevState.status === UNMOUNTED) {
+      return {
+        status: EXITED
+      };
+    }
+
+    return null;
+  } // getSnapshotBeforeUpdate(prevProps) {
+  //   let nextStatus = null
+  //   if (prevProps !== this.props) {
+  //     const { status } = this.state
+  //     if (this.props.in) {
+  //       if (status !== ENTERING && status !== ENTERED) {
+  //         nextStatus = ENTERING
+  //       }
+  //     } else {
+  //       if (status === ENTERING || status === ENTERED) {
+  //         nextStatus = EXITING
+  //       }
+  //     }
+  //   }
+  //   return { nextStatus }
+  // }
+  ;
+
+  var _proto = Transition.prototype;
+
+  _proto.componentDidMount = function componentDidMount() {
+    this.updateStatus(true, this.appearStatus);
+  };
+
+  _proto.componentDidUpdate = function componentDidUpdate(prevProps) {
+    var nextStatus = null;
+
+    if (prevProps !== this.props) {
+      var status = this.state.status;
+
+      if (this.props.in) {
+        if (status !== ENTERING && status !== ENTERED) {
+          nextStatus = ENTERING;
+        }
+      } else {
+        if (status === ENTERING || status === ENTERED) {
+          nextStatus = EXITING;
+        }
+      }
+    }
+
+    this.updateStatus(false, nextStatus);
+  };
+
+  _proto.componentWillUnmount = function componentWillUnmount() {
+    this.cancelNextCallback();
+  };
+
+  _proto.getTimeouts = function getTimeouts() {
+    var timeout = this.props.timeout;
+    var exit, enter, appear;
+    exit = enter = appear = timeout;
+
+    if (timeout != null && typeof timeout !== 'number') {
+      exit = timeout.exit;
+      enter = timeout.enter; // TODO: remove fallback for next major
+
+      appear = timeout.appear !== undefined ? timeout.appear : enter;
+    }
+
+    return {
+      exit: exit,
+      enter: enter,
+      appear: appear
+    };
+  };
+
+  _proto.updateStatus = function updateStatus(mounting, nextStatus) {
+    if (mounting === void 0) {
+      mounting = false;
+    }
+
+    if (nextStatus !== null) {
+      // nextStatus will always be ENTERING or EXITING.
+      this.cancelNextCallback();
+
+      if (nextStatus === ENTERING) {
+        if (this.props.unmountOnExit || this.props.mountOnEnter) {
+          var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this); // https://github.com/reactjs/react-transition-group/pull/749
+          // With unmountOnExit or mountOnEnter, the enter animation should happen at the transition between `exited` and `entering`.
+          // To make the animation happen,  we have to separate each rendering and avoid being processed as batched.
+
+          if (node) forceReflow(node);
+        }
+
+        this.performEnter(mounting);
+      } else {
+        this.performExit();
+      }
+    } else if (this.props.unmountOnExit && this.state.status === EXITED) {
+      this.setState({
+        status: UNMOUNTED
+      });
+    }
+  };
+
+  _proto.performEnter = function performEnter(mounting) {
+    var _this2 = this;
+
+    var enter = this.props.enter;
+    var appearing = this.context ? this.context.isMounting : mounting;
+
+    var _ref2 = this.props.nodeRef ? [appearing] : [ReactDOM$3.findDOMNode(this), appearing],
+        maybeNode = _ref2[0],
+        maybeAppearing = _ref2[1];
+
+    var timeouts = this.getTimeouts();
+    var enterTimeout = appearing ? timeouts.appear : timeouts.enter; // no enter animation skip right to ENTERED
+    // if we are mounting and running this it means appear _must_ be set
+
+    if (!mounting && !enter || config.disabled) {
+      this.safeSetState({
+        status: ENTERED
+      }, function () {
+        _this2.props.onEntered(maybeNode);
+      });
+      return;
+    }
+
+    this.props.onEnter(maybeNode, maybeAppearing);
+    this.safeSetState({
+      status: ENTERING
+    }, function () {
+      _this2.props.onEntering(maybeNode, maybeAppearing);
+
+      _this2.onTransitionEnd(enterTimeout, function () {
+        _this2.safeSetState({
+          status: ENTERED
+        }, function () {
+          _this2.props.onEntered(maybeNode, maybeAppearing);
+        });
+      });
+    });
+  };
+
+  _proto.performExit = function performExit() {
+    var _this3 = this;
+
+    var exit = this.props.exit;
+    var timeouts = this.getTimeouts();
+    var maybeNode = this.props.nodeRef ? undefined : ReactDOM$3.findDOMNode(this); // no exit animation skip right to EXITED
+
+    if (!exit || config.disabled) {
+      this.safeSetState({
+        status: EXITED
+      }, function () {
+        _this3.props.onExited(maybeNode);
+      });
+      return;
+    }
+
+    this.props.onExit(maybeNode);
+    this.safeSetState({
+      status: EXITING
+    }, function () {
+      _this3.props.onExiting(maybeNode);
+
+      _this3.onTransitionEnd(timeouts.exit, function () {
+        _this3.safeSetState({
+          status: EXITED
+        }, function () {
+          _this3.props.onExited(maybeNode);
+        });
+      });
+    });
+  };
+
+  _proto.cancelNextCallback = function cancelNextCallback() {
+    if (this.nextCallback !== null) {
+      this.nextCallback.cancel();
+      this.nextCallback = null;
+    }
+  };
+
+  _proto.safeSetState = function safeSetState(nextState, callback) {
+    // This shouldn't be necessary, but there are weird race conditions with
+    // setState callbacks and unmounting in testing, so always make sure that
+    // we can cancel any pending setState callbacks after we unmount.
+    callback = this.setNextCallback(callback);
+    this.setState(nextState, callback);
+  };
+
+  _proto.setNextCallback = function setNextCallback(callback) {
+    var _this4 = this;
+
+    var active = true;
+
+    this.nextCallback = function (event) {
+      if (active) {
+        active = false;
+        _this4.nextCallback = null;
+        callback(event);
+      }
+    };
+
+    this.nextCallback.cancel = function () {
+      active = false;
+    };
+
+    return this.nextCallback;
+  };
+
+  _proto.onTransitionEnd = function onTransitionEnd(timeout, handler) {
+    this.setNextCallback(handler);
+    var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this);
+    var doesNotHaveTimeoutOrListener = timeout == null && !this.props.addEndListener;
+
+    if (!node || doesNotHaveTimeoutOrListener) {
+      setTimeout(this.nextCallback, 0);
+      return;
+    }
+
+    if (this.props.addEndListener) {
+      var _ref3 = this.props.nodeRef ? [this.nextCallback] : [node, this.nextCallback],
+          maybeNode = _ref3[0],
+          maybeNextCallback = _ref3[1];
+
+      this.props.addEndListener(maybeNode, maybeNextCallback);
+    }
+
+    if (timeout != null) {
+      setTimeout(this.nextCallback, timeout);
+    }
+  };
+
+  _proto.render = function render() {
+    var status = this.state.status;
+
+    if (status === UNMOUNTED) {
       return null;
     }
 
-    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
-      args[_key - 6] = arguments[_key];
+    var _this$props = this.props,
+        children = _this$props.children;
+        _this$props.in;
+        _this$props.mountOnEnter;
+        _this$props.unmountOnExit;
+        _this$props.appear;
+        _this$props.enter;
+        _this$props.exit;
+        _this$props.timeout;
+        _this$props.addEndListener;
+        _this$props.onEnter;
+        _this$props.onEntering;
+        _this$props.onEntered;
+        _this$props.onExit;
+        _this$props.onExiting;
+        _this$props.onExited;
+        _this$props.nodeRef;
+        var childProps = _objectWithoutPropertiesLoose$3(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
+
+    return (
+      /*#__PURE__*/
+      // allows for nested Transitions
+      ReactDOM$3.createElement(TransitionGroupContext.Provider, {
+        value: null
+      }, typeof children === 'function' ? children(status, childProps) : ReactDOM$3.cloneElement(ReactDOM$3.Children.only(children), childProps))
+    );
+  };
+
+  return Transition;
+}(ReactDOM$3.Component);
+
+Transition.contextType = TransitionGroupContext;
+Transition.propTypes = {
+  /**
+   * A React reference to DOM element that need to transition:
+   * https://stackoverflow.com/a/51127130/4671932
+   *
+   *   - When `nodeRef` prop is used, `node` is not passed to callback functions
+   *      (e.g. `onEnter`) because user already has direct access to the node.
+   *   - When changing `key` prop of `Transition` in a `TransitionGroup` a new
+   *     `nodeRef` need to be provided to `Transition` with changed `key` prop
+   *     (see
+   *     [test/CSSTransition-test.js](https://github.com/reactjs/react-transition-group/blob/13435f897b3ab71f6e19d724f145596f5910581c/test/CSSTransition-test.js#L362-L437)).
+   */
+  nodeRef: PropTypes$3.shape({
+    current: typeof Element === 'undefined' ? PropTypes$3.any : function (propValue, key, componentName, location, propFullName, secret) {
+      var value = propValue[key];
+      return PropTypes$3.instanceOf(value && 'ownerDocument' in value ? value.ownerDocument.defaultView.Element : Element)(propValue, key, componentName, location, propFullName, secret);
+    }
+  }),
+
+  /**
+   * A `function` child can be used instead of a React element. This function is
+   * called with the current transition status (`'entering'`, `'entered'`,
+   * `'exiting'`, `'exited'`), which can be used to apply context
+   * specific props to a component.
+   *
+   * ```jsx
+   * <Transition in={this.state.in} timeout={150}>
+   *   {state => (
+   *     <MyComponent className={`fade fade-${state}`} />
+   *   )}
+   * </Transition>
+   * ```
+   */
+  children: PropTypes$3.oneOfType([PropTypes$3.func.isRequired, PropTypes$3.element.isRequired]).isRequired,
+
+  /**
+   * Show the component; triggers the enter or exit states
+   */
+  in: PropTypes$3.bool,
+
+  /**
+   * By default the child component is mounted immediately along with
+   * the parent `Transition` component. If you want to "lazy mount" the component on the
+   * first `in={true}` you can set `mountOnEnter`. After the first enter transition the component will stay
+   * mounted, even on "exited", unless you also specify `unmountOnExit`.
+   */
+  mountOnEnter: PropTypes$3.bool,
+
+  /**
+   * By default the child component stays mounted after it reaches the `'exited'` state.
+   * Set `unmountOnExit` if you'd prefer to unmount the component after it finishes exiting.
+   */
+  unmountOnExit: PropTypes$3.bool,
+
+  /**
+   * By default the child component does not perform the enter transition when
+   * it first mounts, regardless of the value of `in`. If you want this
+   * behavior, set both `appear` and `in` to `true`.
+   *
+   * > **Note**: there are no special appear states like `appearing`/`appeared`, this prop
+   * > only adds an additional enter transition. However, in the
+   * > `<CSSTransition>` component that first enter transition does result in
+   * > additional `.appear-*` classes, that way you can choose to style it
+   * > differently.
+   */
+  appear: PropTypes$3.bool,
+
+  /**
+   * Enable or disable enter transitions.
+   */
+  enter: PropTypes$3.bool,
+
+  /**
+   * Enable or disable exit transitions.
+   */
+  exit: PropTypes$3.bool,
+
+  /**
+   * The duration of the transition, in milliseconds.
+   * Required unless `addEndListener` is provided.
+   *
+   * You may specify a single timeout for all transitions:
+   *
+   * ```jsx
+   * timeout={500}
+   * ```
+   *
+   * or individually:
+   *
+   * ```jsx
+   * timeout={{
+   *  appear: 500,
+   *  enter: 300,
+   *  exit: 500,
+   * }}
+   * ```
+   *
+   * - `appear` defaults to the value of `enter`
+   * - `enter` defaults to `0`
+   * - `exit` defaults to `0`
+   *
+   * @type {number | { enter?: number, exit?: number, appear?: number }}
+   */
+  timeout: function timeout(props) {
+    var pt = timeoutsShape;
+    if (!props.addEndListener) pt = pt.isRequired;
+
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
     }
 
-    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
+    return pt.apply(void 0, [props].concat(args));
+  },
+
+  /**
+   * Add a custom transition end trigger. Called with the transitioning
+   * DOM node and a `done` callback. Allows for more fine grained transition end
+   * logic. Timeouts are still used as a fallback if provided.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * ```jsx
+   * addEndListener={(node, done) => {
+   *   // use the css transitionend event to mark the finish of a transition
+   *   node.addEventListener('transitionend', done, false);
+   * }}
+   * ```
+   */
+  addEndListener: PropTypes$3.func,
+
+  /**
+   * Callback fired before the "entering" status is applied. An extra parameter
+   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement, isAppearing: bool) -> void
+   */
+  onEnter: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "entering" status is applied. An extra parameter
+   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement, isAppearing: bool)
+   */
+  onEntering: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "entered" status is applied. An extra parameter
+   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement, isAppearing: bool) -> void
+   */
+  onEntered: PropTypes$3.func,
+
+  /**
+   * Callback fired before the "exiting" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement) -> void
+   */
+  onExit: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "exiting" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement) -> void
+   */
+  onExiting: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "exited" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed
+   *
+   * @type Function(node: HtmlElement) -> void
+   */
+  onExited: PropTypes$3.func
+} ; // Name the function so it is clearer in the documentation
+
+function noop$1() {}
+
+Transition.defaultProps = {
+  in: false,
+  mountOnEnter: false,
+  unmountOnExit: false,
+  appear: false,
+  enter: true,
+  exit: true,
+  onEnter: noop$1,
+  onEntering: noop$1,
+  onEntered: noop$1,
+  onExit: noop$1,
+  onExiting: noop$1,
+  onExited: noop$1
+};
+Transition.UNMOUNTED = UNMOUNTED;
+Transition.EXITED = EXITED;
+Transition.ENTERING = ENTERING;
+Transition.ENTERED = ENTERED;
+Transition.EXITING = EXITING;
+
+var canUseDOM$1 = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
+
+/* eslint-disable no-return-assign */
+var optionsSupported = false;
+var onceSupported = false;
+
+try {
+  var options = {
+    get passive() {
+      return optionsSupported = true;
+    },
+
+    get once() {
+      // eslint-disable-next-line no-multi-assign
+      return onceSupported = optionsSupported = true;
+    }
+
+  };
+
+  if (canUseDOM$1) {
+    window.addEventListener('test', options, options);
+    window.removeEventListener('test', options, true);
+  }
+} catch (e) {
+  /* */
+}
+
+/**
+ * An `addEventListener` ponyfill, supports the `once` option
+ * 
+ * @param node the element
+ * @param eventName the event name
+ * @param handle the handler
+ * @param options event options
+ */
+function addEventListener(node, eventName, handler, options) {
+  if (options && typeof options !== 'boolean' && !onceSupported) {
+    var once = options.once,
+        capture = options.capture;
+    var wrappedHandler = handler;
+
+    if (!onceSupported && once) {
+      wrappedHandler = handler.__once || function onceHandler(event) {
+        this.removeEventListener(eventName, onceHandler, capture);
+        handler.call(this, event);
+      };
+
+      handler.__once = wrappedHandler;
+    }
+
+    node.addEventListener(eventName, wrappedHandler, optionsSupported ? options : capture);
   }
 
-  var chainedCheckType = checkType.bind(null, false);
-  chainedCheckType.isRequired = checkType.bind(null, true);
-
-  return chainedCheckType;
+  node.addEventListener(eventName, handler, options);
 }
-module.exports = exports['default'];
-}(createChainableTypeChecker, createChainableTypeChecker.exports));
 
-(function (module, exports) {
+/**
+ * A `removeEventListener` ponyfill
+ * 
+ * @param node the element
+ * @param eventName the event name
+ * @param handle the handler
+ * @param options event options
+ */
+function removeEventListener(node, eventName, handler, options) {
+  var capture = options && typeof options !== 'boolean' ? options.capture : options;
+  node.removeEventListener(eventName, handler, capture);
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
+  if (handler.__once) {
+    node.removeEventListener(eventName, handler.__once, capture);
+  }
+}
+
+function listen(node, eventName, handler, options) {
+  addEventListener(node, eventName, handler, options);
+  return function () {
+    removeEventListener(node, eventName, handler, options);
+  };
+}
+
+/**
+ * Triggers an event on a given element.
+ * 
+ * @param node the element
+ * @param eventName the event name to trigger
+ * @param bubbles whether the event should bubble up
+ * @param cancelable whether the event should be cancelable
+ */
+function triggerEvent(node, eventName, bubbles, cancelable) {
+  if (bubbles === void 0) {
+    bubbles = false;
+  }
+
+  if (cancelable === void 0) {
+    cancelable = true;
+  }
+
+  if (node) {
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent(eventName, bubbles, cancelable);
+    node.dispatchEvent(event);
+  }
+}
+
+function parseDuration$1(node) {
+  var str = style(node, 'transitionDuration') || '';
+  var mult = str.indexOf('ms') === -1 ? 1000 : 1;
+  return parseFloat(str) * mult;
+}
+
+function emulateTransitionEnd(element, duration, padding) {
+  if (padding === void 0) {
+    padding = 5;
+  }
+
+  var called = false;
+  var handle = setTimeout(function () {
+    if (!called) triggerEvent(element, 'transitionend', true);
+  }, duration + padding);
+  var remove = listen(element, 'transitionend', function () {
+    called = true;
+  }, {
+    once: true
+  });
+  return function () {
+    clearTimeout(handle);
+    remove();
+  };
+}
+
+function transitionEnd(element, handler, duration, padding) {
+  if (duration == null) duration = parseDuration$1(element) || 0;
+  var removeEmulate = emulateTransitionEnd(element, duration, padding);
+  var remove = listen(element, 'transitionend', handler);
+  return function () {
+    removeEmulate();
+    remove();
+  };
+}
+
+function parseDuration(node, property) {
+  const str = style(node, property) || '';
+  const mult = str.indexOf('ms') === -1 ? 1000 : 1;
+  return parseFloat(str) * mult;
+}
+function transitionEndListener(element, handler) {
+  const duration = parseDuration(element, 'transitionDuration');
+  const delay = parseDuration(element, 'transitionDelay');
+  const remove = transitionEnd(element, e => {
+    if (e.target === element) {
+      remove();
+      handler(e);
+    }
+  }, duration + delay);
+}
+
+/**
+ * Safe chained function
+ *
+ * Will only create a new function if needed,
+ * otherwise will pass back existing functions or null.
+ *
+ * @param {function} functions to chain
+ * @returns {function|null}
+ */
+function createChainedFunction(...funcs) {
+  return funcs.filter(f => f != null).reduce((acc, f) => {
+    if (typeof f !== 'function') {
+      throw new Error('Invalid Argument Type, must only provide functions, undefined, or null.');
+    }
+    if (acc === null) return f;
+    return function chainedFunction(...args) {
+      // @ts-ignore
+      acc.apply(this, args);
+      // @ts-ignore
+      f.apply(this, args);
+    };
+  }, null);
+}
+
+// reading a dimension prop will cause the browser to recalculate,
+// which will let our animations work
+function triggerBrowserReflow(node) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  node.offsetHeight;
+}
+
+const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
+  ref.current = value;
+};
+function mergeRefs(refA, refB) {
+  const a = toFnRef(refA);
+  const b = toFnRef(refB);
+  return value => {
+    if (a) a(value);
+    if (b) b(value);
+  };
+}
+
+/**
+ * Create and returns a single callback ref composed from two other Refs.
+ *
+ * ```tsx
+ * const Button = React.forwardRef((props, ref) => {
+ *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
+ *   const mergedRef = useMergedRefs(ref, attachRef);
+ *
+ *   return <button ref={mergedRef} {...props}/>
+ * })
+ * ```
+ *
+ * @param refA A Callback or mutable Ref
+ * @param refB A Callback or mutable Ref
+ * @category refs
+ */
+function useMergedRefs(refA, refB) {
+  return d(() => mergeRefs(refA, refB), [refA, refB]);
+}
+
+function safeFindDOMNode(componentOrElement) {
+  if (componentOrElement && 'setState' in componentOrElement) {
+    return ReactDOM$3.findDOMNode(componentOrElement);
+  }
+  return componentOrElement != null ? componentOrElement : null;
+}
+
+// Normalizes Transition callbacks when nodeRef is used.
+const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
+  onEnter,
+  onEntering,
+  onEntered,
+  onExit,
+  onExiting,
+  onExited,
+  addEndListener,
+  children,
+  childRef,
+  ...props
+}, ref) => {
+  const nodeRef = s(null);
+  const mergedRef = useMergedRefs(nodeRef, childRef);
+  const attachRef = r => {
+    mergedRef(safeFindDOMNode(r));
+  };
+  const normalize = callback => param => {
+    if (callback && nodeRef.current) {
+      callback(nodeRef.current, param);
+    }
+  };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const handleEnter = A$1(normalize(onEnter), [onEnter]);
+  const handleEntering = A$1(normalize(onEntering), [onEntering]);
+  const handleEntered = A$1(normalize(onEntered), [onEntered]);
+  const handleExit = A$1(normalize(onExit), [onExit]);
+  const handleExiting = A$1(normalize(onExiting), [onExiting]);
+  const handleExited = A$1(normalize(onExited), [onExited]);
+  const handleAddEndListener = A$1(normalize(addEndListener), [addEndListener]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  return /*#__PURE__*/e(Transition, {
+    ref: ref,
+    ...props,
+    onEnter: handleEnter,
+    onEntered: handleEntered,
+    onEntering: handleEntering,
+    onExit: handleExit,
+    onExited: handleExited,
+    onExiting: handleExiting,
+    addEndListener: handleAddEndListener,
+    nodeRef: nodeRef,
+    children: typeof children === 'function' ? (status, innerProps) =>
+    // TODO: Types for RTG missing innerProps, so need to cast.
+    children(status, {
+      ...innerProps,
+      ref: attachRef
+    }) : /*#__PURE__*/ReactDOM$3.cloneElement(children, {
+      ref: attachRef
+    })
+  });
 });
-exports.default = all;
+var TransitionWrapper$1 = TransitionWrapper;
 
-var _createChainableTypeChecker = createChainableTypeChecker.exports;
-
-var _createChainableTypeChecker2 = _interopRequireDefault(_createChainableTypeChecker);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function all() {
-  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
-    validators[_key] = arguments[_key];
-  }
-
-  function allPropTypes() {
-    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    var error = null;
-
-    validators.forEach(function (validator) {
-      if (error != null) {
-        return;
-      }
-
-      var result = validator.apply(undefined, args);
-      if (result != null) {
-        error = result;
-      }
-    });
-
-    return error;
-  }
-
-  return (0, _createChainableTypeChecker2.default)(allPropTypes);
+const MARGINS = {
+  height: ['marginTop', 'marginBottom'],
+  width: ['marginLeft', 'marginRight']
+};
+function getDefaultDimensionValue(dimension, elem) {
+  const offset = `offset${dimension[0].toUpperCase()}${dimension.slice(1)}`;
+  const value = elem[offset];
+  const margins = MARGINS[dimension];
+  return value +
+  // @ts-ignore
+  parseInt(style(elem, margins[0]), 10) +
+  // @ts-ignore
+  parseInt(style(elem, margins[1]), 10);
 }
-module.exports = exports['default'];
-}(all, all.exports));
+const collapseStyles = {
+  [EXITED]: 'collapse',
+  [EXITING]: 'collapsing',
+  [ENTERING]: 'collapsing',
+  [ENTERED]: 'collapse show'
+};
+const Collapse = /*#__PURE__*/ReactDOM$3.forwardRef(({
+  onEnter,
+  onEntering,
+  onEntered,
+  onExit,
+  onExiting,
+  className,
+  children,
+  dimension = 'height',
+  in: inProp = false,
+  timeout = 300,
+  mountOnEnter = false,
+  unmountOnExit = false,
+  appear = false,
+  getDimensionValue = getDefaultDimensionValue,
+  ...props
+}, ref) => {
+  /* Compute dimension */
+  const computedDimension = typeof dimension === 'function' ? dimension() : dimension;
 
-var _excluded$p = ["as", "className", "type", "tooltip"];
-var propTypes = {
+  /* -- Expanding -- */
+  const handleEnter = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = '0';
+  }, onEnter), [computedDimension, onEnter]);
+  const handleEntering = d(() => createChainedFunction(elem => {
+    const scroll = `scroll${computedDimension[0].toUpperCase()}${computedDimension.slice(1)}`;
+    elem.style[computedDimension] = `${elem[scroll]}px`;
+  }, onEntering), [computedDimension, onEntering]);
+  const handleEntered = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = null;
+  }, onEntered), [computedDimension, onEntered]);
+
+  /* -- Collapsing -- */
+  const handleExit = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = `${getDimensionValue(computedDimension, elem)}px`;
+    triggerBrowserReflow(elem);
+  }, onExit), [onExit, getDimensionValue, computedDimension]);
+  const handleExiting = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = null;
+  }, onExiting), [computedDimension, onExiting]);
+  return /*#__PURE__*/e(TransitionWrapper$1, {
+    ref: ref,
+    addEndListener: transitionEndListener,
+    ...props,
+    "aria-expanded": props.role ? inProp : null,
+    onEnter: handleEnter,
+    onEntering: handleEntering,
+    onEntered: handleEntered,
+    onExit: handleExit,
+    onExiting: handleExiting,
+    childRef: children.ref,
+    in: inProp,
+    timeout: timeout,
+    mountOnEnter: mountOnEnter,
+    unmountOnExit: unmountOnExit,
+    appear: appear,
+    children: (state, innerProps) => /*#__PURE__*/ReactDOM$3.cloneElement(children, {
+      ...innerProps,
+      className: classNames(className, children.props.className, collapseStyles[state], computedDimension === 'width' && 'collapse-horizontal')
+    })
+  });
+});
+
+// @ts-ignore
+
+var Collapse$1 = Collapse;
+
+function isAccordionItemSelected(activeEventKey, eventKey) {
+  return Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : activeEventKey === eventKey;
+}
+const context$3 = /*#__PURE__*/D$1({});
+context$3.displayName = 'AccordionContext';
+var AccordionContext = context$3;
+
+/**
+ * This component accepts all of [`Collapse`'s props](/docs/utilities/transitions#collapse-1).
+ */
+const AccordionCollapse = /*#__PURE__*/x(({
+  as: Component = 'div',
+  bsPrefix,
+  className,
+  children,
+  eventKey,
+  ...props
+}, ref) => {
+  const {
+    activeEventKey
+  } = F$1(AccordionContext);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-collapse');
+  return /*#__PURE__*/e(Collapse$1, {
+    ref: ref,
+    in: isAccordionItemSelected(activeEventKey, eventKey),
+    ...props,
+    className: classNames(className, bsPrefix),
+    children: /*#__PURE__*/e(Component, {
+      children: k.only(children)
+    })
+  });
+});
+AccordionCollapse.displayName = 'AccordionCollapse';
+var AccordionCollapse$1 = AccordionCollapse;
+
+const context$2 = /*#__PURE__*/D$1({
+  eventKey: ''
+});
+context$2.displayName = 'AccordionItemContext';
+var AccordionItemContext = context$2;
+
+const AccordionBody = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  bsPrefix,
+  className,
+  onEnter,
+  onEntering,
+  onEntered,
+  onExit,
+  onExiting,
+  onExited,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-body');
+  const {
+    eventKey
+  } = F$1(AccordionItemContext);
+  return /*#__PURE__*/e(AccordionCollapse$1, {
+    eventKey: eventKey,
+    onEnter: onEnter,
+    onEntering: onEntering,
+    onEntered: onEntered,
+    onExit: onExit,
+    onExiting: onExiting,
+    onExited: onExited,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, bsPrefix)
+    })
+  });
+});
+AccordionBody.displayName = 'AccordionBody';
+var AccordionBody$1 = AccordionBody;
+
+function useAccordionButton(eventKey, onClick) {
+  const {
+    activeEventKey,
+    onSelect,
+    alwaysOpen
+  } = F$1(AccordionContext);
+  return e => {
+    /*
+      Compare the event key in context with the given event key.
+      If they are the same, then collapse the component.
+    */
+    let eventKeyPassed = eventKey === activeEventKey ? null : eventKey;
+    if (alwaysOpen) {
+      if (Array.isArray(activeEventKey)) {
+        if (activeEventKey.includes(eventKey)) {
+          eventKeyPassed = activeEventKey.filter(k => k !== eventKey);
+        } else {
+          eventKeyPassed = [...activeEventKey, eventKey];
+        }
+      } else {
+        // activeEventKey is undefined.
+        eventKeyPassed = [eventKey];
+      }
+    }
+    onSelect == null ? void 0 : onSelect(eventKeyPassed, e);
+    onClick == null ? void 0 : onClick(e);
+  };
+}
+const AccordionButton = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'button',
+  bsPrefix,
+  className,
+  onClick,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-button');
+  const {
+    eventKey
+  } = F$1(AccordionItemContext);
+  const accordionOnClick = useAccordionButton(eventKey, onClick);
+  const {
+    activeEventKey
+  } = F$1(AccordionContext);
+  if (Component === 'button') {
+    props.type = 'button';
+  }
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    onClick: accordionOnClick,
+    ...props,
+    "aria-expanded": Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : eventKey === activeEventKey,
+    className: classNames(className, bsPrefix, !isAccordionItemSelected(activeEventKey, eventKey) && 'collapsed')
+  });
+});
+AccordionButton.displayName = 'AccordionButton';
+var AccordionButton$1 = AccordionButton;
+
+const AccordionHeader = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'h2',
+  bsPrefix,
+  className,
+  children,
+  onClick,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-header');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, bsPrefix),
+    children: /*#__PURE__*/e(AccordionButton$1, {
+      onClick: onClick,
+      children: children
+    })
+  });
+});
+AccordionHeader.displayName = 'AccordionHeader';
+var AccordionHeader$1 = AccordionHeader;
+
+const AccordionItem = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  bsPrefix,
+  className,
+  eventKey,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-item');
+  const contextValue = d(() => ({
+    eventKey
+  }), [eventKey]);
+  return /*#__PURE__*/e(AccordionItemContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, bsPrefix)
+    })
+  });
+});
+AccordionItem.displayName = 'AccordionItem';
+var AccordionItem$1 = AccordionItem;
+
+const Accordion = /*#__PURE__*/x((props, ref) => {
+  const {
+    // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+    as: Component = 'div',
+    activeKey,
+    bsPrefix,
+    className,
+    onSelect,
+    flush,
+    alwaysOpen,
+    ...controlledProps
+  } = useUncontrolled(props, {
+    activeKey: 'onSelect'
+  });
+  const prefix = useBootstrapPrefix(bsPrefix, 'accordion');
+  const contextValue = d(() => ({
+    activeEventKey: activeKey,
+    onSelect,
+    alwaysOpen
+  }), [activeKey, onSelect, alwaysOpen]);
+  return /*#__PURE__*/e(AccordionContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...controlledProps,
+      className: classNames(className, prefix, flush && `${prefix}-flush`)
+    })
+  });
+});
+Accordion.displayName = 'Accordion';
+var Accordion$1 = Object.assign(Accordion, {
+  Button: AccordionButton$1,
+  Collapse: AccordionCollapse$1,
+  Item: AccordionItem$1,
+  Header: AccordionHeader$1,
+  Body: AccordionBody$1
+});
+
+const propTypes$1 = {
   /**
    * Specify whether the feedback is for valid or invalid fields
    *
    * @type {('valid'|'invalid')}
    */
   type: PropTypes$3.string,
-
   /** Display feedback as a tooltip. */
   tooltip: PropTypes$3.bool,
   as: PropTypes$3.elementType
 };
-var Feedback = /*#__PURE__*/ReactDOM$3.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      className = _ref.className,
-      _ref$type = _ref.type,
-      type = _ref$type === void 0 ? 'valid' : _ref$type,
-      _ref$tooltip = _ref.tooltip,
-      tooltip = _ref$tooltip === void 0 ? false : _ref$tooltip,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$p);
-
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classNames(className, type + "-" + (tooltip ? 'tooltip' : 'feedback'))
-  }));
-});
+const Feedback = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  as: Component = 'div',
+  className,
+  type = 'valid',
+  tooltip = false,
+  ...props
+}, ref) => /*#__PURE__*/e(Component, {
+  ...props,
+  ref: ref,
+  className: classNames(className, `${type}-${tooltip ? 'tooltip' : 'feedback'}`)
+}));
 Feedback.displayName = 'Feedback';
-Feedback.propTypes = propTypes;
+Feedback.propTypes = propTypes$1;
 var Feedback$1 = Feedback;
 
-var FormContext = /*#__PURE__*/ReactDOM$3.createContext({
-  controlId: undefined
-});
+// TODO
+
+const FormContext = /*#__PURE__*/D$1({});
 var FormContext$1 = FormContext;
 
-var ThemeContext = /*#__PURE__*/ReactDOM$3.createContext({});
-ThemeContext.Consumer;
-    ThemeContext.Provider;
-
-function useBootstrapPrefix(prefix, defaultPrefix) {
-  var prefixes = F$1(ThemeContext);
-  return prefix || prefixes[defaultPrefix] || defaultPrefix;
-}
-
-var _excluded$o = ["id", "bsPrefix", "bsCustomPrefix", "className", "type", "isValid", "isInvalid", "isStatic", "as"];
-var FormCheckInput = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      _ref$type = _ref.type,
-      type = _ref$type === void 0 ? 'checkbox' : _ref$type,
-      _ref$isValid = _ref.isValid,
-      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
-      _ref$isInvalid = _ref.isInvalid,
-      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
-      isStatic = _ref.isStatic,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$o);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-input'] : [bsPrefix, 'form-check-input'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
+const FormCheckInput = /*#__PURE__*/x(({
+  id,
+  bsPrefix,
+  className,
+  type = 'checkbox',
+  isValid = false,
+  isInvalid = false,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'input',
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-input');
+  return /*#__PURE__*/e(Component, {
+    ...props,
     ref: ref,
     type: type,
     id: id || controlId,
-    className: classNames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
-  }));
+    className: classNames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
+  });
 });
 FormCheckInput.displayName = 'FormCheckInput';
 var FormCheckInput$1 = FormCheckInput;
 
-var _excluded$n = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
-var FormCheckLabel = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$n);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-label'] : [bsPrefix, 'form-check-label'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM$3.createElement("label", _extends({}, props, {
+const FormCheckLabel = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  htmlFor,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-label');
+  return /*#__PURE__*/e("label", {
+    ...props,
     ref: ref,
     htmlFor: htmlFor || controlId,
     className: classNames(className, bsPrefix)
-  }));
+  });
 });
 FormCheckLabel.displayName = 'FormCheckLabel';
 var FormCheckLabel$1 = FormCheckLabel;
 
-var _excluded$m = ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"];
-var FormCheck = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      _ref$inline = _ref.inline,
-      inline = _ref$inline === void 0 ? false : _ref$inline,
-      _ref$disabled = _ref.disabled,
-      disabled = _ref$disabled === void 0 ? false : _ref$disabled,
-      _ref$isValid = _ref.isValid,
-      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
-      _ref$isInvalid = _ref.isInvalid,
-      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
-      _ref$feedbackTooltip = _ref.feedbackTooltip,
-      feedbackTooltip = _ref$feedbackTooltip === void 0 ? false : _ref$feedbackTooltip,
-      feedback = _ref.feedback,
-      className = _ref.className,
-      style = _ref.style,
-      _ref$title = _ref.title,
-      title = _ref$title === void 0 ? '' : _ref$title,
-      _ref$type = _ref.type,
-      type = _ref$type === void 0 ? 'checkbox' : _ref$type,
-      label = _ref.label,
-      children = _ref.children,
-      propCustom = _ref.custom,
-      _ref$as = _ref.as,
-      as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$m);
+/**
+ * Finds whether a component's `children` prop includes a React element of the
+ * specified type.
+ */
+function hasChildOfType(children, type) {
+  return k.toArray(children).some(child => /*#__PURE__*/tn(child) && child.type === type);
+}
 
-  var custom = type === 'switch' ? true : propCustom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-control'] : [bsPrefix, 'form-check'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId;
-
-  var innerFormContext = d(function () {
-    return {
-      controlId: id || controlId,
-      custom: custom
-    };
-  }, [controlId, custom, id]);
-  var hasLabel = custom || label != null && label !== false && !children;
-  var input = /*#__PURE__*/ReactDOM$3.createElement(FormCheckInput$1, _extends({}, props, {
+const FormCheck = /*#__PURE__*/x(({
+  id,
+  bsPrefix,
+  bsSwitchPrefix,
+  inline = false,
+  reverse = false,
+  disabled = false,
+  isValid = false,
+  isInvalid = false,
+  feedbackTooltip = false,
+  feedback,
+  feedbackType,
+  className,
+  style,
+  title = '',
+  type = 'checkbox',
+  label,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as = 'input',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check');
+  bsSwitchPrefix = useBootstrapPrefix(bsSwitchPrefix, 'form-switch');
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  const innerFormContext = d(() => ({
+    controlId: id || controlId
+  }), [controlId, id]);
+  const hasLabel = !children && label != null && label !== false || hasChildOfType(children, FormCheckLabel$1);
+  const input = /*#__PURE__*/e(FormCheckInput$1, {
+    ...props,
     type: type === 'switch' ? 'checkbox' : type,
     ref: ref,
     isValid: isValid,
     isInvalid: isInvalid,
-    isStatic: !hasLabel,
     disabled: disabled,
     as: as
-  }));
-  return /*#__PURE__*/ReactDOM$3.createElement(FormContext$1.Provider, {
-    value: innerFormContext
-  }, /*#__PURE__*/ReactDOM$3.createElement("div", {
-    style: style,
-    className: classNames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
-  }, children || /*#__PURE__*/ReactDOM$3.createElement(ReactDOM$3.Fragment, null, input, hasLabel && /*#__PURE__*/ReactDOM$3.createElement(FormCheckLabel$1, {
-    title: title
-  }, label), (isValid || isInvalid) && /*#__PURE__*/ReactDOM$3.createElement(Feedback$1, {
-    type: isValid ? 'valid' : 'invalid',
-    tooltip: feedbackTooltip
-  }, feedback))));
+  });
+  return /*#__PURE__*/e(FormContext$1.Provider, {
+    value: innerFormContext,
+    children: /*#__PURE__*/e("div", {
+      style: style,
+      className: classNames(className, hasLabel && bsPrefix, inline && `${bsPrefix}-inline`, reverse && `${bsPrefix}-reverse`, type === 'switch' && bsSwitchPrefix),
+      children: children || /*#__PURE__*/e(d$1, {
+        children: [input, hasLabel && /*#__PURE__*/e(FormCheckLabel$1, {
+          title: title,
+          children: label
+        }), feedback && /*#__PURE__*/e(Feedback$1, {
+          type: feedbackType,
+          tooltip: feedbackTooltip,
+          children: feedback
+        })]
+      })
+    })
+  });
 });
 FormCheck.displayName = 'FormCheck';
-FormCheck.Input = FormCheckInput$1;
-FormCheck.Label = FormCheckLabel$1;
-var FormCheck$1 = FormCheck;
-
-var _excluded$l = ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"];
-var FormFileInput = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      lang = _ref.lang,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$l);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var type = 'file';
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-input'] : [bsPrefix, 'form-control-file'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    id: id || controlId,
-    type: type,
-    lang: lang,
-    className: classNames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
-  }));
+var FormCheck$1 = Object.assign(FormCheck, {
+  Input: FormCheckInput$1,
+  Label: FormCheckLabel$1
 });
-FormFileInput.displayName = 'FormFileInput';
-var FormFileInput$1 = FormFileInput;
-
-var _excluded$k = ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"];
-var FormFileLabel = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$k);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-label'] : [bsPrefix, 'form-file-label'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  return /*#__PURE__*/ReactDOM$3.createElement("label", _extends({}, props, {
-    ref: ref,
-    htmlFor: htmlFor || controlId,
-    className: classNames(className, bsPrefix),
-    "data-browse": props['data-browse']
-  }));
-});
-FormFileLabel.displayName = 'FormFileLabel';
-var FormFileLabel$1 = FormFileLabel;
-
-var _excluded$j = ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedbackTooltip", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"];
-var FormFile = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      _ref$disabled = _ref.disabled,
-      disabled = _ref$disabled === void 0 ? false : _ref$disabled,
-      _ref$isValid = _ref.isValid,
-      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
-      _ref$isInvalid = _ref.isInvalid,
-      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
-      _ref$feedbackTooltip = _ref.feedbackTooltip,
-      feedbackTooltip = _ref$feedbackTooltip === void 0 ? false : _ref$feedbackTooltip,
-      feedback = _ref.feedback,
-      className = _ref.className,
-      style = _ref.style,
-      label = _ref.label,
-      children = _ref.children,
-      custom = _ref.custom,
-      lang = _ref.lang,
-      dataBrowse = _ref['data-browse'],
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      _ref$inputAs = _ref.inputAs,
-      inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$j);
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  var type = 'file';
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId;
-
-  var innerFormContext = d(function () {
-    return {
-      controlId: id || controlId,
-      custom: custom
-    };
-  }, [controlId, custom, id]);
-  var hasLabel = label != null && label !== false && !children;
-  var input = /*#__PURE__*/ReactDOM$3.createElement(FormFileInput$1, _extends({}, props, {
-    ref: ref,
-    isValid: isValid,
-    isInvalid: isInvalid,
-    disabled: disabled,
-    as: inputAs,
-    lang: lang
-  }));
-  return /*#__PURE__*/ReactDOM$3.createElement(FormContext$1.Provider, {
-    value: innerFormContext
-  }, /*#__PURE__*/ReactDOM$3.createElement(Component, {
-    style: style,
-    className: classNames(className, bsPrefix, custom && "custom-" + type)
-  }, children || /*#__PURE__*/ReactDOM$3.createElement(ReactDOM$3.Fragment, null, custom ? /*#__PURE__*/ReactDOM$3.createElement(ReactDOM$3.Fragment, null, input, hasLabel && /*#__PURE__*/ReactDOM$3.createElement(FormFileLabel$1, {
-    "data-browse": dataBrowse
-  }, label)) : /*#__PURE__*/ReactDOM$3.createElement(ReactDOM$3.Fragment, null, hasLabel && /*#__PURE__*/ReactDOM$3.createElement(FormFileLabel$1, null, label), input), (isValid || isInvalid) && /*#__PURE__*/ReactDOM$3.createElement(Feedback$1, {
-    type: isValid ? 'valid' : 'invalid',
-    tooltip: feedbackTooltip
-  }, feedback))));
-});
-FormFile.displayName = 'FormFile';
-FormFile.Input = FormFileInput$1;
-FormFile.Label = FormFileLabel$1;
-var FormFile$1 = FormFile;
 
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
@@ -1640,218 +2793,51 @@ var warning = function() {};
 
 var warning_1 = warning;
 
-var _excluded$i = ["bsPrefix", "bsCustomPrefix", "type", "size", "htmlSize", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"];
-var FormControl = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      type = _ref.type,
-      size = _ref.size,
-      htmlSize = _ref.htmlSize,
-      id = _ref.id,
-      className = _ref.className,
-      _ref$isValid = _ref.isValid,
-      isValid = _ref$isValid === void 0 ? false : _ref$isValid,
-      _ref$isInvalid = _ref.isInvalid,
-      isInvalid = _ref$isInvalid === void 0 ? false : _ref$isInvalid,
-      plaintext = _ref.plaintext,
-      readOnly = _ref.readOnly,
-      custom = _ref.custom,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$i);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId;
-
-  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-control'],
-      prefix = _ref2[0],
-      defaultPrefix = _ref2[1];
-
-  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
-  var classes;
-
+const FormControl = /*#__PURE__*/x(({
+  bsPrefix,
+  type,
+  size,
+  htmlSize,
+  id,
+  className,
+  isValid = false,
+  isInvalid = false,
+  plaintext,
+  readOnly,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'input',
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
+  let classes;
   if (plaintext) {
-    var _classes;
-
-    classes = (_classes = {}, _classes[bsPrefix + "-plaintext"] = true, _classes);
-  } else if (type === 'file') {
-    var _classes2;
-
-    classes = (_classes2 = {}, _classes2[bsPrefix + "-file"] = true, _classes2);
-  } else if (type === 'range') {
-    var _classes3;
-
-    classes = (_classes3 = {}, _classes3[bsPrefix + "-range"] = true, _classes3);
-  } else if (Component === 'select' && custom) {
-    var _classes4;
-
-    classes = (_classes4 = {}, _classes4[bsPrefix + "-select"] = true, _classes4[bsPrefix + "-select-" + size] = size, _classes4);
+    classes = {
+      [`${bsPrefix}-plaintext`]: true
+    };
   } else {
-    var _classes5;
-
-    classes = (_classes5 = {}, _classes5[bsPrefix] = true, _classes5[bsPrefix + "-" + size] = size, _classes5);
+    classes = {
+      [bsPrefix]: true,
+      [`${bsPrefix}-${size}`]: size
+    };
   }
-
   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/e(Component, {
+    ...props,
     type: type,
     size: htmlSize,
     ref: ref,
     readOnly: readOnly,
     id: id || controlId,
-    className: classNames(className, classes, isValid && "is-valid", isInvalid && "is-invalid")
-  }));
+    className: classNames(className, classes, isValid && `is-valid`, isInvalid && `is-invalid`, type === 'color' && `${bsPrefix}-color`)
+  });
 });
 FormControl.displayName = 'FormControl';
 var FormControl$1 = Object.assign(FormControl, {
   Feedback: Feedback$1
 });
-
-var _excluded$h = ["bsPrefix", "className", "children", "controlId", "as"];
-var FormGroup = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      children = _ref.children,
-      controlId = _ref.controlId,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$h);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
-  var context = d(function () {
-    return {
-      controlId: controlId
-    };
-  }, [controlId]);
-  return /*#__PURE__*/ReactDOM$3.createElement(FormContext$1.Provider, {
-    value: context
-  }, /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classNames(className, bsPrefix)
-  }), children));
-});
-FormGroup.displayName = 'FormGroup';
-var FormGroup$1 = FormGroup;
-
-var _excluded$g = ["bsPrefix", "className", "as"];
-var DEVICE_SIZES$1 = ['xl', 'lg', 'md', 'sm', 'xs'];
-var Col = /*#__PURE__*/ReactDOM$3.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$g);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'col');
-  var spans = [];
-  var classes = [];
-  DEVICE_SIZES$1.forEach(function (brkPoint) {
-    var propValue = props[brkPoint];
-    delete props[brkPoint];
-    var span;
-    var offset;
-    var order;
-
-    if (typeof propValue === 'object' && propValue != null) {
-      var _propValue$span = propValue.span;
-      span = _propValue$span === void 0 ? true : _propValue$span;
-      offset = propValue.offset;
-      order = propValue.order;
-    } else {
-      span = propValue;
-    }
-
-    var infix = brkPoint !== 'xs' ? "-" + brkPoint : '';
-    if (span) spans.push(span === true ? "" + prefix + infix : "" + prefix + infix + "-" + span);
-    if (order != null) classes.push("order" + infix + "-" + order);
-    if (offset != null) classes.push("offset" + infix + "-" + offset);
-  });
-
-  if (!spans.length) {
-    spans.push(prefix); // plain 'col'
-  }
-
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classNames.apply(void 0, [className].concat(spans, classes))
-  }));
-});
-Col.displayName = 'Col';
-
-var _excluded$f = ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"];
-var defaultProps$b = {
-  column: false,
-  srOnly: false
-};
-var FormLabel = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'label' : _ref$as,
-      bsPrefix = _ref.bsPrefix,
-      column = _ref.column,
-      srOnly = _ref.srOnly,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$f);
-
-  var _useContext = F$1(FormContext$1),
-      controlId = _useContext.controlId;
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
-  var columnClass = 'col-form-label';
-  if (typeof column === 'string') columnClass = columnClass + " " + columnClass + "-" + column;
-  var classes = classNames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
-  warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
-  htmlFor = htmlFor || controlId;
-  if (column) return /*#__PURE__*/ReactDOM$3.createElement(Col, _extends({
-    ref: ref,
-    as: "label",
-    className: classes,
-    htmlFor: htmlFor
-  }, props));
-  return (
-    /*#__PURE__*/
-    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    ReactDOM$3.createElement(Component, _extends({
-      ref: ref,
-      className: classes,
-      htmlFor: htmlFor
-    }, props))
-  );
-});
-FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$b;
-var FormLabel$1 = FormLabel;
-
-var _excluded$e = ["bsPrefix", "className", "as", "muted"];
-var FormText = /*#__PURE__*/ReactDOM$3.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'small' : _ref$as,
-      muted = _ref.muted,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$e);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classNames(className, bsPrefix, muted && 'text-muted')
-  }));
-});
-FormText.displayName = 'FormText';
-var FormText$1 = FormText;
-
-var Switch = /*#__PURE__*/ReactDOM$3.forwardRef(function (props, ref) {
-  return /*#__PURE__*/ReactDOM$3.createElement(FormCheck$1, _extends({}, props, {
-    ref: ref,
-    type: "switch"
-  }));
-});
-Switch.displayName = 'Switch';
-Switch.Input = FormCheck$1.Input;
-Switch.Label = FormCheck$1.Label;
-var Switch$1 = Switch;
 
 var rHyphen = /-(.)/g;
 function camelize(string) {
@@ -1860,124 +2846,351 @@ function camelize(string) {
   });
 }
 
-var _excluded$d = ["className", "bsPrefix", "as"];
-
-var pascalCase = function pascalCase(str) {
-  return str[0].toUpperCase() + camelize(str).slice(1);
-};
-
+const pascalCase = str => str[0].toUpperCase() + camelize(str).slice(1);
 // TODO: emstricten & fix the typing here! `createWithBsPrefix<TElementType>...`
-function createWithBsPrefix(prefix, _temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      _ref$displayName = _ref.displayName,
-      displayName = _ref$displayName === void 0 ? pascalCase(prefix) : _ref$displayName,
-      Component = _ref.Component,
-      defaultProps = _ref.defaultProps;
-
-  var BsComponent = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref2, ref) {
-    var className = _ref2.className,
-        bsPrefix = _ref2.bsPrefix,
-        _ref2$as = _ref2.as,
-        Tag = _ref2$as === void 0 ? Component || 'div' : _ref2$as,
-        props = _objectWithoutPropertiesLoose(_ref2, _excluded$d);
-
-    var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
-    return /*#__PURE__*/ReactDOM$3.createElement(Tag, _extends({
+function createWithBsPrefix(prefix, {
+  displayName = pascalCase(prefix),
+  Component,
+  defaultProps
+} = {}) {
+  const BsComponent = /*#__PURE__*/x(({
+    className,
+    bsPrefix,
+    as: Tag = Component || 'div',
+    ...props
+  }, ref) => {
+    const componentProps = {
+      ...defaultProps,
+      ...props
+    };
+    const resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
+    return /*#__PURE__*/e(Tag, {
       ref: ref,
-      className: classNames(className, resolvedPrefix)
-    }, props));
+      className: classNames(className, resolvedPrefix),
+      ...componentProps
+    });
   });
-  BsComponent.defaultProps = defaultProps;
   BsComponent.displayName = displayName;
   return BsComponent;
 }
 
-var _excluded$c = ["bsPrefix", "inline", "className", "validated", "as"];
-var FormRow = createWithBsPrefix('form-row');
-var defaultProps$a = {
-  inline: false
-};
-var FormImpl = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      inline = _ref.inline,
-      className = _ref.className,
-      validated = _ref.validated,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'form' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$c);
+var FormFloating = createWithBsPrefix('form-floating');
 
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classNames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
-  }));
+const FormGroup = /*#__PURE__*/x(({
+  controlId,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const context = d(() => ({
+    controlId
+  }), [controlId]);
+  return /*#__PURE__*/e(FormContext$1.Provider, {
+    value: context,
+    children: /*#__PURE__*/e(Component, {
+      ...props,
+      ref: ref
+    })
+  });
 });
-FormImpl.displayName = 'Form';
-FormImpl.defaultProps = defaultProps$a;
-FormImpl.Row = FormRow;
-FormImpl.Group = FormGroup$1;
-FormImpl.Control = FormControl$1;
-FormImpl.Check = FormCheck$1;
-FormImpl.File = FormFile$1;
-FormImpl.Switch = Switch$1;
-FormImpl.Label = FormLabel$1;
-FormImpl.Text = FormText$1;
+FormGroup.displayName = 'FormGroup';
+var FormGroup$1 = FormGroup;
 
-var _excluded$b = ["bsPrefix", "size", "hasValidation", "className", "as"];
-var InputGroupAppend = createWithBsPrefix('input-group-append');
-var InputGroupPrepend = createWithBsPrefix('input-group-prepend');
-var InputGroupText = createWithBsPrefix('input-group-text', {
+function useCol({
+  as,
+  bsPrefix,
+  className,
+  ...props
+}) {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'col');
+  const breakpoints = useBootstrapBreakpoints();
+  const minBreakpoint = useBootstrapMinBreakpoint();
+  const spans = [];
+  const classes = [];
+  breakpoints.forEach(brkPoint => {
+    const propValue = props[brkPoint];
+    delete props[brkPoint];
+    let span;
+    let offset;
+    let order;
+    if (typeof propValue === 'object' && propValue != null) {
+      ({
+        span,
+        offset,
+        order
+      } = propValue);
+    } else {
+      span = propValue;
+    }
+    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
+    if (span) spans.push(span === true ? `${bsPrefix}${infix}` : `${bsPrefix}${infix}-${span}`);
+    if (order != null) classes.push(`order${infix}-${order}`);
+    if (offset != null) classes.push(`offset${infix}-${offset}`);
+  });
+  return [{
+    ...props,
+    className: classNames(className, ...spans, ...classes)
+  }, {
+    as,
+    bsPrefix,
+    spans
+  }];
+}
+const Col = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+(props, ref) => {
+  const [{
+    className,
+    ...colProps
+  }, {
+    as: Component = 'div',
+    bsPrefix,
+    spans
+  }] = useCol(props);
+  return /*#__PURE__*/e(Component, {
+    ...colProps,
+    ref: ref,
+    className: classNames(className, !spans.length && bsPrefix)
+  });
+});
+Col.displayName = 'Col';
+
+const FormLabel = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'label',
+  bsPrefix,
+  column = false,
+  visuallyHidden = false,
+  className,
+  htmlFor,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
+  let columnClass = 'col-form-label';
+  if (typeof column === 'string') columnClass = `${columnClass} ${columnClass}-${column}`;
+  const classes = classNames(className, bsPrefix, visuallyHidden && 'visually-hidden', column && columnClass);
+  warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
+  htmlFor = htmlFor || controlId;
+  if (column) return /*#__PURE__*/e(Col, {
+    ref: ref,
+    as: "label",
+    className: classes,
+    htmlFor: htmlFor,
+    ...props
+  });
+  return (
+    /*#__PURE__*/
+    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
+    e(Component, {
+      ref: ref,
+      className: classes,
+      htmlFor: htmlFor,
+      ...props
+    })
+  );
+});
+FormLabel.displayName = 'FormLabel';
+var FormLabel$1 = FormLabel;
+
+const FormRange = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  id,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-range');
+  return /*#__PURE__*/e("input", {
+    ...props,
+    type: "range",
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    id: id || controlId
+  });
+});
+FormRange.displayName = 'FormRange';
+var FormRange$1 = FormRange;
+
+const FormSelect = /*#__PURE__*/x(({
+  bsPrefix,
+  size,
+  htmlSize,
+  className,
+  isValid = false,
+  isInvalid = false,
+  id,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-select');
+  return /*#__PURE__*/e("select", {
+    ...props,
+    size: htmlSize,
+    ref: ref,
+    className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, isValid && `is-valid`, isInvalid && `is-invalid`),
+    id: id || controlId
+  });
+});
+FormSelect.displayName = 'FormSelect';
+var FormSelect$1 = FormSelect;
+
+const FormText = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  as: Component = 'small',
+  muted,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
+  return /*#__PURE__*/e(Component, {
+    ...props,
+    ref: ref,
+    className: classNames(className, bsPrefix, muted && 'text-muted')
+  });
+});
+FormText.displayName = 'FormText';
+var FormText$1 = FormText;
+
+const Switch = /*#__PURE__*/x((props, ref) => /*#__PURE__*/e(FormCheck$1, {
+  ...props,
+  ref: ref,
+  type: "switch"
+}));
+Switch.displayName = 'Switch';
+var Switch$1 = Object.assign(Switch, {
+  Input: FormCheck$1.Input,
+  Label: FormCheck$1.Label
+});
+
+const FloatingLabel = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  children,
+  controlId,
+  label,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
+  return /*#__PURE__*/e(FormGroup$1, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    controlId: controlId,
+    ...props,
+    children: [children, /*#__PURE__*/e("label", {
+      htmlFor: controlId,
+      children: label
+    })]
+  });
+});
+FloatingLabel.displayName = 'FloatingLabel';
+var FloatingLabel$1 = FloatingLabel;
+
+const propTypes = {
+  /**
+   * The Form `ref` will be forwarded to the underlying element,
+   * which means, unless it's rendered `as` a composite component,
+   * it will be a DOM node, when resolved.
+   *
+   * @type {ReactRef}
+   * @alias ref
+   */
+  _ref: PropTypes$3.any,
+  /**
+   * Mark a form as having been validated. Setting it to `true` will
+   * toggle any validation styles on the forms elements.
+   */
+  validated: PropTypes$3.bool,
+  as: PropTypes$3.elementType
+};
+const Form = /*#__PURE__*/x(({
+  className,
+  validated,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'form',
+  ...props
+}, ref) => /*#__PURE__*/e(Component, {
+  ...props,
+  ref: ref,
+  className: classNames(className, validated && 'was-validated')
+}));
+Form.displayName = 'Form';
+Form.propTypes = propTypes;
+var Form$1 = Object.assign(Form, {
+  Group: FormGroup$1,
+  Control: FormControl$1,
+  Floating: FormFloating,
+  Check: FormCheck$1,
+  Switch: Switch$1,
+  Label: FormLabel$1,
+  Text: FormText$1,
+  Range: FormRange$1,
+  Select: FormSelect$1,
+  FloatingLabel: FloatingLabel$1
+});
+
+const context$1 = /*#__PURE__*/D$1(null);
+context$1.displayName = 'InputGroupContext';
+var InputGroupContext = context$1;
+
+const InputGroupText = createWithBsPrefix('input-group-text', {
   Component: 'span'
 });
-
-var InputGroupCheckbox = function InputGroupCheckbox(props) {
-  return /*#__PURE__*/ReactDOM$3.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM$3.createElement("input", _extends({
-    type: "checkbox"
-  }, props)));
-};
-
-var InputGroupRadio = function InputGroupRadio(props) {
-  return /*#__PURE__*/ReactDOM$3.createElement(InputGroupText, null, /*#__PURE__*/ReactDOM$3.createElement("input", _extends({
-    type: "radio"
-  }, props)));
-};
-
-/**
- *
- * @property {InputGroupAppend} Append
- * @property {InputGroupPrepend} Prepend
- * @property {InputGroupText} Text
- * @property {InputGroupRadio} Radio
- * @property {InputGroupCheckbox} Checkbox
- */
-var InputGroup = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      size = _ref.size,
-      hasValidation = _ref.hasValidation,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$b);
-
+const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText, {
+  children: /*#__PURE__*/e(FormCheckInput$1, {
+    type: "checkbox",
+    ...props
+  })
+});
+const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText, {
+  children: /*#__PURE__*/e(FormCheckInput$1, {
+    type: "radio",
+    ...props
+  })
+});
+const InputGroup = /*#__PURE__*/x(({
+  bsPrefix,
+  size,
+  hasValidation,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({
-    ref: ref
-  }, props, {
-    className: classNames(className, bsPrefix, size && bsPrefix + "-" + size, hasValidation && 'has-validation')
-  }));
+
+  // Intentionally an empty object. Used in detecting if a dropdown
+  // exists under an input group.
+  const contextValue = d(() => ({}), []);
+  return /*#__PURE__*/e(InputGroupContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, hasValidation && 'has-validation')
+    })
+  });
 });
 InputGroup.displayName = 'InputGroup';
-InputGroup.Text = InputGroupText;
-InputGroup.Radio = InputGroupRadio;
-InputGroup.Checkbox = InputGroupCheckbox;
-InputGroup.Append = InputGroupAppend;
-InputGroup.Prepend = InputGroupPrepend;
+var InputGroup$1 = Object.assign(InputGroup, {
+  Text: InputGroupText,
+  Radio: InputGroupRadio,
+  Checkbox: InputGroupCheckbox
+});
 
 class ControlNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      note: propTypes$1.exports.object,
-      selected: propTypes$1.exports.boolean
+      note: propTypes$2.exports.object,
+      selected: propTypes$2.exports.boolean
     };
   }
   render() {
@@ -2003,13 +3216,13 @@ class ControlNote extends ReactDOM$3.PureComponent {
     // TODO: Slider.
     switch (type) {
       case 'check':
-        return v$1(InputGroup, {
+        return v$1(InputGroup$1, {
           ref: ref,
           style: {
             border,
             opacity: blur ? 0.5 : 1
           }
-        }, v$1(FormImpl.Check, {
+        }, v$1(Form$1.Check, {
           label: label,
           type: "checkbox",
           name: label,
@@ -2017,25 +3230,25 @@ class ControlNote extends ReactDOM$3.PureComponent {
           className: `note control check ${blur ? 'disabled' : 'enabled'}`
         }));
       case 'input':
-        return v$1(InputGroup, {
+        return v$1(InputGroup$1, {
           ref: ref,
           style: {
             border,
             opacity: blur ? 0.5 : 1
           }
-        }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
+        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
           className: `note control input ${blur ? 'disabled' : 'enabled'}`,
           value: value,
           name: label
         }));
       case 'select':
-        return v$1(InputGroup, {
+        return v$1(InputGroup$1, {
           ref: ref,
           style: {
             border,
             opacity: blur ? 0.5 : 1
           }
-        }, v$1(InputGroup.Text, null, label), v$1(FormImpl.Control, {
+        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
           as: "select",
           className: `note control select ${blur ? 'disabled' : 'enabled'}`,
           name: label
@@ -2056,181 +3269,143 @@ class ControlNote extends ReactDOM$3.PureComponent {
   }
 }
 
-/**
- * Safe chained function
- *
- * Will only create a new function if needed,
- * otherwise will pass back existing functions or null.
- *
- * @param {function} functions to chain
- * @returns {function|null}
- */
-function createChainedFunction() {
-  for (var _len = arguments.length, funcs = new Array(_len), _key = 0; _key < _len; _key++) {
-    funcs[_key] = arguments[_key];
-  }
-
-  return funcs.filter(function (f) {
-    return f != null;
-  }).reduce(function (acc, f) {
-    if (typeof f !== 'function') {
-      throw new Error('Invalid Argument Type, must only provide functions, undefined, or null.');
-    }
-
-    if (acc === null) return f;
-    return function chainedFunction() {
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
-      }
-
-      // @ts-ignore
-      acc.apply(this, args); // @ts-ignore
-
-      f.apply(this, args);
-    };
-  }, null);
-}
-
-var _excluded$a = ["as", "disabled", "onKeyDown"];
-
+const _excluded$2 = ["as", "disabled"];
+function _objectWithoutPropertiesLoose$2(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 function isTrivialHref(href) {
   return !href || href.trim() === '#';
 }
-/**
- * There are situations due to browser quirks or Bootstrap CSS where
- * an anchor tag is needed, when semantically a button tag is the
- * better choice. SafeAnchor ensures that when an anchor is used like a
- * button its accessible. It also emulates input `disabled` behavior for
- * links, which is usually desirable for Buttons, NavItems, DropdownItems, etc.
- */
-
-
-var SafeAnchor = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'a' : _ref$as,
-      disabled = _ref.disabled,
-      onKeyDown = _ref.onKeyDown,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$a);
-
-  var handleClick = function handleClick(event) {
-    var href = props.href,
-        onClick = props.onClick;
-
-    if (disabled || isTrivialHref(href)) {
+function useButtonProps({
+  tagName,
+  disabled,
+  href,
+  target,
+  rel,
+  role,
+  onClick,
+  tabIndex = 0,
+  type
+}) {
+  if (!tagName) {
+    if (href != null || target != null || rel != null) {
+      tagName = 'a';
+    } else {
+      tagName = 'button';
+    }
+  }
+  const meta = {
+    tagName
+  };
+  if (tagName === 'button') {
+    return [{
+      type: type || 'button',
+      disabled
+    }, meta];
+  }
+  const handleClick = event => {
+    if (disabled || tagName === 'a' && isTrivialHref(href)) {
       event.preventDefault();
     }
-
     if (disabled) {
       event.stopPropagation();
       return;
     }
-
-    if (onClick) {
-      onClick(event);
-    }
+    onClick == null ? void 0 : onClick(event);
   };
-
-  var handleKeyDown = function handleKeyDown(event) {
+  const handleKeyDown = event => {
     if (event.key === ' ') {
       event.preventDefault();
       handleClick(event);
     }
   };
-
-  if (isTrivialHref(props.href)) {
-    props.role = props.role || 'button'; // we want to make sure there is a href attribute on the node
-    // otherwise, the cursor incorrectly styled (except with role='button')
-
-    props.href = props.href || '#';
+  if (tagName === 'a') {
+    // Ensure there's a href so Enter can trigger anchor button.
+    href || (href = '#');
+    if (disabled) {
+      href = undefined;
+    }
   }
-
-  if (disabled) {
-    props.tabIndex = -1;
-    props['aria-disabled'] = true;
-  }
-
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({
-    ref: ref
-  }, props, {
+  return [{
+    role: role != null ? role : 'button',
+    // explicitly undefined so that it overrides the props disabled in a spread
+    // e.g. <Tag {...props} {...hookProps} />
+    disabled: undefined,
+    tabIndex: disabled ? undefined : tabIndex,
+    href,
+    target: tagName === 'a' ? target : undefined,
+    'aria-disabled': !disabled ? undefined : disabled,
+    rel: tagName === 'a' ? rel : undefined,
     onClick: handleClick,
-    onKeyDown: createChainedFunction(handleKeyDown, onKeyDown)
+    onKeyDown: handleKeyDown
+  }, meta];
+}
+const Button$1 = /*#__PURE__*/x((_ref, ref) => {
+  let {
+      as: asProp,
+      disabled
+    } = _ref,
+    props = _objectWithoutPropertiesLoose$2(_ref, _excluded$2);
+  const [buttonProps, {
+    tagName: Component
+  }] = useButtonProps(Object.assign({
+    tagName: asProp,
+    disabled
+  }, props));
+  return /*#__PURE__*/e(Component, Object.assign({}, props, buttonProps, {
+    ref: ref
   }));
 });
-SafeAnchor.displayName = 'SafeAnchor';
-var SafeAnchor$1 = SafeAnchor;
+Button$1.displayName = 'Button';
 
-var _excluded$9 = ["bsPrefix", "variant", "size", "active", "className", "block", "type", "as"];
-var defaultProps$9 = {
-  variant: 'primary',
-  active: false,
-  disabled: false
-};
-var Button = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      variant = _ref.variant,
-      size = _ref.size,
-      active = _ref.active,
-      className = _ref.className,
-      block = _ref.block,
-      type = _ref.type,
-      as = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$9);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'btn');
-  var classes = classNames(className, prefix, active && 'active', variant && prefix + "-" + variant, block && prefix + "-block", size && prefix + "-" + size);
-
-  if (props.href) {
-    return /*#__PURE__*/ReactDOM$3.createElement(SafeAnchor$1, _extends({}, props, {
-      as: as,
-      ref: ref,
-      className: classNames(classes, props.disabled && 'disabled')
-    }));
-  }
-
-  if (ref) {
-    props.ref = ref;
-  }
-
-  if (type) {
-    props.type = type;
-  } else if (!as) {
-    props.type = 'button';
-  }
-
-  var Component = as || 'button';
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    className: classes
-  }));
+const Button = /*#__PURE__*/x(({
+  as,
+  bsPrefix,
+  variant = 'primary',
+  size,
+  active = false,
+  disabled = false,
+  className,
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'btn');
+  const [buttonProps, {
+    tagName
+  }] = useButtonProps({
+    tagName: as,
+    disabled,
+    ...props
+  });
+  const Component = tagName;
+  return /*#__PURE__*/e(Component, {
+    ...buttonProps,
+    ...props,
+    ref: ref,
+    disabled: disabled,
+    className: classNames(className, prefix, active && 'active', variant && `${prefix}-${variant}`, size && `${prefix}-${size}`, props.href && disabled && 'disabled')
+  });
 });
 Button.displayName = 'Button';
-Button.defaultProps = defaultProps$9;
 
-var _excluded$8 = ["bsPrefix", "size", "toggle", "vertical", "className", "as"];
-var defaultProps$8 = {
-  vertical: false,
-  toggle: false,
-  role: 'group'
-};
-var ButtonGroup = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      size = _ref.size,
-      toggle = _ref.toggle,
-      vertical = _ref.vertical,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      rest = _objectWithoutPropertiesLoose(_ref, _excluded$8);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
-  var baseClass = prefix;
-  if (vertical) baseClass = prefix + "-vertical";
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, rest, {
+const ButtonGroup = /*#__PURE__*/x(({
+  bsPrefix,
+  size,
+  vertical = false,
+  className,
+  role = 'group',
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...rest
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
+  let baseClass = prefix;
+  if (vertical) baseClass = `${prefix}-vertical`;
+  return /*#__PURE__*/e(Component, {
+    ...rest,
     ref: ref,
-    className: classNames(className, baseClass, size && prefix + "-" + size, toggle && prefix + "-toggle")
-  }));
+    role: role,
+    className: classNames(className, baseClass, size && `${prefix}-${size}`)
+  });
 });
 ButtonGroup.displayName = 'ButtonGroup';
-ButtonGroup.defaultProps = defaultProps$8;
 
 /*
  * base64-arraybuffer 1.0.2 <https://github.com/niklasvh/base64-arraybuffer>
@@ -2294,9 +3469,9 @@ const downloadFile = async ({
 class DownloadNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      note: propTypes$1.exports.object,
-      selected: propTypes$1.exports.boolean,
-      workspace: propTypes$1.exports.string
+      note: propTypes$2.exports.object,
+      selected: propTypes$2.exports.boolean,
+      workspace: propTypes$2.exports.string
     };
   }
   render() {
@@ -2329,7 +3504,18 @@ class DownloadNote extends ReactDOM$3.PureComponent {
           type,
           workspace
         })
-      }, "Download ", filename));
+      }, v$1("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "16",
+        height: "16",
+        fill: "currentColor",
+        class: "bi bi-download",
+        viewBox: "0 0 16 16"
+      }, v$1("path", {
+        d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
+      }), v$1("path", {
+        d: "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
+      })), ' ', filename));
     }
     const ref = selected && /*#__PURE__*/p$1();
     if (selected) {
@@ -2816,11 +4002,11 @@ function CodeJar(editor, highlight, opt = {}) {
 class EditNote extends ReactDOM$3.Component {
   static get propTypes() {
     return {
-      note: propTypes$1.exports.string,
-      notebookPath: propTypes$1.exports.string,
-      workspace: propTypes$1.exports.string,
-      onChange: propTypes$1.exports.func,
-      onKeyDown: propTypes$1.exports.func
+      note: propTypes$2.exports.string,
+      notebookPath: propTypes$2.exports.string,
+      workspace: propTypes$2.exports.string,
+      onChange: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func
     };
   }
   constructor(props) {
@@ -2863,9 +4049,9 @@ class EditNote extends ReactDOM$3.Component {
 class ErrorNote extends ReactDOM$3.Component {
   static get propTypes() {
     return {
-      note: propTypes$1.exports.string,
-      notebookPath: propTypes$1.exports.string,
-      workspace: propTypes$1.exports.string
+      note: propTypes$2.exports.string,
+      notebookPath: propTypes$2.exports.string,
+      workspace: propTypes$2.exports.string
     };
   }
   constructor(props) {
@@ -2887,6 +4073,39 @@ class ErrorNote extends ReactDOM$3.Component {
     return v$1("div", {
       class: "note error"
     }, v$1("p", null, text));
+  }
+}
+
+class IconNote extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object
+    };
+  }
+  render() {
+    const {
+      note
+    } = this.props;
+    const {
+      blur = false,
+      view
+    } = note;
+    const {
+      viewId
+    } = view;
+    const iconIdClass = viewId ? `iconId_${viewId}` : '';
+    if (!note.url) {
+      return v$1("span", null);
+    }
+    return v$1("img", {
+      class: `note icon ${iconIdClass}`,
+      style: {
+        height: '64px',
+        width: '64px',
+        opacity: blur ? 0.5 : 1
+      },
+      src: note.url
+    });
   }
 }
 
@@ -5789,8 +7008,8 @@ marked.use({
 class MdNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      note: propTypes$1.exports.object,
-      selected: propTypes$1.exports.boolean
+      note: propTypes$2.exports.object,
+      selected: propTypes$2.exports.boolean
     };
   }
   render() {
@@ -5859,7 +7078,7 @@ function __rest(s, e) {
     return t;
 }
 
-var defaultProps$7 = {
+var defaultProps$1 = {
     color: '#38ad48',
     enabled: true,
     size: 50,
@@ -5876,16 +7095,16 @@ var withSharedProps = function (Component) {
             return null;
         return ReactDOM$3.createElement(Component, __assign$3({}, componentProps));
     };
-    Wrapper.defaultProps = defaultProps$7;
+    Wrapper.defaultProps = defaultProps$1;
     return Wrapper;
 };
 
-var defaultProps$6 = {
+var defaultProps = {
     speed: 100,
     still: false,
     thickness: 100,
 };
-var secondaryColorDefaultProps = __assign$3(__assign$3({}, defaultProps$6), { secondaryColor: 'rgba(0,0,0,0.44)' });
+var secondaryColorDefaultProps = __assign$3(__assign$3({}, defaultProps), { secondaryColor: 'rgba(0,0,0,0.44)' });
 
 function styleInject(css, ref) {
   if ( ref === void 0 ) ref = {};
@@ -5933,11 +7152,11 @@ var SpinnerCircularSplit = withSharedProps(Component);
 class ViewNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      note: propTypes$1.exports.object,
-      notebookPath: propTypes$1.exports.string,
-      onClickView: propTypes$1.exports.func,
-      selected: propTypes$1.exports.boolean,
-      workspace: propTypes$1.exports.string
+      note: propTypes$2.exports.object,
+      notebookPath: propTypes$2.exports.string,
+      onClickView: propTypes$2.exports.func,
+      selected: propTypes$2.exports.boolean,
+      workspace: propTypes$2.exports.string
     };
   }
   showOrbitView() {}
@@ -6146,281 +7365,345 @@ const updateNotebookState = async (application, {
 class Notebook extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      notes: propTypes$1.exports.object,
-      onChange: propTypes$1.exports.func,
-      onClickView: propTypes$1.exports.func,
-      onKeyDown: propTypes$1.exports.func,
-      selectedLine: propTypes$1.exports.number,
-      notebookPath: propTypes$1.exports.string,
-      state: propTypes$1.exports.string,
-      workspace: propTypes$1.exports.string
+      notes: propTypes$2.exports.object,
+      onChange: propTypes$2.exports.func,
+      onClickView: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func,
+      selectedLine: propTypes$2.exports.number,
+      notebookPath: propTypes$2.exports.string,
+      state: propTypes$2.exports.string,
+      workspace: propTypes$2.exports.string
     };
   }
   render() {
-    const {
-      notebookPath,
-      notes,
-      onChange,
-      onClickView,
-      onKeyDown,
-      // selectedLine,
-      state = 'idle',
-      workspace
-    } = this.props;
-    const ordered = Object.values(notes);
-    const getLine = note => {
-      if (note.sourceLocation) {
-        return note.sourceLocation.line;
-      } else {
-        return 0;
-      }
-    };
-    const getNth = note => {
-      if (note.sourceLocation) {
-        return note.sourceLocation.nth;
-      } else {
-        return 0;
-      }
-    };
-    const order = (a, b) => {
-      const lineA = getLine(a);
-      const lineB = getLine(b);
-      if (lineA !== lineB) {
-        return lineA - lineB;
-      }
-      const nthA = getNth(a);
-      const nthB = getNth(b);
-      return nthA - nthB;
-    };
-    ordered.sort(order);
-    let line = 0;
-    let id;
-    let hasStub = false;
-    const ids = [];
-    let children;
-    for (const note of ordered) {
-      if (note.sourceLocation.id !== id) {
-        id = note.sourceLocation.id;
-        children = [];
-        ids.push({
-          id,
-          children
-        });
-      }
-      if (note.hash === 'stub') {
-        hasStub = true;
-      }
-      // FIX: This seems wasteful.
-      const selected = false;
-      let child;
-      if (note.sourceLocation) {
-        line = note.sourceLocation.line;
-      }
-      if (note.view) {
-        child = v$1(ViewNote, {
-          key: note.hash,
-          note: note,
-          onClickView: onClickView,
-          selected: selected
-        });
-      } else if (note.error) {
-        child = v$1(ErrorNote, {
-          key: note.hash,
-          note: note,
-          selected: selected,
-          workspace: workspace
-        });
-      } else if (note.md) {
-        child = v$1(MdNote, {
-          key: note.hash,
-          note: note,
-          selected: selected,
-          workspace: workspace
-        });
-      } else if (note.download) {
-        child = v$1(DownloadNote, {
-          key: note.hash,
-          note: note,
-          selected: selected,
-          workspace: workspace
-        });
-      } else if (note.control) {
-        child = v$1(ControlNote, {
-          key: note.hash,
-          note: note,
-          selected: selected,
-          workspace: workspace
-        });
-      } else if (note.sourceText !== undefined) {
-        child = v$1(EditNote, {
-          key: note.hash,
-          note: note,
-          onChange: sourceText => onChange(note, {
-            sourceText
-          }),
-          onKeyDown: onKeyDown,
-          selected: selected,
-          workspace: workspace
-        });
-      }
-      if (children && child) {
-        children.push(child);
-      }
-    }
-    if (!hasStub) {
-      // Append an empty editor.
-      const stub = {
-        hash: 'stub',
-        sourceText: '',
-        sourceLocation: {
-          path: notebookPath,
-          line: line + 1
+    try {
+      const {
+        notebookPath,
+        notes,
+        onChange,
+        onClickView,
+        onKeyDown,
+        // selectedLine,
+        state = 'idle',
+        workspace
+      } = this.props;
+      const ordered = Object.values(notes);
+      const getLine = note => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.line;
+        } else {
+          return 0;
         }
       };
-      ids.push({
-        id: '+',
-        children: [v$1(EditNote, {
-          key: stub.hash,
-          note: stub,
-          onChange: sourceText => onChange(stub, {
-            sourceText
-          }),
-          workspace: workspace
-        })]
-      });
-    }
-    y(() => mermaid.init(undefined, '.mermaid'));
-    const sections = [];
-    for (const {
-      id,
-      children
-    } of ids) {
-      sections.push(v$1("div", null, v$1("h3", null, id), v$1("br", null), children, v$1("hr", null)));
-    }
-    return v$1("div", {
-      id: notebookPath,
-      classList: "notebook notes",
-      style: {
-        overflow: 'auto'
+      const getNth = note => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.nth;
+        } else {
+          return 0;
+        }
+      };
+      const order = (a, b) => {
+        const lineA = getLine(a);
+        const lineB = getLine(b);
+        if (lineA !== lineB) {
+          return lineA - lineB;
+        }
+        const nthA = getNth(a);
+        const nthB = getNth(b);
+        return nthA - nthB;
+      };
+      ordered.sort(order);
+      let line = 0;
+      let id;
+      let hasStub = false;
+      const ids = [];
+      let children;
+      let downloads;
+      let errors;
+      let icons;
+      let entry;
+      for (const note of ordered) {
+        if (note.sourceLocation.id !== id) {
+          id = note.sourceLocation.id;
+          children = [];
+          downloads = [];
+          errors = [];
+          icons = [];
+          entry = {
+            id,
+            blue: false,
+            children,
+            downloads,
+            errors,
+            icons
+          };
+          ids.push(entry);
+        }
+        if (note.hash === 'stub') {
+          hasStub = true;
+        }
+        // FIX: This seems wasteful.
+        const selected = false;
+        let child;
+        let download;
+        let error;
+        let icon;
+        if (note.sourceLocation) {
+          line = note.sourceLocation.line;
+        }
+        if (note.view) {
+          child = v$1(ViewNote, {
+            key: note.hash,
+            note: note,
+            onClickView: onClickView,
+            selected: selected
+          });
+          icon = v$1(IconNote, {
+            key: note.hash,
+            note: note
+          });
+          if (note.blur) {
+            entry.blur = true;
+          }
+        } else if (note.error) {
+          child = v$1(ErrorNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+          error = child;
+        } else if (note.md) {
+          child = v$1(MdNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+        } else if (note.download) {
+          child = v$1(DownloadNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+          download = child;
+        } else if (note.control) {
+          child = v$1(ControlNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+        } else if (note.sourceText !== undefined) {
+          child = v$1(EditNote, {
+            key: note.hash,
+            note: note,
+            onChange: sourceText => onChange(note, {
+              sourceText
+            }),
+            onKeyDown: onKeyDown,
+            selected: selected,
+            workspace: workspace
+          });
+        }
+        if (children && child) {
+          children.push(child);
+        }
+        if (downloads && download) {
+          downloads.push(download);
+        }
+        if (icons && icon) {
+          icons.push(icon);
+        }
+        if (errors && error) {
+          errors.push(error);
+        }
       }
-    }, state === 'running' && v$1(SpinnerCircularSplit, {
-      color: "#36d7b7",
-      size: 64,
-      style: {
-        position: 'fixed',
-        right: 32,
-        top: 64,
-        zIndex: 1000
+      if (!hasStub) {
+        // Append an empty editor.
+        const stub = {
+          hash: 'stub',
+          sourceText: '',
+          sourceLocation: {
+            path: notebookPath,
+            line: line + 1
+          }
+        };
+        ids.push({
+          id: '+',
+          children: [v$1(EditNote, {
+            key: stub.hash,
+            note: stub,
+            onChange: sourceText => onChange(stub, {
+              sourceText
+            }),
+            workspace: workspace
+          })]
+        });
       }
-    }), sections);
+      y(() => mermaid.init(undefined, '.mermaid'));
+      const sections = [];
+      const compare = (a, b) => {
+        if (a < b) {
+          return -1;
+        } else if (a > b) {
+          return 1;
+        } else {
+          return 0;
+        }
+      };
+      ids.sort((a, b) => compare(a.id, b.id));
+      for (const {
+        id,
+        blur = false,
+        children = [],
+        downloads = [],
+        errors = [],
+        icons = []
+      } of ids) {
+        sections.push(v$1(Accordion$1, {
+          key: id
+        }, v$1(Accordion$1.Item, {
+          eventKey: id
+        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? '! &nbsp;&nbsp;' : '', ' ', icons, " \xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
+          color: "#36d7b7",
+          size: "64"
+        }) : ''), v$1(Accordion$1.Body, null, children))));
+      }
+      return v$1("div", {
+        id: notebookPath,
+        classList: "notebook notes",
+        style: {
+          overflow: 'auto'
+        }
+      }, state === 'running' && v$1(SpinnerCircularSplit, {
+        color: "#36d7b7",
+        size: 64,
+        style: {
+          position: 'fixed',
+          right: 32,
+          top: 64,
+          zIndex: 1000
+        }
+      }), sections);
+    } catch (error) {
+      console.log(error.stack);
+      throw error;
+    }
   }
 }
 
-var divWithClassName = (function (className) {
-  return /*#__PURE__*/ReactDOM$3.forwardRef(function (p, ref) {
-    return /*#__PURE__*/ReactDOM$3.createElement("div", _extends({}, p, {
-      ref: ref,
-      className: classNames(p.className, className)
-    }));
+var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+  ...p,
+  ref: ref,
+  className: classNames(p.className, className)
+})));
+
+const CardImg = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  variant,
+  as: Component = 'img',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    ...props
   });
 });
-
-var context = /*#__PURE__*/ReactDOM$3.createContext(null);
-context.displayName = 'CardContext';
-var CardContext = context;
-
-var _excluded$7 = ["bsPrefix", "className", "variant", "as"];
-var defaultProps$5 = {
-  variant: null
-};
-var CardImg = /*#__PURE__*/ReactDOM$3.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      variant = _ref.variant,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'img' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$7);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({
-    ref: ref,
-    className: classNames(variant ? prefix + "-" + variant : prefix, className)
-  }, props));
-});
 CardImg.displayName = 'CardImg';
-CardImg.defaultProps = defaultProps$5;
 var CardImg$1 = CardImg;
 
-var _excluded$6 = ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"];
-var DivStyledAsH5 = divWithClassName('h5');
-var DivStyledAsH6 = divWithClassName('h6');
-var CardBody = createWithBsPrefix('card-body');
-var CardTitle = createWithBsPrefix('card-title', {
+const context = /*#__PURE__*/D$1(null);
+context.displayName = 'CardHeaderContext';
+var CardHeaderContext = context;
+
+const CardHeader = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
+  const contextValue = d(() => ({
+    cardHeaderBsPrefix: prefix
+  }), [prefix]);
+  return /*#__PURE__*/e(CardHeaderContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, prefix)
+    })
+  });
+});
+CardHeader.displayName = 'CardHeader';
+var CardHeader$1 = CardHeader;
+
+const DivStyledAsH5 = divWithClassName('h5');
+const DivStyledAsH6 = divWithClassName('h6');
+const CardBody = createWithBsPrefix('card-body');
+const CardTitle = createWithBsPrefix('card-title', {
   Component: DivStyledAsH5
 });
-var CardSubtitle = createWithBsPrefix('card-subtitle', {
+const CardSubtitle = createWithBsPrefix('card-subtitle', {
   Component: DivStyledAsH6
 });
-var CardLink = createWithBsPrefix('card-link', {
+const CardLink = createWithBsPrefix('card-link', {
   Component: 'a'
 });
-var CardText = createWithBsPrefix('card-text', {
+const CardText = createWithBsPrefix('card-text', {
   Component: 'p'
 });
-var CardHeader = createWithBsPrefix('card-header');
-var CardFooter = createWithBsPrefix('card-footer');
-var CardImgOverlay = createWithBsPrefix('card-img-overlay');
-var defaultProps$4 = {
-  body: false
-};
-var Card = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      bg = _ref.bg,
-      text = _ref.text,
-      border = _ref.border,
-      body = _ref.body,
-      children = _ref.children,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$6);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'card');
-  var cardContext = d(function () {
-    return {
-      cardHeaderBsPrefix: prefix + "-header"
-    };
-  }, [prefix]);
-  return /*#__PURE__*/ReactDOM$3.createElement(CardContext.Provider, {
-    value: cardContext
-  }, /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({
-    ref: ref
-  }, props, {
-    className: classNames(className, prefix, bg && "bg-" + bg, text && "text-" + text, border && "border-" + border)
-  }), body ?
-  /*#__PURE__*/
-  // @ts-ignore
-  ReactDOM$3.createElement(CardBody, null, children) : children));
+const CardFooter = createWithBsPrefix('card-footer');
+const CardImgOverlay = createWithBsPrefix('card-img-overlay');
+const Card = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  bg,
+  text,
+  border,
+  body = false,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
+    children: body ? /*#__PURE__*/e(CardBody, {
+      children: children
+    }) : children
+  });
 });
 Card.displayName = 'Card';
-Card.defaultProps = defaultProps$4;
-Card.Img = CardImg$1;
-Card.Title = CardTitle;
-Card.Subtitle = CardSubtitle;
-Card.Body = CardBody;
-Card.Link = CardLink;
-Card.Text = CardText;
-Card.Header = CardHeader;
-Card.Footer = CardFooter;
-Card.ImgOverlay = CardImgOverlay;
+var Card$1 = Object.assign(Card, {
+  Img: CardImg$1,
+  Title: CardTitle,
+  Subtitle: CardSubtitle,
+  Body: CardBody,
+  Link: CardLink,
+  Text: CardText,
+  Header: CardHeader$1,
+  Footer: CardFooter,
+  ImgOverlay: CardImgOverlay
+});
 
 class DynamicView extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      path: propTypes$1.exports.string,
-      view: propTypes$1.exports.object,
-      workspace: propTypes$1.exports.string
+      path: propTypes$2.exports.string,
+      view: propTypes$2.exports.object,
+      workspace: propTypes$2.exports.string
     };
   }
   async buildElement(container) {
@@ -14086,7 +15369,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.24.1";
+exports.version = "1.24.2";
 
 });
 
@@ -17954,61 +19237,58 @@ ace.define("ace/selection",["require","exports","module","ace/lib/oop","ace/lib/
 var lang = require("./lib/lang");
 var EventEmitter = require("./lib/event_emitter").EventEmitter;
 var Range = require("./range").Range;
-var Selection = function (session) {
-    this.session = session;
-    this.doc = session.getDocument();
-    this.clearSelection();
-    this.cursor = this.lead = this.doc.createAnchor(0, 0);
-    this.anchor = this.doc.createAnchor(0, 0);
-    this.$silent = false;
-    var self = this;
-    this.cursor.on("change", function (e) {
-        self.$cursorChanged = true;
-        if (!self.$silent)
-            self._emit("changeCursor");
-        if (!self.$isEmpty && !self.$silent)
-            self._emit("changeSelection");
-        if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column)
-            self.$desiredColumn = null;
-    });
-    this.anchor.on("change", function () {
-        self.$anchorChanged = true;
-        if (!self.$isEmpty && !self.$silent)
-            self._emit("changeSelection");
-    });
-};
-(function () {
-    oop.implement(this, EventEmitter);
-    this.isEmpty = function () {
+var Selection = /** @class */ (function () {
+    function Selection(session) {
+        this.session = session;
+        this.doc = session.getDocument();
+        this.clearSelection();
+        this.cursor = this.lead = this.doc.createAnchor(0, 0);
+        this.anchor = this.doc.createAnchor(0, 0);
+        this.$silent = false;
+        var self = this;
+        this.cursor.on("change", function (e) {
+            self.$cursorChanged = true;
+            if (!self.$silent)
+                self._emit("changeCursor");
+            if (!self.$isEmpty && !self.$silent)
+                self._emit("changeSelection");
+            if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column)
+                self.$desiredColumn = null;
+        });
+        this.anchor.on("change", function () {
+            self.$anchorChanged = true;
+            if (!self.$isEmpty && !self.$silent)
+                self._emit("changeSelection");
+        });
+    }
+    Selection.prototype.isEmpty = function () {
         return this.$isEmpty || (this.anchor.row == this.lead.row &&
             this.anchor.column == this.lead.column);
     };
-    this.isMultiLine = function () {
+    Selection.prototype.isMultiLine = function () {
         return !this.$isEmpty && this.anchor.row != this.cursor.row;
     };
-    this.getCursor = function () {
+    Selection.prototype.getCursor = function () {
         return this.lead.getPosition();
     };
-    this.setAnchor = function (row, column) {
+    Selection.prototype.setAnchor = function (row, column) {
         this.$isEmpty = false;
         this.anchor.setPosition(row, column);
     };
-    this.setSelectionAnchor = this.setAnchor;
-    this.getAnchor = function () {
+    Selection.prototype.getAnchor = function () {
         if (this.$isEmpty)
             return this.getSelectionLead();
         return this.anchor.getPosition();
     };
-    this.getSelectionAnchor = this.getAnchor;
-    this.getSelectionLead = function () {
+    Selection.prototype.getSelectionLead = function () {
         return this.lead.getPosition();
     };
-    this.isBackwards = function () {
+    Selection.prototype.isBackwards = function () {
         var anchor = this.anchor;
         var lead = this.lead;
         return (anchor.row > lead.row || (anchor.row == lead.row && anchor.column > lead.column));
     };
-    this.getRange = function () {
+    Selection.prototype.getRange = function () {
         var anchor = this.anchor;
         var lead = this.lead;
         if (this.$isEmpty)
@@ -18017,22 +19297,21 @@ var Selection = function (session) {
             ? Range.fromPoints(lead, anchor)
             : Range.fromPoints(anchor, lead);
     };
-    this.clearSelection = function () {
+    Selection.prototype.clearSelection = function () {
         if (!this.$isEmpty) {
             this.$isEmpty = true;
             this._emit("changeSelection");
         }
     };
-    this.selectAll = function () {
+    Selection.prototype.selectAll = function () {
         this.$setSelection(0, 0, Number.MAX_VALUE, Number.MAX_VALUE);
     };
-    this.setRange =
-        this.setSelectionRange = function (range, reverse) {
-            var start = reverse ? range.end : range.start;
-            var end = reverse ? range.start : range.end;
-            this.$setSelection(start.row, start.column, end.row, end.column);
-        };
-    this.$setSelection = function (anchorRow, anchorColumn, cursorRow, cursorColumn) {
+    Selection.prototype.setRange = function (range, reverse) {
+        var start = reverse ? range.end : range.start;
+        var end = reverse ? range.start : range.end;
+        this.$setSelection(start.row, start.column, end.row, end.column);
+    };
+    Selection.prototype.$setSelection = function (anchorRow, anchorColumn, cursorRow, cursorColumn) {
         if (this.$silent)
             return;
         var wasEmpty = this.$isEmpty;
@@ -18048,61 +19327,61 @@ var Selection = function (session) {
         if (this.$cursorChanged || this.$anchorChanged || wasEmpty != this.$isEmpty || wasMultiselect)
             this._emit("changeSelection");
     };
-    this.$moveSelection = function (mover) {
+    Selection.prototype.$moveSelection = function (mover) {
         var lead = this.lead;
         if (this.$isEmpty)
             this.setSelectionAnchor(lead.row, lead.column);
         mover.call(this);
     };
-    this.selectTo = function (row, column) {
+    Selection.prototype.selectTo = function (row, column) {
         this.$moveSelection(function () {
             this.moveCursorTo(row, column);
         });
     };
-    this.selectToPosition = function (pos) {
+    Selection.prototype.selectToPosition = function (pos) {
         this.$moveSelection(function () {
             this.moveCursorToPosition(pos);
         });
     };
-    this.moveTo = function (row, column) {
+    Selection.prototype.moveTo = function (row, column) {
         this.clearSelection();
         this.moveCursorTo(row, column);
     };
-    this.moveToPosition = function (pos) {
+    Selection.prototype.moveToPosition = function (pos) {
         this.clearSelection();
         this.moveCursorToPosition(pos);
     };
-    this.selectUp = function () {
+    Selection.prototype.selectUp = function () {
         this.$moveSelection(this.moveCursorUp);
     };
-    this.selectDown = function () {
+    Selection.prototype.selectDown = function () {
         this.$moveSelection(this.moveCursorDown);
     };
-    this.selectRight = function () {
+    Selection.prototype.selectRight = function () {
         this.$moveSelection(this.moveCursorRight);
     };
-    this.selectLeft = function () {
+    Selection.prototype.selectLeft = function () {
         this.$moveSelection(this.moveCursorLeft);
     };
-    this.selectLineStart = function () {
+    Selection.prototype.selectLineStart = function () {
         this.$moveSelection(this.moveCursorLineStart);
     };
-    this.selectLineEnd = function () {
+    Selection.prototype.selectLineEnd = function () {
         this.$moveSelection(this.moveCursorLineEnd);
     };
-    this.selectFileEnd = function () {
+    Selection.prototype.selectFileEnd = function () {
         this.$moveSelection(this.moveCursorFileEnd);
     };
-    this.selectFileStart = function () {
+    Selection.prototype.selectFileStart = function () {
         this.$moveSelection(this.moveCursorFileStart);
     };
-    this.selectWordRight = function () {
+    Selection.prototype.selectWordRight = function () {
         this.$moveSelection(this.moveCursorWordRight);
     };
-    this.selectWordLeft = function () {
+    Selection.prototype.selectWordLeft = function () {
         this.$moveSelection(this.moveCursorWordLeft);
     };
-    this.getWordRange = function (row, column) {
+    Selection.prototype.getWordRange = function (row, column) {
         if (typeof column == "undefined") {
             var cursor = row || this.lead;
             row = cursor.row;
@@ -18110,15 +19389,15 @@ var Selection = function (session) {
         }
         return this.session.getWordRange(row, column);
     };
-    this.selectWord = function () {
+    Selection.prototype.selectWord = function () {
         this.setSelectionRange(this.getWordRange());
     };
-    this.selectAWord = function () {
+    Selection.prototype.selectAWord = function () {
         var cursor = this.getCursor();
         var range = this.session.getAWordRange(cursor.row, cursor.column);
         this.setSelectionRange(range);
     };
-    this.getLineRange = function (row, excludeLastChar) {
+    Selection.prototype.getLineRange = function (row, excludeLastChar) {
         var rowStart = typeof row == "number" ? row : this.lead.row;
         var rowEnd;
         var foldLine = this.session.getFoldLine(rowStart);
@@ -18134,16 +19413,16 @@ var Selection = function (session) {
         else
             return new Range(rowStart, 0, rowEnd + 1, 0);
     };
-    this.selectLine = function () {
+    Selection.prototype.selectLine = function () {
         this.setSelectionRange(this.getLineRange());
     };
-    this.moveCursorUp = function () {
+    Selection.prototype.moveCursorUp = function () {
         this.moveCursorBy(-1, 0);
     };
-    this.moveCursorDown = function () {
+    Selection.prototype.moveCursorDown = function () {
         this.moveCursorBy(1, 0);
     };
-    this.wouldMoveIntoSoftTab = function (cursor, tabSize, direction) {
+    Selection.prototype.wouldMoveIntoSoftTab = function (cursor, tabSize, direction) {
         var start = cursor.column;
         var end = cursor.column + tabSize;
         if (direction < 0) {
@@ -18152,7 +19431,7 @@ var Selection = function (session) {
         }
         return this.session.isTabStop(cursor) && this.doc.getLine(cursor.row).slice(start, end).split(" ").length - 1 == tabSize;
     };
-    this.moveCursorLeft = function () {
+    Selection.prototype.moveCursorLeft = function () {
         var cursor = this.lead.getPosition(), fold;
         if (fold = this.session.getFoldAt(cursor.row, cursor.column, -1)) {
             this.moveCursorTo(fold.start.row, fold.start.column);
@@ -18172,7 +19451,7 @@ var Selection = function (session) {
             }
         }
     };
-    this.moveCursorRight = function () {
+    Selection.prototype.moveCursorRight = function () {
         var cursor = this.lead.getPosition(), fold;
         if (fold = this.session.getFoldAt(cursor.row, cursor.column, 1)) {
             this.moveCursorTo(fold.end.row, fold.end.column);
@@ -18193,7 +19472,7 @@ var Selection = function (session) {
             }
         }
     };
-    this.moveCursorLineStart = function () {
+    Selection.prototype.moveCursorLineStart = function () {
         var row = this.lead.row;
         var column = this.lead.column;
         var screenRow = this.session.documentToScreenRow(row, column);
@@ -18204,7 +19483,7 @@ var Selection = function (session) {
             firstColumnPosition.column += leadingSpace[0].length;
         this.moveCursorToPosition(firstColumnPosition);
     };
-    this.moveCursorLineEnd = function () {
+    Selection.prototype.moveCursorLineEnd = function () {
         var lead = this.lead;
         var lineEnd = this.session.getDocumentLastRowColumnPosition(lead.row, lead.column);
         if (this.lead.column == lineEnd.column) {
@@ -18217,15 +19496,15 @@ var Selection = function (session) {
         }
         this.moveCursorTo(lineEnd.row, lineEnd.column);
     };
-    this.moveCursorFileEnd = function () {
+    Selection.prototype.moveCursorFileEnd = function () {
         var row = this.doc.getLength() - 1;
         var column = this.doc.getLine(row).length;
         this.moveCursorTo(row, column);
     };
-    this.moveCursorFileStart = function () {
+    Selection.prototype.moveCursorFileStart = function () {
         this.moveCursorTo(0, 0);
     };
-    this.moveCursorLongWordRight = function () {
+    Selection.prototype.moveCursorLongWordRight = function () {
         var row = this.lead.row;
         var column = this.lead.column;
         var line = this.doc.getLine(row);
@@ -18255,7 +19534,7 @@ var Selection = function (session) {
         }
         this.moveCursorTo(row, column);
     };
-    this.moveCursorLongWordLeft = function () {
+    Selection.prototype.moveCursorLongWordLeft = function () {
         var row = this.lead.row;
         var column = this.lead.column;
         var fold;
@@ -18288,7 +19567,7 @@ var Selection = function (session) {
         }
         this.moveCursorTo(row, column);
     };
-    this.$shortWordEndIndex = function (rightOfCursor) {
+    Selection.prototype.$shortWordEndIndex = function (rightOfCursor) {
         var index = 0, ch;
         var whitespaceRe = /\s/;
         var tokenRe = this.session.tokenRe;
@@ -18322,7 +19601,7 @@ var Selection = function (session) {
         tokenRe.lastIndex = 0;
         return index;
     };
-    this.moveCursorShortWordRight = function () {
+    Selection.prototype.moveCursorShortWordRight = function () {
         var row = this.lead.row;
         var column = this.lead.column;
         var line = this.doc.getLine(row);
@@ -18343,7 +19622,7 @@ var Selection = function (session) {
         var index = this.$shortWordEndIndex(rightOfCursor);
         this.moveCursorTo(row, column + index);
     };
-    this.moveCursorShortWordLeft = function () {
+    Selection.prototype.moveCursorShortWordLeft = function () {
         var row = this.lead.row;
         var column = this.lead.column;
         var fold;
@@ -18363,19 +19642,19 @@ var Selection = function (session) {
         var index = this.$shortWordEndIndex(leftOfCursor);
         return this.moveCursorTo(row, column - index);
     };
-    this.moveCursorWordRight = function () {
+    Selection.prototype.moveCursorWordRight = function () {
         if (this.session.$selectLongWords)
             this.moveCursorLongWordRight();
         else
             this.moveCursorShortWordRight();
     };
-    this.moveCursorWordLeft = function () {
+    Selection.prototype.moveCursorWordLeft = function () {
         if (this.session.$selectLongWords)
             this.moveCursorLongWordLeft();
         else
             this.moveCursorShortWordLeft();
     };
-    this.moveCursorBy = function (rows, chars) {
+    Selection.prototype.moveCursorBy = function (rows, chars) {
         var screenPos = this.session.documentToScreenPosition(this.lead.row, this.lead.column);
         var offsetX;
         if (chars === 0) {
@@ -18404,10 +19683,10 @@ var Selection = function (session) {
         if (rows !== 0 && chars === 0 && docPos.row === this.lead.row && docPos.column === this.lead.column) ;
         this.moveCursorTo(docPos.row, docPos.column + chars, chars === 0);
     };
-    this.moveCursorToPosition = function (position) {
+    Selection.prototype.moveCursorToPosition = function (position) {
         this.moveCursorTo(position.row, position.column);
     };
-    this.moveCursorTo = function (row, column, keepDesiredColumn) {
+    Selection.prototype.moveCursorTo = function (row, column, keepDesiredColumn) {
         var fold = this.session.getFoldAt(row, column, 1);
         if (fold) {
             row = fold.start.row;
@@ -18426,19 +19705,19 @@ var Selection = function (session) {
         if (!keepDesiredColumn)
             this.$desiredColumn = null;
     };
-    this.moveCursorToScreen = function (row, column, keepDesiredColumn) {
+    Selection.prototype.moveCursorToScreen = function (row, column, keepDesiredColumn) {
         var pos = this.session.screenToDocumentPosition(row, column);
         this.moveCursorTo(pos.row, pos.column, keepDesiredColumn);
     };
-    this.detach = function () {
+    Selection.prototype.detach = function () {
         this.lead.detach();
         this.anchor.detach();
     };
-    this.fromOrientedRange = function (range) {
+    Selection.prototype.fromOrientedRange = function (range) {
         this.setSelectionRange(range, range.cursor == range.start);
         this.$desiredColumn = range.desiredColumn || this.$desiredColumn;
     };
-    this.toOrientedRange = function (range) {
+    Selection.prototype.toOrientedRange = function (range) {
         var r = this.getRange();
         if (range) {
             range.start.column = r.start.column;
@@ -18453,7 +19732,7 @@ var Selection = function (session) {
         range.desiredColumn = this.$desiredColumn;
         return range;
     };
-    this.getRangeOfMovements = function (func) {
+    Selection.prototype.getRangeOfMovements = function (func) {
         var start = this.getCursor();
         try {
             func(this);
@@ -18467,7 +19746,7 @@ var Selection = function (session) {
             this.moveCursorToPosition(start);
         }
     };
-    this.toJSON = function () {
+    Selection.prototype.toJSON = function () {
         if (this.rangeCount) {
             var data = this.ranges.map(function (r) {
                 var r1 = r.clone();
@@ -18481,7 +19760,7 @@ var Selection = function (session) {
         }
         return data;
     };
-    this.fromJSON = function (data) {
+    Selection.prototype.fromJSON = function (data) {
         if (data.start == undefined) {
             if (this.rangeList && data.length > 1) {
                 this.toSingleRange(data[0]);
@@ -18501,7 +19780,7 @@ var Selection = function (session) {
             this.toSingleRange(data);
         this.setSelectionRange(data, data.isBackwards);
     };
-    this.isEqual = function (data) {
+    Selection.prototype.isEqual = function (data) {
         if ((data.length || this.rangeCount) && data.length != this.rangeCount)
             return false;
         if (!data.length || !this.ranges)
@@ -18512,7 +19791,12 @@ var Selection = function (session) {
         }
         return true;
     };
-}).call(Selection.prototype);
+    return Selection;
+}());
+Selection.prototype.setSelectionAnchor = Selection.prototype.setAnchor;
+Selection.prototype.getSelectionAnchor = Selection.prototype.getAnchor;
+Selection.prototype.setSelectionRange = Selection.prototype.setRange;
+oop.implement(Selection.prototype, EventEmitter);
 exports.Selection = Selection;
 
 });
@@ -35610,7 +36894,7 @@ var __assign$1 = (commonjsGlobal && commonjsGlobal.__assign) || function () {
 };
 Object.defineProperty(ace$5, "__esModule", { value: true });
 var ace_builds_1$1 = ace$4.exports;
-var PropTypes$2 = propTypes$1.exports;
+var PropTypes$2 = propTypes$2.exports;
 var React$3 = require$$0;
 var isEqual$1 = lodash_isequal.exports;
 var editorOptions_1$1 = editorOptions$1;
@@ -37185,7 +38469,7 @@ var editorOptions_1 = editorOptions$1;
 var ace$1 = (0, editorOptions_1.getAceInstance)();
 var ace_builds_1 = ace$4.exports;
 var ext_split_1 = extSplit.exports;
-var PropTypes$1 = propTypes$1.exports;
+var PropTypes$1 = propTypes$2.exports;
 var React$2 = require$$0;
 var isEqual = lodash_isequal.exports;
 var get = lodash_get;
@@ -39812,7 +41096,7 @@ var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
     };
 })();
 Object.defineProperty(diff, "__esModule", { value: true });
-var PropTypes = propTypes$1.exports;
+var PropTypes = propTypes$2.exports;
 var React$1 = require$$0;
 var split_1$1 = split;
 var DiffMatchPatch = diffMatchPatch.exports;
@@ -44934,7 +46218,7 @@ var showLiveAutocomplete = function (e) {
     var editor = e.editor;
     var prefix = util.getCompletionPrefix(editor);
     var triggerAutocomplete = util.triggerAutocomplete(editor);
-    if ((prefix || triggerAutocomplete) && prefix.length >= editor.$liveAutocompletionThreshold) {
+    if (prefix && prefix.length >= editor.$liveAutocompletionThreshold || triggerAutocomplete) {
         var completer = Autocomplete.for(editor);
         completer.autoShown = true;
         completer.showPopup(editor);
@@ -45279,16 +46563,16 @@ aceEditorCompleter.setCompleters([snippetCompleter]);
 class JsEditorUi extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      path: propTypes$1.exports.string,
-      data: propTypes$1.exports.string,
-      advice: propTypes$1.exports.object,
-      onRun: propTypes$1.exports.func,
-      onSave: propTypes$1.exports.func,
-      onChange: propTypes$1.exports.func,
-      onClickLink: propTypes$1.exports.func,
-      onClose: propTypes$1.exports.func,
-      onSelectView: propTypes$1.exports.func,
-      onCursorChange: propTypes$1.exports.func
+      path: propTypes$2.exports.string,
+      data: propTypes$2.exports.string,
+      advice: propTypes$2.exports.object,
+      onRun: propTypes$2.exports.func,
+      onSave: propTypes$2.exports.func,
+      onChange: propTypes$2.exports.func,
+      onClickLink: propTypes$2.exports.func,
+      onClose: propTypes$2.exports.func,
+      onSelectView: propTypes$2.exports.func,
+      onCursorChange: propTypes$2.exports.func
     };
   }
   constructor(props) {
@@ -45505,61 +46789,6 @@ class JsEditorUi extends ReactDOM$3.PureComponent {
   }
 }
 
-function defaultKey(key) {
-  return 'default' + key.charAt(0).toUpperCase() + key.substr(1);
-}
-
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
-
-function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-
-function useUncontrolledProp(propValue, defaultValue, handler) {
-  var wasPropRef = s(propValue !== undefined);
-
-  var _useState = l(defaultValue),
-      stateValue = _useState[0],
-      setState = _useState[1];
-
-  var isProp = propValue !== undefined;
-  var wasProp = wasPropRef.current;
-  wasPropRef.current = isProp;
-  /**
-   * If a prop switches from controlled to Uncontrolled
-   * reset its value to the defaultValue
-   */
-
-  if (!isProp && wasProp && stateValue !== defaultValue) {
-    setState(defaultValue);
-  }
-
-  return [isProp ? propValue : stateValue, A$1(function (value) {
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    if (handler) handler.apply(void 0, [value].concat(args));
-    setState(value);
-  }, [handler])];
-}
-function useUncontrolled(props, config) {
-  return Object.keys(config).reduce(function (result, fieldName) {
-    var _extends2;
-
-    var _ref = result,
-        defaultValue = _ref[defaultKey(fieldName)],
-        propsValue = _ref[fieldName],
-        rest = _objectWithoutPropertiesLoose(_ref, [defaultKey(fieldName), fieldName].map(_toPropertyKey));
-
-    var handlerName = config[fieldName];
-
-    var _useUncontrolledProp = useUncontrolledProp(propsValue, defaultValue, props[handlerName]),
-        value = _useUncontrolledProp[0],
-        handler = _useUncontrolledProp[1];
-
-    return _extends({}, rest, (_extends2 = {}, _extends2[fieldName] = value, _extends2[handlerName] = handler, _extends2));
-  }, props);
-}
-
 var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
 /**
  * Runs `querySelectorAll` on a given element.
@@ -45595,159 +46824,27 @@ function useForceUpdate() {
   return dispatch;
 }
 
-const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
-  ref.current = value;
-};
-function mergeRefs(refA, refB) {
-  const a = toFnRef(refA);
-  const b = toFnRef(refB);
-  return value => {
-    if (a) a(value);
-    if (b) b(value);
-  };
-}
-
-/**
- * Create and returns a single callback ref composed from two other Refs.
- *
- * ```tsx
- * const Button = React.forwardRef((props, ref) => {
- *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
- *   const mergedRef = useMergedRefs(ref, attachRef);
- *
- *   return <button ref={mergedRef} {...props}/>
- * })
- * ```
- *
- * @param refA A Callback or mutable Ref
- * @param refB A Callback or mutable Ref
- * @category refs
- */
-function useMergedRefs(refA, refB) {
-  return d(() => mergeRefs(refA, refB), [refA, refB]);
-}
-
-var NavContext = /*#__PURE__*/ReactDOM$3.createContext(null);
+const NavContext = /*#__PURE__*/D$1(null);
 NavContext.displayName = 'NavContext';
 var NavContext$1 = NavContext;
 
-var SelectableContext = /*#__PURE__*/ReactDOM$3.createContext(null);
-var makeEventKey = function makeEventKey(eventKey, href) {
-  if (href === void 0) {
-    href = null;
-  }
-
+const SelectableContext = /*#__PURE__*/D$1(null);
+const makeEventKey = (eventKey, href = null) => {
   if (eventKey != null) return String(eventKey);
   return href || null;
 };
-var SelectableContext$1 = SelectableContext;
 
-var TabContext = /*#__PURE__*/ReactDOM$3.createContext(null);
+const TabContext = /*#__PURE__*/D$1(null);
 var TabContext$1 = TabContext;
 
-var _excluded$5 = ["as", "onSelect", "activeKey", "role", "onKeyDown"];
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-var noop = function noop() {};
-
-var AbstractNav = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'ul' : _ref$as,
-      onSelect = _ref.onSelect,
-      activeKey = _ref.activeKey,
-      role = _ref.role,
-      onKeyDown = _ref.onKeyDown,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$5);
-
-  // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
-  // and don't want to reset the set in the effect
-  var forceUpdate = useForceUpdate();
-  var needsRefocusRef = s(false);
-  var parentOnSelect = F$1(SelectableContext$1);
-  var tabContext = F$1(TabContext$1);
-  var getControlledId, getControllerId;
-
-  if (tabContext) {
-    role = role || 'tablist';
-    activeKey = tabContext.activeKey;
-    getControlledId = tabContext.getControlledId;
-    getControllerId = tabContext.getControllerId;
-  }
-
-  var listNode = s(null);
-
-  var getNextActiveChild = function getNextActiveChild(offset) {
-    var currentListNode = listNode.current;
-    if (!currentListNode) return null;
-    var items = qsa(currentListNode, '[data-rb-event-key]:not(.disabled)');
-    var activeChild = currentListNode.querySelector('.active');
-    if (!activeChild) return null;
-    var index = items.indexOf(activeChild);
-    if (index === -1) return null;
-    var nextIndex = index + offset;
-    if (nextIndex >= items.length) nextIndex = 0;
-    if (nextIndex < 0) nextIndex = items.length - 1;
-    return items[nextIndex];
-  };
-
-  var handleSelect = function handleSelect(key, event) {
-    if (key == null) return;
-    if (onSelect) onSelect(key, event);
-    if (parentOnSelect) parentOnSelect(key, event);
-  };
-
-  var handleKeyDown = function handleKeyDown(event) {
-    if (onKeyDown) onKeyDown(event);
-    var nextActiveChild;
-
-    switch (event.key) {
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        nextActiveChild = getNextActiveChild(-1);
-        break;
-
-      case 'ArrowRight':
-      case 'ArrowDown':
-        nextActiveChild = getNextActiveChild(1);
-        break;
-
-      default:
-        return;
-    }
-
-    if (!nextActiveChild) return;
-    event.preventDefault();
-    handleSelect(nextActiveChild.dataset.rbEventKey, event);
-    needsRefocusRef.current = true;
-    forceUpdate();
-  };
-
-  y(function () {
-    if (listNode.current && needsRefocusRef.current) {
-      var activeChild = listNode.current.querySelector('[data-rb-event-key].active');
-      if (activeChild) activeChild.focus();
-    }
-
-    needsRefocusRef.current = false;
-  });
-  var mergedRef = useMergedRefs(ref, listNode);
-  return /*#__PURE__*/ReactDOM$3.createElement(SelectableContext$1.Provider, {
-    value: handleSelect
-  }, /*#__PURE__*/ReactDOM$3.createElement(NavContext$1.Provider, {
-    value: {
-      role: role,
-      // used by NavLink to determine it's role
-      activeKey: makeEventKey(activeKey),
-      getControlledId: getControlledId || noop,
-      getControllerId: getControllerId || noop
-    }
-  }, /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    onKeyDown: handleKeyDown,
-    ref: mergedRef,
-    role: role
-  }))));
-});
-var AbstractNav$1 = AbstractNav;
+const ATTRIBUTE_PREFIX = `data-rr-ui-`;
+const PROPERTY_PREFIX = `rrUi`;
+function dataAttr(property) {
+  return `${ATTRIBUTE_PREFIX}${property}`;
+}
+function dataProp(property) {
+  return `${PROPERTY_PREFIX}${property}`;
+}
 
 /**
  * Creates a `Ref` whose value is updated in an effect, ensuring the most recent
@@ -45773,182 +46870,300 @@ function useEventCallback(fn) {
   }, [ref]);
 }
 
-var _excluded$4 = ["active", "className", "eventKey", "onSelect", "onClick", "as"];
-var defaultProps$3 = {
-  disabled: false
-};
-var AbstractNavItem = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var active = _ref.active,
-      className = _ref.className,
-      eventKey = _ref.eventKey,
-      onSelect = _ref.onSelect,
-      onClick = _ref.onClick,
-      Component = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$4);
-
-  var navKey = makeEventKey(eventKey, props.href);
-  var parentOnSelect = F$1(SelectableContext$1);
-  var navContext = F$1(NavContext$1);
-  var isActive = active;
-
+const _excluded$1 = ["as", "active", "eventKey"];
+function _objectWithoutPropertiesLoose$1(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+function useNavItem({
+  key,
+  onClick,
+  active,
+  id,
+  role,
+  disabled
+}) {
+  const parentOnSelect = F$1(SelectableContext);
+  const navContext = F$1(NavContext$1);
+  const tabContext = F$1(TabContext$1);
+  let isActive = active;
+  const props = {
+    role
+  };
   if (navContext) {
-    if (!props.role && navContext.role === 'tablist') props.role = 'tab';
-    var contextControllerId = navContext.getControllerId(navKey);
-    var contextControlledId = navContext.getControlledId(navKey);
-    warning_1(!contextControllerId || !props.id, "[react-bootstrap] The provided id '" + props.id + "' was overwritten by the current navContext with '" + contextControllerId + "'.") ;
-    warning_1(!contextControlledId || !props['aria-controls'], "[react-bootstrap] The provided aria-controls value '" + props['aria-controls'] + "' was overwritten by the current navContext with '" + contextControlledId + "'.") ;
-    props['data-rb-event-key'] = navKey;
-    props.id = contextControllerId || props.id;
-    props['aria-controls'] = contextControlledId || props['aria-controls'];
-    isActive = active == null && navKey != null ? navContext.activeKey === navKey : active;
-  }
+    if (!role && navContext.role === 'tablist') props.role = 'tab';
+    const contextControllerId = navContext.getControllerId(key != null ? key : null);
+    const contextControlledId = navContext.getControlledId(key != null ? key : null);
 
+    // @ts-ignore
+    props[dataAttr('event-key')] = key;
+    props.id = contextControllerId || id;
+    isActive = active == null && key != null ? navContext.activeKey === key : active;
+
+    /**
+     * Simplified scenario for `mountOnEnter`.
+     *
+     * While it would make sense to keep 'aria-controls' for tabs that have been mounted at least
+     * once, it would also complicate the code quite a bit, for very little gain.
+     * The following implementation is probably good enough.
+     *
+     * @see https://github.com/react-restart/ui/pull/40#issuecomment-1009971561
+     */
+    if (isActive || !(tabContext != null && tabContext.unmountOnExit) && !(tabContext != null && tabContext.mountOnEnter)) props['aria-controls'] = contextControlledId;
+  }
   if (props.role === 'tab') {
-    if (props.disabled) {
+    props['aria-selected'] = isActive;
+    if (!isActive) {
+      props.tabIndex = -1;
+    }
+    if (disabled) {
       props.tabIndex = -1;
       props['aria-disabled'] = true;
     }
-
-    props['aria-selected'] = isActive;
   }
-
-  var handleOnclick = useEventCallback(function (e) {
-    if (onClick) onClick(e);
-    if (navKey == null) return;
-    if (onSelect) onSelect(navKey, e);
-    if (parentOnSelect) parentOnSelect(navKey, e);
+  props.onClick = useEventCallback(e => {
+    if (disabled) return;
+    onClick == null ? void 0 : onClick(e);
+    if (key == null) {
+      return;
+    }
+    if (parentOnSelect && !e.isPropagationStopped()) {
+      parentOnSelect(key, e);
+    }
   });
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({}, props, {
-    ref: ref,
-    onClick: handleOnclick,
-    className: classNames(className, isActive && 'active')
+  return [props, {
+    isActive
+  }];
+}
+const NavItem = /*#__PURE__*/x((_ref, ref) => {
+  let {
+      as: Component = Button$1,
+      active,
+      eventKey
+    } = _ref,
+    options = _objectWithoutPropertiesLoose$1(_ref, _excluded$1);
+  const [props, meta] = useNavItem(Object.assign({
+    key: makeEventKey(eventKey, options.href),
+    active
+  }, options));
+
+  // @ts-ignore
+  props[dataAttr('active')] = meta.isActive;
+  return /*#__PURE__*/e(Component, Object.assign({}, options, props, {
+    ref: ref
   }));
 });
-AbstractNavItem.defaultProps = defaultProps$3;
-var AbstractNavItem$1 = AbstractNavItem;
+NavItem.displayName = 'NavItem';
+var NavItem$1 = NavItem;
 
-var _excluded$3 = ["bsPrefix", "active", "disabled", "className", "variant", "action", "as", "onClick"];
-var defaultProps$2 = {
-  variant: undefined,
-  active: false,
-  disabled: false
-};
-var ListGroupItem = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      active = _ref.active,
-      disabled = _ref.disabled,
-      className = _ref.className,
-      variant = _ref.variant,
-      action = _ref.action,
-      as = _ref.as,
-      onClick = _ref.onClick,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$3);
+const _excluded = ["as", "onSelect", "activeKey", "role", "onKeyDown"];
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noop = () => {};
+const EVENT_KEY_ATTR = dataAttr('event-key');
+const Nav = /*#__PURE__*/x((_ref, ref) => {
+  let {
+      // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+      as: Component = 'div',
+      onSelect,
+      activeKey,
+      role,
+      onKeyDown
+    } = _ref,
+    props = _objectWithoutPropertiesLoose(_ref, _excluded);
+  // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
+  // and don't want to reset the set in the effect
+  const forceUpdate = useForceUpdate();
+  const needsRefocusRef = s(false);
+  const parentOnSelect = F$1(SelectableContext);
+  const tabContext = F$1(TabContext$1);
+  let getControlledId, getControllerId;
+  if (tabContext) {
+    role = role || 'tablist';
+    activeKey = tabContext.activeKey;
+    // TODO: do we need to duplicate these?
+    getControlledId = tabContext.getControlledId;
+    getControllerId = tabContext.getControllerId;
+  }
+  const listNode = s(null);
+  const getNextActiveTab = offset => {
+    const currentListNode = listNode.current;
+    if (!currentListNode) return null;
+    const items = qsa(currentListNode, `[${EVENT_KEY_ATTR}]:not([aria-disabled=true])`);
+    const activeChild = currentListNode.querySelector('[aria-selected=true]');
+    if (!activeChild || activeChild !== document.activeElement) return null;
+    const index = items.indexOf(activeChild);
+    if (index === -1) return null;
+    let nextIndex = index + offset;
+    if (nextIndex >= items.length) nextIndex = 0;
+    if (nextIndex < 0) nextIndex = items.length - 1;
+    return items[nextIndex];
+  };
+  const handleSelect = (key, event) => {
+    if (key == null) return;
+    onSelect == null ? void 0 : onSelect(key, event);
+    parentOnSelect == null ? void 0 : parentOnSelect(key, event);
+  };
+  const handleKeyDown = event => {
+    onKeyDown == null ? void 0 : onKeyDown(event);
+    if (!tabContext) {
+      return;
+    }
+    let nextActiveChild;
+    switch (event.key) {
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextActiveChild = getNextActiveTab(-1);
+        break;
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextActiveChild = getNextActiveTab(1);
+        break;
+      default:
+        return;
+    }
+    if (!nextActiveChild) return;
+    event.preventDefault();
+    handleSelect(nextActiveChild.dataset[dataProp('EventKey')] || null, event);
+    needsRefocusRef.current = true;
+    forceUpdate();
+  };
+  y(() => {
+    if (listNode.current && needsRefocusRef.current) {
+      const activeChild = listNode.current.querySelector(`[${EVENT_KEY_ATTR}][aria-selected=true]`);
+      activeChild == null ? void 0 : activeChild.focus();
+    }
+    needsRefocusRef.current = false;
+  });
+  const mergedRef = useMergedRefs(ref, listNode);
+  return /*#__PURE__*/e(SelectableContext.Provider, {
+    value: handleSelect,
+    children: /*#__PURE__*/e(NavContext$1.Provider, {
+      value: {
+        role,
+        // used by NavLink to determine it's role
+        activeKey: makeEventKey(activeKey),
+        getControlledId: getControlledId || noop,
+        getControllerId: getControllerId || noop
+      },
+      children: /*#__PURE__*/e(Component, Object.assign({}, props, {
+        onKeyDown: handleKeyDown,
+        ref: mergedRef,
+        role: role
+      }))
+    })
+  });
+});
+Nav.displayName = 'Nav';
+var BaseNav = Object.assign(Nav, {
+  Item: NavItem$1
+});
 
+const ListGroupItem = /*#__PURE__*/x(({
+  bsPrefix,
+  active,
+  disabled,
+  eventKey,
+  className,
+  variant,
+  action,
+  as,
+  ...props
+}, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'list-group-item');
-  var handleClick = A$1(function (event) {
+  const [navItemProps, meta] = useNavItem({
+    key: makeEventKey(eventKey, props.href),
+    active,
+    ...props
+  });
+  const handleClick = useEventCallback(event => {
     if (disabled) {
       event.preventDefault();
       event.stopPropagation();
       return;
     }
-
-    if (onClick) onClick(event);
-  }, [disabled, onClick]);
-
+    navItemProps.onClick(event);
+  });
   if (disabled && props.tabIndex === undefined) {
     props.tabIndex = -1;
     props['aria-disabled'] = true;
   }
 
-  return /*#__PURE__*/ReactDOM$3.createElement(AbstractNavItem$1, _extends({
-    ref: ref
-  }, props, {
-    // eslint-disable-next-line no-nested-ternary
-    as: as || (action ? props.href ? 'a' : 'button' : 'div'),
+  // eslint-disable-next-line no-nested-ternary
+  const Component = as || (action ? props.href ? 'a' : 'button' : 'div');
+  warning_1(as || !(!action && props.href), '`action=false` and `href` should not be used together.') ;
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    ...navItemProps,
     onClick: handleClick,
-    className: classNames(className, bsPrefix, active && 'active', disabled && 'disabled', variant && bsPrefix + "-" + variant, action && bsPrefix + "-action")
-  }));
+    className: classNames(className, bsPrefix, meta.isActive && 'active', disabled && 'disabled', variant && `${bsPrefix}-${variant}`, action && `${bsPrefix}-action`)
+  });
 });
-ListGroupItem.defaultProps = defaultProps$2;
 ListGroupItem.displayName = 'ListGroupItem';
 var ListGroupItem$1 = ListGroupItem;
 
-var _excluded$2 = ["className", "bsPrefix", "variant", "horizontal", "as"];
-var defaultProps$1 = {
-  variant: undefined,
-  horizontal: undefined
-};
-var ListGroup = /*#__PURE__*/ReactDOM$3.forwardRef(function (props, ref) {
-  var _useUncontrolled = useUncontrolled(props, {
+const ListGroup = /*#__PURE__*/x((props, ref) => {
+  const {
+    className,
+    bsPrefix: initialBsPrefix,
+    variant,
+    horizontal,
+    numbered,
+    // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+    as = 'div',
+    ...controlledProps
+  } = useUncontrolled(props, {
     activeKey: 'onSelect'
-  }),
-      className = _useUncontrolled.className,
-      initialBsPrefix = _useUncontrolled.bsPrefix,
-      variant = _useUncontrolled.variant,
-      horizontal = _useUncontrolled.horizontal,
-      _useUncontrolled$as = _useUncontrolled.as,
-      as = _useUncontrolled$as === void 0 ? 'div' : _useUncontrolled$as,
-      controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, _excluded$2);
-
-  var bsPrefix = useBootstrapPrefix(initialBsPrefix, 'list-group');
-  var horizontalVariant;
-
+  });
+  const bsPrefix = useBootstrapPrefix(initialBsPrefix, 'list-group');
+  let horizontalVariant;
   if (horizontal) {
-    horizontalVariant = horizontal === true ? 'horizontal' : "horizontal-" + horizontal;
-  } else {
-    horizontalVariant = null;
+    horizontalVariant = horizontal === true ? 'horizontal' : `horizontal-${horizontal}`;
   }
-
   warning_1(!(horizontal && variant === 'flush'), '`variant="flush"` and `horizontal` should not be used together.') ;
-  return /*#__PURE__*/ReactDOM$3.createElement(AbstractNav$1, _extends({
-    ref: ref
-  }, controlledProps, {
+  return /*#__PURE__*/e(BaseNav, {
+    ref: ref,
+    ...controlledProps,
     as: as,
-    className: classNames(className, bsPrefix, variant && bsPrefix + "-" + variant, horizontalVariant && bsPrefix + "-" + horizontalVariant)
-  }));
+    className: classNames(className, bsPrefix, variant && `${bsPrefix}-${variant}`, horizontalVariant && `${bsPrefix}-${horizontalVariant}`, numbered && `${bsPrefix}-numbered`)
+  });
 });
-ListGroup.defaultProps = defaultProps$1;
 ListGroup.displayName = 'ListGroup';
-ListGroup.Item = ListGroupItem$1;
+var ListGroup$1 = Object.assign(ListGroup, {
+  Item: ListGroupItem$1
+});
 
-var _excluded$1 = ["bsPrefix", "className", "noGutters", "as"];
-var DEVICE_SIZES = ['xl', 'lg', 'md', 'sm', 'xs'];
-var defaultProps = {
-  noGutters: false
-};
-var Row = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      noGutters = _ref.noGutters,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded$1);
-
-  var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
-  var sizePrefix = decoratedBsPrefix + "-cols";
-  var classes = [];
-  DEVICE_SIZES.forEach(function (brkPoint) {
-    var propValue = props[brkPoint];
+const Row = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
+  const breakpoints = useBootstrapBreakpoints();
+  const minBreakpoint = useBootstrapMinBreakpoint();
+  const sizePrefix = `${decoratedBsPrefix}-cols`;
+  const classes = [];
+  breakpoints.forEach(brkPoint => {
+    const propValue = props[brkPoint];
     delete props[brkPoint];
-    var cols;
-
+    let cols;
     if (propValue != null && typeof propValue === 'object') {
-      cols = propValue.cols;
+      ({
+        cols
+      } = propValue);
     } else {
       cols = propValue;
     }
-
-    var infix = brkPoint !== 'xs' ? "-" + brkPoint : '';
-    if (cols != null) classes.push("" + sizePrefix + infix + "-" + cols);
+    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
+    if (cols != null) classes.push(`${sizePrefix}${infix}-${cols}`);
   });
-  return /*#__PURE__*/ReactDOM$3.createElement(Component, _extends({
-    ref: ref
-  }, props, {
-    className: classNames.apply(void 0, [className, decoratedBsPrefix, noGutters && 'no-gutters'].concat(classes))
-  }));
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, decoratedBsPrefix, ...classes)
+  });
 });
 Row.displayName = 'Row';
-Row.defaultProps = defaultProps;
 
 var dist = {};
 
@@ -46251,38 +47466,35 @@ Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function ()
 
 var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
 
-var _excluded = ["bsPrefix", "className", "striped", "bordered", "borderless", "hover", "size", "variant", "responsive"];
-var Table = /*#__PURE__*/ReactDOM$3.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      striped = _ref.striped,
-      bordered = _ref.bordered,
-      borderless = _ref.borderless,
-      hover = _ref.hover,
-      size = _ref.size,
-      variant = _ref.variant,
-      responsive = _ref.responsive,
-      props = _objectWithoutPropertiesLoose(_ref, _excluded);
-
-  var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'table');
-  var classes = classNames(className, decoratedBsPrefix, variant && decoratedBsPrefix + "-" + variant, size && decoratedBsPrefix + "-" + size, striped && decoratedBsPrefix + "-striped", bordered && decoratedBsPrefix + "-bordered", borderless && decoratedBsPrefix + "-borderless", hover && decoratedBsPrefix + "-hover");
-  var table = /*#__PURE__*/ReactDOM$3.createElement("table", _extends({}, props, {
+const Table = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  striped,
+  bordered,
+  borderless,
+  hover,
+  size,
+  variant,
+  responsive,
+  ...props
+}, ref) => {
+  const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'table');
+  const classes = classNames(className, decoratedBsPrefix, variant && `${decoratedBsPrefix}-${variant}`, size && `${decoratedBsPrefix}-${size}`, striped && `${decoratedBsPrefix}-${typeof striped === 'string' ? `striped-${striped}` : 'striped'}`, bordered && `${decoratedBsPrefix}-bordered`, borderless && `${decoratedBsPrefix}-borderless`, hover && `${decoratedBsPrefix}-hover`);
+  const table = /*#__PURE__*/e("table", {
+    ...props,
     className: classes,
     ref: ref
-  }));
-
+  });
   if (responsive) {
-    var responsiveClass = decoratedBsPrefix + "-responsive";
-
+    let responsiveClass = `${decoratedBsPrefix}-responsive`;
     if (typeof responsive === 'string') {
-      responsiveClass = responsiveClass + "-" + responsive;
+      responsiveClass = `${responsiveClass}-${responsive}`;
     }
-
-    return /*#__PURE__*/ReactDOM$3.createElement("div", {
-      className: responsiveClass
-    }, table);
+    return /*#__PURE__*/e("div", {
+      className: responsiveClass,
+      children: table
+    });
   }
-
   return table;
 });
 
@@ -46405,9 +47617,9 @@ const defaultModelConfig = {
 class App extends ReactDOM$3.Component {
   static get propTypes() {
     return {
-      workspace: propTypes$1.exports.string,
-      sha: propTypes$1.exports.string,
-      path: propTypes$1.exports.start
+      workspace: propTypes$2.exports.string,
+      sha: propTypes$2.exports.string,
+      path: propTypes$2.exports.start
     };
   }
   constructor(props) {
@@ -47456,20 +48668,20 @@ class App extends ReactDOM$3.Component {
             const isOpen = file => WorkspaceOpenPaths.includes(file.substring(7));
             const computeListItemVariant = file => isOpen(file) ? 'primary' : 'secondary';
             const prefix = `source/${WorkspaceLoadPrefix}`;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Set Base Path"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
+            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Set Base Path"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
               controlId: "WorkspaceLoadPrefixId"
-            }, v$1(FormImpl.Control, {
+            }, v$1(Form$1.Control, {
               placeholder: "Prefix",
               onChange: e => this.updateState({
                 WorkspaceLoadPrefix: e.target.value
               }),
               value: WorkspaceLoadPrefix
-            })))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Select Paths"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(ListGroup, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => v$1(ListGroup.Item, {
+            })))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Select Paths"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(ListGroup$1, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => v$1(ListGroup$1.Item, {
               key: index
             }, v$1(ButtonGroup, {
               variant: computeListItemVariant(file),
               key: index
-            }, v$1(InputGroup.Checkbox, {
+            }, v$1(InputGroup$1.Checkbox, {
               key: index,
               type: "checkbox",
               id: `WorkspaceSelect/${file}`
@@ -47486,7 +48698,7 @@ class App extends ReactDOM$3.Component {
                   this.Workspace.openWorkingFile(file);
                 }
               }
-            }, file.substring(prefix.length)))))))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Export Selected Paths to Folder"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
+            }, file.substring(prefix.length)))))))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Export Selected Paths to Folder"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Button, {
               onClick: () => {
                 const {
                   WorkspaceLoadPrefix
@@ -47494,21 +48706,21 @@ class App extends ReactDOM$3.Component {
                 this.Workspace.export(WorkspaceLoadPrefix);
               },
               disabled: !WorkspaceLoadPrefix
-            }, "Export"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Revert Selected Paths"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Button, {
+            }, "Export"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Revert Selected Paths"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Button, {
               onClick: async event => {
                 for (const path of this.Workspace.getSelectedPaths()) {
                   this.Workspace.revertWorkingFile(path);
                 }
               }
-            }, "Revert"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Import"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(FormImpl.Group, {
+            }, "Revert"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Import"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
               controlId: "WorkspaceLoadPathId"
-            }, v$1(FormImpl.Control, {
+            }, v$1(Form$1.Control, {
               placeholder: "Path (extending Base Path)",
               onChange: e => this.updateState({
                 WorkspaceLoadPath: e.target.value
               }),
               value: WorkspaceLoadPath
-            }), v$1(FormImpl.Text, null, "Path")), v$1(Button, {
+            }), v$1(Form$1.Text, null, "Path")), v$1(Button, {
               variant: "primary",
               onClick: () => {
                 const {
@@ -47518,7 +48730,7 @@ class App extends ReactDOM$3.Component {
                 this.Workspace.loadWorkingPath(`${WorkspaceLoadPrefix}${WorkspaceLoadPath}`);
               },
               disabled: !WorkspaceLoadPath
-            }, "Import or Open New"), v$1(FormImpl.Control, {
+            }, "Import or Open New"), v$1(Form$1.Control, {
               as: "input",
               type: "file",
               id: "WorkspaceUploadControl",
@@ -47538,7 +48750,7 @@ class App extends ReactDOM$3.Component {
                 document.getElementById('WorkspaceUploadControl').click();
               },
               disabled: !WorkspaceLoadPath
-            }, "Upload from Computer"))))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Reset Workspace"), v$1(Card.Text, null, v$1(Button, {
+            }, "Upload from Computer"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Workspace"), v$1(Card$1.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Workspace.reset
             }, "Reset")))));
@@ -47653,10 +48865,10 @@ class App extends ReactDOM$3.Component {
             const {
               WorkspaceFiles = []
             } = this.state;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "(Advanced Interface)"), v$1(Card.Text, null, "This provides lower level access to the internal filesystem."))), v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Clear Cached Files"), v$1(Card.Text, null, v$1(Button, {
+            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "(Advanced Interface)"), v$1(Card$1.Text, null, "This provides lower level access to the internal filesystem."))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Clear Cached Files"), v$1(Card$1.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Temporary Files"))), v$1(Card.Body, null, v$1(Card.Title, null, "Source Files"), v$1(Card.Text, null, v$1(Table, {
+            }, "Delete Temporary Files"))), v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Source Files"), v$1(Card$1.Text, null, v$1(Table, {
               striped: true,
               border: true,
               hover: true
@@ -47664,7 +48876,7 @@ class App extends ReactDOM$3.Component {
               key: index
             }, v$1("td", null, v$1(Button, {
               onClick: () => this.Files.deleteSourceFile(file)
-            }, "Delete")), v$1("td", null, file))))))), v$1(Card.Body, null, v$1(Card.Title, null, "Reset Layout"), v$1(Card.Text, null, v$1(Button, {
+            }, "Delete")), v$1("td", null, file))))))), v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Layout"), v$1(Card$1.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Model.reset
             }, "Reset")))));
@@ -47675,9 +48887,9 @@ class App extends ReactDOM$3.Component {
               LogMessages = [],
               LogFilter = ''
             } = this.state;
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Log Messages"), v$1(Card.Text, null, v$1(FormImpl, null, v$1(Row, null, v$1(Col, null, v$1(FormImpl.Group, {
+            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Log Messages"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Row, null, v$1(Col, null, v$1(Form$1.Group, {
               controlId: "LogFilterId"
-            }, v$1(FormImpl.Control, {
+            }, v$1(Form$1.Control, {
               placeholder: "Filter source by regex",
               value: LogFilter
             }))), v$1(Col, null, v$1(Button, {
@@ -47708,14 +48920,14 @@ class App extends ReactDOM$3.Component {
           }
         case 'Config':
           {
-            return v$1("div", null, v$1(Card, null, v$1(Card.Body, null, v$1(Card.Title, null, "Configuration"), v$1(Card.Text, null, v$1(FormImpl, {
+            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Configuration"), v$1(Card$1.Text, null, v$1(Form$1, {
               id: "form/Config"
             }, v$1(Button, {
               variant: "primary",
               onClick: this.Config.update
-            }, "Update"), v$1(FormImpl.Group, {
+            }, "Update"), v$1(Form$1.Group, {
               controlId: "Config/api/shape/endTimer/md"
-            }, v$1(FormImpl.Check, {
+            }, v$1(Form$1.Check, {
               type: "checkbox",
               label: "Emit md from endTimer",
               checked: this.Config.path('Config/api/shape/endTimer').md
