@@ -1,4 +1,3 @@
-/*
 const Base = (l = SIZE, w = SIZE) =>
   Box(l, w)
     .op(Loft(inset(1), z(1)), cut(inset(1)).ez([1, 6 + 1]))
@@ -54,11 +53,6 @@ const Core = (magnets = 'tlrb') =>
 
 const hole = Box(8).Loft(z(0), z(0.5), offset(0.5).z(1)).gap();
 
-const stoneFloorTile = tile
-  .join(stoneFloor.scaleToFit(SIZE - 1 - 0.2, SIZE - 1 - 0.2))
-  .fuse()
-  .stl('stone_floor_tile');
-
 const tightTile = Box(SIZE - 0.2)
   .Loft(inset(1).z(0), z(1), z(3), inset(1).z(4))
   .cut(base1x1.gap().z(-7.1), Connector(0.15))
@@ -66,7 +60,7 @@ const tightTile = Box(SIZE - 0.2)
   .stl('tightTile')
   .v(1);
 
-const tile1x1 = Box(SIZE - 0.2)
+export const tile1x1 = Box(SIZE - 0.2)
   .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
   .cut(base1x1.gap().z(-7.1), Connector(0.25))
   .z(-3)
@@ -74,10 +68,6 @@ const tile1x1 = Box(SIZE - 0.2)
   .v(1);
 
 const connector = Connector(0.25).stl('connector');
-
-const stoneFloor = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/tiles/stone_floor.stl'
-).align('z>');
 
 const looseTile = Box(SIZE - 0.2)
   .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
@@ -122,15 +112,7 @@ const tightHalfTile = tightTile
   .stl('tight_half_tile')
   .v(1);
 
-const brokenStoneFloor = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/broken_stone_floor.stl'
-).align('z>');
-
-const cobbleFanRoad = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/cobble_fan_road.stl'
-).align('xyz>');
-
-const tile2x2 = Box((SIZE - 0.1) * 2)
+export const tile2x2 = Box((SIZE - 0.1) * 2)
   .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
   .cut(
     base1x1
@@ -146,37 +128,12 @@ const tile2x2 = Box((SIZE - 0.1) * 2)
   .stl('tile2x2', fuse())
   .v(1);
 
-const cobbleFanRoadTile = tile2x2
-  .join(cobbleFanRoad.scaleToFit((SIZE - 0.1) * 2, (SIZE - 0.1) * 2))
-  .fuse()
-  .stl('cobble_fan_road_tile');
-
-const treeTrunkTile = tile2x2
-  .and(
-    mud.scaleToFit((SIZE - 0.1) * 2, (SIZE - 0.1) * 2),
-    treeTrunk.scaleToFit(SIZE - 0.2, SIZE - 0.2, 50)
-  )
-  .stl('tree_trunk_tile');
-
-const treeTrunk = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/Terrain4Print/giant-1-12cm.stl'
-).align('xyz>');
-
-const mud = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/mud-2x2.stl'
-).align('xyz>');
-
-const SIZE = 24;
+export const SIZE = 24;
 
 const spar = Box([3 + 2.2, -3 - 2, 2], 1)
   .ez([1, 6.1])
   .x((SIZE - 8.2) / 2)
   .view(1);
-
-const brokenStoneFloorTile = tile1x1
-  .join(brokenStoneFloor.scaleToFit(SIZE - 0.2, SIZE - 0.2))
-  .fuse()
-  .stl('broken_stone_floor_1x1');
 
 const tile2x1 = Box(SIZE * 2 - 0.2, SIZE - 0.2)
   .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
@@ -202,4 +159,3 @@ const top3x3 = Top(SIZE * 3 - 0.2, SIZE * 3 - 0.2)
   .join(Connector().x(SIZE, 0, -SIZE).y(SIZE, 0, -SIZE))
   .cut(base3x3.z(-7.1))
   .stl('top3x3');
-*/
