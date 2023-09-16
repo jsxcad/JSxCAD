@@ -1375,7 +1375,7 @@ class App extends React.Component {
             <EditNote
               isDraft={true}
               notebookPath={path}
-              key='$Draft'
+              key="$Draft"
               note={note}
               onChange={(sourceText) => this.Draft.change(sourceText)}
               onKeyDown={(e) => this.onKeyDown(e)}

@@ -31,25 +31,34 @@ export class EditNote extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    return this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText;
+    return (
+      this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText
+    );
   }
 
   render() {
     const { note, onKeyDown } = this.props;
     const { sourceText } = note;
     return (
-          <Card>
-          <pre style={{ padding: '1em', outline: 'none' }} contenteditable onKeyDown={onKeyDown} onInput={(event) => this.onChange(event)}
-           ref={(ref) => {
-                  if (this.ref === ref) {
-                    return;
-                  }
-                  this.ref = ref;
-                  if (ref !== null) {
-                    ref.innerText = sourceText;
-                  }
-                }}>{sourceText}</pre>
-                </Card>
+      <Card>
+        <pre
+          style={{ padding: '1em', outline: 'none' }}
+          contenteditable
+          onKeyDown={onKeyDown}
+          onInput={(event) => this.onChange(event)}
+          ref={(ref) => {
+            if (this.ref === ref) {
+              return;
+            }
+            this.ref = ref;
+            if (ref !== null) {
+              ref.innerText = sourceText;
+            }
+          }}
+        >
+          {sourceText}
+        </pre>
+      </Card>
     );
   }
 }

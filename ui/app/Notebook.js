@@ -72,12 +72,6 @@ export const updateNotebookState = async (
     application.setState(op);
   };
 
-  if (notes.length === 0) {
-    console.log(`QQ/Notes are empty`);
-  } else {
-    console.log(`QQ/Notes are ${notes.length}`);
-  }
-
   for (const note of notes) {
     updateNote(note);
     if (note.view) {
@@ -185,9 +179,7 @@ export class Notebook extends React.PureComponent {
         return nthA - nthB;
       };
       ordered.sort(order);
-      let line = 0;
       let id;
-      let hasStub = false;
       const ids = [];
       let children;
       let downloads;
@@ -204,18 +196,12 @@ export class Notebook extends React.PureComponent {
           entry = { id, blue: false, children, downloads, errors, icons };
           ids.push(entry);
         }
-        if (note.hash === 'stub') {
-          hasStub = true;
-        }
         // FIX: This seems wasteful.
         const selected = false;
         let child;
         let download;
         let error;
         let icon;
-        if (note.sourceLocation) {
-          line = note.sourceLocation.line;
-        }
         if (note.view) {
           child = (
             <ViewNote
@@ -293,32 +279,6 @@ export class Notebook extends React.PureComponent {
         }
       }
 
-/*
-      if (!hasStub) {
-        // Append an empty editor.
-        const stub = {
-          hash: 'stub',
-          sourceText: '',
-          sourceLocation: { path: notebookPath, line: line + 1, id: '+' },
-        };
-        ids.push({
-          id: '+',
-          downloads: [],
-          icons: [],
-          errors: [],
-          children: [
-            <EditNote
-              key={stub.hash}
-              note={stub}
-              onChange={(sourceText) => onChange(stub, { sourceText })}
-              onKeyDown={onKeyDown}
-              workspace={workspace}
-            />,
-          ],
-        });
-      }
-*/
-
       useEffect(() => mermaid.init(undefined, '.mermaid'));
 
       const sections = [];
@@ -344,8 +304,8 @@ export class Notebook extends React.PureComponent {
           <Accordion key={id} defaultActiveKey={id}>
             <Accordion.Item eventKey={id}>
               <Accordion.Header>
-                {id} &nbsp;&nbsp; {errors.length > 0 ? errors[0] : ''}{' '}
-                {icons} &nbsp;&nbsp; {downloads}{' '}
+                {id} &nbsp;&nbsp; {errors.length > 0 ? errors[0] : ''} {icons}{' '}
+                &nbsp;&nbsp; {downloads}{' '}
                 {blur ? <SpinnerCircularSplit color="#36d7b7" size="32" /> : ''}
               </Accordion.Header>
               <Accordion.Body>{children}</Accordion.Body>

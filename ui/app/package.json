@@ -29,7 +29,6 @@
     "@jsxcad/ui-threejs": "^0.0.79",
     "ace-builds": "^1.4.7",
     "base64-arraybuffer": "^1.0.1",
-    "codejar": "^3.7.0",
     "extract-urls": "^1.3.2",
     "file-saver": "^2.0.2",
     "flexlayout-react": "^0.5.20",

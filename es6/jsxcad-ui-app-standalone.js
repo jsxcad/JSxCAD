@@ -6923,11 +6923,6 @@ const updateNotebookState = async (application, {
     };
     application.setState(op);
   };
-  if (notes.length === 0) {
-    console.log(`QQ/Notes are empty`);
-  } else {
-    console.log(`QQ/Notes are ${notes.length}`);
-  }
   for (const note of notes) {
     updateNote(note);
     if (note.view) {
@@ -7043,9 +7038,7 @@ class Notebook extends ReactDOM$1.PureComponent {
         return nthA - nthB;
       };
       ordered.sort(order);
-      let line = 0;
       let id;
-      let hasStub = false;
       const ids = [];
       let children;
       let downloads;
@@ -7069,18 +7062,12 @@ class Notebook extends ReactDOM$1.PureComponent {
           };
           ids.push(entry);
         }
-        if (note.hash === 'stub') {
-          hasStub = true;
-        }
         // FIX: This seems wasteful.
         const selected = false;
         let child;
         let download;
         let error;
         let icon;
-        if (note.sourceLocation) {
-          line = note.sourceLocation.line;
-        }
         if (note.view) {
           child = v$1(ViewNote, {
             key: note.hash,
@@ -7150,33 +7137,6 @@ class Notebook extends ReactDOM$1.PureComponent {
           errors.push(error);
         }
       }
-
-      /*
-            if (!hasStub) {
-              // Append an empty editor.
-              const stub = {
-                hash: 'stub',
-                sourceText: '',
-                sourceLocation: { path: notebookPath, line: line + 1, id: '+' },
-              };
-              ids.push({
-                id: '+',
-                downloads: [],
-                icons: [],
-                errors: [],
-                children: [
-                  <EditNote
-                    key={stub.hash}
-                    note={stub}
-                    onChange={(sourceText) => onChange(stub, { sourceText })}
-                    onKeyDown={onKeyDown}
-                    workspace={workspace}
-                  />,
-                ],
-              });
-            }
-      */
-
       y(() => mermaid.init(undefined, '.mermaid'));
       const sections = [];
       const compare = (a, b) => {
@@ -7202,7 +7162,7 @@ class Notebook extends ReactDOM$1.PureComponent {
           defaultActiveKey: id
         }, v$1(Accordion$1.Item, {
           eventKey: id
-        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? errors[0] : '', ' ', icons, " \xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
+        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? errors[0] : '', " ", icons, ' ', "\xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
           color: "#36d7b7",
           size: "32"
         }) : ''), v$1(Accordion$1.Body, null, children))));
