@@ -13947,7 +13947,28 @@ require("./es6-shim");
 
 });
 
-ace.define("ace/lib/lang",["require","exports","module"], function(require, exports, module){exports.last = function (a) {
+ace.define("ace/lib/deep_copy",["require","exports","module"], function(require, exports, module){exports.deepCopy = function deepCopy(obj) {
+    if (typeof obj !== "object" || !obj)
+        return obj;
+    var copy;
+    if (Array.isArray(obj)) {
+        copy = [];
+        for (var key = 0; key < obj.length; key++) {
+            copy[key] = deepCopy(obj[key]);
+        }
+        return copy;
+    }
+    if (Object.prototype.toString.call(obj) !== "[object Object]")
+        return obj;
+    copy = {};
+    for (var key in obj)
+        copy[key] = deepCopy(obj[key]);
+    return copy;
+};
+
+});
+
+ace.define("ace/lib/lang",["require","exports","module","ace/lib/deep_copy"], function(require, exports, module){exports.last = function (a) {
     return a[a.length - 1];
 };
 exports.stringReverse = function (string) {
@@ -13988,24 +14009,7 @@ exports.copyArray = function (array) {
     }
     return copy;
 };
-exports.deepCopy = function deepCopy(obj) {
-    if (typeof obj !== "object" || !obj)
-        return obj;
-    var copy;
-    if (Array.isArray(obj)) {
-        copy = [];
-        for (var key = 0; key < obj.length; key++) {
-            copy[key] = deepCopy(obj[key]);
-        }
-        return copy;
-    }
-    if (Object.prototype.toString.call(obj) !== "[object Object]")
-        return obj;
-    copy = {};
-    for (var key in obj)
-        copy[key] = deepCopy(obj[key]);
-    return copy;
-};
+exports.deepCopy = require("./deep_copy").deepCopy;
 exports.arrayToMap = function (arr) {
     var map = {};
     for (var i = 0; i < arr.length; i++) {
@@ -14593,9 +14597,20 @@ exports.EventEmitter = EventEmitter;
 
 });
 
-ace.define("ace/lib/app_config",["require","exports","module","ace/lib/oop","ace/lib/event_emitter"], function(require, exports, module){"no use strict";
+ace.define("ace/lib/report_error",["require","exports","module"], function(require, exports, module){exports.reportError = function reportError(msg, data) {
+    var e = new Error(msg);
+    e.data = data;
+    if (typeof console == "object" && console.error)
+        console.error(e);
+    setTimeout(function () { throw e; });
+};
+
+});
+
+ace.define("ace/lib/app_config",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/report_error"], function(require, exports, module){"no use strict";
 var oop = require("./oop");
 var EventEmitter = require("./event_emitter").EventEmitter;
+var reportError = require("./report_error").reportError;
 var optionsProvider = {
     setOptions: function (optList) {
         Object.keys(optList).forEach(function (key) {
@@ -14646,13 +14661,6 @@ var optionsProvider = {
 function warn(message) {
     if (typeof console != "undefined" && console.warn)
         console.warn.apply(console, arguments);
-}
-function reportError(msg, data) {
-    var e = new Error(msg);
-    e.data = data;
-    if (typeof console == "object" && console.error)
-        console.error(e);
-    setTimeout(function () { throw e; });
 }
 var messages;
 var AppConfig = /** @class */ (function () {
@@ -14883,7 +14891,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.24.2";
+exports.version = "1.26.0";
 
 });
 
@@ -19315,7 +19323,7 @@ exports.Selection = Selection;
 
 });
 
-ace.define("ace/tokenizer",["require","exports","module","ace/config"], function(require, exports, module){var config = require("./config");
+ace.define("ace/tokenizer",["require","exports","module","ace/lib/report_error"], function(require, exports, module){var reportError = require("./lib/report_error").reportError;
 var MAX_TOKEN_COUNT = 2000;
 var Tokenizer = /** @class */ (function () {
     function Tokenizer(rules) {
@@ -19596,12 +19604,12 @@ var Tokenizer = /** @class */ (function () {
     };
     return Tokenizer;
 }());
-Tokenizer.prototype.reportError = config.reportError;
+Tokenizer.prototype.reportError = reportError;
 exports.Tokenizer = Tokenizer;
 
 });
 
-ace.define("ace/mode/text_highlight_rules",["require","exports","module","ace/lib/lang"], function(require, exports, module){var lang = require("../lib/lang");
+ace.define("ace/mode/text_highlight_rules",["require","exports","module","ace/lib/deep_copy"], function(require, exports, module){var deepCopy = require("../lib/deep_copy").deepCopy;
 var TextHighlightRules = function () {
     this.$rules = {
         "start": [{
@@ -19655,7 +19663,7 @@ var TextHighlightRules = function () {
         if (escapeRules) {
             var addRules = Array.prototype[append ? "push" : "unshift"];
             for (var i = 0; i < states.length; i++)
-                addRules.apply(this.$rules[states[i]], lang.deepCopy(escapeRules));
+                addRules.apply(this.$rules[states[i]], deepCopy(escapeRules));
         }
         if (!this.$embeds)
             this.$embeds = [];
@@ -29819,12 +29827,21 @@ exports.Marker = Marker;
 
 });
 
-ace.define("ace/layer/text",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/layer/lines","ace/lib/event_emitter","ace/config"], function(require, exports, module){var oop = require("../lib/oop");
+ace.define("ace/layer/text_util",["require","exports","module"], function(require, exports, module){// Tokens for which Ace just uses a simple TextNode and does not add any special className.
+var textTokens = new Set(["text", "rparen", "lparen"]);
+exports.isTextToken = function (tokenType) {
+    return textTokens.has(tokenType);
+};
+
+});
+
+ace.define("ace/layer/text",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/layer/lines","ace/lib/event_emitter","ace/config","ace/layer/text_util"], function(require, exports, module){var oop = require("../lib/oop");
 var dom = require("../lib/dom");
 var lang = require("../lib/lang");
 var Lines = require("./lines").Lines;
 var EventEmitter = require("../lib/event_emitter").EventEmitter;
 var nls = require("../config").nls;
+var isTextToken = require("./text_util").isTextToken;
 var Text = /** @class */ (function () {
     function Text(parentEl) {
         this.dom = dom;
@@ -30093,7 +30110,7 @@ var Text = /** @class */ (function () {
                     valueFragment.appendChild(span);
                 }
                 else {
-                    valueFragment.appendChild(this.com.createTextNode(simpleSpace, this.element));
+                    valueFragment.appendChild(this.dom.createTextNode(simpleSpace, this.element));
                 }
             }
             else if (controlCharacter) {
@@ -30120,7 +30137,7 @@ var Text = /** @class */ (function () {
             }
         }
         valueFragment.appendChild(this.dom.createTextNode(i ? value.slice(i) : value, this.element));
-        if (!this.$textToken[token.type]) {
+        if (!isTextToken(token.type)) {
             var classes = "ace_" + token.type.replace(/\./g, " ace_");
             var span = this.dom.createElement("span");
             if (token.type == "fold") {
@@ -30430,11 +30447,6 @@ var Text = /** @class */ (function () {
     };
     return Text;
 }());
-Text.prototype.$textToken = {
-    "text": true,
-    "rparen": true,
-    "lparen": true
-};
 Text.prototype.EOF_CHAR = "\xB6";
 Text.prototype.EOL_CHAR_LF = "\xAC";
 Text.prototype.EOL_CHAR_CRLF = "\xa4";
@@ -44887,6 +44899,7 @@ var Autocomplete = /** @class */ (function () {
         this.keyboardHandler = new HashHandler();
         this.keyboardHandler.bindKeys(this.commands);
         this.parentNode = null;
+        this.setSelectOnHover = false;
         this.blurListener = this.blurListener.bind(this);
         this.changeListener = this.changeListener.bind(this);
         this.mousedownListener = this.mousedownListener.bind(this);
@@ -44998,6 +45011,7 @@ var Autocomplete = /** @class */ (function () {
         if (this.inlineEnabled && !this.inlineRenderer)
             this.$initInline();
         this.popup.autoSelect = this.autoSelect;
+        this.popup.setSelectOnHover(this.setSelectOnHover);
         this.popup.setData(this.completions.filtered, this.completions.filterText);
         if (this.editor.textInput.setAriaOptions) {
             this.editor.textInput.setAriaOptions({
@@ -47554,7 +47568,7 @@ class App extends ReactDOM$3.Component {
           // We don't know how to run anything else.
           return;
         }
-        let script = NotebookText;
+        let script = NotebookText + this.Draft.getCode();
         const version = new Date().getTime();
         const evaluate = async script => {
           try {
@@ -47605,13 +47619,16 @@ class App extends ReactDOM$3.Component {
           }
         };
         NotebookAdvice.definitions = topLevel;
-        await execute(script, {
+        await execute(script + this.Draft().getCode(), {
           evaluate,
           replay,
           path: NotebookPath,
           topLevel,
           workspace
         });
+
+        // A bit of a race condition here.
+        this.Draft().change('');
         await resolvePending();
         clearNotebookState(this, {
           path: NotebookPath,
@@ -47661,8 +47678,7 @@ class App extends ReactDOM$3.Component {
       const {
         workspace
       } = this.props;
-      const NotebookText = this.Notebook.getText(path) + this.Draft.getCode();
-      await this.Draft.change('');
+      const NotebookText = this.Notebook.getText(path);
       // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;

@@ -89,6 +89,7 @@ public:
     return out;
   }
 };
+#endif
 
 // This weight calculator refuses weights for triangles within the same lofting
 // span.
@@ -176,82 +177,6 @@ void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
                                 start + triangle.get<1>(),
                                 start + triangle.get<2>()};
     polygons.push_back(polygon);
-  }
-}
-#endif
-
-// FIX: brute force.
-void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
-                          Polygons& polygons) {
-  struct Candidate {
-    int a;
-    int b;
-    int c;
-    enum { UPPER, LOWER } side;
-    Triangle t;
-    double score;
-  };
-
-  struct CandidateComparator {
-    bool operator()(const Candidate& a, const Candidate& b) const {
-      return a.score > b.score;
-    }
-  };
-
-  struct CandidateRanker {
-    double operator()(const Candidate& a) const { return 1; }
-  };
-
-  std::priority_queue<Candidate, CandidateComparator> candidates;
-
-  CandidateRanker computeRank;
-
-  // For each segment, we must find a point on the other span to bridge to.
-  std::vector<Candidate> candidates for (size_t nth = 1; nth < lower.size();
-                                         nth++) {
-    for (size_t bridge = 0; bridge < upper.size(); bridge++) {
-      Triangle t(lower[nth - 1], lower[nth], upper[bridge]);
-      candidates.emplace_back(nth - 1, nth, bridge, LOWER, t, computeRank(t));
-    }
-  }
-
-  for (size_t nth = 1; nth < upper.size(); nth++) {
-    for (size_t bridge = 0; bridge < lower.size(); bridge++) {
-      Triangle t(upper[nth - 1], upper[nth], lower[bridge]);
-      candidates.emplace_back(nth - 1, nth, bridge, UPPER, t, computeRank(t));
-    }
-  }
-
-  Triangles triangles;
-  std::set<int> seen_upper;
-  std::set<int> seen_lower;
-
-  for (;;) {
-    const Candidate best = candidates.top();
-    candidates.pop();
-    // Skip edges that we've already selected.
-    switch (best.side) {
-      case UPPER: {
-        if (!seen_upper.insert(best.a).second) {
-          continue;
-        }
-        break;
-      }
-      case LOWER: {
-        if (!seen_lower.insert(best.a).second) {
-          continue;
-        }
-        break;
-      }
-    }
-    triangles.push(best.triangle);
-  }
-
-  points.insert(points.end(), upper.begin(), upper.end());
-  points.insert(points.end(), lower.begin(), lower.end());
-
-  for (const Triangle& t : triangles) {
-    polygons.emplace_back(t.vertex(0), t.vertex(1), t.vertex(2));
   }
 }
 

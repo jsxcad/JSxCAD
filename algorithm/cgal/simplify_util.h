@@ -13,6 +13,84 @@
 #include <fstream>
 #include <iostream>
 
+namespace CGAL {
+namespace Surface_mesh_simplification {
+
+template <class BaseFilter = internal::Dummy_filter>
+class Angle_bounded_normal_change_filter {
+ public:
+  Angle_bounded_normal_change_filter(
+      double angle_threshold, const BaseFilter& base_filter = BaseFilter())
+      : m_base_filter(base_filter), angle_threshold_(angle_threshold) {}
+
+  template <typename Profile>
+  std::optional<typename Profile::Point> operator()(
+      const Profile& profile, std::optional<typename Profile::Point> op) const {
+    typedef typename Profile::VertexPointMap Vertex_point_map;
+
+    typedef typename Profile::Geom_traits Geom_traits;
+    typedef typename Geom_traits::Vector_3 Vector;
+
+    typedef typename boost::property_traits<Vertex_point_map>::value_type Point;
+    typedef typename boost::property_traits<Vertex_point_map>::reference
+        Point_reference;
+
+    const Geom_traits& gt = profile.geom_traits();
+    const Vertex_point_map& vpm = profile.vertex_point_map();
+
+    op = m_base_filter(profile, op);
+    if (op) {
+      // triangles returns the triangles of the star of the vertices of the edge
+      // to collapse First the two trianges incident to the edge, then the other
+      // triangles The second vertex of each triangle is the vertex that gets
+      // placed
+      const typename Profile::Triangle_vector& triangles = profile.triangles();
+      if (triangles.size() > 2) {
+        typename Profile::Triangle_vector::const_iterator it =
+            triangles.begin();
+
+        if (profile.left_face_exists()) ++it;
+        if (profile.right_face_exists()) ++it;
+
+        while (it != triangles.end()) {
+          const typename Profile::Triangle& t = *it;
+          Point_reference p = get(vpm, t.v0);
+          Point_reference q = get(vpm, t.v1);
+          Point_reference r = get(vpm, t.v2);
+          const Point& q2 = *op;
+
+          Vector eqp = gt.construct_vector_3_object()(q, p);
+          Vector eqr = gt.construct_vector_3_object()(q, r);
+          Vector eq2p = gt.construct_vector_3_object()(q2, p);
+          Vector eq2r = gt.construct_vector_3_object()(q2, r);
+
+          Vector n1 = gt.construct_cross_product_vector_3_object()(eqp, eqr);
+          Vector n2 = gt.construct_cross_product_vector_3_object()(eq2p, eq2r);
+
+          FT scalar_product = gt.compute_scalar_product_3_object()(n1, n2);
+
+          double angle = acos(CGAL::to_double(scalar_product));
+
+          if (angle > angle_threshold_) {
+            return std::optional<typename Profile::Point>();
+          }
+
+          ++it;
+        }
+      }
+    }
+
+    return op;
+  }
+
+ private:
+  const BaseFilter m_base_filter;
+  const double angle_threshold_;
+};
+
+}  // namespace Surface_mesh_simplification
+}  // namespace CGAL
+
 namespace {
 struct Constrained_edge_map {
   typedef boost::readable_property_map_tag category;
@@ -88,7 +166,8 @@ void simplify(double angle_threshold, Surface_mesh& mesh,
 
   MakeDeterministic();
 
-  CGAL::Surface_mesh_simplification::Bounded_normal_change_filter<> filter;
+  CGAL::Surface_mesh_simplification::Angle_bounded_normal_change_filter<>
+      filter(angle_threshold_degrees);
 
   auto parameters = CGAL::parameters::edge_is_constrained_map(constraints_map)
                         .get_placement(placement);

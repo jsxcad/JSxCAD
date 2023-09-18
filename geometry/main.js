@@ -230,6 +230,7 @@ export {
   untag,
 } from './tag.js';
 export { rewriteTags } from './tagged/rewriteTags.js';
+export { samplePointCloud } from './cloud.js';
 export { seam } from './seam.js';
 export { section } from './section.js';
 export { seq } from './seq.js';

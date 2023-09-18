@@ -560,7 +560,7 @@ class App extends React.Component {
           return;
         }
 
-        let script = NotebookText;
+        let script = NotebookText + this.Draft.getCode();
 
         const version = new Date().getTime();
 
@@ -589,6 +589,7 @@ class App extends React.Component {
             throw error;
           }
         };
+
         const replay = async (script) => {
           // FIX: Remove this, since it doesn't get used anymore.
           try {
@@ -614,14 +615,20 @@ class App extends React.Component {
             throw error;
           }
         };
+
         NotebookAdvice.definitions = topLevel;
-        await execute(script, {
+
+        await execute(script + this.Draft().getCode(), {
           evaluate,
           replay,
           path: NotebookPath,
           topLevel,
           workspace,
         });
+
+        // A bit of a race condition here.
+        this.Draft().change('');
+
         await resolvePending();
         clearNotebookState(this, {
           path: NotebookPath,
@@ -664,8 +671,7 @@ class App extends React.Component {
     this.Notebook.save = async (path) => {
       logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const { workspace } = this.props;
-      const NotebookText = this.Notebook.getText(path) + this.Draft.getCode();
-      await this.Draft.change('');
+      const NotebookText = this.Notebook.getText(path);
       // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;
