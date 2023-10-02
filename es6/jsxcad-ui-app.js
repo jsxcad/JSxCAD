@@ -47568,7 +47568,7 @@ class App extends ReactDOM$3.Component {
           // We don't know how to run anything else.
           return;
         }
-        let script = NotebookText + this.Draft.getCode();
+        let script = NotebookText;
         const version = new Date().getTime();
         const evaluate = async script => {
           try {
@@ -47619,16 +47619,22 @@ class App extends ReactDOM$3.Component {
           }
         };
         NotebookAdvice.definitions = topLevel;
-        await execute(script + this.Draft().getCode(), {
-          evaluate,
-          replay,
-          path: NotebookPath,
-          topLevel,
-          workspace
-        });
+        try {
+          await execute(script + this.Draft.getCode(), {
+            evaluate,
+            replay,
+            path: NotebookPath,
+            topLevel,
+            workspace
+          });
+        } catch (error) {
+          console.log(error.stack);
+          throw error;
+        }
 
         // A bit of a race condition here.
-        this.Draft().change('');
+        // this.Draft().change('');
+
         await resolvePending();
         clearNotebookState(this, {
           path: NotebookPath,
@@ -48364,7 +48370,6 @@ class App extends ReactDOM$3.Component {
                 id: '$Draft'
               }
             };
-            console.log(`QQ/Draft: ${note.sourceText}`);
             return v$1(EditNote, {
               isDraft: true,
               notebookPath: path,

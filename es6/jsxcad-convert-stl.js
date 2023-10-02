@@ -135,7 +135,11 @@ const fromStl = async (
     wrapAbsoluteOffset,
     wrapRelativeAlpha = 300,
     wrapRelativeOffset = 5000,
-    cornerThreshold = 0,
+    faceCountLimit = 0,
+    sharpEdgeThreshold = 0,
+    doRemoveSelfIntersections = false,
+    doWrap = false,
+    doAutorefine = false,
   } = {}
 ) => {
   const { positions, cells } = parse(stl, format);
@@ -156,7 +160,11 @@ const fromStl = async (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    cornerThreshold,
+    faceCountLimit,
+    sharpEdgeThreshold,
+    doRemoveSelfIntersections,
+    doWrap,
+    doAutorefine,
   });
 };
 
@@ -179,12 +187,15 @@ const computeNormal = ([one, two, three]) => {
 const equals = ([aX, aY, aZ], [bX, bY, bZ]) =>
   aX === bX && aY === bY && aZ === bZ;
 
-const round = (value, tolerance) => Math.round(value / tolerance) * tolerance;
+// const round = (value, tolerance) => Math.round(value / tolerance) * tolerance;
+
+// Do not round.
+const round = (value, tolerance) => value;
 
 const roundVertex = ([x, y, z], tolerance = 0.001) => [
-  round(x, tolerance),
-  round(y, tolerance),
-  round(z, tolerance),
+  round(x),
+  round(y),
+  round(z),
 ];
 
 const convertToFacets = (polygons) =>

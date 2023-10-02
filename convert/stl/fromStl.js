@@ -39,7 +39,11 @@ export const fromStl = async (
     wrapAbsoluteOffset,
     wrapRelativeAlpha = 300,
     wrapRelativeOffset = 5000,
-    cornerThreshold = 0,
+    faceCountLimit = 0,
+    sharpEdgeThreshold = 0,
+    doRemoveSelfIntersections = false,
+    doWrap = false,
+    doAutorefine = false,
   } = {}
 ) => {
   const { positions, cells } = parse(stl, format);
@@ -60,6 +64,10 @@ export const fromStl = async (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    cornerThreshold,
+    faceCountLimit,
+    sharpEdgeThreshold,
+    doRemoveSelfIntersections,
+    doWrap,
+    doAutorefine,
   });
 };

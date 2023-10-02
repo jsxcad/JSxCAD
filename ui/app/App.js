@@ -560,7 +560,7 @@ class App extends React.Component {
           return;
         }
 
-        let script = NotebookText + this.Draft.getCode();
+        let script = NotebookText;
 
         const version = new Date().getTime();
 
@@ -618,16 +618,21 @@ class App extends React.Component {
 
         NotebookAdvice.definitions = topLevel;
 
-        await execute(script + this.Draft().getCode(), {
-          evaluate,
-          replay,
-          path: NotebookPath,
-          topLevel,
-          workspace,
-        });
+        try {
+          await execute(script + this.Draft.getCode(), {
+            evaluate,
+            replay,
+            path: NotebookPath,
+            topLevel,
+            workspace,
+          });
+        } catch (error) {
+          console.log(error.stack);
+          throw error;
+        }
 
         // A bit of a race condition here.
-        this.Draft().change('');
+        // this.Draft().change('');
 
         await resolvePending();
         clearNotebookState(this, {
@@ -1376,7 +1381,6 @@ class App extends React.Component {
             sourceText: this.Draft.getCode(),
             sourceLocation: { path, line: 0, id: '$Draft' },
           };
-          console.log(`QQ/Draft: ${note.sourceText}`);
           return (
             <EditNote
               isDraft={true}

@@ -16,7 +16,7 @@ export const simplify = (inputs, cornerThreshold, eps) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by simplify');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs);
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
         throw new Error(`Unexpected status ${status}`);
     }

@@ -1,4 +1,4 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fromSegmentToInverseTransform, invertTransform, fuse as fuse$1, convexHull as convexHull$1, eachPoint, makeUnitSphere, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, reconstruct as reconstruct$1, remesh as remesh$1, withAabbTreeQuery, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fromSegmentToInverseTransform, invertTransform, fuse as fuse$1, convexHull as convexHull$1, eachPoint, makeUnitSphere, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, reconstruct as reconstruct$1, remesh as remesh$1, repair as repair$1, withAabbTreeQuery, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending, log as log$1 } from './jsxcad-sys.js';
@@ -338,24 +338,24 @@ const reify = (geometry) => {
 
 const toConcreteGeometry = (geometry) => reify(geometry);
 
-const filter$H = (geometry) =>
+const filter$J = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type);
 
 const involute = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$H, inputs);
+  linearize(concreteGeometry, filter$J, inputs);
   const outputs = involute$1(inputs);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$G = (geometry) =>
+const filter$I = (geometry) =>
   isNotTypeGhost(geometry) &&
   ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
     ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
 
 const measureBoundingBox = (geometry) =>
-  computeBoundingBox(linearize(geometry, filter$G));
+  computeBoundingBox(linearize(geometry, filter$I));
 
 const X$a = 0;
 const Y$a = 1;
@@ -435,13 +435,13 @@ const And = (geometries) => taggedGroup({}, ...geometries);
 const and = (geometry, geometries) =>
   taggedGroup({}, geometry, ...geometries);
 
-const filter$F = (geometry) =>
+const filter$H = (geometry) =>
   ['points', 'segments'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const Link = (geometries, { close = false, reverse = false } = {}) => {
   const inputs = [];
   for (const geometry of geometries) {
-    linearize(geometry, filter$F, inputs);
+    linearize(geometry, filter$H, inputs);
   }
   const outputs = link$1(inputs, close, reverse);
   return taggedGroup({}, ...outputs);
@@ -535,12 +535,12 @@ const Point = (x = 0, y = 0, z = 0, coordinate) =>
 
 const Points = (coordinates) => taggedPoints({}, coordinates);
 
-const filter$E = (geometry) =>
+const filter$G = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const computeNormal = (geometry) =>
-  Group(computeNormal$1(linearize(geometry, filter$E)));
+  Group(computeNormal$1(linearize(geometry, filter$G)));
 
 // TODO: Make this more robust.
 const computeNormalCoordinate = (geometry) =>
@@ -563,13 +563,13 @@ const getLeafs = (geometry) => {
   return leafs;
 };
 
-const filter$D = (geometry) =>
+const filter$F = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) && isNotTypeGhost(geometry);
 
 const makeAbsolute = (geometry, tags = []) => {
-  const inputs = linearize(geometry, filter$D);
+  const inputs = linearize(geometry, filter$F);
   const outputs = makeAbsolute$1(inputs);
   return replacer(inputs, outputs)(geometry);
 };
@@ -643,12 +643,12 @@ const moveAlong = (geometry, direction, deltas) => {
 const moveAlongNormal = (geometry, deltas) =>
   moveAlong(geometry, computeNormalCoordinate(geometry), deltas);
 
-const filter$C = (noVoid) => (geometry) =>
+const filter$E = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid));
 
 const extrude = (geometry, top, bottom, { noVoid } = {}) => {
-  const inputs = linearize(geometry, filter$C(noVoid));
+  const inputs = linearize(geometry, filter$E(noVoid));
   const count = inputs.length;
   inputs.push(top, bottom);
   const outputs = extrude$1(inputs, count, noVoid);
@@ -720,14 +720,14 @@ const computeSides = (c1, c2, sides, zag = 0.01) => {
   return 32;
 };
 
-const filter$B = (geometry) =>
+const filter$D = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const fill$1 = (geometry, tags = []) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$B, inputs);
+  linearize(concreteGeometry, filter$D, inputs);
   const outputs = fill$2(inputs);
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
@@ -1078,14 +1078,14 @@ const Box = ([x = 1, y = x, z = 0], options = {}) => {
   return makeBox(c1, c2);
 };
 
-const filter$A = (geometry) =>
+const filter$C = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const Fuse = (geometries, { exact } = {}) => {
   const inputs = [];
   for (const geometry of geometries) {
-    linearize(geometry, filter$A, inputs);
+    linearize(geometry, filter$C, inputs);
   }
   const outputs = fuse$1(inputs, exact);
   return Group(outputs);
@@ -1094,13 +1094,13 @@ const Fuse = (geometries, { exact } = {}) => {
 const fuse = (geometry, geometries, { exact }) =>
   Fuse([geometry, ...geometries], { exact });
 
-const filter$z = (geometry) =>
+const filter$B = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(geometry.type);
 
 const ConvexHull = (geometries) => {
   const inputs = [];
   for (const geometry of geometries) {
-    linearize(geometry, filter$z, inputs);
+    linearize(geometry, filter$B, inputs);
   }
   const outputs = convexHull$1(inputs);
   return Group(outputs);
@@ -1136,13 +1136,13 @@ and limitations under the License.
 ***************************************************************************** */
 var extendStatics=function(d,b){return extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b;}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p]);},extendStatics(d,b)};function __extends(d,b){function __(){this.constructor=d;}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __);}var __assign=function(){return __assign=Object.assign||function(t){for(var s,i=1,n=arguments.length;i<n;i++)for(var p in s=arguments[i])Object.prototype.hasOwnProperty.call(s,p)&&(t[p]=s[p]);return t},__assign.apply(this,arguments)};function extrapolateControlPoint(u,v){for(var e=new Array(u.length),i=0;i<u.length;i++)e[i]=2*u[i]-v[i];return e}function getControlPoints(idx,points,closed){var p0,p1,p2,p3,maxIndex=points.length-1;if(closed)p0=points[idx-1<0?maxIndex:idx-1],p1=points[idx%points.length],p2=points[(idx+1)%points.length],p3=points[(idx+2)%points.length];else {if(idx===maxIndex)throw Error("There is no spline segment at this index for a closed curve!");p1=points[idx],p2=points[idx+1],p0=idx>0?points[idx-1]:extrapolateControlPoint(p1,p2),p3=idx<maxIndex-1?points[idx+2]:extrapolateControlPoint(p2,p1);}return [p0,p1,p2,p3]}function getSegmentIndexAndT(ct,points,closed){void 0===closed&&(closed=!1);var nPoints=closed?points.length:points.length-1;if(1===ct)return {index:nPoints-1,weight:1};var p=nPoints*ct,index=Math.floor(p);return {index:index,weight:p-index}}function fill(v,val){for(var i=0;i<v.length;i++)v[i]=val;return v}function map(v,func){for(var i=0;i<v.length;i++)v[i]=func(v[i],i);return v}function reduce(v,func,r){void 0===r&&(r=0);for(var i=0;i<v.length;i++)r=func(r,v[i],i);return r}function copyValues(source,target){target=target||new Array(source.length);for(var i=0;i<source.length;i++)target[i]=source[i];return target}function clamp(value,min,max){return void 0===min&&(min=0),void 0===max&&(max=1),value<min?min:value>max?max:value}function binarySearch(targetValue,accumulatedValues){var min=accumulatedValues[0];if(targetValue>=accumulatedValues[accumulatedValues.length-1])return accumulatedValues.length-1;if(targetValue<=min)return 0;for(var left=0,right=accumulatedValues.length-1;left<=right;){var mid=Math.floor((left+right)/2),lMid=accumulatedValues[mid];if(lMid<targetValue)left=mid+1;else {if(!(lMid>targetValue))return mid;right=mid-1;}}return Math.max(0,right)}var EPS=Math.pow(2,-42);function cuberoot(x){var y=Math.pow(Math.abs(x),1/3);return x<0?-y:y}function getQuadRoots(a,b,c){if(Math.abs(a)<EPS)return Math.abs(b)<EPS?[]:[-c/b];var D=b*b-4*a*c;return Math.abs(D)<EPS?[-b/(2*a)]:D>0?[(-b+Math.sqrt(D))/(2*a),(-b-Math.sqrt(D))/(2*a)]:[]}function getCubicRoots(a,b,c,d){if(Math.abs(a)<EPS)return getQuadRoots(b,c,d);var roots,p=(3*a*c-b*b)/(3*a*a),q=(2*b*b*b-9*a*b*c+27*a*a*d)/(27*a*a*a);if(Math.abs(p)<EPS)roots=[cuberoot(-q)];else if(Math.abs(q)<EPS)roots=[0].concat(p<0?[Math.sqrt(-p),-Math.sqrt(-p)]:[]);else {var D=q*q/4+p*p*p/27;if(Math.abs(D)<EPS)roots=[-1.5*q/p,3*q/p];else if(D>0){roots=[(u=cuberoot(-q/2-Math.sqrt(D)))-p/(3*u)];}else {var u=2*Math.sqrt(-p/3),t=Math.acos(3*q/p/u)/3,k=2*Math.PI/3;roots=[u*Math.cos(t),u*Math.cos(t-k),u*Math.cos(t-2*k)];}}for(var i=0;i<roots.length;i++)roots[i]-=b/(3*a);return roots}function dot(v1,v2){if(v1.length!==v2.length)throw Error("Vectors must be of equal length!");for(var p=0,k=0;k<v1.length;k++)p+=v1[k]*v2[k];return p}function cross(v1,v2,target){if(!(v1.length>3)){target=target||new Array(3);var ax=v1[0],ay=v1[1],az=v1[2]||0,bx=v2[0],by=v2[1],bz=v2[2]||0;return target[0]=ay*bz-az*by,target[1]=az*bx-ax*bz,target[2]=ax*by-ay*bx,target}}function sumOfSquares(v1,v2){for(var sumOfSquares=0,i=0;i<v1.length;i++)sumOfSquares+=(v1[i]-v2[i])*(v1[i]-v2[i]);return sumOfSquares}function magnitude(v){for(var sumOfSquares=0,i=0;i<v.length;i++)sumOfSquares+=v[i]*v[i];return Math.sqrt(sumOfSquares)}function distance(p1,p2){var sqrs=sumOfSquares(p1,p2);return 0===sqrs?0:Math.sqrt(sqrs)}function normalize(v,target){var u=target?copyValues(v,target):v,squared=reduce(u,(function(s,c){return s+Math.pow(c,2)})),l=Math.sqrt(squared);return 0===l?fill(u,0):map(u,(function(c){return c/l}))}function orthogonal(v,target){if(v.length>2)throw Error("Only supported for 2d vectors");var u=target?copyValues(v,target):v,x=-u[1];return u[1]=u[0],u[0]=x,u}function calcKnotSequence(p0,p1,p2,p3,alpha){if(void 0===alpha&&(alpha=0),0===alpha)return [0,1,2,3];var deltaT=function(u,v){return Math.pow(sumOfSquares(u,v),.5*alpha)},t1=deltaT(p1,p0),t2=deltaT(p2,p1)+t1;return [0,t1,t2,deltaT(p3,p2)+t2]}function calculateCoefficients(p0,p1,p2,p3,options){for(var tension=Number.isFinite(options.tension)?options.tension:.5,alpha=Number.isFinite(options.alpha)?options.alpha:null,knotSequence=alpha>0?calcKnotSequence(p0,p1,p2,p3,alpha):null,coefficientsList=new Array(p0.length),k=0;k<p0.length;k++){var u=0,v=0,v0=p0[k],v1=p1[k],v2=p2[k],v3=p3[k];if(knotSequence){var t0=knotSequence[0],t1=knotSequence[1],t2=knotSequence[2],t3=knotSequence[3];t1-t2!=0&&(t0-t1!=0&&t0-t2!=0&&(u=(1-tension)*(t2-t1)*((v0-v1)/(t0-t1)-(v0-v2)/(t0-t2)+(v1-v2)/(t1-t2))),t1-t3!=0&&t2-t3!=0&&(v=(1-tension)*(t2-t1)*((v1-v2)/(t1-t2)-(v1-v3)/(t1-t3)+(v2-v3)/(t2-t3))));}else u=(1-tension)*(v2-v0)*.5,v=(1-tension)*(v3-v1)*.5;var a=2*v1-2*v2+u+v,b=-3*v1+3*v2-2*u-v,c=u,d=v1;coefficientsList[k]=[a,b,c,d];}return coefficientsList}function valueAtT(t,coefficients){var t2=t*t,t3=t*t2;return coefficients[0]*t3+coefficients[1]*t2+coefficients[2]*t+coefficients[3]}function derivativeAtT(t,coefficients){var t2=t*t;return 3*coefficients[0]*t2+2*coefficients[1]*t+coefficients[2]}function secondDerivativeAtT(t,coefficients){return 6*coefficients[0]*t+2*coefficients[1]}function findRootsOfT(lookup,coefficients){var a=coefficients[0],b=coefficients[1],c=coefficients[2],x=coefficients[3]-lookup;return 0===a&&0===b&&0===c&&0===x?[0]:getCubicRoots(a,b,c,x).filter((function(t){return t>-EPS&&t<=1+EPS})).map((function(t){return clamp(t,0,1)}))}function evaluateForT(func,t,coefficients,target){void 0===target&&(target=null),target=target||new Array(coefficients.length);for(var k=0;k<coefficients.length;k++)target[k]=func(t,coefficients[k]);return target}var AbstractCurveMapper=function(){function AbstractCurveMapper(onInvalidateCache){void 0===onInvalidateCache&&(onInvalidateCache=null),this._alpha=0,this._tension=.5,this._closed=!1,this._onInvalidateCache=null,this._onInvalidateCache=onInvalidateCache,this._cache={arcLengths:null,coefficients:null};}return AbstractCurveMapper.prototype._invalidateCache=function(){this.points&&(this._cache={arcLengths:null,coefficients:null},this._onInvalidateCache&&this._onInvalidateCache());},Object.defineProperty(AbstractCurveMapper.prototype,"alpha",{get:function(){return this._alpha},set:function(alpha){Number.isFinite(alpha)&&alpha!==this._alpha&&(this._invalidateCache(),this._alpha=alpha);},enumerable:!1,configurable:!0}),Object.defineProperty(AbstractCurveMapper.prototype,"tension",{get:function(){return this._tension},set:function(tension){Number.isFinite(tension)&&tension!==this._tension&&(this._invalidateCache(),this._tension=tension);},enumerable:!1,configurable:!0}),Object.defineProperty(AbstractCurveMapper.prototype,"points",{get:function(){return this._points},set:function(points){if(!points||points.length<2)throw Error("At least 2 control points are required!");this._points=points,this._invalidateCache();},enumerable:!1,configurable:!0}),Object.defineProperty(AbstractCurveMapper.prototype,"closed",{get:function(){return this._closed},set:function(closed){closed=!!closed,this._closed!==closed&&(this._invalidateCache(),this._closed=closed);},enumerable:!1,configurable:!0}),AbstractCurveMapper.prototype.reset=function(){this._invalidateCache();},AbstractCurveMapper.prototype.evaluateForT=function(func,t,target){var _a=getSegmentIndexAndT(t,this.points,this.closed),index=_a.index;return evaluateForT(func,_a.weight,this.getCoefficients(index),target)},AbstractCurveMapper.prototype.getCoefficients=function(idx){if(this.points){if(this._cache.coefficients||(this._cache.coefficients=new Map),!this._cache.coefficients.has(idx)){var _a=getControlPoints(idx,this.points,this.closed),coefficients=calculateCoefficients(_a[0],_a[1],_a[2],_a[3],{tension:this.tension,alpha:this.alpha});this._cache.coefficients.set(idx,coefficients);}return this._cache.coefficients.get(idx)}},AbstractCurveMapper}(),SegmentedCurveMapper=function(_super){function SegmentedCurveMapper(subDivisions,onInvalidateCache){void 0===subDivisions&&(subDivisions=300),void 0===onInvalidateCache&&(onInvalidateCache=null);var _this=_super.call(this,onInvalidateCache)||this;return _this._subDivisions=subDivisions,_this}return __extends(SegmentedCurveMapper,_super),Object.defineProperty(SegmentedCurveMapper.prototype,"arcLengths",{get:function(){return this._cache.arcLengths||(this._cache.arcLengths=this.computeArcLengths()),this._cache.arcLengths},enumerable:!1,configurable:!0}),SegmentedCurveMapper.prototype._invalidateCache=function(){_super.prototype._invalidateCache.call(this),this._cache.arcLengths=null;},SegmentedCurveMapper.prototype.computeArcLengths=function(){var current,lengths=[],last=this.evaluateForT(valueAtT,0),sum=0;lengths.push(0);for(var p=1;p<=this._subDivisions;p++)sum+=distance(current=this.evaluateForT(valueAtT,p/this._subDivisions),last),lengths.push(sum),last=current;return lengths},SegmentedCurveMapper.prototype.lengthAt=function(u){var arcLengths=this.arcLengths;return u*arcLengths[arcLengths.length-1]},SegmentedCurveMapper.prototype.getT=function(u){var arcLengths=this.arcLengths,il=arcLengths.length,targetArcLength=u*arcLengths[il-1],i=binarySearch(targetArcLength,arcLengths);if(arcLengths[i]===targetArcLength)return i/(il-1);var lengthBefore=arcLengths[i];return (i+(targetArcLength-lengthBefore)/(arcLengths[i+1]-lengthBefore))/(il-1)},SegmentedCurveMapper.prototype.getU=function(t){if(0===t)return 0;if(1===t)return 1;var arcLengths=this.arcLengths,al=arcLengths.length-1,totalLength=arcLengths[al],tIdx=t*al,subIdx=Math.floor(tIdx),l1=arcLengths[subIdx];if(tIdx===subIdx)return l1/totalLength;var t0=subIdx/al;return (l1+distance(this.evaluateForT(valueAtT,t0),this.evaluateForT(valueAtT,t)))/totalLength},SegmentedCurveMapper}(AbstractCurveMapper),lut=[[[-.906179845938664,.23692688505618908],[-.5384693101056831,.47862867049936647],[0,.5688888888888889],[.5384693101056831,.47862867049936647],[.906179845938664,.23692688505618908]],[[-.932469514203152,.17132449237917036],[-.6612093864662645,.3607615730481386],[-.2386191860831969,.46791393457269104],[.2386191860831969,.46791393457269104],[.6612093864662645,.3607615730481386],[.932469514203152,.17132449237917036]],[[-.9491079123427585,.1294849661688697],[-.7415311855993945,.27970539148927664],[-.4058451513773972,.3818300505051189],[0,.4179591836734694],[.4058451513773972,.3818300505051189],[.7415311855993945,.27970539148927664],[.9491079123427585,.1294849661688697]],[[-.9602898564975363,.10122853629037626],[-.7966664774136267,.22238103445337448],[-.525532409916329,.31370664587788727],[-.1834346424956498,.362683783378362],[.1834346424956498,.362683783378362],[.525532409916329,.31370664587788727],[.7966664774136267,.22238103445337448],[.9602898564975363,.10122853629037626]],[[-.9681602395076261,.08127438836157441],[-.8360311073266358,.1806481606948574],[-.6133714327005904,.26061069640293544],[-.3242534234038089,.31234707704000286],[0,.3302393550012598],[.3242534234038089,.31234707704000286],[.6133714327005904,.26061069640293544],[.8360311073266358,.1806481606948574],[.9681602395076261,.08127438836157441]],[[-.9739065285171717,.06667134430868814],[-.8650633666889845,.1494513491505806],[-.6794095682990244,.21908636251598204],[-.4333953941292472,.26926671930999635],[-.14887433898163122,.29552422471475287],[.14887433898163122,.29552422471475287],[.4333953941292472,.26926671930999635],[.6794095682990244,.21908636251598204],[.8650633666889845,.1494513491505806],[.9739065285171717,.06667134430868814]],[[-.978228658146056,.0556685671161736],[-.887062599768095,.125580369464904],[-.730152005574049,.186290210927734],[-.519096129206811,.23319376459199],[-.269543155952344,.262804544510246],[0,.2729250867779],[.269543155952344,.262804544510246],[.519096129206811,.23319376459199],[.730152005574049,.186290210927734],[.887062599768095,.125580369464904],[.978228658146056,.0556685671161736]],[[-.981560634246719,.0471753363865118],[-.904117256370474,.106939325995318],[-.769902674194304,.160078328543346],[-.587317954286617,.203167426723065],[-.36783149899818,.233492536538354],[-.125233408511468,.249147045813402],[.125233408511468,.249147045813402],[.36783149899818,.233492536538354],[.587317954286617,.203167426723065],[.769902674194304,.160078328543346],[.904117256370474,.106939325995318],[.981560634246719,.0471753363865118]],[[-.984183054718588,.0404840047653158],[-.917598399222977,.0921214998377284],[-.801578090733309,.138873510219787],[-.64234933944034,.178145980761945],[-.448492751036446,.207816047536888],[-.230458315955134,.226283180262897],[0,.232551553230873],[.230458315955134,.226283180262897],[.448492751036446,.207816047536888],[.64234933944034,.178145980761945],[.801578090733309,.138873510219787],[.917598399222977,.0921214998377284],[.984183054718588,.0404840047653158]],[[-.986283808696812,.0351194603317518],[-.928434883663573,.0801580871597602],[-.827201315069764,.121518570687903],[-.687292904811685,.157203167158193],[-.515248636358154,.185538397477937],[-.319112368927889,.205198463721295],[-.108054948707343,.215263853463157],[.108054948707343,.215263853463157],[.319112368927889,.205198463721295],[.515248636358154,.185538397477937],[.687292904811685,.157203167158193],[.827201315069764,.121518570687903],[.928434883663573,.0801580871597602],[.986283808696812,.0351194603317518]],[[-.987992518020485,.0307532419961172],[-.937273392400705,.0703660474881081],[-.848206583410427,.107159220467171],[-.72441773136017,.139570677926154],[-.570972172608538,.166269205816993],[-.394151347077563,.186161000015562],[-.201194093997434,.198431485327111],[0,.202578241925561],[.201194093997434,.198431485327111],[.394151347077563,.186161000015562],[.570972172608538,.166269205816993],[.72441773136017,.139570677926154],[.848206583410427,.107159220467171],[.937273392400705,.0703660474881081],[.987992518020485,.0307532419961172]],[[-.989400934991649,.027152459411754],[-.944575023073232,.0622535239386478],[-.865631202387831,.0951585116824927],[-.755404408355003,.124628971255533],[-.617876244402643,.149595988816576],[-.458016777657227,.169156519395002],[-.281603550779258,.182603415044923],[-.0950125098376374,.189450610455068],[.0950125098376374,.189450610455068],[.281603550779258,.182603415044923],[.458016777657227,.169156519395002],[.617876244402643,.149595988816576],[.755404408355003,.124628971255533],[.865631202387831,.0951585116824927],[.944575023073232,.0622535239386478],[.989400934991649,.027152459411754]],[[-.990575475314417,.0241483028685479],[-.950675521768767,.0554595293739872],[-.880239153726985,.0850361483171791],[-.781514003896801,.111883847193403],[-.65767115921669,.135136368468525],[-.512690537086476,.15404576107681],[-.351231763453876,.16800410215645],[-.178484181495847,.176562705366992],[0,.179446470356206],[.178484181495847,.176562705366992],[.351231763453876,.16800410215645],[.512690537086476,.15404576107681],[.65767115921669,.135136368468525],[.781514003896801,.111883847193403],[.880239153726985,.0850361483171791],[.950675521768767,.0554595293739872],[.990575475314417,.0241483028685479]],[[-.99156516842093,.0216160135264833],[-.955823949571397,.0497145488949698],[-.892602466497555,.076425730254889],[-.803704958972523,.100942044106287],[-.691687043060353,.122555206711478],[-.559770831073947,.14064291467065],[-.411751161462842,.154684675126265],[-.251886225691505,.164276483745832],[-.0847750130417353,.169142382963143],[.0847750130417353,.169142382963143],[.251886225691505,.164276483745832],[.411751161462842,.154684675126265],[.559770831073947,.14064291467065],[.691687043060353,.122555206711478],[.803704958972523,.100942044106287],[.892602466497555,.076425730254889],[.955823949571397,.0497145488949697],[.99156516842093,.0216160135264833]],[[-.992406843843584,.0194617882297264],[-.96020815213483,.0448142267656996],[-.903155903614817,.0690445427376412],[-.822714656537142,.0914900216224499],[-.720966177335229,.111566645547333],[-.600545304661681,.128753962539336],[-.46457074137596,.142606702173606],[-.316564099963629,.152766042065859],[-.160358645640225,.158968843393954],[0,.161054449848783],[.160358645640225,.158968843393954],[.316564099963629,.152766042065859],[.46457074137596,.142606702173606],[.600545304661681,.128753962539336],[.720966177335229,.111566645547333],[.822714656537142,.0914900216224499],[.903155903614817,.0690445427376412],[.96020815213483,.0448142267656996],[.992406843843584,.0194617882297264]],[[-.993128599185094,.0176140071391521],[-.963971927277913,.0406014298003869],[-.912234428251325,.062672048334109],[-.839116971822218,.0832767415767047],[-.74633190646015,.10193011981724],[-.636053680726515,.118194531961518],[-.510867001950827,.131688638449176],[-.373706088715419,.142096109318382],[-.227785851141645,.149172986472603],[-.0765265211334973,.152753387130725],[.0765265211334973,.152753387130725],[.227785851141645,.149172986472603],[.373706088715419,.142096109318382],[.510867001950827,.131688638449176],[.636053680726515,.118194531961518],[.74633190646015,.10193011981724],[.839116971822218,.0832767415767047],[.912234428251325,.062672048334109],[.963971927277913,.0406014298003869],[.993128599185094,.0176140071391521]],[[-.993752170620389,.0160172282577743],[-.967226838566306,.0369537897708524],[-.9200993341504,.0571344254268572],[-.853363364583317,.0761001136283793],[-.768439963475677,.0934444234560338],[-.667138804197412,.108797299167148],[-.551618835887219,.121831416053728],[-.424342120207438,.132268938633337],[-.288021316802401,.139887394791073],[-.145561854160895,.14452440398997],[0,.14608113364969],[.145561854160895,.14452440398997],[.288021316802401,.139887394791073],[.424342120207438,.132268938633337],[.551618835887219,.121831416053728],[.667138804197412,.108797299167148],[.768439963475677,.0934444234560338],[.853363364583317,.0761001136283793],[.9200993341504,.0571344254268572],[.967226838566306,.0369537897708524],[.993752170620389,.0160172282577743]],[[-.994294585482399,.0146279952982722],[-.970060497835428,.0337749015848141],[-.926956772187174,.0522933351526832],[-.8658125777203,.0697964684245204],[-.787816805979208,.0859416062170677],[-.694487263186682,.10041414444288],[-.587640403506911,.112932296080539],[-.469355837986757,.123252376810512],[-.341935820892084,.131173504787062],[-.207860426688221,.136541498346015],[-.0697392733197222,.139251872855631],[.0697392733197222,.139251872855631],[.207860426688221,.136541498346015],[.341935820892084,.131173504787062],[.469355837986757,.123252376810512],[.587640403506911,.112932296080539],[.694487263186682,.10041414444288],[.787816805979208,.0859416062170677],[.8658125777203,.0697964684245204],[.926956772187174,.0522933351526832],[.970060497835428,.0337749015848141],[.994294585482399,.0146279952982722]],[[-.994769334997552,.0134118594871417],[-.972542471218115,.0309880058569794],[-.932971086826016,.0480376717310846],[-.876752358270441,.0642324214085258],[-.804888401618839,.0792814117767189],[-.71866136313195,.0929157660600351],[-.619609875763646,.104892091464541],[-.509501477846007,.114996640222411],[-.39030103803029,.123049084306729],[-.264135680970344,.128905722188082],[-.133256824298466,.132462039404696],[0,.133654572186106],[.133256824298466,.132462039404696],[.264135680970344,.128905722188082],[.39030103803029,.123049084306729],[.509501477846007,.114996640222411],[.619609875763646,.104892091464541],[.71866136313195,.0929157660600351],[.804888401618839,.0792814117767189],[.876752358270441,.0642324214085258],[.932971086826016,.0480376717310846],[.972542471218115,.0309880058569794],[.994769334997552,.0134118594871417]],[[-.995187219997021,.0123412297999872],[-.974728555971309,.0285313886289336],[-.938274552002732,.0442774388174198],[-.886415527004401,.0592985849154367],[-.820001985973902,.0733464814110803],[-.740124191578554,.0861901615319532],[-.648093651936975,.0976186521041138],[-.545421471388839,.107444270115965],[-.433793507626045,.115505668053725],[-.315042679696163,.121670472927803],[-.191118867473616,.125837456346828],[-.0640568928626056,.127938195346752],[.0640568928626056,.127938195346752],[.191118867473616,.125837456346828],[.315042679696163,.121670472927803],[.433793507626045,.115505668053725],[.545421471388839,.107444270115965],[.648093651936975,.0976186521041138],[.740124191578554,.0861901615319532],[.820001985973902,.0733464814110803],[.886415527004401,.0592985849154367],[.938274552002732,.0442774388174198],[.974728555971309,.0285313886289336],[.995187219997021,.0123412297999872]],[[-.995556969790498,.0113937985010262],[-.976663921459517,.0263549866150321],[-.942974571228974,.0409391567013063],[-.894991997878275,.0549046959758351],[-.833442628760834,.0680383338123569],[-.759259263037357,.080140700335001],[-.673566368473468,.0910282619829636],[-.577662930241222,.10053594906705],[-.473002731445714,.108519624474263],[-.361172305809387,.114858259145711],[-.243866883720988,.119455763535784],[-.12286469261071,.12224244299031],[0,.123176053726715],[.12286469261071,.12224244299031],[.243866883720988,.119455763535784],[.361172305809387,.114858259145711],[.473002731445714,.108519624474263],[.577662930241222,.10053594906705],[.673566368473468,.0910282619829636],[.759259263037357,.080140700335001],[.833442628760834,.0680383338123569],[.894991997878275,.0549046959758351],[.942974571228974,.0409391567013063],[.976663921459517,.0263549866150321],[.995556969790498,.0113937985010262]],[[-.995885701145616,.010551372617343],[-.97838544595647,.0244178510926319],[-.947159066661714,.0379623832943627],[-.902637861984307,.0509758252971478],[-.845445942788498,.0632740463295748],[-.776385948820678,.0746841497656597],[-.696427260419957,.0850458943134852],[-.606692293017618,.0942138003559141],[-.508440714824505,.102059161094425],[-.403051755123486,.108471840528576],[-.292004839485956,.113361816546319],[-.17685882035689,.116660443485296],[-.0592300934293132,.118321415279262],[.0592300934293132,.118321415279262],[.17685882035689,.116660443485296],[.292004839485956,.113361816546319],[.403051755123486,.108471840528576],[.508440714824505,.102059161094425],[.606692293017618,.0942138003559141],[.696427260419957,.0850458943134852],[.776385948820678,.0746841497656597],[.845445942788498,.0632740463295748],[.902637861984307,.0509758252971478],[.947159066661714,.0379623832943627],[.97838544595647,.0244178510926319],[.995885701145616,.010551372617343]],[[-.996179262888988,.00979899605129436],[-.979923475961501,.0226862315961806],[-.950900557814705,.0352970537574197],[-.909482320677491,.047449412520615],[-.856207908018294,.0589835368598335],[-.791771639070508,.0697488237662455],[-.717013473739423,.0796048677730577],[-.632907971946495,.0884231585437569],[-.540551564579456,.0960887273700285],[-.441148251750026,.102501637817745],[-.335993903638508,.107578285788533],[-.226459365439536,.111252488356845],[-.113972585609529,.113476346108965],[0,.114220867378956],[.113972585609529,.113476346108965],[.226459365439536,.111252488356845],[.335993903638508,.107578285788533],[.441148251750026,.102501637817745],[.540551564579456,.0960887273700285],[.632907971946495,.0884231585437569],[.717013473739423,.0796048677730577],[.791771639070508,.0697488237662455],[.856207908018294,.0589835368598336],[.909482320677491,.047449412520615],[.950900557814705,.0352970537574197],[.979923475961501,.0226862315961806],[.996179262888988,.00979899605129436]],[[-.996442497573954,.00912428259309452],[-.981303165370872,.0211321125927712],[-.954259280628938,.0329014277823043],[-.915633026392132,.0442729347590042],[-.865892522574395,.0551073456757167],[-.805641370917179,.0652729239669995],[-.735610878013631,.0746462142345687],[-.656651094038864,.0831134172289012],[-.569720471811401,.0905717443930328],[-.475874224955118,.0969306579979299],[-.376251516089078,.10211296757806],[-.272061627635178,.106055765922846],[-.16456928213338,.108711192258294],[-.0550792898840342,.110047013016475],[.0550792898840342,.110047013016475],[.16456928213338,.108711192258294],[.272061627635178,.106055765922846],[.376251516089078,.10211296757806],[.475874224955118,.0969306579979299],[.569720471811401,.0905717443930328],[.656651094038864,.0831134172289012],[.735610878013631,.0746462142345687],[.805641370917179,.0652729239669995],[.865892522574395,.0551073456757167],[.915633026392132,.0442729347590042],[.954259280628938,.0329014277823043],[.981303165370872,.0211321125927712],[.996442497573954,.00912428259309452]],[[-.996679442260596,.00851690387874641],[-.982545505261413,.0197320850561227],[-.957285595778087,.0307404922020936],[-.921180232953058,.0414020625186828],[-.874637804920102,.0515948269024979],[-.818185487615252,.0612030906570791],[-.752462851734477,.0701179332550512],[-.678214537602686,.0782383271357637],[-.596281797138227,.0854722573661725],[-.507592955124227,.0917377571392587],[-.413152888174008,.0969638340944086],[-.314031637867639,.101091273759914],[-.211352286166001,.104073310077729],[-.106278230132679,.10587615509732],[0,.106479381718314],[.106278230132679,.10587615509732],[.211352286166001,.104073310077729],[.314031637867639,.101091273759914],[.413152888174008,.0969638340944086],[.507592955124227,.0917377571392587],[.596281797138227,.0854722573661725],[.678214537602686,.0782383271357637],[.752462851734477,.0701179332550512],[.818185487615252,.0612030906570791],[.874637804920102,.0515948269024979],[.921180232953058,.0414020625186828],[.957285595778087,.0307404922020936],[.982545505261413,.0197320850561227],[.996679442260596,.00851690387874641]],[[-.996893484074649,.0079681924961666],[-.983668123279747,.0184664683110909],[-.960021864968307,.0287847078833233],[-.926200047429274,.038799192569627],[-.882560535792052,.048402672830594],[-.829565762382768,.057493156217619],[-.767777432104826,.0659742298821805],[-.697850494793315,.0737559747377052],[-.620526182989242,.0807558952294202],[-.536624148142019,.0868997872010829],[-.447033769538089,.0921225222377861],[-.352704725530878,.0963687371746442],[-.254636926167889,.0995934205867952],[-.153869913608583,.101762389748405],[-.0514718425553176,.102852652893558],[.0514718425553176,.102852652893558],[.153869913608583,.101762389748405],[.254636926167889,.0995934205867952],[.352704725530878,.0963687371746442],[.447033769538089,.0921225222377861],[.536624148142019,.0868997872010829],[.620526182989242,.0807558952294202],[.697850494793315,.0737559747377052],[.767777432104826,.0659742298821805],[.829565762382768,.057493156217619],[.882560535792052,.048402672830594],[.926200047429274,.038799192569627],[.960021864968307,.0287847078833233],[.983668123279747,.0184664683110909],[.996893484074649,.0079681924961666]]],maxOrder=lut.length+5;var NumericalCurveMapper=function(_super){function NumericalCurveMapper(nQuadraturePoints,nInverseSamples,onInvalidateCache){void 0===nQuadraturePoints&&(nQuadraturePoints=24),void 0===nInverseSamples&&(nInverseSamples=21);var _this=_super.call(this,onInvalidateCache)||this;return _this._nSamples=21,_this._gauss=function(order){if(order<5||order>maxOrder)throw Error("Order for Gaussian Quadrature must be in the range of ".concat(5," and ").concat(maxOrder,"."));return lut[order-5]}(nQuadraturePoints),_this._nSamples=nInverseSamples,_this}return __extends(NumericalCurveMapper,_super),NumericalCurveMapper.prototype._invalidateCache=function(){_super.prototype._invalidateCache.call(this),this._cache.arcLengths=null,this._cache.samples=null;},Object.defineProperty(NumericalCurveMapper.prototype,"arcLengths",{get:function(){return this._cache.arcLengths||(this._cache.arcLengths=this.computeArcLengths()),this._cache.arcLengths},enumerable:!1,configurable:!0}),NumericalCurveMapper.prototype.getSamples=function(idx){if(this.points){if(this._cache.samples||(this._cache.samples=new Map),!this._cache.samples.has(idx)){for(var samples=this._nSamples,lengths=[],slopes=[],coefficients=this.getCoefficients(idx),i=0;i<samples;++i){var ti=i/(samples-1);lengths.push(this.computeArcLength(idx,0,ti));var dtln=magnitude(evaluateForT(derivativeAtT,ti,coefficients)),slope=0===dtln?0:1/dtln;this.tension>.95&&(slope=clamp(slope,-1,1)),slopes.push(slope);}var nCoeff=samples-1,dis=[],cis=[],li_prev=lengths[0],tdi_prev=slopes[0],step=1/nCoeff;for(i=0;i<nCoeff;++i){var li=li_prev,lDiff=(li_prev=lengths[i+1])-li,tdi=tdi_prev,tdi_next=slopes[i+1];tdi_prev=tdi_next;var si=step/lDiff,di=(tdi+tdi_next-2*si)/(lDiff*lDiff),ci=(3*si-2*tdi-tdi_next)/lDiff;dis.push(di),cis.push(ci);}this._cache.samples.set(idx,[lengths,slopes,cis,dis]);}return this._cache.samples.get(idx)}},NumericalCurveMapper.prototype.computeArcLength=function(index,t0,t1){if(void 0===t0&&(t0=0),void 0===t1&&(t1=1),t0===t1)return 0;for(var coefficients=this.getCoefficients(index),z=.5*(t1-t0),sum=0,i=0;i<this._gauss.length;i++){var _a=this._gauss[i],T=_a[0];sum+=_a[1]*magnitude(evaluateForT(derivativeAtT,z*T+z+t0,coefficients));}return z*sum},NumericalCurveMapper.prototype.computeArcLengths=function(){if(this.points){var lengths=[];lengths.push(0);for(var nPoints=this.closed?this.points.length:this.points.length-1,tl=0,i=0;i<nPoints;i++){tl+=this.computeArcLength(i),lengths.push(tl);}return lengths}},NumericalCurveMapper.prototype.inverse=function(idx,len){var step=1/(this._nSamples-1),_a=this.getSamples(idx),lengths=_a[0],slopes=_a[1],cis=_a[2],dis=_a[3];if(len>=lengths[lengths.length-1])return 1;if(len<=0)return 0;var i=Math.max(0,binarySearch(len,lengths)),ti=i*step;if(lengths[i]===len)return ti;var tdi=slopes[i],di=dis[i],ci=cis[i],ld=len-lengths[i];return ((di*ld+ci)*ld+tdi)*ld+ti},NumericalCurveMapper.prototype.lengthAt=function(u){return u*this.arcLengths[this.arcLengths.length-1]},NumericalCurveMapper.prototype.getT=function(u){var arcLengths=this.arcLengths,il=arcLengths.length,targetArcLength=u*arcLengths[il-1],i=binarySearch(targetArcLength,arcLengths),ti=i/(il-1);if(arcLengths[i]===targetArcLength)return ti;var len=targetArcLength-arcLengths[i];return (i+this.inverse(i,len))/(il-1)},NumericalCurveMapper.prototype.getU=function(t){if(0===t)return 0;if(1===t)return 1;var arcLengths=this.arcLengths,al=arcLengths.length-1,totalLength=arcLengths[al],tIdx=t*al,subIdx=Math.floor(tIdx),l1=arcLengths[subIdx];if(tIdx===subIdx)return l1/totalLength;var t0=tIdx-subIdx;return (l1+this.computeArcLength(subIdx,0,t0))/totalLength},NumericalCurveMapper}(AbstractCurveMapper),CurveInterpolator=function(){function CurveInterpolator(points,options){void 0===options&&(options={});var _this=this;this._cache=new Map;var curveMapper=(options=__assign({tension:.5,alpha:0,closed:!1},options)).arcDivisions?new SegmentedCurveMapper(options.arcDivisions,(function(){return _this._invalidateCache()})):new NumericalCurveMapper(options.numericalApproximationOrder,options.numericalInverseSamples,(function(){return _this._invalidateCache()}));curveMapper.alpha=options.alpha,curveMapper.tension=options.tension,curveMapper.closed=options.closed,curveMapper.points=points,this._lmargin=options.lmargin||1-curveMapper.tension,this._curveMapper=curveMapper;}return CurveInterpolator.prototype.getTimeFromPosition=function(position,clampInput){return void 0===clampInput&&(clampInput=!1),this._curveMapper.getT(clampInput?clamp(position,0,1):position)},CurveInterpolator.prototype.getPositionFromTime=function(t,clampInput){return void 0===clampInput&&(clampInput=!1),this._curveMapper.getU(clampInput?clamp(t,0,1):t)},CurveInterpolator.prototype.getPositionFromLength=function(length,clampInput){void 0===clampInput&&(clampInput=!1);var l=clampInput?clamp(length,0,this.length):length;return this._curveMapper.getU(l/this.length)},CurveInterpolator.prototype.getLengthAt=function(position,clampInput){return void 0===position&&(position=1),void 0===clampInput&&(clampInput=!1),this._curveMapper.lengthAt(clampInput?clamp(position,0,1):position)},CurveInterpolator.prototype.getTimeAtKnot=function(index){if(index<0||index>this.points.length-1)throw Error("Invalid index!");return 0===index?0:this.closed||index!==this.points.length-1?index/(this.closed?this.points.length:this.points.length-1):1},CurveInterpolator.prototype.getPositionAtKnot=function(index){return this.getPositionFromTime(this.getTimeAtKnot(index))},CurveInterpolator.prototype.getPointAtTime=function(t,target){return 0===(t=clamp(t,0,1))?copyValues(this.points[0],target):1===t?copyValues(this.closed?this.points[0]:this.points[this.points.length-1],target):this._curveMapper.evaluateForT(valueAtT,t,target)},CurveInterpolator.prototype.getPointAt=function(position,target){return this.getPointAtTime(this.getTimeFromPosition(position),target)},CurveInterpolator.prototype.getTangentAt=function(position,target){var t=clamp(this.getTimeFromPosition(position),0,1);return this.getTangentAtTime(t,target)},CurveInterpolator.prototype.getTangentAtTime=function(t,target){return normalize(this._curveMapper.evaluateForT(derivativeAtT,t,target))},CurveInterpolator.prototype.getNormalAt=function(position,target){var t=clamp(this.getTimeFromPosition(position),0,1);return this.getNormalAtTime(t,target)},CurveInterpolator.prototype.getNormalAtTime=function(t,target){var dt=normalize(this._curveMapper.evaluateForT(derivativeAtT,t));if(!(dt.length<2||dt.length>3)){var normal=target||new Array(dt.length);if(2===dt.length)return normal[0]=-dt[1],normal[1]=dt[0],normal;var ddt=normalize(this._curveMapper.evaluateForT(secondDerivativeAtT,t));return normalize(cross(cross(dt,ddt),dt),normal)}},CurveInterpolator.prototype.getCurvatureAt=function(position){var t=clamp(this.getTimeFromPosition(position),0,1);return this.getCurvatureAtTime(t)},CurveInterpolator.prototype.getCurvatureAtTime=function(t){var dt=this._curveMapper.evaluateForT(derivativeAtT,t),ddt=this._curveMapper.evaluateForT(secondDerivativeAtT,t),tangent=normalize(dt,[]),curvature=0,direction=void 0;if(2===dt.length){if(0!==(denominator=Math.pow(dt[0]*dt[0]+dt[1]*dt[1],1.5))){var signedCurvature=(dt[0]*ddt[1]-dt[1]*ddt[0])/denominator;direction=signedCurvature<0?[tangent[1],-tangent[0]]:[-tangent[1],tangent[0]],curvature=Math.abs(signedCurvature);}}else if(3===dt.length){var a=magnitude(dt),cp=cross(dt,ddt);direction=normalize(cross(cp,dt)),0!==a&&(curvature=magnitude(cp)/Math.pow(a,3));}else {a=magnitude(dt);var b=magnitude(ddt),denominator=Math.pow(a,3),dotProduct=dot(dt,ddt);0!==denominator&&(curvature=Math.sqrt(Math.pow(a,2)*Math.pow(b,2)-Math.pow(dotProduct,2))/denominator);}return {curvature:curvature,radius:0!==curvature?1/curvature:0,tangent:tangent,direction:direction}},CurveInterpolator.prototype.getDerivativeAt=function(position,target){var t=clamp(this.getTimeFromPosition(position),0,1);return this._curveMapper.evaluateForT(derivativeAtT,t,target)},CurveInterpolator.prototype.getSecondDerivativeAt=function(position,target){var t=clamp(this.getTimeFromPosition(position),0,1);return this._curveMapper.evaluateForT(secondDerivativeAtT,t,target)},CurveInterpolator.prototype.getBoundingBox=function(from,to){if(void 0===from&&(from=0),void 0===to&&(to=1),0===from&&1===to&&this._cache.has("bbox"))return this._cache.get("bbox");for(var min=[],max=[],t0=this.getTimeFromPosition(from),t1=this.getTimeFromPosition(to),start=this.getPointAtTime(t0),end=this.getPointAtTime(t1),nPoints=this.closed?this.points.length:this.points.length-1,i0=Math.floor(nPoints*t0),i1=Math.ceil(nPoints*t1),c=0;c<start.length;c++)min[c]=Math.min(start[c],end[c]),max[c]=Math.max(start[c],end[c]);for(var _loop_1=function(i){var p2=getControlPoints(i-1,this_1.points,this_1.closed)[2];if(i<i1)for(var c=0;c<p2.length;c++)p2[c]<min[c]&&(min[c]=p2[c]),p2[c]>max[c]&&(max[c]=p2[c]);if(this_1.tension<1){var w0_1=nPoints*t0-(i-1),w1_1=nPoints*t1-(i-1),valid=function(t){return t>-EPS&&t<=1+EPS&&(i-1!==i0||t>w0_1)&&(i!==i1||t<w1_1)},coefficients_1=this_1._curveMapper.getCoefficients(i-1),_loop_2=function(c){var _b=coefficients_1[c];getQuadRoots(3*_b[0],2*_b[1],_b[2]).filter(valid).forEach((function(t){var v=valueAtT(t,coefficients_1[c]);v<min[c]&&(min[c]=v),v>max[c]&&(max[c]=v);}));};for(c=0;c<coefficients_1.length;c++)_loop_2(c);}},this_1=this,i=i0+1;i<=i1;i++)_loop_1(i);var bbox={min:min,max:max};return 0===from&&1===to&&this._cache.set("bbox",bbox),bbox},CurveInterpolator.prototype.getPoints=function(segments,returnType,from,to){if(void 0===segments&&(segments=100),void 0===from&&(from=0),void 0===to&&(to=1),!segments||segments<=0)throw Error("Invalid arguments passed to getPoints(). You must specify at least 1 sample/segment.");if(!(from<0||to>1||to<from)){for(var pts=[],d=0;d<=segments;d++){var u=0===from&&1===to?d/segments:from+d/segments*(to-from);pts.push(this.getPointAt(u,returnType&&new returnType));}return pts}},CurveInterpolator.prototype.getNearestPosition=function(point,threshold){var _this=this;if(void 0===threshold&&(threshold=1e-5),threshold<=0||!Number.isFinite(threshold))throw Error("Invalid threshold. Must be a number greater than zero!");var samples=10*this.points.length-1,pu=new Array(point.length),minDist=1/0,minU=0,lut=this.createLookupTable(samples);Array.from(lut.keys()).forEach((function(key){var c=lut.get(key),dist=distance(point,c);if(dist<minDist)return minDist=dist,minU=key,!0}));for(var minT=this.getTimeFromPosition(minU),bisect=function(t){if(t>=0&&t<=1){_this.getPointAtTime(t,pu);var dist=distance(point,pu);if(dist<minDist)return minDist=dist,minT=t,!0}},step=.005;step>threshold;)bisect(minT-step)||bisect(minT+step)||(step/=2);return {u:minU=this._curveMapper.getU(minT),distance:minDist,point:pu}},CurveInterpolator.prototype.getIntersects=function(v,axis,max,margin){var _this=this;void 0===axis&&(axis=0),void 0===max&&(max=0),void 0===margin&&(margin=this._lmargin);var solutions=this.getIntersectsAsTime(v,axis,max,margin).map((function(t){return _this.getPointAtTime(t)}));return 1===Math.abs(max)?1===solutions.length?solutions[0]:null:solutions},CurveInterpolator.prototype.getIntersectsAsPositions=function(v,axis,max,margin){var _this=this;return void 0===axis&&(axis=0),void 0===max&&(max=0),void 0===margin&&(margin=this._lmargin),this.getIntersectsAsTime(v,axis,max,margin).map((function(t){return _this.getPositionFromTime(t)}))},CurveInterpolator.prototype.getIntersectsAsTime=function(v,axis,max,margin){void 0===axis&&(axis=0),void 0===max&&(max=0),void 0===margin&&(margin=this._lmargin);for(var k=axis,solutions=new Set,nPoints=this.closed?this.points.length:this.points.length-1,i=0;i<nPoints&&(0===max||solutions.size<Math.abs(max));i+=1){var idx=max<0?nPoints-(i+1):i,_a=getControlPoints(idx,this.points,this.closed),p1=_a[1],p2=_a[2],coefficients=this._curveMapper.getCoefficients(idx),vmin=void 0,vmax=void 0;if(p1[k]<p2[k]?(vmin=p1[k],vmax=p2[k]):(vmin=p2[k],vmax=p1[k]),v-margin<=vmax&&v+margin>=vmin){var ts=findRootsOfT(v,coefficients[k]);max<0?ts.sort((function(a,b){return b-a})):max>=0&&ts.sort((function(a,b){return a-b}));for(var j=0;j<ts.length;j++){var nt=(ts[j]+idx)/nPoints;if(solutions.add(nt),0!==max&&solutions.size===Math.abs(max))break}}}return Array.from(solutions)},CurveInterpolator.prototype.createLookupTable=function(samples,from,to){if(void 0===from&&(from=0),void 0===to&&(to=1),!samples||samples<=1)throw Error("Invalid arguments passed to createLookupTable(). You must specify at least 2 samples.");if(!(from<0||to>1||to<from)){var cacheKey="lut_".concat(samples,"_").concat(from,"_").concat(to);if(!this._cache.has(cacheKey)){for(var lut=new Map,d=0;d<samples;d++){var u=0===from&&1===to?d/(samples-1):from+d/(samples-1)*(to-from),point=this.getPointAt(u);lut.set(u,point);}this._cache.set(cacheKey,lut);}return this._cache.get(cacheKey)}},CurveInterpolator.prototype.forEach=function(func,samples,from,to){var _this=this;void 0===from&&(from=0),void 0===to&&(to=1);var positions=[];if(Number.isFinite(samples)){if(samples<=1)throw Error("Invalid arguments passed to forEach(). You must specify at least 2 samples.");for(var nSamples=samples,i=0;i<samples;i++){var u=0===from&&1===to?i/(nSamples-1):from+i/(nSamples-1)*(to-from);positions.push(u);}}else Array.isArray(samples)&&(positions=samples);var prev=null;positions.forEach((function(u,i){if(!Number.isFinite(u)||u<0||u>1)throw Error("Invalid position (u) for sample in forEach!");var t=_this.getTimeFromPosition(u),current=func({u:u,t:t,i:i,prev:prev});prev={u:u,t:t,i:i,value:current};}));},CurveInterpolator.prototype.map=function(func,samples,from,to){var _this=this;void 0===from&&(from=0),void 0===to&&(to=1);var positions=[];if(Number.isFinite(samples)){if(samples<=1)throw Error("Invalid arguments passed to map(). You must specify at least 2 samples.");for(var nSamples=samples,i=0;i<samples;i++){var u=0===from&&1===to?i/(nSamples-1):from+i/(nSamples-1)*(to-from);positions.push(u);}}else Array.isArray(samples)&&(positions=samples);var prev=null;return positions.map((function(u,i){if(!Number.isFinite(u)||u<0||u>1)throw Error("Invalid position (u) for sample in map()!");var t=_this.getTimeFromPosition(u),current=func({u:u,t:t,i:i,prev:prev});return prev={u:u,t:t,i:i,value:current},current}))},CurveInterpolator.prototype.reduce=function(func,initialValue,samples,from,to){var _this=this;void 0===from&&(from=0),void 0===to&&(to=1);var positions=[];if(Number.isFinite(samples)){if(samples<=1)throw Error("Invalid arguments passed to map(). You must specify at least 2 samples.");for(var nSamples=samples,i=0;i<samples;i++){var u=0===from&&1===to?i/(nSamples-1):from+i/(nSamples-1)*(to-from);positions.push(u);}}else Array.isArray(samples)&&(positions=samples);return positions.reduce((function(acc,u,i){if(!Number.isFinite(u)||u<0||u>1)throw Error("Invalid position (u) for sample in map()!");var t=_this.getTimeFromPosition(u);return func({acc:acc,u:u,t:t,i:i})}),initialValue)},CurveInterpolator.prototype._invalidateCache=function(){return this._cache=new Map,this},CurveInterpolator.prototype.reset=function(){this._curveMapper.reset();},Object.defineProperty(CurveInterpolator.prototype,"points",{get:function(){return this._curveMapper.points},set:function(pts){this._curveMapper.points=pts;},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"tension",{get:function(){return this._curveMapper.tension},set:function(t){this._curveMapper.tension=t;},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"alpha",{get:function(){return this._curveMapper.alpha},set:function(a){this._curveMapper.alpha=a;},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"closed",{get:function(){return this._curveMapper.closed},set:function(isClosed){this._curveMapper.closed=isClosed;},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"length",{get:function(){return this._curveMapper.lengthAt(1)},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"minX",{get:function(){return this.getBoundingBox().min[0]},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"maxX",{get:function(){return this.getBoundingBox().max[0]},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"minY",{get:function(){return this.getBoundingBox().min[1]},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"maxY",{get:function(){return this.getBoundingBox().max[1]},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"minZ",{get:function(){return this.getBoundingBox().min[2]},enumerable:!1,configurable:!0}),Object.defineProperty(CurveInterpolator.prototype,"maxZ",{get:function(){return this.getBoundingBox().max[2]},enumerable:!1,configurable:!0}),CurveInterpolator}();(function(_super){function CurveInterpolator2D(points,tension,arcDivisions,closed,alpha){return void 0===tension&&(tension=.5),void 0===arcDivisions&&(arcDivisions=300),void 0===closed&&(closed=!1),void 0===alpha&&(alpha=0),_super.call(this,points.map((function(p){return [p[0],p[1]]})),{tension:tension,alpha:alpha,arcDivisions:arcDivisions,closed:closed})||this}return __extends(CurveInterpolator2D,_super),CurveInterpolator2D.prototype.x=function(y,max,margin){void 0===max&&(max=0),void 0===margin&&(margin=this._lmargin);var res=this.getIntersects(y,1,max,margin);return 1===Math.abs(max)?res[0]:res.map((function(d){return d[0]}))},CurveInterpolator2D.prototype.y=function(x,max,margin){void 0===max&&(max=0),void 0===margin&&(margin=this._lmargin);var res=this.getIntersects(x,0,max,margin);return 1===Math.abs(max)?res[1]:res.map((function(d){return d[1]}))},CurveInterpolator2D.prototype.getNormalAt=function(position,target){return normalize(orthogonal(this.getTangentAt(position,target)))},CurveInterpolator2D.prototype.getAngleAt=function(position){var tan=this.getTangentAt(position);return Math.atan2(tan[1],tan[0])},CurveInterpolator2D.prototype.getBoundingBox=function(from,to){void 0===from&&(from=0),void 0===to&&(to=1);var bbox=_super.prototype.getBoundingBox.call(this,from,to);return {x1:bbox.min[0],x2:bbox.max[0],y1:bbox.min[1],y2:bbox.max[1],min:bbox.min,max:bbox.max}},CurveInterpolator2D})(CurveInterpolator);
 
-const filter$y = (geometry) =>
+const filter$A = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) && isNotTypeGhost(geometry);
 
 const emitEachCoordinate = (geometry, emit) => {
-  const inputs = linearize(geometry, filter$y);
+  const inputs = linearize(geometry, filter$A);
   eachPoint(inputs, emit);
 };
 
@@ -3102,17 +3102,17 @@ const rewriteTags = (
 const hasColor = (geometry, name) =>
   rewriteTags(toTagsFromName(name), [], geometry);
 
-const filter$x = (geometry) =>
+const filter$z = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const outline = (geometry, selections = []) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$x, inputs);
+  linearize(concreteGeometry, filter$z, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$x, inputs);
+    linearize(toConcreteGeometry(selection), filter$z, inputs);
   }
   const outputs = outline$1(inputs, count);
   return replacer(inputs, outputs)(concreteGeometry);
@@ -3500,13 +3500,13 @@ const taggedLayout = (
   };
 };
 
-const filter$w = () => (geometry) =>
+const filter$y = () => (geometry) =>
   ['polygonsWithHoles'].includes(geometry.type);
 
 const convertPolygonsToMeshes = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$w(), inputs);
+  linearize(concreteGeometry, filter$y(), inputs);
   if (inputs.length === 0) {
     return geometry;
   }
@@ -3519,12 +3519,12 @@ const convertPolygonsToMeshes = (geometry) => {
   }
 };
 
-const filter$v = (geometry) =>
+const filter$x = (geometry) =>
   geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
 
 const serialize = (geometry) => {
   const inputs = [];
-  linearize(geometry, filter$v, inputs, /* includeSketches= */ true);
+  linearize(geometry, filter$x, inputs, /* includeSketches= */ true);
   if (inputs.length === 0) {
     return geometry;
   }
@@ -3875,7 +3875,7 @@ const Segment = (segment) => taggedSegments({}, [segment]);
 
 const Segments = (segments) => taggedSegments({}, segments);
 
-const filter$u = ({ type }) => type === 'segments';
+const filter$w = ({ type }) => type === 'segments';
 
 const eachSegment = (geometry, emit, selections = []) => {
   if (!(selections instanceof Array)) {
@@ -3883,7 +3883,7 @@ const eachSegment = (geometry, emit, selections = []) => {
   }
   for (const { matrix, segments, normals, faces } of linearize(
     outline(geometry, selections),
-    filter$u
+    filter$w
   )) {
     for (let nth = 0; nth < segments.length; nth++) {
       const [source, target] = segments[nth];
@@ -3996,7 +3996,7 @@ const abstract = (geometry, types) => {
   return geometry;
 };
 
-const filter$t = (geometry) => ['graph'].includes(geometry.type);
+const filter$v = (geometry) => ['graph'].includes(geometry.type);
 
 const approximate = (
   geometry,
@@ -4012,7 +4012,7 @@ const approximate = (
     maxNumberOfProxies,
   }
 ) => {
-  const inputs = linearize(geometry, filter$t);
+  const inputs = linearize(geometry, filter$v);
   const outputs = approximate$1(
     inputs,
     iterations,
@@ -4042,7 +4042,7 @@ const allTags = (geometry) => {
   return collectedTags;
 };
 
-const filter$s = (geometry) =>
+const filter$u = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
@@ -4054,7 +4054,7 @@ const Disjoint = (geometries, { backward, exact }) => {
   );
   const inputs = [];
   for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter$s, inputs);
+    linearize(concreteGeometry, filter$u, inputs);
   }
   // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
   const outputs = disjoint$1(inputs, backward, exact);
@@ -4115,10 +4115,10 @@ const bb = (
   }
 };
 
-const filter$r = (geometry) => ['graph'].includes(geometry.type);
+const filter$t = (geometry) => ['graph'].includes(geometry.type);
 
 const bend = (geometry, radius = 100) => {
-  const inputs = linearize(geometry, filter$r);
+  const inputs = linearize(geometry, filter$t);
   const outputs = bend$1(inputs, radius);
   return replacer(inputs, outputs)(geometry);
 };
@@ -4322,7 +4322,7 @@ const cached =
     return result;
   };
 
-const filter$q = (geometry) =>
+const filter$s = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -4338,7 +4338,7 @@ const cast = (planeReference, sourceReference, geometry) => {
   inputs.length = 1;
   linearize(toConcreteGeometry(sourceReference), filterReferences$1, inputs);
   inputs.length = 2;
-  linearize(concreteGeometry, filter$q, inputs);
+  linearize(concreteGeometry, filter$s, inputs);
   const outputs = cast$1(inputs);
   return taggedGroup({}, ...outputs);
 };
@@ -4346,7 +4346,7 @@ const cast = (planeReference, sourceReference, geometry) => {
 const hasMaterial = (geometry, name) =>
   rewriteTags(toTagsFromName$1(name), [], geometry);
 
-const filter$p = (noVoid, onlyGraph) => (geometry) =>
+const filter$r = (noVoid, onlyGraph) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
@@ -4360,10 +4360,10 @@ const clip = (
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$p(noVoid, onlyGraph), inputs);
+  linearize(concreteGeometry, filter$r(noVoid, onlyGraph), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
-    linearize(geometry, filter$p(noVoid), inputs);
+    linearize(geometry, filter$r(noVoid), inputs);
   }
   const outputs = clip$1(inputs, count, open, exact);
   const ghosts = [];
@@ -4385,7 +4385,7 @@ const clipFrom = (clipBy, clipFrom, modes) =>
 const commonVolume = (geometry, modes) => {
   const inputs = linearize(
     geometry,
-    filter$p(modes.noVoid, { ...modes, onlyGraph: true })
+    filter$r(modes.noVoid, { ...modes, onlyGraph: true })
   );
   switch (inputs.length) {
     case 0: {
@@ -4401,12 +4401,12 @@ const commonVolume = (geometry, modes) => {
   }
 };
 
-const filter$o = (geometry) =>
+const filter$q = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const computeCentroid = (geometry, top, bottom) =>
-  Group(computeCentroid$1(linearize(geometry, filter$o)));
+  Group(computeCentroid$1(linearize(geometry, filter$q)));
 
 const computeGeneralizedDiameter = (geometry) => {
   const coordinates = toCoordinates(geometry);
@@ -4441,7 +4441,7 @@ const computeImplicitVolume = (
   return taggedGroup({}, ...outputs);
 };
 
-const filter$n = (geometry) =>
+const filter$p = (geometry) =>
   isNotTypeGhost(geometry) &&
   ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
     ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
@@ -4449,12 +4449,39 @@ const filter$n = (geometry) =>
 const computeOrientedBoundingBox = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$n, inputs);
+  linearize(concreteGeometry, filter$p, inputs);
   const outputs = computeOrientedBoundingBox$1(inputs);
   return outputs[0];
 };
 
-const filter$m = (geometry) =>
+const computeReliefFromImage = (
+  x,
+  y,
+  z,
+  data,
+  angularBound,
+  radiusBound,
+  distanceBound,
+  errorBound,
+  extrusion,
+  doClose
+) => {
+  const outputs = computeReliefFromImage$1(
+    x,
+    y,
+    z,
+    data,
+    angularBound,
+    radiusBound,
+    distanceBound,
+    errorBound,
+    extrusion,
+    doClose
+  );
+  return taggedGroup({}, ...outputs);
+};
+
+const filter$o = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const computeToolpath = (
@@ -4468,9 +4495,9 @@ const computeToolpath = (
   annealingDecay
 ) => {
   const inputs = [];
-  linearize(geometry, filter$m, inputs);
+  linearize(geometry, filter$o, inputs);
   const materialStart = inputs.length;
-  linearize(material, filter$m, inputs);
+  linearize(material, filter$o, inputs);
   const outputs = computeToolpath$1(
     inputs,
     materialStart,
@@ -4554,23 +4581,23 @@ const deform = (
   return replacer(inputs, outputs, length)(concreteGeometry);
 };
 
-const filter$l = (geometry) => ['graph'].includes(geometry.type);
+const filter$n = (geometry) => ['graph'].includes(geometry.type);
 
 const demesh = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$l, inputs);
+  linearize(concreteGeometry, filter$n, inputs);
   const outputs = demesh$1(inputs);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$k = (geometry, parent) =>
+const filter$m = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const dilateXY = (geometry, amount) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$k, inputs);
+  linearize(concreteGeometry, filter$m, inputs);
   const outputs = dilateXY$1(inputs, amount);
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {
@@ -4662,7 +4689,7 @@ const drop = (geometry, selector) => on(geometry, selector, ghost);
 
 const each = (geometry) => getLeafs(geometry);
 
-const filter$j = (geometry) =>
+const filter$l = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -4674,10 +4701,10 @@ const eachFaceEdges = (
   if (!(select instanceof Array)) {
     select = [select];
   }
-  const inputs = linearize(geometry, filter$j);
+  const inputs = linearize(geometry, filter$l);
   const count = inputs.length;
   for (const selection of select) {
-    linearize(selection, filter$j, inputs);
+    linearize(selection, filter$l, inputs);
   }
   const outputs = faceEdges(inputs, count).filter(({ type }) =>
     ['polygonsWithHoles', 'segments'].includes(type)
@@ -4746,13 +4773,13 @@ const eachTriangle = (geometry, emitTriangle) => {
   eachTriangle$1(inputs, emitTriangle);
 };
 
-const filter$i = (geometry) =>
+const filter$k = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const fix = (geometry, selfIntersection = true) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$i, inputs);
+  linearize(concreteGeometry, filter$k, inputs);
   const outputs = fix$1(inputs, selfIntersection);
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -4820,7 +4847,11 @@ const fromPolygonSoup = (
     wrapAbsoluteOffset,
     wrapRelativeAlpha,
     wrapRelativeOffset,
-    cornerThreshold,
+    faceCountLimit,
+    sharpEdgeThreshold,
+    doRemoveSelfIntersections,
+    doWrap,
+    doAutorefine,
   } = {}
 ) => {
   const outputs = fromPolygonSoup$1(
@@ -4831,31 +4862,35 @@ const fromPolygonSoup = (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    cornerThreshold
+    faceCountLimit,
+    sharpEdgeThreshold,
+    doRemoveSelfIntersections,
+    doWrap,
+    doAutorefine
   );
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
 
 const gap = (geometry) => hasTypeGhost(hasTypeVoid(geometry));
 
-const filter$h = (geometry) =>
+const filter$j = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const generateLowerEnvelope = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$h, inputs);
+  linearize(concreteGeometry, filter$j, inputs);
   const outputs = generateEnvelope(inputs, /* envelopeType= */ 1);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filter$g = (geometry) =>
+const filter$i = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const generateUpperEnvelope = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$g, inputs);
+  linearize(concreteGeometry, filter$i, inputs);
   const outputs = generateEnvelope(inputs, /* envelopeType= */ 0);
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -4945,15 +4980,15 @@ const getTags = (geometry) => {
   }
 };
 
-const filter$f = (geometry, parent) =>
+const filter$h = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const grow = (geometry, offset, axes = 'xyz', selections) => {
-  const inputs = linearize(geometry, filter$f);
+  const inputs = linearize(geometry, filter$h);
   const count = inputs.length;
   inputs.push(Z$3(offset));
   for (const selection of selections) {
-    linearize(selection, filter$f, inputs);
+    linearize(selection, filter$h, inputs);
   }
   const outputs = grow$1(inputs, count, {
     x: axes.includes('x'),
@@ -4978,7 +5013,7 @@ const inItem = (geometry) => {
 const hold = (geometry, geometries) =>
   on(geometry, inItem(geometry), (inside) => Group([inside, ...geometries]));
 
-const filter$e = (geometry) =>
+const filter$g = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -4987,7 +5022,7 @@ const inset = (
   initial = 1,
   { segments = 16, step, limit } = {}
 ) => {
-  const inputs = linearize(geometry, filter$e);
+  const inputs = linearize(geometry, filter$g);
   const outputs = inset$1(inputs, initial, step, limit, segments);
   // Inner insets should come first.
   return Group(outputs);
@@ -5032,17 +5067,17 @@ const isNotShowWireframe = (geometry) =>
   isNotShow(geometry, showWireframe);
 const isShowWireframe = (geometry) => isShow(geometry, showWireframe);
 
-const filter$d = (noVoid) => (geometry) =>
+const filter$f = (noVoid) => (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const filterAdds = (noVoid) => (geometry) =>
-  filter$d() && isNotTypeGhost(geometry);
+  filter$f() && isNotTypeGhost(geometry);
 
 const join = (geometry, geometries, { exact, noVoid }) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$d(), inputs);
+  linearize(concreteGeometry, filter$f(), inputs);
   const count = inputs.length;
   for (const geometry of geometries) {
     linearize(geometry, filterAdds(), inputs);
@@ -5057,7 +5092,7 @@ const joinTo = (geometry, other, modes) =>
 const keep = (tags, geometry) =>
   rewriteTags(['type:void'], [], geometry, tags, 'has not');
 
-const filter$c = (geometry) =>
+const filter$e = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -5066,10 +5101,10 @@ const Loft = (geometries, { open = false }) => {
   // This is wrong -- we produce a total linearization over geometries,
   // but really it should be partitioned.
   for (const geometry of geometries) {
-    linearize(toConcreteGeometry(geometry), filter$c, inputs);
+    linearize(geometry, filter$e, inputs);
   }
   const outputs = loft$1(inputs, !open);
-  return taggedGroup({}, ...outputs);
+  return Group(outputs);
 };
 
 const loft = (geometry, geometries, mode) =>
@@ -5097,22 +5132,22 @@ const masked = (geometry, masks) => {
 const masking = (mask, masked) =>
   Group([gap(mask), hasTypeMasked(masked)]);
 
-const filter$b = (geometry) =>
+const filter$d = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   hasNotTypeVoid(geometry);
 
 const measureArea = (geometry) => {
   const linear = [];
-  linearize(geometry, filter$b, linear);
+  linearize(geometry, filter$d, linear);
   return computeArea(linear);
 };
 
-const filter$a = (geometry) =>
+const filter$c = (geometry) =>
   geometry.type === 'graph' && hasNotTypeVoid(geometry);
 
 const measureVolume = (geometry) => {
   const linear = [];
-  linearize(geometry, filter$a, linear);
+  linearize(geometry, filter$c, linear);
   return computeVolume(linear);
 };
 
@@ -5142,7 +5177,7 @@ const nth = (geometry, nths) => {
   return Group(group);
 };
 
-const filter$9 = (geometry) =>
+const filter$b = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
@@ -5151,7 +5186,7 @@ const offset = (
   initial = 1,
   { segments = 16, step, limit } = {}
 ) => {
-  const inputs = linearize(geometry, filter$9);
+  const inputs = linearize(geometry, filter$b);
   const outputs = offset$1(inputs, initial, step, limit, segments);
   return Group(outputs);
 };
@@ -5275,18 +5310,18 @@ const orient = (
   return c;
 };
 
-const filter$8 = () => (geometry) =>
+const filter$a = () => (geometry) =>
   ['graph'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
 const reconstruct = (geometry) => {
-  const inputs = linearize(geometry, filter$8());
+  const inputs = linearize(geometry, filter$a());
   const outputs = reconstruct$1(inputs);
   return replacer(inputs, outputs)(geometry);
 };
 
-const filter$7 = (geometry) => ['graph'].includes(geometry.type);
+const filter$9 = (geometry) => ['graph'].includes(geometry.type);
 
 const remesh = (
   geometry,
@@ -5295,10 +5330,10 @@ const remesh = (
   { iterations = 1, relaxationSteps = 1, targetEdgeLength = resolution }
 ) => {
   const inputs = [];
-  linearize(geometry, filter$7, inputs);
+  linearize(geometry, filter$9, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(selection, filter$7, inputs);
+    linearize(selection, filter$9, inputs);
   }
   const outputs = remesh$1(
     inputs,
@@ -5307,6 +5342,15 @@ const remesh = (
     relaxationSteps,
     targetEdgeLength
   );
+  return replacer(inputs, outputs)(geometry);
+};
+
+const filter$8 = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
+
+const repair = (geometry, strategies) => {
+  const inputs = linearize(geometry, filter$8);
+  const outputs = repair$1(inputs, strategies);
   return replacer(inputs, outputs)(geometry);
 };
 
@@ -5471,16 +5515,16 @@ const samplePointCloud = (geometries, resolution = 1) => {
   return Points(points);
 };
 
-const filter$6 = (geometry, parent) =>
+const filter$7 = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const seam = (geometry, selections) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$6, inputs);
+  linearize(concreteGeometry, filter$7, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$6, inputs);
+    linearize(toConcreteGeometry(selection), filter$7, inputs);
   }
   const outputs = seam$1(inputs, count);
   return replacer(inputs, outputs)(concreteGeometry);
@@ -5515,7 +5559,7 @@ const section = (inputGeometry, referenceGeometries = []) => {
   return Group([...outputs, ...ghosts]);
 };
 
-const filter$5 = (geometry, parent) =>
+const filter$6 = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const shell = (
@@ -5534,7 +5578,7 @@ const shell = (
   const [innerOffset = 0, outerOffset = 0] = interval;
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$5, inputs);
+  linearize(concreteGeometry, filter$6, inputs);
   const outputs = shell$1(
     inputs,
     innerOffset,
@@ -5556,17 +5600,17 @@ const shell = (
   );
 };
 
-const filter$4 = (geometry) => ['graph'].includes(geometry.type);
+const filter$5 = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-const simplify = (geometry, cornerThreshold, eps) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$4, inputs);
-  const outputs = simplify$1(inputs, cornerThreshold, eps);
-  return replacer(inputs, outputs)(concreteGeometry);
+const simplify = (geometry, faceCount, sharpEdgeThreshold) => {
+  const inputs = linearize(geometry, filter$5);
+  const outputs = simplify$1(inputs, faceCount, sharpEdgeThreshold);
+  // return replacer(inputs, outputs)(geometry);
+  return Group(outputs);
 };
 
-const filter$3 = (geometry) =>
+const filter$4 = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const smooth = (
@@ -5580,10 +5624,10 @@ const smooth = (
 ) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$3, inputs);
+  linearize(concreteGeometry, filter$4, inputs);
   const count = inputs.length;
   for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$3, inputs);
+    linearize(toConcreteGeometry(selection), filter$4, inputs);
   }
   const outputs = smooth$1(
     inputs,
@@ -5605,14 +5649,14 @@ const smooth = (
   );
 };
 
-const filter$2 = (geometry) =>
+const filter$3 = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const separate = (geometry, { noShapes, noHoles, holesAsShapes }) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$2, inputs);
+  linearize(concreteGeometry, filter$3, inputs);
   const outputs = separate$1(inputs, !noShapes, !noHoles, holesAsShapes);
   return taggedGroup({}, ...outputs);
 };
@@ -5752,12 +5796,12 @@ const toTriangleArray = (geometry) => {
   return triangles;
 };
 
-const filter$1 = (geometry) => ['graph'].includes(geometry.type);
+const filter$2 = (geometry) => ['graph'].includes(geometry.type);
 
 const twist = (geometry, radius) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$1, inputs);
+  linearize(concreteGeometry, filter$2, inputs);
   const outputs = twist$1(inputs, radius);
   return replacer(inputs, outputs)(concreteGeometry);
 };
@@ -5778,6 +5822,15 @@ const unfold = (inputGeometry) => {
   return taggedGroup({}, ...outputs, ...ghosts);
 };
 
+const filter$1 = (geometry) =>
+  ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
+
+const validate = (geometry, strategies) => {
+  const inputs = linearize(geometry, filter$1);
+  const outputs = validate$1(inputs, strategies);
+  return replacer(inputs, outputs)(geometry);
+};
+
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
@@ -5796,4 +5849,4 @@ const Wrap = (geometries, offset = 1, alpha = 0.1) => {
 const wrap = (geometry, geometries, offset, alpha) =>
   tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
 
-export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Link, Loop, Octagon, Orb, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, reify, remesh, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Link, Loop, Octagon, Orb, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
