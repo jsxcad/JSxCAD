@@ -32,8 +32,9 @@ const processArgs = (args) => {
 const build = async (...args) => {
   const { isQuiet, baseDirectory } = processArgs(args.filter((arg) => arg));
   const browser = await puppeteer.launch({
-    headless: true,
-    dumpio: true,
+    headless: 'new',
+    // dumpio: true,
+    // pipe: true,
     args: [
       '--disable-features=BlockInsecurePrivateNetworkRequests',
       '--disable-web-security',

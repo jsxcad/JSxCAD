@@ -21,8 +21,8 @@ export class IconNote extends React.PureComponent {
       <img
         class={`note icon ${iconIdClass}`}
         style={{
-          height: '64px',
-          width: '64px',
+          height: '32px',
+          width: '32px',
           opacity: blur ? 0.5 : 1,
         }}
         src={note.url}

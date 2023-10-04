@@ -168,6 +168,8 @@ typedef std::vector<Polyline> Polylines;
 typedef CGAL::Triple<int, int, int> Triangle_int;
 typedef std::map<Point, Vertex_index> Vertex_map;
 
+typedef CGAL::Surface_mesh<Point> Epeck_surface_mesh;
+
 typedef Epick_kernel::Point_3 Epick_point;
 typedef std::vector<Epick_point> Epick_points;
 typedef CGAL::Surface_mesh<Epick_point> Epick_surface_mesh;
@@ -2114,6 +2116,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "ComputeImplicitVolume.h"
 #include "ComputeNormal.h"
 #include "ComputeOrientedBoundingBox.h"
+#include "ComputeReliefFromImage.h"
 #include "ComputeToolpath.h"
 #include "ComputeVolume.h"
 #include "ConvertPolygonsToMeshes.h"
@@ -2146,6 +2149,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Outline.h"
 #include "Reconstruct.h"
 #include "Remesh.h"
+#include "Repair.h"
 #include "Seam.h"
 #include "Section.h"
 #include "Separate.h"
@@ -2154,6 +2158,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Smooth.h"
 #include "Twist.h"
 #include "Unfold.h"
+#include "Validate.h"
 #include "Wrap.h"
 
 double FT__to_double(const FT& ft) { return CGAL::to_double(ft); }
@@ -2453,6 +2458,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeNormal", &ComputeNormal,
                        emscripten::allow_raw_pointers());
+  emscripten::function("ComputeReliefFromImage", &ComputeReliefFromImage,
+                       emscripten::allow_raw_pointers());
   emscripten::function("ComputeToolpath", &ComputeToolpath,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeVolume", &ComputeVolume,
@@ -2499,6 +2506,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Reconstruct", &Reconstruct,
                        emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
+  emscripten::function("Repair", &Repair, emscripten::allow_raw_pointers());
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
@@ -2507,6 +2515,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
   emscripten::function("Unfold", &Unfold, emscripten::allow_raw_pointers());
+  emscripten::function("Validate", &Validate, emscripten::allow_raw_pointers());
   emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double,

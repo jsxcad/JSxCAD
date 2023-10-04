@@ -12,7 +12,11 @@ export const fromPolygonSoup = (
     wrapAbsoluteOffset,
     wrapRelativeAlpha,
     wrapRelativeOffset,
-    cornerThreshold,
+    faceCountLimit,
+    sharpEdgeThreshold,
+    doRemoveSelfIntersections,
+    doWrap,
+    doAutorefine,
   } = {}
 ) => {
   const outputs = fromPolygonSoupWithCgal(
@@ -23,7 +27,11 @@ export const fromPolygonSoup = (
     wrapRelativeOffset,
     wrapAbsoluteAlpha,
     wrapAbsoluteOffset,
-    cornerThreshold
+    faceCountLimit,
+    sharpEdgeThreshold,
+    doRemoveSelfIntersections,
+    doWrap,
+    doAutorefine
   );
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

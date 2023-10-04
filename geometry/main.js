@@ -57,6 +57,7 @@ export { computeGeneralizedDiameter } from './computeGeneralizedDiameter.js';
 export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
 export { computeOrientedBoundingBox } from './computeOrientedBoundingBox.js';
+export { computeReliefFromImage } from './computeReliefFromImage.js';
 export { computeToolpath } from './computeToolpath.js';
 export { copy } from './copy.js';
 export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
@@ -219,6 +220,7 @@ export {
 export { reconstruct } from './reconstruct.js';
 export { reify } from './tagged/reify.js';
 export { remesh } from './remesh.js';
+export { repair } from './repair.js';
 export {
   as,
   asPart,
@@ -230,6 +232,7 @@ export {
   untag,
 } from './tag.js';
 export { rewriteTags } from './tagged/rewriteTags.js';
+export { samplePointCloud } from './cloud.js';
 export { seam } from './seam.js';
 export { section } from './section.js';
 export { seq } from './seq.js';
@@ -268,6 +271,7 @@ export { transform } from './tagged/transform.js';
 export { twist } from './twist.js';
 export { update } from './tagged/update.js';
 export { unfold } from './unfold.js';
+export { validate } from './validate.js';
 export { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
 export { Wrap, wrap } from './wrap.js';
 export { write, writeNonblocking } from './tagged/write.js';

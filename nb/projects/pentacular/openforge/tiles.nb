@@ -1,23 +1,24 @@
 import { SIZE, tile1x1, tile2x2 } from './openforge.nb';
 
+/*
 const treeTrunk = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/Terrain4Print/giant-1-12cm.stl'
+  'https://jsxcad.js.org/stl/openforge/Terrain4Print/giant-1-12cm.stl'
 ).align('xyz>');
 
 const mud = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/mud-2x2.stl'
+  'https://jsxcad.js.org/stl/openforge/mud-2x2.stl'
 ).align('xyz>');
 
 const stoneFloor = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/stone_floor.stl'
+  'https://jsxcad.js.org/stl/openforge/stone_floor.stl'
 ).align('z>');
 
 const brokenStoneFloor = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/broken_stone_floor.stl'
+  'https://jsxcad.js.org/stl/openforge/broken_stone_floor.stl'
 ).align('z>');
 
 const cobbleFanRoad = LoadStl(
-  'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/openforge/cobble_fan_road.stl'
+  'https://jsxcad.js.org/stl/openforge/cobble_fan_road.stl'
 ).align('xyz>');
 
 const stoneFloorTile = tile1x1
@@ -41,3 +42,4 @@ const treeTrunkTile = tile2x2
     treeTrunk.scaleToFit(SIZE - 0.2, SIZE - 0.2, 50)
   )
   .stl('tree_trunk_tile');
+*/

@@ -14,16 +14,23 @@ import { view } from './view.js';
 
 export const LoadStl = Shape.registerMethod3(
   'LoadStl',
-  ['string', 'modes:binary,ascii,wrap', 'options'],
+  [
+    'string',
+    'modes:binary,ascii,wrap,removeSelfIntersections,autorefine',
+    'number',
+    'options',
+  ],
   async (
     path,
-    { binary, ascii, wrap },
+    { binary, ascii, wrap, removeSelfIntersections, autorefine },
+    implicitFaceCountLimit = 0,
     {
       wrapAbsoluteAlpha,
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold = 0,
+      faceCountLimit = implicitFaceCountLimit,
+      sharpEdgeThreshold = 120 / 360,
     } = {}
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
@@ -43,7 +50,11 @@ export const LoadStl = Shape.registerMethod3(
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold,
+      faceCountLimit,
+      sharpEdgeThreshold,
+      doRemoveSelfIntersections: removeSelfIntersections,
+      doWrap: wrap,
+      doAutorefine: autorefine,
     });
   }
 );

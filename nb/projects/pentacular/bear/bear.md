@@ -16,10 +16,6 @@ const spacing = control('spacing', 2, 'input');
 const a = await LoadStl(url).align('z>');
 ```
 
-![Image](bear.md.$2_bear.png)
-
-[bear.stl](bear.bear.stl)
-
 This is a low-poly model of a bear.
 
 ```JavaScript
@@ -28,13 +24,7 @@ await a.stl('bear').note('This is a low-poly model of a bear.');
 
 Stl sliced each 2mm up to 200mm.
 
-![Image](bear.md.$3.png)
-
 Laid out on a single sheet for cutting.
-
-![Image](bear.md.$3_slices.png)
-
-[slices.pdf](bear.slices.pdf)
 
 ```JavaScript
 await a.section(seq({ to: height, by: spacing }, XY, Group))

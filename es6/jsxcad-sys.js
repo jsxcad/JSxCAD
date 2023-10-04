@@ -2395,6 +2395,7 @@ const getFileWriter = () => {
     };
   } else if (isBrowser || isWebWorker) {
     return async (qualifiedPath, data) => {
+      if (navigator.storage && navigator.storage.estimate) ;
       return db(qualifiedPath).setItemAndIncrementVersion(qualifiedPath, data);
     };
   }

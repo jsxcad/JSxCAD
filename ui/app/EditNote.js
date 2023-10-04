@@ -1,6 +1,6 @@
 import * as PropTypes from 'prop-types';
 
-import { CodeJar } from 'codejar';
+import Card from 'react-bootstrap/Card';
 import React from 'react';
 
 export class EditNote extends React.Component {
@@ -23,34 +23,42 @@ export class EditNote extends React.Component {
 
   async componentWillUnmount() {}
 
-  onChange(id, text) {
-    const { onChange } = this.props;
-    if (onChange) {
-      onChange(text, id);
+  onChange(event) {
+    const { onChange, note } = this.props;
+    if (onChange && this.ref && this.ref.innerText !== note.sourceText) {
+      onChange(this.ref.innerText, note);
     }
   }
 
-  shouldComponentUpdate() {
-    return false;
+  shouldComponentUpdate(nextProps) {
+    return (
+      this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText
+    );
   }
 
   render() {
     const { note, onKeyDown } = this.props;
     const { sourceText } = note;
     return (
-      <div
-        class="note edit"
-        onkeydown={onKeyDown}
-        ref={(ref) => {
-          if (ref) {
-            CodeJar(ref, () => {}).onUpdate((text) =>
-              this.onChange(note, text)
-            );
-          }
-        }}
-      >
-        {sourceText}
-      </div>
+      <Card>
+        <pre
+          style={{ padding: '1em', outline: 'none' }}
+          contenteditable
+          onKeyDown={onKeyDown}
+          onInput={(event) => this.onChange(event)}
+          ref={(ref) => {
+            if (this.ref === ref) {
+              return;
+            }
+            this.ref = ref;
+            if (ref !== null) {
+              ref.innerText = sourceText;
+            }
+          }}
+        >
+          {sourceText}
+        </pre>
+      </Card>
     );
   }
 }

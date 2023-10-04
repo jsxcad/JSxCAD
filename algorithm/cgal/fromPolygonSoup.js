@@ -11,7 +11,11 @@ export const fromPolygonSoup = (
   wrapRelativeOffset = 5000,
   wrapAbsoluteAlpha = 0,
   wrapAbsoluteOffset = 0,
-  cornerThreshold = 0
+  faceCountLimit = 0,
+  sharpEdgeThreshold = 0,
+  doRemoveSelfIntersections = false,
+  doWrap = false,
+  doAutorefine = false
 ) =>
   withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
     const status = g.FromPolygonSoup(
@@ -34,7 +38,11 @@ export const fromPolygonSoup = (
       wrapAbsoluteOffset,
       wrapRelativeAlpha,
       wrapRelativeOffset,
-      cornerThreshold
+      faceCountLimit,
+      sharpEdgeThreshold,
+      doRemoveSelfIntersections,
+      doWrap,
+      doAutorefine
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

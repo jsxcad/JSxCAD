@@ -1154,103 +1154,6 @@ var compat_module = /*#__PURE__*/Object.freeze({
 	useErrorBoundary: q$1
 });
 
-function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-    return target;
-  };
-  return _extends.apply(this, arguments);
-}
-
-function _objectWithoutPropertiesLoose$3(source, excluded) {
-  if (source == null) return {};
-  var target = {};
-  var sourceKeys = Object.keys(source);
-  var key, i;
-  for (i = 0; i < sourceKeys.length; i++) {
-    key = sourceKeys[i];
-    if (excluded.indexOf(key) >= 0) continue;
-    target[key] = source[key];
-  }
-  return target;
-}
-
-function defaultKey(key) {
-  return 'default' + key.charAt(0).toUpperCase() + key.substr(1);
-}
-
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
-
-function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-
-function useUncontrolledProp(propValue, defaultValue, handler) {
-  var wasPropRef = s(propValue !== undefined);
-
-  var _useState = l(defaultValue),
-      stateValue = _useState[0],
-      setState = _useState[1];
-
-  var isProp = propValue !== undefined;
-  var wasProp = wasPropRef.current;
-  wasPropRef.current = isProp;
-  /**
-   * If a prop switches from controlled to Uncontrolled
-   * reset its value to the defaultValue
-   */
-
-  if (!isProp && wasProp && stateValue !== defaultValue) {
-    setState(defaultValue);
-  }
-
-  return [isProp ? propValue : stateValue, A$1(function (value) {
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    if (handler) handler.apply(void 0, [value].concat(args));
-    setState(value);
-  }, [handler])];
-}
-function useUncontrolled(props, config) {
-  return Object.keys(config).reduce(function (result, fieldName) {
-    var _extends2;
-
-    var _ref = result,
-        defaultValue = _ref[defaultKey(fieldName)],
-        propsValue = _ref[fieldName],
-        rest = _objectWithoutPropertiesLoose$3(_ref, [defaultKey(fieldName), fieldName].map(_toPropertyKey));
-
-    var handlerName = config[fieldName];
-
-    var _useUncontrolledProp = useUncontrolledProp(propsValue, defaultValue, props[handlerName]),
-        value = _useUncontrolledProp[0],
-        handler = _useUncontrolledProp[1];
-
-    return _extends({}, rest, (_extends2 = {}, _extends2[fieldName] = value, _extends2[handlerName] = handler, _extends2));
-  }, props);
-}
-
-function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
-  return _setPrototypeOf(o, p);
-}
-
-function _inheritsLoose(subClass, superClass) {
-  subClass.prototype = Object.create(superClass.prototype);
-  subClass.prototype.constructor = subClass;
-  _setPrototypeOf(subClass, superClass);
-}
-
 var o=0;function e(_,e,n,t,f){var l,s,u={};for(s in e)"ref"==s?l=e[s]:u[s]=e[s];var a={type:_,props:u,key:n,ref:l,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:--o,__source:t,__self:f};if("function"==typeof _&&(l=_.defaultProps))for(s in l)void 0===u[s]&&(u[s]=l[s]);return l$1.vnode&&l$1.vnode(a),a}
 
 const DEFAULT_BREAKPOINTS = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
@@ -1279,1315 +1182,205 @@ function useBootstrapMinBreakpoint() {
   return minBreakpoint;
 }
 
-/**
- * Returns the owner document of a given element.
- * 
- * @param node the element
- */
-function ownerDocument(node) {
-  return node && node.ownerDocument || document;
-}
-
-/**
- * Returns the owner window of a given element.
- * 
- * @param node the element
- */
-
-function ownerWindow(node) {
-  var doc = ownerDocument(node);
-  return doc && doc.defaultView || window;
-}
-
-/**
- * Returns one or all computed style properties of an element.
- * 
- * @param node the element
- * @param psuedoElement the style property
- */
-
-function getComputedStyle$1(node, psuedoElement) {
-  return ownerWindow(node).getComputedStyle(node, psuedoElement);
-}
-
-var rUpper = /([A-Z])/g;
-function hyphenate(string) {
-  return string.replace(rUpper, '-$1').toLowerCase();
-}
-
-/**
- * Copyright 2013-2014, Facebook, Inc.
- * All rights reserved.
- * https://github.com/facebook/react/blob/2aeb8a2a6beb00617a4217f7f8284924fa2ad819/src/vendor/core/hyphenateStyleName.js
- */
-var msPattern = /^ms-/;
-function hyphenateStyleName(string) {
-  return hyphenate(string).replace(msPattern, '-ms-');
-}
-
-var supportedTransforms = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i;
-function isTransform(value) {
-  return !!(value && supportedTransforms.test(value));
-}
-
-function style(node, property) {
-  var css = '';
-  var transforms = '';
-
-  if (typeof property === 'string') {
-    return node.style.getPropertyValue(hyphenateStyleName(property)) || getComputedStyle$1(node).getPropertyValue(hyphenateStyleName(property));
-  }
-
-  Object.keys(property).forEach(function (key) {
-    var value = property[key];
-
-    if (!value && value !== 0) {
-      node.style.removeProperty(hyphenateStyleName(key));
-    } else if (isTransform(key)) {
-      transforms += key + "(" + value + ") ";
-    } else {
-      css += hyphenateStyleName(key) + ": " + value + ";";
-    }
-  });
-
-  if (transforms) {
-    css += "transform: " + transforms + ";";
-  }
-
-  node.style.cssText += ";" + css;
-}
-
-var config = {
-  disabled: false
-};
-
-var timeoutsShape = PropTypes$3.oneOfType([PropTypes$3.number, PropTypes$3.shape({
-  enter: PropTypes$3.number,
-  exit: PropTypes$3.number,
-  appear: PropTypes$3.number
-}).isRequired]) ;
-PropTypes$3.oneOfType([PropTypes$3.string, PropTypes$3.shape({
-  enter: PropTypes$3.string,
-  exit: PropTypes$3.string,
-  active: PropTypes$3.string
-}), PropTypes$3.shape({
-  enter: PropTypes$3.string,
-  enterDone: PropTypes$3.string,
-  enterActive: PropTypes$3.string,
-  exit: PropTypes$3.string,
-  exitDone: PropTypes$3.string,
-  exitActive: PropTypes$3.string
-})]) ;
-
-var TransitionGroupContext = ReactDOM$3.createContext(null);
-
-var forceReflow = function forceReflow(node) {
-  return node.scrollTop;
-};
-
-var UNMOUNTED = 'unmounted';
-var EXITED = 'exited';
-var ENTERING = 'entering';
-var ENTERED = 'entered';
-var EXITING = 'exiting';
-/**
- * The Transition component lets you describe a transition from one component
- * state to another _over time_ with a simple declarative API. Most commonly
- * it's used to animate the mounting and unmounting of a component, but can also
- * be used to describe in-place transition states as well.
- *
- * ---
- *
- * **Note**: `Transition` is a platform-agnostic base component. If you're using
- * transitions in CSS, you'll probably want to use
- * [`CSSTransition`](https://reactcommunity.org/react-transition-group/css-transition)
- * instead. It inherits all the features of `Transition`, but contains
- * additional features necessary to play nice with CSS transitions (hence the
- * name of the component).
- *
- * ---
- *
- * By default the `Transition` component does not alter the behavior of the
- * component it renders, it only tracks "enter" and "exit" states for the
- * components. It's up to you to give meaning and effect to those states. For
- * example we can add styles to a component when it enters or exits:
- *
- * ```jsx
- * import { Transition } from 'react-transition-group';
- *
- * const duration = 300;
- *
- * const defaultStyle = {
- *   transition: `opacity ${duration}ms ease-in-out`,
- *   opacity: 0,
- * }
- *
- * const transitionStyles = {
- *   entering: { opacity: 1 },
- *   entered:  { opacity: 1 },
- *   exiting:  { opacity: 0 },
- *   exited:  { opacity: 0 },
- * };
- *
- * const Fade = ({ in: inProp }) => (
- *   <Transition in={inProp} timeout={duration}>
- *     {state => (
- *       <div style={{
- *         ...defaultStyle,
- *         ...transitionStyles[state]
- *       }}>
- *         I'm a fade Transition!
- *       </div>
- *     )}
- *   </Transition>
- * );
- * ```
- *
- * There are 4 main states a Transition can be in:
- *  - `'entering'`
- *  - `'entered'`
- *  - `'exiting'`
- *  - `'exited'`
- *
- * Transition state is toggled via the `in` prop. When `true` the component
- * begins the "Enter" stage. During this stage, the component will shift from
- * its current transition state, to `'entering'` for the duration of the
- * transition and then to the `'entered'` stage once it's complete. Let's take
- * the following example (we'll use the
- * [useState](https://reactjs.org/docs/hooks-reference.html#usestate) hook):
- *
- * ```jsx
- * function App() {
- *   const [inProp, setInProp] = useState(false);
- *   return (
- *     <div>
- *       <Transition in={inProp} timeout={500}>
- *         {state => (
- *           // ...
- *         )}
- *       </Transition>
- *       <button onClick={() => setInProp(true)}>
- *         Click to Enter
- *       </button>
- *     </div>
- *   );
- * }
- * ```
- *
- * When the button is clicked the component will shift to the `'entering'` state
- * and stay there for 500ms (the value of `timeout`) before it finally switches
- * to `'entered'`.
- *
- * When `in` is `false` the same thing happens except the state moves from
- * `'exiting'` to `'exited'`.
- */
-
-var Transition = /*#__PURE__*/function (_React$Component) {
-  _inheritsLoose(Transition, _React$Component);
-
-  function Transition(props, context) {
-    var _this;
-
-    _this = _React$Component.call(this, props, context) || this;
-    var parentGroup = context; // In the context of a TransitionGroup all enters are really appears
-
-    var appear = parentGroup && !parentGroup.isMounting ? props.enter : props.appear;
-    var initialStatus;
-    _this.appearStatus = null;
-
-    if (props.in) {
-      if (appear) {
-        initialStatus = EXITED;
-        _this.appearStatus = ENTERING;
-      } else {
-        initialStatus = ENTERED;
-      }
-    } else {
-      if (props.unmountOnExit || props.mountOnEnter) {
-        initialStatus = UNMOUNTED;
-      } else {
-        initialStatus = EXITED;
-      }
-    }
-
-    _this.state = {
-      status: initialStatus
-    };
-    _this.nextCallback = null;
-    return _this;
-  }
-
-  Transition.getDerivedStateFromProps = function getDerivedStateFromProps(_ref, prevState) {
-    var nextIn = _ref.in;
-
-    if (nextIn && prevState.status === UNMOUNTED) {
-      return {
-        status: EXITED
-      };
-    }
-
-    return null;
-  } // getSnapshotBeforeUpdate(prevProps) {
-  //   let nextStatus = null
-  //   if (prevProps !== this.props) {
-  //     const { status } = this.state
-  //     if (this.props.in) {
-  //       if (status !== ENTERING && status !== ENTERED) {
-  //         nextStatus = ENTERING
-  //       }
-  //     } else {
-  //       if (status === ENTERING || status === ENTERED) {
-  //         nextStatus = EXITING
-  //       }
-  //     }
-  //   }
-  //   return { nextStatus }
-  // }
-  ;
-
-  var _proto = Transition.prototype;
-
-  _proto.componentDidMount = function componentDidMount() {
-    this.updateStatus(true, this.appearStatus);
-  };
-
-  _proto.componentDidUpdate = function componentDidUpdate(prevProps) {
-    var nextStatus = null;
-
-    if (prevProps !== this.props) {
-      var status = this.state.status;
-
-      if (this.props.in) {
-        if (status !== ENTERING && status !== ENTERED) {
-          nextStatus = ENTERING;
-        }
-      } else {
-        if (status === ENTERING || status === ENTERED) {
-          nextStatus = EXITING;
-        }
-      }
-    }
-
-    this.updateStatus(false, nextStatus);
-  };
-
-  _proto.componentWillUnmount = function componentWillUnmount() {
-    this.cancelNextCallback();
-  };
-
-  _proto.getTimeouts = function getTimeouts() {
-    var timeout = this.props.timeout;
-    var exit, enter, appear;
-    exit = enter = appear = timeout;
-
-    if (timeout != null && typeof timeout !== 'number') {
-      exit = timeout.exit;
-      enter = timeout.enter; // TODO: remove fallback for next major
-
-      appear = timeout.appear !== undefined ? timeout.appear : enter;
-    }
-
-    return {
-      exit: exit,
-      enter: enter,
-      appear: appear
-    };
-  };
-
-  _proto.updateStatus = function updateStatus(mounting, nextStatus) {
-    if (mounting === void 0) {
-      mounting = false;
-    }
-
-    if (nextStatus !== null) {
-      // nextStatus will always be ENTERING or EXITING.
-      this.cancelNextCallback();
-
-      if (nextStatus === ENTERING) {
-        if (this.props.unmountOnExit || this.props.mountOnEnter) {
-          var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this); // https://github.com/reactjs/react-transition-group/pull/749
-          // With unmountOnExit or mountOnEnter, the enter animation should happen at the transition between `exited` and `entering`.
-          // To make the animation happen,  we have to separate each rendering and avoid being processed as batched.
-
-          if (node) forceReflow(node);
-        }
-
-        this.performEnter(mounting);
-      } else {
-        this.performExit();
-      }
-    } else if (this.props.unmountOnExit && this.state.status === EXITED) {
-      this.setState({
-        status: UNMOUNTED
-      });
-    }
-  };
-
-  _proto.performEnter = function performEnter(mounting) {
-    var _this2 = this;
-
-    var enter = this.props.enter;
-    var appearing = this.context ? this.context.isMounting : mounting;
-
-    var _ref2 = this.props.nodeRef ? [appearing] : [ReactDOM$3.findDOMNode(this), appearing],
-        maybeNode = _ref2[0],
-        maybeAppearing = _ref2[1];
-
-    var timeouts = this.getTimeouts();
-    var enterTimeout = appearing ? timeouts.appear : timeouts.enter; // no enter animation skip right to ENTERED
-    // if we are mounting and running this it means appear _must_ be set
-
-    if (!mounting && !enter || config.disabled) {
-      this.safeSetState({
-        status: ENTERED
-      }, function () {
-        _this2.props.onEntered(maybeNode);
-      });
-      return;
-    }
-
-    this.props.onEnter(maybeNode, maybeAppearing);
-    this.safeSetState({
-      status: ENTERING
-    }, function () {
-      _this2.props.onEntering(maybeNode, maybeAppearing);
-
-      _this2.onTransitionEnd(enterTimeout, function () {
-        _this2.safeSetState({
-          status: ENTERED
-        }, function () {
-          _this2.props.onEntered(maybeNode, maybeAppearing);
-        });
-      });
-    });
-  };
-
-  _proto.performExit = function performExit() {
-    var _this3 = this;
-
-    var exit = this.props.exit;
-    var timeouts = this.getTimeouts();
-    var maybeNode = this.props.nodeRef ? undefined : ReactDOM$3.findDOMNode(this); // no exit animation skip right to EXITED
-
-    if (!exit || config.disabled) {
-      this.safeSetState({
-        status: EXITED
-      }, function () {
-        _this3.props.onExited(maybeNode);
-      });
-      return;
-    }
-
-    this.props.onExit(maybeNode);
-    this.safeSetState({
-      status: EXITING
-    }, function () {
-      _this3.props.onExiting(maybeNode);
-
-      _this3.onTransitionEnd(timeouts.exit, function () {
-        _this3.safeSetState({
-          status: EXITED
-        }, function () {
-          _this3.props.onExited(maybeNode);
-        });
-      });
-    });
-  };
-
-  _proto.cancelNextCallback = function cancelNextCallback() {
-    if (this.nextCallback !== null) {
-      this.nextCallback.cancel();
-      this.nextCallback = null;
-    }
-  };
-
-  _proto.safeSetState = function safeSetState(nextState, callback) {
-    // This shouldn't be necessary, but there are weird race conditions with
-    // setState callbacks and unmounting in testing, so always make sure that
-    // we can cancel any pending setState callbacks after we unmount.
-    callback = this.setNextCallback(callback);
-    this.setState(nextState, callback);
-  };
-
-  _proto.setNextCallback = function setNextCallback(callback) {
-    var _this4 = this;
-
-    var active = true;
-
-    this.nextCallback = function (event) {
-      if (active) {
-        active = false;
-        _this4.nextCallback = null;
-        callback(event);
-      }
-    };
-
-    this.nextCallback.cancel = function () {
-      active = false;
-    };
-
-    return this.nextCallback;
-  };
-
-  _proto.onTransitionEnd = function onTransitionEnd(timeout, handler) {
-    this.setNextCallback(handler);
-    var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this);
-    var doesNotHaveTimeoutOrListener = timeout == null && !this.props.addEndListener;
-
-    if (!node || doesNotHaveTimeoutOrListener) {
-      setTimeout(this.nextCallback, 0);
-      return;
-    }
-
-    if (this.props.addEndListener) {
-      var _ref3 = this.props.nodeRef ? [this.nextCallback] : [node, this.nextCallback],
-          maybeNode = _ref3[0],
-          maybeNextCallback = _ref3[1];
-
-      this.props.addEndListener(maybeNode, maybeNextCallback);
-    }
-
-    if (timeout != null) {
-      setTimeout(this.nextCallback, timeout);
-    }
-  };
-
-  _proto.render = function render() {
-    var status = this.state.status;
-
-    if (status === UNMOUNTED) {
-      return null;
-    }
-
-    var _this$props = this.props,
-        children = _this$props.children;
-        _this$props.in;
-        _this$props.mountOnEnter;
-        _this$props.unmountOnExit;
-        _this$props.appear;
-        _this$props.enter;
-        _this$props.exit;
-        _this$props.timeout;
-        _this$props.addEndListener;
-        _this$props.onEnter;
-        _this$props.onEntering;
-        _this$props.onEntered;
-        _this$props.onExit;
-        _this$props.onExiting;
-        _this$props.onExited;
-        _this$props.nodeRef;
-        var childProps = _objectWithoutPropertiesLoose$3(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
-
-    return (
-      /*#__PURE__*/
-      // allows for nested Transitions
-      ReactDOM$3.createElement(TransitionGroupContext.Provider, {
-        value: null
-      }, typeof children === 'function' ? children(status, childProps) : ReactDOM$3.cloneElement(ReactDOM$3.Children.only(children), childProps))
-    );
-  };
-
-  return Transition;
-}(ReactDOM$3.Component);
-
-Transition.contextType = TransitionGroupContext;
-Transition.propTypes = {
-  /**
-   * A React reference to DOM element that need to transition:
-   * https://stackoverflow.com/a/51127130/4671932
-   *
-   *   - When `nodeRef` prop is used, `node` is not passed to callback functions
-   *      (e.g. `onEnter`) because user already has direct access to the node.
-   *   - When changing `key` prop of `Transition` in a `TransitionGroup` a new
-   *     `nodeRef` need to be provided to `Transition` with changed `key` prop
-   *     (see
-   *     [test/CSSTransition-test.js](https://github.com/reactjs/react-transition-group/blob/13435f897b3ab71f6e19d724f145596f5910581c/test/CSSTransition-test.js#L362-L437)).
-   */
-  nodeRef: PropTypes$3.shape({
-    current: typeof Element === 'undefined' ? PropTypes$3.any : function (propValue, key, componentName, location, propFullName, secret) {
-      var value = propValue[key];
-      return PropTypes$3.instanceOf(value && 'ownerDocument' in value ? value.ownerDocument.defaultView.Element : Element)(propValue, key, componentName, location, propFullName, secret);
-    }
-  }),
-
-  /**
-   * A `function` child can be used instead of a React element. This function is
-   * called with the current transition status (`'entering'`, `'entered'`,
-   * `'exiting'`, `'exited'`), which can be used to apply context
-   * specific props to a component.
-   *
-   * ```jsx
-   * <Transition in={this.state.in} timeout={150}>
-   *   {state => (
-   *     <MyComponent className={`fade fade-${state}`} />
-   *   )}
-   * </Transition>
-   * ```
-   */
-  children: PropTypes$3.oneOfType([PropTypes$3.func.isRequired, PropTypes$3.element.isRequired]).isRequired,
-
-  /**
-   * Show the component; triggers the enter or exit states
-   */
-  in: PropTypes$3.bool,
-
-  /**
-   * By default the child component is mounted immediately along with
-   * the parent `Transition` component. If you want to "lazy mount" the component on the
-   * first `in={true}` you can set `mountOnEnter`. After the first enter transition the component will stay
-   * mounted, even on "exited", unless you also specify `unmountOnExit`.
-   */
-  mountOnEnter: PropTypes$3.bool,
-
-  /**
-   * By default the child component stays mounted after it reaches the `'exited'` state.
-   * Set `unmountOnExit` if you'd prefer to unmount the component after it finishes exiting.
-   */
-  unmountOnExit: PropTypes$3.bool,
-
-  /**
-   * By default the child component does not perform the enter transition when
-   * it first mounts, regardless of the value of `in`. If you want this
-   * behavior, set both `appear` and `in` to `true`.
-   *
-   * > **Note**: there are no special appear states like `appearing`/`appeared`, this prop
-   * > only adds an additional enter transition. However, in the
-   * > `<CSSTransition>` component that first enter transition does result in
-   * > additional `.appear-*` classes, that way you can choose to style it
-   * > differently.
-   */
-  appear: PropTypes$3.bool,
-
-  /**
-   * Enable or disable enter transitions.
-   */
-  enter: PropTypes$3.bool,
-
-  /**
-   * Enable or disable exit transitions.
-   */
-  exit: PropTypes$3.bool,
-
-  /**
-   * The duration of the transition, in milliseconds.
-   * Required unless `addEndListener` is provided.
-   *
-   * You may specify a single timeout for all transitions:
-   *
-   * ```jsx
-   * timeout={500}
-   * ```
-   *
-   * or individually:
-   *
-   * ```jsx
-   * timeout={{
-   *  appear: 500,
-   *  enter: 300,
-   *  exit: 500,
-   * }}
-   * ```
-   *
-   * - `appear` defaults to the value of `enter`
-   * - `enter` defaults to `0`
-   * - `exit` defaults to `0`
-   *
-   * @type {number | { enter?: number, exit?: number, appear?: number }}
-   */
-  timeout: function timeout(props) {
-    var pt = timeoutsShape;
-    if (!props.addEndListener) pt = pt.isRequired;
-
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    return pt.apply(void 0, [props].concat(args));
-  },
-
-  /**
-   * Add a custom transition end trigger. Called with the transitioning
-   * DOM node and a `done` callback. Allows for more fine grained transition end
-   * logic. Timeouts are still used as a fallback if provided.
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
-   *
-   * ```jsx
-   * addEndListener={(node, done) => {
-   *   // use the css transitionend event to mark the finish of a transition
-   *   node.addEventListener('transitionend', done, false);
-   * }}
-   * ```
-   */
-  addEndListener: PropTypes$3.func,
-
-  /**
-   * Callback fired before the "entering" status is applied. An extra parameter
-   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
-   *
-   * @type Function(node: HtmlElement, isAppearing: bool) -> void
-   */
-  onEnter: PropTypes$3.func,
-
-  /**
-   * Callback fired after the "entering" status is applied. An extra parameter
-   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
-   *
-   * @type Function(node: HtmlElement, isAppearing: bool)
-   */
-  onEntering: PropTypes$3.func,
-
-  /**
-   * Callback fired after the "entered" status is applied. An extra parameter
-   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
-   *
-   * @type Function(node: HtmlElement, isAppearing: bool) -> void
-   */
-  onEntered: PropTypes$3.func,
-
-  /**
-   * Callback fired before the "exiting" status is applied.
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
-   *
-   * @type Function(node: HtmlElement) -> void
-   */
-  onExit: PropTypes$3.func,
-
-  /**
-   * Callback fired after the "exiting" status is applied.
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
-   *
-   * @type Function(node: HtmlElement) -> void
-   */
-  onExiting: PropTypes$3.func,
-
-  /**
-   * Callback fired after the "exited" status is applied.
-   *
-   * **Note**: when `nodeRef` prop is passed, `node` is not passed
-   *
-   * @type Function(node: HtmlElement) -> void
-   */
-  onExited: PropTypes$3.func
-} ; // Name the function so it is clearer in the documentation
-
-function noop$1() {}
-
-Transition.defaultProps = {
-  in: false,
-  mountOnEnter: false,
-  unmountOnExit: false,
-  appear: false,
-  enter: true,
-  exit: true,
-  onEnter: noop$1,
-  onEntering: noop$1,
-  onEntered: noop$1,
-  onExit: noop$1,
-  onExiting: noop$1,
-  onExited: noop$1
-};
-Transition.UNMOUNTED = UNMOUNTED;
-Transition.EXITED = EXITED;
-Transition.ENTERING = ENTERING;
-Transition.ENTERED = ENTERED;
-Transition.EXITING = EXITING;
-
-var canUseDOM$1 = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
-
-/* eslint-disable no-return-assign */
-var optionsSupported = false;
-var onceSupported = false;
-
-try {
-  var options = {
-    get passive() {
-      return optionsSupported = true;
-    },
-
-    get once() {
-      // eslint-disable-next-line no-multi-assign
-      return onceSupported = optionsSupported = true;
-    }
-
-  };
-
-  if (canUseDOM$1) {
-    window.addEventListener('test', options, options);
-    window.removeEventListener('test', options, true);
-  }
-} catch (e) {
-  /* */
-}
-
-/**
- * An `addEventListener` ponyfill, supports the `once` option
- * 
- * @param node the element
- * @param eventName the event name
- * @param handle the handler
- * @param options event options
- */
-function addEventListener(node, eventName, handler, options) {
-  if (options && typeof options !== 'boolean' && !onceSupported) {
-    var once = options.once,
-        capture = options.capture;
-    var wrappedHandler = handler;
-
-    if (!onceSupported && once) {
-      wrappedHandler = handler.__once || function onceHandler(event) {
-        this.removeEventListener(eventName, onceHandler, capture);
-        handler.call(this, event);
-      };
-
-      handler.__once = wrappedHandler;
-    }
-
-    node.addEventListener(eventName, wrappedHandler, optionsSupported ? options : capture);
-  }
-
-  node.addEventListener(eventName, handler, options);
-}
-
-/**
- * A `removeEventListener` ponyfill
- * 
- * @param node the element
- * @param eventName the event name
- * @param handle the handler
- * @param options event options
- */
-function removeEventListener(node, eventName, handler, options) {
-  var capture = options && typeof options !== 'boolean' ? options.capture : options;
-  node.removeEventListener(eventName, handler, capture);
-
-  if (handler.__once) {
-    node.removeEventListener(eventName, handler.__once, capture);
-  }
-}
-
-function listen(node, eventName, handler, options) {
-  addEventListener(node, eventName, handler, options);
-  return function () {
-    removeEventListener(node, eventName, handler, options);
-  };
-}
-
-/**
- * Triggers an event on a given element.
- * 
- * @param node the element
- * @param eventName the event name to trigger
- * @param bubbles whether the event should bubble up
- * @param cancelable whether the event should be cancelable
- */
-function triggerEvent(node, eventName, bubbles, cancelable) {
-  if (bubbles === void 0) {
-    bubbles = false;
-  }
-
-  if (cancelable === void 0) {
-    cancelable = true;
-  }
-
-  if (node) {
-    var event = document.createEvent('HTMLEvents');
-    event.initEvent(eventName, bubbles, cancelable);
-    node.dispatchEvent(event);
-  }
-}
-
-function parseDuration$1(node) {
-  var str = style(node, 'transitionDuration') || '';
-  var mult = str.indexOf('ms') === -1 ? 1000 : 1;
-  return parseFloat(str) * mult;
-}
-
-function emulateTransitionEnd(element, duration, padding) {
-  if (padding === void 0) {
-    padding = 5;
-  }
-
-  var called = false;
-  var handle = setTimeout(function () {
-    if (!called) triggerEvent(element, 'transitionend', true);
-  }, duration + padding);
-  var remove = listen(element, 'transitionend', function () {
-    called = true;
-  }, {
-    once: true
-  });
-  return function () {
-    clearTimeout(handle);
-    remove();
-  };
-}
-
-function transitionEnd(element, handler, duration, padding) {
-  if (duration == null) duration = parseDuration$1(element) || 0;
-  var removeEmulate = emulateTransitionEnd(element, duration, padding);
-  var remove = listen(element, 'transitionend', handler);
-  return function () {
-    removeEmulate();
-    remove();
-  };
-}
-
-function parseDuration(node, property) {
-  const str = style(node, property) || '';
-  const mult = str.indexOf('ms') === -1 ? 1000 : 1;
-  return parseFloat(str) * mult;
-}
-function transitionEndListener(element, handler) {
-  const duration = parseDuration(element, 'transitionDuration');
-  const delay = parseDuration(element, 'transitionDelay');
-  const remove = transitionEnd(element, e => {
-    if (e.target === element) {
-      remove();
-      handler(e);
-    }
-  }, duration + delay);
-}
-
-/**
- * Safe chained function
- *
- * Will only create a new function if needed,
- * otherwise will pass back existing functions or null.
- *
- * @param {function} functions to chain
- * @returns {function|null}
- */
-function createChainedFunction(...funcs) {
-  return funcs.filter(f => f != null).reduce((acc, f) => {
-    if (typeof f !== 'function') {
-      throw new Error('Invalid Argument Type, must only provide functions, undefined, or null.');
-    }
-    if (acc === null) return f;
-    return function chainedFunction(...args) {
-      // @ts-ignore
-      acc.apply(this, args);
-      // @ts-ignore
-      f.apply(this, args);
-    };
-  }, null);
-}
-
-// reading a dimension prop will cause the browser to recalculate,
-// which will let our animations work
-function triggerBrowserReflow(node) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  node.offsetHeight;
-}
-
-const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
-  ref.current = value;
-};
-function mergeRefs(refA, refB) {
-  const a = toFnRef(refA);
-  const b = toFnRef(refB);
-  return value => {
-    if (a) a(value);
-    if (b) b(value);
-  };
-}
-
-/**
- * Create and returns a single callback ref composed from two other Refs.
- *
- * ```tsx
- * const Button = React.forwardRef((props, ref) => {
- *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
- *   const mergedRef = useMergedRefs(ref, attachRef);
- *
- *   return <button ref={mergedRef} {...props}/>
- * })
- * ```
- *
- * @param refA A Callback or mutable Ref
- * @param refB A Callback or mutable Ref
- * @category refs
- */
-function useMergedRefs(refA, refB) {
-  return d(() => mergeRefs(refA, refB), [refA, refB]);
-}
-
-function safeFindDOMNode(componentOrElement) {
-  if (componentOrElement && 'setState' in componentOrElement) {
-    return ReactDOM$3.findDOMNode(componentOrElement);
-  }
-  return componentOrElement != null ? componentOrElement : null;
-}
-
-// Normalizes Transition callbacks when nodeRef is used.
-const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
-  onEnter,
-  onEntering,
-  onEntered,
-  onExit,
-  onExiting,
-  onExited,
-  addEndListener,
-  children,
-  childRef,
-  ...props
-}, ref) => {
-  const nodeRef = s(null);
-  const mergedRef = useMergedRefs(nodeRef, childRef);
-  const attachRef = r => {
-    mergedRef(safeFindDOMNode(r));
-  };
-  const normalize = callback => param => {
-    if (callback && nodeRef.current) {
-      callback(nodeRef.current, param);
-    }
-  };
-
-  /* eslint-disable react-hooks/exhaustive-deps */
-  const handleEnter = A$1(normalize(onEnter), [onEnter]);
-  const handleEntering = A$1(normalize(onEntering), [onEntering]);
-  const handleEntered = A$1(normalize(onEntered), [onEntered]);
-  const handleExit = A$1(normalize(onExit), [onExit]);
-  const handleExiting = A$1(normalize(onExiting), [onExiting]);
-  const handleExited = A$1(normalize(onExited), [onExited]);
-  const handleAddEndListener = A$1(normalize(addEndListener), [addEndListener]);
-  /* eslint-enable react-hooks/exhaustive-deps */
-
-  return /*#__PURE__*/e(Transition, {
-    ref: ref,
-    ...props,
-    onEnter: handleEnter,
-    onEntered: handleEntered,
-    onEntering: handleEntering,
-    onExit: handleExit,
-    onExited: handleExited,
-    onExiting: handleExiting,
-    addEndListener: handleAddEndListener,
-    nodeRef: nodeRef,
-    children: typeof children === 'function' ? (status, innerProps) =>
-    // TODO: Types for RTG missing innerProps, so need to cast.
-    children(status, {
-      ...innerProps,
-      ref: attachRef
-    }) : /*#__PURE__*/ReactDOM$3.cloneElement(children, {
-      ref: attachRef
-    })
-  });
-});
-var TransitionWrapper$1 = TransitionWrapper;
-
-const MARGINS = {
-  height: ['marginTop', 'marginBottom'],
-  width: ['marginLeft', 'marginRight']
-};
-function getDefaultDimensionValue(dimension, elem) {
-  const offset = `offset${dimension[0].toUpperCase()}${dimension.slice(1)}`;
-  const value = elem[offset];
-  const margins = MARGINS[dimension];
-  return value +
-  // @ts-ignore
-  parseInt(style(elem, margins[0]), 10) +
-  // @ts-ignore
-  parseInt(style(elem, margins[1]), 10);
-}
-const collapseStyles = {
-  [EXITED]: 'collapse',
-  [EXITING]: 'collapsing',
-  [ENTERING]: 'collapsing',
-  [ENTERED]: 'collapse show'
-};
-const Collapse = /*#__PURE__*/ReactDOM$3.forwardRef(({
-  onEnter,
-  onEntering,
-  onEntered,
-  onExit,
-  onExiting,
+const CardBody = /*#__PURE__*/x(({
   className,
-  children,
-  dimension = 'height',
-  in: inProp = false,
-  timeout = 300,
-  mountOnEnter = false,
-  unmountOnExit = false,
-  appear = false,
-  getDimensionValue = getDefaultDimensionValue,
+  bsPrefix,
+  as: Component = 'div',
   ...props
 }, ref) => {
-  /* Compute dimension */
-  const computedDimension = typeof dimension === 'function' ? dimension() : dimension;
-
-  /* -- Expanding -- */
-  const handleEnter = d(() => createChainedFunction(elem => {
-    elem.style[computedDimension] = '0';
-  }, onEnter), [computedDimension, onEnter]);
-  const handleEntering = d(() => createChainedFunction(elem => {
-    const scroll = `scroll${computedDimension[0].toUpperCase()}${computedDimension.slice(1)}`;
-    elem.style[computedDimension] = `${elem[scroll]}px`;
-  }, onEntering), [computedDimension, onEntering]);
-  const handleEntered = d(() => createChainedFunction(elem => {
-    elem.style[computedDimension] = null;
-  }, onEntered), [computedDimension, onEntered]);
-
-  /* -- Collapsing -- */
-  const handleExit = d(() => createChainedFunction(elem => {
-    elem.style[computedDimension] = `${getDimensionValue(computedDimension, elem)}px`;
-    triggerBrowserReflow(elem);
-  }, onExit), [onExit, getDimensionValue, computedDimension]);
-  const handleExiting = d(() => createChainedFunction(elem => {
-    elem.style[computedDimension] = null;
-  }, onExiting), [computedDimension, onExiting]);
-  return /*#__PURE__*/e(TransitionWrapper$1, {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
+  return /*#__PURE__*/e(Component, {
     ref: ref,
-    addEndListener: transitionEndListener,
-    ...props,
-    "aria-expanded": props.role ? inProp : null,
-    onEnter: handleEnter,
-    onEntering: handleEntering,
-    onEntered: handleEntered,
-    onExit: handleExit,
-    onExiting: handleExiting,
-    childRef: children.ref,
-    in: inProp,
-    timeout: timeout,
-    mountOnEnter: mountOnEnter,
-    unmountOnExit: unmountOnExit,
-    appear: appear,
-    children: (state, innerProps) => /*#__PURE__*/ReactDOM$3.cloneElement(children, {
-      ...innerProps,
-      className: classNames(className, children.props.className, collapseStyles[state], computedDimension === 'width' && 'collapse-horizontal')
-    })
+    className: classNames(className, bsPrefix),
+    ...props
   });
 });
+CardBody.displayName = 'CardBody';
+var CardBody$1 = CardBody;
 
-// @ts-ignore
-
-var Collapse$1 = Collapse;
-
-function isAccordionItemSelected(activeEventKey, eventKey) {
-  return Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : activeEventKey === eventKey;
-}
-const context$3 = /*#__PURE__*/D$1({});
-context$3.displayName = 'AccordionContext';
-var AccordionContext = context$3;
-
-/**
- * This component accepts all of [`Collapse`'s props](/docs/utilities/transitions#collapse-1).
- */
-const AccordionCollapse = /*#__PURE__*/x(({
+const CardFooter = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
   as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardFooter.displayName = 'CardFooter';
+var CardFooter$1 = CardFooter;
+
+const context$1 = /*#__PURE__*/D$1(null);
+context$1.displayName = 'CardHeaderContext';
+var CardHeaderContext = context$1;
+
+const CardHeader = /*#__PURE__*/x(({
   bsPrefix,
   className,
-  children,
-  eventKey,
-  ...props
-}, ref) => {
-  const {
-    activeEventKey
-  } = F$1(AccordionContext);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-collapse');
-  return /*#__PURE__*/e(Collapse$1, {
-    ref: ref,
-    in: isAccordionItemSelected(activeEventKey, eventKey),
-    ...props,
-    className: classNames(className, bsPrefix),
-    children: /*#__PURE__*/e(Component, {
-      children: k.only(children)
-    })
-  });
-});
-AccordionCollapse.displayName = 'AccordionCollapse';
-var AccordionCollapse$1 = AccordionCollapse;
-
-const context$2 = /*#__PURE__*/D$1({
-  eventKey: ''
-});
-context$2.displayName = 'AccordionItemContext';
-var AccordionItemContext = context$2;
-
-const AccordionBody = /*#__PURE__*/x(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'div',
-  bsPrefix,
-  className,
-  onEnter,
-  onEntering,
-  onEntered,
-  onExit,
-  onExiting,
-  onExited,
   ...props
 }, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-body');
-  const {
-    eventKey
-  } = F$1(AccordionItemContext);
-  return /*#__PURE__*/e(AccordionCollapse$1, {
-    eventKey: eventKey,
-    onEnter: onEnter,
-    onEntering: onEntering,
-    onEntered: onEntered,
-    onExit: onExit,
-    onExiting: onExiting,
-    onExited: onExited,
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
+  const contextValue = d(() => ({
+    cardHeaderBsPrefix: prefix
+  }), [prefix]);
+  return /*#__PURE__*/e(CardHeaderContext.Provider, {
+    value: contextValue,
     children: /*#__PURE__*/e(Component, {
       ref: ref,
       ...props,
-      className: classNames(className, bsPrefix)
+      className: classNames(className, prefix)
     })
   });
 });
-AccordionBody.displayName = 'AccordionBody';
-var AccordionBody$1 = AccordionBody;
+CardHeader.displayName = 'CardHeader';
+var CardHeader$1 = CardHeader;
 
-function useAccordionButton(eventKey, onClick) {
-  const {
-    activeEventKey,
-    onSelect,
-    alwaysOpen
-  } = F$1(AccordionContext);
-  return e => {
-    /*
-      Compare the event key in context with the given event key.
-      If they are the same, then collapse the component.
-    */
-    let eventKeyPassed = eventKey === activeEventKey ? null : eventKey;
-    if (alwaysOpen) {
-      if (Array.isArray(activeEventKey)) {
-        if (activeEventKey.includes(eventKey)) {
-          eventKeyPassed = activeEventKey.filter(k => k !== eventKey);
-        } else {
-          eventKeyPassed = [...activeEventKey, eventKey];
-        }
-      } else {
-        // activeEventKey is undefined.
-        eventKeyPassed = [eventKey];
-      }
-    }
-    onSelect == null ? void 0 : onSelect(eventKeyPassed, e);
-    onClick == null ? void 0 : onClick(e);
-  };
-}
-const AccordionButton = /*#__PURE__*/x(({
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'button',
+const CardImg = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
   bsPrefix,
   className,
-  onClick,
+  variant,
+  as: Component = 'img',
   ...props
 }, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-button');
-  const {
-    eventKey
-  } = F$1(AccordionItemContext);
-  const accordionOnClick = useAccordionButton(eventKey, onClick);
-  const {
-    activeEventKey
-  } = F$1(AccordionContext);
-  if (Component === 'button') {
-    props.type = 'button';
-  }
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
   return /*#__PURE__*/e(Component, {
     ref: ref,
-    onClick: accordionOnClick,
-    ...props,
-    "aria-expanded": Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : eventKey === activeEventKey,
-    className: classNames(className, bsPrefix, !isAccordionItemSelected(activeEventKey, eventKey) && 'collapsed')
+    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    ...props
   });
 });
-AccordionButton.displayName = 'AccordionButton';
-var AccordionButton$1 = AccordionButton;
+CardImg.displayName = 'CardImg';
+var CardImg$1 = CardImg;
 
-const AccordionHeader = /*#__PURE__*/x(({
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'h2',
-  bsPrefix,
+const CardImgOverlay = /*#__PURE__*/x(({
   className,
-  children,
-  onClick,
+  bsPrefix,
+  as: Component = 'div',
   ...props
 }, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-header');
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardImgOverlay.displayName = 'CardImgOverlay';
+var CardImgOverlay$1 = CardImgOverlay;
+
+const CardLink = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'a',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardLink.displayName = 'CardLink';
+var CardLink$1 = CardLink;
+
+var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+  ...p,
+  ref: ref,
+  className: classNames(p.className, className)
+})));
+
+const DivStyledAsH6 = divWithClassName('h6');
+const CardSubtitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH6,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardSubtitle.displayName = 'CardSubtitle';
+var CardSubtitle$1 = CardSubtitle;
+
+const CardText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'p',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardText.displayName = 'CardText';
+var CardText$1 = CardText;
+
+const DivStyledAsH5 = divWithClassName('h5');
+const CardTitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH5,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardTitle.displayName = 'CardTitle';
+var CardTitle$1 = CardTitle;
+
+const Card = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  bg,
+  text,
+  border,
+  body = false,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card');
   return /*#__PURE__*/e(Component, {
     ref: ref,
     ...props,
-    className: classNames(className, bsPrefix),
-    children: /*#__PURE__*/e(AccordionButton$1, {
-      onClick: onClick,
+    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
+    children: body ? /*#__PURE__*/e(CardBody$1, {
       children: children
-    })
+    }) : children
   });
 });
-AccordionHeader.displayName = 'AccordionHeader';
-var AccordionHeader$1 = AccordionHeader;
-
-const AccordionItem = /*#__PURE__*/x(({
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  bsPrefix,
-  className,
-  eventKey,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-item');
-  const contextValue = d(() => ({
-    eventKey
-  }), [eventKey]);
-  return /*#__PURE__*/e(AccordionItemContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...props,
-      className: classNames(className, bsPrefix)
-    })
-  });
-});
-AccordionItem.displayName = 'AccordionItem';
-var AccordionItem$1 = AccordionItem;
-
-const Accordion = /*#__PURE__*/x((props, ref) => {
-  const {
-    // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-    as: Component = 'div',
-    activeKey,
-    bsPrefix,
-    className,
-    onSelect,
-    flush,
-    alwaysOpen,
-    ...controlledProps
-  } = useUncontrolled(props, {
-    activeKey: 'onSelect'
-  });
-  const prefix = useBootstrapPrefix(bsPrefix, 'accordion');
-  const contextValue = d(() => ({
-    activeEventKey: activeKey,
-    onSelect,
-    alwaysOpen
-  }), [activeKey, onSelect, alwaysOpen]);
-  return /*#__PURE__*/e(AccordionContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...controlledProps,
-      className: classNames(className, prefix, flush && `${prefix}-flush`)
-    })
-  });
-});
-Accordion.displayName = 'Accordion';
-var Accordion$1 = Object.assign(Accordion, {
-  Button: AccordionButton$1,
-  Collapse: AccordionCollapse$1,
-  Item: AccordionItem$1,
-  Header: AccordionHeader$1,
-  Body: AccordionBody$1
+Card.displayName = 'Card';
+var Card$1 = Object.assign(Card, {
+  Img: CardImg$1,
+  Title: CardTitle$1,
+  Subtitle: CardSubtitle$1,
+  Body: CardBody$1,
+  Link: CardLink$1,
+  Text: CardText$1,
+  Header: CardHeader$1,
+  Footer: CardFooter$1,
+  ImgOverlay: CardImgOverlay$1
 });
 
 const propTypes$1 = {
@@ -2812,17 +1605,6 @@ const FormControl = /*#__PURE__*/x(({
     controlId
   } = F$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
-  let classes;
-  if (plaintext) {
-    classes = {
-      [`${bsPrefix}-plaintext`]: true
-    };
-  } else {
-    classes = {
-      [bsPrefix]: true,
-      [`${bsPrefix}-${size}`]: size
-    };
-  }
   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
   return /*#__PURE__*/e(Component, {
     ...props,
@@ -2831,7 +1613,7 @@ const FormControl = /*#__PURE__*/x(({
     ref: ref,
     readOnly: readOnly,
     id: id || controlId,
-    className: classNames(className, classes, isValid && `is-valid`, isInvalid && `is-invalid`, type === 'color' && `${bsPrefix}-color`)
+    className: classNames(className, plaintext ? `${bsPrefix}-plaintext` : bsPrefix, size && `${bsPrefix}-${size}`, type === 'color' && `${bsPrefix}-color`, isValid && 'is-valid', isInvalid && 'is-invalid')
   });
 });
 FormControl.displayName = 'FormControl';
@@ -2839,42 +1621,21 @@ var FormControl$1 = Object.assign(FormControl, {
   Feedback: Feedback$1
 });
 
-var rHyphen = /-(.)/g;
-function camelize(string) {
-  return string.replace(rHyphen, function (_, chr) {
-    return chr.toUpperCase();
-  });
-}
-
-const pascalCase = str => str[0].toUpperCase() + camelize(str).slice(1);
-// TODO: emstricten & fix the typing here! `createWithBsPrefix<TElementType>...`
-function createWithBsPrefix(prefix, {
-  displayName = pascalCase(prefix),
-  Component,
-  defaultProps
-} = {}) {
-  const BsComponent = /*#__PURE__*/x(({
-    className,
-    bsPrefix,
-    as: Tag = Component || 'div',
+const FormFloating = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
     ...props
-  }, ref) => {
-    const componentProps = {
-      ...defaultProps,
-      ...props
-    };
-    const resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
-    return /*#__PURE__*/e(Tag, {
-      ref: ref,
-      className: classNames(className, resolvedPrefix),
-      ...componentProps
-    });
   });
-  BsComponent.displayName = displayName;
-  return BsComponent;
-}
-
-var FormFloating = createWithBsPrefix('form-floating');
+});
+FormFloating.displayName = 'FormFloating';
+var FormFloating$1 = FormFloating;
 
 const FormGroup = /*#__PURE__*/x(({
   controlId,
@@ -3127,7 +1888,7 @@ Form.propTypes = propTypes;
 var Form$1 = Object.assign(Form, {
   Group: FormGroup$1,
   Control: FormControl$1,
-  Floating: FormFloating,
+  Floating: FormFloating$1,
   Check: FormCheck$1,
   Switch: Switch$1,
   Label: FormLabel$1,
@@ -3137,20 +1898,33 @@ var Form$1 = Object.assign(Form, {
   FloatingLabel: FloatingLabel$1
 });
 
-const context$1 = /*#__PURE__*/D$1(null);
-context$1.displayName = 'InputGroupContext';
-var InputGroupContext = context$1;
+const context = /*#__PURE__*/D$1(null);
+context.displayName = 'InputGroupContext';
+var InputGroupContext = context;
 
-const InputGroupText = createWithBsPrefix('input-group-text', {
-  Component: 'span'
+const InputGroupText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'span',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
 });
-const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText, {
+InputGroupText.displayName = 'InputGroupText';
+var InputGroupText$1 = InputGroupText;
+
+const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText$1, {
   children: /*#__PURE__*/e(FormCheckInput$1, {
     type: "checkbox",
     ...props
   })
 });
-const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText, {
+const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText$1, {
   children: /*#__PURE__*/e(FormCheckInput$1, {
     type: "radio",
     ...props
@@ -3181,7 +1955,7 @@ const InputGroup = /*#__PURE__*/x(({
 });
 InputGroup.displayName = 'InputGroup';
 var InputGroup$1 = Object.assign(InputGroup, {
-  Text: InputGroupText,
+  Text: InputGroupText$1,
   Radio: InputGroupRadio,
   Checkbox: InputGroupCheckbox
 });
@@ -3270,7 +2044,7 @@ class ControlNote extends ReactDOM$3.PureComponent {
 }
 
 const _excluded$2 = ["as", "disabled"];
-function _objectWithoutPropertiesLoose$2(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+function _objectWithoutPropertiesLoose$3(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 function isTrivialHref(href) {
   return !href || href.trim() === '#';
 }
@@ -3343,7 +2117,7 @@ const Button$1 = /*#__PURE__*/x((_ref, ref) => {
       as: asProp,
       disabled
     } = _ref,
-    props = _objectWithoutPropertiesLoose$2(_ref, _excluded$2);
+    props = _objectWithoutPropertiesLoose$3(_ref, _excluded$2);
   const [buttonProps, {
     tagName: Component
   }] = useButtonProps(Object.assign({
@@ -3532,473 +2306,6 @@ class DownloadNote extends ReactDOM$3.PureComponent {
   }
 }
 
-const globalWindow = window;
-function CodeJar(editor, highlight, opt = {}) {
-    const options = Object.assign({ tab: '\t', indentOn: /[({\[]$/, moveToNewLine: /^[)}\]]/, spellcheck: false, catchTab: true, preserveIdent: true, addClosing: true, history: true, window: globalWindow }, opt);
-    const window = options.window;
-    const document = window.document;
-    let listeners = [];
-    let history = [];
-    let at = -1;
-    let focus = false;
-    let callback;
-    let prev; // code content prior keydown event
-    editor.setAttribute('contenteditable', 'plaintext-only');
-    editor.setAttribute('spellcheck', options.spellcheck ? 'true' : 'false');
-    editor.style.outline = 'none';
-    editor.style.overflowWrap = 'break-word';
-    editor.style.overflowY = 'auto';
-    editor.style.whiteSpace = 'pre-wrap';
-    let isLegacy = false; // true if plaintext-only is not supported
-    highlight(editor);
-    if (editor.contentEditable !== 'plaintext-only')
-        isLegacy = true;
-    if (isLegacy)
-        editor.setAttribute('contenteditable', 'true');
-    const debounceHighlight = debounce(() => {
-        const pos = save();
-        highlight(editor, pos);
-        restore(pos);
-    }, 30);
-    let recording = false;
-    const shouldRecord = (event) => {
-        return !isUndo(event) && !isRedo(event)
-            && event.key !== 'Meta'
-            && event.key !== 'Control'
-            && event.key !== 'Alt'
-            && !event.key.startsWith('Arrow');
-    };
-    const debounceRecordHistory = debounce((event) => {
-        if (shouldRecord(event)) {
-            recordHistory();
-            recording = false;
-        }
-    }, 300);
-    const on = (type, fn) => {
-        listeners.push([type, fn]);
-        editor.addEventListener(type, fn);
-    };
-    on('keydown', event => {
-        if (event.defaultPrevented)
-            return;
-        prev = toString();
-        if (options.preserveIdent)
-            handleNewLine(event);
-        else
-            legacyNewLineFix(event);
-        if (options.catchTab)
-            handleTabCharacters(event);
-        if (options.addClosing)
-            handleSelfClosingCharacters(event);
-        if (options.history) {
-            handleUndoRedo(event);
-            if (shouldRecord(event) && !recording) {
-                recordHistory();
-                recording = true;
-            }
-        }
-        if (isLegacy && !isCopy(event))
-            restore(save());
-    });
-    on('keyup', event => {
-        if (event.defaultPrevented)
-            return;
-        if (event.isComposing)
-            return;
-        if (prev !== toString())
-            debounceHighlight();
-        debounceRecordHistory(event);
-        if (callback)
-            callback(toString());
-    });
-    on('focus', _event => {
-        focus = true;
-    });
-    on('blur', _event => {
-        focus = false;
-    });
-    on('paste', event => {
-        recordHistory();
-        handlePaste(event);
-        recordHistory();
-        if (callback)
-            callback(toString());
-    });
-    function save() {
-        const s = getSelection();
-        const pos = { start: 0, end: 0, dir: undefined };
-        let { anchorNode, anchorOffset, focusNode, focusOffset } = s;
-        if (!anchorNode || !focusNode)
-            throw 'error1';
-        // If the anchor and focus are the editor element, return either a full
-        // highlight or a start/end cursor position depending on the selection
-        if (anchorNode === editor && focusNode === editor) {
-            pos.start = (anchorOffset > 0 && editor.textContent) ? editor.textContent.length : 0;
-            pos.end = (focusOffset > 0 && editor.textContent) ? editor.textContent.length : 0;
-            pos.dir = (focusOffset >= anchorOffset) ? '->' : '<-';
-            return pos;
-        }
-        // Selection anchor and focus are expected to be text nodes,
-        // so normalize them.
-        if (anchorNode.nodeType === Node.ELEMENT_NODE) {
-            const node = document.createTextNode('');
-            anchorNode.insertBefore(node, anchorNode.childNodes[anchorOffset]);
-            anchorNode = node;
-            anchorOffset = 0;
-        }
-        if (focusNode.nodeType === Node.ELEMENT_NODE) {
-            const node = document.createTextNode('');
-            focusNode.insertBefore(node, focusNode.childNodes[focusOffset]);
-            focusNode = node;
-            focusOffset = 0;
-        }
-        visit(editor, el => {
-            if (el === anchorNode && el === focusNode) {
-                pos.start += anchorOffset;
-                pos.end += focusOffset;
-                pos.dir = anchorOffset <= focusOffset ? '->' : '<-';
-                return 'stop';
-            }
-            if (el === anchorNode) {
-                pos.start += anchorOffset;
-                if (!pos.dir) {
-                    pos.dir = '->';
-                }
-                else {
-                    return 'stop';
-                }
-            }
-            else if (el === focusNode) {
-                pos.end += focusOffset;
-                if (!pos.dir) {
-                    pos.dir = '<-';
-                }
-                else {
-                    return 'stop';
-                }
-            }
-            if (el.nodeType === Node.TEXT_NODE) {
-                if (pos.dir != '->')
-                    pos.start += el.nodeValue.length;
-                if (pos.dir != '<-')
-                    pos.end += el.nodeValue.length;
-            }
-        });
-        // collapse empty text nodes
-        editor.normalize();
-        return pos;
-    }
-    function restore(pos) {
-        const s = getSelection();
-        let startNode, startOffset = 0;
-        let endNode, endOffset = 0;
-        if (!pos.dir)
-            pos.dir = '->';
-        if (pos.start < 0)
-            pos.start = 0;
-        if (pos.end < 0)
-            pos.end = 0;
-        // Flip start and end if the direction reversed
-        if (pos.dir == '<-') {
-            const { start, end } = pos;
-            pos.start = end;
-            pos.end = start;
-        }
-        let current = 0;
-        visit(editor, el => {
-            if (el.nodeType !== Node.TEXT_NODE)
-                return;
-            const len = (el.nodeValue || '').length;
-            if (current + len > pos.start) {
-                if (!startNode) {
-                    startNode = el;
-                    startOffset = pos.start - current;
-                }
-                if (current + len > pos.end) {
-                    endNode = el;
-                    endOffset = pos.end - current;
-                    return 'stop';
-                }
-            }
-            current += len;
-        });
-        if (!startNode)
-            startNode = editor, startOffset = editor.childNodes.length;
-        if (!endNode)
-            endNode = editor, endOffset = editor.childNodes.length;
-        // Flip back the selection
-        if (pos.dir == '<-') {
-            [startNode, startOffset, endNode, endOffset] = [endNode, endOffset, startNode, startOffset];
-        }
-        s.setBaseAndExtent(startNode, startOffset, endNode, endOffset);
-    }
-    function beforeCursor() {
-        const s = getSelection();
-        const r0 = s.getRangeAt(0);
-        const r = document.createRange();
-        r.selectNodeContents(editor);
-        r.setEnd(r0.startContainer, r0.startOffset);
-        return r.toString();
-    }
-    function afterCursor() {
-        const s = getSelection();
-        const r0 = s.getRangeAt(0);
-        const r = document.createRange();
-        r.selectNodeContents(editor);
-        r.setStart(r0.endContainer, r0.endOffset);
-        return r.toString();
-    }
-    function handleNewLine(event) {
-        if (event.key === 'Enter') {
-            const before = beforeCursor();
-            const after = afterCursor();
-            let [padding] = findPadding(before);
-            let newLinePadding = padding;
-            // If last symbol is "{" ident new line
-            if (options.indentOn.test(before)) {
-                newLinePadding += options.tab;
-            }
-            // Preserve padding
-            if (newLinePadding.length > 0) {
-                preventDefault(event);
-                event.stopPropagation();
-                insert('\n' + newLinePadding);
-            }
-            else {
-                legacyNewLineFix(event);
-            }
-            // Place adjacent "}" on next line
-            if (newLinePadding !== padding && options.moveToNewLine.test(after)) {
-                const pos = save();
-                insert('\n' + padding);
-                restore(pos);
-            }
-        }
-    }
-    function legacyNewLineFix(event) {
-        // Firefox does not support plaintext-only mode
-        // and puts <div><br></div> on Enter. Let's help.
-        if (isLegacy && event.key === 'Enter') {
-            preventDefault(event);
-            event.stopPropagation();
-            if (afterCursor() == '') {
-                insert('\n ');
-                const pos = save();
-                pos.start = --pos.end;
-                restore(pos);
-            }
-            else {
-                insert('\n');
-            }
-        }
-    }
-    function handleSelfClosingCharacters(event) {
-        const open = `([{'"`;
-        const close = `)]}'"`;
-        const codeAfter = afterCursor();
-        const codeBefore = beforeCursor();
-        const escapeCharacter = codeBefore.substr(codeBefore.length - 1) === '\\';
-        const charAfter = codeAfter.substr(0, 1);
-        if (close.includes(event.key) && !escapeCharacter && charAfter === event.key) {
-            // We already have closing char next to cursor.
-            // Move one char to right.
-            const pos = save();
-            preventDefault(event);
-            pos.start = ++pos.end;
-            restore(pos);
-        }
-        else if (open.includes(event.key)
-            && !escapeCharacter
-            && (`"'`.includes(event.key) || ['', ' ', '\n'].includes(charAfter))) {
-            preventDefault(event);
-            const pos = save();
-            const wrapText = pos.start == pos.end ? '' : getSelection().toString();
-            const text = event.key + wrapText + close[open.indexOf(event.key)];
-            insert(text);
-            pos.start++;
-            pos.end++;
-            restore(pos);
-        }
-    }
-    function handleTabCharacters(event) {
-        if (event.key === 'Tab') {
-            preventDefault(event);
-            if (event.shiftKey) {
-                const before = beforeCursor();
-                let [padding, start,] = findPadding(before);
-                if (padding.length > 0) {
-                    const pos = save();
-                    // Remove full length tab or just remaining padding
-                    const len = Math.min(options.tab.length, padding.length);
-                    restore({ start, end: start + len });
-                    document.execCommand('delete');
-                    pos.start -= len;
-                    pos.end -= len;
-                    restore(pos);
-                }
-            }
-            else {
-                insert(options.tab);
-            }
-        }
-    }
-    function handleUndoRedo(event) {
-        if (isUndo(event)) {
-            preventDefault(event);
-            at--;
-            const record = history[at];
-            if (record) {
-                editor.innerHTML = record.html;
-                restore(record.pos);
-            }
-            if (at < 0)
-                at = 0;
-        }
-        if (isRedo(event)) {
-            preventDefault(event);
-            at++;
-            const record = history[at];
-            if (record) {
-                editor.innerHTML = record.html;
-                restore(record.pos);
-            }
-            if (at >= history.length)
-                at--;
-        }
-    }
-    function recordHistory() {
-        if (!focus)
-            return;
-        const html = editor.innerHTML;
-        const pos = save();
-        const lastRecord = history[at];
-        if (lastRecord) {
-            if (lastRecord.html === html
-                && lastRecord.pos.start === pos.start
-                && lastRecord.pos.end === pos.end)
-                return;
-        }
-        at++;
-        history[at] = { html, pos };
-        history.splice(at + 1);
-        const maxHistory = 300;
-        if (at > maxHistory) {
-            at = maxHistory;
-            history.splice(0, 1);
-        }
-    }
-    function handlePaste(event) {
-        preventDefault(event);
-        const text = (event.originalEvent || event)
-            .clipboardData
-            .getData('text/plain')
-            .replace(/\r/g, '');
-        const pos = save();
-        insert(text);
-        highlight(editor);
-        restore({
-            start: Math.min(pos.start, pos.end) + text.length,
-            end: Math.min(pos.start, pos.end) + text.length,
-            dir: '<-',
-        });
-    }
-    function visit(editor, visitor) {
-        const queue = [];
-        if (editor.firstChild)
-            queue.push(editor.firstChild);
-        let el = queue.pop();
-        while (el) {
-            if (visitor(el) === 'stop')
-                break;
-            if (el.nextSibling)
-                queue.push(el.nextSibling);
-            if (el.firstChild)
-                queue.push(el.firstChild);
-            el = queue.pop();
-        }
-    }
-    function isCtrl(event) {
-        return event.metaKey || event.ctrlKey;
-    }
-    function isUndo(event) {
-        return isCtrl(event) && !event.shiftKey && getKeyCode(event) === 'Z';
-    }
-    function isRedo(event) {
-        return isCtrl(event) && event.shiftKey && getKeyCode(event) === 'Z';
-    }
-    function isCopy(event) {
-        return isCtrl(event) && getKeyCode(event) === 'C';
-    }
-    function getKeyCode(event) {
-        let key = event.key || event.keyCode || event.which;
-        if (!key)
-            return undefined;
-        return (typeof key === 'string' ? key : String.fromCharCode(key)).toUpperCase();
-    }
-    function insert(text) {
-        text = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        document.execCommand('insertHTML', false, text);
-    }
-    function debounce(cb, wait) {
-        let timeout = 0;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = window.setTimeout(() => cb(...args), wait);
-        };
-    }
-    function findPadding(text) {
-        // Find beginning of previous line.
-        let i = text.length - 1;
-        while (i >= 0 && text[i] !== '\n')
-            i--;
-        i++;
-        // Find padding of the line.
-        let j = i;
-        while (j < text.length && /[ \t]/.test(text[j]))
-            j++;
-        return [text.substring(i, j) || '', i, j];
-    }
-    function toString() {
-        return editor.textContent || '';
-    }
-    function preventDefault(event) {
-        event.preventDefault();
-    }
-    function getSelection() {
-        var _a;
-        if (((_a = editor.parentNode) === null || _a === void 0 ? void 0 : _a.nodeType) == Node.DOCUMENT_FRAGMENT_NODE) {
-            return editor.parentNode.getSelection();
-        }
-        return window.getSelection();
-    }
-    return {
-        updateOptions(newOptions) {
-            Object.assign(options, newOptions);
-        },
-        updateCode(code) {
-            editor.textContent = code;
-            highlight(editor);
-        },
-        onUpdate(cb) {
-            callback = cb;
-        },
-        toString,
-        save,
-        restore,
-        recordHistory,
-        destroy() {
-            for (let [type, fn] of listeners) {
-                editor.removeEventListener(type, fn);
-            }
-        },
-    };
-}
-
 class EditNote extends ReactDOM$3.Component {
   static get propTypes() {
     return {
@@ -4015,16 +2322,17 @@ class EditNote extends ReactDOM$3.Component {
   }
   async componentDidMount() {}
   async componentWillUnmount() {}
-  onChange(id, text) {
+  onChange(event) {
     const {
-      onChange
+      onChange,
+      note
     } = this.props;
-    if (onChange) {
-      onChange(text, id);
+    if (onChange && this.ref && this.ref.innerText !== note.sourceText) {
+      onChange(this.ref.innerText, note);
     }
   }
-  shouldComponentUpdate() {
-    return false;
+  shouldComponentUpdate(nextProps) {
+    return this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText;
   }
   render() {
     const {
@@ -4034,15 +2342,24 @@ class EditNote extends ReactDOM$3.Component {
     const {
       sourceText
     } = note;
-    return v$1("div", {
-      class: "note edit",
-      onkeydown: onKeyDown,
+    return v$1(Card$1, null, v$1("pre", {
+      style: {
+        padding: '1em',
+        outline: 'none'
+      },
+      contenteditable: true,
+      onKeyDown: onKeyDown,
+      onInput: event => this.onChange(event),
       ref: ref => {
-        if (ref) {
-          CodeJar(ref, () => {}).onUpdate(text => this.onChange(note, text));
+        if (this.ref === ref) {
+          return;
+        }
+        this.ref = ref;
+        if (ref !== null) {
+          ref.innerText = sourceText;
         }
       }
-    }, sourceText);
+    }, sourceText));
   }
 }
 
@@ -4100,8 +2417,8 @@ class IconNote extends ReactDOM$3.PureComponent {
     return v$1("img", {
       class: `note icon ${iconIdClass}`,
       style: {
-        height: '64px',
-        width: '64px',
+        height: '32px',
+        width: '32px',
         opacity: blur ? 0.5 : 1
       },
       src: note.url
@@ -7149,6 +5466,309 @@ var Component = function (_a) {
 Component.defaultProps = secondaryColorDefaultProps;
 var SpinnerCircularSplit = withSharedProps(Component);
 
+var dist = {};
+
+var SplitPane$2 = {};
+
+var require$$1 = /*@__PURE__*/getAugmentedNamespace(compat_module);
+
+var Pane = {};
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pane = void 0;
+const React = require$$1;
+const baseStyle = {
+    position: 'relative',
+    outline: 'none',
+    border: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    flexBasis: 'auto',
+};
+exports.Pane = React.memo(({ size, minSize, split, className, forwardRef, children }) => {
+    const style = Object.assign(Object.assign({}, baseStyle), { flexGrow: size, flexShrink: size });
+    if (split === 'vertical') {
+        style.width = 0;
+        style.height = '100%';
+        style.minWidth = minSize;
+    }
+    else {
+        style.width = '100%';
+        style.height = 0;
+        style.minHeight = minSize;
+    }
+    const classes = ['Pane', split, className].join(' ');
+    return (React.createElement("div", { className: classes, style: style, ref: forwardRef }, children));
+});
+exports.Pane.displayName = 'Pane';
+
+}(Pane));
+
+var Resizer = {};
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Resizer = void 0;
+const React = require$$1;
+const { useCallback } = React;
+exports.Resizer = React.memo(({ split, className, index, onDragStarted }) => {
+    const handleMouseDown = useCallback((event) => {
+        event.preventDefault();
+        onDragStarted(index, event);
+    }, [index, onDragStarted]);
+    const handleTouchStart = useCallback((event) => {
+        event.preventDefault();
+        onDragStarted(index, event.touches[0]);
+    }, [index, onDragStarted]);
+    const classes = ['Resizer', split, className].join(' ');
+    return (React.createElement("span", { role: 'presentation', className: classes, style: { flex: 'none' }, onMouseDown: handleMouseDown, onTouchStart: handleTouchStart }));
+});
+exports.Resizer.displayName = 'Resizer';
+
+}(Resizer));
+
+var util = {};
+
+Object.defineProperty(util, "__esModule", { value: true });
+util.useDragState = util.useEventListener = void 0;
+const React$g = require$$1;
+const ReactDOM$2 = require$$1;
+const { useCallback, useMemo, useState, useEffect } = React$g;
+function useEventListener(type, listener) {
+    useEffect(() => {
+        if (!listener)
+            return;
+        document.addEventListener(type, listener);
+        return () => {
+            document.removeEventListener(type, listener);
+        };
+    }, [type, listener]);
+}
+util.useEventListener = useEventListener;
+function useDragStateHandlers(split, onDragFinished) {
+    const [dragging, setDragging] = useState(null);
+    const [current, setCurrent] = useState(0);
+    const beginDrag = useCallback((event, extraState) => {
+        const pos = split === 'vertical' ? event.clientX : event.clientY;
+        setDragging([extraState, pos]);
+        setCurrent(pos);
+    }, [split]);
+    const [dragState, onMouseUp] = useMemo(() => {
+        if (!dragging) {
+            return [null, undefined];
+        }
+        const [extraState, origin] = dragging;
+        const dragState = { offset: current - origin, extraState };
+        const onMouseUp = () => {
+            ReactDOM$2.unstable_batchedUpdates(() => {
+                setDragging(null);
+                onDragFinished(dragState);
+            });
+        };
+        return [dragState, onMouseUp];
+    }, [current, dragging, onDragFinished]);
+    const [onMouseMove, onTouchMove] = useMemo(() => {
+        if (!dragging) {
+            return [undefined, undefined];
+        }
+        const onMouseMove = (event) => {
+            const pos = split === 'vertical' ? event.clientX : event.clientY;
+            setCurrent(pos);
+        };
+        const onTouchMove = (event) => {
+            onMouseMove(event.touches[0]);
+        };
+        return [onMouseMove, onTouchMove];
+    }, [dragging, split]);
+    return { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp };
+}
+function useDragState(split, onDragFinished) {
+    const { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp } = useDragStateHandlers(split, onDragFinished);
+    useEventListener('mousemove', onMouseMove);
+    useEventListener('touchmove', onTouchMove);
+    useEventListener('mouseup', onMouseUp);
+    return [dragState, beginDrag];
+}
+util.useDragState = useDragState;
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SplitPane = void 0;
+const React = require$$1;
+const { useCallback, useRef, useState, useMemo, useEffect } = React;
+const Pane_1 = Pane;
+const Resizer_1 = Resizer;
+const util_1 = util;
+const DEFAULT_MIN_SIZE = 50;
+function getNodeKey(node, index) {
+    if (typeof node === 'object' && node && node.key != null) {
+        return 'key.' + node.key;
+    }
+    return 'index.' + index;
+}
+function getMinSize(index, minSizes) {
+    if (typeof minSizes === 'number') {
+        if (minSizes > 0) {
+            return minSizes;
+        }
+    }
+    else if (minSizes instanceof Array) {
+        const value = minSizes[index];
+        if (value > 0) {
+            return value;
+        }
+    }
+    return DEFAULT_MIN_SIZE;
+}
+function getDefaultSize(index, defaultSizes) {
+    if (defaultSizes) {
+        const value = defaultSizes[index];
+        if (value >= 0) {
+            return value;
+        }
+    }
+    return 1;
+}
+function move(sizes, index, offset, minSizes) {
+    if (!offset || index < 0 || index + 1 >= sizes.length) {
+        return 0;
+    }
+    const firstMinSize = getMinSize(index, minSizes);
+    const secondMinSize = getMinSize(index + 1, minSizes);
+    const firstSize = sizes[index] + offset;
+    const secondSize = sizes[index + 1] - offset;
+    if (offset < 0 && firstSize < firstMinSize) {
+        // offset is negative, so missing and pushed are, too
+        const missing = firstSize - firstMinSize;
+        const pushed = move(sizes, index - 1, missing, minSizes);
+        offset -= missing - pushed;
+    }
+    else if (offset > 0 && secondSize < secondMinSize) {
+        const missing = secondMinSize - secondSize;
+        const pushed = move(sizes, index + 1, missing, minSizes);
+        offset -= missing - pushed;
+    }
+    sizes[index] += offset;
+    sizes[index + 1] -= offset;
+    return offset;
+}
+const defaultProps = {
+    split: 'vertical',
+    className: '',
+};
+function useSplitPaneResize(options) {
+    const { children, split, defaultSizes, minSize: minSizes, onDragStarted, onChange, onDragFinished } = options;
+    const [sizes, setSizes] = useState(new Map());
+    const paneRefs = useRef(new Map());
+    const getMovedSizes = useCallback((dragState) => {
+        const collectedSizes = children.map((node, index) => sizes.get(getNodeKey(node, index)) || getDefaultSize(index, defaultSizes));
+        if (dragState) {
+            const { offset, extraState: { index }, } = dragState;
+            move(collectedSizes, index, offset, minSizes);
+        }
+        return collectedSizes;
+    }, [children, defaultSizes, minSizes, sizes]);
+    const handleDragFinished = useCallback((dragState) => {
+        const movedSizes = getMovedSizes(dragState);
+        setSizes(new Map(children.map((node, index) => [
+            getNodeKey(node, index),
+            movedSizes[index],
+        ])));
+        if (onDragFinished) {
+            onDragFinished(movedSizes);
+        }
+    }, [children, getMovedSizes, onDragFinished]);
+    const [dragState, beginDrag] = (0, util_1.useDragState)(split, handleDragFinished);
+    const movedSizes = useMemo(() => getMovedSizes(dragState), [dragState, getMovedSizes]);
+    const resizeState = dragState ? dragState.extraState : null;
+    useEffect(() => {
+        if (onChange && dragState) {
+            onChange(movedSizes);
+        }
+    }, [dragState, movedSizes, onChange]);
+    const childPanes = useMemo(() => {
+        const prevPaneRefs = paneRefs.current;
+        paneRefs.current = new Map();
+        return children.map((node, index) => {
+            const key = getNodeKey(node, index);
+            const ref = prevPaneRefs.get(key) || React.createRef();
+            paneRefs.current.set(key, ref);
+            const minSize = getMinSize(index, minSizes);
+            return { key, node, ref, minSize };
+        });
+    }, [children, minSizes]);
+    const childPanesWithSizes = useMemo(() => childPanes.map((child, index) => {
+        const size = movedSizes[index];
+        return Object.assign(Object.assign({}, child), { size });
+    }), [childPanes, movedSizes]);
+    const handleDragStart = useCallback((index, pos) => {
+        const sizeAttr = split === 'vertical' ? 'width' : 'height';
+        const clientSizes = new Map(childPanes.map(({ key, ref }) => {
+            const size = ref.current ? ref.current.getBoundingClientRect()[sizeAttr] : 0;
+            return [key, size];
+        }));
+        if (onDragStarted) {
+            onDragStarted();
+        }
+        beginDrag(pos, { index });
+        setSizes(clientSizes);
+    }, [beginDrag, childPanes, onDragStarted, split]);
+    return { childPanes: childPanesWithSizes, resizeState, handleDragStart };
+}
+exports.SplitPane = React.memo((props) => {
+    const options = Object.assign(Object.assign({}, defaultProps), props);
+    const { split, className } = options;
+    const { childPanes, resizeState, handleDragStart } = useSplitPaneResize(options);
+    const splitStyleProps = split === 'vertical'
+        ? {
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+        }
+        : {
+            bottom: 0,
+            top: 0,
+            flexDirection: 'column',
+            minHeight: '100%',
+            width: '100%',
+        };
+    const style = Object.assign({ display: 'flex', flex: 1, height: '100%', position: 'absolute', outline: 'none', overflow: 'hidden' }, splitStyleProps);
+    const classes = ['SplitPane', split, className].join(' ');
+    const dragLayerStyle = {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+    };
+    const dragLayerClasses = ['DragLayer', split, resizeState ? 'resizing' : '', className].join(' ');
+    const entries = [];
+    childPanes.forEach(({ key, node, ref, size, minSize }, index) => {
+        if (index !== 0) {
+            const resizing = resizeState && resizeState.index === index - 1;
+            entries.push(React.createElement(Resizer_1.Resizer, { key: 'resizer.' + index, split: split, className: className + (resizing ? ' resizing' : ''), index: index - 1, onDragStarted: handleDragStart }));
+        }
+        entries.push(React.createElement(Pane_1.Pane, { key: 'pane.' + key, forwardRef: ref, size: size, minSize: minSize, split: split, className: className }, node));
+    });
+    return (React.createElement("div", { className: classes, style: style },
+        React.createElement("div", { className: dragLayerClasses, style: dragLayerStyle }),
+        entries));
+});
+exports.SplitPane.displayName = 'SplitPane';
+
+}(SplitPane$2));
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SplitPane = void 0;
+var SplitPane_1 = SplitPane$2;
+Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
+
+}(dist));
+
+var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
+
 class ViewNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
@@ -7219,6 +5839,9 @@ class ViewNote extends ReactDOM$3.PureComponent {
   }
 }
 
+const {
+  SplitPane: SplitPane$1
+} = SplitPaneModule;
 const blurNotebookState = async (application, {
   path,
   workspace
@@ -7387,6 +6010,7 @@ class Notebook extends ReactDOM$3.PureComponent {
         state = 'idle',
         workspace
       } = this.props;
+      const contents = [];
       const ordered = Object.values(notes);
       const getLine = note => {
         if (note.sourceLocation) {
@@ -7413,9 +6037,7 @@ class Notebook extends ReactDOM$3.PureComponent {
         return nthA - nthB;
       };
       ordered.sort(order);
-      let line = 0;
       let id;
-      let hasStub = false;
       const ids = [];
       let children;
       let downloads;
@@ -7439,18 +6061,12 @@ class Notebook extends ReactDOM$3.PureComponent {
           };
           ids.push(entry);
         }
-        if (note.hash === 'stub') {
-          hasStub = true;
-        }
         // FIX: This seems wasteful.
         const selected = false;
         let child;
         let download;
         let error;
         let icon;
-        if (note.sourceLocation) {
-          line = note.sourceLocation.line;
-        }
         if (note.view) {
           child = v$1(ViewNote, {
             key: note.hash,
@@ -7520,28 +6136,6 @@ class Notebook extends ReactDOM$3.PureComponent {
           errors.push(error);
         }
       }
-      if (!hasStub) {
-        // Append an empty editor.
-        const stub = {
-          hash: 'stub',
-          sourceText: '',
-          sourceLocation: {
-            path: notebookPath,
-            line: line + 1
-          }
-        };
-        ids.push({
-          id: '+',
-          children: [v$1(EditNote, {
-            key: stub.hash,
-            note: stub,
-            onChange: sourceText => onChange(stub, {
-              sourceText
-            }),
-            workspace: workspace
-          })]
-        });
-      }
       y(() => mermaid.init(undefined, '.mermaid'));
       const sections = [];
       const compare = (a, b) => {
@@ -7558,20 +6152,29 @@ class Notebook extends ReactDOM$3.PureComponent {
         id,
         blur = false,
         children = [],
-        downloads = [],
-        errors = [],
-        icons = []
+        // downloads = [],
+        errors = []
+        // icons = [],
       } of ids) {
-        sections.push(v$1(Accordion$1, {
+        contents.push(v$1("a", {
+          onClick: () => document.querySelector(`#note-id-${CSS.escape(id)}`).scrollIntoView({
+            behavior: 'smooth'
+          })
+        }, id));
+        contents.push(v$1("br", null));
+        sections.push(v$1(Card$1, {
+          id: `note-id-${id}`,
           key: id
-        }, v$1(Accordion$1.Item, {
-          eventKey: id
-        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? '! &nbsp;&nbsp;' : '', ' ', icons, " \xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
+        }, v$1(Card$1.Body, null, blur ? v$1(SpinnerCircularSplit, {
           color: "#36d7b7",
-          size: "64"
-        }) : ''), v$1(Accordion$1.Body, null, children))));
+          size: "32"
+        }) : '', v$1(Card$1.Title, null, id), errors && v$1(Card$1.Text, null, errors), children)));
       }
-      return v$1("div", {
+      return v$1(SplitPane$1, null, v$1("div", {
+        style: {
+          overflow: 'auto'
+        }
+      }, contents), v$1("div", {
         id: notebookPath,
         classList: "notebook notes",
         style: {
@@ -7586,117 +6189,13 @@ class Notebook extends ReactDOM$3.PureComponent {
           top: 64,
           zIndex: 1000
         }
-      }), sections);
+      }), sections));
     } catch (error) {
       console.log(error.stack);
       throw error;
     }
   }
 }
-
-var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
-  ...p,
-  ref: ref,
-  className: classNames(p.className, className)
-})));
-
-const CardImg = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  bsPrefix,
-  className,
-  variant,
-  as: Component = 'img',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
-    ...props
-  });
-});
-CardImg.displayName = 'CardImg';
-var CardImg$1 = CardImg;
-
-const context = /*#__PURE__*/D$1(null);
-context.displayName = 'CardHeaderContext';
-var CardHeaderContext = context;
-
-const CardHeader = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
-  const contextValue = d(() => ({
-    cardHeaderBsPrefix: prefix
-  }), [prefix]);
-  return /*#__PURE__*/e(CardHeaderContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...props,
-      className: classNames(className, prefix)
-    })
-  });
-});
-CardHeader.displayName = 'CardHeader';
-var CardHeader$1 = CardHeader;
-
-const DivStyledAsH5 = divWithClassName('h5');
-const DivStyledAsH6 = divWithClassName('h6');
-const CardBody = createWithBsPrefix('card-body');
-const CardTitle = createWithBsPrefix('card-title', {
-  Component: DivStyledAsH5
-});
-const CardSubtitle = createWithBsPrefix('card-subtitle', {
-  Component: DivStyledAsH6
-});
-const CardLink = createWithBsPrefix('card-link', {
-  Component: 'a'
-});
-const CardText = createWithBsPrefix('card-text', {
-  Component: 'p'
-});
-const CardFooter = createWithBsPrefix('card-footer');
-const CardImgOverlay = createWithBsPrefix('card-img-overlay');
-const Card = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  bg,
-  text,
-  border,
-  body = false,
-  children,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    ...props,
-    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
-    children: body ? /*#__PURE__*/e(CardBody, {
-      children: children
-    }) : children
-  });
-});
-Card.displayName = 'Card';
-var Card$1 = Object.assign(Card, {
-  Img: CardImg$1,
-  Title: CardTitle,
-  Subtitle: CardSubtitle,
-  Body: CardBody,
-  Link: CardLink,
-  Text: CardText,
-  Header: CardHeader$1,
-  Footer: CardFooter,
-  ImgOverlay: CardImgOverlay
-});
 
 class DynamicView extends ReactDOM$3.PureComponent {
   static get propTypes() {
@@ -8733,13 +7232,13 @@ exports.CLASSES = void 0;
 
 }(Types));
 
-var Node$2 = {};
+var Node$1 = {};
 
-Object.defineProperty(Node$2, "__esModule", { value: true });
+Object.defineProperty(Node$1, "__esModule", { value: true });
 var DockLocation_1$6 = DockLocation$1;
 var Orientation_1$a = Orientation$1;
 var Rect_1$8 = Rect$1;
-var Node$1 = /** @class */ (function () {
+var Node = /** @class */ (function () {
     /** @hidden @internal */
     function Node(model) {
         /** @hidden @internal */
@@ -8957,7 +7456,7 @@ var Node$1 = /** @class */ (function () {
     };
     return Node;
 }());
-Node$2.default = Node$1;
+Node$1.default = Node;
 
 var SplitterNode$1 = {};
 
@@ -8979,7 +7478,7 @@ var __extends$9 = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 Object.defineProperty(SplitterNode$1, "__esModule", { value: true });
 var AttributeDefinitions_1$5 = AttributeDefinitions$1;
 var Orientation_1$9 = Orientation$1;
-var Node_1$4 = Node$2;
+var Node_1$4 = Node$1;
 var SplitterNode = /** @class */ (function (_super) {
     __extends$9(SplitterNode, _super);
     /** @hidden @internal */
@@ -9069,7 +7568,7 @@ var __extends$8 = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 Object.defineProperty(TabNode$1, "__esModule", { value: true });
 var Attribute_1$4 = Attribute$1;
 var AttributeDefinitions_1$4 = AttributeDefinitions$1;
-var Node_1$3 = Node$2;
+var Node_1$3 = Node$1;
 var TabNode = /** @class */ (function (_super) {
     __extends$8(TabNode, _super);
     /** @hidden @internal */
@@ -9282,7 +7781,7 @@ var Orientation_1$8 = Orientation$1;
 var Rect_1$7 = Rect$1;
 var Types_1$e = Types;
 var BorderNode_1$5 = BorderNode$1;
-var Node_1$2 = Node$2;
+var Node_1$2 = Node$1;
 var SplitterNode_1$2 = SplitterNode$1;
 var TabSetNode_1$6 = TabSetNode$1;
 var RowNode = /** @class */ (function (_super) {
@@ -9812,7 +8311,7 @@ var DropInfo_1$1 = DropInfo$1;
 var Orientation_1$7 = Orientation$1;
 var Rect_1$6 = Rect$1;
 var Types_1$d = Types;
-var Node_1$1 = Node$2;
+var Node_1$1 = Node$1;
 var RowNode_1$1 = RowNode$1;
 var TabNode_1$3 = TabNode$1;
 var Utils_1$2 = Utils;
@@ -10330,7 +8829,7 @@ var DropInfo_1 = DropInfo$1;
 var Orientation_1$6 = Orientation$1;
 var Rect_1$5 = Rect$1;
 var Types_1$c = Types;
-var Node_1 = Node$2;
+var Node_1 = Node$1;
 var SplitterNode_1$1 = SplitterNode$1;
 var TabNode_1$2 = TabNode$1;
 var Utils_1$1 = Utils;
@@ -11925,8 +10424,6 @@ Model$1.default = Model;
 
 var Layout$1 = {};
 
-var require$$0 = /*@__PURE__*/getAugmentedNamespace(compat_module);
-
 var BorderTabSet$1 = {};
 
 var BorderButton$1 = {};
@@ -11950,8 +10447,8 @@ var PopupMenu$1 = {};
 
 Object.defineProperty(PopupMenu$1, "__esModule", { value: true });
 PopupMenu$1.showPopup = void 0;
-var React$g = require$$0;
-var ReactDOM$2 = require$$0;
+var React$f = require$$1;
+var ReactDOM$1 = require$$1;
 var _1 = lib$1;
 var Types_1$b = Types;
 /** @hidden @internal */
@@ -11979,7 +10476,7 @@ function showPopup(layoutDiv, triggerElement, items, onSelect, classNameMapper) 
     var onHide = function () {
         _1.DragDrop.instance.hideGlass();
         layoutDiv.removeChild(elm);
-        ReactDOM$2.unmountComponentAtNode(elm);
+        ReactDOM$1.unmountComponentAtNode(elm);
         elm.removeEventListener("mousedown", onElementMouseDown);
         currentDocument.removeEventListener("mousedown", onDocMouseDown);
     };
@@ -11991,7 +10488,7 @@ function showPopup(layoutDiv, triggerElement, items, onSelect, classNameMapper) 
     };
     elm.addEventListener("mousedown", onElementMouseDown);
     currentDocument.addEventListener("mousedown", onDocMouseDown);
-    ReactDOM$2.render(React$g.createElement(PopupMenu, { currentDocument: currentDocument, onSelect: onSelect, onHide: onHide, items: items, classNameMapper: classNameMapper }), elm);
+    ReactDOM$1.render(React$f.createElement(PopupMenu, { currentDocument: currentDocument, onSelect: onSelect, onHide: onHide, items: items, classNameMapper: classNameMapper }), elm);
 }
 PopupMenu$1.showPopup = showPopup;
 /** @hidden @internal */
@@ -12002,15 +10499,15 @@ var PopupMenu = function (props) {
         onHide();
         event.stopPropagation();
     };
-    var itemElements = items.map(function (item, i) { return (React$g.createElement("div", { key: item.index, className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM), "data-layout-path": "/popup-menu/tb" + i, onClick: function (event) { return onItemClick(item, event); }, title: item.node.getHelpText() }, item.node._getRenderedName())); });
-    return (React$g.createElement("div", { className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU), "data-layout-path": "/popup-menu" }, itemElements));
+    var itemElements = items.map(function (item, i) { return (React$f.createElement("div", { key: item.index, className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM), "data-layout-path": "/popup-menu/tb" + i, onClick: function (event) { return onItemClick(item, event); }, title: item.node.getHelpText() }, item.node._getRenderedName())); });
+    return (React$f.createElement("div", { className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU), "data-layout-path": "/popup-menu" }, itemElements));
 };
 
 var TabButton$1 = {};
 
 Object.defineProperty(TabButton$1, "__esModule", { value: true });
 TabButton$1.TabButton = void 0;
-var React$f = require$$0;
+var React$e = require$$1;
 var I18nLabel_1$5 = I18nLabel;
 var Actions_1$7 = Actions$1;
 var Rect_1$3 = Rect$1;
@@ -12020,9 +10517,9 @@ var TabSet_1$3 = TabSet$1;
 /** @hidden @internal */
 var TabButton = function (props) {
     var layout = props.layout, node = props.node, selected = props.selected, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var selfRef = React$f.useRef(null);
-    var contentRef = React$f.useRef(null);
-    var contentWidth = React$f.useRef(0);
+    var selfRef = React$e.useRef(null);
+    var contentRef = React$e.useRef(null);
+    var contentWidth = React$e.useRef(0);
     var onMouseDown = function (event) {
         if (!TabSet_1$3.isAuxMouseEvent(event) && !layout.getEditingTab()) {
             var message = layout.i18nName(I18nLabel_1$5.I18nLabel.Move_Tab, node.getName());
@@ -12084,7 +10581,7 @@ var TabButton = function (props) {
     var onCloseMouseDown = function (event) {
         event.stopPropagation();
     };
-    React$f.useLayoutEffect(function () {
+    React$e.useLayoutEffect(function () {
         updateRect();
         if (layout.getEditingTab() === node) {
             contentRef.current.select();
@@ -12150,24 +10647,24 @@ var TabButton = function (props) {
         }
     }
     if (leadingContent === undefined && node.getIcon() !== undefined) {
-        leadingContent = React$f.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
+        leadingContent = React$e.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
     }
     var buttons = [];
     // allow customization of leading contents (icon) and contents
     var renderState = { leading: leadingContent, content: titleContent, name: name, buttons: buttons };
     layout.customizeTab(node, renderState);
     node._setRenderedName(renderState.name);
-    var content = (React$f.createElement("div", { ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT) }, renderState.content));
-    var leading = React$f.createElement("div", { className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING) }, renderState.leading);
+    var content = (React$e.createElement("div", { ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT) }, renderState.content));
+    var leading = React$e.createElement("div", { className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING) }, renderState.leading);
     if (layout.getEditingTab() === node) {
         var contentStyle = { width: contentWidth + "px" };
-        content = (React$f.createElement("input", { style: contentStyle, ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TEXTBOX), "data-layout-path": path + "/textbox", type: "text", autoFocus: true, defaultValue: node.getName(), onKeyDown: onTextBoxKeyPress, onMouseDown: onTextBoxMouseDown, onTouchStart: onTextBoxMouseDown }));
+        content = (React$e.createElement("input", { style: contentStyle, ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TEXTBOX), "data-layout-path": path + "/textbox", type: "text", autoFocus: true, defaultValue: node.getName(), onKeyDown: onTextBoxKeyPress, onMouseDown: onTextBoxMouseDown, onTouchStart: onTextBoxMouseDown }));
     }
     if (node.isEnableClose()) {
         var closeTitle = layout.i18nName(I18nLabel_1$5.I18nLabel.Close_Tab);
-        buttons.push(React$f.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
+        buttons.push(React$e.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
     }
-    return (React$f.createElement("div", { ref: selfRef, "data-layout-path": path, className: classNames, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
+    return (React$e.createElement("div", { ref: selfRef, "data-layout-path": path, className: classNames, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
         leading,
         content,
         buttons));
@@ -12178,27 +10675,27 @@ var TabOverflowHook = {};
 
 Object.defineProperty(TabOverflowHook, "__esModule", { value: true });
 TabOverflowHook.useTabOverflow = void 0;
-var React$e = require$$0;
+var React$d = require$$1;
 var Rect_1$2 = Rect$1;
 var TabSetNode_1$3 = TabSetNode$1;
 var Orientation_1$3 = Orientation$1;
 /** @hidden @internal */
 var useTabOverflow = function (node, orientation, toolbarRef, stickyButtonsRef) {
-    var firstRender = React$e.useRef(true);
-    var tabsTruncated = React$e.useRef(false);
-    var lastRect = React$e.useRef(new Rect_1$2.default(0, 0, 0, 0));
-    var selfRef = React$e.useRef(null);
-    var _a = React$e.useState(0), position = _a[0], setPosition = _a[1];
-    var userControlledLeft = React$e.useRef(false);
-    var _b = React$e.useState([]), hiddenTabs = _b[0], setHiddenTabs = _b[1];
+    var firstRender = React$d.useRef(true);
+    var tabsTruncated = React$d.useRef(false);
+    var lastRect = React$d.useRef(new Rect_1$2.default(0, 0, 0, 0));
+    var selfRef = React$d.useRef(null);
+    var _a = React$d.useState(0), position = _a[0], setPosition = _a[1];
+    var userControlledLeft = React$d.useRef(false);
+    var _b = React$d.useState([]), hiddenTabs = _b[0], setHiddenTabs = _b[1];
     // if selected node or tabset/border rectangle change then unset usercontrolled (so selected tab will be kept in view)
-    React$e.useLayoutEffect(function () {
+    React$d.useLayoutEffect(function () {
         userControlledLeft.current = false;
     }, [node.getSelectedNode(), node.getRect().width, node.getRect().height]);
-    React$e.useLayoutEffect(function () {
+    React$d.useLayoutEffect(function () {
         updateVisibleTabs();
     });
-    React$e.useEffect(function () {
+    React$d.useEffect(function () {
         var instance = selfRef.current;
         instance.addEventListener('wheel', onWheel);
         return function () {
@@ -12341,7 +10838,7 @@ var __extends$4 = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 })();
 Object.defineProperty(ErrorBoundary$1, "__esModule", { value: true });
 ErrorBoundary$1.ErrorBoundary = void 0;
-var React$d = require$$0;
+var React$c = require$$1;
 var Types_1$9 = Types;
 /** @hidden @internal */
 var ErrorBoundary = /** @class */ (function (_super) {
@@ -12360,19 +10857,19 @@ var ErrorBoundary = /** @class */ (function (_super) {
     };
     ErrorBoundary.prototype.render = function () {
         if (this.state.hasError) {
-            return (React$d.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTAINER },
-                React$d.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTENT }, this.props.message)));
+            return (React$c.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTAINER },
+                React$c.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTENT }, this.props.message)));
         }
         return this.props.children;
     };
     return ErrorBoundary;
-}(React$d.Component));
+}(React$c.Component));
 ErrorBoundary$1.ErrorBoundary = ErrorBoundary;
 
 Object.defineProperty(Tab$1, "__esModule", { value: true });
 Tab$1.hideElement = Tab$1.Tab = void 0;
-var React$c = require$$0;
-var react_1$1 = require$$0;
+var React$b = require$$1;
+var react_1$1 = require$$1;
 var Actions_1$6 = Actions$1;
 var TabSetNode_1$2 = TabSetNode$1;
 var Types_1$8 = Types;
@@ -12382,8 +10879,8 @@ var __1$2 = lib$1;
 /** @hidden @internal */
 var Tab = function (props) {
     var layout = props.layout, selected = props.selected, node = props.node, factory = props.factory, path = props.path;
-    var _a = React$c.useState(!props.node.isEnableRenderOnDemand() || props.selected), renderComponent = _a[0], setRenderComponent = _a[1];
-    React$c.useLayoutEffect(function () {
+    var _a = React$b.useState(!props.node.isEnableRenderOnDemand() || props.selected), renderComponent = _a[0], setRenderComponent = _a[1];
+    React$b.useLayoutEffect(function () {
         if (!renderComponent && selected) {
             // load on demand
             // console.log("load on demand: " + node.getName());
@@ -12419,9 +10916,9 @@ var Tab = function (props) {
         className += " " + cm(Types_1$8.CLASSES.FLEXLAYOUT__TAB_BORDER);
         className += " " + cm(Types_1$8.CLASSES.FLEXLAYOUT__TAB_BORDER_ + parentNode.getLocation().getName());
     }
-    return (React$c.createElement("div", { className: className, "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
-        React$c.createElement(ErrorBoundary_1$1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$4.I18nLabel.Error_rendering_component) },
-            React$c.createElement(react_1$1.Fragment, null, child))));
+    return (React$b.createElement("div", { className: className, "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
+        React$b.createElement(ErrorBoundary_1$1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$4.I18nLabel.Error_rendering_component) },
+            React$b.createElement(react_1$1.Fragment, null, child))));
 };
 Tab$1.Tab = Tab;
 function hideElement(style, useVisibility) {
@@ -12441,7 +10938,7 @@ var __spreadArray$2 = (commonjsGlobal && commonjsGlobal.__spreadArray) || functi
 };
 Object.defineProperty(TabSet$1, "__esModule", { value: true });
 TabSet$1.isAuxMouseEvent = TabSet$1.TabSet = void 0;
-var React$b = require$$0;
+var React$a = require$$1;
 var I18nLabel_1$3 = I18nLabel;
 var Actions_1$5 = Actions$1;
 var PopupMenu_1$1 = PopupMenu$1;
@@ -12453,10 +10950,10 @@ var Tab_1$2 = Tab$1;
 /** @hidden @internal */
 var TabSet = function (props) {
     var node = props.node, layout = props.layout, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var toolbarRef = React$b.useRef(null);
-    var overflowbuttonRef = React$b.useRef(null);
-    var tabbarInnerRef = React$b.useRef(null);
-    var stickyButtonsRef = React$b.useRef(null);
+    var toolbarRef = React$a.useRef(null);
+    var overflowbuttonRef = React$a.useRef(null);
+    var tabbarInnerRef = React$a.useRef(null);
+    var stickyButtonsRef = React$a.useRef(null);
     var _a = TabOverflowHook_1$1.useTabOverflow(node, Orientation_1$2.default.HORZ, toolbarRef, stickyButtonsRef), selfRef = _a.selfRef, position = _a.position, userControlledLeft = _a.userControlledLeft, hiddenTabs = _a.hiddenTabs, onMouseWheel = _a.onMouseWheel, tabsTruncated = _a.tabsTruncated;
     var onOverflowClick = function (event) {
         var element = overflowbuttonRef.current;
@@ -12531,7 +11028,7 @@ var TabSet = function (props) {
         for (var i = 0; i < node.getChildren().length; i++) {
             var child = node.getChildren()[i];
             var isSelected = node.getSelected() === i;
-            tabs.push(React$b.createElement(TabButton_1.TabButton, { layout: layout, node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, height: node.getTabStripHeight(), iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
+            tabs.push(React$a.createElement(TabButton_1.TabButton, { layout: layout, node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, height: node.getTabStripHeight(), iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
         }
     }
     var showHeader = node.getName() !== undefined;
@@ -12550,32 +11047,32 @@ var TabSet = function (props) {
             buttons = __spreadArray$2(__spreadArray$2([], stickyButtons), buttons);
         }
         else {
-            tabs.push(React$b.createElement("div", { ref: stickyButtonsRef, key: "sticky_buttons_container", onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER) }, stickyButtons));
+            tabs.push(React$a.createElement("div", { ref: stickyButtonsRef, key: "sticky_buttons_container", onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER) }, stickyButtons));
         }
     }
     var toolbar;
     if (hiddenTabs.length > 0) {
         var overflowTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Overflow_Menu_Tooltip);
-        buttons.push(React$b.createElement("button", { key: "overflowbutton", "data-layout-path": path + "/button/overflow", ref: overflowbuttonRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_BUTTON_OVERFLOW), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
+        buttons.push(React$a.createElement("button", { key: "overflowbutton", "data-layout-path": path + "/button/overflow", ref: overflowbuttonRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_BUTTON_OVERFLOW), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
             icons.more,
             hiddenTabs.length));
     }
     if (selectedTabNode !== undefined && layout.isSupportsPopout() && selectedTabNode.isEnableFloat() && !selectedTabNode.isFloating()) {
         var floatTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Float_Tab);
-        buttons.push(React$b.createElement("button", { key: "float", "data-layout-path": path + "/button/float", title: floatTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.popout));
+        buttons.push(React$a.createElement("button", { key: "float", "data-layout-path": path + "/button/float", title: floatTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.popout));
     }
     if (node.canMaximize()) {
         var minTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Restore);
         var maxTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Maximize);
         var btns = showHeader ? headerButtons : buttons;
-        btns.push(React$b.createElement("button", { key: "max", "data-layout-path": path + "/button/max", title: node.isMaximized() ? minTitle : maxTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_ + (node.isMaximized() ? "max" : "min")), onClick: onMaximizeToggle, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, node.isMaximized() ? icons === null || icons === void 0 ? void 0 : icons.restore : icons === null || icons === void 0 ? void 0 : icons.maximize));
+        btns.push(React$a.createElement("button", { key: "max", "data-layout-path": path + "/button/max", title: node.isMaximized() ? minTitle : maxTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_ + (node.isMaximized() ? "max" : "min")), onClick: onMaximizeToggle, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, node.isMaximized() ? icons === null || icons === void 0 ? void 0 : icons.restore : icons === null || icons === void 0 ? void 0 : icons.maximize));
     }
     if (!node.isMaximized() && node.isEnableClose()) {
         var title = layout.i18nName(I18nLabel_1$3.I18nLabel.Close_Tabset);
         var btns = showHeader ? headerButtons : buttons;
-        btns.push(React$b.createElement("button", { key: "close", "data-layout-path": path + "/button/close", title: title, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_CLOSE), onClick: onClose, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.closeTabset));
+        btns.push(React$a.createElement("button", { key: "close", "data-layout-path": path + "/button/close", title: title, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_CLOSE), onClick: onClose, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.closeTabset));
     }
-    toolbar = (React$b.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, buttons));
+    toolbar = (React$a.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, buttons));
     var header;
     var tabStrip;
     var tabStripClasses = cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_OUTER);
@@ -12590,7 +11087,7 @@ var TabSet = function (props) {
         tabStripClasses += " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_MAXIMIZED);
     }
     if (showHeader) {
-        var headerToolbar = (React$b.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, headerButtons));
+        var headerToolbar = (React$a.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, headerButtons));
         var tabHeaderClasses = cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_HEADER);
         if (node.isActive()) {
             tabHeaderClasses += " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_SELECTED);
@@ -12601,8 +11098,8 @@ var TabSet = function (props) {
         if (node.getClassNameHeader() !== undefined) {
             tabHeaderClasses += " " + node.getClassNameHeader();
         }
-        header = (React$b.createElement("div", { className: tabHeaderClasses, style: { height: node.getHeaderHeight() + "px" }, "data-layout-path": path + "/header", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
-            React$b.createElement("div", { className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_HEADER_CONTENT) }, headerContent),
+        header = (React$a.createElement("div", { className: tabHeaderClasses, style: { height: node.getHeaderHeight() + "px" }, "data-layout-path": path + "/header", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
+            React$a.createElement("div", { className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_HEADER_CONTENT) }, headerContent),
             headerToolbar));
     }
     var tabStripStyle = { height: node.getTabStripHeight() + "px" };
@@ -12613,12 +11110,12 @@ var TabSet = function (props) {
     else {
         tabStripStyle["bottom"] = "0px";
     }
-    tabStrip = (React$b.createElement("div", { className: tabStripClasses, style: tabStripStyle, "data-layout-path": path + "/tabstrip", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
-        React$b.createElement("div", { ref: tabbarInnerRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_ + node.getTabLocation()) },
-            React$b.createElement("div", { style: { left: position }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ + node.getTabLocation()) }, tabs)),
+    tabStrip = (React$a.createElement("div", { className: tabStripClasses, style: tabStripStyle, "data-layout-path": path + "/tabstrip", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
+        React$a.createElement("div", { ref: tabbarInnerRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_ + node.getTabLocation()) },
+            React$a.createElement("div", { style: { left: position }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ + node.getTabLocation()) }, tabs)),
         toolbar));
     style = layout.styleFont(style);
-    return (React$b.createElement("div", { ref: selfRef, dir: "ltr", "data-layout-path": path, style: style, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET), onWheel: onMouseWheel },
+    return (React$a.createElement("div", { ref: selfRef, dir: "ltr", "data-layout-path": path, style: style, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET), onWheel: onMouseWheel },
         header,
         tabStrip));
 };
@@ -12637,7 +11134,7 @@ TabSet$1.isAuxMouseEvent = isAuxMouseEvent;
 
 Object.defineProperty(BorderButton$1, "__esModule", { value: true });
 BorderButton$1.BorderButton = void 0;
-var React$a = require$$0;
+var React$9 = require$$1;
 var __1$1 = lib$1;
 var Actions_1$4 = Actions$1;
 var Rect_1$1 = Rect$1;
@@ -12647,7 +11144,7 @@ var TabSet_1$2 = TabSet$1;
 /** @hidden @internal */
 var BorderButton = function (props) {
     var layout = props.layout, node = props.node, selected = props.selected, border = props.border, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var selfRef = React$a.useRef(null);
+    var selfRef = React$9.useRef(null);
     var onMouseDown = function (event) {
         if (!TabSet_1$2.isAuxMouseEvent(event)) {
             var message = layout.i18nName(__1$1.I18nLabel.Move_Tab, node.getName());
@@ -12689,7 +11186,7 @@ var BorderButton = function (props) {
     var onCloseMouseDown = function (event) {
         event.stopPropagation();
     };
-    React$a.useLayoutEffect(function () {
+    React$9.useLayoutEffect(function () {
         updateRect();
     });
     var updateRect = function () {
@@ -12732,20 +11229,20 @@ var BorderButton = function (props) {
         }
     }
     if (leadingContent === undefined && node.getIcon() !== undefined) {
-        leadingContent = React$a.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
+        leadingContent = React$9.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
     }
     var buttons = [];
     // allow customization of leading contents (icon) and contents
     var renderState = { leading: leadingContent, content: titleContent, name: name, buttons: buttons };
     layout.customizeTab(node, renderState);
     node._setRenderedName(renderState.name);
-    var content = React$a.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT) }, renderState.content);
-    var leading = React$a.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_LEADING) }, renderState.leading);
+    var content = React$9.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT) }, renderState.content);
+    var leading = React$9.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_LEADING) }, renderState.leading);
     if (node.isEnableClose()) {
         var closeTitle = layout.i18nName(__1$1.I18nLabel.Close_Tab);
-        buttons.push(React$a.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
+        buttons.push(React$9.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
     }
-    return (React$a.createElement("div", { ref: selfRef, style: {}, className: classNames, "data-layout-path": path, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
+    return (React$9.createElement("div", { ref: selfRef, style: {}, className: classNames, "data-layout-path": path, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
         leading,
         content,
         buttons));
@@ -12754,7 +11251,7 @@ BorderButton$1.BorderButton = BorderButton;
 
 Object.defineProperty(BorderTabSet$1, "__esModule", { value: true });
 BorderTabSet$1.BorderTabSet = void 0;
-var React$9 = require$$0;
+var React$8 = require$$1;
 var DockLocation_1$1 = DockLocation$1;
 var BorderButton_1 = BorderButton$1;
 var PopupMenu_1 = PopupMenu$1;
@@ -12767,9 +11264,9 @@ var TabSet_1$1 = TabSet$1;
 /** @hidden @internal */
 var BorderTabSet = function (props) {
     var border = props.border, layout = props.layout, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var toolbarRef = React$9.useRef(null);
-    var overflowbuttonRef = React$9.useRef(null);
-    var stickyButtonsRef = React$9.useRef(null);
+    var toolbarRef = React$8.useRef(null);
+    var overflowbuttonRef = React$8.useRef(null);
+    var stickyButtonsRef = React$8.useRef(null);
     var _a = TabOverflowHook_1.useTabOverflow(border, Orientation_1$1.default.flip(border.getOrientation()), toolbarRef, stickyButtonsRef), selfRef = _a.selfRef, position = _a.position, userControlledLeft = _a.userControlledLeft, hiddenTabs = _a.hiddenTabs, onMouseWheel = _a.onMouseWheel;
     var onAuxMouseClick = function (event) {
         if (TabSet_1$1.isAuxMouseEvent(event)) {
@@ -12804,7 +11301,7 @@ var BorderTabSet = function (props) {
     var layoutTab = function (i) {
         var isSelected = border.getSelected() === i;
         var child = border.getChildren()[i];
-        tabs.push(React$9.createElement(BorderButton_1.BorderButton, { layout: layout, border: border.getLocation().getName(), node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
+        tabs.push(React$8.createElement(BorderButton_1.BorderButton, { layout: layout, border: border.getLocation().getName(), node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
     };
     for (var i = 0; i < border.getChildren().length; i++) {
         layoutTab(i);
@@ -12821,7 +11318,7 @@ var BorderTabSet = function (props) {
     var toolbar;
     if (hiddenTabs.length > 0) {
         var overflowTitle = layout.i18nName(I18nLabel_1$2.I18nLabel.Overflow_Menu_Tooltip);
-        buttons.push(React$9.createElement("button", { key: "overflowbutton", ref: overflowbuttonRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ + border.getLocation().getName()), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
+        buttons.push(React$8.createElement("button", { key: "overflowbutton", ref: overflowbuttonRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ + border.getLocation().getName()), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
             icons.more,
             hiddenTabs.length));
     }
@@ -12830,10 +11327,10 @@ var BorderTabSet = function (props) {
         var selectedTabNode = border.getChildren()[selectedIndex];
         if (selectedTabNode !== undefined && layout.isSupportsPopout() && selectedTabNode.isEnableFloat() && !selectedTabNode.isFloating()) {
             var floatTitle = layout.i18nName(I18nLabel_1$2.I18nLabel.Float_Tab);
-            buttons.push(React$9.createElement("button", { key: "float", title: floatTitle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }));
+            buttons.push(React$8.createElement("button", { key: "float", title: floatTitle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }));
         }
     }
-    toolbar = (React$9.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_ + border.getLocation().getName()) }, buttons));
+    toolbar = (React$8.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_ + border.getLocation().getName()) }, buttons));
     style = layout.styleFont(style);
     var innerStyle = {};
     var borderHeight = border.getBorderBarSize() - 1;
@@ -12846,9 +11343,9 @@ var BorderTabSet = function (props) {
     else {
         innerStyle = { height: borderHeight, left: position };
     }
-    return (React$9.createElement("div", { ref: selfRef, dir: "ltr", style: style, className: borderClasses, "data-layout-path": path, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onWheel: onMouseWheel },
-        React$9.createElement("div", { style: { height: borderHeight }, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_ + border.getLocation().getName()) },
-            React$9.createElement("div", { style: innerStyle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ + border.getLocation().getName()) }, tabs)),
+    return (React$8.createElement("div", { ref: selfRef, dir: "ltr", style: style, className: borderClasses, "data-layout-path": path, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onWheel: onMouseWheel },
+        React$8.createElement("div", { style: { height: borderHeight }, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_ + border.getLocation().getName()) },
+            React$8.createElement("div", { style: innerStyle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ + border.getLocation().getName()) }, tabs)),
         toolbar));
 };
 BorderTabSet$1.BorderTabSet = BorderTabSet;
@@ -12857,7 +11354,7 @@ var Splitter$1 = {};
 
 Object.defineProperty(Splitter$1, "__esModule", { value: true });
 Splitter$1.Splitter = void 0;
-var React$8 = require$$0;
+var React$7 = require$$1;
 var DragDrop_1$1 = DragDrop$1;
 var Actions_1$2 = Actions$1;
 var BorderNode_1$1 = BorderNode$1;
@@ -12866,8 +11363,8 @@ var Types_1$4 = Types;
 /** @hidden @internal */
 var Splitter = function (props) {
     var layout = props.layout, node = props.node, path = props.path;
-    var pBounds = React$8.useRef([]);
-    var outlineDiv = React$8.useRef(undefined);
+    var pBounds = React$7.useRef([]);
+    var outlineDiv = React$7.useRef(undefined);
     var parentNode = node.getParent();
     var onMouseDown = function (event) {
         DragDrop_1$1.default.instance.setGlassCursorOverride(node.getOrientation() === Orientation_1.default.HORZ ? "ns-resize" : "ew-resize");
@@ -12966,7 +11463,7 @@ var Splitter = function (props) {
     }
     var extra = node.getModel().getSplitterExtra();
     if (extra === 0) {
-        return (React$8.createElement("div", { style: style, "data-layout-path": path, className: className, onTouchStart: onMouseDown, onMouseDown: onMouseDown }));
+        return (React$7.createElement("div", { style: style, "data-layout-path": path, className: className, onTouchStart: onMouseDown, onMouseDown: onMouseDown }));
     }
     else {
         // add extended transparent div for hit testing
@@ -12984,8 +11481,8 @@ var Splitter = function (props) {
             cursor: node.getOrientation() === Orientation_1.default.HORZ ? "ns-resize" : "ew-resize"
         });
         var className2 = cm(Types_1$4.CLASSES.FLEXLAYOUT__SPLITTER_EXTRA);
-        return (React$8.createElement("div", { style: style, "data-layout-path": path, className: className },
-            React$8.createElement("div", { style: style2, className: className2, onTouchStart: onMouseDown, onMouseDown: onMouseDown })));
+        return (React$7.createElement("div", { style: style, "data-layout-path": path, className: className },
+            React$7.createElement("div", { style: style2, className: className2, onTouchStart: onMouseDown, onMouseDown: onMouseDown })));
     }
 };
 Splitter$1.Splitter = Splitter;
@@ -12999,15 +11496,15 @@ var __spreadArray$1 = (commonjsGlobal && commonjsGlobal.__spreadArray) || functi
 };
 Object.defineProperty(FloatingWindow$1, "__esModule", { value: true });
 FloatingWindow$1.FloatingWindow = void 0;
-var React$7 = require$$0;
-var react_dom_1 = require$$0;
+var React$6 = require$$1;
+var react_dom_1 = require$$1;
 var Types_1$3 = Types;
 /** @hidden @internal */
 var FloatingWindow = function (props) {
     var title = props.title, id = props.id, url = props.url, rect = props.rect, onCloseWindow = props.onCloseWindow, onSetWindow = props.onSetWindow, children = props.children;
-    var popoutWindow = React$7.useRef(null);
-    var _a = React$7.useState(undefined), content = _a[0], setContent = _a[1];
-    React$7.useLayoutEffect(function () {
+    var popoutWindow = React$6.useRef(null);
+    var _a = React$6.useState(undefined), content = _a[0], setContent = _a[1];
+    React$6.useLayoutEffect(function () {
         var r = rect;
         // Make a local copy of the styles from the current window which will be passed into
         // the floating window. window.document.styleSheets is mutable and we can't guarantee
@@ -13111,19 +11608,19 @@ var FloatingWindowTab$1 = {};
 
 Object.defineProperty(FloatingWindowTab$1, "__esModule", { value: true });
 FloatingWindowTab$1.FloatingWindowTab = void 0;
-var React$6 = require$$0;
+var React$5 = require$$1;
 var ErrorBoundary_1 = ErrorBoundary$1;
 var I18nLabel_1$1 = I18nLabel;
-var react_1 = require$$0;
+var react_1 = require$$1;
 var Types_1$2 = Types;
 /** @hidden @internal */
 var FloatingWindowTab = function (props) {
     var layout = props.layout, node = props.node, factory = props.factory;
     var cm = layout.getClassName;
     var child = factory(node);
-    return (React$6.createElement("div", { className: cm(Types_1$2.CLASSES.FLEXLAYOUT__FLOATING_WINDOW_TAB) },
-        React$6.createElement(ErrorBoundary_1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$1.I18nLabel.Error_rendering_component) },
-            React$6.createElement(react_1.Fragment, null, child))));
+    return (React$5.createElement("div", { className: cm(Types_1$2.CLASSES.FLEXLAYOUT__FLOATING_WINDOW_TAB) },
+        React$5.createElement(ErrorBoundary_1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$1.I18nLabel.Error_rendering_component) },
+            React$5.createElement(react_1.Fragment, null, child))));
 };
 FloatingWindowTab$1.FloatingWindowTab = FloatingWindowTab;
 
@@ -13131,7 +11628,7 @@ var TabFloating$1 = {};
 
 Object.defineProperty(TabFloating$1, "__esModule", { value: true });
 TabFloating$1.TabFloating = void 0;
-var React$5 = require$$0;
+var React$4 = require$$1;
 var Actions_1$1 = Actions$1;
 var TabSetNode_1$1 = TabSetNode$1;
 var Types_1$1 = Types;
@@ -13174,16 +11671,16 @@ var TabFloating = function (props) {
     var dockMessage = layout.i18nName(I18nLabel_1.I18nLabel.Floating_Window_Dock_Window);
     var customRenderCallback = layout.getOnRenderFloatingTabPlaceholder();
     if (customRenderCallback) {
-        return (React$5.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style }, customRenderCallback(dockPopout, showPopout)));
+        return (React$4.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style }, customRenderCallback(dockPopout, showPopout)));
     }
     else {
-        return (React$5.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
-            React$5.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING_INNER) },
-                React$5.createElement("div", null, message),
-                React$5.createElement("div", null,
-                    React$5.createElement("a", { href: "#", onClick: onClickFocus }, showMessage)),
-                React$5.createElement("div", null,
-                    React$5.createElement("a", { href: "#", onClick: onClickDock }, dockMessage)))));
+        return (React$4.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
+            React$4.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING_INNER) },
+                React$4.createElement("div", null, message),
+                React$4.createElement("div", null,
+                    React$4.createElement("a", { href: "#", onClick: onClickFocus }, showMessage)),
+                React$4.createElement("div", null,
+                    React$4.createElement("a", { href: "#", onClick: onClickDock }, dockMessage)))));
     }
 };
 TabFloating$1.TabFloating = TabFloating;
@@ -13210,8 +11707,8 @@ var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function
 };
 Object.defineProperty(Layout$1, "__esModule", { value: true });
 Layout$1.Layout = void 0;
-var React$4 = require$$0;
-var ReactDOM$1 = require$$0;
+var React$3 = require$$1;
+var ReactDOM = require$$1;
 var DockLocation_1 = DockLocation$1;
 var DragDrop_1 = DragDrop$1;
 var Actions_1 = Actions$1;
@@ -13386,7 +11883,7 @@ var Layout = /** @class */ (function (_super) {
         };
         /** @hidden @internal */
         _this.dragRectRender = function (text, node, json, onRendered) {
-            var content = React$4.createElement("div", { style: { whiteSpace: "pre" } }, text.replace("<br>", "\n"));
+            var content = React$3.createElement("div", { style: { whiteSpace: "pre" } }, text.replace("<br>", "\n"));
             if (_this.props.onRenderDragRect !== undefined) {
                 var customContent = _this.props.onRenderDragRect(text, node, json);
                 if (customContent !== undefined) {
@@ -13396,7 +11893,7 @@ var Layout = /** @class */ (function (_super) {
             // hide div until the render is complete
             _this.dragDiv.style.visibility = "hidden";
             _this.dragRectRendered = false;
-            ReactDOM$1.render(React$4.createElement(DragRectRenderWrapper
+            ReactDOM.render(React$3.createElement(DragRectRenderWrapper
             // wait for it to be rendered
             , { 
                 // wait for it to be rendered
@@ -13507,10 +12004,10 @@ var Layout = /** @class */ (function (_super) {
         };
         _this.props.model._setChangeListener(_this.onModelChange);
         _this.tabIds = [];
-        _this.selfRef = React$4.createRef();
-        _this.findHeaderBarSizeRef = React$4.createRef();
-        _this.findTabBarSizeRef = React$4.createRef();
-        _this.findBorderBarSizeRef = React$4.createRef();
+        _this.selfRef = React$3.createRef();
+        _this.findHeaderBarSizeRef = React$3.createRef();
+        _this.findTabBarSizeRef = React$3.createRef();
+        _this.findBorderBarSizeRef = React$3.createRef();
         _this.supportsPopout = props.supportsPopout !== undefined ? props.supportsPopout : defaultSupportsPopout;
         _this.popoutURL = props.popoutURL ? props.popoutURL : "popout.html";
         // For backwards compatibility, prop closeIcon sets prop icons.close:
@@ -13636,7 +12133,7 @@ var Layout = /** @class */ (function (_super) {
         // first render will be used to find the size (via selfRef)
         if (this.firstRender) {
             this.firstRender = false;
-            return (React$4.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT) }, this.metricsElements()));
+            return (React$3.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT) }, this.metricsElements()));
         }
         this.props.model._setPointerFine(window && window.matchMedia && window.matchMedia("(pointer: fine)").matches);
         // this.start = Date.now();
@@ -13674,7 +12171,7 @@ var Layout = /** @class */ (function (_super) {
             }
         });
         // this.layoutTime = (Date.now() - this.start);
-        return (React$4.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT), onDragEnter: this.props.onExternalDrag ? this.onDragEnter : undefined },
+        return (React$3.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT), onDragEnter: this.props.onExternalDrag ? this.onDragEnter : undefined },
             tabSetComponents,
             this.tabIds.map(function (t) {
                 return tabComponents[t];
@@ -13688,10 +12185,10 @@ var Layout = /** @class */ (function (_super) {
     Layout.prototype.metricsElements = function () {
         // used to measure the tab and border tab sizes
         var fontStyle = this.styleFont({ visibility: "hidden" });
-        return (React$4.createElement(React$4.Fragment, null,
-            React$4.createElement("div", { key: "findHeaderBarSize", ref: this.findHeaderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_HEADER_SIZER) }, "FindHeaderBarSize"),
-            React$4.createElement("div", { key: "findTabBarSize", ref: this.findTabBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_SIZER) }, "FindTabBarSize"),
-            React$4.createElement("div", { key: "findBorderBarSize", ref: this.findBorderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__BORDER_SIZER) }, "FindBorderBarSize")));
+        return (React$3.createElement(React$3.Fragment, null,
+            React$3.createElement("div", { key: "findHeaderBarSize", ref: this.findHeaderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_HEADER_SIZER) }, "FindHeaderBarSize"),
+            React$3.createElement("div", { key: "findTabBarSize", ref: this.findTabBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_SIZER) }, "FindTabBarSize"),
+            React$3.createElement("div", { key: "findBorderBarSize", ref: this.findBorderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__BORDER_SIZER) }, "FindBorderBarSize")));
     };
     /** @hidden @internal */
     Layout.prototype.renderBorder = function (borderSet, borderComponents, tabComponents, floatingWindows, splitterComponents) {
@@ -13699,7 +12196,7 @@ var Layout = /** @class */ (function (_super) {
             var border = _a[_i];
             var borderPath = "/border/" + border.getLocation().getName();
             if (border.isShowing()) {
-                borderComponents.push(React$4.createElement(BorderTabSet_1.BorderTabSet, { key: "border_" + border.getLocation().getName(), path: borderPath, border: border, layout: this, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
+                borderComponents.push(React$3.createElement(BorderTabSet_1.BorderTabSet, { key: "border_" + border.getLocation().getName(), path: borderPath, border: border, layout: this, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
                 var drawChildren = border._getDrawChildren();
                 var i = 0;
                 var tabCount = 0;
@@ -13707,18 +12204,18 @@ var Layout = /** @class */ (function (_super) {
                     var child = drawChildren_1[_b];
                     if (child instanceof SplitterNode_1.default) {
                         var path = borderPath + "/s";
-                        splitterComponents.push(React$4.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, node: child, path: path }));
+                        splitterComponents.push(React$3.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, node: child, path: path }));
                     }
                     else if (child instanceof TabNode_1.default) {
                         var path = borderPath + "/t" + tabCount++;
                         if (this.supportsPopout && child.isFloating()) {
                             var rect = this._getScreenRect(child);
-                            floatingWindows.push(React$4.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
-                                React$4.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
-                            tabComponents[child.getId()] = React$4.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected() });
+                            floatingWindows.push(React$3.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
+                                React$3.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
+                            tabComponents[child.getId()] = React$3.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected() });
                         }
                         else {
-                            tabComponents[child.getId()] = React$4.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected(), factory: this.props.factory });
+                            tabComponents[child.getId()] = React$3.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected(), factory: this.props.factory });
                         }
                     }
                     i++;
@@ -13736,11 +12233,11 @@ var Layout = /** @class */ (function (_super) {
             var child = _a[_i];
             if (child instanceof SplitterNode_1.default) {
                 var newPath = path + "/s" + (splitterCount++);
-                splitterComponents.push(React$4.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, path: newPath, node: child }));
+                splitterComponents.push(React$3.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, path: newPath, node: child }));
             }
             else if (child instanceof TabSetNode_1.default) {
                 var newPath = path + "/ts" + (rowCount++);
-                tabSetComponents.push(React$4.createElement(TabSet_1.TabSet, { key: child.getId(), layout: this, path: newPath, node: child, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
+                tabSetComponents.push(React$3.createElement(TabSet_1.TabSet, { key: child.getId(), layout: this, path: newPath, node: child, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
                 this.renderChildren(newPath, child, tabSetComponents, tabComponents, floatingWindows, splitterComponents);
             }
             else if (child instanceof TabNode_1.default) {
@@ -13752,12 +12249,12 @@ var Layout = /** @class */ (function (_super) {
                 }
                 if (this.supportsPopout && child.isFloating()) {
                     var rect = this._getScreenRect(child);
-                    floatingWindows.push(React$4.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
-                        React$4.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
-                    tabComponents[child.getId()] = React$4.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab });
+                    floatingWindows.push(React$3.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
+                        React$3.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
+                    tabComponents[child.getId()] = React$3.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab });
                 }
                 else {
-                    tabComponents[child.getId()] = React$4.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab, factory: this.props.factory });
+                    tabComponents[child.getId()] = React$3.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab, factory: this.props.factory });
                 }
             }
             else {
@@ -14052,15 +12549,15 @@ var Layout = /** @class */ (function (_super) {
         }
     };
     return Layout;
-}(React$4.Component));
+}(React$3.Component));
 Layout$1.Layout = Layout;
 /** @hidden @internal */
 var DragRectRenderWrapper = function (props) {
-    React$4.useEffect(function () {
+    React$3.useEffect(function () {
         var _a;
         (_a = props.onRendered) === null || _a === void 0 ? void 0 : _a.call(props);
     }, [props]);
-    return (React$4.createElement(React$4.Fragment, null, props.children));
+    return (React$3.createElement(React$3.Fragment, null, props.children));
 };
 Layout$1.default = Layout;
 
@@ -14085,7 +12582,7 @@ var BorderSet_1 = BorderSet$1;
 exports.BorderSet = BorderSet_1.default;
 var Model_1 = Model$1;
 exports.Model = Model_1.default;
-var Node_1 = Node$2;
+var Node_1 = Node$1;
 exports.Node = Node_1.default;
 var RowNode_1 = RowNode$1;
 exports.RowNode = RowNode_1.default;
@@ -14433,7 +12930,28 @@ require("./es6-shim");
 
 });
 
-ace.define("ace/lib/lang",["require","exports","module"], function(require, exports, module){exports.last = function (a) {
+ace.define("ace/lib/deep_copy",["require","exports","module"], function(require, exports, module){exports.deepCopy = function deepCopy(obj) {
+    if (typeof obj !== "object" || !obj)
+        return obj;
+    var copy;
+    if (Array.isArray(obj)) {
+        copy = [];
+        for (var key = 0; key < obj.length; key++) {
+            copy[key] = deepCopy(obj[key]);
+        }
+        return copy;
+    }
+    if (Object.prototype.toString.call(obj) !== "[object Object]")
+        return obj;
+    copy = {};
+    for (var key in obj)
+        copy[key] = deepCopy(obj[key]);
+    return copy;
+};
+
+});
+
+ace.define("ace/lib/lang",["require","exports","module","ace/lib/deep_copy"], function(require, exports, module){exports.last = function (a) {
     return a[a.length - 1];
 };
 exports.stringReverse = function (string) {
@@ -14474,24 +12992,7 @@ exports.copyArray = function (array) {
     }
     return copy;
 };
-exports.deepCopy = function deepCopy(obj) {
-    if (typeof obj !== "object" || !obj)
-        return obj;
-    var copy;
-    if (Array.isArray(obj)) {
-        copy = [];
-        for (var key = 0; key < obj.length; key++) {
-            copy[key] = deepCopy(obj[key]);
-        }
-        return copy;
-    }
-    if (Object.prototype.toString.call(obj) !== "[object Object]")
-        return obj;
-    copy = {};
-    for (var key in obj)
-        copy[key] = deepCopy(obj[key]);
-    return copy;
-};
+exports.deepCopy = require("./deep_copy").deepCopy;
 exports.arrayToMap = function (arr) {
     var map = {};
     for (var i = 0; i < arr.length; i++) {
@@ -15079,9 +13580,20 @@ exports.EventEmitter = EventEmitter;
 
 });
 
-ace.define("ace/lib/app_config",["require","exports","module","ace/lib/oop","ace/lib/event_emitter"], function(require, exports, module){"no use strict";
+ace.define("ace/lib/report_error",["require","exports","module"], function(require, exports, module){exports.reportError = function reportError(msg, data) {
+    var e = new Error(msg);
+    e.data = data;
+    if (typeof console == "object" && console.error)
+        console.error(e);
+    setTimeout(function () { throw e; });
+};
+
+});
+
+ace.define("ace/lib/app_config",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/report_error"], function(require, exports, module){"no use strict";
 var oop = require("./oop");
 var EventEmitter = require("./event_emitter").EventEmitter;
+var reportError = require("./report_error").reportError;
 var optionsProvider = {
     setOptions: function (optList) {
         Object.keys(optList).forEach(function (key) {
@@ -15132,13 +13644,6 @@ var optionsProvider = {
 function warn(message) {
     if (typeof console != "undefined" && console.warn)
         console.warn.apply(console, arguments);
-}
-function reportError(msg, data) {
-    var e = new Error(msg);
-    e.data = data;
-    if (typeof console == "object" && console.error)
-        console.error(e);
-    setTimeout(function () { throw e; });
 }
 var messages;
 var AppConfig = /** @class */ (function () {
@@ -15369,7 +13874,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.24.2";
+exports.version = "1.28.0";
 
 });
 
@@ -17314,23 +15819,13 @@ var HoverTooltip = /** @class */ (function (_super) {
         element.appendChild(domNode);
         element.style.display = "block";
         var position = renderer.textToScreenCoordinates(range.start.row, range.start.column);
-        var cursorPos = editor.getCursorPosition();
         var labelHeight = element.clientHeight;
         var rect = renderer.scroller.getBoundingClientRect();
-        var isTopdown = true;
-        if (this.row > cursorPos.row) {
-            isTopdown = true;
+        var isAbove = true;
+        if (position.pageY - labelHeight < 0) {
+            isAbove = false;
         }
-        else if (this.row < cursorPos.row) {
-            isTopdown = false;
-        }
-        if (position.pageY - labelHeight + renderer.lineHeight < rect.top) {
-            isTopdown = true;
-        }
-        else if (position.pageY + labelHeight > rect.bottom) {
-            isTopdown = false;
-        }
-        if (!isTopdown) {
+        if (isAbove) {
             position.pageY -= labelHeight;
         }
         else {
@@ -19801,7 +18296,7 @@ exports.Selection = Selection;
 
 });
 
-ace.define("ace/tokenizer",["require","exports","module","ace/config"], function(require, exports, module){var config = require("./config");
+ace.define("ace/tokenizer",["require","exports","module","ace/lib/report_error"], function(require, exports, module){var reportError = require("./lib/report_error").reportError;
 var MAX_TOKEN_COUNT = 2000;
 var Tokenizer = /** @class */ (function () {
     function Tokenizer(rules) {
@@ -20082,12 +18577,12 @@ var Tokenizer = /** @class */ (function () {
     };
     return Tokenizer;
 }());
-Tokenizer.prototype.reportError = config.reportError;
+Tokenizer.prototype.reportError = reportError;
 exports.Tokenizer = Tokenizer;
 
 });
 
-ace.define("ace/mode/text_highlight_rules",["require","exports","module","ace/lib/lang"], function(require, exports, module){var lang = require("../lib/lang");
+ace.define("ace/mode/text_highlight_rules",["require","exports","module","ace/lib/deep_copy"], function(require, exports, module){var deepCopy = require("../lib/deep_copy").deepCopy;
 var TextHighlightRules = function () {
     this.$rules = {
         "start": [{
@@ -20141,7 +18636,7 @@ var TextHighlightRules = function () {
         if (escapeRules) {
             var addRules = Array.prototype[append ? "push" : "unshift"];
             for (var i = 0; i < states.length; i++)
-                addRules.apply(this.$rules[states[i]], lang.deepCopy(escapeRules));
+                addRules.apply(this.$rules[states[i]], deepCopy(escapeRules));
         }
         if (!this.$embeds)
             this.$embeds = [];
@@ -30305,12 +28800,21 @@ exports.Marker = Marker;
 
 });
 
-ace.define("ace/layer/text",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/layer/lines","ace/lib/event_emitter","ace/config"], function(require, exports, module){var oop = require("../lib/oop");
+ace.define("ace/layer/text_util",["require","exports","module"], function(require, exports, module){// Tokens for which Ace just uses a simple TextNode and does not add any special className.
+var textTokens = new Set(["text", "rparen", "lparen"]);
+exports.isTextToken = function (tokenType) {
+    return textTokens.has(tokenType);
+};
+
+});
+
+ace.define("ace/layer/text",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/layer/lines","ace/lib/event_emitter","ace/config","ace/layer/text_util"], function(require, exports, module){var oop = require("../lib/oop");
 var dom = require("../lib/dom");
 var lang = require("../lib/lang");
 var Lines = require("./lines").Lines;
 var EventEmitter = require("../lib/event_emitter").EventEmitter;
 var nls = require("../config").nls;
+var isTextToken = require("./text_util").isTextToken;
 var Text = /** @class */ (function () {
     function Text(parentEl) {
         this.dom = dom;
@@ -30579,7 +29083,7 @@ var Text = /** @class */ (function () {
                     valueFragment.appendChild(span);
                 }
                 else {
-                    valueFragment.appendChild(this.com.createTextNode(simpleSpace, this.element));
+                    valueFragment.appendChild(this.dom.createTextNode(simpleSpace, this.element));
                 }
             }
             else if (controlCharacter) {
@@ -30606,7 +29110,7 @@ var Text = /** @class */ (function () {
             }
         }
         valueFragment.appendChild(this.dom.createTextNode(i ? value.slice(i) : value, this.element));
-        if (!this.$textToken[token.type]) {
+        if (!isTextToken(token.type)) {
             var classes = "ace_" + token.type.replace(/\./g, " ace_");
             var span = this.dom.createElement("span");
             if (token.type == "fold") {
@@ -30916,11 +29420,6 @@ var Text = /** @class */ (function () {
     };
     return Text;
 }());
-Text.prototype.$textToken = {
-    "text": true,
-    "rparen": true,
-    "lparen": true
-};
 Text.prototype.EOF_CHAR = "\xB6";
 Text.prototype.EOL_CHAR_LF = "\xAC";
 Text.prototype.EOL_CHAR_CRLF = "\xa4";
@@ -36895,7 +35394,7 @@ var __assign$1 = (commonjsGlobal && commonjsGlobal.__assign) || function () {
 Object.defineProperty(ace$5, "__esModule", { value: true });
 var ace_builds_1$1 = ace$4.exports;
 var PropTypes$2 = propTypes$2.exports;
-var React$3 = require$$0;
+var React$2 = require$$1;
 var isEqual$1 = lodash_isequal.exports;
 var editorOptions_1$1 = editorOptions$1;
 var ace$2 = (0, editorOptions_1$1.getAceInstance)();
@@ -37225,7 +35724,7 @@ var ReactAce = /** @class */ (function (_super) {
     ReactAce.prototype.render = function () {
         var _a = this.props, name = _a.name, width = _a.width, height = _a.height, style = _a.style;
         var divStyle = __assign$1({ width: width, height: height }, style);
-        return React$3.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
+        return React$2.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
     };
     ReactAce.propTypes = {
         mode: PropTypes$2.oneOfType([PropTypes$2.string, PropTypes$2.object]),
@@ -37312,7 +35811,7 @@ var ReactAce = /** @class */ (function (_super) {
         navigateToFileEnd: true
     };
     return ReactAce;
-}(React$3.Component));
+}(React$2.Component));
 ace$5.default = ReactAce;
 
 var diff = {};
@@ -38470,7 +36969,7 @@ var ace$1 = (0, editorOptions_1.getAceInstance)();
 var ace_builds_1 = ace$4.exports;
 var ext_split_1 = extSplit.exports;
 var PropTypes$1 = propTypes$2.exports;
-var React$2 = require$$0;
+var React$1 = require$$1;
 var isEqual = lodash_isequal.exports;
 var get = lodash_get;
 var SplitComponent = /** @class */ (function (_super) {
@@ -38771,7 +37270,7 @@ var SplitComponent = /** @class */ (function (_super) {
     SplitComponent.prototype.render = function () {
         var _a = this.props, name = _a.name, width = _a.width, height = _a.height, style = _a.style;
         var divStyle = __assign({ width: width, height: height }, style);
-        return React$2.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
+        return React$1.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
     };
     SplitComponent.propTypes = {
         className: PropTypes$1.string,
@@ -38856,7 +37355,7 @@ var SplitComponent = /** @class */ (function (_super) {
         enableLiveAutocompletion: false
     };
     return SplitComponent;
-}(React$2.Component));
+}(React$1.Component));
 split.default = SplitComponent;
 
 var diffMatchPatch = {exports: {}};
@@ -41097,7 +39596,7 @@ var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 })();
 Object.defineProperty(diff, "__esModule", { value: true });
 var PropTypes = propTypes$2.exports;
-var React$1 = require$$0;
+var React = require$$1;
 var split_1$1 = split;
 var DiffMatchPatch = diffMatchPatch.exports;
 var DiffComponent = /** @class */ (function (_super) {
@@ -41255,7 +39754,7 @@ var DiffComponent = /** @class */ (function (_super) {
     };
     DiffComponent.prototype.render = function () {
         var markers = this.diff();
-        return (React$1.createElement(split_1$1.default, { name: this.props.name, className: this.props.className, focus: this.props.focus, orientation: this.props.orientation, splits: this.props.splits, mode: this.props.mode, theme: this.props.theme, height: this.props.height, width: this.props.width, fontSize: this.props.fontSize, showGutter: this.props.showGutter, onChange: this.onChange, onPaste: this.props.onPaste, onLoad: this.props.onLoad, onScroll: this.props.onScroll, minLines: this.props.minLines, maxLines: this.props.maxLines, readOnly: this.props.readOnly, highlightActiveLine: this.props.highlightActiveLine, showPrintMargin: this.props.showPrintMargin, tabSize: this.props.tabSize, cursorStart: this.props.cursorStart, editorProps: this.props.editorProps, style: this.props.style, scrollMargin: this.props.scrollMargin, setOptions: this.props.setOptions, wrapEnabled: this.props.wrapEnabled, enableBasicAutocompletion: this.props.enableBasicAutocompletion, enableLiveAutocompletion: this.props.enableLiveAutocompletion, value: this.state.value, markers: markers }));
+        return (React.createElement(split_1$1.default, { name: this.props.name, className: this.props.className, focus: this.props.focus, orientation: this.props.orientation, splits: this.props.splits, mode: this.props.mode, theme: this.props.theme, height: this.props.height, width: this.props.width, fontSize: this.props.fontSize, showGutter: this.props.showGutter, onChange: this.onChange, onPaste: this.props.onPaste, onLoad: this.props.onLoad, onScroll: this.props.onScroll, minLines: this.props.minLines, maxLines: this.props.maxLines, readOnly: this.props.readOnly, highlightActiveLine: this.props.highlightActiveLine, showPrintMargin: this.props.showPrintMargin, tabSize: this.props.tabSize, cursorStart: this.props.cursorStart, editorProps: this.props.editorProps, style: this.props.style, scrollMargin: this.props.scrollMargin, setOptions: this.props.setOptions, wrapEnabled: this.props.wrapEnabled, enableBasicAutocompletion: this.props.enableBasicAutocompletion, enableLiveAutocompletion: this.props.enableLiveAutocompletion, value: this.state.value, markers: markers }));
     };
     DiffComponent.propTypes = {
         cursorStart: PropTypes.number,
@@ -41321,7 +39820,7 @@ var DiffComponent = /** @class */ (function (_super) {
         wrapEnabled: true
     };
     return DiffComponent;
-}(React$1.Component));
+}(React.Component));
 diff.default = DiffComponent;
 
 Object.defineProperty(lib, "__esModule", { value: true });
@@ -45251,7 +43750,7 @@ var AceInline = /** @class */ (function () {
             return false;
         }
         var displayText = completion.snippet ? snippetManager.getDisplayTextForSnippet(editor, completion.snippet) : completion.value;
-        if (!displayText || !displayText.startsWith(prefix)) {
+        if (completion.hideInlinePreview || !displayText || !displayText.startsWith(prefix)) {
             return false;
         }
         this.editor = editor;
@@ -45373,6 +43872,8 @@ var Autocomplete = /** @class */ (function () {
         this.keyboardHandler = new HashHandler();
         this.keyboardHandler.bindKeys(this.commands);
         this.parentNode = null;
+        this.setSelectOnHover = false;
+        this.stickySelectionDelay = 500;
         this.blurListener = this.blurListener.bind(this);
         this.changeListener = this.changeListener.bind(this);
         this.mousedownListener = this.mousedownListener.bind(this);
@@ -45382,6 +43883,9 @@ var Autocomplete = /** @class */ (function () {
             this.updateCompletions(true);
         }.bind(this));
         this.tooltipTimer = lang.delayedCall(this.updateDocTooltip.bind(this), 50);
+        this.stickySelectionTimer = lang.delayedCall(function () {
+            this.stickySelection = true;
+        }.bind(this), this.stickySelectionDelay);
     }
     Autocomplete.prototype.$init = function () {
         this.popup = new AcePopup(this.parentNode || document.body || document.documentElement);
@@ -45390,7 +43894,7 @@ var Autocomplete = /** @class */ (function () {
             e.stop();
         }.bind(this));
         this.popup.focus = this.editor.focus.bind(this.editor);
-        this.popup.on("show", this.$onPopupChange.bind(this));
+        this.popup.on("show", this.$onPopupShow.bind(this));
         this.popup.on("hide", this.$onHidePopup.bind(this));
         this.popup.on("select", this.$onPopupChange.bind(this));
         this.popup.on("changeHoverMarker", this.tooltipTimer.bind(null, null));
@@ -45410,6 +43914,8 @@ var Autocomplete = /** @class */ (function () {
             this.inlineRenderer.hide();
         }
         this.hideDocTooltip();
+        this.stickySelectionTimer.cancel();
+        this.stickySelection = false;
     };
     Autocomplete.prototype.$onPopupChange = function (hide) {
         if (this.inlineRenderer && this.inlineEnabled) {
@@ -45421,6 +43927,12 @@ var Autocomplete = /** @class */ (function () {
             this.$updatePopupPosition();
         }
         this.tooltipTimer.call(null, null);
+    };
+    Autocomplete.prototype.$onPopupShow = function (hide) {
+        this.$onPopupChange(hide);
+        this.stickySelection = false;
+        if (this.stickySelectionDelay >= 0)
+            this.stickySelectionTimer.schedule(this.stickySelectionDelay);
     };
     Autocomplete.prototype.observeLayoutChanges = function () {
         if (this.$elements || !this.editor)
@@ -45484,6 +43996,8 @@ var Autocomplete = /** @class */ (function () {
         if (this.inlineEnabled && !this.inlineRenderer)
             this.$initInline();
         this.popup.autoSelect = this.autoSelect;
+        this.popup.setSelectOnHover(this.setSelectOnHover);
+        var previousSelectedItem = this.popup.data[this.popup.getRow()];
         this.popup.setData(this.completions.filtered, this.completions.filterText);
         if (this.editor.textInput.setAriaOptions) {
             this.editor.textInput.setAriaOptions({
@@ -45492,7 +44006,11 @@ var Autocomplete = /** @class */ (function () {
             });
         }
         editor.keyBinding.addKeyboardHandler(this.keyboardHandler);
-        this.popup.setRow(this.autoSelect ? 0 : -1);
+        var newRow = this.popup.data.indexOf(previousSelectedItem);
+        if (newRow && this.stickySelection)
+            this.popup.setRow(this.autoSelect ? newRow : -1);
+        else
+            this.popup.setRow(this.autoSelect ? 0 : -1);
         if (!keepPopupPosition) {
             this.popup.setTheme(editor.getTheme());
             this.popup.setFontSize(editor.getFontSize());
@@ -45888,6 +44406,10 @@ var CompletionProvider = /** @class */ (function () {
         var total = editor.completers.length;
         editor.completers.forEach(function (completer, i) {
             completer.getCompletions(editor, session, pos, prefix, function (err, results) {
+                if (completer.hideInlinePreview)
+                    results = results.map(function (result) {
+                        return Object.assign(result, { hideInlinePreview: completer.hideInlinePreview });
+                    });
                 if (!err && results)
                     matches = matches.concat(results);
                 callback(null, {
@@ -46789,6 +45311,89 @@ class JsEditorUi extends ReactDOM$3.PureComponent {
   }
 }
 
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+
+function _objectWithoutPropertiesLoose$2(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+
+function defaultKey(key) {
+  return 'default' + key.charAt(0).toUpperCase() + key.substr(1);
+}
+
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
+function useUncontrolledProp(propValue, defaultValue, handler) {
+  var wasPropRef = s(propValue !== undefined);
+
+  var _useState = l(defaultValue),
+      stateValue = _useState[0],
+      setState = _useState[1];
+
+  var isProp = propValue !== undefined;
+  var wasProp = wasPropRef.current;
+  wasPropRef.current = isProp;
+  /**
+   * If a prop switches from controlled to Uncontrolled
+   * reset its value to the defaultValue
+   */
+
+  if (!isProp && wasProp && stateValue !== defaultValue) {
+    setState(defaultValue);
+  }
+
+  return [isProp ? propValue : stateValue, A$1(function (value) {
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    if (handler) handler.apply(void 0, [value].concat(args));
+    setState(value);
+  }, [handler])];
+}
+function useUncontrolled(props, config) {
+  return Object.keys(config).reduce(function (result, fieldName) {
+    var _extends2;
+
+    var _ref = result,
+        defaultValue = _ref[defaultKey(fieldName)],
+        propsValue = _ref[fieldName],
+        rest = _objectWithoutPropertiesLoose$2(_ref, [defaultKey(fieldName), fieldName].map(_toPropertyKey));
+
+    var handlerName = config[fieldName];
+
+    var _useUncontrolledProp = useUncontrolledProp(propsValue, defaultValue, props[handlerName]),
+        value = _useUncontrolledProp[0],
+        handler = _useUncontrolledProp[1];
+
+    return _extends({}, rest, (_extends2 = {}, _extends2[fieldName] = value, _extends2[handlerName] = handler, _extends2));
+  }, props);
+}
+
 var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
 /**
  * Runs `querySelectorAll` on a given element.
@@ -46822,6 +45427,38 @@ function useForceUpdate() {
   // updates when they are strictly equal to the last state value
   const [, dispatch] = p(state => !state, false);
   return dispatch;
+}
+
+const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
+  ref.current = value;
+};
+function mergeRefs(refA, refB) {
+  const a = toFnRef(refA);
+  const b = toFnRef(refB);
+  return value => {
+    if (a) a(value);
+    if (b) b(value);
+  };
+}
+
+/**
+ * Create and returns a single callback ref composed from two other Refs.
+ *
+ * ```tsx
+ * const Button = React.forwardRef((props, ref) => {
+ *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
+ *   const mergedRef = useMergedRefs(ref, attachRef);
+ *
+ *   return <button ref={mergedRef} {...props}/>
+ * })
+ * ```
+ *
+ * @param refA A Callback or mutable Ref
+ * @param refB A Callback or mutable Ref
+ * @category refs
+ */
+function useMergedRefs(refA, refB) {
+  return d(() => mergeRefs(refA, refB), [refA, refB]);
 }
 
 const NavContext = /*#__PURE__*/D$1(null);
@@ -47165,307 +45802,6 @@ const Row = /*#__PURE__*/x(({
 });
 Row.displayName = 'Row';
 
-var dist = {};
-
-var SplitPane$1 = {};
-
-var Pane = {};
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Pane = void 0;
-const React = require$$0;
-const baseStyle = {
-    position: 'relative',
-    outline: 'none',
-    border: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexBasis: 'auto',
-};
-exports.Pane = React.memo(({ size, minSize, split, className, forwardRef, children }) => {
-    const style = Object.assign(Object.assign({}, baseStyle), { flexGrow: size, flexShrink: size });
-    if (split === 'vertical') {
-        style.width = 0;
-        style.height = '100%';
-        style.minWidth = minSize;
-    }
-    else {
-        style.width = '100%';
-        style.height = 0;
-        style.minHeight = minSize;
-    }
-    const classes = ['Pane', split, className].join(' ');
-    return (React.createElement("div", { className: classes, style: style, ref: forwardRef }, children));
-});
-exports.Pane.displayName = 'Pane';
-
-}(Pane));
-
-var Resizer = {};
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Resizer = void 0;
-const React = require$$0;
-const { useCallback } = React;
-exports.Resizer = React.memo(({ split, className, index, onDragStarted }) => {
-    const handleMouseDown = useCallback((event) => {
-        event.preventDefault();
-        onDragStarted(index, event);
-    }, [index, onDragStarted]);
-    const handleTouchStart = useCallback((event) => {
-        event.preventDefault();
-        onDragStarted(index, event.touches[0]);
-    }, [index, onDragStarted]);
-    const classes = ['Resizer', split, className].join(' ');
-    return (React.createElement("span", { role: 'presentation', className: classes, style: { flex: 'none' }, onMouseDown: handleMouseDown, onTouchStart: handleTouchStart }));
-});
-exports.Resizer.displayName = 'Resizer';
-
-}(Resizer));
-
-var util = {};
-
-Object.defineProperty(util, "__esModule", { value: true });
-util.useDragState = util.useEventListener = void 0;
-const React = require$$0;
-const ReactDOM = require$$0;
-const { useCallback, useMemo, useState, useEffect } = React;
-function useEventListener(type, listener) {
-    useEffect(() => {
-        if (!listener)
-            return;
-        document.addEventListener(type, listener);
-        return () => {
-            document.removeEventListener(type, listener);
-        };
-    }, [type, listener]);
-}
-util.useEventListener = useEventListener;
-function useDragStateHandlers(split, onDragFinished) {
-    const [dragging, setDragging] = useState(null);
-    const [current, setCurrent] = useState(0);
-    const beginDrag = useCallback((event, extraState) => {
-        const pos = split === 'vertical' ? event.clientX : event.clientY;
-        setDragging([extraState, pos]);
-        setCurrent(pos);
-    }, [split]);
-    const [dragState, onMouseUp] = useMemo(() => {
-        if (!dragging) {
-            return [null, undefined];
-        }
-        const [extraState, origin] = dragging;
-        const dragState = { offset: current - origin, extraState };
-        const onMouseUp = () => {
-            ReactDOM.unstable_batchedUpdates(() => {
-                setDragging(null);
-                onDragFinished(dragState);
-            });
-        };
-        return [dragState, onMouseUp];
-    }, [current, dragging, onDragFinished]);
-    const [onMouseMove, onTouchMove] = useMemo(() => {
-        if (!dragging) {
-            return [undefined, undefined];
-        }
-        const onMouseMove = (event) => {
-            const pos = split === 'vertical' ? event.clientX : event.clientY;
-            setCurrent(pos);
-        };
-        const onTouchMove = (event) => {
-            onMouseMove(event.touches[0]);
-        };
-        return [onMouseMove, onTouchMove];
-    }, [dragging, split]);
-    return { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp };
-}
-function useDragState(split, onDragFinished) {
-    const { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp } = useDragStateHandlers(split, onDragFinished);
-    useEventListener('mousemove', onMouseMove);
-    useEventListener('touchmove', onTouchMove);
-    useEventListener('mouseup', onMouseUp);
-    return [dragState, beginDrag];
-}
-util.useDragState = useDragState;
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SplitPane = void 0;
-const React = require$$0;
-const { useCallback, useRef, useState, useMemo, useEffect } = React;
-const Pane_1 = Pane;
-const Resizer_1 = Resizer;
-const util_1 = util;
-const DEFAULT_MIN_SIZE = 50;
-function getNodeKey(node, index) {
-    if (typeof node === 'object' && node && node.key != null) {
-        return 'key.' + node.key;
-    }
-    return 'index.' + index;
-}
-function getMinSize(index, minSizes) {
-    if (typeof minSizes === 'number') {
-        if (minSizes > 0) {
-            return minSizes;
-        }
-    }
-    else if (minSizes instanceof Array) {
-        const value = minSizes[index];
-        if (value > 0) {
-            return value;
-        }
-    }
-    return DEFAULT_MIN_SIZE;
-}
-function getDefaultSize(index, defaultSizes) {
-    if (defaultSizes) {
-        const value = defaultSizes[index];
-        if (value >= 0) {
-            return value;
-        }
-    }
-    return 1;
-}
-function move(sizes, index, offset, minSizes) {
-    if (!offset || index < 0 || index + 1 >= sizes.length) {
-        return 0;
-    }
-    const firstMinSize = getMinSize(index, minSizes);
-    const secondMinSize = getMinSize(index + 1, minSizes);
-    const firstSize = sizes[index] + offset;
-    const secondSize = sizes[index + 1] - offset;
-    if (offset < 0 && firstSize < firstMinSize) {
-        // offset is negative, so missing and pushed are, too
-        const missing = firstSize - firstMinSize;
-        const pushed = move(sizes, index - 1, missing, minSizes);
-        offset -= missing - pushed;
-    }
-    else if (offset > 0 && secondSize < secondMinSize) {
-        const missing = secondMinSize - secondSize;
-        const pushed = move(sizes, index + 1, missing, minSizes);
-        offset -= missing - pushed;
-    }
-    sizes[index] += offset;
-    sizes[index + 1] -= offset;
-    return offset;
-}
-const defaultProps = {
-    split: 'vertical',
-    className: '',
-};
-function useSplitPaneResize(options) {
-    const { children, split, defaultSizes, minSize: minSizes, onDragStarted, onChange, onDragFinished } = options;
-    const [sizes, setSizes] = useState(new Map());
-    const paneRefs = useRef(new Map());
-    const getMovedSizes = useCallback((dragState) => {
-        const collectedSizes = children.map((node, index) => sizes.get(getNodeKey(node, index)) || getDefaultSize(index, defaultSizes));
-        if (dragState) {
-            const { offset, extraState: { index }, } = dragState;
-            move(collectedSizes, index, offset, minSizes);
-        }
-        return collectedSizes;
-    }, [children, defaultSizes, minSizes, sizes]);
-    const handleDragFinished = useCallback((dragState) => {
-        const movedSizes = getMovedSizes(dragState);
-        setSizes(new Map(children.map((node, index) => [
-            getNodeKey(node, index),
-            movedSizes[index],
-        ])));
-        if (onDragFinished) {
-            onDragFinished(movedSizes);
-        }
-    }, [children, getMovedSizes, onDragFinished]);
-    const [dragState, beginDrag] = (0, util_1.useDragState)(split, handleDragFinished);
-    const movedSizes = useMemo(() => getMovedSizes(dragState), [dragState, getMovedSizes]);
-    const resizeState = dragState ? dragState.extraState : null;
-    useEffect(() => {
-        if (onChange && dragState) {
-            onChange(movedSizes);
-        }
-    }, [dragState, movedSizes, onChange]);
-    const childPanes = useMemo(() => {
-        const prevPaneRefs = paneRefs.current;
-        paneRefs.current = new Map();
-        return children.map((node, index) => {
-            const key = getNodeKey(node, index);
-            const ref = prevPaneRefs.get(key) || React.createRef();
-            paneRefs.current.set(key, ref);
-            const minSize = getMinSize(index, minSizes);
-            return { key, node, ref, minSize };
-        });
-    }, [children, minSizes]);
-    const childPanesWithSizes = useMemo(() => childPanes.map((child, index) => {
-        const size = movedSizes[index];
-        return Object.assign(Object.assign({}, child), { size });
-    }), [childPanes, movedSizes]);
-    const handleDragStart = useCallback((index, pos) => {
-        const sizeAttr = split === 'vertical' ? 'width' : 'height';
-        const clientSizes = new Map(childPanes.map(({ key, ref }) => {
-            const size = ref.current ? ref.current.getBoundingClientRect()[sizeAttr] : 0;
-            return [key, size];
-        }));
-        if (onDragStarted) {
-            onDragStarted();
-        }
-        beginDrag(pos, { index });
-        setSizes(clientSizes);
-    }, [beginDrag, childPanes, onDragStarted, split]);
-    return { childPanes: childPanesWithSizes, resizeState, handleDragStart };
-}
-exports.SplitPane = React.memo((props) => {
-    const options = Object.assign(Object.assign({}, defaultProps), props);
-    const { split, className } = options;
-    const { childPanes, resizeState, handleDragStart } = useSplitPaneResize(options);
-    const splitStyleProps = split === 'vertical'
-        ? {
-            left: 0,
-            right: 0,
-            flexDirection: 'row',
-        }
-        : {
-            bottom: 0,
-            top: 0,
-            flexDirection: 'column',
-            minHeight: '100%',
-            width: '100%',
-        };
-    const style = Object.assign({ display: 'flex', flex: 1, height: '100%', position: 'absolute', outline: 'none', overflow: 'hidden' }, splitStyleProps);
-    const classes = ['SplitPane', split, className].join(' ');
-    const dragLayerStyle = {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-    };
-    const dragLayerClasses = ['DragLayer', split, resizeState ? 'resizing' : '', className].join(' ');
-    const entries = [];
-    childPanes.forEach(({ key, node, ref, size, minSize }, index) => {
-        if (index !== 0) {
-            const resizing = resizeState && resizeState.index === index - 1;
-            entries.push(React.createElement(Resizer_1.Resizer, { key: 'resizer.' + index, split: split, className: className + (resizing ? ' resizing' : ''), index: index - 1, onDragStarted: handleDragStart }));
-        }
-        entries.push(React.createElement(Pane_1.Pane, { key: 'pane.' + key, forwardRef: ref, size: size, minSize: minSize, split: split, className: className }, node));
-    });
-    return (React.createElement("div", { className: classes, style: style },
-        React.createElement("div", { className: dragLayerClasses, style: dragLayerStyle }),
-        entries));
-});
-exports.SplitPane.displayName = 'SplitPane';
-
-}(SplitPane$1));
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SplitPane = void 0;
-var SplitPane_1 = SplitPane$1;
-Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
-
-}(dist));
-
-var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
-
 const Table = /*#__PURE__*/x(({
   bsPrefix,
   className,
@@ -47529,7 +45865,7 @@ const defaultModelConfig = {
   borders: [{
     type: 'border',
     location: 'left',
-    weight: 50,
+    weight: 200,
     children: [{
       id: 'Workspace',
       type: 'tab',
@@ -47590,24 +45926,24 @@ const defaultModelConfig = {
     children: [{
       id: 'Notebooks',
       type: 'tabset',
-      weight: 100,
+      weight: 300,
       enableDeleteWhenEmpty: false,
       children: [{
-        id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/start.nb',
+        id: 'Notebook/https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/index.nb',
         type: 'tab',
-        name: 'start.nb',
+        name: 'index.nb',
         component: 'Notebook'
       }]
     }, {
-      id: 'Clipboards',
+      id: 'Drafts',
       type: 'tabset',
       weight: 100,
       enableDeleteWhenEmpty: false,
       children: [{
-        id: 'Clipboard',
+        id: 'Draft',
         type: 'tab',
-        name: 'Clipboard',
-        component: 'Clipboard',
+        name: 'Draft',
+        component: 'Draft',
         enableClose: false,
         borderWidth: 1024
       }]
@@ -47671,29 +46007,32 @@ class App extends ReactDOM$3.Component {
     };
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
     this.layoutRef = /*#__PURE__*/ReactDOM$3.createRef();
-    this.Clipboard = {};
-    this.Clipboard.change = data => {
+    this.Draft = {};
+    this.Draft.change = data => {
       const {
-        Clipboard = {}
+        Draft = {}
       } = this.state;
-      this.setState({
-        Clipboard: {
-          ...Clipboard,
-          code: data
-        }
-      });
+      if (Draft.code !== data) {
+        console.log(`QQ/Draft.change: ${Draft.code} to ${data}`);
+        return this.setState({
+          Draft: {
+            ...Draft,
+            code: data
+          }
+        });
+      }
     };
-    this.Clipboard.getCode = data => {
+    this.Draft.getCode = data => {
       const {
-        Clipboard = {}
+        Draft = {}
       } = this.state;
       const {
         code = ''
-      } = Clipboard;
+      } = Draft;
       return code;
     };
-    this.Clipboard.run = () => {};
-    this.Clipboard.save = () => {};
+    this.Draft.run = () => {};
+    this.Draft.save = () => {};
     this.Config = {};
     this.Config.path = path => {
       const {
@@ -48088,13 +46427,22 @@ class App extends ReactDOM$3.Component {
           }
         };
         NotebookAdvice.definitions = topLevel;
-        await execute(script, {
-          evaluate,
-          replay,
-          path: NotebookPath,
-          topLevel,
-          workspace
-        });
+        try {
+          await execute(script + this.Draft.getCode(), {
+            evaluate,
+            replay,
+            path: NotebookPath,
+            topLevel,
+            workspace
+          });
+        } catch (error) {
+          console.log(error.stack);
+          throw error;
+        }
+
+        // A bit of a race condition here.
+        // this.Draft().change('');
+
         await resolvePending();
         clearNotebookState(this, {
           path: NotebookPath,
@@ -48371,17 +46719,17 @@ class App extends ReactDOM$3.Component {
       switch (ops.length) {
         case 0:
           {
-            this.Clipboard.change(``);
+            this.Draft.change(``);
             break;
           }
         case 1:
           {
-            this.Clipboard.change(`const ${editId} = ${ops[0]};`);
+            this.Draft.change(`const ${editId} = ${ops[0]};`);
             break;
           }
         default:
           {
-            this.Clipboard.change(`const ${editId} = Group(${ops.join(', ')});`);
+            this.Draft.change(`const ${editId} = Group(${ops.join(', ')});`);
             break;
           }
       }
@@ -48655,6 +47003,16 @@ class App extends ReactDOM$3.Component {
       }
       await this.Workspace.store();
     };
+    const onCodeChange = (note, {
+      sourceText
+    }) => updateNotebookState(this, {
+      notes: [{
+        ...note,
+        sourceText
+      }],
+      sourceLocation: note.sourceLocation,
+      workspace
+    });
     this.factory = node => {
       switch (node.getComponent()) {
         case 'Workspace':
@@ -48767,23 +47125,13 @@ class App extends ReactDOM$3.Component {
               [`NotebookLine/${path}`]: NotebookLine
             } = this.state;
             const NotebookAdvice = this.Notebook.ensureAdvice(path);
-            const onChange = (note, {
-              sourceText
-            }) => updateNotebookState(this, {
-              notes: [{
-                ...note,
-                sourceText
-              }],
-              sourceLocation: note.sourceLocation,
-              workspace
-            });
             switch (NotebookMode) {
               case 'edit':
                 {
                   return v$1(SplitPane, null, v$1(Notebook, {
                     notebookPath: path,
                     notes: NotebookNotes,
-                    onChange: onChange,
+                    onChange: onCodeChange,
                     onClickView: this.Notebook.clickView,
                     onKeyDown: e => this.onKeyDown(e),
                     selectedLine: NotebookLine,
@@ -48809,7 +47157,7 @@ class App extends ReactDOM$3.Component {
                     notebookPath: path,
                     notes: NotebookNotes,
                     onClickView: this.Notebook.clickView,
-                    onChange: onChange,
+                    onChange: onCodeChange,
                     onKeyDown: e => this.onKeyDown(e),
                     selectedLine: NotebookLine,
                     workspace: workspace,
@@ -48818,19 +47166,26 @@ class App extends ReactDOM$3.Component {
                 }
             }
           }
-        case 'Clipboard':
+        case 'Draft':
           {
-            const {
-              Clipboard = {}
-            } = this.state;
-            const {
-              code = ''
-            } = Clipboard;
-            return v$1(JsEditorUi, {
-              onRun: () => this.Clipboard.run(),
-              onSave: () => this.Clipboard.save(),
-              onChange: data => this.Clipboard.change(data),
-              data: code
+            const path = this.Notebook.getSelectedPath();
+            const note = {
+              hash: '$Draft',
+              sourceText: this.Draft.getCode(),
+              sourceLocation: {
+                path,
+                line: 0,
+                id: '$Draft'
+              }
+            };
+            return v$1(EditNote, {
+              isDraft: true,
+              notebookPath: path,
+              key: "$Draft",
+              note: note,
+              onChange: sourceText => this.Draft.change(sourceText),
+              onKeyDown: e => this.onKeyDown(e),
+              workspace: workspace
             });
           }
         case 'View':
@@ -49123,6 +47478,8 @@ const installUi = async ({
   sha,
   path
 }) => {
+  const isPersistent = await navigator.storage.persist();
+  console.log(`QQ/isPersistent: ${isPersistent}`);
   await boot();
   ReactDOM$3.render(v$1(App, {
     sha: 'master',

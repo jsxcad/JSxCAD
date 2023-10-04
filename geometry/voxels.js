@@ -11,12 +11,12 @@ const floor = (value, resolution) =>
   Math.floor(value / resolution) * resolution;
 const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
 
-const floorPoint = ([x, y, z], resolution) => [
+export const floorPoint = ([x, y, z], resolution) => [
   floor(x, resolution),
   floor(y, resolution),
   floor(z, resolution),
 ];
-const ceilPoint = ([x, y, z], resolution) => [
+export const ceilPoint = ([x, y, z], resolution) => [
   ceil(x, resolution),
   ceil(y, resolution),
   ceil(z, resolution),
