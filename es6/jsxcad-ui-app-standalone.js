@@ -2580,12 +2580,213 @@ const Accordion = /*#__PURE__*/x((props, ref) => {
   });
 });
 Accordion.displayName = 'Accordion';
-var Accordion$1 = Object.assign(Accordion, {
+Object.assign(Accordion, {
   Button: AccordionButton$1,
   Collapse: AccordionCollapse$1,
   Item: AccordionItem$1,
   Header: AccordionHeader$1,
   Body: AccordionBody$1
+});
+
+const CardBody = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardBody.displayName = 'CardBody';
+var CardBody$1 = CardBody;
+
+const CardFooter = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardFooter.displayName = 'CardFooter';
+var CardFooter$1 = CardFooter;
+
+const context$1 = /*#__PURE__*/D$1(null);
+context$1.displayName = 'CardHeaderContext';
+var CardHeaderContext = context$1;
+
+const CardHeader = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
+  const contextValue = d(() => ({
+    cardHeaderBsPrefix: prefix
+  }), [prefix]);
+  return /*#__PURE__*/e(CardHeaderContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, prefix)
+    })
+  });
+});
+CardHeader.displayName = 'CardHeader';
+var CardHeader$1 = CardHeader;
+
+const CardImg = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  variant,
+  as: Component = 'img',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    ...props
+  });
+});
+CardImg.displayName = 'CardImg';
+var CardImg$1 = CardImg;
+
+const CardImgOverlay = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardImgOverlay.displayName = 'CardImgOverlay';
+var CardImgOverlay$1 = CardImgOverlay;
+
+const CardLink = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'a',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardLink.displayName = 'CardLink';
+var CardLink$1 = CardLink;
+
+var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+  ...p,
+  ref: ref,
+  className: classNames(p.className, className)
+})));
+
+const DivStyledAsH6 = divWithClassName('h6');
+const CardSubtitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH6,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardSubtitle.displayName = 'CardSubtitle';
+var CardSubtitle$1 = CardSubtitle;
+
+const CardText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'p',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardText.displayName = 'CardText';
+var CardText$1 = CardText;
+
+const DivStyledAsH5 = divWithClassName('h5');
+const CardTitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH5,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardTitle.displayName = 'CardTitle';
+var CardTitle$1 = CardTitle;
+
+const Card = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  bg,
+  text,
+  border,
+  body = false,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
+    children: body ? /*#__PURE__*/e(CardBody$1, {
+      children: children
+    }) : children
+  });
+});
+Card.displayName = 'Card';
+var Card$1 = Object.assign(Card, {
+  Img: CardImg$1,
+  Title: CardTitle$1,
+  Subtitle: CardSubtitle$1,
+  Body: CardBody$1,
+  Link: CardLink$1,
+  Text: CardText$1,
+  Header: CardHeader$1,
+  Footer: CardFooter$1,
+  ImgOverlay: CardImgOverlay$1
 });
 
 const propTypes$1 = {
@@ -3104,9 +3305,9 @@ var Form$1 = Object.assign(Form, {
   FloatingLabel: FloatingLabel$1
 });
 
-const context$1 = /*#__PURE__*/D$1(null);
-context$1.displayName = 'InputGroupContext';
-var InputGroupContext = context$1;
+const context = /*#__PURE__*/D$1(null);
+context.displayName = 'InputGroupContext';
+var InputGroupContext = context;
 
 const InputGroupText = /*#__PURE__*/x(({
   className,
@@ -3511,207 +3712,6 @@ class DownloadNote extends ReactDOM$1.PureComponent {
     }, buttons);
   }
 }
-
-const CardBody = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardBody.displayName = 'CardBody';
-var CardBody$1 = CardBody;
-
-const CardFooter = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardFooter.displayName = 'CardFooter';
-var CardFooter$1 = CardFooter;
-
-const context = /*#__PURE__*/D$1(null);
-context.displayName = 'CardHeaderContext';
-var CardHeaderContext = context;
-
-const CardHeader = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
-  const contextValue = d(() => ({
-    cardHeaderBsPrefix: prefix
-  }), [prefix]);
-  return /*#__PURE__*/e(CardHeaderContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...props,
-      className: classNames(className, prefix)
-    })
-  });
-});
-CardHeader.displayName = 'CardHeader';
-var CardHeader$1 = CardHeader;
-
-const CardImg = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  bsPrefix,
-  className,
-  variant,
-  as: Component = 'img',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
-    ...props
-  });
-});
-CardImg.displayName = 'CardImg';
-var CardImg$1 = CardImg;
-
-const CardImgOverlay = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardImgOverlay.displayName = 'CardImgOverlay';
-var CardImgOverlay$1 = CardImgOverlay;
-
-const CardLink = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'a',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardLink.displayName = 'CardLink';
-var CardLink$1 = CardLink;
-
-var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
-  ...p,
-  ref: ref,
-  className: classNames(p.className, className)
-})));
-
-const DivStyledAsH6 = divWithClassName('h6');
-const CardSubtitle = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = DivStyledAsH6,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardSubtitle.displayName = 'CardSubtitle';
-var CardSubtitle$1 = CardSubtitle;
-
-const CardText = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'p',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardText.displayName = 'CardText';
-var CardText$1 = CardText;
-
-const DivStyledAsH5 = divWithClassName('h5');
-const CardTitle = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = DivStyledAsH5,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardTitle.displayName = 'CardTitle';
-var CardTitle$1 = CardTitle;
-
-const Card = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  bg,
-  text,
-  border,
-  body = false,
-  children,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    ...props,
-    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
-    children: body ? /*#__PURE__*/e(CardBody$1, {
-      children: children
-    }) : children
-  });
-});
-Card.displayName = 'Card';
-var Card$1 = Object.assign(Card, {
-  Img: CardImg$1,
-  Title: CardTitle$1,
-  Subtitle: CardSubtitle$1,
-  Body: CardBody$1,
-  Link: CardLink$1,
-  Text: CardText$1,
-  Header: CardHeader$1,
-  Footer: CardFooter$1,
-  ImgOverlay: CardImgOverlay$1
-});
 
 class EditNote extends ReactDOM$1.Component {
   static get propTypes() {
@@ -6873,461 +6873,9 @@ var Component = function (_a) {
 Component.defaultProps = secondaryColorDefaultProps;
 var SpinnerCircularSplit = withSharedProps(Component);
 
-class ViewNote extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object,
-      notebookPath: propTypes$2.exports.string,
-      onClickView: propTypes$2.exports.func,
-      selected: propTypes$2.exports.boolean,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  showOrbitView() {}
-  render() {
-    const {
-      notebookPath,
-      note,
-      onClickView,
-      selected,
-      workspace
-    } = this.props;
-    const {
-      blur = false,
-      view,
-      sourceLocation
-    } = note;
-    const {
-      height,
-      width,
-      viewId
-    } = view;
-    const onClick = event => {
-      if (onClickView) {
-        onClickView({
-          event,
-          notebookPath,
-          note,
-          path: note.path,
-          view: note.view,
-          workspace,
-          sourceLocation
-        });
-      }
-    };
-    const viewIdClass = viewId ? `viewId_${viewId}` : '';
-    if (!note.url) {
-      return v$1(SpinnerCircularSplit, {
-        color: "#36d7b7",
-        size: Math.min(width, height) * 0.8
-      });
-    }
-    const ref = selected && /*#__PURE__*/p$1();
-    if (selected) {
-      y(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
-    return v$1("img", {
-      ref: ref,
-      class: `note view ${viewIdClass}`,
-      style: {
-        display: 'block',
-        height: `${height}px`,
-        width: `${width}px`,
-        border,
-        opacity: blur ? 0.5 : 1
-      },
-      src: note.url,
-      onClick: onClick
-    });
-  }
-}
-
-const clearNotebookState = async (application, {
-  path,
-  workspace,
-  isToBeKept
-}) => {
-  application.setState(state => {
-    const {
-      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-    } = state;
-    const newNotebookNotes = {};
-    for (const key of Object.keys(oldNotebookNotes)) {
-      const note = oldNotebookNotes[key];
-      if (isToBeKept(note)) {
-        newNotebookNotes[key] = note;
-      }
-    }
-    return {
-      [`NotebookNotes/${path}`]: newNotebookNotes
-    };
-  });
-};
-const updateNotebookState = async (application, {
-  notes,
-  sourceLocation,
-  workspace
-}) => {
-  const updateNote = note => {
-    const {
-      sourceLocation
-    } = note;
-    if (!sourceLocation) {
-      return;
-    }
-    const {
-      path
-    } = sourceLocation;
-    if (!note.hash) {
-      return;
-    }
-    const op = state => {
-      const {
-        [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-      } = state;
-      const oldNote = oldNotebookNotes[note.hash] || {};
-      const newNotebookNotes = {
-        ...oldNotebookNotes,
-        [note.hash]: {
-          ...oldNote,
-          blur: false,
-          ...note
-        }
-      };
-      return {
-        [`NotebookNotes/${path}`]: newNotebookNotes
-      };
-    };
-    application.setState(op);
-  };
-  for (const note of notes) {
-    updateNote(note);
-    if (note.view) {
-      if (!note.url) {
-        const loadThumbnail = async () => {
-          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
-            workspace
-          });
-          if (!url) {
-            const {
-              path,
-              view,
-              sourceLocation
-            } = note;
-            const {
-              width,
-              height
-            } = view;
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const offscreenCanvas = canvas.transferControlToOffscreen();
-            for (let nth = 0; nth < 3; nth++) {
-              try {
-                url = await application.ask({
-                  op: 'app/staticView',
-                  path,
-                  workspace,
-                  view,
-                  offscreenCanvas
-                }, {
-                  path
-                }, [offscreenCanvas]);
-                // Cache the thumbnail for next time.
-                await write(`thumbnail/${note.hash}`, url, {
-                  workspace
-                });
-                updateNote({
-                  hash: note.hash,
-                  url,
-                  sourceLocation
-                });
-              } catch (error) {
-                if (error.message === 'Terminated') {
-                  // Try again.
-                  continue;
-                }
-              }
-            }
-          }
-          if (url) {
-            updateNote({
-              hash: note.hash,
-              url,
-              sourceLocation
-            });
-          }
-        };
-        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
-        setTimeout(loadThumbnail, 200);
-      }
-    }
-  }
-};
-class Notebook extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      notes: propTypes$2.exports.object,
-      onChange: propTypes$2.exports.func,
-      onClickView: propTypes$2.exports.func,
-      onKeyDown: propTypes$2.exports.func,
-      selectedLine: propTypes$2.exports.number,
-      notebookPath: propTypes$2.exports.string,
-      state: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  render() {
-    try {
-      const {
-        notebookPath,
-        notes,
-        onChange,
-        onClickView,
-        onKeyDown,
-        // selectedLine,
-        state = 'idle',
-        workspace
-      } = this.props;
-      const ordered = Object.values(notes);
-      const getLine = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      let id;
-      const ids = [];
-      let children;
-      let downloads;
-      let errors;
-      let icons;
-      let entry;
-      for (const note of ordered) {
-        if (note.sourceLocation.id !== id) {
-          id = note.sourceLocation.id;
-          children = [];
-          downloads = [];
-          errors = [];
-          icons = [];
-          entry = {
-            id,
-            blue: false,
-            children,
-            downloads,
-            errors,
-            icons
-          };
-          ids.push(entry);
-        }
-        // FIX: This seems wasteful.
-        const selected = false;
-        let child;
-        let download;
-        let error;
-        let icon;
-        if (note.view) {
-          child = v$1(ViewNote, {
-            key: note.hash,
-            note: note,
-            onClickView: onClickView,
-            selected: selected
-          });
-          icon = v$1(IconNote, {
-            key: note.hash,
-            note: note
-          });
-          if (note.blur) {
-            entry.blur = true;
-          }
-        } else if (note.error) {
-          child = v$1(ErrorNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-          error = child;
-        } else if (note.md) {
-          child = v$1(MdNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-        } else if (note.download) {
-          child = v$1(DownloadNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-          download = child;
-        } else if (note.control) {
-          child = v$1(ControlNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-        } else if (note.sourceText !== undefined) {
-          child = v$1(EditNote, {
-            key: note.hash,
-            note: note,
-            onChange: sourceText => onChange(note, {
-              sourceText
-            }),
-            onKeyDown: onKeyDown,
-            selected: selected,
-            workspace: workspace
-          });
-        }
-        if (children && child) {
-          children.push(child);
-        }
-        if (downloads && download) {
-          downloads.push(download);
-        }
-        if (icons && icon) {
-          icons.push(icon);
-        }
-        if (errors && error) {
-          errors.push(error);
-        }
-      }
-      y(() => mermaid.init(undefined, '.mermaid'));
-      const sections = [];
-      const compare = (a, b) => {
-        if (a < b) {
-          return -1;
-        } else if (a > b) {
-          return 1;
-        } else {
-          return 0;
-        }
-      };
-      ids.sort((a, b) => compare(a.id, b.id));
-      for (const {
-        id,
-        blur = false,
-        children = [],
-        downloads = [],
-        errors = [],
-        icons = []
-      } of ids) {
-        sections.push(v$1(Accordion$1, {
-          key: id,
-          defaultActiveKey: id
-        }, v$1(Accordion$1.Item, {
-          eventKey: id
-        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? errors[0] : '', " ", icons, ' ', "\xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
-          color: "#36d7b7",
-          size: "32"
-        }) : ''), v$1(Accordion$1.Body, null, children))));
-      }
-      return v$1("div", {
-        id: notebookPath,
-        classList: "notebook notes",
-        style: {
-          overflow: 'auto'
-        }
-      }, state === 'running' && v$1(SpinnerCircularSplit, {
-        color: "#36d7b7",
-        size: 64,
-        style: {
-          position: 'fixed',
-          right: 32,
-          top: 64,
-          zIndex: 1000
-        }
-      }), sections);
-    } catch (error) {
-      console.log(error.stack);
-      throw error;
-    }
-  }
-}
-
-class DynamicView extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      path: propTypes$2.exports.string,
-      view: propTypes$2.exports.object,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  async buildElement(container) {
-    const {
-      path,
-      view,
-      workspace
-    } = this.props;
-    if (!path) {
-      return;
-    }
-    const geometry = await readOrWatch(path, {
-      workspace
-    });
-    const {
-      updateGeometry
-    } = await orbitDisplay({
-      path,
-      geometry,
-      view
-    }, container);
-    this.watcher = async () => {
-      updateGeometry(await read(path, {
-        workspace
-      }));
-    };
-    watchFile(path, workspace, this.watcher);
-  }
-  componentWillUnmount() {
-    const {
-      workspace
-    } = this.props;
-    if (this.watcher) {
-      unwatchFile(this.path, workspace, this.watcher);
-    }
-    while (this.container.firstChild !== this.container.lastChild) {
-      this.container.removeChild(this.container.firstChild);
-    }
-  }
-  render() {
-    return v$1("div", {
-      classList: "note orbitView",
-      ref: async container => {
-        if (container) {
-          await this.buildElement(container);
-        }
-      }
-    });
-  }
-}
-
 var dist = {};
 
-var SplitPane$1 = {};
+var SplitPane$2 = {};
 
 var require$$0 = /*@__PURE__*/getAugmentedNamespace(compat_module);
 
@@ -7616,17 +7164,481 @@ exports.SplitPane = React.memo((props) => {
 });
 exports.SplitPane.displayName = 'SplitPane';
 
-}(SplitPane$1));
+}(SplitPane$2));
 
 (function (exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SplitPane = void 0;
-var SplitPane_1 = SplitPane$1;
+var SplitPane_1 = SplitPane$2;
 Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
 
 }(dist));
 
 var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
+
+class ViewNote extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object,
+      notebookPath: propTypes$2.exports.string,
+      onClickView: propTypes$2.exports.func,
+      selected: propTypes$2.exports.boolean,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  showOrbitView() {}
+  render() {
+    const {
+      notebookPath,
+      note,
+      onClickView,
+      selected,
+      workspace
+    } = this.props;
+    const {
+      blur = false,
+      view,
+      sourceLocation
+    } = note;
+    const {
+      height,
+      width,
+      viewId
+    } = view;
+    const onClick = event => {
+      if (onClickView) {
+        onClickView({
+          event,
+          notebookPath,
+          note,
+          path: note.path,
+          view: note.view,
+          workspace,
+          sourceLocation
+        });
+      }
+    };
+    const viewIdClass = viewId ? `viewId_${viewId}` : '';
+    if (!note.url) {
+      return v$1(SpinnerCircularSplit, {
+        color: "#36d7b7",
+        size: Math.min(width, height) * 0.8
+      });
+    }
+    const ref = selected && /*#__PURE__*/p$1();
+    if (selected) {
+      y(() => ref.current.scrollIntoView(true));
+    }
+    const border = selected ? '1px dashed dodgerblue' : '0px';
+    return v$1("img", {
+      ref: ref,
+      class: `note view ${viewIdClass}`,
+      style: {
+        display: 'block',
+        height: `${height}px`,
+        width: `${width}px`,
+        border,
+        opacity: blur ? 0.5 : 1
+      },
+      src: note.url,
+      onClick: onClick
+    });
+  }
+}
+
+const {
+  SplitPane: SplitPane$1
+} = SplitPaneModule;
+const clearNotebookState = async (application, {
+  path,
+  workspace,
+  isToBeKept
+}) => {
+  application.setState(state => {
+    const {
+      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
+    } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      if (isToBeKept(note)) {
+        newNotebookNotes[key] = note;
+      }
+    }
+    return {
+      [`NotebookNotes/${path}`]: newNotebookNotes
+    };
+  });
+};
+const updateNotebookState = async (application, {
+  notes,
+  sourceLocation,
+  workspace
+}) => {
+  const updateNote = note => {
+    const {
+      sourceLocation
+    } = note;
+    if (!sourceLocation) {
+      return;
+    }
+    const {
+      path
+    } = sourceLocation;
+    if (!note.hash) {
+      return;
+    }
+    const op = state => {
+      const {
+        [`NotebookNotes/${path}`]: oldNotebookNotes = {}
+      } = state;
+      const oldNote = oldNotebookNotes[note.hash] || {};
+      const newNotebookNotes = {
+        ...oldNotebookNotes,
+        [note.hash]: {
+          ...oldNote,
+          blur: false,
+          ...note
+        }
+      };
+      return {
+        [`NotebookNotes/${path}`]: newNotebookNotes
+      };
+    };
+    application.setState(op);
+  };
+  for (const note of notes) {
+    updateNote(note);
+    if (note.view) {
+      if (!note.url) {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
+            workspace
+          });
+          if (!url) {
+            const {
+              path,
+              view,
+              sourceLocation
+            } = note;
+            const {
+              width,
+              height
+            } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                url = await application.ask({
+                  op: 'app/staticView',
+                  path,
+                  workspace,
+                  view,
+                  offscreenCanvas
+                }, {
+                  path
+                }, [offscreenCanvas]);
+                // Cache the thumbnail for next time.
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace
+                });
+                updateNote({
+                  hash: note.hash,
+                  url,
+                  sourceLocation
+                });
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
+            }
+          }
+          if (url) {
+            updateNote({
+              hash: note.hash,
+              url,
+              sourceLocation
+            });
+          }
+        };
+        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
+        setTimeout(loadThumbnail, 200);
+      }
+    }
+  }
+};
+class Notebook extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      notes: propTypes$2.exports.object,
+      onChange: propTypes$2.exports.func,
+      onClickView: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func,
+      selectedLine: propTypes$2.exports.number,
+      notebookPath: propTypes$2.exports.string,
+      state: propTypes$2.exports.string,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    try {
+      const {
+        notebookPath,
+        notes,
+        onChange,
+        onClickView,
+        onKeyDown,
+        // selectedLine,
+        state = 'idle',
+        workspace
+      } = this.props;
+      const contents = [];
+      const ordered = Object.values(notes);
+      const getLine = note => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.line;
+        } else {
+          return 0;
+        }
+      };
+      const getNth = note => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.nth;
+        } else {
+          return 0;
+        }
+      };
+      const order = (a, b) => {
+        const lineA = getLine(a);
+        const lineB = getLine(b);
+        if (lineA !== lineB) {
+          return lineA - lineB;
+        }
+        const nthA = getNth(a);
+        const nthB = getNth(b);
+        return nthA - nthB;
+      };
+      ordered.sort(order);
+      let id;
+      const ids = [];
+      let children;
+      let downloads;
+      let errors;
+      let icons;
+      let entry;
+      for (const note of ordered) {
+        if (note.sourceLocation.id !== id) {
+          id = note.sourceLocation.id;
+          children = [];
+          downloads = [];
+          errors = [];
+          icons = [];
+          entry = {
+            id,
+            blue: false,
+            children,
+            downloads,
+            errors,
+            icons
+          };
+          ids.push(entry);
+        }
+        // FIX: This seems wasteful.
+        const selected = false;
+        let child;
+        let download;
+        let error;
+        let icon;
+        if (note.view) {
+          child = v$1(ViewNote, {
+            key: note.hash,
+            note: note,
+            onClickView: onClickView,
+            selected: selected
+          });
+          icon = v$1(IconNote, {
+            key: note.hash,
+            note: note
+          });
+          if (note.blur) {
+            entry.blur = true;
+          }
+        } else if (note.error) {
+          child = v$1(ErrorNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+          error = child;
+        } else if (note.md) {
+          child = v$1(MdNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+        } else if (note.download) {
+          child = v$1(DownloadNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+          download = child;
+        } else if (note.control) {
+          child = v$1(ControlNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          });
+        } else if (note.sourceText !== undefined) {
+          child = v$1(EditNote, {
+            key: note.hash,
+            note: note,
+            onChange: sourceText => onChange(note, {
+              sourceText
+            }),
+            onKeyDown: onKeyDown,
+            selected: selected,
+            workspace: workspace
+          });
+        }
+        if (children && child) {
+          children.push(child);
+        }
+        if (downloads && download) {
+          downloads.push(download);
+        }
+        if (icons && icon) {
+          icons.push(icon);
+        }
+        if (errors && error) {
+          errors.push(error);
+        }
+      }
+      y(() => mermaid.init(undefined, '.mermaid'));
+      const sections = [];
+      const compare = (a, b) => {
+        if (a < b) {
+          return -1;
+        } else if (a > b) {
+          return 1;
+        } else {
+          return 0;
+        }
+      };
+      ids.sort((a, b) => compare(a.id, b.id));
+      for (const {
+        id,
+        blur = false,
+        children = [],
+        downloads = [],
+        errors = [],
+        icons = []
+      } of ids) {
+        contents.push(v$1("a", {
+          onClick: () => document.querySelector(`#note-id-${id}`).scrollIntoView({
+            behavior: 'smooth'
+          })
+        }, id));
+        contents.push(v$1("br", null));
+        sections.push(v$1(Card$1, {
+          id: `note-id-${id}`,
+          key: id
+        }, v$1(Card$1.Body, null, blur ? v$1(SpinnerCircularSplit, {
+          color: "#36d7b7",
+          size: "32"
+        }) : '', v$1(Card$1.Title, null, id), children)));
+      }
+      return v$1(SplitPane$1, null, v$1("div", {
+        style: {
+          overflow: 'auto'
+        }
+      }, contents), v$1("div", {
+        id: notebookPath,
+        classList: "notebook notes",
+        style: {
+          overflow: 'auto'
+        }
+      }, state === 'running' && v$1(SpinnerCircularSplit, {
+        color: "#36d7b7",
+        size: 64,
+        style: {
+          position: 'fixed',
+          right: 32,
+          top: 64,
+          zIndex: 1000
+        }
+      }), sections));
+    } catch (error) {
+      console.log(error.stack);
+      throw error;
+    }
+  }
+}
+
+class DynamicView extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      path: propTypes$2.exports.string,
+      view: propTypes$2.exports.object,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  async buildElement(container) {
+    const {
+      path,
+      view,
+      workspace
+    } = this.props;
+    if (!path) {
+      return;
+    }
+    const geometry = await readOrWatch(path, {
+      workspace
+    });
+    const {
+      updateGeometry
+    } = await orbitDisplay({
+      path,
+      geometry,
+      view
+    }, container);
+    this.watcher = async () => {
+      updateGeometry(await read(path, {
+        workspace
+      }));
+    };
+    watchFile(path, workspace, this.watcher);
+  }
+  componentWillUnmount() {
+    const {
+      workspace
+    } = this.props;
+    if (this.watcher) {
+      unwatchFile(this.path, workspace, this.watcher);
+    }
+    while (this.container.firstChild !== this.container.lastChild) {
+      this.container.removeChild(this.container.firstChild);
+    }
+  }
+  render() {
+    return v$1("div", {
+      classList: "note orbitView",
+      ref: async container => {
+        if (container) {
+          await this.buildElement(container);
+        }
+      }
+    });
+  }
+}
 
 const {
   SplitPane

@@ -7,6 +7,7 @@ import * as PropTypes from 'prop-types';
 import { read, readOrWatch, write } from '@jsxcad/sys';
 
 import Accordion from 'react-bootstrap/Accordion';
+import Card from 'react-bootstrap/Card';
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
 import EditNote from './EditNote.js';
@@ -15,8 +16,11 @@ import IconNote from './IconNote.js';
 import MdNote from './MdNote.js';
 import React from 'react';
 import { SpinnerCircularSplit } from 'spinners-react';
+import SplitPaneModule from 'react-multi-split-pane';
 import ViewNote from './ViewNote.js';
 import { useEffect } from 'preact/hooks';
+
+const { SplitPane } = SplitPaneModule;
 
 export const blurNotebookState = async (application, { path, workspace }) => {
   application.setState((state) => {
@@ -153,6 +157,7 @@ export class Notebook extends React.PureComponent {
         state = 'idle',
         workspace,
       } = this.props;
+      const contents = [];
       const ordered = Object.values(notes);
       const getLine = (note) => {
         if (note.sourceLocation) {
@@ -300,35 +305,39 @@ export class Notebook extends React.PureComponent {
         errors = [],
         icons = [],
       } of ids) {
+        contents.push(<a onClick={() => document.querySelector(`#note-id-${id}`).scrollIntoView({ behavior: 'smooth' })}>{id}</a>);
+        contents.push(<br/>)
         sections.push(
-          <Accordion key={id} defaultActiveKey={id}>
-            <Accordion.Item eventKey={id}>
-              <Accordion.Header>
-                {id} &nbsp;&nbsp; {errors.length > 0 ? errors[0] : ''} {icons}{' '}
-                &nbsp;&nbsp; {downloads}{' '}
-                {blur ? <SpinnerCircularSplit color="#36d7b7" size="32" /> : ''}
-              </Accordion.Header>
-              <Accordion.Body>{children}</Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
+          <Card id={`note-id-${id}`} key={id}>
+            <Card.Body>
+              {blur ? <SpinnerCircularSplit color="#36d7b7" size="32" /> : ''}
+              <Card.Title>{id}</Card.Title>
+              {children}
+            </Card.Body>
+          </Card>
         );
       }
 
       return (
-        <div
-          id={notebookPath}
-          classList="notebook notes"
-          style={{ overflow: 'auto' }}
-        >
-          {state === 'running' && (
-            <SpinnerCircularSplit
-              color="#36d7b7"
-              size={64}
-              style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
-            />
-          )}
-          {sections}
-        </div>
+        <SplitPane>
+          <div style={{ overflow: 'auto' }}>
+            {contents}
+          </div>
+          <div
+            id={notebookPath}
+            classList="notebook notes"
+            style={{ overflow: 'auto' }}
+          >
+            {state === 'running' && (
+              <SpinnerCircularSplit
+                color="#36d7b7"
+                size={64}
+                style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
+              />
+            )}
+            {sections}
+          </div>
+        </SplitPane>
       );
     } catch (error) {
       console.log(error.stack);

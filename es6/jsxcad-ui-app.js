@@ -2582,12 +2582,213 @@ const Accordion = /*#__PURE__*/x((props, ref) => {
   });
 });
 Accordion.displayName = 'Accordion';
-var Accordion$1 = Object.assign(Accordion, {
+Object.assign(Accordion, {
   Button: AccordionButton$1,
   Collapse: AccordionCollapse$1,
   Item: AccordionItem$1,
   Header: AccordionHeader$1,
   Body: AccordionBody$1
+});
+
+const CardBody = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardBody.displayName = 'CardBody';
+var CardBody$1 = CardBody;
+
+const CardFooter = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardFooter.displayName = 'CardFooter';
+var CardFooter$1 = CardFooter;
+
+const context$1 = /*#__PURE__*/D$1(null);
+context$1.displayName = 'CardHeaderContext';
+var CardHeaderContext = context$1;
+
+const CardHeader = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
+  const contextValue = d(() => ({
+    cardHeaderBsPrefix: prefix
+  }), [prefix]);
+  return /*#__PURE__*/e(CardHeaderContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, prefix)
+    })
+  });
+});
+CardHeader.displayName = 'CardHeader';
+var CardHeader$1 = CardHeader;
+
+const CardImg = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  variant,
+  as: Component = 'img',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    ...props
+  });
+});
+CardImg.displayName = 'CardImg';
+var CardImg$1 = CardImg;
+
+const CardImgOverlay = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardImgOverlay.displayName = 'CardImgOverlay';
+var CardImgOverlay$1 = CardImgOverlay;
+
+const CardLink = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'a',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardLink.displayName = 'CardLink';
+var CardLink$1 = CardLink;
+
+var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+  ...p,
+  ref: ref,
+  className: classNames(p.className, className)
+})));
+
+const DivStyledAsH6 = divWithClassName('h6');
+const CardSubtitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH6,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardSubtitle.displayName = 'CardSubtitle';
+var CardSubtitle$1 = CardSubtitle;
+
+const CardText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'p',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardText.displayName = 'CardText';
+var CardText$1 = CardText;
+
+const DivStyledAsH5 = divWithClassName('h5');
+const CardTitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH5,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardTitle.displayName = 'CardTitle';
+var CardTitle$1 = CardTitle;
+
+const Card = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  bg,
+  text,
+  border,
+  body = false,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
+    children: body ? /*#__PURE__*/e(CardBody$1, {
+      children: children
+    }) : children
+  });
+});
+Card.displayName = 'Card';
+var Card$1 = Object.assign(Card, {
+  Img: CardImg$1,
+  Title: CardTitle$1,
+  Subtitle: CardSubtitle$1,
+  Body: CardBody$1,
+  Link: CardLink$1,
+  Text: CardText$1,
+  Header: CardHeader$1,
+  Footer: CardFooter$1,
+  ImgOverlay: CardImgOverlay$1
 });
 
 const propTypes$1 = {
@@ -3105,9 +3306,9 @@ var Form$1 = Object.assign(Form, {
   FloatingLabel: FloatingLabel$1
 });
 
-const context$1 = /*#__PURE__*/D$1(null);
-context$1.displayName = 'InputGroupContext';
-var InputGroupContext = context$1;
+const context = /*#__PURE__*/D$1(null);
+context.displayName = 'InputGroupContext';
+var InputGroupContext = context;
 
 const InputGroupText = /*#__PURE__*/x(({
   className,
@@ -3512,207 +3713,6 @@ class DownloadNote extends ReactDOM$3.PureComponent {
     }, buttons);
   }
 }
-
-const CardBody = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardBody.displayName = 'CardBody';
-var CardBody$1 = CardBody;
-
-const CardFooter = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardFooter.displayName = 'CardFooter';
-var CardFooter$1 = CardFooter;
-
-const context = /*#__PURE__*/D$1(null);
-context.displayName = 'CardHeaderContext';
-var CardHeaderContext = context;
-
-const CardHeader = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
-  const contextValue = d(() => ({
-    cardHeaderBsPrefix: prefix
-  }), [prefix]);
-  return /*#__PURE__*/e(CardHeaderContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...props,
-      className: classNames(className, prefix)
-    })
-  });
-});
-CardHeader.displayName = 'CardHeader';
-var CardHeader$1 = CardHeader;
-
-const CardImg = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  bsPrefix,
-  className,
-  variant,
-  as: Component = 'img',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
-    ...props
-  });
-});
-CardImg.displayName = 'CardImg';
-var CardImg$1 = CardImg;
-
-const CardImgOverlay = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardImgOverlay.displayName = 'CardImgOverlay';
-var CardImgOverlay$1 = CardImgOverlay;
-
-const CardLink = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'a',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardLink.displayName = 'CardLink';
-var CardLink$1 = CardLink;
-
-var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
-  ...p,
-  ref: ref,
-  className: classNames(p.className, className)
-})));
-
-const DivStyledAsH6 = divWithClassName('h6');
-const CardSubtitle = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = DivStyledAsH6,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardSubtitle.displayName = 'CardSubtitle';
-var CardSubtitle$1 = CardSubtitle;
-
-const CardText = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'p',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardText.displayName = 'CardText';
-var CardText$1 = CardText;
-
-const DivStyledAsH5 = divWithClassName('h5');
-const CardTitle = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = DivStyledAsH5,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-CardTitle.displayName = 'CardTitle';
-var CardTitle$1 = CardTitle;
-
-const Card = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  bg,
-  text,
-  border,
-  body = false,
-  children,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    ...props,
-    className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
-    children: body ? /*#__PURE__*/e(CardBody$1, {
-      children: children
-    }) : children
-  });
-});
-Card.displayName = 'Card';
-var Card$1 = Object.assign(Card, {
-  Img: CardImg$1,
-  Title: CardTitle$1,
-  Subtitle: CardSubtitle$1,
-  Body: CardBody$1,
-  Link: CardLink$1,
-  Text: CardText$1,
-  Header: CardHeader$1,
-  Footer: CardFooter$1,
-  ImgOverlay: CardImgOverlay$1
-});
 
 class EditNote extends ReactDOM$3.Component {
   static get propTypes() {
@@ -6874,6 +6874,309 @@ var Component = function (_a) {
 Component.defaultProps = secondaryColorDefaultProps;
 var SpinnerCircularSplit = withSharedProps(Component);
 
+var dist = {};
+
+var SplitPane$2 = {};
+
+var require$$1 = /*@__PURE__*/getAugmentedNamespace(compat_module);
+
+var Pane = {};
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pane = void 0;
+const React = require$$1;
+const baseStyle = {
+    position: 'relative',
+    outline: 'none',
+    border: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    flexBasis: 'auto',
+};
+exports.Pane = React.memo(({ size, minSize, split, className, forwardRef, children }) => {
+    const style = Object.assign(Object.assign({}, baseStyle), { flexGrow: size, flexShrink: size });
+    if (split === 'vertical') {
+        style.width = 0;
+        style.height = '100%';
+        style.minWidth = minSize;
+    }
+    else {
+        style.width = '100%';
+        style.height = 0;
+        style.minHeight = minSize;
+    }
+    const classes = ['Pane', split, className].join(' ');
+    return (React.createElement("div", { className: classes, style: style, ref: forwardRef }, children));
+});
+exports.Pane.displayName = 'Pane';
+
+}(Pane));
+
+var Resizer = {};
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Resizer = void 0;
+const React = require$$1;
+const { useCallback } = React;
+exports.Resizer = React.memo(({ split, className, index, onDragStarted }) => {
+    const handleMouseDown = useCallback((event) => {
+        event.preventDefault();
+        onDragStarted(index, event);
+    }, [index, onDragStarted]);
+    const handleTouchStart = useCallback((event) => {
+        event.preventDefault();
+        onDragStarted(index, event.touches[0]);
+    }, [index, onDragStarted]);
+    const classes = ['Resizer', split, className].join(' ');
+    return (React.createElement("span", { role: 'presentation', className: classes, style: { flex: 'none' }, onMouseDown: handleMouseDown, onTouchStart: handleTouchStart }));
+});
+exports.Resizer.displayName = 'Resizer';
+
+}(Resizer));
+
+var util = {};
+
+Object.defineProperty(util, "__esModule", { value: true });
+util.useDragState = util.useEventListener = void 0;
+const React$g = require$$1;
+const ReactDOM$2 = require$$1;
+const { useCallback, useMemo, useState, useEffect } = React$g;
+function useEventListener(type, listener) {
+    useEffect(() => {
+        if (!listener)
+            return;
+        document.addEventListener(type, listener);
+        return () => {
+            document.removeEventListener(type, listener);
+        };
+    }, [type, listener]);
+}
+util.useEventListener = useEventListener;
+function useDragStateHandlers(split, onDragFinished) {
+    const [dragging, setDragging] = useState(null);
+    const [current, setCurrent] = useState(0);
+    const beginDrag = useCallback((event, extraState) => {
+        const pos = split === 'vertical' ? event.clientX : event.clientY;
+        setDragging([extraState, pos]);
+        setCurrent(pos);
+    }, [split]);
+    const [dragState, onMouseUp] = useMemo(() => {
+        if (!dragging) {
+            return [null, undefined];
+        }
+        const [extraState, origin] = dragging;
+        const dragState = { offset: current - origin, extraState };
+        const onMouseUp = () => {
+            ReactDOM$2.unstable_batchedUpdates(() => {
+                setDragging(null);
+                onDragFinished(dragState);
+            });
+        };
+        return [dragState, onMouseUp];
+    }, [current, dragging, onDragFinished]);
+    const [onMouseMove, onTouchMove] = useMemo(() => {
+        if (!dragging) {
+            return [undefined, undefined];
+        }
+        const onMouseMove = (event) => {
+            const pos = split === 'vertical' ? event.clientX : event.clientY;
+            setCurrent(pos);
+        };
+        const onTouchMove = (event) => {
+            onMouseMove(event.touches[0]);
+        };
+        return [onMouseMove, onTouchMove];
+    }, [dragging, split]);
+    return { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp };
+}
+function useDragState(split, onDragFinished) {
+    const { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp } = useDragStateHandlers(split, onDragFinished);
+    useEventListener('mousemove', onMouseMove);
+    useEventListener('touchmove', onTouchMove);
+    useEventListener('mouseup', onMouseUp);
+    return [dragState, beginDrag];
+}
+util.useDragState = useDragState;
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SplitPane = void 0;
+const React = require$$1;
+const { useCallback, useRef, useState, useMemo, useEffect } = React;
+const Pane_1 = Pane;
+const Resizer_1 = Resizer;
+const util_1 = util;
+const DEFAULT_MIN_SIZE = 50;
+function getNodeKey(node, index) {
+    if (typeof node === 'object' && node && node.key != null) {
+        return 'key.' + node.key;
+    }
+    return 'index.' + index;
+}
+function getMinSize(index, minSizes) {
+    if (typeof minSizes === 'number') {
+        if (minSizes > 0) {
+            return minSizes;
+        }
+    }
+    else if (minSizes instanceof Array) {
+        const value = minSizes[index];
+        if (value > 0) {
+            return value;
+        }
+    }
+    return DEFAULT_MIN_SIZE;
+}
+function getDefaultSize(index, defaultSizes) {
+    if (defaultSizes) {
+        const value = defaultSizes[index];
+        if (value >= 0) {
+            return value;
+        }
+    }
+    return 1;
+}
+function move(sizes, index, offset, minSizes) {
+    if (!offset || index < 0 || index + 1 >= sizes.length) {
+        return 0;
+    }
+    const firstMinSize = getMinSize(index, minSizes);
+    const secondMinSize = getMinSize(index + 1, minSizes);
+    const firstSize = sizes[index] + offset;
+    const secondSize = sizes[index + 1] - offset;
+    if (offset < 0 && firstSize < firstMinSize) {
+        // offset is negative, so missing and pushed are, too
+        const missing = firstSize - firstMinSize;
+        const pushed = move(sizes, index - 1, missing, minSizes);
+        offset -= missing - pushed;
+    }
+    else if (offset > 0 && secondSize < secondMinSize) {
+        const missing = secondMinSize - secondSize;
+        const pushed = move(sizes, index + 1, missing, minSizes);
+        offset -= missing - pushed;
+    }
+    sizes[index] += offset;
+    sizes[index + 1] -= offset;
+    return offset;
+}
+const defaultProps = {
+    split: 'vertical',
+    className: '',
+};
+function useSplitPaneResize(options) {
+    const { children, split, defaultSizes, minSize: minSizes, onDragStarted, onChange, onDragFinished } = options;
+    const [sizes, setSizes] = useState(new Map());
+    const paneRefs = useRef(new Map());
+    const getMovedSizes = useCallback((dragState) => {
+        const collectedSizes = children.map((node, index) => sizes.get(getNodeKey(node, index)) || getDefaultSize(index, defaultSizes));
+        if (dragState) {
+            const { offset, extraState: { index }, } = dragState;
+            move(collectedSizes, index, offset, minSizes);
+        }
+        return collectedSizes;
+    }, [children, defaultSizes, minSizes, sizes]);
+    const handleDragFinished = useCallback((dragState) => {
+        const movedSizes = getMovedSizes(dragState);
+        setSizes(new Map(children.map((node, index) => [
+            getNodeKey(node, index),
+            movedSizes[index],
+        ])));
+        if (onDragFinished) {
+            onDragFinished(movedSizes);
+        }
+    }, [children, getMovedSizes, onDragFinished]);
+    const [dragState, beginDrag] = (0, util_1.useDragState)(split, handleDragFinished);
+    const movedSizes = useMemo(() => getMovedSizes(dragState), [dragState, getMovedSizes]);
+    const resizeState = dragState ? dragState.extraState : null;
+    useEffect(() => {
+        if (onChange && dragState) {
+            onChange(movedSizes);
+        }
+    }, [dragState, movedSizes, onChange]);
+    const childPanes = useMemo(() => {
+        const prevPaneRefs = paneRefs.current;
+        paneRefs.current = new Map();
+        return children.map((node, index) => {
+            const key = getNodeKey(node, index);
+            const ref = prevPaneRefs.get(key) || React.createRef();
+            paneRefs.current.set(key, ref);
+            const minSize = getMinSize(index, minSizes);
+            return { key, node, ref, minSize };
+        });
+    }, [children, minSizes]);
+    const childPanesWithSizes = useMemo(() => childPanes.map((child, index) => {
+        const size = movedSizes[index];
+        return Object.assign(Object.assign({}, child), { size });
+    }), [childPanes, movedSizes]);
+    const handleDragStart = useCallback((index, pos) => {
+        const sizeAttr = split === 'vertical' ? 'width' : 'height';
+        const clientSizes = new Map(childPanes.map(({ key, ref }) => {
+            const size = ref.current ? ref.current.getBoundingClientRect()[sizeAttr] : 0;
+            return [key, size];
+        }));
+        if (onDragStarted) {
+            onDragStarted();
+        }
+        beginDrag(pos, { index });
+        setSizes(clientSizes);
+    }, [beginDrag, childPanes, onDragStarted, split]);
+    return { childPanes: childPanesWithSizes, resizeState, handleDragStart };
+}
+exports.SplitPane = React.memo((props) => {
+    const options = Object.assign(Object.assign({}, defaultProps), props);
+    const { split, className } = options;
+    const { childPanes, resizeState, handleDragStart } = useSplitPaneResize(options);
+    const splitStyleProps = split === 'vertical'
+        ? {
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+        }
+        : {
+            bottom: 0,
+            top: 0,
+            flexDirection: 'column',
+            minHeight: '100%',
+            width: '100%',
+        };
+    const style = Object.assign({ display: 'flex', flex: 1, height: '100%', position: 'absolute', outline: 'none', overflow: 'hidden' }, splitStyleProps);
+    const classes = ['SplitPane', split, className].join(' ');
+    const dragLayerStyle = {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+    };
+    const dragLayerClasses = ['DragLayer', split, resizeState ? 'resizing' : '', className].join(' ');
+    const entries = [];
+    childPanes.forEach(({ key, node, ref, size, minSize }, index) => {
+        if (index !== 0) {
+            const resizing = resizeState && resizeState.index === index - 1;
+            entries.push(React.createElement(Resizer_1.Resizer, { key: 'resizer.' + index, split: split, className: className + (resizing ? ' resizing' : ''), index: index - 1, onDragStarted: handleDragStart }));
+        }
+        entries.push(React.createElement(Pane_1.Pane, { key: 'pane.' + key, forwardRef: ref, size: size, minSize: minSize, split: split, className: className }, node));
+    });
+    return (React.createElement("div", { className: classes, style: style },
+        React.createElement("div", { className: dragLayerClasses, style: dragLayerStyle }),
+        entries));
+});
+exports.SplitPane.displayName = 'SplitPane';
+
+}(SplitPane$2));
+
+(function (exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SplitPane = void 0;
+var SplitPane_1 = SplitPane$2;
+Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
+
+}(dist));
+
+var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
+
 class ViewNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
@@ -6944,6 +7247,9 @@ class ViewNote extends ReactDOM$3.PureComponent {
   }
 }
 
+const {
+  SplitPane: SplitPane$1
+} = SplitPaneModule;
 const blurNotebookState = async (application, {
   path,
   workspace
@@ -7112,6 +7418,7 @@ class Notebook extends ReactDOM$3.PureComponent {
         state = 'idle',
         workspace
       } = this.props;
+      const contents = [];
       const ordered = Object.values(notes);
       const getLine = note => {
         if (note.sourceLocation) {
@@ -7257,17 +7564,25 @@ class Notebook extends ReactDOM$3.PureComponent {
         errors = [],
         icons = []
       } of ids) {
-        sections.push(v$1(Accordion$1, {
-          key: id,
-          defaultActiveKey: id
-        }, v$1(Accordion$1.Item, {
-          eventKey: id
-        }, v$1(Accordion$1.Header, null, id, " \xA0\xA0 ", errors.length > 0 ? errors[0] : '', " ", icons, ' ', "\xA0\xA0 ", downloads, ' ', blur ? v$1(SpinnerCircularSplit, {
+        contents.push(v$1("a", {
+          onClick: () => document.querySelector(`#note-id-${id}`).scrollIntoView({
+            behavior: 'smooth'
+          })
+        }, id));
+        contents.push(v$1("br", null));
+        sections.push(v$1(Card$1, {
+          id: `note-id-${id}`,
+          key: id
+        }, v$1(Card$1.Body, null, blur ? v$1(SpinnerCircularSplit, {
           color: "#36d7b7",
           size: "32"
-        }) : ''), v$1(Accordion$1.Body, null, children))));
+        }) : '', v$1(Card$1.Title, null, id), children)));
       }
-      return v$1("div", {
+      return v$1(SplitPane$1, null, v$1("div", {
+        style: {
+          overflow: 'auto'
+        }
+      }, contents), v$1("div", {
         id: notebookPath,
         classList: "notebook notes",
         style: {
@@ -7282,7 +7597,7 @@ class Notebook extends ReactDOM$3.PureComponent {
           top: 64,
           zIndex: 1000
         }
-      }), sections);
+      }), sections));
     } catch (error) {
       console.log(error.stack);
       throw error;
@@ -11517,8 +11832,6 @@ Model$1.default = Model;
 
 var Layout$1 = {};
 
-var require$$0 = /*@__PURE__*/getAugmentedNamespace(compat_module);
-
 var BorderTabSet$1 = {};
 
 var BorderButton$1 = {};
@@ -11542,8 +11855,8 @@ var PopupMenu$1 = {};
 
 Object.defineProperty(PopupMenu$1, "__esModule", { value: true });
 PopupMenu$1.showPopup = void 0;
-var React$g = require$$0;
-var ReactDOM$2 = require$$0;
+var React$f = require$$1;
+var ReactDOM$1 = require$$1;
 var _1 = lib$1;
 var Types_1$b = Types;
 /** @hidden @internal */
@@ -11571,7 +11884,7 @@ function showPopup(layoutDiv, triggerElement, items, onSelect, classNameMapper) 
     var onHide = function () {
         _1.DragDrop.instance.hideGlass();
         layoutDiv.removeChild(elm);
-        ReactDOM$2.unmountComponentAtNode(elm);
+        ReactDOM$1.unmountComponentAtNode(elm);
         elm.removeEventListener("mousedown", onElementMouseDown);
         currentDocument.removeEventListener("mousedown", onDocMouseDown);
     };
@@ -11583,7 +11896,7 @@ function showPopup(layoutDiv, triggerElement, items, onSelect, classNameMapper) 
     };
     elm.addEventListener("mousedown", onElementMouseDown);
     currentDocument.addEventListener("mousedown", onDocMouseDown);
-    ReactDOM$2.render(React$g.createElement(PopupMenu, { currentDocument: currentDocument, onSelect: onSelect, onHide: onHide, items: items, classNameMapper: classNameMapper }), elm);
+    ReactDOM$1.render(React$f.createElement(PopupMenu, { currentDocument: currentDocument, onSelect: onSelect, onHide: onHide, items: items, classNameMapper: classNameMapper }), elm);
 }
 PopupMenu$1.showPopup = showPopup;
 /** @hidden @internal */
@@ -11594,15 +11907,15 @@ var PopupMenu = function (props) {
         onHide();
         event.stopPropagation();
     };
-    var itemElements = items.map(function (item, i) { return (React$g.createElement("div", { key: item.index, className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM), "data-layout-path": "/popup-menu/tb" + i, onClick: function (event) { return onItemClick(item, event); }, title: item.node.getHelpText() }, item.node._getRenderedName())); });
-    return (React$g.createElement("div", { className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU), "data-layout-path": "/popup-menu" }, itemElements));
+    var itemElements = items.map(function (item, i) { return (React$f.createElement("div", { key: item.index, className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM), "data-layout-path": "/popup-menu/tb" + i, onClick: function (event) { return onItemClick(item, event); }, title: item.node.getHelpText() }, item.node._getRenderedName())); });
+    return (React$f.createElement("div", { className: classNameMapper(Types_1$b.CLASSES.FLEXLAYOUT__POPUP_MENU), "data-layout-path": "/popup-menu" }, itemElements));
 };
 
 var TabButton$1 = {};
 
 Object.defineProperty(TabButton$1, "__esModule", { value: true });
 TabButton$1.TabButton = void 0;
-var React$f = require$$0;
+var React$e = require$$1;
 var I18nLabel_1$5 = I18nLabel;
 var Actions_1$7 = Actions$1;
 var Rect_1$3 = Rect$1;
@@ -11612,9 +11925,9 @@ var TabSet_1$3 = TabSet$1;
 /** @hidden @internal */
 var TabButton = function (props) {
     var layout = props.layout, node = props.node, selected = props.selected, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var selfRef = React$f.useRef(null);
-    var contentRef = React$f.useRef(null);
-    var contentWidth = React$f.useRef(0);
+    var selfRef = React$e.useRef(null);
+    var contentRef = React$e.useRef(null);
+    var contentWidth = React$e.useRef(0);
     var onMouseDown = function (event) {
         if (!TabSet_1$3.isAuxMouseEvent(event) && !layout.getEditingTab()) {
             var message = layout.i18nName(I18nLabel_1$5.I18nLabel.Move_Tab, node.getName());
@@ -11676,7 +11989,7 @@ var TabButton = function (props) {
     var onCloseMouseDown = function (event) {
         event.stopPropagation();
     };
-    React$f.useLayoutEffect(function () {
+    React$e.useLayoutEffect(function () {
         updateRect();
         if (layout.getEditingTab() === node) {
             contentRef.current.select();
@@ -11742,24 +12055,24 @@ var TabButton = function (props) {
         }
     }
     if (leadingContent === undefined && node.getIcon() !== undefined) {
-        leadingContent = React$f.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
+        leadingContent = React$e.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
     }
     var buttons = [];
     // allow customization of leading contents (icon) and contents
     var renderState = { leading: leadingContent, content: titleContent, name: name, buttons: buttons };
     layout.customizeTab(node, renderState);
     node._setRenderedName(renderState.name);
-    var content = (React$f.createElement("div", { ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT) }, renderState.content));
-    var leading = React$f.createElement("div", { className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING) }, renderState.leading);
+    var content = (React$e.createElement("div", { ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT) }, renderState.content));
+    var leading = React$e.createElement("div", { className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING) }, renderState.leading);
     if (layout.getEditingTab() === node) {
         var contentStyle = { width: contentWidth + "px" };
-        content = (React$f.createElement("input", { style: contentStyle, ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TEXTBOX), "data-layout-path": path + "/textbox", type: "text", autoFocus: true, defaultValue: node.getName(), onKeyDown: onTextBoxKeyPress, onMouseDown: onTextBoxMouseDown, onTouchStart: onTextBoxMouseDown }));
+        content = (React$e.createElement("input", { style: contentStyle, ref: contentRef, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TEXTBOX), "data-layout-path": path + "/textbox", type: "text", autoFocus: true, defaultValue: node.getName(), onKeyDown: onTextBoxKeyPress, onMouseDown: onTextBoxMouseDown, onTouchStart: onTextBoxMouseDown }));
     }
     if (node.isEnableClose()) {
         var closeTitle = layout.i18nName(I18nLabel_1$5.I18nLabel.Close_Tab);
-        buttons.push(React$f.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
+        buttons.push(React$e.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$a.CLASSES.FLEXLAYOUT__TAB_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
     }
-    return (React$f.createElement("div", { ref: selfRef, "data-layout-path": path, className: classNames, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
+    return (React$e.createElement("div", { ref: selfRef, "data-layout-path": path, className: classNames, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
         leading,
         content,
         buttons));
@@ -11770,27 +12083,27 @@ var TabOverflowHook = {};
 
 Object.defineProperty(TabOverflowHook, "__esModule", { value: true });
 TabOverflowHook.useTabOverflow = void 0;
-var React$e = require$$0;
+var React$d = require$$1;
 var Rect_1$2 = Rect$1;
 var TabSetNode_1$3 = TabSetNode$1;
 var Orientation_1$3 = Orientation$1;
 /** @hidden @internal */
 var useTabOverflow = function (node, orientation, toolbarRef, stickyButtonsRef) {
-    var firstRender = React$e.useRef(true);
-    var tabsTruncated = React$e.useRef(false);
-    var lastRect = React$e.useRef(new Rect_1$2.default(0, 0, 0, 0));
-    var selfRef = React$e.useRef(null);
-    var _a = React$e.useState(0), position = _a[0], setPosition = _a[1];
-    var userControlledLeft = React$e.useRef(false);
-    var _b = React$e.useState([]), hiddenTabs = _b[0], setHiddenTabs = _b[1];
+    var firstRender = React$d.useRef(true);
+    var tabsTruncated = React$d.useRef(false);
+    var lastRect = React$d.useRef(new Rect_1$2.default(0, 0, 0, 0));
+    var selfRef = React$d.useRef(null);
+    var _a = React$d.useState(0), position = _a[0], setPosition = _a[1];
+    var userControlledLeft = React$d.useRef(false);
+    var _b = React$d.useState([]), hiddenTabs = _b[0], setHiddenTabs = _b[1];
     // if selected node or tabset/border rectangle change then unset usercontrolled (so selected tab will be kept in view)
-    React$e.useLayoutEffect(function () {
+    React$d.useLayoutEffect(function () {
         userControlledLeft.current = false;
     }, [node.getSelectedNode(), node.getRect().width, node.getRect().height]);
-    React$e.useLayoutEffect(function () {
+    React$d.useLayoutEffect(function () {
         updateVisibleTabs();
     });
-    React$e.useEffect(function () {
+    React$d.useEffect(function () {
         var instance = selfRef.current;
         instance.addEventListener('wheel', onWheel);
         return function () {
@@ -11933,7 +12246,7 @@ var __extends$4 = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 })();
 Object.defineProperty(ErrorBoundary$1, "__esModule", { value: true });
 ErrorBoundary$1.ErrorBoundary = void 0;
-var React$d = require$$0;
+var React$c = require$$1;
 var Types_1$9 = Types;
 /** @hidden @internal */
 var ErrorBoundary = /** @class */ (function (_super) {
@@ -11952,19 +12265,19 @@ var ErrorBoundary = /** @class */ (function (_super) {
     };
     ErrorBoundary.prototype.render = function () {
         if (this.state.hasError) {
-            return (React$d.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTAINER },
-                React$d.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTENT }, this.props.message)));
+            return (React$c.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTAINER },
+                React$c.createElement("div", { className: Types_1$9.CLASSES.FLEXLAYOUT__ERROR_BOUNDARY_CONTENT }, this.props.message)));
         }
         return this.props.children;
     };
     return ErrorBoundary;
-}(React$d.Component));
+}(React$c.Component));
 ErrorBoundary$1.ErrorBoundary = ErrorBoundary;
 
 Object.defineProperty(Tab$1, "__esModule", { value: true });
 Tab$1.hideElement = Tab$1.Tab = void 0;
-var React$c = require$$0;
-var react_1$1 = require$$0;
+var React$b = require$$1;
+var react_1$1 = require$$1;
 var Actions_1$6 = Actions$1;
 var TabSetNode_1$2 = TabSetNode$1;
 var Types_1$8 = Types;
@@ -11974,8 +12287,8 @@ var __1$2 = lib$1;
 /** @hidden @internal */
 var Tab = function (props) {
     var layout = props.layout, selected = props.selected, node = props.node, factory = props.factory, path = props.path;
-    var _a = React$c.useState(!props.node.isEnableRenderOnDemand() || props.selected), renderComponent = _a[0], setRenderComponent = _a[1];
-    React$c.useLayoutEffect(function () {
+    var _a = React$b.useState(!props.node.isEnableRenderOnDemand() || props.selected), renderComponent = _a[0], setRenderComponent = _a[1];
+    React$b.useLayoutEffect(function () {
         if (!renderComponent && selected) {
             // load on demand
             // console.log("load on demand: " + node.getName());
@@ -12011,9 +12324,9 @@ var Tab = function (props) {
         className += " " + cm(Types_1$8.CLASSES.FLEXLAYOUT__TAB_BORDER);
         className += " " + cm(Types_1$8.CLASSES.FLEXLAYOUT__TAB_BORDER_ + parentNode.getLocation().getName());
     }
-    return (React$c.createElement("div", { className: className, "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
-        React$c.createElement(ErrorBoundary_1$1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$4.I18nLabel.Error_rendering_component) },
-            React$c.createElement(react_1$1.Fragment, null, child))));
+    return (React$b.createElement("div", { className: className, "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
+        React$b.createElement(ErrorBoundary_1$1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$4.I18nLabel.Error_rendering_component) },
+            React$b.createElement(react_1$1.Fragment, null, child))));
 };
 Tab$1.Tab = Tab;
 function hideElement(style, useVisibility) {
@@ -12033,7 +12346,7 @@ var __spreadArray$2 = (commonjsGlobal && commonjsGlobal.__spreadArray) || functi
 };
 Object.defineProperty(TabSet$1, "__esModule", { value: true });
 TabSet$1.isAuxMouseEvent = TabSet$1.TabSet = void 0;
-var React$b = require$$0;
+var React$a = require$$1;
 var I18nLabel_1$3 = I18nLabel;
 var Actions_1$5 = Actions$1;
 var PopupMenu_1$1 = PopupMenu$1;
@@ -12045,10 +12358,10 @@ var Tab_1$2 = Tab$1;
 /** @hidden @internal */
 var TabSet = function (props) {
     var node = props.node, layout = props.layout, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var toolbarRef = React$b.useRef(null);
-    var overflowbuttonRef = React$b.useRef(null);
-    var tabbarInnerRef = React$b.useRef(null);
-    var stickyButtonsRef = React$b.useRef(null);
+    var toolbarRef = React$a.useRef(null);
+    var overflowbuttonRef = React$a.useRef(null);
+    var tabbarInnerRef = React$a.useRef(null);
+    var stickyButtonsRef = React$a.useRef(null);
     var _a = TabOverflowHook_1$1.useTabOverflow(node, Orientation_1$2.default.HORZ, toolbarRef, stickyButtonsRef), selfRef = _a.selfRef, position = _a.position, userControlledLeft = _a.userControlledLeft, hiddenTabs = _a.hiddenTabs, onMouseWheel = _a.onMouseWheel, tabsTruncated = _a.tabsTruncated;
     var onOverflowClick = function (event) {
         var element = overflowbuttonRef.current;
@@ -12123,7 +12436,7 @@ var TabSet = function (props) {
         for (var i = 0; i < node.getChildren().length; i++) {
             var child = node.getChildren()[i];
             var isSelected = node.getSelected() === i;
-            tabs.push(React$b.createElement(TabButton_1.TabButton, { layout: layout, node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, height: node.getTabStripHeight(), iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
+            tabs.push(React$a.createElement(TabButton_1.TabButton, { layout: layout, node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, height: node.getTabStripHeight(), iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
         }
     }
     var showHeader = node.getName() !== undefined;
@@ -12142,32 +12455,32 @@ var TabSet = function (props) {
             buttons = __spreadArray$2(__spreadArray$2([], stickyButtons), buttons);
         }
         else {
-            tabs.push(React$b.createElement("div", { ref: stickyButtonsRef, key: "sticky_buttons_container", onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER) }, stickyButtons));
+            tabs.push(React$a.createElement("div", { ref: stickyButtonsRef, key: "sticky_buttons_container", onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER) }, stickyButtons));
         }
     }
     var toolbar;
     if (hiddenTabs.length > 0) {
         var overflowTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Overflow_Menu_Tooltip);
-        buttons.push(React$b.createElement("button", { key: "overflowbutton", "data-layout-path": path + "/button/overflow", ref: overflowbuttonRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_BUTTON_OVERFLOW), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
+        buttons.push(React$a.createElement("button", { key: "overflowbutton", "data-layout-path": path + "/button/overflow", ref: overflowbuttonRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_BUTTON_OVERFLOW), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
             icons.more,
             hiddenTabs.length));
     }
     if (selectedTabNode !== undefined && layout.isSupportsPopout() && selectedTabNode.isEnableFloat() && !selectedTabNode.isFloating()) {
         var floatTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Float_Tab);
-        buttons.push(React$b.createElement("button", { key: "float", "data-layout-path": path + "/button/float", title: floatTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.popout));
+        buttons.push(React$a.createElement("button", { key: "float", "data-layout-path": path + "/button/float", title: floatTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.popout));
     }
     if (node.canMaximize()) {
         var minTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Restore);
         var maxTitle = layout.i18nName(I18nLabel_1$3.I18nLabel.Maximize);
         var btns = showHeader ? headerButtons : buttons;
-        btns.push(React$b.createElement("button", { key: "max", "data-layout-path": path + "/button/max", title: node.isMaximized() ? minTitle : maxTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_ + (node.isMaximized() ? "max" : "min")), onClick: onMaximizeToggle, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, node.isMaximized() ? icons === null || icons === void 0 ? void 0 : icons.restore : icons === null || icons === void 0 ? void 0 : icons.maximize));
+        btns.push(React$a.createElement("button", { key: "max", "data-layout-path": path + "/button/max", title: node.isMaximized() ? minTitle : maxTitle, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_ + (node.isMaximized() ? "max" : "min")), onClick: onMaximizeToggle, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, node.isMaximized() ? icons === null || icons === void 0 ? void 0 : icons.restore : icons === null || icons === void 0 ? void 0 : icons.maximize));
     }
     if (!node.isMaximized() && node.isEnableClose()) {
         var title = layout.i18nName(I18nLabel_1$3.I18nLabel.Close_Tabset);
         var btns = showHeader ? headerButtons : buttons;
-        btns.push(React$b.createElement("button", { key: "close", "data-layout-path": path + "/button/close", title: title, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_CLOSE), onClick: onClose, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.closeTabset));
+        btns.push(React$a.createElement("button", { key: "close", "data-layout-path": path + "/button/close", title: title, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_CLOSE), onClick: onClose, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 : icons.closeTabset));
     }
-    toolbar = (React$b.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, buttons));
+    toolbar = (React$a.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, buttons));
     var header;
     var tabStrip;
     var tabStripClasses = cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_OUTER);
@@ -12182,7 +12495,7 @@ var TabSet = function (props) {
         tabStripClasses += " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_MAXIMIZED);
     }
     if (showHeader) {
-        var headerToolbar = (React$b.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, headerButtons));
+        var headerToolbar = (React$a.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TAB_TOOLBAR), onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown, onDragStart: function (e) { e.preventDefault(); } }, headerButtons));
         var tabHeaderClasses = cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_HEADER);
         if (node.isActive()) {
             tabHeaderClasses += " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_SELECTED);
@@ -12193,8 +12506,8 @@ var TabSet = function (props) {
         if (node.getClassNameHeader() !== undefined) {
             tabHeaderClasses += " " + node.getClassNameHeader();
         }
-        header = (React$b.createElement("div", { className: tabHeaderClasses, style: { height: node.getHeaderHeight() + "px" }, "data-layout-path": path + "/header", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
-            React$b.createElement("div", { className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_HEADER_CONTENT) }, headerContent),
+        header = (React$a.createElement("div", { className: tabHeaderClasses, style: { height: node.getHeaderHeight() + "px" }, "data-layout-path": path + "/header", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
+            React$a.createElement("div", { className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_HEADER_CONTENT) }, headerContent),
             headerToolbar));
     }
     var tabStripStyle = { height: node.getTabStripHeight() + "px" };
@@ -12205,12 +12518,12 @@ var TabSet = function (props) {
     else {
         tabStripStyle["bottom"] = "0px";
     }
-    tabStrip = (React$b.createElement("div", { className: tabStripClasses, style: tabStripStyle, "data-layout-path": path + "/tabstrip", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
-        React$b.createElement("div", { ref: tabbarInnerRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_ + node.getTabLocation()) },
-            React$b.createElement("div", { style: { left: position }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ + node.getTabLocation()) }, tabs)),
+    tabStrip = (React$a.createElement("div", { className: tabStripClasses, style: tabStripStyle, "data-layout-path": path + "/tabstrip", onMouseDown: onMouseDown, onContextMenu: onContextMenu, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onTouchStart: onMouseDown },
+        React$a.createElement("div", { ref: tabbarInnerRef, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_ + node.getTabLocation()) },
+            React$a.createElement("div", { style: { left: position }, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER) + " " + cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ + node.getTabLocation()) }, tabs)),
         toolbar));
     style = layout.styleFont(style);
-    return (React$b.createElement("div", { ref: selfRef, dir: "ltr", "data-layout-path": path, style: style, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET), onWheel: onMouseWheel },
+    return (React$a.createElement("div", { ref: selfRef, dir: "ltr", "data-layout-path": path, style: style, className: cm(Types_1$7.CLASSES.FLEXLAYOUT__TABSET), onWheel: onMouseWheel },
         header,
         tabStrip));
 };
@@ -12229,7 +12542,7 @@ TabSet$1.isAuxMouseEvent = isAuxMouseEvent;
 
 Object.defineProperty(BorderButton$1, "__esModule", { value: true });
 BorderButton$1.BorderButton = void 0;
-var React$a = require$$0;
+var React$9 = require$$1;
 var __1$1 = lib$1;
 var Actions_1$4 = Actions$1;
 var Rect_1$1 = Rect$1;
@@ -12239,7 +12552,7 @@ var TabSet_1$2 = TabSet$1;
 /** @hidden @internal */
 var BorderButton = function (props) {
     var layout = props.layout, node = props.node, selected = props.selected, border = props.border, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var selfRef = React$a.useRef(null);
+    var selfRef = React$9.useRef(null);
     var onMouseDown = function (event) {
         if (!TabSet_1$2.isAuxMouseEvent(event)) {
             var message = layout.i18nName(__1$1.I18nLabel.Move_Tab, node.getName());
@@ -12281,7 +12594,7 @@ var BorderButton = function (props) {
     var onCloseMouseDown = function (event) {
         event.stopPropagation();
     };
-    React$a.useLayoutEffect(function () {
+    React$9.useLayoutEffect(function () {
         updateRect();
     });
     var updateRect = function () {
@@ -12324,20 +12637,20 @@ var BorderButton = function (props) {
         }
     }
     if (leadingContent === undefined && node.getIcon() !== undefined) {
-        leadingContent = React$a.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
+        leadingContent = React$9.createElement("img", { src: node.getIcon(), alt: "leadingContent" });
     }
     var buttons = [];
     // allow customization of leading contents (icon) and contents
     var renderState = { leading: leadingContent, content: titleContent, name: name, buttons: buttons };
     layout.customizeTab(node, renderState);
     node._setRenderedName(renderState.name);
-    var content = React$a.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT) }, renderState.content);
-    var leading = React$a.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_LEADING) }, renderState.leading);
+    var content = React$9.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT) }, renderState.content);
+    var leading = React$9.createElement("div", { className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_LEADING) }, renderState.leading);
     if (node.isEnableClose()) {
         var closeTitle = layout.i18nName(__1$1.I18nLabel.Close_Tab);
-        buttons.push(React$a.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
+        buttons.push(React$9.createElement("div", { key: "close", "data-layout-path": path + "/button/close", title: closeTitle, className: cm(Types_1$6.CLASSES.FLEXLAYOUT__BORDER_BUTTON_TRAILING), onMouseDown: onCloseMouseDown, onClick: onClose, onTouchStart: onCloseMouseDown }, icons === null || icons === void 0 ? void 0 : icons.close));
     }
-    return (React$a.createElement("div", { ref: selfRef, style: {}, className: classNames, "data-layout-path": path, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
+    return (React$9.createElement("div", { ref: selfRef, style: {}, className: classNames, "data-layout-path": path, onMouseDown: onMouseDown, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onTouchStart: onMouseDown, title: node.getHelpText() },
         leading,
         content,
         buttons));
@@ -12346,7 +12659,7 @@ BorderButton$1.BorderButton = BorderButton;
 
 Object.defineProperty(BorderTabSet$1, "__esModule", { value: true });
 BorderTabSet$1.BorderTabSet = void 0;
-var React$9 = require$$0;
+var React$8 = require$$1;
 var DockLocation_1$1 = DockLocation$1;
 var BorderButton_1 = BorderButton$1;
 var PopupMenu_1 = PopupMenu$1;
@@ -12359,9 +12672,9 @@ var TabSet_1$1 = TabSet$1;
 /** @hidden @internal */
 var BorderTabSet = function (props) {
     var border = props.border, layout = props.layout, iconFactory = props.iconFactory, titleFactory = props.titleFactory, icons = props.icons, path = props.path;
-    var toolbarRef = React$9.useRef(null);
-    var overflowbuttonRef = React$9.useRef(null);
-    var stickyButtonsRef = React$9.useRef(null);
+    var toolbarRef = React$8.useRef(null);
+    var overflowbuttonRef = React$8.useRef(null);
+    var stickyButtonsRef = React$8.useRef(null);
     var _a = TabOverflowHook_1.useTabOverflow(border, Orientation_1$1.default.flip(border.getOrientation()), toolbarRef, stickyButtonsRef), selfRef = _a.selfRef, position = _a.position, userControlledLeft = _a.userControlledLeft, hiddenTabs = _a.hiddenTabs, onMouseWheel = _a.onMouseWheel;
     var onAuxMouseClick = function (event) {
         if (TabSet_1$1.isAuxMouseEvent(event)) {
@@ -12396,7 +12709,7 @@ var BorderTabSet = function (props) {
     var layoutTab = function (i) {
         var isSelected = border.getSelected() === i;
         var child = border.getChildren()[i];
-        tabs.push(React$9.createElement(BorderButton_1.BorderButton, { layout: layout, border: border.getLocation().getName(), node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
+        tabs.push(React$8.createElement(BorderButton_1.BorderButton, { layout: layout, border: border.getLocation().getName(), node: child, path: path + "/tb" + i, key: child.getId(), selected: isSelected, iconFactory: iconFactory, titleFactory: titleFactory, icons: icons }));
     };
     for (var i = 0; i < border.getChildren().length; i++) {
         layoutTab(i);
@@ -12413,7 +12726,7 @@ var BorderTabSet = function (props) {
     var toolbar;
     if (hiddenTabs.length > 0) {
         var overflowTitle = layout.i18nName(I18nLabel_1$2.I18nLabel.Overflow_Menu_Tooltip);
-        buttons.push(React$9.createElement("button", { key: "overflowbutton", ref: overflowbuttonRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ + border.getLocation().getName()), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
+        buttons.push(React$8.createElement("button", { key: "overflowbutton", ref: overflowbuttonRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ + border.getLocation().getName()), title: overflowTitle, onClick: onOverflowClick, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }, icons === null || icons === void 0 ? void 0 :
             icons.more,
             hiddenTabs.length));
     }
@@ -12422,10 +12735,10 @@ var BorderTabSet = function (props) {
         var selectedTabNode = border.getChildren()[selectedIndex];
         if (selectedTabNode !== undefined && layout.isSupportsPopout() && selectedTabNode.isEnableFloat() && !selectedTabNode.isFloating()) {
             var floatTitle = layout.i18nName(I18nLabel_1$2.I18nLabel.Float_Tab);
-            buttons.push(React$9.createElement("button", { key: "float", title: floatTitle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }));
+            buttons.push(React$8.createElement("button", { key: "float", title: floatTitle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_FLOAT), onClick: onFloatTab, onMouseDown: onInterceptMouseDown, onTouchStart: onInterceptMouseDown }));
         }
     }
-    toolbar = (React$9.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_ + border.getLocation().getName()) }, buttons));
+    toolbar = (React$8.createElement("div", { key: "toolbar", ref: toolbarRef, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_ + border.getLocation().getName()) }, buttons));
     style = layout.styleFont(style);
     var innerStyle = {};
     var borderHeight = border.getBorderBarSize() - 1;
@@ -12438,9 +12751,9 @@ var BorderTabSet = function (props) {
     else {
         innerStyle = { height: borderHeight, left: position };
     }
-    return (React$9.createElement("div", { ref: selfRef, dir: "ltr", style: style, className: borderClasses, "data-layout-path": path, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onWheel: onMouseWheel },
-        React$9.createElement("div", { style: { height: borderHeight }, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_ + border.getLocation().getName()) },
-            React$9.createElement("div", { style: innerStyle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ + border.getLocation().getName()) }, tabs)),
+    return (React$8.createElement("div", { ref: selfRef, dir: "ltr", style: style, className: borderClasses, "data-layout-path": path, onClick: onAuxMouseClick, onAuxClick: onAuxMouseClick, onContextMenu: onContextMenu, onWheel: onMouseWheel },
+        React$8.createElement("div", { style: { height: borderHeight }, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_ + border.getLocation().getName()) },
+            React$8.createElement("div", { style: innerStyle, className: cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER) + " " + cm(Types_1$5.CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ + border.getLocation().getName()) }, tabs)),
         toolbar));
 };
 BorderTabSet$1.BorderTabSet = BorderTabSet;
@@ -12449,7 +12762,7 @@ var Splitter$1 = {};
 
 Object.defineProperty(Splitter$1, "__esModule", { value: true });
 Splitter$1.Splitter = void 0;
-var React$8 = require$$0;
+var React$7 = require$$1;
 var DragDrop_1$1 = DragDrop$1;
 var Actions_1$2 = Actions$1;
 var BorderNode_1$1 = BorderNode$1;
@@ -12458,8 +12771,8 @@ var Types_1$4 = Types;
 /** @hidden @internal */
 var Splitter = function (props) {
     var layout = props.layout, node = props.node, path = props.path;
-    var pBounds = React$8.useRef([]);
-    var outlineDiv = React$8.useRef(undefined);
+    var pBounds = React$7.useRef([]);
+    var outlineDiv = React$7.useRef(undefined);
     var parentNode = node.getParent();
     var onMouseDown = function (event) {
         DragDrop_1$1.default.instance.setGlassCursorOverride(node.getOrientation() === Orientation_1.default.HORZ ? "ns-resize" : "ew-resize");
@@ -12558,7 +12871,7 @@ var Splitter = function (props) {
     }
     var extra = node.getModel().getSplitterExtra();
     if (extra === 0) {
-        return (React$8.createElement("div", { style: style, "data-layout-path": path, className: className, onTouchStart: onMouseDown, onMouseDown: onMouseDown }));
+        return (React$7.createElement("div", { style: style, "data-layout-path": path, className: className, onTouchStart: onMouseDown, onMouseDown: onMouseDown }));
     }
     else {
         // add extended transparent div for hit testing
@@ -12576,8 +12889,8 @@ var Splitter = function (props) {
             cursor: node.getOrientation() === Orientation_1.default.HORZ ? "ns-resize" : "ew-resize"
         });
         var className2 = cm(Types_1$4.CLASSES.FLEXLAYOUT__SPLITTER_EXTRA);
-        return (React$8.createElement("div", { style: style, "data-layout-path": path, className: className },
-            React$8.createElement("div", { style: style2, className: className2, onTouchStart: onMouseDown, onMouseDown: onMouseDown })));
+        return (React$7.createElement("div", { style: style, "data-layout-path": path, className: className },
+            React$7.createElement("div", { style: style2, className: className2, onTouchStart: onMouseDown, onMouseDown: onMouseDown })));
     }
 };
 Splitter$1.Splitter = Splitter;
@@ -12591,15 +12904,15 @@ var __spreadArray$1 = (commonjsGlobal && commonjsGlobal.__spreadArray) || functi
 };
 Object.defineProperty(FloatingWindow$1, "__esModule", { value: true });
 FloatingWindow$1.FloatingWindow = void 0;
-var React$7 = require$$0;
-var react_dom_1 = require$$0;
+var React$6 = require$$1;
+var react_dom_1 = require$$1;
 var Types_1$3 = Types;
 /** @hidden @internal */
 var FloatingWindow = function (props) {
     var title = props.title, id = props.id, url = props.url, rect = props.rect, onCloseWindow = props.onCloseWindow, onSetWindow = props.onSetWindow, children = props.children;
-    var popoutWindow = React$7.useRef(null);
-    var _a = React$7.useState(undefined), content = _a[0], setContent = _a[1];
-    React$7.useLayoutEffect(function () {
+    var popoutWindow = React$6.useRef(null);
+    var _a = React$6.useState(undefined), content = _a[0], setContent = _a[1];
+    React$6.useLayoutEffect(function () {
         var r = rect;
         // Make a local copy of the styles from the current window which will be passed into
         // the floating window. window.document.styleSheets is mutable and we can't guarantee
@@ -12703,19 +13016,19 @@ var FloatingWindowTab$1 = {};
 
 Object.defineProperty(FloatingWindowTab$1, "__esModule", { value: true });
 FloatingWindowTab$1.FloatingWindowTab = void 0;
-var React$6 = require$$0;
+var React$5 = require$$1;
 var ErrorBoundary_1 = ErrorBoundary$1;
 var I18nLabel_1$1 = I18nLabel;
-var react_1 = require$$0;
+var react_1 = require$$1;
 var Types_1$2 = Types;
 /** @hidden @internal */
 var FloatingWindowTab = function (props) {
     var layout = props.layout, node = props.node, factory = props.factory;
     var cm = layout.getClassName;
     var child = factory(node);
-    return (React$6.createElement("div", { className: cm(Types_1$2.CLASSES.FLEXLAYOUT__FLOATING_WINDOW_TAB) },
-        React$6.createElement(ErrorBoundary_1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$1.I18nLabel.Error_rendering_component) },
-            React$6.createElement(react_1.Fragment, null, child))));
+    return (React$5.createElement("div", { className: cm(Types_1$2.CLASSES.FLEXLAYOUT__FLOATING_WINDOW_TAB) },
+        React$5.createElement(ErrorBoundary_1.ErrorBoundary, { message: props.layout.i18nName(I18nLabel_1$1.I18nLabel.Error_rendering_component) },
+            React$5.createElement(react_1.Fragment, null, child))));
 };
 FloatingWindowTab$1.FloatingWindowTab = FloatingWindowTab;
 
@@ -12723,7 +13036,7 @@ var TabFloating$1 = {};
 
 Object.defineProperty(TabFloating$1, "__esModule", { value: true });
 TabFloating$1.TabFloating = void 0;
-var React$5 = require$$0;
+var React$4 = require$$1;
 var Actions_1$1 = Actions$1;
 var TabSetNode_1$1 = TabSetNode$1;
 var Types_1$1 = Types;
@@ -12766,16 +13079,16 @@ var TabFloating = function (props) {
     var dockMessage = layout.i18nName(I18nLabel_1.I18nLabel.Floating_Window_Dock_Window);
     var customRenderCallback = layout.getOnRenderFloatingTabPlaceholder();
     if (customRenderCallback) {
-        return (React$5.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style }, customRenderCallback(dockPopout, showPopout)));
+        return (React$4.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style }, customRenderCallback(dockPopout, showPopout)));
     }
     else {
-        return (React$5.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
-            React$5.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING_INNER) },
-                React$5.createElement("div", null, message),
-                React$5.createElement("div", null,
-                    React$5.createElement("a", { href: "#", onClick: onClickFocus }, showMessage)),
-                React$5.createElement("div", null,
-                    React$5.createElement("a", { href: "#", onClick: onClickDock }, dockMessage)))));
+        return (React$4.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING), "data-layout-path": path, onMouseDown: onMouseDown, onTouchStart: onMouseDown, style: style },
+            React$4.createElement("div", { className: cm(Types_1$1.CLASSES.FLEXLAYOUT__TAB_FLOATING_INNER) },
+                React$4.createElement("div", null, message),
+                React$4.createElement("div", null,
+                    React$4.createElement("a", { href: "#", onClick: onClickFocus }, showMessage)),
+                React$4.createElement("div", null,
+                    React$4.createElement("a", { href: "#", onClick: onClickDock }, dockMessage)))));
     }
 };
 TabFloating$1.TabFloating = TabFloating;
@@ -12802,8 +13115,8 @@ var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function
 };
 Object.defineProperty(Layout$1, "__esModule", { value: true });
 Layout$1.Layout = void 0;
-var React$4 = require$$0;
-var ReactDOM$1 = require$$0;
+var React$3 = require$$1;
+var ReactDOM = require$$1;
 var DockLocation_1 = DockLocation$1;
 var DragDrop_1 = DragDrop$1;
 var Actions_1 = Actions$1;
@@ -12978,7 +13291,7 @@ var Layout = /** @class */ (function (_super) {
         };
         /** @hidden @internal */
         _this.dragRectRender = function (text, node, json, onRendered) {
-            var content = React$4.createElement("div", { style: { whiteSpace: "pre" } }, text.replace("<br>", "\n"));
+            var content = React$3.createElement("div", { style: { whiteSpace: "pre" } }, text.replace("<br>", "\n"));
             if (_this.props.onRenderDragRect !== undefined) {
                 var customContent = _this.props.onRenderDragRect(text, node, json);
                 if (customContent !== undefined) {
@@ -12988,7 +13301,7 @@ var Layout = /** @class */ (function (_super) {
             // hide div until the render is complete
             _this.dragDiv.style.visibility = "hidden";
             _this.dragRectRendered = false;
-            ReactDOM$1.render(React$4.createElement(DragRectRenderWrapper
+            ReactDOM.render(React$3.createElement(DragRectRenderWrapper
             // wait for it to be rendered
             , { 
                 // wait for it to be rendered
@@ -13099,10 +13412,10 @@ var Layout = /** @class */ (function (_super) {
         };
         _this.props.model._setChangeListener(_this.onModelChange);
         _this.tabIds = [];
-        _this.selfRef = React$4.createRef();
-        _this.findHeaderBarSizeRef = React$4.createRef();
-        _this.findTabBarSizeRef = React$4.createRef();
-        _this.findBorderBarSizeRef = React$4.createRef();
+        _this.selfRef = React$3.createRef();
+        _this.findHeaderBarSizeRef = React$3.createRef();
+        _this.findTabBarSizeRef = React$3.createRef();
+        _this.findBorderBarSizeRef = React$3.createRef();
         _this.supportsPopout = props.supportsPopout !== undefined ? props.supportsPopout : defaultSupportsPopout;
         _this.popoutURL = props.popoutURL ? props.popoutURL : "popout.html";
         // For backwards compatibility, prop closeIcon sets prop icons.close:
@@ -13228,7 +13541,7 @@ var Layout = /** @class */ (function (_super) {
         // first render will be used to find the size (via selfRef)
         if (this.firstRender) {
             this.firstRender = false;
-            return (React$4.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT) }, this.metricsElements()));
+            return (React$3.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT) }, this.metricsElements()));
         }
         this.props.model._setPointerFine(window && window.matchMedia && window.matchMedia("(pointer: fine)").matches);
         // this.start = Date.now();
@@ -13266,7 +13579,7 @@ var Layout = /** @class */ (function (_super) {
             }
         });
         // this.layoutTime = (Date.now() - this.start);
-        return (React$4.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT), onDragEnter: this.props.onExternalDrag ? this.onDragEnter : undefined },
+        return (React$3.createElement("div", { ref: this.selfRef, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__LAYOUT), onDragEnter: this.props.onExternalDrag ? this.onDragEnter : undefined },
             tabSetComponents,
             this.tabIds.map(function (t) {
                 return tabComponents[t];
@@ -13280,10 +13593,10 @@ var Layout = /** @class */ (function (_super) {
     Layout.prototype.metricsElements = function () {
         // used to measure the tab and border tab sizes
         var fontStyle = this.styleFont({ visibility: "hidden" });
-        return (React$4.createElement(React$4.Fragment, null,
-            React$4.createElement("div", { key: "findHeaderBarSize", ref: this.findHeaderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_HEADER_SIZER) }, "FindHeaderBarSize"),
-            React$4.createElement("div", { key: "findTabBarSize", ref: this.findTabBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_SIZER) }, "FindTabBarSize"),
-            React$4.createElement("div", { key: "findBorderBarSize", ref: this.findBorderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__BORDER_SIZER) }, "FindBorderBarSize")));
+        return (React$3.createElement(React$3.Fragment, null,
+            React$3.createElement("div", { key: "findHeaderBarSize", ref: this.findHeaderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_HEADER_SIZER) }, "FindHeaderBarSize"),
+            React$3.createElement("div", { key: "findTabBarSize", ref: this.findTabBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__TABSET_SIZER) }, "FindTabBarSize"),
+            React$3.createElement("div", { key: "findBorderBarSize", ref: this.findBorderBarSizeRef, style: fontStyle, className: this.getClassName(Types_1.CLASSES.FLEXLAYOUT__BORDER_SIZER) }, "FindBorderBarSize")));
     };
     /** @hidden @internal */
     Layout.prototype.renderBorder = function (borderSet, borderComponents, tabComponents, floatingWindows, splitterComponents) {
@@ -13291,7 +13604,7 @@ var Layout = /** @class */ (function (_super) {
             var border = _a[_i];
             var borderPath = "/border/" + border.getLocation().getName();
             if (border.isShowing()) {
-                borderComponents.push(React$4.createElement(BorderTabSet_1.BorderTabSet, { key: "border_" + border.getLocation().getName(), path: borderPath, border: border, layout: this, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
+                borderComponents.push(React$3.createElement(BorderTabSet_1.BorderTabSet, { key: "border_" + border.getLocation().getName(), path: borderPath, border: border, layout: this, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
                 var drawChildren = border._getDrawChildren();
                 var i = 0;
                 var tabCount = 0;
@@ -13299,18 +13612,18 @@ var Layout = /** @class */ (function (_super) {
                     var child = drawChildren_1[_b];
                     if (child instanceof SplitterNode_1.default) {
                         var path = borderPath + "/s";
-                        splitterComponents.push(React$4.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, node: child, path: path }));
+                        splitterComponents.push(React$3.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, node: child, path: path }));
                     }
                     else if (child instanceof TabNode_1.default) {
                         var path = borderPath + "/t" + tabCount++;
                         if (this.supportsPopout && child.isFloating()) {
                             var rect = this._getScreenRect(child);
-                            floatingWindows.push(React$4.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
-                                React$4.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
-                            tabComponents[child.getId()] = React$4.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected() });
+                            floatingWindows.push(React$3.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
+                                React$3.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
+                            tabComponents[child.getId()] = React$3.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected() });
                         }
                         else {
-                            tabComponents[child.getId()] = React$4.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected(), factory: this.props.factory });
+                            tabComponents[child.getId()] = React$3.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: path, node: child, selected: i === border.getSelected(), factory: this.props.factory });
                         }
                     }
                     i++;
@@ -13328,11 +13641,11 @@ var Layout = /** @class */ (function (_super) {
             var child = _a[_i];
             if (child instanceof SplitterNode_1.default) {
                 var newPath = path + "/s" + (splitterCount++);
-                splitterComponents.push(React$4.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, path: newPath, node: child }));
+                splitterComponents.push(React$3.createElement(Splitter_1.Splitter, { key: child.getId(), layout: this, path: newPath, node: child }));
             }
             else if (child instanceof TabSetNode_1.default) {
                 var newPath = path + "/ts" + (rowCount++);
-                tabSetComponents.push(React$4.createElement(TabSet_1.TabSet, { key: child.getId(), layout: this, path: newPath, node: child, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
+                tabSetComponents.push(React$3.createElement(TabSet_1.TabSet, { key: child.getId(), layout: this, path: newPath, node: child, iconFactory: this.props.iconFactory, titleFactory: this.props.titleFactory, icons: this.icons }));
                 this.renderChildren(newPath, child, tabSetComponents, tabComponents, floatingWindows, splitterComponents);
             }
             else if (child instanceof TabNode_1.default) {
@@ -13344,12 +13657,12 @@ var Layout = /** @class */ (function (_super) {
                 }
                 if (this.supportsPopout && child.isFloating()) {
                     var rect = this._getScreenRect(child);
-                    floatingWindows.push(React$4.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
-                        React$4.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
-                    tabComponents[child.getId()] = React$4.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab });
+                    floatingWindows.push(React$3.createElement(FloatingWindow_1.FloatingWindow, { key: child.getId(), url: this.popoutURL, rect: rect, title: child.getName(), id: child.getId(), onSetWindow: this.onSetWindow, onCloseWindow: this.onCloseWindow },
+                        React$3.createElement(FloatingWindowTab_1.FloatingWindowTab, { layout: this, node: child, factory: this.props.factory })));
+                    tabComponents[child.getId()] = React$3.createElement(TabFloating_1.TabFloating, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab });
                 }
                 else {
-                    tabComponents[child.getId()] = React$4.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab, factory: this.props.factory });
+                    tabComponents[child.getId()] = React$3.createElement(Tab_1.Tab, { key: child.getId(), layout: this, path: newPath, node: child, selected: child === selectedTab, factory: this.props.factory });
                 }
             }
             else {
@@ -13644,15 +13957,15 @@ var Layout = /** @class */ (function (_super) {
         }
     };
     return Layout;
-}(React$4.Component));
+}(React$3.Component));
 Layout$1.Layout = Layout;
 /** @hidden @internal */
 var DragRectRenderWrapper = function (props) {
-    React$4.useEffect(function () {
+    React$3.useEffect(function () {
         var _a;
         (_a = props.onRendered) === null || _a === void 0 ? void 0 : _a.call(props);
     }, [props]);
-    return (React$4.createElement(React$4.Fragment, null, props.children));
+    return (React$3.createElement(React$3.Fragment, null, props.children));
 };
 Layout$1.default = Layout;
 
@@ -36489,7 +36802,7 @@ var __assign$1 = (commonjsGlobal && commonjsGlobal.__assign) || function () {
 Object.defineProperty(ace$5, "__esModule", { value: true });
 var ace_builds_1$1 = ace$4.exports;
 var PropTypes$2 = propTypes$2.exports;
-var React$3 = require$$0;
+var React$2 = require$$1;
 var isEqual$1 = lodash_isequal.exports;
 var editorOptions_1$1 = editorOptions$1;
 var ace$2 = (0, editorOptions_1$1.getAceInstance)();
@@ -36819,7 +37132,7 @@ var ReactAce = /** @class */ (function (_super) {
     ReactAce.prototype.render = function () {
         var _a = this.props, name = _a.name, width = _a.width, height = _a.height, style = _a.style;
         var divStyle = __assign$1({ width: width, height: height }, style);
-        return React$3.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
+        return React$2.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
     };
     ReactAce.propTypes = {
         mode: PropTypes$2.oneOfType([PropTypes$2.string, PropTypes$2.object]),
@@ -36906,7 +37219,7 @@ var ReactAce = /** @class */ (function (_super) {
         navigateToFileEnd: true
     };
     return ReactAce;
-}(React$3.Component));
+}(React$2.Component));
 ace$5.default = ReactAce;
 
 var diff = {};
@@ -38064,7 +38377,7 @@ var ace$1 = (0, editorOptions_1.getAceInstance)();
 var ace_builds_1 = ace$4.exports;
 var ext_split_1 = extSplit.exports;
 var PropTypes$1 = propTypes$2.exports;
-var React$2 = require$$0;
+var React$1 = require$$1;
 var isEqual = lodash_isequal.exports;
 var get = lodash_get;
 var SplitComponent = /** @class */ (function (_super) {
@@ -38365,7 +38678,7 @@ var SplitComponent = /** @class */ (function (_super) {
     SplitComponent.prototype.render = function () {
         var _a = this.props, name = _a.name, width = _a.width, height = _a.height, style = _a.style;
         var divStyle = __assign({ width: width, height: height }, style);
-        return React$2.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
+        return React$1.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
     };
     SplitComponent.propTypes = {
         className: PropTypes$1.string,
@@ -38450,7 +38763,7 @@ var SplitComponent = /** @class */ (function (_super) {
         enableLiveAutocompletion: false
     };
     return SplitComponent;
-}(React$2.Component));
+}(React$1.Component));
 split.default = SplitComponent;
 
 var diffMatchPatch = {exports: {}};
@@ -40691,7 +41004,7 @@ var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 })();
 Object.defineProperty(diff, "__esModule", { value: true });
 var PropTypes = propTypes$2.exports;
-var React$1 = require$$0;
+var React = require$$1;
 var split_1$1 = split;
 var DiffMatchPatch = diffMatchPatch.exports;
 var DiffComponent = /** @class */ (function (_super) {
@@ -40849,7 +41162,7 @@ var DiffComponent = /** @class */ (function (_super) {
     };
     DiffComponent.prototype.render = function () {
         var markers = this.diff();
-        return (React$1.createElement(split_1$1.default, { name: this.props.name, className: this.props.className, focus: this.props.focus, orientation: this.props.orientation, splits: this.props.splits, mode: this.props.mode, theme: this.props.theme, height: this.props.height, width: this.props.width, fontSize: this.props.fontSize, showGutter: this.props.showGutter, onChange: this.onChange, onPaste: this.props.onPaste, onLoad: this.props.onLoad, onScroll: this.props.onScroll, minLines: this.props.minLines, maxLines: this.props.maxLines, readOnly: this.props.readOnly, highlightActiveLine: this.props.highlightActiveLine, showPrintMargin: this.props.showPrintMargin, tabSize: this.props.tabSize, cursorStart: this.props.cursorStart, editorProps: this.props.editorProps, style: this.props.style, scrollMargin: this.props.scrollMargin, setOptions: this.props.setOptions, wrapEnabled: this.props.wrapEnabled, enableBasicAutocompletion: this.props.enableBasicAutocompletion, enableLiveAutocompletion: this.props.enableLiveAutocompletion, value: this.state.value, markers: markers }));
+        return (React.createElement(split_1$1.default, { name: this.props.name, className: this.props.className, focus: this.props.focus, orientation: this.props.orientation, splits: this.props.splits, mode: this.props.mode, theme: this.props.theme, height: this.props.height, width: this.props.width, fontSize: this.props.fontSize, showGutter: this.props.showGutter, onChange: this.onChange, onPaste: this.props.onPaste, onLoad: this.props.onLoad, onScroll: this.props.onScroll, minLines: this.props.minLines, maxLines: this.props.maxLines, readOnly: this.props.readOnly, highlightActiveLine: this.props.highlightActiveLine, showPrintMargin: this.props.showPrintMargin, tabSize: this.props.tabSize, cursorStart: this.props.cursorStart, editorProps: this.props.editorProps, style: this.props.style, scrollMargin: this.props.scrollMargin, setOptions: this.props.setOptions, wrapEnabled: this.props.wrapEnabled, enableBasicAutocompletion: this.props.enableBasicAutocompletion, enableLiveAutocompletion: this.props.enableLiveAutocompletion, value: this.state.value, markers: markers }));
     };
     DiffComponent.propTypes = {
         cursorStart: PropTypes.number,
@@ -40915,7 +41228,7 @@ var DiffComponent = /** @class */ (function (_super) {
         wrapEnabled: true
     };
     return DiffComponent;
-}(React$1.Component));
+}(React.Component));
 diff.default = DiffComponent;
 
 Object.defineProperty(lib, "__esModule", { value: true });
@@ -46781,307 +47094,6 @@ const Row = /*#__PURE__*/x(({
   });
 });
 Row.displayName = 'Row';
-
-var dist = {};
-
-var SplitPane$1 = {};
-
-var Pane = {};
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Pane = void 0;
-const React = require$$0;
-const baseStyle = {
-    position: 'relative',
-    outline: 'none',
-    border: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexBasis: 'auto',
-};
-exports.Pane = React.memo(({ size, minSize, split, className, forwardRef, children }) => {
-    const style = Object.assign(Object.assign({}, baseStyle), { flexGrow: size, flexShrink: size });
-    if (split === 'vertical') {
-        style.width = 0;
-        style.height = '100%';
-        style.minWidth = minSize;
-    }
-    else {
-        style.width = '100%';
-        style.height = 0;
-        style.minHeight = minSize;
-    }
-    const classes = ['Pane', split, className].join(' ');
-    return (React.createElement("div", { className: classes, style: style, ref: forwardRef }, children));
-});
-exports.Pane.displayName = 'Pane';
-
-}(Pane));
-
-var Resizer = {};
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Resizer = void 0;
-const React = require$$0;
-const { useCallback } = React;
-exports.Resizer = React.memo(({ split, className, index, onDragStarted }) => {
-    const handleMouseDown = useCallback((event) => {
-        event.preventDefault();
-        onDragStarted(index, event);
-    }, [index, onDragStarted]);
-    const handleTouchStart = useCallback((event) => {
-        event.preventDefault();
-        onDragStarted(index, event.touches[0]);
-    }, [index, onDragStarted]);
-    const classes = ['Resizer', split, className].join(' ');
-    return (React.createElement("span", { role: 'presentation', className: classes, style: { flex: 'none' }, onMouseDown: handleMouseDown, onTouchStart: handleTouchStart }));
-});
-exports.Resizer.displayName = 'Resizer';
-
-}(Resizer));
-
-var util = {};
-
-Object.defineProperty(util, "__esModule", { value: true });
-util.useDragState = util.useEventListener = void 0;
-const React = require$$0;
-const ReactDOM = require$$0;
-const { useCallback, useMemo, useState, useEffect } = React;
-function useEventListener(type, listener) {
-    useEffect(() => {
-        if (!listener)
-            return;
-        document.addEventListener(type, listener);
-        return () => {
-            document.removeEventListener(type, listener);
-        };
-    }, [type, listener]);
-}
-util.useEventListener = useEventListener;
-function useDragStateHandlers(split, onDragFinished) {
-    const [dragging, setDragging] = useState(null);
-    const [current, setCurrent] = useState(0);
-    const beginDrag = useCallback((event, extraState) => {
-        const pos = split === 'vertical' ? event.clientX : event.clientY;
-        setDragging([extraState, pos]);
-        setCurrent(pos);
-    }, [split]);
-    const [dragState, onMouseUp] = useMemo(() => {
-        if (!dragging) {
-            return [null, undefined];
-        }
-        const [extraState, origin] = dragging;
-        const dragState = { offset: current - origin, extraState };
-        const onMouseUp = () => {
-            ReactDOM.unstable_batchedUpdates(() => {
-                setDragging(null);
-                onDragFinished(dragState);
-            });
-        };
-        return [dragState, onMouseUp];
-    }, [current, dragging, onDragFinished]);
-    const [onMouseMove, onTouchMove] = useMemo(() => {
-        if (!dragging) {
-            return [undefined, undefined];
-        }
-        const onMouseMove = (event) => {
-            const pos = split === 'vertical' ? event.clientX : event.clientY;
-            setCurrent(pos);
-        };
-        const onTouchMove = (event) => {
-            onMouseMove(event.touches[0]);
-        };
-        return [onMouseMove, onTouchMove];
-    }, [dragging, split]);
-    return { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp };
-}
-function useDragState(split, onDragFinished) {
-    const { beginDrag, dragState, onMouseMove, onTouchMove, onMouseUp } = useDragStateHandlers(split, onDragFinished);
-    useEventListener('mousemove', onMouseMove);
-    useEventListener('touchmove', onTouchMove);
-    useEventListener('mouseup', onMouseUp);
-    return [dragState, beginDrag];
-}
-util.useDragState = useDragState;
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SplitPane = void 0;
-const React = require$$0;
-const { useCallback, useRef, useState, useMemo, useEffect } = React;
-const Pane_1 = Pane;
-const Resizer_1 = Resizer;
-const util_1 = util;
-const DEFAULT_MIN_SIZE = 50;
-function getNodeKey(node, index) {
-    if (typeof node === 'object' && node && node.key != null) {
-        return 'key.' + node.key;
-    }
-    return 'index.' + index;
-}
-function getMinSize(index, minSizes) {
-    if (typeof minSizes === 'number') {
-        if (minSizes > 0) {
-            return minSizes;
-        }
-    }
-    else if (minSizes instanceof Array) {
-        const value = minSizes[index];
-        if (value > 0) {
-            return value;
-        }
-    }
-    return DEFAULT_MIN_SIZE;
-}
-function getDefaultSize(index, defaultSizes) {
-    if (defaultSizes) {
-        const value = defaultSizes[index];
-        if (value >= 0) {
-            return value;
-        }
-    }
-    return 1;
-}
-function move(sizes, index, offset, minSizes) {
-    if (!offset || index < 0 || index + 1 >= sizes.length) {
-        return 0;
-    }
-    const firstMinSize = getMinSize(index, minSizes);
-    const secondMinSize = getMinSize(index + 1, minSizes);
-    const firstSize = sizes[index] + offset;
-    const secondSize = sizes[index + 1] - offset;
-    if (offset < 0 && firstSize < firstMinSize) {
-        // offset is negative, so missing and pushed are, too
-        const missing = firstSize - firstMinSize;
-        const pushed = move(sizes, index - 1, missing, minSizes);
-        offset -= missing - pushed;
-    }
-    else if (offset > 0 && secondSize < secondMinSize) {
-        const missing = secondMinSize - secondSize;
-        const pushed = move(sizes, index + 1, missing, minSizes);
-        offset -= missing - pushed;
-    }
-    sizes[index] += offset;
-    sizes[index + 1] -= offset;
-    return offset;
-}
-const defaultProps = {
-    split: 'vertical',
-    className: '',
-};
-function useSplitPaneResize(options) {
-    const { children, split, defaultSizes, minSize: minSizes, onDragStarted, onChange, onDragFinished } = options;
-    const [sizes, setSizes] = useState(new Map());
-    const paneRefs = useRef(new Map());
-    const getMovedSizes = useCallback((dragState) => {
-        const collectedSizes = children.map((node, index) => sizes.get(getNodeKey(node, index)) || getDefaultSize(index, defaultSizes));
-        if (dragState) {
-            const { offset, extraState: { index }, } = dragState;
-            move(collectedSizes, index, offset, minSizes);
-        }
-        return collectedSizes;
-    }, [children, defaultSizes, minSizes, sizes]);
-    const handleDragFinished = useCallback((dragState) => {
-        const movedSizes = getMovedSizes(dragState);
-        setSizes(new Map(children.map((node, index) => [
-            getNodeKey(node, index),
-            movedSizes[index],
-        ])));
-        if (onDragFinished) {
-            onDragFinished(movedSizes);
-        }
-    }, [children, getMovedSizes, onDragFinished]);
-    const [dragState, beginDrag] = (0, util_1.useDragState)(split, handleDragFinished);
-    const movedSizes = useMemo(() => getMovedSizes(dragState), [dragState, getMovedSizes]);
-    const resizeState = dragState ? dragState.extraState : null;
-    useEffect(() => {
-        if (onChange && dragState) {
-            onChange(movedSizes);
-        }
-    }, [dragState, movedSizes, onChange]);
-    const childPanes = useMemo(() => {
-        const prevPaneRefs = paneRefs.current;
-        paneRefs.current = new Map();
-        return children.map((node, index) => {
-            const key = getNodeKey(node, index);
-            const ref = prevPaneRefs.get(key) || React.createRef();
-            paneRefs.current.set(key, ref);
-            const minSize = getMinSize(index, minSizes);
-            return { key, node, ref, minSize };
-        });
-    }, [children, minSizes]);
-    const childPanesWithSizes = useMemo(() => childPanes.map((child, index) => {
-        const size = movedSizes[index];
-        return Object.assign(Object.assign({}, child), { size });
-    }), [childPanes, movedSizes]);
-    const handleDragStart = useCallback((index, pos) => {
-        const sizeAttr = split === 'vertical' ? 'width' : 'height';
-        const clientSizes = new Map(childPanes.map(({ key, ref }) => {
-            const size = ref.current ? ref.current.getBoundingClientRect()[sizeAttr] : 0;
-            return [key, size];
-        }));
-        if (onDragStarted) {
-            onDragStarted();
-        }
-        beginDrag(pos, { index });
-        setSizes(clientSizes);
-    }, [beginDrag, childPanes, onDragStarted, split]);
-    return { childPanes: childPanesWithSizes, resizeState, handleDragStart };
-}
-exports.SplitPane = React.memo((props) => {
-    const options = Object.assign(Object.assign({}, defaultProps), props);
-    const { split, className } = options;
-    const { childPanes, resizeState, handleDragStart } = useSplitPaneResize(options);
-    const splitStyleProps = split === 'vertical'
-        ? {
-            left: 0,
-            right: 0,
-            flexDirection: 'row',
-        }
-        : {
-            bottom: 0,
-            top: 0,
-            flexDirection: 'column',
-            minHeight: '100%',
-            width: '100%',
-        };
-    const style = Object.assign({ display: 'flex', flex: 1, height: '100%', position: 'absolute', outline: 'none', overflow: 'hidden' }, splitStyleProps);
-    const classes = ['SplitPane', split, className].join(' ');
-    const dragLayerStyle = {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-    };
-    const dragLayerClasses = ['DragLayer', split, resizeState ? 'resizing' : '', className].join(' ');
-    const entries = [];
-    childPanes.forEach(({ key, node, ref, size, minSize }, index) => {
-        if (index !== 0) {
-            const resizing = resizeState && resizeState.index === index - 1;
-            entries.push(React.createElement(Resizer_1.Resizer, { key: 'resizer.' + index, split: split, className: className + (resizing ? ' resizing' : ''), index: index - 1, onDragStarted: handleDragStart }));
-        }
-        entries.push(React.createElement(Pane_1.Pane, { key: 'pane.' + key, forwardRef: ref, size: size, minSize: minSize, split: split, className: className }, node));
-    });
-    return (React.createElement("div", { className: classes, style: style },
-        React.createElement("div", { className: dragLayerClasses, style: dragLayerStyle }),
-        entries));
-});
-exports.SplitPane.displayName = 'SplitPane';
-
-}(SplitPane$1));
-
-(function (exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SplitPane = void 0;
-var SplitPane_1 = SplitPane$1;
-Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
-
-}(dist));
-
-var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
 
 const Table = /*#__PURE__*/x(({
   bsPrefix,

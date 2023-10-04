@@ -1,5 +1,6 @@
 import { SIZE, tile1x1, tile2x2 } from './openforge.nb';
 
+/*
 const treeTrunk = LoadStl(
   'https://jsxcad.js.org/stl/openforge/Terrain4Print/giant-1-12cm.stl'
 ).align('xyz>');
@@ -41,3 +42,4 @@ const treeTrunkTile = tile2x2
     treeTrunk.scaleToFit(SIZE - 0.2, SIZE - 0.2, 50)
   )
   .stl('tree_trunk_tile');
+*/
