@@ -2812,17 +2812,6 @@ const FormControl = /*#__PURE__*/x(({
     controlId
   } = F$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
-  let classes;
-  if (plaintext) {
-    classes = {
-      [`${bsPrefix}-plaintext`]: true
-    };
-  } else {
-    classes = {
-      [bsPrefix]: true,
-      [`${bsPrefix}-${size}`]: size
-    };
-  }
   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
   return /*#__PURE__*/e(Component, {
     ...props,
@@ -2831,7 +2820,7 @@ const FormControl = /*#__PURE__*/x(({
     ref: ref,
     readOnly: readOnly,
     id: id || controlId,
-    className: classNames(className, classes, isValid && `is-valid`, isInvalid && `is-invalid`, type === 'color' && `${bsPrefix}-color`)
+    className: classNames(className, plaintext ? `${bsPrefix}-plaintext` : bsPrefix, size && `${bsPrefix}-${size}`, type === 'color' && `${bsPrefix}-color`, isValid && 'is-valid', isInvalid && 'is-invalid')
   });
 });
 FormControl.displayName = 'FormControl';
@@ -2839,42 +2828,21 @@ var FormControl$1 = Object.assign(FormControl, {
   Feedback: Feedback$1
 });
 
-var rHyphen = /-(.)/g;
-function camelize(string) {
-  return string.replace(rHyphen, function (_, chr) {
-    return chr.toUpperCase();
-  });
-}
-
-const pascalCase = str => str[0].toUpperCase() + camelize(str).slice(1);
-// TODO: emstricten & fix the typing here! `createWithBsPrefix<TElementType>...`
-function createWithBsPrefix(prefix, {
-  displayName = pascalCase(prefix),
-  Component,
-  defaultProps
-} = {}) {
-  const BsComponent = /*#__PURE__*/x(({
-    className,
-    bsPrefix,
-    as: Tag = Component || 'div',
+const FormFloating = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
     ...props
-  }, ref) => {
-    const componentProps = {
-      ...defaultProps,
-      ...props
-    };
-    const resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
-    return /*#__PURE__*/e(Tag, {
-      ref: ref,
-      className: classNames(className, resolvedPrefix),
-      ...componentProps
-    });
   });
-  BsComponent.displayName = displayName;
-  return BsComponent;
-}
-
-var FormFloating = createWithBsPrefix('form-floating');
+});
+FormFloating.displayName = 'FormFloating';
+var FormFloating$1 = FormFloating;
 
 const FormGroup = /*#__PURE__*/x(({
   controlId,
@@ -3127,7 +3095,7 @@ Form.propTypes = propTypes;
 var Form$1 = Object.assign(Form, {
   Group: FormGroup$1,
   Control: FormControl$1,
-  Floating: FormFloating,
+  Floating: FormFloating$1,
   Check: FormCheck$1,
   Switch: Switch$1,
   Label: FormLabel$1,
@@ -3141,16 +3109,29 @@ const context$1 = /*#__PURE__*/D$1(null);
 context$1.displayName = 'InputGroupContext';
 var InputGroupContext = context$1;
 
-const InputGroupText = createWithBsPrefix('input-group-text', {
-  Component: 'span'
+const InputGroupText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'span',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
 });
-const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText, {
+InputGroupText.displayName = 'InputGroupText';
+var InputGroupText$1 = InputGroupText;
+
+const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText$1, {
   children: /*#__PURE__*/e(FormCheckInput$1, {
     type: "checkbox",
     ...props
   })
 });
-const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText, {
+const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText$1, {
   children: /*#__PURE__*/e(FormCheckInput$1, {
     type: "radio",
     ...props
@@ -3181,7 +3162,7 @@ const InputGroup = /*#__PURE__*/x(({
 });
 InputGroup.displayName = 'InputGroup';
 var InputGroup$1 = Object.assign(InputGroup, {
-  Text: InputGroupText,
+  Text: InputGroupText$1,
   Radio: InputGroupRadio,
   Checkbox: InputGroupCheckbox
 });
@@ -3532,30 +3513,37 @@ class DownloadNote extends ReactDOM$3.PureComponent {
   }
 }
 
-var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
-  ...p,
-  ref: ref,
-  className: classNames(p.className, className)
-})));
-
-const CardImg = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  bsPrefix,
+const CardBody = /*#__PURE__*/x(({
   className,
-  variant,
-  as: Component = 'img',
+  bsPrefix,
+  as: Component = 'div',
   ...props
 }, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
   return /*#__PURE__*/e(Component, {
     ref: ref,
-    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    className: classNames(className, bsPrefix),
     ...props
   });
 });
-CardImg.displayName = 'CardImg';
-var CardImg$1 = CardImg;
+CardBody.displayName = 'CardBody';
+var CardBody$1 = CardBody;
+
+const CardFooter = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardFooter.displayName = 'CardFooter';
+var CardFooter$1 = CardFooter;
 
 const context = /*#__PURE__*/D$1(null);
 context.displayName = 'CardHeaderContext';
@@ -3584,23 +3572,113 @@ const CardHeader = /*#__PURE__*/x(({
 CardHeader.displayName = 'CardHeader';
 var CardHeader$1 = CardHeader;
 
-const DivStyledAsH5 = divWithClassName('h5');
+const CardImg = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  variant,
+  as: Component = 'img',
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
+    ...props
+  });
+});
+CardImg.displayName = 'CardImg';
+var CardImg$1 = CardImg;
+
+const CardImgOverlay = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardImgOverlay.displayName = 'CardImgOverlay';
+var CardImgOverlay$1 = CardImgOverlay;
+
+const CardLink = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'a',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+CardLink.displayName = 'CardLink';
+var CardLink$1 = CardLink;
+
+var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+  ...p,
+  ref: ref,
+  className: classNames(p.className, className)
+})));
+
 const DivStyledAsH6 = divWithClassName('h6');
-const CardBody = createWithBsPrefix('card-body');
-const CardTitle = createWithBsPrefix('card-title', {
-  Component: DivStyledAsH5
+const CardSubtitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH6,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
 });
-const CardSubtitle = createWithBsPrefix('card-subtitle', {
-  Component: DivStyledAsH6
+CardSubtitle.displayName = 'CardSubtitle';
+var CardSubtitle$1 = CardSubtitle;
+
+const CardText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'p',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
 });
-const CardLink = createWithBsPrefix('card-link', {
-  Component: 'a'
+CardText.displayName = 'CardText';
+var CardText$1 = CardText;
+
+const DivStyledAsH5 = divWithClassName('h5');
+const CardTitle = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = DivStyledAsH5,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
 });
-const CardText = createWithBsPrefix('card-text', {
-  Component: 'p'
-});
-const CardFooter = createWithBsPrefix('card-footer');
-const CardImgOverlay = createWithBsPrefix('card-img-overlay');
+CardTitle.displayName = 'CardTitle';
+var CardTitle$1 = CardTitle;
+
 const Card = /*#__PURE__*/x(({
   bsPrefix,
   className,
@@ -3618,7 +3696,7 @@ const Card = /*#__PURE__*/x(({
     ref: ref,
     ...props,
     className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
-    children: body ? /*#__PURE__*/e(CardBody, {
+    children: body ? /*#__PURE__*/e(CardBody$1, {
       children: children
     }) : children
   });
@@ -3626,14 +3704,14 @@ const Card = /*#__PURE__*/x(({
 Card.displayName = 'Card';
 var Card$1 = Object.assign(Card, {
   Img: CardImg$1,
-  Title: CardTitle,
-  Subtitle: CardSubtitle,
-  Body: CardBody,
-  Link: CardLink,
-  Text: CardText,
+  Title: CardTitle$1,
+  Subtitle: CardSubtitle$1,
+  Body: CardBody$1,
+  Link: CardLink$1,
+  Text: CardText$1,
   Header: CardHeader$1,
-  Footer: CardFooter,
-  ImgOverlay: CardImgOverlay
+  Footer: CardFooter$1,
+  ImgOverlay: CardImgOverlay$1
 });
 
 class EditNote extends ReactDOM$3.Component {
@@ -14891,7 +14969,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.26.0";
+exports.version = "1.28.0";
 
 });
 
@@ -16836,23 +16914,13 @@ var HoverTooltip = /** @class */ (function (_super) {
         element.appendChild(domNode);
         element.style.display = "block";
         var position = renderer.textToScreenCoordinates(range.start.row, range.start.column);
-        var cursorPos = editor.getCursorPosition();
         var labelHeight = element.clientHeight;
         var rect = renderer.scroller.getBoundingClientRect();
-        var isTopdown = true;
-        if (this.row > cursorPos.row) {
-            isTopdown = true;
+        var isAbove = true;
+        if (position.pageY - labelHeight < 0) {
+            isAbove = false;
         }
-        else if (this.row < cursorPos.row) {
-            isTopdown = false;
-        }
-        if (position.pageY - labelHeight + renderer.lineHeight < rect.top) {
-            isTopdown = true;
-        }
-        else if (position.pageY + labelHeight > rect.bottom) {
-            isTopdown = false;
-        }
-        if (!isTopdown) {
+        if (isAbove) {
             position.pageY -= labelHeight;
         }
         else {
@@ -44777,7 +44845,7 @@ var AceInline = /** @class */ (function () {
             return false;
         }
         var displayText = completion.snippet ? snippetManager.getDisplayTextForSnippet(editor, completion.snippet) : completion.value;
-        if (!displayText || !displayText.startsWith(prefix)) {
+        if (completion.hideInlinePreview || !displayText || !displayText.startsWith(prefix)) {
             return false;
         }
         this.editor = editor;
@@ -44900,6 +44968,7 @@ var Autocomplete = /** @class */ (function () {
         this.keyboardHandler.bindKeys(this.commands);
         this.parentNode = null;
         this.setSelectOnHover = false;
+        this.stickySelectionDelay = 500;
         this.blurListener = this.blurListener.bind(this);
         this.changeListener = this.changeListener.bind(this);
         this.mousedownListener = this.mousedownListener.bind(this);
@@ -44909,6 +44978,9 @@ var Autocomplete = /** @class */ (function () {
             this.updateCompletions(true);
         }.bind(this));
         this.tooltipTimer = lang.delayedCall(this.updateDocTooltip.bind(this), 50);
+        this.stickySelectionTimer = lang.delayedCall(function () {
+            this.stickySelection = true;
+        }.bind(this), this.stickySelectionDelay);
     }
     Autocomplete.prototype.$init = function () {
         this.popup = new AcePopup(this.parentNode || document.body || document.documentElement);
@@ -44917,7 +44989,7 @@ var Autocomplete = /** @class */ (function () {
             e.stop();
         }.bind(this));
         this.popup.focus = this.editor.focus.bind(this.editor);
-        this.popup.on("show", this.$onPopupChange.bind(this));
+        this.popup.on("show", this.$onPopupShow.bind(this));
         this.popup.on("hide", this.$onHidePopup.bind(this));
         this.popup.on("select", this.$onPopupChange.bind(this));
         this.popup.on("changeHoverMarker", this.tooltipTimer.bind(null, null));
@@ -44937,6 +45009,8 @@ var Autocomplete = /** @class */ (function () {
             this.inlineRenderer.hide();
         }
         this.hideDocTooltip();
+        this.stickySelectionTimer.cancel();
+        this.stickySelection = false;
     };
     Autocomplete.prototype.$onPopupChange = function (hide) {
         if (this.inlineRenderer && this.inlineEnabled) {
@@ -44948,6 +45022,12 @@ var Autocomplete = /** @class */ (function () {
             this.$updatePopupPosition();
         }
         this.tooltipTimer.call(null, null);
+    };
+    Autocomplete.prototype.$onPopupShow = function (hide) {
+        this.$onPopupChange(hide);
+        this.stickySelection = false;
+        if (this.stickySelectionDelay >= 0)
+            this.stickySelectionTimer.schedule(this.stickySelectionDelay);
     };
     Autocomplete.prototype.observeLayoutChanges = function () {
         if (this.$elements || !this.editor)
@@ -45012,6 +45092,7 @@ var Autocomplete = /** @class */ (function () {
             this.$initInline();
         this.popup.autoSelect = this.autoSelect;
         this.popup.setSelectOnHover(this.setSelectOnHover);
+        var previousSelectedItem = this.popup.data[this.popup.getRow()];
         this.popup.setData(this.completions.filtered, this.completions.filterText);
         if (this.editor.textInput.setAriaOptions) {
             this.editor.textInput.setAriaOptions({
@@ -45020,7 +45101,11 @@ var Autocomplete = /** @class */ (function () {
             });
         }
         editor.keyBinding.addKeyboardHandler(this.keyboardHandler);
-        this.popup.setRow(this.autoSelect ? 0 : -1);
+        var newRow = this.popup.data.indexOf(previousSelectedItem);
+        if (newRow && this.stickySelection)
+            this.popup.setRow(this.autoSelect ? newRow : -1);
+        else
+            this.popup.setRow(this.autoSelect ? 0 : -1);
         if (!keepPopupPosition) {
             this.popup.setTheme(editor.getTheme());
             this.popup.setFontSize(editor.getFontSize());
@@ -45416,6 +45501,10 @@ var CompletionProvider = /** @class */ (function () {
         var total = editor.completers.length;
         editor.completers.forEach(function (completer, i) {
             completer.getCompletions(editor, session, pos, prefix, function (err, results) {
+                if (completer.hideInlinePreview)
+                    results = results.map(function (result) {
+                        return Object.assign(result, { hideInlinePreview: completer.hideInlinePreview });
+                    });
                 if (!err && results)
                     matches = matches.concat(results);
                 callback(null, {
