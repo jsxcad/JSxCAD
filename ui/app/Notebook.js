@@ -1,4 +1,4 @@
-/* global mermaid */
+/* global CSS, mermaid */
 
 import './Notebook.css';
 
@@ -6,7 +6,6 @@ import * as PropTypes from 'prop-types';
 
 import { read, readOrWatch, write } from '@jsxcad/sys';
 
-import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
@@ -301,17 +300,28 @@ export class Notebook extends React.PureComponent {
         id,
         blur = false,
         children = [],
-        downloads = [],
+        // downloads = [],
         errors = [],
-        icons = [],
+        // icons = [],
       } of ids) {
-        contents.push(<a onClick={() => document.querySelector(`#note-id-${id}`).scrollIntoView({ behavior: 'smooth' })}>{id}</a>);
-        contents.push(<br/>)
+        contents.push(
+          <a
+            onClick={() =>
+              document
+                .querySelector(`#note-id-${CSS.escape(id)}`)
+                .scrollIntoView({ behavior: 'smooth' })
+            }
+          >
+            {id}
+          </a>
+        );
+        contents.push(<br />);
         sections.push(
           <Card id={`note-id-${id}`} key={id}>
             <Card.Body>
               {blur ? <SpinnerCircularSplit color="#36d7b7" size="32" /> : ''}
               <Card.Title>{id}</Card.Title>
+              {errors && <Card.Text>{errors}</Card.Text>}
               {children}
             </Card.Body>
           </Card>
@@ -320,9 +330,7 @@ export class Notebook extends React.PureComponent {
 
       return (
         <SplitPane>
-          <div style={{ overflow: 'auto' }}>
-            {contents}
-          </div>
+          <div style={{ overflow: 'auto' }}>{contents}</div>
           <div
             id={notebookPath}
             classList="notebook notes"
