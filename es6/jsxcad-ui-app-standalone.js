@@ -1381,6 +1381,83 @@ var Card$1 = Object.assign(Card, {
   ImgOverlay: CardImgOverlay$1
 });
 
+function useCol({
+  as,
+  bsPrefix,
+  className,
+  ...props
+}) {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'col');
+  const breakpoints = useBootstrapBreakpoints();
+  const minBreakpoint = useBootstrapMinBreakpoint();
+  const spans = [];
+  const classes = [];
+  breakpoints.forEach(brkPoint => {
+    const propValue = props[brkPoint];
+    delete props[brkPoint];
+    let span;
+    let offset;
+    let order;
+    if (typeof propValue === 'object' && propValue != null) {
+      ({
+        span,
+        offset,
+        order
+      } = propValue);
+    } else {
+      span = propValue;
+    }
+    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
+    if (span) spans.push(span === true ? `${bsPrefix}${infix}` : `${bsPrefix}${infix}-${span}`);
+    if (order != null) classes.push(`order${infix}-${order}`);
+    if (offset != null) classes.push(`offset${infix}-${offset}`);
+  });
+  return [{
+    ...props,
+    className: classNames(className, ...spans, ...classes)
+  }, {
+    as,
+    bsPrefix,
+    spans
+  }];
+}
+const Col = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+(props, ref) => {
+  const [{
+    className,
+    ...colProps
+  }, {
+    as: Component = 'div',
+    bsPrefix,
+    spans
+  }] = useCol(props);
+  return /*#__PURE__*/e(Component, {
+    ...colProps,
+    ref: ref,
+    className: classNames(className, !spans.length && bsPrefix)
+  });
+});
+Col.displayName = 'Col';
+
+const Container = /*#__PURE__*/x(({
+  bsPrefix,
+  fluid = false,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  className,
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'container');
+  const suffix = typeof fluid === 'string' ? `-${fluid}` : '-fluid';
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, fluid ? `${prefix}${suffix}` : prefix)
+  });
+});
+Container.displayName = 'Container';
+
 const propTypes$1 = {
   /**
    * Specify whether the feedback is for valid or invalid fields
@@ -1655,66 +1732,6 @@ const FormGroup = /*#__PURE__*/x(({
 FormGroup.displayName = 'FormGroup';
 var FormGroup$1 = FormGroup;
 
-function useCol({
-  as,
-  bsPrefix,
-  className,
-  ...props
-}) {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'col');
-  const breakpoints = useBootstrapBreakpoints();
-  const minBreakpoint = useBootstrapMinBreakpoint();
-  const spans = [];
-  const classes = [];
-  breakpoints.forEach(brkPoint => {
-    const propValue = props[brkPoint];
-    delete props[brkPoint];
-    let span;
-    let offset;
-    let order;
-    if (typeof propValue === 'object' && propValue != null) {
-      ({
-        span,
-        offset,
-        order
-      } = propValue);
-    } else {
-      span = propValue;
-    }
-    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
-    if (span) spans.push(span === true ? `${bsPrefix}${infix}` : `${bsPrefix}${infix}-${span}`);
-    if (order != null) classes.push(`order${infix}-${order}`);
-    if (offset != null) classes.push(`offset${infix}-${offset}`);
-  });
-  return [{
-    ...props,
-    className: classNames(className, ...spans, ...classes)
-  }, {
-    as,
-    bsPrefix,
-    spans
-  }];
-}
-const Col = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-(props, ref) => {
-  const [{
-    className,
-    ...colProps
-  }, {
-    as: Component = 'div',
-    bsPrefix,
-    spans
-  }] = useCol(props);
-  return /*#__PURE__*/e(Component, {
-    ...colProps,
-    ref: ref,
-    className: classNames(className, !spans.length && bsPrefix)
-  });
-});
-Col.displayName = 'Col';
-var Col$1 = Col;
-
 const FormLabel = /*#__PURE__*/x(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'label',
@@ -1734,7 +1751,7 @@ const FormLabel = /*#__PURE__*/x(({
   const classes = classNames(className, bsPrefix, visuallyHidden && 'visually-hidden', column && columnClass);
   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
   htmlFor = htmlFor || controlId;
-  if (column) return /*#__PURE__*/e(Col$1, {
+  if (column) return /*#__PURE__*/e(Col, {
     ref: ref,
     as: "label",
     className: classes,
@@ -2389,39 +2406,6 @@ class ErrorNote extends ReactDOM$1.Component {
     return v$1("div", {
       class: "note error"
     }, v$1("p", null, text));
-  }
-}
-
-class IconNote extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object
-    };
-  }
-  render() {
-    const {
-      note
-    } = this.props;
-    const {
-      blur = false,
-      view
-    } = note;
-    const {
-      viewId
-    } = view;
-    const iconIdClass = viewId ? `iconId_${viewId}` : '';
-    if (!note.url) {
-      return v$1("span", null);
-    }
-    return v$1("img", {
-      class: `note icon ${iconIdClass}`,
-      style: {
-        height: '32px',
-        width: '32px',
-        opacity: blur ? 0.5 : 1
-      },
-      src: note.url
-    });
   }
 }
 
@@ -5356,6 +5340,40 @@ class MdNote extends ReactDOM$1.PureComponent {
   }
 }
 
+const Row = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
+  const breakpoints = useBootstrapBreakpoints();
+  const minBreakpoint = useBootstrapMinBreakpoint();
+  const sizePrefix = `${decoratedBsPrefix}-cols`;
+  const classes = [];
+  breakpoints.forEach(brkPoint => {
+    const propValue = props[brkPoint];
+    delete props[brkPoint];
+    let cols;
+    if (propValue != null && typeof propValue === 'object') {
+      ({
+        cols
+      } = propValue);
+    } else {
+      cols = propValue;
+    }
+    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
+    if (cols != null) classes.push(`${sizePrefix}${infix}-${cols}`);
+  });
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, decoratedBsPrefix, ...classes)
+  });
+});
+Row.displayName = 'Row';
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -5465,9 +5483,433 @@ var Component = function (_a) {
 Component.defaultProps = secondaryColorDefaultProps;
 var SpinnerCircularSplit = withSharedProps(Component);
 
+// import { SpinnerCircularSplit } from 'spinners-react';
+
+class ViewNote extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object,
+      notebookPath: propTypes$2.exports.string,
+      onClickView: propTypes$2.exports.func,
+      selected: propTypes$2.exports.boolean,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    const {
+      notebookPath,
+      note,
+      onClickView,
+      workspace
+    } = this.props;
+    const {
+      view,
+      sourceLocation
+    } = note;
+    const {
+      height,
+      width,
+      viewId
+    } = view;
+    const onClick = event => {
+      if (onClickView) {
+        onClickView({
+          event,
+          notebookPath,
+          note,
+          path: note.path,
+          view: note.view,
+          workspace,
+          sourceLocation
+        });
+      }
+    };
+    const viewIdClass = viewId ? `viewId_${viewId}` : '';
+    if (!note.url) {
+      return v$1("div", null);
+    }
+    return v$1("img", {
+      class: viewIdClass,
+      style: {
+        width,
+        height
+      },
+      variant: "top",
+      src: note.url,
+      onClick: onClick
+    });
+  }
+}
+
+const clearNotebookState = async (application, {
+  path,
+  workspace,
+  isToBeKept
+}) => {
+  application.setState(state => {
+    const {
+      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
+    } = state;
+    const newNotebookNotes = {};
+    for (const key of Object.keys(oldNotebookNotes)) {
+      const note = oldNotebookNotes[key];
+      if (isToBeKept(note)) {
+        newNotebookNotes[key] = note;
+      }
+    }
+    return {
+      [`NotebookNotes/${path}`]: newNotebookNotes
+    };
+  });
+};
+const updateNotebookState = async (application, {
+  notes,
+  sourceLocation,
+  workspace
+}) => {
+  const updateNote = note => {
+    const {
+      sourceLocation
+    } = note;
+    if (!sourceLocation) {
+      return;
+    }
+    const {
+      path
+    } = sourceLocation;
+    if (!note.hash) {
+      return;
+    }
+    const op = state => {
+      const {
+        [`NotebookNotes/${path}`]: oldNotebookNotes = {}
+      } = state;
+      const oldNote = oldNotebookNotes[note.hash] || {};
+      const newNotebookNotes = {
+        ...oldNotebookNotes,
+        [note.hash]: {
+          ...oldNote,
+          blur: false,
+          ...note
+        }
+      };
+      return {
+        [`NotebookNotes/${path}`]: newNotebookNotes
+      };
+    };
+    application.setState(op);
+  };
+  for (const note of notes) {
+    updateNote(note);
+    if (note.view) {
+      if (!note.url) {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
+            workspace
+          });
+          if (!url) {
+            const {
+              path,
+              view,
+              sourceLocation
+            } = note;
+            const {
+              width,
+              height
+            } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                console.log(`QQ/ask staticView nth=${nth}`);
+                url = await application.ask({
+                  op: 'app/staticView',
+                  path,
+                  workspace,
+                  view,
+                  offscreenCanvas
+                }, {
+                  path
+                }, [offscreenCanvas]);
+                // Cache the thumbnail for next time.
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace
+                });
+                updateNote({
+                  hash: note.hash,
+                  url,
+                  sourceLocation
+                });
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
+            }
+          }
+          if (url) {
+            note.url = url;
+            updateNote({
+              hash: note.hash,
+              url,
+              sourceLocation
+            });
+          }
+        };
+        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
+        setTimeout(loadThumbnail, 200);
+      }
+    }
+  }
+};
+class Notebook extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      notes: propTypes$2.exports.object,
+      onChange: propTypes$2.exports.func,
+      onClickView: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func,
+      selectedLine: propTypes$2.exports.number,
+      notebookPath: propTypes$2.exports.string,
+      state: propTypes$2.exports.string,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    try {
+      const {
+        notebookPath,
+        notes,
+        onChange,
+        onClickView,
+        onKeyDown,
+        // selectedLine,
+        state = 'idle',
+        workspace
+      } = this.props;
+      const ordered = Object.values(notes);
+      const getLine = note => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.line;
+        } else {
+          return 0;
+        }
+      };
+      const getNth = note => {
+        if (note.sourceLocation) {
+          return note.sourceLocation.nth;
+        } else {
+          return 0;
+        }
+      };
+      const order = (a, b) => {
+        const lineA = getLine(a);
+        const lineB = getLine(b);
+        if (lineA !== lineB) {
+          return lineA - lineB;
+        }
+        const nthA = getNth(a);
+        const nthB = getNth(b);
+        return nthA - nthB;
+      };
+      ordered.sort(order);
+      const entries = new Map();
+      for (const note of ordered) {
+        const id = note.sourceLocation.id;
+        if (!entries.has(id)) {
+          entries.set(id, {
+            blur: false,
+            downloads: [],
+            errors: [],
+            views: [],
+            mds: [],
+            controls: [],
+            editors: []
+          });
+        }
+        const entry = entries.get(id);
+        // FIX: This seems wasteful.
+        const selected = false;
+        if (note.view) {
+          entry.views.push(v$1(ViewNote, {
+            key: note.hash,
+            note: note,
+            onClickView: onClickView,
+            selected: selected
+          }));
+        } else if (note.error) {
+          entry.errors.push(v$1(Card$1.Body, {
+            variant: "danger"
+          }, v$1(Card$1.Text, null, v$1(ErrorNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          }))));
+        } else if (note.md) {
+          entry.mds.push(v$1(MdNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          }));
+        } else if (note.download) {
+          entry.downloads.push(v$1(DownloadNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          }));
+        } else if (note.control) {
+          entry.controls.push(v$1(ControlNote, {
+            key: note.hash,
+            note: note,
+            selected: selected,
+            workspace: workspace
+          }));
+        } else if (note.sourceText !== undefined) {
+          entry.editors.push(v$1(EditNote, {
+            key: note.hash,
+            note: note,
+            onChange: sourceText => onChange(note, {
+              sourceText
+            }),
+            onKeyDown: onKeyDown,
+            selected: selected,
+            workspace: workspace
+          }));
+        }
+      }
+      y(() => mermaid.init(undefined, '.mermaid'));
+      const sections = [];
+      const compare = (a, b) => {
+        if (a < b) {
+          return -1;
+        } else if (a > b) {
+          return 1;
+        } else {
+          return 0;
+        }
+      };
+      const ids = [...entries.keys()];
+      ids.sort((a, b) => compare(a.id, b.id));
+      for (const id of ids) {
+        const {
+          downloads = [],
+          errors = [],
+          views = [],
+          mds = [],
+          controls = [],
+          editors = []
+        } = entries.get(id);
+        sections.push(v$1(Card$1, {
+          key: id
+        }, v$1(Card$1.Header, {
+          id: `note-id-${id}`
+        }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
+          key: nth
+        }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, editors)));
+      }
+      return v$1("div", {
+        id: notebookPath,
+        classList: "notebook notes",
+        style: {
+          overflow: 'auto'
+        }
+      }, false && state === 'running' && v$1(SpinnerCircularSplit, {
+        color: "#36d7b7",
+        size: 64,
+        style: {
+          position: 'fixed',
+          right: 32,
+          top: 64,
+          zIndex: 1000
+        }
+      }), sections);
+    } catch (error) {
+      console.log(error.stack);
+      throw error;
+    }
+  }
+}
+
+class DynamicView extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      onIndicatePoint: propTypes$2.exports.func,
+      path: propTypes$2.exports.string,
+      view: propTypes$2.exports.object,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  async buildElement(container) {
+    const {
+      onIndicatePoint,
+      path,
+      view,
+      workspace
+    } = this.props;
+    if (!path) {
+      return;
+    }
+    const geometry = await readOrWatch(path, {
+      workspace
+    });
+    const {
+      anchorControls,
+      updateGeometry
+    } = await orbitDisplay({
+      path,
+      geometry,
+      view
+    }, container);
+    anchorControls.addEventListener('indicatePoint', ({
+      point
+    }) => {
+      if (onIndicatePoint) onIndicatePoint(point);
+    });
+    this.watcher = async () => {
+      updateGeometry(await read(path, {
+        workspace
+      }));
+    };
+    watchFile(path, workspace, this.watcher);
+  }
+  componentWillUnmount() {
+    const {
+      workspace
+    } = this.props;
+    if (this.watcher) {
+      unwatchFile(this.path, workspace, this.watcher);
+    }
+    while (this.container.firstChild !== this.container.lastChild) {
+      this.container.removeChild(this.container.firstChild);
+    }
+  }
+  shouldComponentUpdate(nextProps) {
+    if (this.props.path !== nextProps.path) {
+      return true;
+    }
+    return false;
+  }
+  render() {
+    return v$1("div", {
+      classList: "note orbitView",
+      ref: async container => {
+        if (container) {
+          await this.buildElement(container);
+        }
+      }
+    });
+  }
+}
+
 var dist = {};
 
-var SplitPane$2 = {};
+var SplitPane$1 = {};
 
 var require$$0 = /*@__PURE__*/getAugmentedNamespace(compat_module);
 
@@ -5756,481 +6198,17 @@ exports.SplitPane = React.memo((props) => {
 });
 exports.SplitPane.displayName = 'SplitPane';
 
-}(SplitPane$2));
+}(SplitPane$1));
 
 (function (exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SplitPane = void 0;
-var SplitPane_1 = SplitPane$2;
+var SplitPane_1 = SplitPane$1;
 Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function () { return SplitPane_1.SplitPane; } });
 
 }(dist));
 
 var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
-
-class ViewNote extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object,
-      notebookPath: propTypes$2.exports.string,
-      onClickView: propTypes$2.exports.func,
-      selected: propTypes$2.exports.boolean,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  showOrbitView() {}
-  render() {
-    const {
-      notebookPath,
-      note,
-      onClickView,
-      selected,
-      workspace
-    } = this.props;
-    const {
-      blur = false,
-      view,
-      sourceLocation
-    } = note;
-    const {
-      height,
-      width,
-      viewId
-    } = view;
-    const onClick = event => {
-      if (onClickView) {
-        onClickView({
-          event,
-          notebookPath,
-          note,
-          path: note.path,
-          view: note.view,
-          workspace,
-          sourceLocation
-        });
-      }
-    };
-    const viewIdClass = viewId ? `viewId_${viewId}` : '';
-    if (!note.url) {
-      return v$1(SpinnerCircularSplit, {
-        color: "#36d7b7",
-        size: Math.min(width, height) * 0.8
-      });
-    }
-    const ref = selected && /*#__PURE__*/p$1();
-    if (selected) {
-      y(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
-    return v$1("img", {
-      ref: ref,
-      class: `note view ${viewIdClass}`,
-      style: {
-        display: 'block',
-        height: `${height}px`,
-        width: `${width}px`,
-        border,
-        opacity: blur ? 0.5 : 1
-      },
-      src: note.url,
-      onClick: onClick
-    });
-  }
-}
-
-const {
-  SplitPane: SplitPane$1
-} = SplitPaneModule;
-const clearNotebookState = async (application, {
-  path,
-  workspace,
-  isToBeKept
-}) => {
-  application.setState(state => {
-    const {
-      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-    } = state;
-    const newNotebookNotes = {};
-    for (const key of Object.keys(oldNotebookNotes)) {
-      const note = oldNotebookNotes[key];
-      if (isToBeKept(note)) {
-        newNotebookNotes[key] = note;
-      }
-    }
-    return {
-      [`NotebookNotes/${path}`]: newNotebookNotes
-    };
-  });
-};
-const updateNotebookState = async (application, {
-  notes,
-  sourceLocation,
-  workspace
-}) => {
-  const updateNote = note => {
-    const {
-      sourceLocation
-    } = note;
-    if (!sourceLocation) {
-      return;
-    }
-    const {
-      path
-    } = sourceLocation;
-    if (!note.hash) {
-      return;
-    }
-    const op = state => {
-      const {
-        [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-      } = state;
-      const oldNote = oldNotebookNotes[note.hash] || {};
-      const newNotebookNotes = {
-        ...oldNotebookNotes,
-        [note.hash]: {
-          ...oldNote,
-          blur: false,
-          ...note
-        }
-      };
-      return {
-        [`NotebookNotes/${path}`]: newNotebookNotes
-      };
-    };
-    application.setState(op);
-  };
-  for (const note of notes) {
-    updateNote(note);
-    if (note.view) {
-      if (!note.url) {
-        const loadThumbnail = async () => {
-          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
-            workspace
-          });
-          if (!url) {
-            const {
-              path,
-              view,
-              sourceLocation
-            } = note;
-            const {
-              width,
-              height
-            } = view;
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const offscreenCanvas = canvas.transferControlToOffscreen();
-            for (let nth = 0; nth < 3; nth++) {
-              try {
-                url = await application.ask({
-                  op: 'app/staticView',
-                  path,
-                  workspace,
-                  view,
-                  offscreenCanvas
-                }, {
-                  path
-                }, [offscreenCanvas]);
-                // Cache the thumbnail for next time.
-                await write(`thumbnail/${note.hash}`, url, {
-                  workspace
-                });
-                updateNote({
-                  hash: note.hash,
-                  url,
-                  sourceLocation
-                });
-              } catch (error) {
-                if (error.message === 'Terminated') {
-                  // Try again.
-                  continue;
-                }
-              }
-            }
-          }
-          if (url) {
-            updateNote({
-              hash: note.hash,
-              url,
-              sourceLocation
-            });
-          }
-        };
-        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
-        setTimeout(loadThumbnail, 200);
-      }
-    }
-  }
-};
-class Notebook extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      notes: propTypes$2.exports.object,
-      onChange: propTypes$2.exports.func,
-      onClickView: propTypes$2.exports.func,
-      onKeyDown: propTypes$2.exports.func,
-      selectedLine: propTypes$2.exports.number,
-      notebookPath: propTypes$2.exports.string,
-      state: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  render() {
-    try {
-      const {
-        notebookPath,
-        notes,
-        onChange,
-        onClickView,
-        onKeyDown,
-        // selectedLine,
-        state = 'idle',
-        workspace
-      } = this.props;
-      const contents = [];
-      const ordered = Object.values(notes);
-      const getLine = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      let id;
-      const ids = [];
-      let children;
-      let downloads;
-      let errors;
-      let icons;
-      let entry;
-      for (const note of ordered) {
-        if (note.sourceLocation.id !== id) {
-          id = note.sourceLocation.id;
-          children = [];
-          downloads = [];
-          errors = [];
-          icons = [];
-          entry = {
-            id,
-            blue: false,
-            children,
-            downloads,
-            errors,
-            icons
-          };
-          ids.push(entry);
-        }
-        // FIX: This seems wasteful.
-        const selected = false;
-        let child;
-        let download;
-        let error;
-        let icon;
-        if (note.view) {
-          child = v$1(ViewNote, {
-            key: note.hash,
-            note: note,
-            onClickView: onClickView,
-            selected: selected
-          });
-          icon = v$1(IconNote, {
-            key: note.hash,
-            note: note
-          });
-          if (note.blur) {
-            entry.blur = true;
-          }
-        } else if (note.error) {
-          child = v$1(ErrorNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-          error = child;
-        } else if (note.md) {
-          child = v$1(MdNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-        } else if (note.download) {
-          child = v$1(DownloadNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-          download = child;
-        } else if (note.control) {
-          child = v$1(ControlNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          });
-        } else if (note.sourceText !== undefined) {
-          child = v$1(EditNote, {
-            key: note.hash,
-            note: note,
-            onChange: sourceText => onChange(note, {
-              sourceText
-            }),
-            onKeyDown: onKeyDown,
-            selected: selected,
-            workspace: workspace
-          });
-        }
-        if (children && child) {
-          children.push(child);
-        }
-        if (downloads && download) {
-          downloads.push(download);
-        }
-        if (icons && icon) {
-          icons.push(icon);
-        }
-        if (errors && error) {
-          errors.push(error);
-        }
-      }
-      y(() => mermaid.init(undefined, '.mermaid'));
-      const sections = [];
-      const compare = (a, b) => {
-        if (a < b) {
-          return -1;
-        } else if (a > b) {
-          return 1;
-        } else {
-          return 0;
-        }
-      };
-      ids.sort((a, b) => compare(a.id, b.id));
-      for (const {
-        id,
-        blur = false,
-        children = [],
-        // downloads = [],
-        errors = []
-        // icons = [],
-      } of ids) {
-        contents.push(v$1("a", {
-          onClick: () => document.querySelector(`#note-id-${CSS.escape(id)}`).scrollIntoView({
-            behavior: 'smooth'
-          })
-        }, id));
-        contents.push(v$1("br", null));
-        sections.push(v$1(Card$1, {
-          id: `note-id-${id}`,
-          key: id
-        }, v$1(Card$1.Body, null, blur ? v$1(SpinnerCircularSplit, {
-          color: "#36d7b7",
-          size: "32"
-        }) : '', v$1(Card$1.Title, null, id), errors && v$1(Card$1.Text, null, errors), children)));
-      }
-      return v$1(SplitPane$1, null, v$1("div", {
-        style: {
-          overflow: 'auto'
-        }
-      }, contents), v$1("div", {
-        id: notebookPath,
-        classList: "notebook notes",
-        style: {
-          overflow: 'auto'
-        }
-      }, state === 'running' && v$1(SpinnerCircularSplit, {
-        color: "#36d7b7",
-        size: 64,
-        style: {
-          position: 'fixed',
-          right: 32,
-          top: 64,
-          zIndex: 1000
-        }
-      }), sections));
-    } catch (error) {
-      console.log(error.stack);
-      throw error;
-    }
-  }
-}
-
-class DynamicView extends ReactDOM$1.PureComponent {
-  static get propTypes() {
-    return {
-      path: propTypes$2.exports.string,
-      view: propTypes$2.exports.object,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  async buildElement(container) {
-    const {
-      path,
-      view,
-      workspace
-    } = this.props;
-    if (!path) {
-      return;
-    }
-    const geometry = await readOrWatch(path, {
-      workspace
-    });
-    const {
-      updateGeometry
-    } = await orbitDisplay({
-      path,
-      geometry,
-      view
-    }, container);
-    this.watcher = async () => {
-      updateGeometry(await read(path, {
-        workspace
-      }));
-    };
-    watchFile(path, workspace, this.watcher);
-  }
-  componentWillUnmount() {
-    const {
-      workspace
-    } = this.props;
-    if (this.watcher) {
-      unwatchFile(this.path, workspace, this.watcher);
-    }
-    while (this.container.firstChild !== this.container.lastChild) {
-      this.container.removeChild(this.container.firstChild);
-    }
-  }
-  render() {
-    return v$1("div", {
-      classList: "note orbitView",
-      ref: async container => {
-        if (container) {
-          await this.buildElement(container);
-        }
-      }
-    });
-  }
-}
 
 const {
   SplitPane

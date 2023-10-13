@@ -2,14 +2,18 @@
 
 #include "./repair_util.h"
 #include "./simplify_util.h"
-#include "./wrap_util.h"
 
-int FromPolygonSoup(Geometry* geometry, emscripten::val fill, bool wrap_always,
-                    double wrap_absolute_alpha, double wrap_absolute_offset,
-                    double wrap_relative_alpha, double wrap_relative_offset,
+int FromPolygonSoup(Geometry* geometry, emscripten::val fill,
                     size_t face_count_limit, double sharp_edge_threshold,
-                    bool do_remove_self_intersections, bool do_wrap,
-                    bool do_autorefine) {
+                    emscripten::val nextStrategy) {
+  std::vector<int> strategies;
+
+  for (int strategy = nextStrategy().as<int>(); strategy != -1;
+       strategy = nextStrategy().as<int>()) {
+    std::cout << "QQ/FromPolygonSoup: strategy=" << strategy << std::endl;
+    strategies.push_back(strategy);
+  }
+
   try {
     int target = geometry->add(GEOMETRY_MESH);
     Surface_mesh& mesh = geometry->mesh(target);
@@ -42,8 +46,11 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill, bool wrap_always,
     }
 
     if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
-      std::cout << "QQ/FromPolygonSoup: repair_self_intersections" << std::endl;
-      repair_self_intersections<Kernel>(mesh);
+      std::cout << "QQ/FromPolygonSoup: repair_self_intersections begin"
+                << std::endl;
+      repair_self_intersections<Kernel>(mesh, strategies);
+      std::cout << "QQ/FromPolygonSoup: repair_self_intersections end"
+                << std::endl;
     }
 
     if (face_count_limit > 0) {

@@ -2338,8 +2338,25 @@ const put = Shape.registerMethod3(
   (geometry, geometries) => on$1(geometry, geometry, () => Group$1(geometries))
 );
 
-const ref = Shape.registerMethod3('ref', ['inputGeometry'], ref$1);
-const Ref = Shape.registerMethod3('Ref', [], Ref$1);
+const ref = Shape.registerMethod3(
+  'ref',
+  [
+    'inputGeometry',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'coordinate',
+  ],
+  ref$1
+);
+const Ref = Shape.registerMethod3(
+  'Ref',
+  ['number', 'number', 'number', 'number', 'number', 'number', 'coordinate'],
+  Ref$1
+);
 
 const repair = Shape.registerMethod3(
   'repair',
@@ -2717,7 +2734,11 @@ const sort = Shape.registerMethod3(
       ops.unshift({ dimension, order, limit });
       spec = rest;
     }
-    for (const { dimension, order, limit } of ops) {
+    const sort = (list, depth = 0) => {
+      if (depth === ops.length) {
+        return Group$1(list);
+      }
+      const { dimension, order, limit } = ops[depth];
       let axis;
       switch (dimension) {
         case 'x':
@@ -2733,23 +2754,42 @@ const sort = Shape.registerMethod3(
       if (limit !== undefined) {
         switch (order) {
           case '>':
-            leafs = leafs.filter(({ min }) => min[axis] > limit);
+            list = list.filter(({ min }) => min[axis] > limit);
             break;
           case '<':
-            leafs = leafs.filter(({ max }) => max[axis] < limit);
+            list = list.filter(({ max }) => max[axis] < limit);
             break;
         }
       }
+      let compare;
       switch (order) {
         case '>':
-          leafs = leafs.sort((a, b) => b.min[axis] - a.min[axis]);
+          compare = (a, b) => b.min[axis] - a.min[axis];
           break;
         case '<':
-          leafs = leafs.sort((a, b) => a.max[axis] - b.max[axis]);
+          compare = (a, b) => a.max[axis] - b.max[axis];
           break;
       }
-    }
-    const result = Group$1(leafs.map(({ leaf }) => leaf));
+      if (compare) {
+        // Fold.
+        list.sort(compare);
+        const folded = [];
+        let matching = [];
+        for (const item of list) {
+          if (matching.length === 0 || compare(item, matching[0]) === 0) {
+            matching.push(item);
+          } else {
+            folded.push(matching.map(({ leaf }) => leaf));
+            matching = [item];
+          }
+        }
+        if (matching.length > 0) {
+          folded.push(matching.map(({ leaf }) => leaf));
+        }
+        return Group$1(folded.map((matches) => sort(matches, depth + 1)));
+      }
+    };
+    const result = sort(leafs);
     console.log(`QQ/sort: result=${JSON.stringify(result)}`);
     return result;
   }
@@ -2759,19 +2799,17 @@ const LoadStl = Shape.registerMethod3(
   'LoadStl',
   [
     'string',
-    'modes:binary,ascii,wrap,removeSelfIntersections,autorefine',
+    'modes:binary,ascii',
+    'strings:wrap,patch,auto',
     'number',
     'options',
   ],
   async (
     path,
-    { binary, ascii, wrap, removeSelfIntersections, autorefine },
+    { binary, ascii },
+    strategies,
     implicitFaceCountLimit = 0,
     {
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
       faceCountLimit = implicitFaceCountLimit,
       sharpEdgeThreshold = 120 / 360,
     } = {}
@@ -2788,42 +2826,30 @@ const LoadStl = Shape.registerMethod3(
     }
     return fromStl(data, {
       format,
-      wrapAlways: wrap,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
       faceCountLimit,
       sharpEdgeThreshold,
-      doRemoveSelfIntersections: removeSelfIntersections,
-      doWrap: wrap,
-      doAutorefine: autorefine,
+      strategies,
     });
   }
 );
 
 const Stl = Shape.registerMethod3(
   'Stl',
-  ['string', 'modes:wrap', 'options'],
+  ['string', 'strings:wrap,patch,auto', 'number', 'options'],
   async (
     text,
-    { wrap },
+    strategies,
+    implicitFaceCountLimit = 0,
     {
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
-      cornerThreshold = 0,
+      faceCountLimit = implicitFaceCountLimit,
+      sharpEdgeThreshold = 120 / 360,
     } = {}
   ) =>
     fromStl(new TextEncoder('utf8').encode(text), {
       format: 'ascii',
-      wrapAlways: wrap,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
-      cornerThreshold,
+      faceCountLimit,
+      sharpEdgeThreshold,
+      strategies,
     })
 );
 

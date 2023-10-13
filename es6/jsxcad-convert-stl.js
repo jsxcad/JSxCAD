@@ -130,16 +130,9 @@ const fromStl = async (
   stl,
   {
     format = 'ascii',
-    wrapAlways,
-    wrapAbsoluteAlpha,
-    wrapAbsoluteOffset,
-    wrapRelativeAlpha = 300,
-    wrapRelativeOffset = 5000,
     faceCountLimit = 0,
     sharpEdgeThreshold = 0,
-    doRemoveSelfIntersections = false,
-    doWrap = false,
-    doAutorefine = false,
+    strategies = [],
   } = {}
 ) => {
   const { positions, cells } = parse(stl, format);
@@ -155,16 +148,9 @@ const fromStl = async (
   }
   return fromPolygonSoup(polygons, {
     tolerance: 0,
-    wrapAlways,
-    wrapRelativeAlpha,
-    wrapRelativeOffset,
-    wrapAbsoluteAlpha,
-    wrapAbsoluteOffset,
     faceCountLimit,
     sharpEdgeThreshold,
-    doRemoveSelfIntersections,
-    doWrap,
-    doAutorefine,
+    strategies,
   });
 };
 

@@ -23,7 +23,9 @@ int number_of_non_manifold_vertices(const Surface_mesh& mesh) {
 // TRY strategies either succeed or make no change.
 enum RepairStrategy {
   REPAIR_AUTOREFINE_AND_REMOVE_SELF_INTERSECTIONS = 0,
-  REPAIR_TRY_REMOVE_SELF_INTERSECTIONS = 1
+  REPAIR_TRY_REMOVE_SELF_INTERSECTIONS = 1,
+  REPAIR_WRAP = 2,
+  REPAIR_CLOSE = 3
 };
 
 template <typename Kernel, typename Surface_mesh>
@@ -32,9 +34,11 @@ bool repair_self_intersections(Surface_mesh& mesh,
   std::cout << "QQ/repair_self_intersections: count="
             << number_of_self_intersections(mesh)
             << " nmvertices=" << number_of_non_manifold_vertices(mesh)
-            << std::endl;
+            << " strategies=" << strategies.size() << std::endl;
 
   for (const int strategy : strategies) {
+    std::cout << "QQ/repair_self_intersections: strategy=" << strategy
+              << std::endl;
     switch (strategy) {
       case REPAIR_AUTOREFINE_AND_REMOVE_SELF_INTERSECTIONS: {
         // Should be precise.
@@ -74,6 +78,54 @@ bool repair_self_intersections(Surface_mesh& mesh,
           std::cout
               << "QQ/repair_self_intersections: remove intersections error: "
               << e.what() << std::endl;
+        }
+        break;
+      }
+      case REPAIR_WRAP: {
+        try {
+          std::cout << "QQ/repair_self_intersections: wrap" << std::endl;
+          double wrap_relative_alpha = 300;
+          double wrap_relative_offset = 5000;
+          // Use a wrapping pass to remove self-intersection.
+          CGAL::Cartesian_converter<Kernel, Epick_kernel> to_cartesian;
+          Epick_points points;
+          std::vector<std::vector<size_t>> faces;
+          wrap_add_mesh_epick(to_cartesian, mesh, points, faces);
+          double alpha;
+          double offset;
+          wrap_compute_alpha_and_offset(
+              CGAL::Polygon_mesh_processing::bbox(mesh), wrap_relative_alpha,
+              wrap_relative_offset, alpha, offset);
+          std::cout << "Computed alpha=" << alpha << " offset=" << offset
+                    << std::endl;
+          // alpha = 0.1;
+          // offset = 0.1;
+          std::cout << "Using alpha=" << alpha << " offset=" << offset
+                    << std::endl;
+          mesh.clear();
+          wrap_epick(points, faces, alpha, offset, mesh);
+        } catch (const std::exception& e) {
+          std::cout << "QQ/repair_self_intersections: wrap error: " << e.what()
+                    << std::endl;
+        }
+        break;
+      }
+      case REPAIR_CLOSE: {
+        try {
+          std::cout << "QQ/repair_self_intersections: close" << std::endl;
+          std::vector<typename Surface_mesh::halfedge_index> border_cycles;
+          CGAL::Polygon_mesh_processing::extract_boundary_cycles(
+              mesh, std::back_inserter(border_cycles));
+          std::cout << "QQ/repair_self_intersections: count="
+                    << border_cycles.size() << std::endl;
+          for (const typename Surface_mesh::halfedge_index hole :
+               border_cycles) {
+            CGAL::Polygon_mesh_processing::triangulate_hole(mesh, hole);
+          }
+          std::cout << "QQ/repair_self_intersections: close done" << std::endl;
+        } catch (const std::exception& e) {
+          std::cout << "QQ/repair_self_intersections: wrap error: " << e.what()
+                    << std::endl;
         }
         break;
       }

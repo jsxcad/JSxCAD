@@ -128,6 +128,22 @@ export const tile2x2 = Box((SIZE - 0.1) * 2)
   .stl('tile2x2', fuse())
   .v(1);
 
+export const tile4x4 = Box((SIZE - 0.1) * 4)
+  .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
+  .cut(
+    base1x1
+      .gap()
+      .z(-7.1)
+      .x(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5),
+    Connector(0.35)
+      .x(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+  )
+  .z(-3)
+  .stl('tile4x4', fuse())
+  .v(1);
+
 export const SIZE = 24;
 
 const spar = Box([3 + 2.2, -3 - 2, 2], 1)

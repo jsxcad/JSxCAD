@@ -50,6 +50,7 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import SplitPaneModule from 'react-multi-split-pane';
 import Table from 'react-bootstrap/Table';
+import TableOfContents from './TableOfContents.js';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
@@ -148,6 +149,21 @@ const defaultModelConfig = {
         },
       ],
     },
+    {
+      type: 'border',
+      location: 'right',
+      weight: 50,
+      children: [
+        {
+          id: 'ToC',
+          type: 'tab',
+          name: 'ToC',
+          component: 'ToC',
+          enableClose: false,
+          borderWidth: 64,
+        },
+      ],
+    },
   ],
   layout: {
     type: 'row',
@@ -239,6 +255,10 @@ class App extends React.Component {
     this.layoutRef = React.createRef();
 
     this.Draft = {};
+
+    this.Draft.append = (data) => {
+      this.Draft.change(this.Draft.getCode() + data);
+    };
 
     this.Draft.change = (data) => {
       const { Draft = {} } = this.state;
@@ -1316,13 +1336,12 @@ class App extends React.Component {
           );
         }
         case 'Notebook': {
-          const path = node.getId().substring('Notebook/'.length);
+          const path = this.Notebook.getSelectedPath();
           const {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
             [`NotebookState/${path}`]: NotebookState = 'idle',
             [`NotebookText/${path}`]: NotebookText,
-            // [`NotebookDefinitions/${path}`]: NotebookDefinitions = {},
-            [`NotebookNotes/${path}`]: NotebookNotes = [],
+            [`NotebookNotes/${path}`]: NotebookNotes = {},
             [`NotebookLine/${path}`]: NotebookLine,
           } = this.state;
           const NotebookAdvice = this.Notebook.ensureAdvice(path);
@@ -1374,6 +1393,11 @@ class App extends React.Component {
             }
           }
         }
+        case 'ToC': {
+          const path = this.Notebook.getSelectedPath();
+          const { [`NotebookNotes/${path}`]: NotebookNotes = {} } = this.state;
+          return <TableOfContents notes={NotebookNotes} />;
+        }
         case 'Draft': {
           const path = this.Notebook.getSelectedPath();
           const note = {
@@ -1399,6 +1423,20 @@ class App extends React.Component {
           return (
             <DynamicView
               path={View.path}
+              onIndicatePoint={([
+                x = 0,
+                y = 0,
+                z = 0,
+                nx = 0,
+                ny = 0,
+                nz = 1,
+              ]) =>
+                navigator.clipboard.writeText(
+                  `Ref(${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(
+                    2
+                  )}, ${nx.toFixed(2)}, ${ny.toFixed(2)}, ${nz.toFixed(2)})`
+                )
+              }
               view={View.view}
               workspace={workspace}
             />

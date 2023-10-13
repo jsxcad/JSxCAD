@@ -23,7 +23,7 @@
   "license": "LGPL",
   "dependencies": {
     "style-to-object": "^0.3.0",
-    "three": "^0.138.3",
+    "three": "^0.157.0",
     "xmldom": "^0.6.0"
   },
   "devDependencies": {

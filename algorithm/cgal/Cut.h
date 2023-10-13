@@ -51,9 +51,9 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
 #endif
           if (geometry->is_reference(nth)) {
             Plane plane(0, 0, 1, 0);
-            plane = plane.transform(geometry->transform(nth)).opposite();
+            plane = plane.transform(geometry->transform(nth));
             if (!CGAL::Polygon_mesh_processing::clip(
-                    geometry->mesh(target), plane,
+                    geometry->mesh(target), plane.opposite(),
                     CGAL::parameters::use_compact_clipper(true).clip_volume(
                         open == false))) {
               return STATUS_ZERO_THICKNESS;

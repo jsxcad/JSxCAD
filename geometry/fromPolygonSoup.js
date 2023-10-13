@@ -7,31 +7,17 @@ export const fromPolygonSoup = (
     tags = [],
     close = false,
     tolerance,
-    wrapAlways,
-    wrapAbsoluteAlpha,
-    wrapAbsoluteOffset,
-    wrapRelativeAlpha,
-    wrapRelativeOffset,
     faceCountLimit,
     sharpEdgeThreshold,
-    doRemoveSelfIntersections,
-    doWrap,
-    doAutorefine,
+    strategies = [],
   } = {}
 ) => {
   const outputs = fromPolygonSoupWithCgal(
     polygons,
     tolerance,
-    wrapAlways,
-    wrapRelativeAlpha,
-    wrapRelativeOffset,
-    wrapAbsoluteAlpha,
-    wrapAbsoluteOffset,
     faceCountLimit,
     sharpEdgeThreshold,
-    doRemoveSelfIntersections,
-    doWrap,
-    doAutorefine
+    strategies
   );
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

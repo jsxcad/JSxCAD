@@ -2,20 +2,14 @@ import { STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
 import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
+import { provideRepairStrategies } from './repair.js';
 
 export const fromPolygonSoup = (
   jsPolygons,
-  tolerance = 0.01,
-  wrapAlways = false,
-  wrapRelativeAlpha = 300,
-  wrapRelativeOffset = 5000,
-  wrapAbsoluteAlpha = 0,
-  wrapAbsoluteOffset = 0,
+  tolerance = 0,
   faceCountLimit = 0,
   sharpEdgeThreshold = 0,
-  doRemoveSelfIntersections = false,
-  doWrap = false,
-  doAutorefine = false
+  strategies = []
 ) =>
   withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
     const status = g.FromPolygonSoup(
@@ -33,16 +27,9 @@ export const fromPolygonSoup = (
           polygons.push_back(polygon);
         }
       },
-      wrapAlways,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
       faceCountLimit,
       sharpEdgeThreshold,
-      doRemoveSelfIntersections,
-      doWrap,
-      doAutorefine
+      provideRepairStrategies(strategies)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

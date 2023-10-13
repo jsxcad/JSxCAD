@@ -47,7 +47,7 @@ export {
   TorusGeometry,
   Vector2,
   Vector3,
-  VertexColors,
+  // VertexColors,
   WebGLRenderer,
   WireframeGeometry,
 } from 'three';

@@ -330,13 +330,9 @@ const b = Box(5)
   .y(10);
 ```
 
-![Image](shape.md.$47.png)
-
 ```JavaScript
 b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 ```
-
-![Image](shape.md.$48.png)
 
 ```JavaScript
 b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();

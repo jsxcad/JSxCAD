@@ -157,7 +157,9 @@ int Clip(Geometry* geometry, int targets, bool open, bool exact) {
         geometry->points(target).swap(in);
         break;
       }
-      case GEOMETRY_REFERENCE:
+      case GEOMETRY_REFERENCE: {
+        break;
+      }
       case GEOMETRY_EMPTY: {
         break;
       }

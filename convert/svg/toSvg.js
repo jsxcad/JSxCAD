@@ -27,7 +27,7 @@ export const toSvg = async (
   // svg reverses the Y axis.
   const scaled = scale(disjointed, [1, -1, 1]);
   const [baseMin] = measureBoundingBox(scaled);
-  const translated = translate(disjointed, [-baseMin[X], -baseMin[Y], 0]);
+  const translated = translate(scaled, [-baseMin[X], -baseMin[Y], 0]);
   const geometry = makeAbsolute(translated);
   const [min, max] = measureBoundingBox(geometry);
   const width = max[X] - min[X];

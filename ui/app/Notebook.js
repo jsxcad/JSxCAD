@@ -1,4 +1,4 @@
-/* global CSS, mermaid */
+/* global mermaid */
 
 import './Notebook.css';
 
@@ -7,19 +7,18 @@ import * as PropTypes from 'prop-types';
 import { read, readOrWatch, write } from '@jsxcad/sys';
 
 import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
 import EditNote from './EditNote.js';
 import ErrorNote from './ErrorNote.js';
-import IconNote from './IconNote.js';
 import MdNote from './MdNote.js';
 import React from 'react';
+import Row from 'react-bootstrap/Row';
 import { SpinnerCircularSplit } from 'spinners-react';
-import SplitPaneModule from 'react-multi-split-pane';
 import ViewNote from './ViewNote.js';
 import { useEffect } from 'preact/hooks';
-
-const { SplitPane } = SplitPaneModule;
 
 export const blurNotebookState = async (application, { path, workspace }) => {
   application.setState((state) => {
@@ -95,6 +94,7 @@ export const updateNotebookState = async (
             const offscreenCanvas = canvas.transferControlToOffscreen();
             for (let nth = 0; nth < 3; nth++) {
               try {
+                console.log(`QQ/ask staticView nth=${nth}`);
                 url = await application.ask(
                   {
                     op: 'app/staticView',
@@ -120,6 +120,7 @@ export const updateNotebookState = async (
             }
           }
           if (url) {
+            note.url = url;
             updateNote({ hash: note.hash, url, sourceLocation });
           }
         };
@@ -156,7 +157,6 @@ export class Notebook extends React.PureComponent {
         state = 'idle',
         workspace,
       } = this.props;
-      const contents = [];
       const ordered = Object.values(notes);
       const getLine = (note) => {
         if (note.sourceLocation) {
@@ -183,31 +183,25 @@ export class Notebook extends React.PureComponent {
         return nthA - nthB;
       };
       ordered.sort(order);
-      let id;
-      const ids = [];
-      let children;
-      let downloads;
-      let errors;
-      let icons;
-      let entry;
+      const entries = new Map();
       for (const note of ordered) {
-        if (note.sourceLocation.id !== id) {
-          id = note.sourceLocation.id;
-          children = [];
-          downloads = [];
-          errors = [];
-          icons = [];
-          entry = { id, blue: false, children, downloads, errors, icons };
-          ids.push(entry);
+        const id = note.sourceLocation.id;
+        if (!entries.has(id)) {
+          entries.set(id, {
+            blur: false,
+            downloads: [],
+            errors: [],
+            views: [],
+            mds: [],
+            controls: [],
+            editors: [],
+          });
         }
+        const entry = entries.get(id);
         // FIX: This seems wasteful.
         const selected = false;
-        let child;
-        let download;
-        let error;
-        let icon;
         if (note.view) {
-          child = (
+          entry.views.push(
             <ViewNote
               key={note.hash}
               note={note}
@@ -215,22 +209,21 @@ export class Notebook extends React.PureComponent {
               selected={selected}
             />
           );
-          icon = <IconNote key={note.hash} note={note} />;
-          if (note.blur) {
-            entry.blur = true;
-          }
         } else if (note.error) {
-          child = (
-            <ErrorNote
-              key={note.hash}
-              note={note}
-              selected={selected}
-              workspace={workspace}
-            />
+          entry.errors.push(
+            <Card.Body variant="danger">
+              <Card.Text>
+                <ErrorNote
+                  key={note.hash}
+                  note={note}
+                  selected={selected}
+                  workspace={workspace}
+                />
+              </Card.Text>
+            </Card.Body>
           );
-          error = child;
         } else if (note.md) {
-          child = (
+          entry.mds.push(
             <MdNote
               key={note.hash}
               note={note}
@@ -239,7 +232,7 @@ export class Notebook extends React.PureComponent {
             />
           );
         } else if (note.download) {
-          child = (
+          entry.downloads.push(
             <DownloadNote
               key={note.hash}
               note={note}
@@ -247,9 +240,8 @@ export class Notebook extends React.PureComponent {
               workspace={workspace}
             />
           );
-          download = child;
         } else if (note.control) {
-          child = (
+          entry.controls.push(
             <ControlNote
               key={note.hash}
               note={note}
@@ -258,7 +250,7 @@ export class Notebook extends React.PureComponent {
             />
           );
         } else if (note.sourceText !== undefined) {
-          child = (
+          entry.editors.push(
             <EditNote
               key={note.hash}
               note={note}
@@ -268,18 +260,6 @@ export class Notebook extends React.PureComponent {
               workspace={workspace}
             />
           );
-        }
-        if (children && child) {
-          children.push(child);
-        }
-        if (downloads && download) {
-          downloads.push(download);
-        }
-        if (icons && icon) {
-          icons.push(icon);
-        }
-        if (errors && error) {
-          errors.push(error);
         }
       }
 
@@ -295,57 +275,65 @@ export class Notebook extends React.PureComponent {
           return 0;
         }
       };
+      const ids = [...entries.keys()];
       ids.sort((a, b) => compare(a.id, b.id));
-      for (const {
-        id,
-        blur = false,
-        children = [],
-        // downloads = [],
-        errors = [],
-        // icons = [],
-      } of ids) {
-        contents.push(
-          <a
-            onClick={() =>
-              document
-                .querySelector(`#note-id-${CSS.escape(id)}`)
-                .scrollIntoView({ behavior: 'smooth' })
-            }
-          >
-            {id}
-          </a>
-        );
-        contents.push(<br />);
+      for (const id of ids) {
+        const {
+          downloads = [],
+          errors = [],
+          views = [],
+          mds = [],
+          controls = [],
+          editors = [],
+        } = entries.get(id);
         sections.push(
-          <Card id={`note-id-${id}`} key={id}>
+          <Card key={id}>
+            <Card.Header id={`note-id-${id}`}>{id}</Card.Header>
+            {errors}
+            <Container>
+              <Row>
+                {views.map((view, nth) => (
+                  <Col key={nth}>{view}</Col>
+                ))}
+                {controls.length > 0 ? (
+                  <Card>
+                    <Card.Body>{controls}</Card.Body>
+                  </Card>
+                ) : (
+                  []
+                )}
+                {downloads.length > 0 ? (
+                  <Card>
+                    <Card.Body>{downloads}</Card.Body>
+                  </Card>
+                ) : (
+                  []
+                )}
+              </Row>
+            </Container>
             <Card.Body>
-              {blur ? <SpinnerCircularSplit color="#36d7b7" size="32" /> : ''}
-              <Card.Title>{id}</Card.Title>
-              {errors && <Card.Text>{errors}</Card.Text>}
-              {children}
+              {mds}
+              {editors}
             </Card.Body>
           </Card>
         );
       }
 
       return (
-        <SplitPane>
-          <div style={{ overflow: 'auto' }}>{contents}</div>
-          <div
-            id={notebookPath}
-            classList="notebook notes"
-            style={{ overflow: 'auto' }}
-          >
-            {state === 'running' && (
-              <SpinnerCircularSplit
-                color="#36d7b7"
-                size={64}
-                style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
-              />
-            )}
-            {sections}
-          </div>
-        </SplitPane>
+        <div
+          id={notebookPath}
+          classList="notebook notes"
+          style={{ overflow: 'auto' }}
+        >
+          {false && state === 'running' && (
+            <SpinnerCircularSplit
+              color="#36d7b7"
+              size={64}
+              style={{ position: 'fixed', right: 32, top: 64, zIndex: 1000 }}
+            />
+          )}
+          {sections}
+        </div>
       );
     } catch (error) {
       console.log(error.stack);
