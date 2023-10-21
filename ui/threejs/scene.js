@@ -5,7 +5,7 @@ import {
   PerspectiveCamera,
   Scene,
   SpotLight,
-  SpotLightHelper,
+  // SpotLightHelper,
   WebGLRenderer,
 } from '@jsxcad/algorithm-threejs';
 
@@ -68,7 +68,7 @@ export const buildScene = ({
     light.layers.enable(SKETCH_LAYER);
     light.layers.enable(GEOMETRY_LAYER);
     camera.add(light);
-    camera.add(new SpotLightHelper(light));
+    // camera.add(new SpotLightHelper(light));
   }
 
   /*
@@ -79,7 +79,7 @@ export const buildScene = ({
     ambient.decay = 0.2;
     scene.add(ambient);
   }
-*/
+  */
 
   {
     // Add spot light for shadows.
@@ -100,7 +100,7 @@ export const buildScene = ({
     spotLight.layers.enable(SKETCH_LAYER);
     spotLight.layers.enable(GEOMETRY_LAYER);
     scene.add(spotLight);
-    scene.add(new SpotLightHelper(spotLight));
+    // scene.add(new SpotLightHelper(spotLight));
   }
 
   if (renderer === undefined) {

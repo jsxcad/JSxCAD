@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, SpotLightHelper, WebGLRenderer, PCFShadowMap, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, SRGBColorSpace, Matrix4, Plane, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, PointsMaterial, Color, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, PCFShadowMap, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, SRGBColorSpace, Matrix4, Plane, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, PointsMaterial, Color, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { isNode } from './jsxcad-sys.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
@@ -63,7 +63,7 @@ const buildScene = ({
     light.layers.enable(SKETCH_LAYER);
     light.layers.enable(GEOMETRY_LAYER);
     camera.add(light);
-    camera.add(new SpotLightHelper(light));
+    // camera.add(new SpotLightHelper(light));
   }
 
   /*
@@ -74,7 +74,7 @@ const buildScene = ({
     ambient.decay = 0.2;
     scene.add(ambient);
   }
-*/
+  */
 
   {
     // Add spot light for shadows.
@@ -95,7 +95,7 @@ const buildScene = ({
     spotLight.layers.enable(SKETCH_LAYER);
     spotLight.layers.enable(GEOMETRY_LAYER);
     scene.add(spotLight);
-    scene.add(new SpotLightHelper(spotLight));
+    // scene.add(new SpotLightHelper(spotLight));
   }
 
   if (renderer === undefined) {
