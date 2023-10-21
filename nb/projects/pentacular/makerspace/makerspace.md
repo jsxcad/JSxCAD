@@ -49,7 +49,7 @@ const bug = And(
         .color('black')
         .as('spots')
     )
-    .rz(1 / 24)
+    .rz(TILT)
     .y(6.25)
     .x(3.5)
     .sx(1, -1),
@@ -116,49 +116,56 @@ const awl = Arc(5)
 ```JavaScript
 const holder = Arc(18)
   .ez([-8, 10])
-  .ry(-1 / 24)
-  .hull(
-    peg.y(16).faces().sort('y<').n(0),
-    Box(10, [-9, -9], [-6, 8]).ry(-1 / 24)
-  )
+  .ry(-TILT)
+  .hull(peg.y(16).faces().sort('y<').n(0), Box(10, [-9, -9], [-6, 8]).ry(-TILT))
   .join(peg.y(16))
   .cut(XY(-8))
   .stl('holder')
   .v(2);
 ```
 
-![Image](makerspace.md.awlHolderTilt_inlay.png)
-
-[inlay.stl](makerspace.inlay.stl)
-
 ![Image](makerspace.md.awlHolderTilt_awl_holder_tilt.png)
 
 [awl_holder_tilt.stl](makerspace.awl_holder_tilt.stl)
 
 ```JavaScript
-const awlHolderTilt = holder
-  .cut(
-    awl.ry(-1 / 24).and(
-      scale(1 / 10)
-        .section(XZ())
-        .e([2])
-        .y(-9)
-        .stl('inlay', rx(1 / 4))
-    )
-  )
-  .stl('awl_holder_tilt');
+const awlHolderTilt = holder.cut(awl.ry(-TILT)).stl('awl_holder_tilt');
 ```
 
-![Image](makerspace.md.simpleHolderTilt_simple_holder_tilt.png)
+![Image](makerspace.md.pegHolder_peg_holder.png)
 
-[simple_holder_tilt.stl](makerspace.simple_holder_tilt.stl)
+[peg_holder.stl](makerspace.peg_holder.stl)
 
 ```JavaScript
-const simpleHolderTilt = holder
-  .cut(
-    Arc(14)
-      .ez([-50, 50])
-      .ry(-1 / 24)
-  )
-  .stl('simple_holder_tilt');
+const pegHolder = ChainHull(
+  Arc(16).to(XZ(-15)),
+  Arc(16).to(XZ(0)),
+  peg.y(16).faces().sort('y<').n(0)
+)
+  .cut(Arc(16).to(XZ(-4)).eachPoint(Orb(6, 18, 6).to))
+  .join(peg.y(16))
+  .cut(XY(-8))
+  .clean()
+  .stl('peg_holder')
+  .v(2);
+```
+
+```JavaScript
+const SimpleInset = (diameter = 14) =>
+  Arc(diameter).Join(ez([10]), inset(1).ez([0, -60]));
+```
+
+```JavaScript
+const TILT = 3 / 48;
+```
+
+![Image](makerspace.md.simpleInset_simple_inset.png)
+
+[simple_inset.stl](makerspace.simple_inset.stl)
+
+```JavaScript
+const simpleInset = SimpleInset(13.75)
+  .fitTo(SimpleInset(12.75).z(1).gap())
+  .masked(SimpleInset(14))
+  .stl('simple_inset');
 ```

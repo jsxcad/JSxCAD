@@ -31,10 +31,8 @@ enum RepairStrategy {
 template <typename Kernel, typename Surface_mesh>
 bool repair_self_intersections(Surface_mesh& mesh,
                                const std::vector<int>& strategies) {
-  std::cout << "QQ/repair_self_intersections: count="
-            << number_of_self_intersections(mesh)
-            << " nmvertices=" << number_of_non_manifold_vertices(mesh)
-            << " strategies=" << strategies.size() << std::endl;
+  std::cout << "QQ/repair_self_intersections: strategies=" << strategies.size()
+            << std::endl;
 
   for (const int strategy : strategies) {
     std::cout << "QQ/repair_self_intersections: strategy=" << strategy
@@ -118,8 +116,11 @@ bool repair_self_intersections(Surface_mesh& mesh,
               mesh, std::back_inserter(border_cycles));
           std::cout << "QQ/repair_self_intersections: count="
                     << border_cycles.size() << std::endl;
+          size_t nth = 0;
           for (const typename Surface_mesh::halfedge_index hole :
                border_cycles) {
+            std::cout << "QQ/repair_self_intersections: close nth=" << ++nth
+                      << std::endl;
             CGAL::Polygon_mesh_processing::triangulate_hole(mesh, hole);
           }
           std::cout << "QQ/repair_self_intersections: close done" << std::endl;
@@ -132,9 +133,7 @@ bool repair_self_intersections(Surface_mesh& mesh,
     }
   }
 
-  std::cout << "QQ/repair_self_intersections: count="
-            << number_of_self_intersections(mesh) << std::endl;
-  std::cout << "QQ/repair_self_intersections: failed" << std::endl;
+  std::cout << "QQ/repair_self_intersections: done" << std::endl;
   return false;
 }
 

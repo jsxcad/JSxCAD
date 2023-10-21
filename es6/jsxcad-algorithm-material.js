@@ -62,7 +62,7 @@ const standardMaterialDefinitions = {
   },
   'material:copper': {
     threejsMaterial: {
-      metalness: 0.0,
+      metalness: 0.5,
       roughness: 0.5,
       reflectivity: 0.8,
       map: 'https://jsxcad.js.org/texture/copper.png',

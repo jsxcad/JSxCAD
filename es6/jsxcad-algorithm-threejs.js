@@ -38391,6 +38391,35 @@ class Light extends Object3D {
 
 }
 
+class HemisphereLight extends Light {
+
+	constructor( skyColor, groundColor, intensity ) {
+
+		super( skyColor, intensity );
+
+		this.isHemisphereLight = true;
+
+		this.type = 'HemisphereLight';
+
+		this.position.copy( Object3D.DEFAULT_UP );
+		this.updateMatrix();
+
+		this.groundColor = new Color( groundColor );
+
+	}
+
+	copy( source, recursive ) {
+
+		super.copy( source, recursive );
+
+		this.groundColor.copy( source.groundColor );
+
+		return this;
+
+	}
+
+}
+
 const _projScreenMatrix$1 = /*@__PURE__*/ new Matrix4();
 const _lightPositionWorld$1 = /*@__PURE__*/ new Vector3();
 const _lookTarget$1 = /*@__PURE__*/ new Vector3();
@@ -39318,6 +39347,91 @@ class Box2 {
 	equals( box ) {
 
 		return box.min.equals( this.min ) && box.max.equals( this.max );
+
+	}
+
+}
+
+const _vector$3 = /*@__PURE__*/ new Vector3();
+
+class SpotLightHelper extends Object3D {
+
+	constructor( light, color ) {
+
+		super();
+
+		this.light = light;
+
+		this.matrix = light.matrixWorld;
+		this.matrixAutoUpdate = false;
+
+		this.color = color;
+
+		this.type = 'SpotLightHelper';
+
+		const geometry = new BufferGeometry();
+
+		const positions = [
+			0, 0, 0, 	0, 0, 1,
+			0, 0, 0, 	1, 0, 1,
+			0, 0, 0,	- 1, 0, 1,
+			0, 0, 0, 	0, 1, 1,
+			0, 0, 0, 	0, - 1, 1
+		];
+
+		for ( let i = 0, j = 1, l = 32; i < l; i ++, j ++ ) {
+
+			const p1 = ( i / l ) * Math.PI * 2;
+			const p2 = ( j / l ) * Math.PI * 2;
+
+			positions.push(
+				Math.cos( p1 ), Math.sin( p1 ), 1,
+				Math.cos( p2 ), Math.sin( p2 ), 1
+			);
+
+		}
+
+		geometry.setAttribute( 'position', new Float32BufferAttribute( positions, 3 ) );
+
+		const material = new LineBasicMaterial( { fog: false, toneMapped: false } );
+
+		this.cone = new LineSegments( geometry, material );
+		this.add( this.cone );
+
+		this.update();
+
+	}
+
+	dispose() {
+
+		this.cone.geometry.dispose();
+		this.cone.material.dispose();
+
+	}
+
+	update() {
+
+		this.light.updateWorldMatrix( true, false );
+		this.light.target.updateWorldMatrix( true, false );
+
+		const coneLength = this.light.distance ? this.light.distance : 1000;
+		const coneWidth = coneLength * Math.tan( this.light.angle );
+
+		this.cone.scale.set( coneWidth, coneWidth, coneLength );
+
+		_vector$3.setFromMatrixPosition( this.light.target.matrixWorld );
+
+		this.cone.lookAt( _vector$3 );
+
+		if ( this.color !== undefined ) {
+
+			this.cone.material.color.set( this.color );
+
+		} else {
+
+			this.cone.material.color.copy( this.light.color );
+
+		}
 
 	}
 
@@ -50063,4 +50177,4 @@ class TrackballControls extends EventDispatcher {
 
 }
 
-export { ArrowHelper, AxesHelper, Box3, BoxGeometry, BufferGeometry, CanvasTexture, ColladaLoader, Color, CylinderGeometry, DoubleSide, EdgesGeometry, Euler, EventDispatcher, Float32BufferAttribute, Frustum, GridHelper, Group, ImageBitmapLoader, Layers, Line, LineBasicMaterial, LineSegments, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry, Path, PerspectiveCamera, Plane, PlaneGeometry, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, SVGLoader, Scene, Shape, ShapeGeometry, SphereGeometry, SpotLight, TorusGeometry, TrackballControls, Vector2, Vector3, WebGLRenderer, WireframeGeometry };
+export { AmbientLight, ArrowHelper, AxesHelper, Box3, BoxGeometry, BufferGeometry, CanvasTexture, ColladaLoader, Color, CylinderGeometry, DoubleSide, EdgesGeometry, Euler, EventDispatcher, Float32BufferAttribute, Frustum, GridHelper, Group, HemisphereLight, ImageBitmapLoader, Layers, Line, LineBasicMaterial, LineSegments, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry, PCFShadowMap, Path, PerspectiveCamera, Plane, PlaneGeometry, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, SRGBColorSpace, SVGLoader, Scene, Shape, ShapeGeometry, SphereGeometry, SpotLight, SpotLightHelper, TorusGeometry, TrackballControls, Vector2, Vector3, WebGLRenderer, WireframeGeometry };

@@ -5,6 +5,7 @@ import {
   MeshPhongMaterial,
   MeshPhysicalMaterial,
   RepeatWrapping,
+  SRGBColorSpace,
 } from '@jsxcad/algorithm-threejs';
 
 import { setColor } from './color.js';
@@ -27,6 +28,7 @@ const loadTexture = (url) => {
             texture.wrapS = texture.wrapT = RepeatWrapping;
             texture.offset.set(0, 0);
             texture.repeat.set(1, 1);
+            texture.colorSpace = SRGBColorSpace;
             resolve(texture);
           },
           (progress) => console.log(`Loading: ${url}`),
