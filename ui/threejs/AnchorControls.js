@@ -228,17 +228,9 @@ class AnchorControls extends EventDispatcher {
 
     const dispose = () => detach();
 
-    let _mouseX, _mouseY;
+    let _mouseX, _mouseY, _surfaceCursor;
 
     const adviseEdits = () => {
-      /*
-      const edits = [];
-      scene.traverse((object) => {
-        if (object.userData.edit) {
-          edits.push(object.userData.edit);
-        }
-      });
-      */
       this.dispatchEvent({
         edits: _edits,
         editId: editId,
@@ -246,11 +238,7 @@ class AnchorControls extends EventDispatcher {
       });
     };
 
-    const onMouseMove = (event) => {
-      const rect = event.target.getBoundingClientRect();
-      _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
-      _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-
+    const getOrientedCursorPoint = () => {
       const { point, normal } = raycast(
         _mouseX,
         _mouseY,
@@ -260,14 +248,26 @@ class AnchorControls extends EventDispatcher {
       );
 
       if (point) {
+        return [point.x, point.y, point.z, normal.x, normal.y, normal.z];
+      }
+    };
+
+    const onMouseMove = (event) => {
+      const rect = event.target.getBoundingClientRect();
+      _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
+      _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+
+      _surfaceCursor = getOrientedCursorPoint(event);
+      if (_surfaceCursor) {
+        const [x, y, z, nx, ny, nz] = _surfaceCursor;
         const position = _cursor.geometry.attributes.position;
-        position.array[0] = point.x;
-        position.array[1] = point.y;
-        position.array[2] = point.z;
+        position.array[0] = x;
+        position.array[1] = y;
+        position.array[2] = z;
         if (_cursor.userData.anchored !== true) {
-          position.array[3] = point.x + normal.x;
-          position.array[4] = point.y + normal.y;
-          position.array[5] = point.z + normal.z;
+          position.array[3] = x + nx;
+          position.array[4] = y + ny;
+          position.array[5] = z + nz;
         }
         position.needsUpdate = true;
         render();
@@ -356,6 +356,17 @@ class AnchorControls extends EventDispatcher {
           case 'q':
             _at.position.addScaledVector(_zAxis, -_step);
             break;
+
+          case 'p': {
+            if (_surfaceCursor) {
+              const [x, y, z, nx, ny, nz] = _surfaceCursor;
+              this.dispatchEvent({
+                type: 'indicatePoint',
+                point: [x, y, z, nx, ny, nz],
+              });
+            }
+            break;
+          }
 
           case 't': {
             const position = _cursor.geometry.attributes.position;

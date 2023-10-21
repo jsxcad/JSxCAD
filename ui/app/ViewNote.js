@@ -1,9 +1,8 @@
 import * as PropTypes from 'prop-types';
 
-import React, { createRef } from 'react';
-
-import { SpinnerCircularSplit } from 'spinners-react';
-import { useEffect } from 'preact/hooks';
+// import Card from 'react-bootstrap/Card';
+import React from 'react';
+// import { SpinnerCircularSplit } from 'spinners-react';
 
 export class ViewNote extends React.PureComponent {
   static get propTypes() {
@@ -16,11 +15,9 @@ export class ViewNote extends React.PureComponent {
     };
   }
 
-  showOrbitView() {}
-
   render() {
-    const { notebookPath, note, onClickView, selected, workspace } = this.props;
-    const { blur = false, view, sourceLocation } = note;
+    const { notebookPath, note, onClickView, workspace } = this.props;
+    const { view, sourceLocation } = note;
     const { height, width, viewId } = view;
     const onClick = (event) => {
       if (onClickView) {
@@ -37,29 +34,13 @@ export class ViewNote extends React.PureComponent {
     };
     const viewIdClass = viewId ? `viewId_${viewId}` : '';
     if (!note.url) {
-      return (
-        <SpinnerCircularSplit
-          color="#36d7b7"
-          size={Math.min(width, height) * 0.8}
-        />
-      );
+      return <div></div>;
     }
-    const ref = selected && createRef();
-    if (selected) {
-      useEffect(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
     return (
       <img
-        ref={ref}
-        class={`note view ${viewIdClass}`}
-        style={{
-          display: 'block',
-          height: `${height}px`,
-          width: `${width}px`,
-          border,
-          opacity: blur ? 0.5 : 1,
-        }}
+        class={viewIdClass}
+        style={{ width, height }}
+        variant="top"
         src={note.url}
         onClick={onClick}
       />

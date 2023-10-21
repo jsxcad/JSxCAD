@@ -35,6 +35,7 @@ export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';
 export { Icosahedron } from './Icosahedron.js';
 export { Orb } from './Orb.js';
+export { OrientedPoint } from './Point.js';
 export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Segments } from './Segments.js';

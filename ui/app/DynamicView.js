@@ -8,6 +8,7 @@ import { orbitDisplay } from '@jsxcad/ui-threejs';
 export class DynamicView extends React.PureComponent {
   static get propTypes() {
     return {
+      onIndicatePoint: PropTypes.func,
       path: PropTypes.string,
       view: PropTypes.object,
       workspace: PropTypes.string,
@@ -15,12 +16,12 @@ export class DynamicView extends React.PureComponent {
   }
 
   async buildElement(container) {
-    const { path, view, workspace } = this.props;
+    const { onIndicatePoint, path, view, workspace } = this.props;
     if (!path) {
       return;
     }
     const geometry = await readOrWatch(path, { workspace });
-    const { updateGeometry } = await orbitDisplay(
+    const { anchorControls, updateGeometry } = await orbitDisplay(
       {
         path,
         geometry,
@@ -28,6 +29,9 @@ export class DynamicView extends React.PureComponent {
       },
       container
     );
+    anchorControls.addEventListener('indicatePoint', ({ point }) => {
+      if (onIndicatePoint) onIndicatePoint(point);
+    });
     this.watcher = async () => {
       updateGeometry(await read(path, { workspace }));
     };
@@ -42,6 +46,13 @@ export class DynamicView extends React.PureComponent {
     while (this.container.firstChild !== this.container.lastChild) {
       this.container.removeChild(this.container.firstChild);
     }
+  }
+
+  shouldComponentUpdate(nextProps) {
+    if (this.props.path !== nextProps.path) {
+      return true;
+    }
+    return false;
   }
 
   render() {

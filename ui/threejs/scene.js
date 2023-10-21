@@ -1,9 +1,11 @@
 import {
   AxesHelper,
   Object3D,
+  PCFShadowMap,
   PerspectiveCamera,
   Scene,
   SpotLight,
+  // SpotLightHelper,
   WebGLRenderer,
 } from '@jsxcad/algorithm-threejs';
 
@@ -40,7 +42,7 @@ export const buildScene = ({
   preserveDrawingBuffer = false,
 }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
-  Object3D.DefaultUp.set(...up);
+  Object3D.DEFAULT_UP.set(...up);
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.position.set(...position);
@@ -58,28 +60,47 @@ export const buildScene = ({
   }
 
   {
-    const light = new SpotLight(0xffffff, 0.7);
+    const light = new SpotLight(0xffffff, 10);
     light.target = camera;
+    light.decay = 0.2;
     light.position.set(0.1, 0.1, 1);
     light.userData.dressing = true;
     light.layers.enable(SKETCH_LAYER);
     light.layers.enable(GEOMETRY_LAYER);
     camera.add(light);
+    // camera.add(new SpotLightHelper(light));
   }
+
+  /*
+  // FIX ambient lighting.
+  {
+    // Add ambient light
+    const ambient = new HemisphereLight( 0xffffff, 0x8d8d8d, 100 );
+    ambient.decay = 0.2;
+    scene.add(ambient);
+  }
+  */
 
   {
     // Add spot light for shadows.
-    const spotLight = new SpotLight(0xffffff, 0.75);
+    const spotLight = new SpotLight(0xffffff, 10);
+    spotLight.angle = Math.PI / 6;
+    spotLight.penumbra = 1;
+    spotLight.decay = 0.2;
+    spotLight.distance = 0;
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
     spotLight.shadow.camera.near = 0.5;
+    spotLight.shadow.camera.far = 1000;
+    spotLight.shadow.focus = 1;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
     spotLight.userData.dressing = true;
     spotLight.layers.enable(SKETCH_LAYER);
     spotLight.layers.enable(GEOMETRY_LAYER);
     scene.add(spotLight);
+    // scene.add(new SpotLightHelper(spotLight));
   }
 
   if (renderer === undefined) {
@@ -95,11 +116,12 @@ export const buildScene = ({
     renderer.inputGamma = true;
     renderer.outputGamma = true;
     renderer.setPixelRatio(window.devicePixelRatio);
+    // renderer.useLegacyLights = true;
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
 
     renderer.shadowMap.enabled = true;
-    // renderer.shadowMapType = BasicShadowMap;
+    renderer.shadowMapType = PCFShadowMap;
   }
   return { camera, canvas: renderer.domElement, renderer, scene };
 };

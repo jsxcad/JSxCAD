@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, Matrix4, Plane, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, PointsMaterial, Color, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
+import { Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, PCFShadowMap, Raycaster, Vector2, Points, LineSegments, Shape, EventDispatcher, MeshBasicMaterial, Vector3, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Mesh, BoxGeometry, MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, SRGBColorSpace, Matrix4, Plane, Group, Path, ShapeGeometry, EdgesGeometry, WireframeGeometry, PointsMaterial, Color, Box3, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers, TrackballControls } from './jsxcad-algorithm-threejs.js';
 import { isNode } from './jsxcad-sys.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
@@ -37,7 +37,7 @@ const buildScene = ({
   preserveDrawingBuffer = false,
 }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1] } = view;
-  Object3D.DefaultUp.set(...up);
+  Object3D.DEFAULT_UP.set(...up);
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.position.set(...position);
@@ -55,28 +55,47 @@ const buildScene = ({
   }
 
   {
-    const light = new SpotLight(0xffffff, 0.7);
+    const light = new SpotLight(0xffffff, 10);
     light.target = camera;
+    light.decay = 0.2;
     light.position.set(0.1, 0.1, 1);
     light.userData.dressing = true;
     light.layers.enable(SKETCH_LAYER);
     light.layers.enable(GEOMETRY_LAYER);
     camera.add(light);
+    // camera.add(new SpotLightHelper(light));
   }
+
+  /*
+  // FIX ambient lighting.
+  {
+    // Add ambient light
+    const ambient = new HemisphereLight( 0xffffff, 0x8d8d8d, 100 );
+    ambient.decay = 0.2;
+    scene.add(ambient);
+  }
+  */
 
   {
     // Add spot light for shadows.
-    const spotLight = new SpotLight(0xffffff, 0.75);
+    const spotLight = new SpotLight(0xffffff, 10);
+    spotLight.angle = Math.PI / 6;
+    spotLight.penumbra = 1;
+    spotLight.decay = 0.2;
+    spotLight.distance = 0;
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
     spotLight.shadow.camera.near = 0.5;
+    spotLight.shadow.camera.far = 1000;
+    spotLight.shadow.focus = 1;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
     spotLight.userData.dressing = true;
     spotLight.layers.enable(SKETCH_LAYER);
     spotLight.layers.enable(GEOMETRY_LAYER);
     scene.add(spotLight);
+    // scene.add(new SpotLightHelper(spotLight));
   }
 
   if (renderer === undefined) {
@@ -92,11 +111,12 @@ const buildScene = ({
     renderer.inputGamma = true;
     renderer.outputGamma = true;
     renderer.setPixelRatio(window.devicePixelRatio);
+    // renderer.useLegacyLights = true;
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
 
     renderer.shadowMap.enabled = true;
-    // renderer.shadowMapType = BasicShadowMap;
+    renderer.shadowMapType = PCFShadowMap;
   }
   return { camera, canvas: renderer.domElement, renderer, scene };
 };
@@ -628,17 +648,9 @@ class AnchorControls extends EventDispatcher {
 
     const dispose = () => detach();
 
-    let _mouseX, _mouseY;
+    let _mouseX, _mouseY, _surfaceCursor;
 
     const adviseEdits = () => {
-      /*
-      const edits = [];
-      scene.traverse((object) => {
-        if (object.userData.edit) {
-          edits.push(object.userData.edit);
-        }
-      });
-      */
       this.dispatchEvent({
         edits: _edits,
         editId: editId,
@@ -646,11 +658,7 @@ class AnchorControls extends EventDispatcher {
       });
     };
 
-    const onMouseMove = (event) => {
-      const rect = event.target.getBoundingClientRect();
-      _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
-      _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
-
+    const getOrientedCursorPoint = () => {
       const { point, normal } = raycast(
         _mouseX,
         _mouseY,
@@ -660,14 +668,26 @@ class AnchorControls extends EventDispatcher {
       );
 
       if (point) {
+        return [point.x, point.y, point.z, normal.x, normal.y, normal.z];
+      }
+    };
+
+    const onMouseMove = (event) => {
+      const rect = event.target.getBoundingClientRect();
+      _mouseX = ((event.clientX - rect.x) / rect.width) * 2 - 1;
+      _mouseY = -((event.clientY - rect.y) / rect.height) * 2 + 1;
+
+      _surfaceCursor = getOrientedCursorPoint();
+      if (_surfaceCursor) {
+        const [x, y, z, nx, ny, nz] = _surfaceCursor;
         const position = _cursor.geometry.attributes.position;
-        position.array[0] = point.x;
-        position.array[1] = point.y;
-        position.array[2] = point.z;
+        position.array[0] = x;
+        position.array[1] = y;
+        position.array[2] = z;
         if (_cursor.userData.anchored !== true) {
-          position.array[3] = point.x + normal.x;
-          position.array[4] = point.y + normal.y;
-          position.array[5] = point.z + normal.z;
+          position.array[3] = x + nx;
+          position.array[4] = y + ny;
+          position.array[5] = z + nz;
         }
         position.needsUpdate = true;
         render();
@@ -756,6 +776,17 @@ class AnchorControls extends EventDispatcher {
           case 'q':
             _at.position.addScaledVector(_zAxis, -_step);
             break;
+
+          case 'p': {
+            if (_surfaceCursor) {
+              const [x, y, z, nx, ny, nz] = _surfaceCursor;
+              this.dispatchEvent({
+                type: 'indicatePoint',
+                point: [x, y, z, nx, ny, nz],
+              });
+            }
+            break;
+          }
 
           case 't': {
             const position = _cursor.geometry.attributes.position;
@@ -867,6 +898,7 @@ const loadTexture = (url) => {
             texture.wrapS = texture.wrapT = RepeatWrapping;
             texture.offset.set(0, 0);
             texture.repeat.set(1, 1);
+            texture.colorSpace = SRGBColorSpace;
             resolve(texture);
           },
           (progress) => console.log(`Loading: ${url}`),
@@ -1878,6 +1910,7 @@ const staticDisplay = async (
   page
 ) => {
   if (locked === true) await acquire();
+  console.log('QQ/static display: begin');
   locked = true;
 
   const datasets = [];
@@ -1934,6 +1967,7 @@ const staticDisplay = async (
 
   render();
 
+  console.log('QQ/static display: end');
   await release();
 
   return { canvas: displayCanvas, renderer };

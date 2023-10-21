@@ -16,19 +16,17 @@ export const LoadStl = Shape.registerMethod3(
   'LoadStl',
   [
     'string',
-    'modes:binary,ascii,wrap,removeSelfIntersections,autorefine',
+    'modes:binary,ascii',
+    'strings:wrap,patch,auto',
     'number',
     'options',
   ],
   async (
     path,
-    { binary, ascii, wrap, removeSelfIntersections, autorefine },
+    { binary, ascii },
+    strategies,
     implicitFaceCountLimit = 0,
     {
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
       faceCountLimit = implicitFaceCountLimit,
       sharpEdgeThreshold = 120 / 360,
     } = {}
@@ -45,42 +43,30 @@ export const LoadStl = Shape.registerMethod3(
     }
     return fromStl(data, {
       format,
-      wrapAlways: wrap,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
       faceCountLimit,
       sharpEdgeThreshold,
-      doRemoveSelfIntersections: removeSelfIntersections,
-      doWrap: wrap,
-      doAutorefine: autorefine,
+      strategies,
     });
   }
 );
 
 export const Stl = Shape.registerMethod3(
   'Stl',
-  ['string', 'modes:wrap', 'options'],
+  ['string', 'strings:wrap,patch,auto', 'number', 'options'],
   async (
     text,
-    { wrap },
+    strategies,
+    implicitFaceCountLimit = 0,
     {
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
-      cornerThreshold = 0,
+      faceCountLimit = implicitFaceCountLimit,
+      sharpEdgeThreshold = 120 / 360,
     } = {}
   ) =>
     fromStl(new TextEncoder('utf8').encode(text), {
       format: 'ascii',
-      wrapAlways: wrap,
-      wrapAbsoluteAlpha,
-      wrapAbsoluteOffset,
-      wrapRelativeAlpha,
-      wrapRelativeOffset,
-      cornerThreshold,
+      faceCountLimit,
+      sharpEdgeThreshold,
+      strategies,
     })
 );
 

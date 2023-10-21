@@ -1,4 +1,4 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fromSegmentToInverseTransform, invertTransform, fuse as fuse$1, convexHull as convexHull$1, eachPoint, makeUnitSphere, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, reconstruct as reconstruct$1, remesh as remesh$1, repair as repair$1, withAabbTreeQuery, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, invertTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, eachPoint, makeUnitSphere, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, offset as offset$1, reconstruct as reconstruct$1, remesh as remesh$1, repair as repair$1, withAabbTreeQuery, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, separate as separate$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending, log as log$1 } from './jsxcad-sys.js';
@@ -532,6 +532,31 @@ const taggedPoints = (
 
 const Point = (x = 0, y = 0, z = 0, coordinate) =>
   taggedPoints({}, [coordinate || [x, y, z]]);
+
+const OrientedPoint = (
+  x = 0,
+  y = 0,
+  z = 0,
+  nx = 0,
+  ny = 0,
+  nz = 1,
+  coordinate
+) => {
+  if (coordinate) {
+    [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
+  }
+  // Disorient the point as though the source of a segment.
+  const inverse = fromSegmentToInverseTransform(
+    [
+      [x, y, z],
+      [x + nx, y + ny, z + nz],
+    ],
+    [0, 0, 1]
+  );
+  const basePoint = transformCoordinate([x, y, z], inverse);
+  const matrix = invertTransform(inverse);
+  return taggedPoints({ matrix }, [basePoint]);
+};
 
 const Points = (coordinates) => taggedPoints({}, coordinates);
 
@@ -4784,22 +4809,59 @@ const fix = (geometry, selfIntersection = true) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const ref = (geometry) => hasTypeReference(geometry);
+const Ref = (
+  x = 0,
+  y = 0,
+  z = 0,
+  nx = 0,
+  ny = 0,
+  nz = 1,
+  coordinate
+) => {
+  if (coordinate) {
+    [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
+  }
+  // Disorient the point as though the source of a segment.
+  const inverse = fromSegmentToInverseTransform(
+    [
+      [x, y, z],
+      [x + nx, y + ny, z + nz],
+    ],
+    [0, 0, 1]
+  );
+  const basePoint = transformCoordinate([x, y, z], inverse);
+  const matrix = invertTransform(inverse);
+  return hasTypeReference(taggedPoints({ matrix }, [basePoint]));
+};
 
-const Ref = () => ref(Point([0, 0, 0]));
+const ref = (
+  geometry,
+  x = 0,
+  y = 0,
+  z = 0,
+  nx = 0,
+  ny = 0,
+  nz = 1,
+  coordinate
+) =>
+  transform(
+    Ref((x = 0), (y = 0), (z = 0), (nx = 0), (ny = 0), (nz = 1), coordinate),
+    transform(geometry.matrix)
+  );
 
-const X$3 = (x = 0) => translate(Ref(), [x, 0, 0]);
-const Y$3 = (y = 0) => translate(Ref(), [0, y, 0]);
-const Z$3 = (z = 0) => translate(Ref(), [0, 0, z]);
-const XY = (z = 0) => translate(Ref(), [0, 0, z]);
-const YX = (z = 0) => rotateX(translate(Ref(), [0, 0, z]), 1 / 2);
-const XZ = (y = 0) => rotateX(translate(Ref(), [0, y, 0]), -1 / 4);
-const ZX = (y = 0) => rotateX(translate(Ref(), [0, y, 0]), 1 / 4);
-const YZ = (x = 0) => rotateY(translate(Ref(), [x, 0, 0]), -1 / 4);
-const ZY = (x = 0) => rotateY(translate(Ref(), [x, 0, 0]), 1 / 40);
-const RX = (t = 0) => rotateX(Ref(), t);
-const RY = (t = 0) => rotateY(Ref(), t);
-const RZ = (t = 0) => rotateZ(Ref(), t);
+const X$3 = (x = 0) => Ref(x, 0, 0, 0, 0, 1);
+const Y$3 = (y = 0) => Ref(0, y, 0, 0, 0, 1);
+const Z$3 = (z = 0) => Ref(0, 0, z, 0, 0, 1);
+const XY = (z = 0) => Ref(0, 0, z, 0, 0, 1);
+const YX = (z = 0) => Ref(0, 0, z, 0, 0, -1);
+const XZ = (y = 0) => Ref(0, y, 0, 0, 1, 0);
+const ZX = (y = 0) => Ref(0, y, 0, 0, -1, 0);
+const YZ = (x = 0) => Ref(x, 0, 0, 1, 0, 0);
+const ZY = (x = 0) => Ref(x, 0, 0, -1, 0, 0);
+
+const RX = (t = 0) => rotateX(Ref(0, 0, 0, 0, 0, 1), t);
+const RY = (t = 0) => rotateY(Ref(0, 0, 0, 0, 0, 1), t);
+const RZ = (t = 0) => rotateZ(Ref(0, 0, 0, 0, 0, 1), t);
 
 const origin = (geometry) => {
   const { local } = getInverseMatrices(geometry);
@@ -4842,31 +4904,17 @@ const fromPolygonSoup = (
     tags = [],
     close = false,
     tolerance,
-    wrapAlways,
-    wrapAbsoluteAlpha,
-    wrapAbsoluteOffset,
-    wrapRelativeAlpha,
-    wrapRelativeOffset,
     faceCountLimit,
     sharpEdgeThreshold,
-    doRemoveSelfIntersections,
-    doWrap,
-    doAutorefine,
+    strategies = [],
   } = {}
 ) => {
   const outputs = fromPolygonSoup$1(
     polygons,
     tolerance,
-    wrapAlways,
-    wrapRelativeAlpha,
-    wrapRelativeOffset,
-    wrapAbsoluteAlpha,
-    wrapAbsoluteOffset,
     faceCountLimit,
     sharpEdgeThreshold,
-    doRemoveSelfIntersections,
-    doWrap,
-    doAutorefine
+    strategies
   );
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };
@@ -5849,4 +5897,4 @@ const Wrap = (geometries, offset = 1, alpha = 0.1) => {
 const wrap = (geometry, geometries, offset, alpha) =>
   tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
 
-export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Link, Loop, Octagon, Orb, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

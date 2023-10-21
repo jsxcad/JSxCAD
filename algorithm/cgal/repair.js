@@ -3,7 +3,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const repair = (inputs, strategies = []) => {
+export const provideRepairStrategies = (strategies) => {
   const strategyCodes = [];
   for (const strategy of strategies) {
     switch (strategy) {
@@ -13,14 +13,24 @@ export const repair = (inputs, strategies = []) => {
       case 'patch':
         strategyCodes.push(1);
         break;
+      case 'wrap':
+        strategyCodes.push(2);
+        break;
+      case 'close':
+        strategyCodes.push(3);
+        break;
       default:
         throw new Error(
-          `Repair strategy: ${strategy} not in ['auto', 'patch'].`
+          `Repair strategy: ${strategy} not in ['auto', 'close', 'patch', 'wrap'].`
         );
     }
   }
-  return withCgalGeometry('repair', inputs, (cgalGeometry, g) => {
-    const status = g.Repair(cgalGeometry, () => strategyCodes.pop() || -1);
+  return () => strategyCodes.shift() || -1;
+};
+
+export const repair = (inputs, strategies = []) =>
+  withCgalGeometry('repair', inputs, (cgalGeometry, g) => {
+    const status = g.Repair(cgalGeometry, provideRepairStrategies(strategies));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by repair');
@@ -30,4 +40,3 @@ export const repair = (inputs, strategies = []) => {
         throw new Error(`Unexpected status ${status}`);
     }
   });
-};

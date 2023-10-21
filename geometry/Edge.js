@@ -2,6 +2,7 @@ import {
   fromSegmentToInverseTransform,
   invertTransform,
 } from '@jsxcad/algorithm-cgal';
+
 import { taggedSegments } from './tagged/taggedSegments.js';
 import { transformCoordinate } from './transform.js';
 

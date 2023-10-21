@@ -220,6 +220,28 @@ export const tile2x2 = Box((SIZE - 0.1) * 2)
   .v(1);
 ```
 
+![Image](openforge.md.tile4x4_tile4x4.png)
+
+[tile4x4.stl](openforge.tile4x4.stl)
+
+```JavaScript
+export const tile4x4 = Box((SIZE - 0.1) * 4)
+  .Loft(inset(0.5).z(0), z(1), z(3), inset(1).z(4))
+  .cut(
+    base1x1
+      .gap()
+      .z(-7.1)
+      .x(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5),
+    Connector(0.35)
+      .x(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+      .y(SIZE * 1.5, SIZE * 0.5, SIZE * -0.5, SIZE * -1.5)
+  )
+  .z(-3)
+  .stl('tile4x4', fuse())
+  .v(1);
+```
+
 ```JavaScript
 export const SIZE = 24;
 ```
