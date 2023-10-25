@@ -7,7 +7,6 @@ export class ErrorNote extends React.Component {
     return {
       note: PropTypes.string,
       notebookPath: PropTypes.string,
-      workspace: PropTypes.string,
     };
   }
 

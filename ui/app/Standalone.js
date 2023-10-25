@@ -2,11 +2,6 @@ import './react-multi-split-pane.css';
 
 import * as PropTypes from 'prop-types';
 
-import Notebook, {
-  clearNotebookState,
-  updateNotebookState,
-} from './Notebook.js';
-
 import {
   addOnEmitHandler,
   boot,
@@ -19,6 +14,7 @@ import {
 } from '@jsxcad/sys';
 
 import DynamicView from './DynamicView.js';
+import Notebook from './Notebook.js';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SplitPaneModule from 'react-multi-split-pane';
@@ -96,13 +92,13 @@ class Standalone extends React.Component {
         if (notes.length === 0) {
           return;
         }
-        const sourceLocation = notes[0].sourceLocation;
+        // const sourceLocation = notes[0].sourceLocation;
         // TODO: Parallelize these operations.
         setVersion(notes, version);
         await renderViews(notes);
         await fixLinks(notes);
         await prepareDownloads(notes);
-        updateNotebookState(this, { notes, sourceLocation, workspace });
+        // updateNotebookState(this, { notes, sourceLocation, workspace });
       };
 
       const onEmitHandler = addOnEmitHandler(addNotes);
@@ -127,11 +123,13 @@ class Standalone extends React.Component {
       this.setState({ [`NotebookState/${module}`]: 'idle' });
 
       removeOnEmitHandler(onEmitHandler);
+      /*
       clearNotebookState(this, {
         path: module,
         workspace,
         isToBeKept: (note) => note.version === version,
       });
+      */
     };
 
     const onKeyDown = (e) => {

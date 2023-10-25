@@ -1,9 +1,10 @@
-import { readOrWatch, read, write, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, read, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { execute } from './jsxcad-api.js';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
+import { toEcmascript } from './jsxcad-compiler.js';
 
 var n,l$1,u$1,t$1,o$2,r$1,f$2,e$2={},c$1=[],s$1=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function a$1(n,l){for(var u in l)n[u]=l[u];return n}function h$1(n){var l=n.parentNode;l&&l.removeChild(n);}function v$1(l,u,i){var t,o,r,f={};for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return y$1(l,f,t,o,null)}function y$1(n,i,t,o,r){var f={type:n,props:i,key:t,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==r?++u$1:r};return null!=l$1.vnode&&l$1.vnode(f),f}function p$1(){return {current:null}}function d$1(n){return n.children}function _$1(n,l){this.props=n,this.context=l;}function k$2(n,l){if(null==l)return n.__?k$2(n.__,n.__.__k.indexOf(n)+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?k$2(n):null}function b$1(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return b$1(n)}}function m$1(n){(!n.__d&&(n.__d=!0)&&t$1.push(n)&&!g$2.__r++||r$1!==l$1.debounceRendering)&&((r$1=l$1.debounceRendering)||o$2)(g$2);}function g$2(){for(var n;g$2.__r=t$1.length;)n=t$1.sort(function(n,l){return n.__v.__b-l.__v.__b}),t$1=[],n.some(function(n){var l,u,i,t,o,r;n.__d&&(o=(t=(l=n).__v).__e,(r=l.__P)&&(u=[],(i=a$1({},t)).__v=t.__v+1,j$2(r,t,i,l.__n,void 0!==r.ownerSVGElement,null!=t.__h?[o]:null,u,null==o?k$2(t):o,t.__h),z$1(u,t),t.__e!=o&&b$1(t)));});}function w$2(n,l,u,i,t,o,r,f,s,a){var h,v,p,_,b,m,g,w=i&&i.__k||c$1,A=w.length;for(u.__k=[],h=0;h<l.length;h++)if(null!=(_=u.__k[h]=null==(_=l[h])||"boolean"==typeof _?null:"string"==typeof _||"number"==typeof _||"bigint"==typeof _?y$1(null,_,null,null,_):Array.isArray(_)?y$1(d$1,{children:_},null,null,null):_.__b>0?y$1(_.type,_.props,_.key,null,_.__v):_)){if(_.__=u,_.__b=u.__b+1,null===(p=w[h])||p&&_.key==p.key&&_.type===p.type)w[h]=void 0;else for(v=0;v<A;v++){if((p=w[v])&&_.key==p.key&&_.type===p.type){w[v]=void 0;break}p=null;}j$2(n,_,p=p||e$2,t,o,r,f,s,a),b=_.__e,(v=_.ref)&&p.ref!=v&&(g||(g=[]),p.ref&&g.push(p.ref,null,_),g.push(v,_.__c||b,_)),null!=b?(null==m&&(m=b),"function"==typeof _.type&&null!=_.__k&&_.__k===p.__k?_.__d=s=x$2(_,s,n):s=P$1(n,_,p,w,b,s),a||"option"!==u.type?"function"==typeof u.type&&(u.__d=s):n.value=""):s&&p.__e==s&&s.parentNode!=n&&(s=k$2(p));}for(u.__e=m,h=A;h--;)null!=w[h]&&("function"==typeof u.type&&null!=w[h].__e&&w[h].__e==u.__d&&(u.__d=k$2(i,h+1)),N$1(w[h],w[h]));if(g)for(h=0;h<g.length;h++)M$1(g[h],g[++h],g[++h]);}function x$2(n,l,u){var i,t;for(i=0;i<n.__k.length;i++)(t=n.__k[i])&&(t.__=n,l="function"==typeof t.type?x$2(t,l,u):P$1(u,t,t,n.__k,t.__e,l));return l}function A$2(n,l){return l=l||[],null==n||"boolean"==typeof n||(Array.isArray(n)?n.some(function(n){A$2(n,l);}):l.push(n)),l}function P$1(n,l,u,i,t,o){var r,f,e;if(void 0!==l.__d)r=l.__d,l.__d=void 0;else if(null==u||t!=o||null==t.parentNode)n:if(null==o||o.parentNode!==n)n.appendChild(t),r=null;else {for(f=o,e=0;(f=f.nextSibling)&&e<i.length;e+=2)if(f==t)break n;n.insertBefore(t,o),r=o;}return void 0!==r?r:t.nextSibling}function C$1(n,l,u,i,t){var o;for(o in u)"children"===o||"key"===o||o in l||H$1(n,o,null,u[o],i);for(o in l)t&&"function"!=typeof l[o]||"children"===o||"key"===o||"value"===o||"checked"===o||u[o]===l[o]||H$1(n,o,l[o],u[o],i);}function $$1(n,l,u){"-"===l[0]?n.setProperty(l,u):n[l]=null==u?"":"number"!=typeof u||s$1.test(l)?u:u+"px";}function H$1(n,l,u,i,t){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof i&&(n.style.cssText=i=""),i)for(l in i)u&&l in u||$$1(n.style,l,"");if(u)for(l in u)i&&u[l]===i[l]||$$1(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/Capture$/,"")),l=l.toLowerCase()in n?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?i||n.addEventListener(l,o?T$2:I$1,o):n.removeEventListener(l,o?T$2:I$1,o);else if("dangerouslySetInnerHTML"!==l){if(t)l=l.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==l&&"list"!==l&&"form"!==l&&"tabIndex"!==l&&"download"!==l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null!=u&&(!1!==u||"a"===l[0]&&"r"===l[1])?n.setAttribute(l,u):n.removeAttribute(l));}}function I$1(n){this.l[n.type+!1](l$1.event?l$1.event(n):n);}function T$2(n){this.l[n.type+!0](l$1.event?l$1.event(n):n);}function j$2(n,u,i,t,o,r,f,e,c){var s,h,v,y,p,k,b,m,g,x,A,P=u.type;if(void 0!==u.constructor)return null;null!=i.__h&&(c=i.__h,e=u.__e=i.__e,u.__h=null,r=[e]),(s=l$1.__b)&&s(u);try{n:if("function"==typeof P){if(m=u.props,g=(s=P.contextType)&&t[s.__c],x=s?g?g.props.value:s.__:t,i.__c?b=(h=u.__c=i.__c).__=h.__E:("prototype"in P&&P.prototype.render?u.__c=h=new P(m,x):(u.__c=h=new _$1(m,x),h.constructor=P,h.render=O$1),g&&g.sub(h),h.props=m,h.state||(h.state={}),h.context=x,h.__n=t,v=h.__d=!0,h.__h=[]),null==h.__s&&(h.__s=h.state),null!=P.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=a$1({},h.__s)),a$1(h.__s,P.getDerivedStateFromProps(m,h.__s))),y=h.props,p=h.state,v)null==P.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(null==P.getDerivedStateFromProps&&m!==y&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,x),!h.__e&&null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,x)||u.__v===i.__v){h.props=m,h.state=h.__s,u.__v!==i.__v&&(h.__d=!1),h.__v=u,u.__e=i.__e,u.__k=i.__k,u.__k.forEach(function(n){n&&(n.__=u);}),h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,x),null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(y,p,k);});}h.context=x,h.props=m,h.state=h.__s,(s=l$1.__r)&&s(u),h.__d=!1,h.__v=u,h.__P=n,s=h.render(h.props,h.state,h.context),h.state=h.__s,null!=h.getChildContext&&(t=a$1(a$1({},t),h.getChildContext())),v||null==h.getSnapshotBeforeUpdate||(k=h.getSnapshotBeforeUpdate(y,p)),A=null!=s&&s.type===d$1&&null==s.key?s.props.children:s,w$2(n,Array.isArray(A)?A:[A],u,i,t,o,r,f,e,c),h.base=u.__e,u.__h=null,h.__h.length&&f.push(h),b&&(h.__E=h.__=null),h.__e=!1;}else null==r&&u.__v===i.__v?(u.__k=i.__k,u.__e=i.__e):u.__e=L$1(i.__e,u,i,t,o,r,f,c);(s=l$1.diffed)&&s(u);}catch(n){u.__v=null,(c||null!=r)&&(u.__e=e,u.__h=!!c,r[r.indexOf(e)]=null),l$1.__e(n,u,i);}}function z$1(n,u){l$1.__c&&l$1.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$1.__e(n,u.__v);}});}function L$1(l,u,i,t,o,r,f,c){var s,a,v,y=i.props,p=u.props,d=u.type,_=0;if("svg"===d&&(o=!0),null!=r)for(;_<r.length;_++)if((s=r[_])&&(s===l||(d?s.localName==d:3==s.nodeType))){l=s,r[_]=null;break}if(null==l){if(null===d)return document.createTextNode(p);l=o?document.createElementNS("http://www.w3.org/2000/svg",d):document.createElement(d,p.is&&p),r=null,c=!1;}if(null===d)y===p||c&&l.data===p||(l.data=p);else {if(r=r&&n.call(l.childNodes),a=(y=i.props||e$2).dangerouslySetInnerHTML,v=p.dangerouslySetInnerHTML,!c){if(null!=r)for(y={},_=0;_<l.attributes.length;_++)y[l.attributes[_].name]=l.attributes[_].value;(v||a)&&(v&&(a&&v.__html==a.__html||v.__html===l.innerHTML)||(l.innerHTML=v&&v.__html||""));}if(C$1(l,p,y,o,c),v)u.__k=[];else if(_=u.props.children,w$2(l,Array.isArray(_)?_:[_],u,i,t,o&&"foreignObject"!==d,r,f,r?r[0]:i.__k&&k$2(i,0),c),null!=r)for(_=r.length;_--;)null!=r[_]&&h$1(r[_]);c||("value"in p&&void 0!==(_=p.value)&&(_!==l.value||"progress"===d&&!_)&&H$1(l,"value",_,y.value,!1),"checked"in p&&void 0!==(_=p.checked)&&_!==l.checked&&H$1(l,"checked",_,y.checked,!1));}return l}function M$1(n,u,i){try{"function"==typeof n?n(u):n.current=u;}catch(n){l$1.__e(n,i);}}function N$1(n,u,i){var t,o;if(l$1.unmount&&l$1.unmount(n),(t=n.ref)&&(t.current&&t.current!==n.__e||M$1(t,null,u)),null!=(t=n.__c)){if(t.componentWillUnmount)try{t.componentWillUnmount();}catch(n){l$1.__e(n,u);}t.base=t.__P=null;}if(t=n.__k)for(o=0;o<t.length;o++)t[o]&&N$1(t[o],u,"function"!=typeof n.type);i||null==n.__e||h$1(n.__e),n.__e=n.__d=void 0;}function O$1(n,l,u){return this.constructor(n,u)}function S$1(u,i,t){var o,r,f;l$1.__&&l$1.__(u,i),r=(o="function"==typeof t)?null:t&&t.__k||i.__k,f=[],j$2(i,u=(!o&&t||i).__k=v$1(d$1,null,[u]),r||e$2,e$2,void 0!==i.ownerSVGElement,!o&&t?[t]:r?null:i.firstChild?n.call(i.childNodes):null,f,!o&&t?t:r?r.__e:i.firstChild,o),z$1(f,u);}function q$2(n,l){S$1(n,l,q$2);}function B$1(l,u,i){var t,o,r,f=a$1({},l.props);for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];return arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),y$1(l.type,f,t||l.key,o||l.ref,null)}function D$1(n,l){var u={__c:l="__cC"+f$2++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,i;return this.getChildContext||(u=[],(i={})[l]=this,this.getChildContext=function(){return i},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.some(m$1);},this.sub=function(n){u.push(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u.splice(u.indexOf(n),1),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=c$1.slice,l$1={__e:function(n,l){for(var u,i,t;l=l.__;)if((u=l.__c)&&!u.__)try{if((i=u.constructor)&&null!=i.getDerivedStateFromError&&(u.setState(i.getDerivedStateFromError(n)),t=u.__d),null!=u.componentDidCatch&&(u.componentDidCatch(n),t=u.__d),t)return u.__E=u}catch(l){n=l;}throw n}},u$1=0,_$1.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=a$1({},this.state),"function"==typeof n&&(n=n(a$1({},u),this.props)),n&&a$1(u,n),null!=n&&this.__v&&(l&&this.__h.push(l),m$1(this));},_$1.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),m$1(this));},_$1.prototype.render=d$1,t$1=[],o$2="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,g$2.__r=0,f$2=0;
 
@@ -1156,6 +1157,93 @@ var compat_module = /*#__PURE__*/Object.freeze({
 
 var o=0;function e(_,e,n,t,f){var l,s,u={};for(s in e)"ref"==s?l=e[s]:u[s]=e[s];var a={type:_,props:u,key:n,ref:l,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:--o,__source:t,__self:f};if("function"==typeof _&&(l=_.defaultProps))for(s in l)void 0===u[s]&&(u[s]=l[s]);return l$1.vnode&&l$1.vnode(a),a}
 
+const _excluded$2 = ["as", "disabled"];
+function _objectWithoutPropertiesLoose$3(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+function isTrivialHref(href) {
+  return !href || href.trim() === '#';
+}
+function useButtonProps({
+  tagName,
+  disabled,
+  href,
+  target,
+  rel,
+  role,
+  onClick,
+  tabIndex = 0,
+  type
+}) {
+  if (!tagName) {
+    if (href != null || target != null || rel != null) {
+      tagName = 'a';
+    } else {
+      tagName = 'button';
+    }
+  }
+  const meta = {
+    tagName
+  };
+  if (tagName === 'button') {
+    return [{
+      type: type || 'button',
+      disabled
+    }, meta];
+  }
+  const handleClick = event => {
+    if (disabled || tagName === 'a' && isTrivialHref(href)) {
+      event.preventDefault();
+    }
+    if (disabled) {
+      event.stopPropagation();
+      return;
+    }
+    onClick == null ? void 0 : onClick(event);
+  };
+  const handleKeyDown = event => {
+    if (event.key === ' ') {
+      event.preventDefault();
+      handleClick(event);
+    }
+  };
+  if (tagName === 'a') {
+    // Ensure there's a href so Enter can trigger anchor button.
+    href || (href = '#');
+    if (disabled) {
+      href = undefined;
+    }
+  }
+  return [{
+    role: role != null ? role : 'button',
+    // explicitly undefined so that it overrides the props disabled in a spread
+    // e.g. <Tag {...props} {...hookProps} />
+    disabled: undefined,
+    tabIndex: disabled ? undefined : tabIndex,
+    href,
+    target: tagName === 'a' ? target : undefined,
+    'aria-disabled': !disabled ? undefined : disabled,
+    rel: tagName === 'a' ? rel : undefined,
+    onClick: handleClick,
+    onKeyDown: handleKeyDown
+  }, meta];
+}
+const Button$1 = /*#__PURE__*/x((_ref, ref) => {
+  let {
+      as: asProp,
+      disabled
+    } = _ref,
+    props = _objectWithoutPropertiesLoose$3(_ref, _excluded$2);
+  const [buttonProps, {
+    tagName: Component
+  }] = useButtonProps(Object.assign({
+    tagName: asProp,
+    disabled
+  }, props));
+  return /*#__PURE__*/e(Component, Object.assign({}, props, buttonProps, {
+    ref: ref
+  }));
+});
+Button$1.displayName = 'Button';
+
 const DEFAULT_BREAKPOINTS = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
 const DEFAULT_MIN_BREAKPOINT = 'xs';
 const ThemeContext = /*#__PURE__*/D$1({
@@ -1181,6 +1269,57 @@ function useBootstrapMinBreakpoint() {
   } = F$1(ThemeContext);
   return minBreakpoint;
 }
+
+const Button = /*#__PURE__*/x(({
+  as,
+  bsPrefix,
+  variant = 'primary',
+  size,
+  active = false,
+  disabled = false,
+  className,
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'btn');
+  const [buttonProps, {
+    tagName
+  }] = useButtonProps({
+    tagName: as,
+    disabled,
+    ...props
+  });
+  const Component = tagName;
+  return /*#__PURE__*/e(Component, {
+    ...buttonProps,
+    ...props,
+    ref: ref,
+    disabled: disabled,
+    className: classNames(className, prefix, active && 'active', variant && `${prefix}-${variant}`, size && `${prefix}-${size}`, props.href && disabled && 'disabled')
+  });
+});
+Button.displayName = 'Button';
+
+const ButtonGroup = /*#__PURE__*/x(({
+  bsPrefix,
+  size,
+  vertical = false,
+  className,
+  role = 'group',
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...rest
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
+  let baseClass = prefix;
+  if (vertical) baseClass = `${prefix}-vertical`;
+  return /*#__PURE__*/e(Component, {
+    ...rest,
+    ref: ref,
+    role: role,
+    className: classNames(className, baseClass, size && `${prefix}-${size}`)
+  });
+});
+ButtonGroup.displayName = 'ButtonGroup';
 
 const CardBody = /*#__PURE__*/x(({
   className,
@@ -1442,4423 +1581,6 @@ const Col = /*#__PURE__*/x(
 });
 Col.displayName = 'Col';
 
-const Container = /*#__PURE__*/x(({
-  bsPrefix,
-  fluid = false,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  className,
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'container');
-  const suffix = typeof fluid === 'string' ? `-${fluid}` : '-fluid';
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    ...props,
-    className: classNames(className, fluid ? `${prefix}${suffix}` : prefix)
-  });
-});
-Container.displayName = 'Container';
-
-const propTypes$1 = {
-  /**
-   * Specify whether the feedback is for valid or invalid fields
-   *
-   * @type {('valid'|'invalid')}
-   */
-  type: PropTypes$3.string,
-  /** Display feedback as a tooltip. */
-  tooltip: PropTypes$3.bool,
-  as: PropTypes$3.elementType
-};
-const Feedback = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  as: Component = 'div',
-  className,
-  type = 'valid',
-  tooltip = false,
-  ...props
-}, ref) => /*#__PURE__*/e(Component, {
-  ...props,
-  ref: ref,
-  className: classNames(className, `${type}-${tooltip ? 'tooltip' : 'feedback'}`)
-}));
-Feedback.displayName = 'Feedback';
-Feedback.propTypes = propTypes$1;
-var Feedback$1 = Feedback;
-
-// TODO
-
-const FormContext = /*#__PURE__*/D$1({});
-var FormContext$1 = FormContext;
-
-const FormCheckInput = /*#__PURE__*/x(({
-  id,
-  bsPrefix,
-  className,
-  type = 'checkbox',
-  isValid = false,
-  isInvalid = false,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'input',
-  ...props
-}, ref) => {
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-input');
-  return /*#__PURE__*/e(Component, {
-    ...props,
-    ref: ref,
-    type: type,
-    id: id || controlId,
-    className: classNames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
-  });
-});
-FormCheckInput.displayName = 'FormCheckInput';
-var FormCheckInput$1 = FormCheckInput;
-
-const FormCheckLabel = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  htmlFor,
-  ...props
-}, ref) => {
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-label');
-  return /*#__PURE__*/e("label", {
-    ...props,
-    ref: ref,
-    htmlFor: htmlFor || controlId,
-    className: classNames(className, bsPrefix)
-  });
-});
-FormCheckLabel.displayName = 'FormCheckLabel';
-var FormCheckLabel$1 = FormCheckLabel;
-
-/**
- * Finds whether a component's `children` prop includes a React element of the
- * specified type.
- */
-function hasChildOfType(children, type) {
-  return k.toArray(children).some(child => /*#__PURE__*/tn(child) && child.type === type);
-}
-
-const FormCheck = /*#__PURE__*/x(({
-  id,
-  bsPrefix,
-  bsSwitchPrefix,
-  inline = false,
-  reverse = false,
-  disabled = false,
-  isValid = false,
-  isInvalid = false,
-  feedbackTooltip = false,
-  feedback,
-  feedbackType,
-  className,
-  style,
-  title = '',
-  type = 'checkbox',
-  label,
-  children,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as = 'input',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check');
-  bsSwitchPrefix = useBootstrapPrefix(bsSwitchPrefix, 'form-switch');
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  const innerFormContext = d(() => ({
-    controlId: id || controlId
-  }), [controlId, id]);
-  const hasLabel = !children && label != null && label !== false || hasChildOfType(children, FormCheckLabel$1);
-  const input = /*#__PURE__*/e(FormCheckInput$1, {
-    ...props,
-    type: type === 'switch' ? 'checkbox' : type,
-    ref: ref,
-    isValid: isValid,
-    isInvalid: isInvalid,
-    disabled: disabled,
-    as: as
-  });
-  return /*#__PURE__*/e(FormContext$1.Provider, {
-    value: innerFormContext,
-    children: /*#__PURE__*/e("div", {
-      style: style,
-      className: classNames(className, hasLabel && bsPrefix, inline && `${bsPrefix}-inline`, reverse && `${bsPrefix}-reverse`, type === 'switch' && bsSwitchPrefix),
-      children: children || /*#__PURE__*/e(d$1, {
-        children: [input, hasLabel && /*#__PURE__*/e(FormCheckLabel$1, {
-          title: title,
-          children: label
-        }), feedback && /*#__PURE__*/e(Feedback$1, {
-          type: feedbackType,
-          tooltip: feedbackTooltip,
-          children: feedback
-        })]
-      })
-    })
-  });
-});
-FormCheck.displayName = 'FormCheck';
-var FormCheck$1 = Object.assign(FormCheck, {
-  Input: FormCheckInput$1,
-  Label: FormCheckLabel$1
-});
-
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-var warning = function() {};
-
-{
-  var printWarning = function printWarning(format, args) {
-    var len = arguments.length;
-    args = new Array(len > 1 ? len - 1 : 0);
-    for (var key = 1; key < len; key++) {
-      args[key - 1] = arguments[key];
-    }
-    var argIndex = 0;
-    var message = 'Warning: ' +
-      format.replace(/%s/g, function() {
-        return args[argIndex++];
-      });
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-
-  warning = function(condition, format, args) {
-    var len = arguments.length;
-    args = new Array(len > 2 ? len - 2 : 0);
-    for (var key = 2; key < len; key++) {
-      args[key - 2] = arguments[key];
-    }
-    if (format === undefined) {
-      throw new Error(
-          '`warning(condition, format, ...args)` requires a warning ' +
-          'message argument'
-      );
-    }
-    if (!condition) {
-      printWarning.apply(null, [format].concat(args));
-    }
-  };
-}
-
-var warning_1 = warning;
-
-const FormControl = /*#__PURE__*/x(({
-  bsPrefix,
-  type,
-  size,
-  htmlSize,
-  id,
-  className,
-  isValid = false,
-  isInvalid = false,
-  plaintext,
-  readOnly,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'input',
-  ...props
-}, ref) => {
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
-  warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
-  return /*#__PURE__*/e(Component, {
-    ...props,
-    type: type,
-    size: htmlSize,
-    ref: ref,
-    readOnly: readOnly,
-    id: id || controlId,
-    className: classNames(className, plaintext ? `${bsPrefix}-plaintext` : bsPrefix, size && `${bsPrefix}-${size}`, type === 'color' && `${bsPrefix}-color`, isValid && 'is-valid', isInvalid && 'is-invalid')
-  });
-});
-FormControl.displayName = 'FormControl';
-var FormControl$1 = Object.assign(FormControl, {
-  Feedback: Feedback$1
-});
-
-const FormFloating = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-FormFloating.displayName = 'FormFloating';
-var FormFloating$1 = FormFloating;
-
-const FormGroup = /*#__PURE__*/x(({
-  controlId,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const context = d(() => ({
-    controlId
-  }), [controlId]);
-  return /*#__PURE__*/e(FormContext$1.Provider, {
-    value: context,
-    children: /*#__PURE__*/e(Component, {
-      ...props,
-      ref: ref
-    })
-  });
-});
-FormGroup.displayName = 'FormGroup';
-var FormGroup$1 = FormGroup;
-
-const FormLabel = /*#__PURE__*/x(({
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'label',
-  bsPrefix,
-  column = false,
-  visuallyHidden = false,
-  className,
-  htmlFor,
-  ...props
-}, ref) => {
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
-  let columnClass = 'col-form-label';
-  if (typeof column === 'string') columnClass = `${columnClass} ${columnClass}-${column}`;
-  const classes = classNames(className, bsPrefix, visuallyHidden && 'visually-hidden', column && columnClass);
-  warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
-  htmlFor = htmlFor || controlId;
-  if (column) return /*#__PURE__*/e(Col, {
-    ref: ref,
-    as: "label",
-    className: classes,
-    htmlFor: htmlFor,
-    ...props
-  });
-  return (
-    /*#__PURE__*/
-    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    e(Component, {
-      ref: ref,
-      className: classes,
-      htmlFor: htmlFor,
-      ...props
-    })
-  );
-});
-FormLabel.displayName = 'FormLabel';
-var FormLabel$1 = FormLabel;
-
-const FormRange = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  id,
-  ...props
-}, ref) => {
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-range');
-  return /*#__PURE__*/e("input", {
-    ...props,
-    type: "range",
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    id: id || controlId
-  });
-});
-FormRange.displayName = 'FormRange';
-var FormRange$1 = FormRange;
-
-const FormSelect = /*#__PURE__*/x(({
-  bsPrefix,
-  size,
-  htmlSize,
-  className,
-  isValid = false,
-  isInvalid = false,
-  id,
-  ...props
-}, ref) => {
-  const {
-    controlId
-  } = F$1(FormContext$1);
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-select');
-  return /*#__PURE__*/e("select", {
-    ...props,
-    size: htmlSize,
-    ref: ref,
-    className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, isValid && `is-valid`, isInvalid && `is-invalid`),
-    id: id || controlId
-  });
-});
-FormSelect.displayName = 'FormSelect';
-var FormSelect$1 = FormSelect;
-
-const FormText = /*#__PURE__*/x(
-// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-({
-  bsPrefix,
-  className,
-  as: Component = 'small',
-  muted,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return /*#__PURE__*/e(Component, {
-    ...props,
-    ref: ref,
-    className: classNames(className, bsPrefix, muted && 'text-muted')
-  });
-});
-FormText.displayName = 'FormText';
-var FormText$1 = FormText;
-
-const Switch = /*#__PURE__*/x((props, ref) => /*#__PURE__*/e(FormCheck$1, {
-  ...props,
-  ref: ref,
-  type: "switch"
-}));
-Switch.displayName = 'Switch';
-var Switch$1 = Object.assign(Switch, {
-  Input: FormCheck$1.Input,
-  Label: FormCheck$1.Label
-});
-
-const FloatingLabel = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  children,
-  controlId,
-  label,
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
-  return /*#__PURE__*/e(FormGroup$1, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    controlId: controlId,
-    ...props,
-    children: [children, /*#__PURE__*/e("label", {
-      htmlFor: controlId,
-      children: label
-    })]
-  });
-});
-FloatingLabel.displayName = 'FloatingLabel';
-var FloatingLabel$1 = FloatingLabel;
-
-const propTypes = {
-  /**
-   * The Form `ref` will be forwarded to the underlying element,
-   * which means, unless it's rendered `as` a composite component,
-   * it will be a DOM node, when resolved.
-   *
-   * @type {ReactRef}
-   * @alias ref
-   */
-  _ref: PropTypes$3.any,
-  /**
-   * Mark a form as having been validated. Setting it to `true` will
-   * toggle any validation styles on the forms elements.
-   */
-  validated: PropTypes$3.bool,
-  as: PropTypes$3.elementType
-};
-const Form = /*#__PURE__*/x(({
-  className,
-  validated,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'form',
-  ...props
-}, ref) => /*#__PURE__*/e(Component, {
-  ...props,
-  ref: ref,
-  className: classNames(className, validated && 'was-validated')
-}));
-Form.displayName = 'Form';
-Form.propTypes = propTypes;
-var Form$1 = Object.assign(Form, {
-  Group: FormGroup$1,
-  Control: FormControl$1,
-  Floating: FormFloating$1,
-  Check: FormCheck$1,
-  Switch: Switch$1,
-  Label: FormLabel$1,
-  Text: FormText$1,
-  Range: FormRange$1,
-  Select: FormSelect$1,
-  FloatingLabel: FloatingLabel$1
-});
-
-const context = /*#__PURE__*/D$1(null);
-context.displayName = 'InputGroupContext';
-var InputGroupContext = context;
-
-const InputGroupText = /*#__PURE__*/x(({
-  className,
-  bsPrefix,
-  as: Component = 'span',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group-text');
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    className: classNames(className, bsPrefix),
-    ...props
-  });
-});
-InputGroupText.displayName = 'InputGroupText';
-var InputGroupText$1 = InputGroupText;
-
-const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText$1, {
-  children: /*#__PURE__*/e(FormCheckInput$1, {
-    type: "checkbox",
-    ...props
-  })
-});
-const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText$1, {
-  children: /*#__PURE__*/e(FormCheckInput$1, {
-    type: "radio",
-    ...props
-  })
-});
-const InputGroup = /*#__PURE__*/x(({
-  bsPrefix,
-  size,
-  hasValidation,
-  className,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
-
-  // Intentionally an empty object. Used in detecting if a dropdown
-  // exists under an input group.
-  const contextValue = d(() => ({}), []);
-  return /*#__PURE__*/e(InputGroupContext.Provider, {
-    value: contextValue,
-    children: /*#__PURE__*/e(Component, {
-      ref: ref,
-      ...props,
-      className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, hasValidation && 'has-validation')
-    })
-  });
-});
-InputGroup.displayName = 'InputGroup';
-var InputGroup$1 = Object.assign(InputGroup, {
-  Text: InputGroupText$1,
-  Radio: InputGroupRadio,
-  Checkbox: InputGroupCheckbox
-});
-
-class ControlNote extends ReactDOM$3.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object,
-      selected: propTypes$2.exports.boolean
-    };
-  }
-  render() {
-    const {
-      note,
-      selected
-    } = this.props;
-    const {
-      blur,
-      control
-    } = note;
-    const {
-      label,
-      options,
-      type,
-      value
-    } = control;
-    const ref = selected && /*#__PURE__*/p$1();
-    if (selected) {
-      y(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
-    // TODO: Slider.
-    switch (type) {
-      case 'check':
-        return v$1(InputGroup$1, {
-          ref: ref,
-          style: {
-            border,
-            opacity: blur ? 0.5 : 1
-          }
-        }, v$1(Form$1.Check, {
-          label: label,
-          type: "checkbox",
-          name: label,
-          checked: value,
-          className: `note control check ${blur ? 'disabled' : 'enabled'}`
-        }));
-      case 'input':
-        return v$1(InputGroup$1, {
-          ref: ref,
-          style: {
-            border,
-            opacity: blur ? 0.5 : 1
-          }
-        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
-          className: `note control input ${blur ? 'disabled' : 'enabled'}`,
-          value: value,
-          name: label
-        }));
-      case 'select':
-        return v$1(InputGroup$1, {
-          ref: ref,
-          style: {
-            border,
-            opacity: blur ? 0.5 : 1
-          }
-        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
-          as: "select",
-          className: `note control select ${blur ? 'disabled' : 'enabled'}`,
-          name: label
-        }, options.map((option, nth) => v$1("option", {
-          key: nth,
-          value: option,
-          selected: option === value
-        }, option))));
-      default:
-        return v$1("div", {
-          ref: ref,
-          style: {
-            border,
-            opacity: blur ? 0.5 : 1
-          }
-        }, "Unsupported control type");
-    }
-  }
-}
-
-const _excluded$2 = ["as", "disabled"];
-function _objectWithoutPropertiesLoose$3(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-function isTrivialHref(href) {
-  return !href || href.trim() === '#';
-}
-function useButtonProps({
-  tagName,
-  disabled,
-  href,
-  target,
-  rel,
-  role,
-  onClick,
-  tabIndex = 0,
-  type
-}) {
-  if (!tagName) {
-    if (href != null || target != null || rel != null) {
-      tagName = 'a';
-    } else {
-      tagName = 'button';
-    }
-  }
-  const meta = {
-    tagName
-  };
-  if (tagName === 'button') {
-    return [{
-      type: type || 'button',
-      disabled
-    }, meta];
-  }
-  const handleClick = event => {
-    if (disabled || tagName === 'a' && isTrivialHref(href)) {
-      event.preventDefault();
-    }
-    if (disabled) {
-      event.stopPropagation();
-      return;
-    }
-    onClick == null ? void 0 : onClick(event);
-  };
-  const handleKeyDown = event => {
-    if (event.key === ' ') {
-      event.preventDefault();
-      handleClick(event);
-    }
-  };
-  if (tagName === 'a') {
-    // Ensure there's a href so Enter can trigger anchor button.
-    href || (href = '#');
-    if (disabled) {
-      href = undefined;
-    }
-  }
-  return [{
-    role: role != null ? role : 'button',
-    // explicitly undefined so that it overrides the props disabled in a spread
-    // e.g. <Tag {...props} {...hookProps} />
-    disabled: undefined,
-    tabIndex: disabled ? undefined : tabIndex,
-    href,
-    target: tagName === 'a' ? target : undefined,
-    'aria-disabled': !disabled ? undefined : disabled,
-    rel: tagName === 'a' ? rel : undefined,
-    onClick: handleClick,
-    onKeyDown: handleKeyDown
-  }, meta];
-}
-const Button$1 = /*#__PURE__*/x((_ref, ref) => {
-  let {
-      as: asProp,
-      disabled
-    } = _ref,
-    props = _objectWithoutPropertiesLoose$3(_ref, _excluded$2);
-  const [buttonProps, {
-    tagName: Component
-  }] = useButtonProps(Object.assign({
-    tagName: asProp,
-    disabled
-  }, props));
-  return /*#__PURE__*/e(Component, Object.assign({}, props, buttonProps, {
-    ref: ref
-  }));
-});
-Button$1.displayName = 'Button';
-
-const Button = /*#__PURE__*/x(({
-  as,
-  bsPrefix,
-  variant = 'primary',
-  size,
-  active = false,
-  disabled = false,
-  className,
-  ...props
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'btn');
-  const [buttonProps, {
-    tagName
-  }] = useButtonProps({
-    tagName: as,
-    disabled,
-    ...props
-  });
-  const Component = tagName;
-  return /*#__PURE__*/e(Component, {
-    ...buttonProps,
-    ...props,
-    ref: ref,
-    disabled: disabled,
-    className: classNames(className, prefix, active && 'active', variant && `${prefix}-${variant}`, size && `${prefix}-${size}`, props.href && disabled && 'disabled')
-  });
-});
-Button.displayName = 'Button';
-
-const ButtonGroup = /*#__PURE__*/x(({
-  bsPrefix,
-  size,
-  vertical = false,
-  className,
-  role = 'group',
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...rest
-}, ref) => {
-  const prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
-  let baseClass = prefix;
-  if (vertical) baseClass = `${prefix}-vertical`;
-  return /*#__PURE__*/e(Component, {
-    ...rest,
-    ref: ref,
-    role: role,
-    className: classNames(className, baseClass, size && `${prefix}-${size}`)
-  });
-});
-ButtonGroup.displayName = 'ButtonGroup';
-
-/*
- * base64-arraybuffer 1.0.2 <https://github.com/niklasvh/base64-arraybuffer>
- * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
- * Released under MIT License
- */
-var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-// Use a lookup table to find the index.
-var lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
-for (var i$1 = 0; i$1 < chars.length; i$1++) {
-    lookup[chars.charCodeAt(i$1)] = i$1;
-}
-var decode = function (base64) {
-    var bufferLength = base64.length * 0.75, len = base64.length, i, p = 0, encoded1, encoded2, encoded3, encoded4;
-    if (base64[base64.length - 1] === '=') {
-        bufferLength--;
-        if (base64[base64.length - 2] === '=') {
-            bufferLength--;
-        }
-    }
-    var arraybuffer = new ArrayBuffer(bufferLength), bytes = new Uint8Array(arraybuffer);
-    for (i = 0; i < len; i += 4) {
-        encoded1 = lookup[base64.charCodeAt(i)];
-        encoded2 = lookup[base64.charCodeAt(i + 1)];
-        encoded3 = lookup[base64.charCodeAt(i + 2)];
-        encoded4 = lookup[base64.charCodeAt(i + 3)];
-        bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
-        bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
-        bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
-    }
-    return arraybuffer;
-};
-
-var FileSaver_min = {exports: {}};
-
-(function (module, exports) {
-(function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(a,b,c){var d=new XMLHttpRequest;d.open("GET",a),d.responseType="blob",d.onload=function(){g(d.response,b,c);},d.onerror=function(){console.error("could not download file");},d.send();}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send();}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.navigator&&/Macintosh/.test(navigator.userAgent)&&/AppleWebKit/.test(navigator.userAgent)&&!/Safari/.test(navigator.userAgent),g=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype&&!a?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else {var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(b,d,e,g){if(g=g||open("","_blank"),g&&(g.document.title=g.document.body.innerText="downloading..."),"string"==typeof b)return c(b,d,e);var h="application/octet-stream"===b.type,i=/constructor/i.test(f.HTMLElement)||f.safari,j=/CriOS\/[\d]+/.test(navigator.userAgent);if((j||h&&i||a)&&"undefined"!=typeof FileReader){var k=new FileReader;k.onloadend=function(){var a=k.result;a=j?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),g?g.location.href=a:location=a,g=null;},k.readAsDataURL(b);}else {var l=f.URL||f.webkitURL,m=l.createObjectURL(b);g?g.location=m:location.href=m,g=null,setTimeout(function(){l.revokeObjectURL(m);},4E4);}});f.saveAs=g.saveAs=g,(module.exports=g);});
-
-
-}(FileSaver_min));
-
-var saveAs = FileSaver_min.exports;
-
-const downloadFile = async ({
-  filename,
-  path,
-  data,
-  type,
-  workspace
-}) => {
-  if (path && !data) {
-    data = await readOrWatch(path, {
-      workspace
-    });
-  }
-  const blob = new Blob([data], {
-    type
-  });
-  saveAs(blob, filename);
-};
-class DownloadNote extends ReactDOM$3.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object,
-      selected: propTypes$2.exports.boolean,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  render() {
-    const {
-      note,
-      selected,
-      workspace
-    } = this.props;
-    const {
-      blur,
-      download
-    } = note;
-    const buttons = [];
-    for (let {
-      path,
-      base64Data,
-      data,
-      filename,
-      type
-    } of download.entries) {
-      if (base64Data) {
-        data = decode(base64Data);
-      }
-      buttons.push(v$1(Button, {
-        onClick: event => downloadFile({
-          event,
-          filename,
-          path,
-          data,
-          type,
-          workspace
-        })
-      }, v$1("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "16",
-        height: "16",
-        fill: "currentColor",
-        class: "bi bi-download",
-        viewBox: "0 0 16 16"
-      }, v$1("path", {
-        d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
-      }), v$1("path", {
-        d: "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
-      })), ' ', filename));
-    }
-    const ref = selected && /*#__PURE__*/p$1();
-    if (selected) {
-      y(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
-    return v$1(ButtonGroup, {
-      ref: ref,
-      style: {
-        border,
-        opacity: blur ? 0.5 : 1
-      }
-    }, buttons);
-  }
-}
-
-class EditNote extends ReactDOM$3.Component {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.string,
-      notebookPath: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string,
-      onChange: propTypes$2.exports.func,
-      onKeyDown: propTypes$2.exports.func
-    };
-  }
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-  async componentDidMount() {}
-  async componentWillUnmount() {}
-  onChange(event) {
-    const {
-      onChange,
-      note
-    } = this.props;
-    if (onChange && this.ref && this.ref.innerText !== note.sourceText) {
-      onChange(this.ref.innerText, note);
-    }
-  }
-  shouldComponentUpdate(nextProps) {
-    return this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText;
-  }
-  render() {
-    const {
-      note,
-      onKeyDown
-    } = this.props;
-    const {
-      sourceText
-    } = note;
-    return v$1(Card$1, null, v$1("pre", {
-      style: {
-        padding: '1em',
-        outline: 'none'
-      },
-      contenteditable: true,
-      onKeyDown: onKeyDown,
-      onInput: event => this.onChange(event),
-      ref: ref => {
-        if (this.ref === ref) {
-          return;
-        }
-        this.ref = ref;
-        if (ref !== null) {
-          ref.innerText = sourceText;
-        }
-      }
-    }, sourceText));
-  }
-}
-
-class ErrorNote extends ReactDOM$3.Component {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.string,
-      notebookPath: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-  async componentDidMount() {}
-  async componentWillUnmount() {}
-  render() {
-    const {
-      note
-    } = this.props;
-    const {
-      error
-    } = note;
-    const {
-      text
-    } = error;
-    return v$1("div", {
-      class: "note error"
-    }, v$1("p", null, text));
-  }
-}
-
-/**
- * marked v4.3.0 - a markdown parser
- * Copyright (c) 2011-2023, Christopher Jeffrey. (MIT Licensed)
- * https://github.com/markedjs/marked
- */
-
-/**
- * DO NOT EDIT THIS FILE
- * The code in this file is generated from files in ./src/
- */
-
-function getDefaults() {
-  return {
-    async: false,
-    baseUrl: null,
-    breaks: false,
-    extensions: null,
-    gfm: true,
-    headerIds: true,
-    headerPrefix: '',
-    highlight: null,
-    hooks: null,
-    langPrefix: 'language-',
-    mangle: true,
-    pedantic: false,
-    renderer: null,
-    sanitize: false,
-    sanitizer: null,
-    silent: false,
-    smartypants: false,
-    tokenizer: null,
-    walkTokens: null,
-    xhtml: false
-  };
-}
-
-let defaults = getDefaults();
-
-function changeDefaults(newDefaults) {
-  defaults = newDefaults;
-}
-
-/**
- * Helpers
- */
-const escapeTest = /[&<>"']/;
-const escapeReplace = new RegExp(escapeTest.source, 'g');
-const escapeTestNoEncode = /[<>"']|&(?!(#\d{1,7}|#[Xx][a-fA-F0-9]{1,6}|\w+);)/;
-const escapeReplaceNoEncode = new RegExp(escapeTestNoEncode.source, 'g');
-const escapeReplacements = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
-const getEscapeReplacement = (ch) => escapeReplacements[ch];
-function escape(html, encode) {
-  if (encode) {
-    if (escapeTest.test(html)) {
-      return html.replace(escapeReplace, getEscapeReplacement);
-    }
-  } else {
-    if (escapeTestNoEncode.test(html)) {
-      return html.replace(escapeReplaceNoEncode, getEscapeReplacement);
-    }
-  }
-
-  return html;
-}
-
-const unescapeTest = /&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/ig;
-
-/**
- * @param {string} html
- */
-function unescape$1(html) {
-  // explicitly match decimal, hex, and named HTML entities
-  return html.replace(unescapeTest, (_, n) => {
-    n = n.toLowerCase();
-    if (n === 'colon') return ':';
-    if (n.charAt(0) === '#') {
-      return n.charAt(1) === 'x'
-        ? String.fromCharCode(parseInt(n.substring(2), 16))
-        : String.fromCharCode(+n.substring(1));
-    }
-    return '';
-  });
-}
-
-const caret = /(^|[^\[])\^/g;
-
-/**
- * @param {string | RegExp} regex
- * @param {string} opt
- */
-function edit(regex, opt) {
-  regex = typeof regex === 'string' ? regex : regex.source;
-  opt = opt || '';
-  const obj = {
-    replace: (name, val) => {
-      val = val.source || val;
-      val = val.replace(caret, '$1');
-      regex = regex.replace(name, val);
-      return obj;
-    },
-    getRegex: () => {
-      return new RegExp(regex, opt);
-    }
-  };
-  return obj;
-}
-
-const nonWordAndColonTest = /[^\w:]/g;
-const originIndependentUrl = /^$|^[a-z][a-z0-9+.-]*:|^[?#]/i;
-
-/**
- * @param {boolean} sanitize
- * @param {string} base
- * @param {string} href
- */
-function cleanUrl(sanitize, base, href) {
-  if (sanitize) {
-    let prot;
-    try {
-      prot = decodeURIComponent(unescape$1(href))
-        .replace(nonWordAndColonTest, '')
-        .toLowerCase();
-    } catch (e) {
-      return null;
-    }
-    if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0 || prot.indexOf('data:') === 0) {
-      return null;
-    }
-  }
-  if (base && !originIndependentUrl.test(href)) {
-    href = resolveUrl(base, href);
-  }
-  try {
-    href = encodeURI(href).replace(/%25/g, '%');
-  } catch (e) {
-    return null;
-  }
-  return href;
-}
-
-const baseUrls = {};
-const justDomain = /^[^:]+:\/*[^/]*$/;
-const protocol = /^([^:]+:)[\s\S]*$/;
-const domain = /^([^:]+:\/*[^/]*)[\s\S]*$/;
-
-/**
- * @param {string} base
- * @param {string} href
- */
-function resolveUrl(base, href) {
-  if (!baseUrls[' ' + base]) {
-    // we can ignore everything in base after the last slash of its path component,
-    // but we might need to add _that_
-    // https://tools.ietf.org/html/rfc3986#section-3
-    if (justDomain.test(base)) {
-      baseUrls[' ' + base] = base + '/';
-    } else {
-      baseUrls[' ' + base] = rtrim(base, '/', true);
-    }
-  }
-  base = baseUrls[' ' + base];
-  const relativeBase = base.indexOf(':') === -1;
-
-  if (href.substring(0, 2) === '//') {
-    if (relativeBase) {
-      return href;
-    }
-    return base.replace(protocol, '$1') + href;
-  } else if (href.charAt(0) === '/') {
-    if (relativeBase) {
-      return href;
-    }
-    return base.replace(domain, '$1') + href;
-  } else {
-    return base + href;
-  }
-}
-
-const noopTest = { exec: function noopTest() {} };
-
-function splitCells(tableRow, count) {
-  // ensure that every cell-delimiting pipe has a space
-  // before it to distinguish it from an escaped pipe
-  const row = tableRow.replace(/\|/g, (match, offset, str) => {
-      let escaped = false,
-        curr = offset;
-      while (--curr >= 0 && str[curr] === '\\') escaped = !escaped;
-      if (escaped) {
-        // odd number of slashes means | is escaped
-        // so we leave it alone
-        return '|';
-      } else {
-        // add space before unescaped |
-        return ' |';
-      }
-    }),
-    cells = row.split(/ \|/);
-  let i = 0;
-
-  // First/last cell in a row cannot be empty if it has no leading/trailing pipe
-  if (!cells[0].trim()) { cells.shift(); }
-  if (cells.length > 0 && !cells[cells.length - 1].trim()) { cells.pop(); }
-
-  if (cells.length > count) {
-    cells.splice(count);
-  } else {
-    while (cells.length < count) cells.push('');
-  }
-
-  for (; i < cells.length; i++) {
-    // leading or trailing whitespace is ignored per the gfm spec
-    cells[i] = cells[i].trim().replace(/\\\|/g, '|');
-  }
-  return cells;
-}
-
-/**
- * Remove trailing 'c's. Equivalent to str.replace(/c*$/, '').
- * /c*$/ is vulnerable to REDOS.
- *
- * @param {string} str
- * @param {string} c
- * @param {boolean} invert Remove suffix of non-c chars instead. Default falsey.
- */
-function rtrim(str, c, invert) {
-  const l = str.length;
-  if (l === 0) {
-    return '';
-  }
-
-  // Length of suffix matching the invert condition.
-  let suffLen = 0;
-
-  // Step left until we fail to match the invert condition.
-  while (suffLen < l) {
-    const currChar = str.charAt(l - suffLen - 1);
-    if (currChar === c && !invert) {
-      suffLen++;
-    } else if (currChar !== c && invert) {
-      suffLen++;
-    } else {
-      break;
-    }
-  }
-
-  return str.slice(0, l - suffLen);
-}
-
-function findClosingBracket(str, b) {
-  if (str.indexOf(b[1]) === -1) {
-    return -1;
-  }
-  const l = str.length;
-  let level = 0,
-    i = 0;
-  for (; i < l; i++) {
-    if (str[i] === '\\') {
-      i++;
-    } else if (str[i] === b[0]) {
-      level++;
-    } else if (str[i] === b[1]) {
-      level--;
-      if (level < 0) {
-        return i;
-      }
-    }
-  }
-  return -1;
-}
-
-function checkSanitizeDeprecation(opt) {
-  if (opt && opt.sanitize && !opt.silent) {
-    console.warn('marked(): sanitize and sanitizer parameters are deprecated since version 0.7.0, should not be used and will be removed in the future. Read more here: https://marked.js.org/#/USING_ADVANCED.md#options');
-  }
-}
-
-// copied from https://stackoverflow.com/a/5450113/806777
-/**
- * @param {string} pattern
- * @param {number} count
- */
-function repeatString(pattern, count) {
-  if (count < 1) {
-    return '';
-  }
-  let result = '';
-  while (count > 1) {
-    if (count & 1) {
-      result += pattern;
-    }
-    count >>= 1;
-    pattern += pattern;
-  }
-  return result + pattern;
-}
-
-function outputLink(cap, link, raw, lexer) {
-  const href = link.href;
-  const title = link.title ? escape(link.title) : null;
-  const text = cap[1].replace(/\\([\[\]])/g, '$1');
-
-  if (cap[0].charAt(0) !== '!') {
-    lexer.state.inLink = true;
-    const token = {
-      type: 'link',
-      raw,
-      href,
-      title,
-      text,
-      tokens: lexer.inlineTokens(text)
-    };
-    lexer.state.inLink = false;
-    return token;
-  }
-  return {
-    type: 'image',
-    raw,
-    href,
-    title,
-    text: escape(text)
-  };
-}
-
-function indentCodeCompensation(raw, text) {
-  const matchIndentToCode = raw.match(/^(\s+)(?:```)/);
-
-  if (matchIndentToCode === null) {
-    return text;
-  }
-
-  const indentToCode = matchIndentToCode[1];
-
-  return text
-    .split('\n')
-    .map(node => {
-      const matchIndentInNode = node.match(/^\s+/);
-      if (matchIndentInNode === null) {
-        return node;
-      }
-
-      const [indentInNode] = matchIndentInNode;
-
-      if (indentInNode.length >= indentToCode.length) {
-        return node.slice(indentToCode.length);
-      }
-
-      return node;
-    })
-    .join('\n');
-}
-
-/**
- * Tokenizer
- */
-class Tokenizer {
-  constructor(options) {
-    this.options = options || defaults;
-  }
-
-  space(src) {
-    const cap = this.rules.block.newline.exec(src);
-    if (cap && cap[0].length > 0) {
-      return {
-        type: 'space',
-        raw: cap[0]
-      };
-    }
-  }
-
-  code(src) {
-    const cap = this.rules.block.code.exec(src);
-    if (cap) {
-      const text = cap[0].replace(/^ {1,4}/gm, '');
-      return {
-        type: 'code',
-        raw: cap[0],
-        codeBlockStyle: 'indented',
-        text: !this.options.pedantic
-          ? rtrim(text, '\n')
-          : text
-      };
-    }
-  }
-
-  fences(src) {
-    const cap = this.rules.block.fences.exec(src);
-    if (cap) {
-      const raw = cap[0];
-      const text = indentCodeCompensation(raw, cap[3] || '');
-
-      return {
-        type: 'code',
-        raw,
-        lang: cap[2] ? cap[2].trim().replace(this.rules.inline._escapes, '$1') : cap[2],
-        text
-      };
-    }
-  }
-
-  heading(src) {
-    const cap = this.rules.block.heading.exec(src);
-    if (cap) {
-      let text = cap[2].trim();
-
-      // remove trailing #s
-      if (/#$/.test(text)) {
-        const trimmed = rtrim(text, '#');
-        if (this.options.pedantic) {
-          text = trimmed.trim();
-        } else if (!trimmed || / $/.test(trimmed)) {
-          // CommonMark requires space before trailing #s
-          text = trimmed.trim();
-        }
-      }
-
-      return {
-        type: 'heading',
-        raw: cap[0],
-        depth: cap[1].length,
-        text,
-        tokens: this.lexer.inline(text)
-      };
-    }
-  }
-
-  hr(src) {
-    const cap = this.rules.block.hr.exec(src);
-    if (cap) {
-      return {
-        type: 'hr',
-        raw: cap[0]
-      };
-    }
-  }
-
-  blockquote(src) {
-    const cap = this.rules.block.blockquote.exec(src);
-    if (cap) {
-      const text = cap[0].replace(/^ *>[ \t]?/gm, '');
-      const top = this.lexer.state.top;
-      this.lexer.state.top = true;
-      const tokens = this.lexer.blockTokens(text);
-      this.lexer.state.top = top;
-      return {
-        type: 'blockquote',
-        raw: cap[0],
-        tokens,
-        text
-      };
-    }
-  }
-
-  list(src) {
-    let cap = this.rules.block.list.exec(src);
-    if (cap) {
-      let raw, istask, ischecked, indent, i, blankLine, endsWithBlankLine,
-        line, nextLine, rawLine, itemContents, endEarly;
-
-      let bull = cap[1].trim();
-      const isordered = bull.length > 1;
-
-      const list = {
-        type: 'list',
-        raw: '',
-        ordered: isordered,
-        start: isordered ? +bull.slice(0, -1) : '',
-        loose: false,
-        items: []
-      };
-
-      bull = isordered ? `\\d{1,9}\\${bull.slice(-1)}` : `\\${bull}`;
-
-      if (this.options.pedantic) {
-        bull = isordered ? bull : '[*+-]';
-      }
-
-      // Get next list item
-      const itemRegex = new RegExp(`^( {0,3}${bull})((?:[\t ][^\\n]*)?(?:\\n|$))`);
-
-      // Check if current bullet point can start a new List Item
-      while (src) {
-        endEarly = false;
-        if (!(cap = itemRegex.exec(src))) {
-          break;
-        }
-
-        if (this.rules.block.hr.test(src)) { // End list if bullet was actually HR (possibly move into itemRegex?)
-          break;
-        }
-
-        raw = cap[0];
-        src = src.substring(raw.length);
-
-        line = cap[2].split('\n', 1)[0].replace(/^\t+/, (t) => ' '.repeat(3 * t.length));
-        nextLine = src.split('\n', 1)[0];
-
-        if (this.options.pedantic) {
-          indent = 2;
-          itemContents = line.trimLeft();
-        } else {
-          indent = cap[2].search(/[^ ]/); // Find first non-space char
-          indent = indent > 4 ? 1 : indent; // Treat indented code blocks (> 4 spaces) as having only 1 indent
-          itemContents = line.slice(indent);
-          indent += cap[1].length;
-        }
-
-        blankLine = false;
-
-        if (!line && /^ *$/.test(nextLine)) { // Items begin with at most one blank line
-          raw += nextLine + '\n';
-          src = src.substring(nextLine.length + 1);
-          endEarly = true;
-        }
-
-        if (!endEarly) {
-          const nextBulletRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}(?:[*+-]|\\d{1,9}[.)])((?:[ \t][^\\n]*)?(?:\\n|$))`);
-          const hrRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)`);
-          const fencesBeginRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}(?:\`\`\`|~~~)`);
-          const headingBeginRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}#`);
-
-          // Check if following lines should be included in List Item
-          while (src) {
-            rawLine = src.split('\n', 1)[0];
-            nextLine = rawLine;
-
-            // Re-align to follow commonmark nesting rules
-            if (this.options.pedantic) {
-              nextLine = nextLine.replace(/^ {1,4}(?=( {4})*[^ ])/g, '  ');
-            }
-
-            // End list item if found code fences
-            if (fencesBeginRegex.test(nextLine)) {
-              break;
-            }
-
-            // End list item if found start of new heading
-            if (headingBeginRegex.test(nextLine)) {
-              break;
-            }
-
-            // End list item if found start of new bullet
-            if (nextBulletRegex.test(nextLine)) {
-              break;
-            }
-
-            // Horizontal rule found
-            if (hrRegex.test(src)) {
-              break;
-            }
-
-            if (nextLine.search(/[^ ]/) >= indent || !nextLine.trim()) { // Dedent if possible
-              itemContents += '\n' + nextLine.slice(indent);
-            } else {
-              // not enough indentation
-              if (blankLine) {
-                break;
-              }
-
-              // paragraph continuation unless last line was a different block level element
-              if (line.search(/[^ ]/) >= 4) { // indented code block
-                break;
-              }
-              if (fencesBeginRegex.test(line)) {
-                break;
-              }
-              if (headingBeginRegex.test(line)) {
-                break;
-              }
-              if (hrRegex.test(line)) {
-                break;
-              }
-
-              itemContents += '\n' + nextLine;
-            }
-
-            if (!blankLine && !nextLine.trim()) { // Check if current line is blank
-              blankLine = true;
-            }
-
-            raw += rawLine + '\n';
-            src = src.substring(rawLine.length + 1);
-            line = nextLine.slice(indent);
-          }
-        }
-
-        if (!list.loose) {
-          // If the previous item ended with a blank line, the list is loose
-          if (endsWithBlankLine) {
-            list.loose = true;
-          } else if (/\n *\n *$/.test(raw)) {
-            endsWithBlankLine = true;
-          }
-        }
-
-        // Check for task list items
-        if (this.options.gfm) {
-          istask = /^\[[ xX]\] /.exec(itemContents);
-          if (istask) {
-            ischecked = istask[0] !== '[ ] ';
-            itemContents = itemContents.replace(/^\[[ xX]\] +/, '');
-          }
-        }
-
-        list.items.push({
-          type: 'list_item',
-          raw,
-          task: !!istask,
-          checked: ischecked,
-          loose: false,
-          text: itemContents
-        });
-
-        list.raw += raw;
-      }
-
-      // Do not consume newlines at end of final item. Alternatively, make itemRegex *start* with any newlines to simplify/speed up endsWithBlankLine logic
-      list.items[list.items.length - 1].raw = raw.trimRight();
-      list.items[list.items.length - 1].text = itemContents.trimRight();
-      list.raw = list.raw.trimRight();
-
-      const l = list.items.length;
-
-      // Item child tokens handled here at end because we needed to have the final item to trim it first
-      for (i = 0; i < l; i++) {
-        this.lexer.state.top = false;
-        list.items[i].tokens = this.lexer.blockTokens(list.items[i].text, []);
-
-        if (!list.loose) {
-          // Check if list should be loose
-          const spacers = list.items[i].tokens.filter(t => t.type === 'space');
-          const hasMultipleLineBreaks = spacers.length > 0 && spacers.some(t => /\n.*\n/.test(t.raw));
-
-          list.loose = hasMultipleLineBreaks;
-        }
-      }
-
-      // Set all items to loose if list is loose
-      if (list.loose) {
-        for (i = 0; i < l; i++) {
-          list.items[i].loose = true;
-        }
-      }
-
-      return list;
-    }
-  }
-
-  html(src) {
-    const cap = this.rules.block.html.exec(src);
-    if (cap) {
-      const token = {
-        type: 'html',
-        raw: cap[0],
-        pre: !this.options.sanitizer
-          && (cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style'),
-        text: cap[0]
-      };
-      if (this.options.sanitize) {
-        const text = this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape(cap[0]);
-        token.type = 'paragraph';
-        token.text = text;
-        token.tokens = this.lexer.inline(text);
-      }
-      return token;
-    }
-  }
-
-  def(src) {
-    const cap = this.rules.block.def.exec(src);
-    if (cap) {
-      const tag = cap[1].toLowerCase().replace(/\s+/g, ' ');
-      const href = cap[2] ? cap[2].replace(/^<(.*)>$/, '$1').replace(this.rules.inline._escapes, '$1') : '';
-      const title = cap[3] ? cap[3].substring(1, cap[3].length - 1).replace(this.rules.inline._escapes, '$1') : cap[3];
-      return {
-        type: 'def',
-        tag,
-        raw: cap[0],
-        href,
-        title
-      };
-    }
-  }
-
-  table(src) {
-    const cap = this.rules.block.table.exec(src);
-    if (cap) {
-      const item = {
-        type: 'table',
-        header: splitCells(cap[1]).map(c => { return { text: c }; }),
-        align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-        rows: cap[3] && cap[3].trim() ? cap[3].replace(/\n[ \t]*$/, '').split('\n') : []
-      };
-
-      if (item.header.length === item.align.length) {
-        item.raw = cap[0];
-
-        let l = item.align.length;
-        let i, j, k, row;
-        for (i = 0; i < l; i++) {
-          if (/^ *-+: *$/.test(item.align[i])) {
-            item.align[i] = 'right';
-          } else if (/^ *:-+: *$/.test(item.align[i])) {
-            item.align[i] = 'center';
-          } else if (/^ *:-+ *$/.test(item.align[i])) {
-            item.align[i] = 'left';
-          } else {
-            item.align[i] = null;
-          }
-        }
-
-        l = item.rows.length;
-        for (i = 0; i < l; i++) {
-          item.rows[i] = splitCells(item.rows[i], item.header.length).map(c => { return { text: c }; });
-        }
-
-        // parse child tokens inside headers and cells
-
-        // header child tokens
-        l = item.header.length;
-        for (j = 0; j < l; j++) {
-          item.header[j].tokens = this.lexer.inline(item.header[j].text);
-        }
-
-        // cell child tokens
-        l = item.rows.length;
-        for (j = 0; j < l; j++) {
-          row = item.rows[j];
-          for (k = 0; k < row.length; k++) {
-            row[k].tokens = this.lexer.inline(row[k].text);
-          }
-        }
-
-        return item;
-      }
-    }
-  }
-
-  lheading(src) {
-    const cap = this.rules.block.lheading.exec(src);
-    if (cap) {
-      return {
-        type: 'heading',
-        raw: cap[0],
-        depth: cap[2].charAt(0) === '=' ? 1 : 2,
-        text: cap[1],
-        tokens: this.lexer.inline(cap[1])
-      };
-    }
-  }
-
-  paragraph(src) {
-    const cap = this.rules.block.paragraph.exec(src);
-    if (cap) {
-      const text = cap[1].charAt(cap[1].length - 1) === '\n'
-        ? cap[1].slice(0, -1)
-        : cap[1];
-      return {
-        type: 'paragraph',
-        raw: cap[0],
-        text,
-        tokens: this.lexer.inline(text)
-      };
-    }
-  }
-
-  text(src) {
-    const cap = this.rules.block.text.exec(src);
-    if (cap) {
-      return {
-        type: 'text',
-        raw: cap[0],
-        text: cap[0],
-        tokens: this.lexer.inline(cap[0])
-      };
-    }
-  }
-
-  escape(src) {
-    const cap = this.rules.inline.escape.exec(src);
-    if (cap) {
-      return {
-        type: 'escape',
-        raw: cap[0],
-        text: escape(cap[1])
-      };
-    }
-  }
-
-  tag(src) {
-    const cap = this.rules.inline.tag.exec(src);
-    if (cap) {
-      if (!this.lexer.state.inLink && /^<a /i.test(cap[0])) {
-        this.lexer.state.inLink = true;
-      } else if (this.lexer.state.inLink && /^<\/a>/i.test(cap[0])) {
-        this.lexer.state.inLink = false;
-      }
-      if (!this.lexer.state.inRawBlock && /^<(pre|code|kbd|script)(\s|>)/i.test(cap[0])) {
-        this.lexer.state.inRawBlock = true;
-      } else if (this.lexer.state.inRawBlock && /^<\/(pre|code|kbd|script)(\s|>)/i.test(cap[0])) {
-        this.lexer.state.inRawBlock = false;
-      }
-
-      return {
-        type: this.options.sanitize
-          ? 'text'
-          : 'html',
-        raw: cap[0],
-        inLink: this.lexer.state.inLink,
-        inRawBlock: this.lexer.state.inRawBlock,
-        text: this.options.sanitize
-          ? (this.options.sanitizer
-            ? this.options.sanitizer(cap[0])
-            : escape(cap[0]))
-          : cap[0]
-      };
-    }
-  }
-
-  link(src) {
-    const cap = this.rules.inline.link.exec(src);
-    if (cap) {
-      const trimmedUrl = cap[2].trim();
-      if (!this.options.pedantic && /^</.test(trimmedUrl)) {
-        // commonmark requires matching angle brackets
-        if (!(/>$/.test(trimmedUrl))) {
-          return;
-        }
-
-        // ending angle bracket cannot be escaped
-        const rtrimSlash = rtrim(trimmedUrl.slice(0, -1), '\\');
-        if ((trimmedUrl.length - rtrimSlash.length) % 2 === 0) {
-          return;
-        }
-      } else {
-        // find closing parenthesis
-        const lastParenIndex = findClosingBracket(cap[2], '()');
-        if (lastParenIndex > -1) {
-          const start = cap[0].indexOf('!') === 0 ? 5 : 4;
-          const linkLen = start + cap[1].length + lastParenIndex;
-          cap[2] = cap[2].substring(0, lastParenIndex);
-          cap[0] = cap[0].substring(0, linkLen).trim();
-          cap[3] = '';
-        }
-      }
-      let href = cap[2];
-      let title = '';
-      if (this.options.pedantic) {
-        // split pedantic href and title
-        const link = /^([^'"]*[^\s])\s+(['"])(.*)\2/.exec(href);
-
-        if (link) {
-          href = link[1];
-          title = link[3];
-        }
-      } else {
-        title = cap[3] ? cap[3].slice(1, -1) : '';
-      }
-
-      href = href.trim();
-      if (/^</.test(href)) {
-        if (this.options.pedantic && !(/>$/.test(trimmedUrl))) {
-          // pedantic allows starting angle bracket without ending angle bracket
-          href = href.slice(1);
-        } else {
-          href = href.slice(1, -1);
-        }
-      }
-      return outputLink(cap, {
-        href: href ? href.replace(this.rules.inline._escapes, '$1') : href,
-        title: title ? title.replace(this.rules.inline._escapes, '$1') : title
-      }, cap[0], this.lexer);
-    }
-  }
-
-  reflink(src, links) {
-    let cap;
-    if ((cap = this.rules.inline.reflink.exec(src))
-        || (cap = this.rules.inline.nolink.exec(src))) {
-      let link = (cap[2] || cap[1]).replace(/\s+/g, ' ');
-      link = links[link.toLowerCase()];
-      if (!link) {
-        const text = cap[0].charAt(0);
-        return {
-          type: 'text',
-          raw: text,
-          text
-        };
-      }
-      return outputLink(cap, link, cap[0], this.lexer);
-    }
-  }
-
-  emStrong(src, maskedSrc, prevChar = '') {
-    let match = this.rules.inline.emStrong.lDelim.exec(src);
-    if (!match) return;
-
-    // _ can't be between two alphanumerics. \p{L}\p{N} includes non-english alphabet/numbers as well
-    if (match[3] && prevChar.match(/[\p{L}\p{N}]/u)) return;
-
-    const nextChar = match[1] || match[2] || '';
-
-    if (!nextChar || (nextChar && (prevChar === '' || this.rules.inline.punctuation.exec(prevChar)))) {
-      const lLength = match[0].length - 1;
-      let rDelim, rLength, delimTotal = lLength, midDelimTotal = 0;
-
-      const endReg = match[0][0] === '*' ? this.rules.inline.emStrong.rDelimAst : this.rules.inline.emStrong.rDelimUnd;
-      endReg.lastIndex = 0;
-
-      // Clip maskedSrc to same section of string as src (move to lexer?)
-      maskedSrc = maskedSrc.slice(-1 * src.length + lLength);
-
-      while ((match = endReg.exec(maskedSrc)) != null) {
-        rDelim = match[1] || match[2] || match[3] || match[4] || match[5] || match[6];
-
-        if (!rDelim) continue; // skip single * in __abc*abc__
-
-        rLength = rDelim.length;
-
-        if (match[3] || match[4]) { // found another Left Delim
-          delimTotal += rLength;
-          continue;
-        } else if (match[5] || match[6]) { // either Left or Right Delim
-          if (lLength % 3 && !((lLength + rLength) % 3)) {
-            midDelimTotal += rLength;
-            continue; // CommonMark Emphasis Rules 9-10
-          }
-        }
-
-        delimTotal -= rLength;
-
-        if (delimTotal > 0) continue; // Haven't found enough closing delimiters
-
-        // Remove extra characters. *a*** -> *a*
-        rLength = Math.min(rLength, rLength + delimTotal + midDelimTotal);
-
-        const raw = src.slice(0, lLength + match.index + (match[0].length - rDelim.length) + rLength);
-
-        // Create `em` if smallest delimiter has odd char count. *a***
-        if (Math.min(lLength, rLength) % 2) {
-          const text = raw.slice(1, -1);
-          return {
-            type: 'em',
-            raw,
-            text,
-            tokens: this.lexer.inlineTokens(text)
-          };
-        }
-
-        // Create 'strong' if smallest delimiter has even char count. **a***
-        const text = raw.slice(2, -2);
-        return {
-          type: 'strong',
-          raw,
-          text,
-          tokens: this.lexer.inlineTokens(text)
-        };
-      }
-    }
-  }
-
-  codespan(src) {
-    const cap = this.rules.inline.code.exec(src);
-    if (cap) {
-      let text = cap[2].replace(/\n/g, ' ');
-      const hasNonSpaceChars = /[^ ]/.test(text);
-      const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
-      if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
-        text = text.substring(1, text.length - 1);
-      }
-      text = escape(text, true);
-      return {
-        type: 'codespan',
-        raw: cap[0],
-        text
-      };
-    }
-  }
-
-  br(src) {
-    const cap = this.rules.inline.br.exec(src);
-    if (cap) {
-      return {
-        type: 'br',
-        raw: cap[0]
-      };
-    }
-  }
-
-  del(src) {
-    const cap = this.rules.inline.del.exec(src);
-    if (cap) {
-      return {
-        type: 'del',
-        raw: cap[0],
-        text: cap[2],
-        tokens: this.lexer.inlineTokens(cap[2])
-      };
-    }
-  }
-
-  autolink(src, mangle) {
-    const cap = this.rules.inline.autolink.exec(src);
-    if (cap) {
-      let text, href;
-      if (cap[2] === '@') {
-        text = escape(this.options.mangle ? mangle(cap[1]) : cap[1]);
-        href = 'mailto:' + text;
-      } else {
-        text = escape(cap[1]);
-        href = text;
-      }
-
-      return {
-        type: 'link',
-        raw: cap[0],
-        text,
-        href,
-        tokens: [
-          {
-            type: 'text',
-            raw: text,
-            text
-          }
-        ]
-      };
-    }
-  }
-
-  url(src, mangle) {
-    let cap;
-    if (cap = this.rules.inline.url.exec(src)) {
-      let text, href;
-      if (cap[2] === '@') {
-        text = escape(this.options.mangle ? mangle(cap[0]) : cap[0]);
-        href = 'mailto:' + text;
-      } else {
-        // do extended autolink path validation
-        let prevCapZero;
-        do {
-          prevCapZero = cap[0];
-          cap[0] = this.rules.inline._backpedal.exec(cap[0])[0];
-        } while (prevCapZero !== cap[0]);
-        text = escape(cap[0]);
-        if (cap[1] === 'www.') {
-          href = 'http://' + cap[0];
-        } else {
-          href = cap[0];
-        }
-      }
-      return {
-        type: 'link',
-        raw: cap[0],
-        text,
-        href,
-        tokens: [
-          {
-            type: 'text',
-            raw: text,
-            text
-          }
-        ]
-      };
-    }
-  }
-
-  inlineText(src, smartypants) {
-    const cap = this.rules.inline.text.exec(src);
-    if (cap) {
-      let text;
-      if (this.lexer.state.inRawBlock) {
-        text = this.options.sanitize ? (this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape(cap[0])) : cap[0];
-      } else {
-        text = escape(this.options.smartypants ? smartypants(cap[0]) : cap[0]);
-      }
-      return {
-        type: 'text',
-        raw: cap[0],
-        text
-      };
-    }
-  }
-}
-
-/**
- * Block-Level Grammar
- */
-const block = {
-  newline: /^(?: *(?:\n|$))+/,
-  code: /^( {4}[^\n]+(?:\n(?: *(?:\n|$))*)?)+/,
-  fences: /^ {0,3}(`{3,}(?=[^`\n]*(?:\n|$))|~{3,})([^\n]*)(?:\n|$)(?:|([\s\S]*?)(?:\n|$))(?: {0,3}\1[~`]* *(?=\n|$)|$)/,
-  hr: /^ {0,3}((?:-[\t ]*){3,}|(?:_[ \t]*){3,}|(?:\*[ \t]*){3,})(?:\n+|$)/,
-  heading: /^ {0,3}(#{1,6})(?=\s|$)(.*)(?:\n+|$)/,
-  blockquote: /^( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/,
-  list: /^( {0,3}bull)([ \t][^\n]+?)?(?:\n|$)/,
-  html: '^ {0,3}(?:' // optional indentation
-    + '<(script|pre|style|textarea)[\\s>][\\s\\S]*?(?:</\\1>[^\\n]*\\n+|$)' // (1)
-    + '|comment[^\\n]*(\\n+|$)' // (2)
-    + '|<\\?[\\s\\S]*?(?:\\?>\\n*|$)' // (3)
-    + '|<![A-Z][\\s\\S]*?(?:>\\n*|$)' // (4)
-    + '|<!\\[CDATA\\[[\\s\\S]*?(?:\\]\\]>\\n*|$)' // (5)
-    + '|</?(tag)(?: +|\\n|/?>)[\\s\\S]*?(?:(?:\\n *)+\\n|$)' // (6)
-    + '|<(?!script|pre|style|textarea)([a-z][\\w-]*)(?:attribute)*? */?>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n *)+\\n|$)' // (7) open tag
-    + '|</(?!script|pre|style|textarea)[a-z][\\w-]*\\s*>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n *)+\\n|$)' // (7) closing tag
-    + ')',
-  def: /^ {0,3}\[(label)\]: *(?:\n *)?([^<\s][^\s]*|<.*?>)(?:(?: +(?:\n *)?| *\n *)(title))? *(?:\n+|$)/,
-  table: noopTest,
-  lheading: /^((?:.|\n(?!\n))+?)\n {0,3}(=+|-+) *(?:\n+|$)/,
-  // regex template, placeholders will be replaced according to different paragraph
-  // interruption rules of commonmark and the original markdown spec:
-  _paragraph: /^([^\n]+(?:\n(?!hr|heading|lheading|blockquote|fences|list|html|table| +\n)[^\n]+)*)/,
-  text: /^[^\n]+/
-};
-
-block._label = /(?!\s*\])(?:\\.|[^\[\]\\])+/;
-block._title = /(?:"(?:\\"?|[^"\\])*"|'[^'\n]*(?:\n[^'\n]+)*\n?'|\([^()]*\))/;
-block.def = edit(block.def)
-  .replace('label', block._label)
-  .replace('title', block._title)
-  .getRegex();
-
-block.bullet = /(?:[*+-]|\d{1,9}[.)])/;
-block.listItemStart = edit(/^( *)(bull) */)
-  .replace('bull', block.bullet)
-  .getRegex();
-
-block.list = edit(block.list)
-  .replace(/bull/g, block.bullet)
-  .replace('hr', '\\n+(?=\\1?(?:(?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$))')
-  .replace('def', '\\n+(?=' + block.def.source + ')')
-  .getRegex();
-
-block._tag = 'address|article|aside|base|basefont|blockquote|body|caption'
-  + '|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption'
-  + '|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe'
-  + '|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option'
-  + '|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr'
-  + '|track|ul';
-block._comment = /<!--(?!-?>)[\s\S]*?(?:-->|$)/;
-block.html = edit(block.html, 'i')
-  .replace('comment', block._comment)
-  .replace('tag', block._tag)
-  .replace('attribute', / +[a-zA-Z:_][\w.:-]*(?: *= *"[^"\n]*"| *= *'[^'\n]*'| *= *[^\s"'=<>`]+)?/)
-  .getRegex();
-
-block.paragraph = edit(block._paragraph)
-  .replace('hr', block.hr)
-  .replace('heading', ' {0,3}#{1,6} ')
-  .replace('|lheading', '') // setex headings don't interrupt commonmark paragraphs
-  .replace('|table', '')
-  .replace('blockquote', ' {0,3}>')
-  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
-  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
-  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)')
-  .replace('tag', block._tag) // pars can be interrupted by type (6) html blocks
-  .getRegex();
-
-block.blockquote = edit(block.blockquote)
-  .replace('paragraph', block.paragraph)
-  .getRegex();
-
-/**
- * Normal Block Grammar
- */
-
-block.normal = { ...block };
-
-/**
- * GFM Block Grammar
- */
-
-block.gfm = {
-  ...block.normal,
-  table: '^ *([^\\n ].*\\|.*)\\n' // Header
-    + ' {0,3}(?:\\| *)?(:?-+:? *(?:\\| *:?-+:? *)*)(?:\\| *)?' // Align
-    + '(?:\\n((?:(?! *\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)' // Cells
-};
-
-block.gfm.table = edit(block.gfm.table)
-  .replace('hr', block.hr)
-  .replace('heading', ' {0,3}#{1,6} ')
-  .replace('blockquote', ' {0,3}>')
-  .replace('code', ' {4}[^\\n]')
-  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
-  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
-  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)')
-  .replace('tag', block._tag) // tables can be interrupted by type (6) html blocks
-  .getRegex();
-
-block.gfm.paragraph = edit(block._paragraph)
-  .replace('hr', block.hr)
-  .replace('heading', ' {0,3}#{1,6} ')
-  .replace('|lheading', '') // setex headings don't interrupt commonmark paragraphs
-  .replace('table', block.gfm.table) // interrupt paragraphs with table
-  .replace('blockquote', ' {0,3}>')
-  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
-  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
-  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)')
-  .replace('tag', block._tag) // pars can be interrupted by type (6) html blocks
-  .getRegex();
-/**
- * Pedantic grammar (original John Gruber's loose markdown specification)
- */
-
-block.pedantic = {
-  ...block.normal,
-  html: edit(
-    '^ *(?:comment *(?:\\n|\\s*$)'
-    + '|<(tag)[\\s\\S]+?</\\1> *(?:\\n{2,}|\\s*$)' // closed tag
-    + '|<tag(?:"[^"]*"|\'[^\']*\'|\\s[^\'"/>\\s]*)*?/?> *(?:\\n{2,}|\\s*$))')
-    .replace('comment', block._comment)
-    .replace(/tag/g, '(?!(?:'
-      + 'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub'
-      + '|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)'
-      + '\\b)\\w+(?!:|[^\\w\\s@]*@)\\b')
-    .getRegex(),
-  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,
-  heading: /^(#{1,6})(.*)(?:\n+|$)/,
-  fences: noopTest, // fences not supported
-  lheading: /^(.+?)\n {0,3}(=+|-+) *(?:\n+|$)/,
-  paragraph: edit(block.normal._paragraph)
-    .replace('hr', block.hr)
-    .replace('heading', ' *#{1,6} *[^\n]')
-    .replace('lheading', block.lheading)
-    .replace('blockquote', ' {0,3}>')
-    .replace('|fences', '')
-    .replace('|list', '')
-    .replace('|html', '')
-    .getRegex()
-};
-
-/**
- * Inline-Level Grammar
- */
-const inline = {
-  escape: /^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/,
-  autolink: /^<(scheme:[^\s\x00-\x1f<>]*|email)>/,
-  url: noopTest,
-  tag: '^comment'
-    + '|^</[a-zA-Z][\\w:-]*\\s*>' // self-closing tag
-    + '|^<[a-zA-Z][\\w-]*(?:attribute)*?\\s*/?>' // open tag
-    + '|^<\\?[\\s\\S]*?\\?>' // processing instruction, e.g. <?php ?>
-    + '|^<![a-zA-Z]+\\s[\\s\\S]*?>' // declaration, e.g. <!DOCTYPE html>
-    + '|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>', // CDATA section
-  link: /^!?\[(label)\]\(\s*(href)(?:\s+(title))?\s*\)/,
-  reflink: /^!?\[(label)\]\[(ref)\]/,
-  nolink: /^!?\[(ref)\](?:\[\])?/,
-  reflinkSearch: 'reflink|nolink(?!\\()',
-  emStrong: {
-    lDelim: /^(?:\*+(?:([punct_])|[^\s*]))|^_+(?:([punct*])|([^\s_]))/,
-    //        (1) and (2) can only be a Right Delimiter. (3) and (4) can only be Left.  (5) and (6) can be either Left or Right.
-    //          () Skip orphan inside strong                                      () Consume to delim     (1) #***                (2) a***#, a***                             (3) #***a, ***a                 (4) ***#              (5) #***#                 (6) a***a
-    rDelimAst: /^(?:[^_*\\]|\\.)*?\_\_(?:[^_*\\]|\\.)*?\*(?:[^_*\\]|\\.)*?(?=\_\_)|(?:[^*\\]|\\.)+(?=[^*])|[punct_](\*+)(?=[\s]|$)|(?:[^punct*_\s\\]|\\.)(\*+)(?=[punct_\s]|$)|[punct_\s](\*+)(?=[^punct*_\s])|[\s](\*+)(?=[punct_])|[punct_](\*+)(?=[punct_])|(?:[^punct*_\s\\]|\\.)(\*+)(?=[^punct*_\s])/,
-    rDelimUnd: /^(?:[^_*\\]|\\.)*?\*\*(?:[^_*\\]|\\.)*?\_(?:[^_*\\]|\\.)*?(?=\*\*)|(?:[^_\\]|\\.)+(?=[^_])|[punct*](\_+)(?=[\s]|$)|(?:[^punct*_\s\\]|\\.)(\_+)(?=[punct*\s]|$)|[punct*\s](\_+)(?=[^punct*_\s])|[\s](\_+)(?=[punct*])|[punct*](\_+)(?=[punct*])/ // ^- Not allowed for _
-  },
-  code: /^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/,
-  br: /^( {2,}|\\)\n(?!\s*$)/,
-  del: noopTest,
-  text: /^(`+|[^`])(?:(?= {2,}\n)|[\s\S]*?(?:(?=[\\<!\[`*_]|\b_|$)|[^ ](?= {2,}\n)))/,
-  punctuation: /^([\spunctuation])/
-};
-
-// list of punctuation marks from CommonMark spec
-// without * and _ to handle the different emphasis markers * and _
-inline._punctuation = '!"#$%&\'()+\\-.,/:;<=>?@\\[\\]`^{|}~';
-inline.punctuation = edit(inline.punctuation).replace(/punctuation/g, inline._punctuation).getRegex();
-
-// sequences em should skip over [title](link), `code`, <html>
-inline.blockSkip = /\[[^\]]*?\]\([^\)]*?\)|`[^`]*?`|<[^>]*?>/g;
-// lookbehind is not available on Safari as of version 16
-// inline.escapedEmSt = /(?<=(?:^|[^\\)(?:\\[^])*)\\[*_]/g;
-inline.escapedEmSt = /(?:^|[^\\])(?:\\\\)*\\[*_]/g;
-
-inline._comment = edit(block._comment).replace('(?:-->|$)', '-->').getRegex();
-
-inline.emStrong.lDelim = edit(inline.emStrong.lDelim)
-  .replace(/punct/g, inline._punctuation)
-  .getRegex();
-
-inline.emStrong.rDelimAst = edit(inline.emStrong.rDelimAst, 'g')
-  .replace(/punct/g, inline._punctuation)
-  .getRegex();
-
-inline.emStrong.rDelimUnd = edit(inline.emStrong.rDelimUnd, 'g')
-  .replace(/punct/g, inline._punctuation)
-  .getRegex();
-
-inline._escapes = /\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/g;
-
-inline._scheme = /[a-zA-Z][a-zA-Z0-9+.-]{1,31}/;
-inline._email = /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/;
-inline.autolink = edit(inline.autolink)
-  .replace('scheme', inline._scheme)
-  .replace('email', inline._email)
-  .getRegex();
-
-inline._attribute = /\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/;
-
-inline.tag = edit(inline.tag)
-  .replace('comment', inline._comment)
-  .replace('attribute', inline._attribute)
-  .getRegex();
-
-inline._label = /(?:\[(?:\\.|[^\[\]\\])*\]|\\.|`[^`]*`|[^\[\]\\`])*?/;
-inline._href = /<(?:\\.|[^\n<>\\])+>|[^\s\x00-\x1f]*/;
-inline._title = /"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/;
-
-inline.link = edit(inline.link)
-  .replace('label', inline._label)
-  .replace('href', inline._href)
-  .replace('title', inline._title)
-  .getRegex();
-
-inline.reflink = edit(inline.reflink)
-  .replace('label', inline._label)
-  .replace('ref', block._label)
-  .getRegex();
-
-inline.nolink = edit(inline.nolink)
-  .replace('ref', block._label)
-  .getRegex();
-
-inline.reflinkSearch = edit(inline.reflinkSearch, 'g')
-  .replace('reflink', inline.reflink)
-  .replace('nolink', inline.nolink)
-  .getRegex();
-
-/**
- * Normal Inline Grammar
- */
-
-inline.normal = { ...inline };
-
-/**
- * Pedantic Inline Grammar
- */
-
-inline.pedantic = {
-  ...inline.normal,
-  strong: {
-    start: /^__|\*\*/,
-    middle: /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
-    endAst: /\*\*(?!\*)/g,
-    endUnd: /__(?!_)/g
-  },
-  em: {
-    start: /^_|\*/,
-    middle: /^()\*(?=\S)([\s\S]*?\S)\*(?!\*)|^_(?=\S)([\s\S]*?\S)_(?!_)/,
-    endAst: /\*(?!\*)/g,
-    endUnd: /_(?!_)/g
-  },
-  link: edit(/^!?\[(label)\]\((.*?)\)/)
-    .replace('label', inline._label)
-    .getRegex(),
-  reflink: edit(/^!?\[(label)\]\s*\[([^\]]*)\]/)
-    .replace('label', inline._label)
-    .getRegex()
-};
-
-/**
- * GFM Inline Grammar
- */
-
-inline.gfm = {
-  ...inline.normal,
-  escape: edit(inline.escape).replace('])', '~|])').getRegex(),
-  _extended_email: /[A-Za-z0-9._+-]+(@)[a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]*[a-zA-Z0-9])+(?![-_])/,
-  url: /^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/,
-  _backpedal: /(?:[^?!.,:;*_'"~()&]+|\([^)]*\)|&(?![a-zA-Z0-9]+;$)|[?!.,:;*_'"~)]+(?!$))+/,
-  del: /^(~~?)(?=[^\s~])([\s\S]*?[^\s~])\1(?=[^~]|$)/,
-  text: /^([`~]+|[^`~])(?:(?= {2,}\n)|(?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@)|[\s\S]*?(?:(?=[\\<!\[`*~_]|\b_|https?:\/\/|ftp:\/\/|www\.|$)|[^ ](?= {2,}\n)|[^a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-](?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@)))/
-};
-
-inline.gfm.url = edit(inline.gfm.url, 'i')
-  .replace('email', inline.gfm._extended_email)
-  .getRegex();
-/**
- * GFM + Line Breaks Inline Grammar
- */
-
-inline.breaks = {
-  ...inline.gfm,
-  br: edit(inline.br).replace('{2,}', '*').getRegex(),
-  text: edit(inline.gfm.text)
-    .replace('\\b_', '\\b_| {2,}\\n')
-    .replace(/\{2,\}/g, '*')
-    .getRegex()
-};
-
-/**
- * smartypants text replacement
- * @param {string} text
- */
-function smartypants(text) {
-  return text
-    // em-dashes
-    .replace(/---/g, '\u2014')
-    // en-dashes
-    .replace(/--/g, '\u2013')
-    // opening singles
-    .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
-    // closing singles & apostrophes
-    .replace(/'/g, '\u2019')
-    // opening doubles
-    .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
-    // closing doubles
-    .replace(/"/g, '\u201d')
-    // ellipses
-    .replace(/\.{3}/g, '\u2026');
-}
-
-/**
- * mangle email addresses
- * @param {string} text
- */
-function mangle(text) {
-  let out = '',
-    i,
-    ch;
-
-  const l = text.length;
-  for (i = 0; i < l; i++) {
-    ch = text.charCodeAt(i);
-    if (Math.random() > 0.5) {
-      ch = 'x' + ch.toString(16);
-    }
-    out += '&#' + ch + ';';
-  }
-
-  return out;
-}
-
-/**
- * Block Lexer
- */
-class Lexer {
-  constructor(options) {
-    this.tokens = [];
-    this.tokens.links = Object.create(null);
-    this.options = options || defaults;
-    this.options.tokenizer = this.options.tokenizer || new Tokenizer();
-    this.tokenizer = this.options.tokenizer;
-    this.tokenizer.options = this.options;
-    this.tokenizer.lexer = this;
-    this.inlineQueue = [];
-    this.state = {
-      inLink: false,
-      inRawBlock: false,
-      top: true
-    };
-
-    const rules = {
-      block: block.normal,
-      inline: inline.normal
-    };
-
-    if (this.options.pedantic) {
-      rules.block = block.pedantic;
-      rules.inline = inline.pedantic;
-    } else if (this.options.gfm) {
-      rules.block = block.gfm;
-      if (this.options.breaks) {
-        rules.inline = inline.breaks;
-      } else {
-        rules.inline = inline.gfm;
-      }
-    }
-    this.tokenizer.rules = rules;
-  }
-
-  /**
-   * Expose Rules
-   */
-  static get rules() {
-    return {
-      block,
-      inline
-    };
-  }
-
-  /**
-   * Static Lex Method
-   */
-  static lex(src, options) {
-    const lexer = new Lexer(options);
-    return lexer.lex(src);
-  }
-
-  /**
-   * Static Lex Inline Method
-   */
-  static lexInline(src, options) {
-    const lexer = new Lexer(options);
-    return lexer.inlineTokens(src);
-  }
-
-  /**
-   * Preprocessing
-   */
-  lex(src) {
-    src = src
-      .replace(/\r\n|\r/g, '\n');
-
-    this.blockTokens(src, this.tokens);
-
-    let next;
-    while (next = this.inlineQueue.shift()) {
-      this.inlineTokens(next.src, next.tokens);
-    }
-
-    return this.tokens;
-  }
-
-  /**
-   * Lexing
-   */
-  blockTokens(src, tokens = []) {
-    if (this.options.pedantic) {
-      src = src.replace(/\t/g, '    ').replace(/^ +$/gm, '');
-    } else {
-      src = src.replace(/^( *)(\t+)/gm, (_, leading, tabs) => {
-        return leading + '    '.repeat(tabs.length);
-      });
-    }
-
-    let token, lastToken, cutSrc, lastParagraphClipped;
-
-    while (src) {
-      if (this.options.extensions
-        && this.options.extensions.block
-        && this.options.extensions.block.some((extTokenizer) => {
-          if (token = extTokenizer.call({ lexer: this }, src, tokens)) {
-            src = src.substring(token.raw.length);
-            tokens.push(token);
-            return true;
-          }
-          return false;
-        })) {
-        continue;
-      }
-
-      // newline
-      if (token = this.tokenizer.space(src)) {
-        src = src.substring(token.raw.length);
-        if (token.raw.length === 1 && tokens.length > 0) {
-          // if there's a single \n as a spacer, it's terminating the last line,
-          // so move it there so that we don't get unecessary paragraph tags
-          tokens[tokens.length - 1].raw += '\n';
-        } else {
-          tokens.push(token);
-        }
-        continue;
-      }
-
-      // code
-      if (token = this.tokenizer.code(src)) {
-        src = src.substring(token.raw.length);
-        lastToken = tokens[tokens.length - 1];
-        // An indented code block cannot interrupt a paragraph.
-        if (lastToken && (lastToken.type === 'paragraph' || lastToken.type === 'text')) {
-          lastToken.raw += '\n' + token.raw;
-          lastToken.text += '\n' + token.text;
-          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
-        } else {
-          tokens.push(token);
-        }
-        continue;
-      }
-
-      // fences
-      if (token = this.tokenizer.fences(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // heading
-      if (token = this.tokenizer.heading(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // hr
-      if (token = this.tokenizer.hr(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // blockquote
-      if (token = this.tokenizer.blockquote(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // list
-      if (token = this.tokenizer.list(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // html
-      if (token = this.tokenizer.html(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // def
-      if (token = this.tokenizer.def(src)) {
-        src = src.substring(token.raw.length);
-        lastToken = tokens[tokens.length - 1];
-        if (lastToken && (lastToken.type === 'paragraph' || lastToken.type === 'text')) {
-          lastToken.raw += '\n' + token.raw;
-          lastToken.text += '\n' + token.raw;
-          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
-        } else if (!this.tokens.links[token.tag]) {
-          this.tokens.links[token.tag] = {
-            href: token.href,
-            title: token.title
-          };
-        }
-        continue;
-      }
-
-      // table (gfm)
-      if (token = this.tokenizer.table(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // lheading
-      if (token = this.tokenizer.lheading(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // top-level paragraph
-      // prevent paragraph consuming extensions by clipping 'src' to extension start
-      cutSrc = src;
-      if (this.options.extensions && this.options.extensions.startBlock) {
-        let startIndex = Infinity;
-        const tempSrc = src.slice(1);
-        let tempStart;
-        this.options.extensions.startBlock.forEach(function(getStartIndex) {
-          tempStart = getStartIndex.call({ lexer: this }, tempSrc);
-          if (typeof tempStart === 'number' && tempStart >= 0) { startIndex = Math.min(startIndex, tempStart); }
-        });
-        if (startIndex < Infinity && startIndex >= 0) {
-          cutSrc = src.substring(0, startIndex + 1);
-        }
-      }
-      if (this.state.top && (token = this.tokenizer.paragraph(cutSrc))) {
-        lastToken = tokens[tokens.length - 1];
-        if (lastParagraphClipped && lastToken.type === 'paragraph') {
-          lastToken.raw += '\n' + token.raw;
-          lastToken.text += '\n' + token.text;
-          this.inlineQueue.pop();
-          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
-        } else {
-          tokens.push(token);
-        }
-        lastParagraphClipped = (cutSrc.length !== src.length);
-        src = src.substring(token.raw.length);
-        continue;
-      }
-
-      // text
-      if (token = this.tokenizer.text(src)) {
-        src = src.substring(token.raw.length);
-        lastToken = tokens[tokens.length - 1];
-        if (lastToken && lastToken.type === 'text') {
-          lastToken.raw += '\n' + token.raw;
-          lastToken.text += '\n' + token.text;
-          this.inlineQueue.pop();
-          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
-        } else {
-          tokens.push(token);
-        }
-        continue;
-      }
-
-      if (src) {
-        const errMsg = 'Infinite loop on byte: ' + src.charCodeAt(0);
-        if (this.options.silent) {
-          console.error(errMsg);
-          break;
-        } else {
-          throw new Error(errMsg);
-        }
-      }
-    }
-
-    this.state.top = true;
-    return tokens;
-  }
-
-  inline(src, tokens = []) {
-    this.inlineQueue.push({ src, tokens });
-    return tokens;
-  }
-
-  /**
-   * Lexing/Compiling
-   */
-  inlineTokens(src, tokens = []) {
-    let token, lastToken, cutSrc;
-
-    // String with links masked to avoid interference with em and strong
-    let maskedSrc = src;
-    let match;
-    let keepPrevChar, prevChar;
-
-    // Mask out reflinks
-    if (this.tokens.links) {
-      const links = Object.keys(this.tokens.links);
-      if (links.length > 0) {
-        while ((match = this.tokenizer.rules.inline.reflinkSearch.exec(maskedSrc)) != null) {
-          if (links.includes(match[0].slice(match[0].lastIndexOf('[') + 1, -1))) {
-            maskedSrc = maskedSrc.slice(0, match.index) + '[' + repeatString('a', match[0].length - 2) + ']' + maskedSrc.slice(this.tokenizer.rules.inline.reflinkSearch.lastIndex);
-          }
-        }
-      }
-    }
-    // Mask out other blocks
-    while ((match = this.tokenizer.rules.inline.blockSkip.exec(maskedSrc)) != null) {
-      maskedSrc = maskedSrc.slice(0, match.index) + '[' + repeatString('a', match[0].length - 2) + ']' + maskedSrc.slice(this.tokenizer.rules.inline.blockSkip.lastIndex);
-    }
-
-    // Mask out escaped em & strong delimiters
-    while ((match = this.tokenizer.rules.inline.escapedEmSt.exec(maskedSrc)) != null) {
-      maskedSrc = maskedSrc.slice(0, match.index + match[0].length - 2) + '++' + maskedSrc.slice(this.tokenizer.rules.inline.escapedEmSt.lastIndex);
-      this.tokenizer.rules.inline.escapedEmSt.lastIndex--;
-    }
-
-    while (src) {
-      if (!keepPrevChar) {
-        prevChar = '';
-      }
-      keepPrevChar = false;
-
-      // extensions
-      if (this.options.extensions
-        && this.options.extensions.inline
-        && this.options.extensions.inline.some((extTokenizer) => {
-          if (token = extTokenizer.call({ lexer: this }, src, tokens)) {
-            src = src.substring(token.raw.length);
-            tokens.push(token);
-            return true;
-          }
-          return false;
-        })) {
-        continue;
-      }
-
-      // escape
-      if (token = this.tokenizer.escape(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // tag
-      if (token = this.tokenizer.tag(src)) {
-        src = src.substring(token.raw.length);
-        lastToken = tokens[tokens.length - 1];
-        if (lastToken && token.type === 'text' && lastToken.type === 'text') {
-          lastToken.raw += token.raw;
-          lastToken.text += token.text;
-        } else {
-          tokens.push(token);
-        }
-        continue;
-      }
-
-      // link
-      if (token = this.tokenizer.link(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // reflink, nolink
-      if (token = this.tokenizer.reflink(src, this.tokens.links)) {
-        src = src.substring(token.raw.length);
-        lastToken = tokens[tokens.length - 1];
-        if (lastToken && token.type === 'text' && lastToken.type === 'text') {
-          lastToken.raw += token.raw;
-          lastToken.text += token.text;
-        } else {
-          tokens.push(token);
-        }
-        continue;
-      }
-
-      // em & strong
-      if (token = this.tokenizer.emStrong(src, maskedSrc, prevChar)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // code
-      if (token = this.tokenizer.codespan(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // br
-      if (token = this.tokenizer.br(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // del (gfm)
-      if (token = this.tokenizer.del(src)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // autolink
-      if (token = this.tokenizer.autolink(src, mangle)) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // url (gfm)
-      if (!this.state.inLink && (token = this.tokenizer.url(src, mangle))) {
-        src = src.substring(token.raw.length);
-        tokens.push(token);
-        continue;
-      }
-
-      // text
-      // prevent inlineText consuming extensions by clipping 'src' to extension start
-      cutSrc = src;
-      if (this.options.extensions && this.options.extensions.startInline) {
-        let startIndex = Infinity;
-        const tempSrc = src.slice(1);
-        let tempStart;
-        this.options.extensions.startInline.forEach(function(getStartIndex) {
-          tempStart = getStartIndex.call({ lexer: this }, tempSrc);
-          if (typeof tempStart === 'number' && tempStart >= 0) { startIndex = Math.min(startIndex, tempStart); }
-        });
-        if (startIndex < Infinity && startIndex >= 0) {
-          cutSrc = src.substring(0, startIndex + 1);
-        }
-      }
-      if (token = this.tokenizer.inlineText(cutSrc, smartypants)) {
-        src = src.substring(token.raw.length);
-        if (token.raw.slice(-1) !== '_') { // Track prevChar before string of ____ started
-          prevChar = token.raw.slice(-1);
-        }
-        keepPrevChar = true;
-        lastToken = tokens[tokens.length - 1];
-        if (lastToken && lastToken.type === 'text') {
-          lastToken.raw += token.raw;
-          lastToken.text += token.text;
-        } else {
-          tokens.push(token);
-        }
-        continue;
-      }
-
-      if (src) {
-        const errMsg = 'Infinite loop on byte: ' + src.charCodeAt(0);
-        if (this.options.silent) {
-          console.error(errMsg);
-          break;
-        } else {
-          throw new Error(errMsg);
-        }
-      }
-    }
-
-    return tokens;
-  }
-}
-
-/**
- * Renderer
- */
-class Renderer {
-  constructor(options) {
-    this.options = options || defaults;
-  }
-
-  code(code, infostring, escaped) {
-    const lang = (infostring || '').match(/\S*/)[0];
-    if (this.options.highlight) {
-      const out = this.options.highlight(code, lang);
-      if (out != null && out !== code) {
-        escaped = true;
-        code = out;
-      }
-    }
-
-    code = code.replace(/\n$/, '') + '\n';
-
-    if (!lang) {
-      return '<pre><code>'
-        + (escaped ? code : escape(code, true))
-        + '</code></pre>\n';
-    }
-
-    return '<pre><code class="'
-      + this.options.langPrefix
-      + escape(lang)
-      + '">'
-      + (escaped ? code : escape(code, true))
-      + '</code></pre>\n';
-  }
-
-  /**
-   * @param {string} quote
-   */
-  blockquote(quote) {
-    return `<blockquote>\n${quote}</blockquote>\n`;
-  }
-
-  html(html) {
-    return html;
-  }
-
-  /**
-   * @param {string} text
-   * @param {string} level
-   * @param {string} raw
-   * @param {any} slugger
-   */
-  heading(text, level, raw, slugger) {
-    if (this.options.headerIds) {
-      const id = this.options.headerPrefix + slugger.slug(raw);
-      return `<h${level} id="${id}">${text}</h${level}>\n`;
-    }
-
-    // ignore IDs
-    return `<h${level}>${text}</h${level}>\n`;
-  }
-
-  hr() {
-    return this.options.xhtml ? '<hr/>\n' : '<hr>\n';
-  }
-
-  list(body, ordered, start) {
-    const type = ordered ? 'ol' : 'ul',
-      startatt = (ordered && start !== 1) ? (' start="' + start + '"') : '';
-    return '<' + type + startatt + '>\n' + body + '</' + type + '>\n';
-  }
-
-  /**
-   * @param {string} text
-   */
-  listitem(text) {
-    return `<li>${text}</li>\n`;
-  }
-
-  checkbox(checked) {
-    return '<input '
-      + (checked ? 'checked="" ' : '')
-      + 'disabled="" type="checkbox"'
-      + (this.options.xhtml ? ' /' : '')
-      + '> ';
-  }
-
-  /**
-   * @param {string} text
-   */
-  paragraph(text) {
-    return `<p>${text}</p>\n`;
-  }
-
-  /**
-   * @param {string} header
-   * @param {string} body
-   */
-  table(header, body) {
-    if (body) body = `<tbody>${body}</tbody>`;
-
-    return '<table>\n'
-      + '<thead>\n'
-      + header
-      + '</thead>\n'
-      + body
-      + '</table>\n';
-  }
-
-  /**
-   * @param {string} content
-   */
-  tablerow(content) {
-    return `<tr>\n${content}</tr>\n`;
-  }
-
-  tablecell(content, flags) {
-    const type = flags.header ? 'th' : 'td';
-    const tag = flags.align
-      ? `<${type} align="${flags.align}">`
-      : `<${type}>`;
-    return tag + content + `</${type}>\n`;
-  }
-
-  /**
-   * span level renderer
-   * @param {string} text
-   */
-  strong(text) {
-    return `<strong>${text}</strong>`;
-  }
-
-  /**
-   * @param {string} text
-   */
-  em(text) {
-    return `<em>${text}</em>`;
-  }
-
-  /**
-   * @param {string} text
-   */
-  codespan(text) {
-    return `<code>${text}</code>`;
-  }
-
-  br() {
-    return this.options.xhtml ? '<br/>' : '<br>';
-  }
-
-  /**
-   * @param {string} text
-   */
-  del(text) {
-    return `<del>${text}</del>`;
-  }
-
-  /**
-   * @param {string} href
-   * @param {string} title
-   * @param {string} text
-   */
-  link(href, title, text) {
-    href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
-    if (href === null) {
-      return text;
-    }
-    let out = '<a href="' + href + '"';
-    if (title) {
-      out += ' title="' + title + '"';
-    }
-    out += '>' + text + '</a>';
-    return out;
-  }
-
-  /**
-   * @param {string} href
-   * @param {string} title
-   * @param {string} text
-   */
-  image(href, title, text) {
-    href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
-    if (href === null) {
-      return text;
-    }
-
-    let out = `<img src="${href}" alt="${text}"`;
-    if (title) {
-      out += ` title="${title}"`;
-    }
-    out += this.options.xhtml ? '/>' : '>';
-    return out;
-  }
-
-  text(text) {
-    return text;
-  }
-}
-
-/**
- * TextRenderer
- * returns only the textual part of the token
- */
-class TextRenderer {
-  // no need for block level renderers
-  strong(text) {
-    return text;
-  }
-
-  em(text) {
-    return text;
-  }
-
-  codespan(text) {
-    return text;
-  }
-
-  del(text) {
-    return text;
-  }
-
-  html(text) {
-    return text;
-  }
-
-  text(text) {
-    return text;
-  }
-
-  link(href, title, text) {
-    return '' + text;
-  }
-
-  image(href, title, text) {
-    return '' + text;
-  }
-
-  br() {
-    return '';
-  }
-}
-
-/**
- * Slugger generates header id
- */
-class Slugger {
-  constructor() {
-    this.seen = {};
-  }
-
-  /**
-   * @param {string} value
-   */
-  serialize(value) {
-    return value
-      .toLowerCase()
-      .trim()
-      // remove html tags
-      .replace(/<[!\/a-z].*?>/ig, '')
-      // remove unwanted chars
-      .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
-      .replace(/\s/g, '-');
-  }
-
-  /**
-   * Finds the next safe (unique) slug to use
-   * @param {string} originalSlug
-   * @param {boolean} isDryRun
-   */
-  getNextSafeSlug(originalSlug, isDryRun) {
-    let slug = originalSlug;
-    let occurenceAccumulator = 0;
-    if (this.seen.hasOwnProperty(slug)) {
-      occurenceAccumulator = this.seen[originalSlug];
-      do {
-        occurenceAccumulator++;
-        slug = originalSlug + '-' + occurenceAccumulator;
-      } while (this.seen.hasOwnProperty(slug));
-    }
-    if (!isDryRun) {
-      this.seen[originalSlug] = occurenceAccumulator;
-      this.seen[slug] = 0;
-    }
-    return slug;
-  }
-
-  /**
-   * Convert string to unique id
-   * @param {object} [options]
-   * @param {boolean} [options.dryrun] Generates the next unique slug without
-   * updating the internal accumulator.
-   */
-  slug(value, options = {}) {
-    const slug = this.serialize(value);
-    return this.getNextSafeSlug(slug, options.dryrun);
-  }
-}
-
-/**
- * Parsing & Compiling
- */
-class Parser {
-  constructor(options) {
-    this.options = options || defaults;
-    this.options.renderer = this.options.renderer || new Renderer();
-    this.renderer = this.options.renderer;
-    this.renderer.options = this.options;
-    this.textRenderer = new TextRenderer();
-    this.slugger = new Slugger();
-  }
-
-  /**
-   * Static Parse Method
-   */
-  static parse(tokens, options) {
-    const parser = new Parser(options);
-    return parser.parse(tokens);
-  }
-
-  /**
-   * Static Parse Inline Method
-   */
-  static parseInline(tokens, options) {
-    const parser = new Parser(options);
-    return parser.parseInline(tokens);
-  }
-
-  /**
-   * Parse Loop
-   */
-  parse(tokens, top = true) {
-    let out = '',
-      i,
-      j,
-      k,
-      l2,
-      l3,
-      row,
-      cell,
-      header,
-      body,
-      token,
-      ordered,
-      start,
-      loose,
-      itemBody,
-      item,
-      checked,
-      task,
-      checkbox,
-      ret;
-
-    const l = tokens.length;
-    for (i = 0; i < l; i++) {
-      token = tokens[i];
-
-      // Run any renderer extensions
-      if (this.options.extensions && this.options.extensions.renderers && this.options.extensions.renderers[token.type]) {
-        ret = this.options.extensions.renderers[token.type].call({ parser: this }, token);
-        if (ret !== false || !['space', 'hr', 'heading', 'code', 'table', 'blockquote', 'list', 'html', 'paragraph', 'text'].includes(token.type)) {
-          out += ret || '';
-          continue;
-        }
-      }
-
-      switch (token.type) {
-        case 'space': {
-          continue;
-        }
-        case 'hr': {
-          out += this.renderer.hr();
-          continue;
-        }
-        case 'heading': {
-          out += this.renderer.heading(
-            this.parseInline(token.tokens),
-            token.depth,
-            unescape$1(this.parseInline(token.tokens, this.textRenderer)),
-            this.slugger);
-          continue;
-        }
-        case 'code': {
-          out += this.renderer.code(token.text,
-            token.lang,
-            token.escaped);
-          continue;
-        }
-        case 'table': {
-          header = '';
-
-          // header
-          cell = '';
-          l2 = token.header.length;
-          for (j = 0; j < l2; j++) {
-            cell += this.renderer.tablecell(
-              this.parseInline(token.header[j].tokens),
-              { header: true, align: token.align[j] }
-            );
-          }
-          header += this.renderer.tablerow(cell);
-
-          body = '';
-          l2 = token.rows.length;
-          for (j = 0; j < l2; j++) {
-            row = token.rows[j];
-
-            cell = '';
-            l3 = row.length;
-            for (k = 0; k < l3; k++) {
-              cell += this.renderer.tablecell(
-                this.parseInline(row[k].tokens),
-                { header: false, align: token.align[k] }
-              );
-            }
-
-            body += this.renderer.tablerow(cell);
-          }
-          out += this.renderer.table(header, body);
-          continue;
-        }
-        case 'blockquote': {
-          body = this.parse(token.tokens);
-          out += this.renderer.blockquote(body);
-          continue;
-        }
-        case 'list': {
-          ordered = token.ordered;
-          start = token.start;
-          loose = token.loose;
-          l2 = token.items.length;
-
-          body = '';
-          for (j = 0; j < l2; j++) {
-            item = token.items[j];
-            checked = item.checked;
-            task = item.task;
-
-            itemBody = '';
-            if (item.task) {
-              checkbox = this.renderer.checkbox(checked);
-              if (loose) {
-                if (item.tokens.length > 0 && item.tokens[0].type === 'paragraph') {
-                  item.tokens[0].text = checkbox + ' ' + item.tokens[0].text;
-                  if (item.tokens[0].tokens && item.tokens[0].tokens.length > 0 && item.tokens[0].tokens[0].type === 'text') {
-                    item.tokens[0].tokens[0].text = checkbox + ' ' + item.tokens[0].tokens[0].text;
-                  }
-                } else {
-                  item.tokens.unshift({
-                    type: 'text',
-                    text: checkbox
-                  });
-                }
-              } else {
-                itemBody += checkbox;
-              }
-            }
-
-            itemBody += this.parse(item.tokens, loose);
-            body += this.renderer.listitem(itemBody, task, checked);
-          }
-
-          out += this.renderer.list(body, ordered, start);
-          continue;
-        }
-        case 'html': {
-          // TODO parse inline content if parameter markdown=1
-          out += this.renderer.html(token.text);
-          continue;
-        }
-        case 'paragraph': {
-          out += this.renderer.paragraph(this.parseInline(token.tokens));
-          continue;
-        }
-        case 'text': {
-          body = token.tokens ? this.parseInline(token.tokens) : token.text;
-          while (i + 1 < l && tokens[i + 1].type === 'text') {
-            token = tokens[++i];
-            body += '\n' + (token.tokens ? this.parseInline(token.tokens) : token.text);
-          }
-          out += top ? this.renderer.paragraph(body) : body;
-          continue;
-        }
-
-        default: {
-          const errMsg = 'Token with "' + token.type + '" type was not found.';
-          if (this.options.silent) {
-            console.error(errMsg);
-            return;
-          } else {
-            throw new Error(errMsg);
-          }
-        }
-      }
-    }
-
-    return out;
-  }
-
-  /**
-   * Parse Inline Tokens
-   */
-  parseInline(tokens, renderer) {
-    renderer = renderer || this.renderer;
-    let out = '',
-      i,
-      token,
-      ret;
-
-    const l = tokens.length;
-    for (i = 0; i < l; i++) {
-      token = tokens[i];
-
-      // Run any renderer extensions
-      if (this.options.extensions && this.options.extensions.renderers && this.options.extensions.renderers[token.type]) {
-        ret = this.options.extensions.renderers[token.type].call({ parser: this }, token);
-        if (ret !== false || !['escape', 'html', 'link', 'image', 'strong', 'em', 'codespan', 'br', 'del', 'text'].includes(token.type)) {
-          out += ret || '';
-          continue;
-        }
-      }
-
-      switch (token.type) {
-        case 'escape': {
-          out += renderer.text(token.text);
-          break;
-        }
-        case 'html': {
-          out += renderer.html(token.text);
-          break;
-        }
-        case 'link': {
-          out += renderer.link(token.href, token.title, this.parseInline(token.tokens, renderer));
-          break;
-        }
-        case 'image': {
-          out += renderer.image(token.href, token.title, token.text);
-          break;
-        }
-        case 'strong': {
-          out += renderer.strong(this.parseInline(token.tokens, renderer));
-          break;
-        }
-        case 'em': {
-          out += renderer.em(this.parseInline(token.tokens, renderer));
-          break;
-        }
-        case 'codespan': {
-          out += renderer.codespan(token.text);
-          break;
-        }
-        case 'br': {
-          out += renderer.br();
-          break;
-        }
-        case 'del': {
-          out += renderer.del(this.parseInline(token.tokens, renderer));
-          break;
-        }
-        case 'text': {
-          out += renderer.text(token.text);
-          break;
-        }
-        default: {
-          const errMsg = 'Token with "' + token.type + '" type was not found.';
-          if (this.options.silent) {
-            console.error(errMsg);
-            return;
-          } else {
-            throw new Error(errMsg);
-          }
-        }
-      }
-    }
-    return out;
-  }
-}
-
-class Hooks {
-  constructor(options) {
-    this.options = options || defaults;
-  }
-
-  static passThroughHooks = new Set([
-    'preprocess',
-    'postprocess'
-  ]);
-
-  /**
-   * Process markdown before marked
-   */
-  preprocess(markdown) {
-    return markdown;
-  }
-
-  /**
-   * Process HTML after marked is finished
-   */
-  postprocess(html) {
-    return html;
-  }
-}
-
-function onError(silent, async, callback) {
-  return (e) => {
-    e.message += '\nPlease report this to https://github.com/markedjs/marked.';
-
-    if (silent) {
-      const msg = '<p>An error occurred:</p><pre>'
-        + escape(e.message + '', true)
-        + '</pre>';
-      if (async) {
-        return Promise.resolve(msg);
-      }
-      if (callback) {
-        callback(null, msg);
-        return;
-      }
-      return msg;
-    }
-
-    if (async) {
-      return Promise.reject(e);
-    }
-    if (callback) {
-      callback(e);
-      return;
-    }
-    throw e;
-  };
-}
-
-function parseMarkdown(lexer, parser) {
-  return (src, opt, callback) => {
-    if (typeof opt === 'function') {
-      callback = opt;
-      opt = null;
-    }
-
-    const origOpt = { ...opt };
-    opt = { ...marked.defaults, ...origOpt };
-    const throwError = onError(opt.silent, opt.async, callback);
-
-    // throw error in case of non string input
-    if (typeof src === 'undefined' || src === null) {
-      return throwError(new Error('marked(): input parameter is undefined or null'));
-    }
-    if (typeof src !== 'string') {
-      return throwError(new Error('marked(): input parameter is of type '
-        + Object.prototype.toString.call(src) + ', string expected'));
-    }
-
-    checkSanitizeDeprecation(opt);
-
-    if (opt.hooks) {
-      opt.hooks.options = opt;
-    }
-
-    if (callback) {
-      const highlight = opt.highlight;
-      let tokens;
-
-      try {
-        if (opt.hooks) {
-          src = opt.hooks.preprocess(src);
-        }
-        tokens = lexer(src, opt);
-      } catch (e) {
-        return throwError(e);
-      }
-
-      const done = function(err) {
-        let out;
-
-        if (!err) {
-          try {
-            if (opt.walkTokens) {
-              marked.walkTokens(tokens, opt.walkTokens);
-            }
-            out = parser(tokens, opt);
-            if (opt.hooks) {
-              out = opt.hooks.postprocess(out);
-            }
-          } catch (e) {
-            err = e;
-          }
-        }
-
-        opt.highlight = highlight;
-
-        return err
-          ? throwError(err)
-          : callback(null, out);
-      };
-
-      if (!highlight || highlight.length < 3) {
-        return done();
-      }
-
-      delete opt.highlight;
-
-      if (!tokens.length) return done();
-
-      let pending = 0;
-      marked.walkTokens(tokens, function(token) {
-        if (token.type === 'code') {
-          pending++;
-          setTimeout(() => {
-            highlight(token.text, token.lang, function(err, code) {
-              if (err) {
-                return done(err);
-              }
-              if (code != null && code !== token.text) {
-                token.text = code;
-                token.escaped = true;
-              }
-
-              pending--;
-              if (pending === 0) {
-                done();
-              }
-            });
-          }, 0);
-        }
-      });
-
-      if (pending === 0) {
-        done();
-      }
-
-      return;
-    }
-
-    if (opt.async) {
-      return Promise.resolve(opt.hooks ? opt.hooks.preprocess(src) : src)
-        .then(src => lexer(src, opt))
-        .then(tokens => opt.walkTokens ? Promise.all(marked.walkTokens(tokens, opt.walkTokens)).then(() => tokens) : tokens)
-        .then(tokens => parser(tokens, opt))
-        .then(html => opt.hooks ? opt.hooks.postprocess(html) : html)
-        .catch(throwError);
-    }
-
-    try {
-      if (opt.hooks) {
-        src = opt.hooks.preprocess(src);
-      }
-      const tokens = lexer(src, opt);
-      if (opt.walkTokens) {
-        marked.walkTokens(tokens, opt.walkTokens);
-      }
-      let html = parser(tokens, opt);
-      if (opt.hooks) {
-        html = opt.hooks.postprocess(html);
-      }
-      return html;
-    } catch (e) {
-      return throwError(e);
-    }
-  };
-}
-
-/**
- * Marked
- */
-function marked(src, opt, callback) {
-  return parseMarkdown(Lexer.lex, Parser.parse)(src, opt, callback);
-}
-
-/**
- * Options
- */
-
-marked.options =
-marked.setOptions = function(opt) {
-  marked.defaults = { ...marked.defaults, ...opt };
-  changeDefaults(marked.defaults);
-  return marked;
-};
-
-marked.getDefaults = getDefaults;
-
-marked.defaults = defaults;
-
-/**
- * Use Extension
- */
-
-marked.use = function(...args) {
-  const extensions = marked.defaults.extensions || { renderers: {}, childTokens: {} };
-
-  args.forEach((pack) => {
-    // copy options to new object
-    const opts = { ...pack };
-
-    // set async to true if it was set to true before
-    opts.async = marked.defaults.async || opts.async || false;
-
-    // ==-- Parse "addon" extensions --== //
-    if (pack.extensions) {
-      pack.extensions.forEach((ext) => {
-        if (!ext.name) {
-          throw new Error('extension name required');
-        }
-        if (ext.renderer) { // Renderer extensions
-          const prevRenderer = extensions.renderers[ext.name];
-          if (prevRenderer) {
-            // Replace extension with func to run new extension but fall back if false
-            extensions.renderers[ext.name] = function(...args) {
-              let ret = ext.renderer.apply(this, args);
-              if (ret === false) {
-                ret = prevRenderer.apply(this, args);
-              }
-              return ret;
-            };
-          } else {
-            extensions.renderers[ext.name] = ext.renderer;
-          }
-        }
-        if (ext.tokenizer) { // Tokenizer Extensions
-          if (!ext.level || (ext.level !== 'block' && ext.level !== 'inline')) {
-            throw new Error("extension level must be 'block' or 'inline'");
-          }
-          if (extensions[ext.level]) {
-            extensions[ext.level].unshift(ext.tokenizer);
-          } else {
-            extensions[ext.level] = [ext.tokenizer];
-          }
-          if (ext.start) { // Function to check for start of token
-            if (ext.level === 'block') {
-              if (extensions.startBlock) {
-                extensions.startBlock.push(ext.start);
-              } else {
-                extensions.startBlock = [ext.start];
-              }
-            } else if (ext.level === 'inline') {
-              if (extensions.startInline) {
-                extensions.startInline.push(ext.start);
-              } else {
-                extensions.startInline = [ext.start];
-              }
-            }
-          }
-        }
-        if (ext.childTokens) { // Child tokens to be visited by walkTokens
-          extensions.childTokens[ext.name] = ext.childTokens;
-        }
-      });
-      opts.extensions = extensions;
-    }
-
-    // ==-- Parse "overwrite" extensions --== //
-    if (pack.renderer) {
-      const renderer = marked.defaults.renderer || new Renderer();
-      for (const prop in pack.renderer) {
-        const prevRenderer = renderer[prop];
-        // Replace renderer with func to run extension, but fall back if false
-        renderer[prop] = (...args) => {
-          let ret = pack.renderer[prop].apply(renderer, args);
-          if (ret === false) {
-            ret = prevRenderer.apply(renderer, args);
-          }
-          return ret;
-        };
-      }
-      opts.renderer = renderer;
-    }
-    if (pack.tokenizer) {
-      const tokenizer = marked.defaults.tokenizer || new Tokenizer();
-      for (const prop in pack.tokenizer) {
-        const prevTokenizer = tokenizer[prop];
-        // Replace tokenizer with func to run extension, but fall back if false
-        tokenizer[prop] = (...args) => {
-          let ret = pack.tokenizer[prop].apply(tokenizer, args);
-          if (ret === false) {
-            ret = prevTokenizer.apply(tokenizer, args);
-          }
-          return ret;
-        };
-      }
-      opts.tokenizer = tokenizer;
-    }
-
-    // ==-- Parse Hooks extensions --== //
-    if (pack.hooks) {
-      const hooks = marked.defaults.hooks || new Hooks();
-      for (const prop in pack.hooks) {
-        const prevHook = hooks[prop];
-        if (Hooks.passThroughHooks.has(prop)) {
-          hooks[prop] = (arg) => {
-            if (marked.defaults.async) {
-              return Promise.resolve(pack.hooks[prop].call(hooks, arg)).then(ret => {
-                return prevHook.call(hooks, ret);
-              });
-            }
-
-            const ret = pack.hooks[prop].call(hooks, arg);
-            return prevHook.call(hooks, ret);
-          };
-        } else {
-          hooks[prop] = (...args) => {
-            let ret = pack.hooks[prop].apply(hooks, args);
-            if (ret === false) {
-              ret = prevHook.apply(hooks, args);
-            }
-            return ret;
-          };
-        }
-      }
-      opts.hooks = hooks;
-    }
-
-    // ==-- Parse WalkTokens extensions --== //
-    if (pack.walkTokens) {
-      const walkTokens = marked.defaults.walkTokens;
-      opts.walkTokens = function(token) {
-        let values = [];
-        values.push(pack.walkTokens.call(this, token));
-        if (walkTokens) {
-          values = values.concat(walkTokens.call(this, token));
-        }
-        return values;
-      };
-    }
-
-    marked.setOptions(opts);
-  });
-};
-
-/**
- * Run callback for every token
- */
-
-marked.walkTokens = function(tokens, callback) {
-  let values = [];
-  for (const token of tokens) {
-    values = values.concat(callback.call(marked, token));
-    switch (token.type) {
-      case 'table': {
-        for (const cell of token.header) {
-          values = values.concat(marked.walkTokens(cell.tokens, callback));
-        }
-        for (const row of token.rows) {
-          for (const cell of row) {
-            values = values.concat(marked.walkTokens(cell.tokens, callback));
-          }
-        }
-        break;
-      }
-      case 'list': {
-        values = values.concat(marked.walkTokens(token.items, callback));
-        break;
-      }
-      default: {
-        if (marked.defaults.extensions && marked.defaults.extensions.childTokens && marked.defaults.extensions.childTokens[token.type]) { // Walk any extensions
-          marked.defaults.extensions.childTokens[token.type].forEach(function(childTokens) {
-            values = values.concat(marked.walkTokens(token[childTokens], callback));
-          });
-        } else if (token.tokens) {
-          values = values.concat(marked.walkTokens(token.tokens, callback));
-        }
-      }
-    }
-  }
-  return values;
-};
-
-/**
- * Parse Inline
- * @param {string} src
- */
-marked.parseInline = parseMarkdown(Lexer.lexInline, Parser.parseInline);
-
-/**
- * Expose
- */
-marked.Parser = Parser;
-marked.parser = Parser.parse;
-marked.Renderer = Renderer;
-marked.TextRenderer = TextRenderer;
-marked.Lexer = Lexer;
-marked.lexer = Lexer.lex;
-marked.Tokenizer = Tokenizer;
-marked.Slugger = Slugger;
-marked.Hooks = Hooks;
-marked.parse = marked;
-
-marked.options;
-marked.setOptions;
-marked.use;
-marked.walkTokens;
-marked.parseInline;
-Parser.parse;
-Lexer.lex;
-
-marked.use({
-  renderer: {
-    code(code, language) {
-      if (language === 'mermaid') {
-        return '<div class="mermaid">' + code + '</div>';
-      } else {
-        return '<pre><code>' + code + '</code></pre>';
-      }
-    }
-  }
-});
-class MdNote extends ReactDOM$3.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object,
-      selected: propTypes$2.exports.boolean
-    };
-  }
-  render() {
-    const {
-      note,
-      selected
-    } = this.props;
-    const {
-      blur = false,
-      md
-    } = note;
-    const html = marked(md);
-    const ref = selected && /*#__PURE__*/p$1();
-    if (selected) {
-      y(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
-    return v$1("div", {
-      ref: ref,
-      dangerouslySetInnerHTML: {
-        __html: html
-      },
-      style: {
-        border,
-        opacity: blur ? 0.5 : 1
-      }
-    });
-  }
-}
-
-const Row = /*#__PURE__*/x(({
-  bsPrefix,
-  className,
-  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-  as: Component = 'div',
-  ...props
-}, ref) => {
-  const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
-  const breakpoints = useBootstrapBreakpoints();
-  const minBreakpoint = useBootstrapMinBreakpoint();
-  const sizePrefix = `${decoratedBsPrefix}-cols`;
-  const classes = [];
-  breakpoints.forEach(brkPoint => {
-    const propValue = props[brkPoint];
-    delete props[brkPoint];
-    let cols;
-    if (propValue != null && typeof propValue === 'object') {
-      ({
-        cols
-      } = propValue);
-    } else {
-      cols = propValue;
-    }
-    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
-    if (cols != null) classes.push(`${sizePrefix}${infix}-${cols}`);
-  });
-  return /*#__PURE__*/e(Component, {
-    ref: ref,
-    ...props,
-    className: classNames(className, decoratedBsPrefix, ...classes)
-  });
-});
-Row.displayName = 'Row';
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-
-var __assign$3 = function() {
-    __assign$3 = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign$3.apply(this, arguments);
-};
-
-function __rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-}
-
-var defaultProps$1 = {
-    color: '#38ad48',
-    enabled: true,
-    size: 50,
-    style: {},
-};
-var normalizeSize = function (size) { return (parseFloat(size.toString()).toString() === size.toString()
-    ? size + "px"
-    : size.toString()); };
-var withSharedProps = function (Component) {
-    var Wrapper = function (props) {
-        var color = props.color, enabled = props.enabled, size = props.size, style = props.style, otherProps = __rest(props, ["color", "enabled", "size", "style"]);
-        var componentProps = __assign$3(__assign$3({}, otherProps), { style: __assign$3({ color: color, overflow: 'visible', width: normalizeSize(size) }, style) });
-        if (!enabled)
-            return null;
-        return ReactDOM$3.createElement(Component, __assign$3({}, componentProps));
-    };
-    Wrapper.defaultProps = defaultProps$1;
-    return Wrapper;
-};
-
-var defaultProps = {
-    speed: 100,
-    still: false,
-    thickness: 100,
-};
-var secondaryColorDefaultProps = __assign$3(__assign$3({}, defaultProps), { secondaryColor: 'rgba(0,0,0,0.44)' });
-
-function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (!css || typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}
-
-var css_248z = "@keyframes spinners-react-circular-split{0%{stroke-dashoffset:1;stroke-dasharray:5,170}10%{stroke-dashoffset:13;stroke-dasharray:30,145}13%{stroke-dashoffset:-11;stroke-dasharray:5,145}50%{stroke-dasharray:5,0,5,165;stroke-dashoffset:-82}51%{stroke-dasharray:2,0,2,139;stroke-dashoffset:-85}61%{stroke-dasharray:15,0,15,165;stroke-dashoffset:-72}64%{stroke-dasharray:5,20,5,145;stroke-dashoffset:-72}}";
-styleInject(css_248z);
-
-var Component = function (_a) {
-    var secondaryColor = _a.secondaryColor, speed = _a.speed, still = _a.still, thickness = _a.thickness, svgProps = __rest(_a, ["secondaryColor", "speed", "still", "thickness"]);
-    var strokeWidth = 4 * (thickness / 100);
-    var circleStyle = !still
-        ? { animation: "spinners-react-circular-split " + 140 / speed + "s linear infinite" }
-        : {};
-    return (ReactDOM$3.createElement("svg", __assign$3({ fill: "none" }, svgProps, { viewBox: "0 0 66 66" }),
-        ReactDOM$3.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: secondaryColor, strokeWidth: strokeWidth }),
-        ReactDOM$3.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: "currentColor", strokeDasharray: "5, 170", strokeDashoffset: "1", strokeLinecap: "round", strokeWidth: strokeWidth, style: circleStyle, transform: "rotate(-90 33 33)" })));
-};
-Component.defaultProps = secondaryColorDefaultProps;
-var SpinnerCircularSplit = withSharedProps(Component);
-
-// import { SpinnerCircularSplit } from 'spinners-react';
-
-class ViewNote extends ReactDOM$3.PureComponent {
-  static get propTypes() {
-    return {
-      note: propTypes$2.exports.object,
-      notebookPath: propTypes$2.exports.string,
-      onClickView: propTypes$2.exports.func,
-      selected: propTypes$2.exports.boolean,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  render() {
-    const {
-      notebookPath,
-      note,
-      onClickView,
-      workspace
-    } = this.props;
-    const {
-      view,
-      sourceLocation
-    } = note;
-    const {
-      height,
-      width,
-      viewId
-    } = view;
-    const onClick = event => {
-      if (onClickView) {
-        onClickView({
-          event,
-          notebookPath,
-          note,
-          path: note.path,
-          view: note.view,
-          workspace,
-          sourceLocation
-        });
-      }
-    };
-    const viewIdClass = viewId ? `viewId_${viewId}` : '';
-    if (!note.url) {
-      return v$1("div", null);
-    }
-    return v$1("img", {
-      class: viewIdClass,
-      style: {
-        width,
-        height
-      },
-      variant: "top",
-      src: note.url,
-      onClick: onClick
-    });
-  }
-}
-
-const blurNotebookState = async (application, {
-  path,
-  workspace
-}) => {
-  application.setState(state => {
-    const {
-      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-    } = state;
-    const newNotebookNotes = {};
-    for (const key of Object.keys(oldNotebookNotes)) {
-      const note = oldNotebookNotes[key];
-      newNotebookNotes[key] = {
-        ...note,
-        blur: true
-      };
-    }
-    return {
-      [`NotebookNotes/${path}`]: newNotebookNotes
-    };
-  });
-};
-const clearNotebookState = async (application, {
-  path,
-  workspace,
-  isToBeKept
-}) => {
-  application.setState(state => {
-    const {
-      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-    } = state;
-    const newNotebookNotes = {};
-    for (const key of Object.keys(oldNotebookNotes)) {
-      const note = oldNotebookNotes[key];
-      if (isToBeKept(note)) {
-        newNotebookNotes[key] = note;
-      }
-    }
-    return {
-      [`NotebookNotes/${path}`]: newNotebookNotes
-    };
-  });
-};
-const updateNotebookState = async (application, {
-  notes,
-  sourceLocation,
-  workspace
-}) => {
-  const updateNote = note => {
-    const {
-      sourceLocation
-    } = note;
-    if (!sourceLocation) {
-      return;
-    }
-    const {
-      path
-    } = sourceLocation;
-    if (!note.hash) {
-      return;
-    }
-    const op = state => {
-      const {
-        [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-      } = state;
-      const oldNote = oldNotebookNotes[note.hash] || {};
-      const newNotebookNotes = {
-        ...oldNotebookNotes,
-        [note.hash]: {
-          ...oldNote,
-          blur: false,
-          ...note
-        }
-      };
-      return {
-        [`NotebookNotes/${path}`]: newNotebookNotes
-      };
-    };
-    application.setState(op);
-  };
-  for (const note of notes) {
-    updateNote(note);
-    if (note.view) {
-      if (!note.url) {
-        const loadThumbnail = async () => {
-          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
-            workspace
-          });
-          if (!url) {
-            const {
-              path,
-              view,
-              sourceLocation
-            } = note;
-            const {
-              width,
-              height
-            } = view;
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const offscreenCanvas = canvas.transferControlToOffscreen();
-            for (let nth = 0; nth < 3; nth++) {
-              try {
-                console.log(`QQ/ask staticView nth=${nth}`);
-                url = await application.ask({
-                  op: 'app/staticView',
-                  path,
-                  workspace,
-                  view,
-                  offscreenCanvas
-                }, {
-                  path
-                }, [offscreenCanvas]);
-                // Cache the thumbnail for next time.
-                await write(`thumbnail/${note.hash}`, url, {
-                  workspace
-                });
-                updateNote({
-                  hash: note.hash,
-                  url,
-                  sourceLocation
-                });
-              } catch (error) {
-                if (error.message === 'Terminated') {
-                  // Try again.
-                  continue;
-                }
-              }
-            }
-          }
-          if (url) {
-            note.url = url;
-            updateNote({
-              hash: note.hash,
-              url,
-              sourceLocation
-            });
-          }
-        };
-        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
-        setTimeout(loadThumbnail, 200);
-      }
-    }
-  }
-};
-class Notebook extends ReactDOM$3.PureComponent {
-  static get propTypes() {
-    return {
-      notes: propTypes$2.exports.object,
-      onChange: propTypes$2.exports.func,
-      onClickView: propTypes$2.exports.func,
-      onKeyDown: propTypes$2.exports.func,
-      selectedLine: propTypes$2.exports.number,
-      notebookPath: propTypes$2.exports.string,
-      state: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string
-    };
-  }
-  render() {
-    try {
-      const {
-        notebookPath,
-        notes,
-        onChange,
-        onClickView,
-        onKeyDown,
-        // selectedLine,
-        state = 'idle',
-        workspace
-      } = this.props;
-      const ordered = Object.values(notes);
-      const getLine = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      const entries = new Map();
-      for (const note of ordered) {
-        const id = note.sourceLocation.id;
-        if (!entries.has(id)) {
-          entries.set(id, {
-            blur: false,
-            downloads: [],
-            errors: [],
-            views: [],
-            mds: [],
-            controls: [],
-            editors: []
-          });
-        }
-        const entry = entries.get(id);
-        // FIX: This seems wasteful.
-        const selected = false;
-        if (note.view) {
-          entry.views.push(v$1(ViewNote, {
-            key: note.hash,
-            note: note,
-            onClickView: onClickView,
-            selected: selected
-          }));
-        } else if (note.error) {
-          entry.errors.push(v$1(Card$1.Body, {
-            variant: "danger"
-          }, v$1(Card$1.Text, null, v$1(ErrorNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }))));
-        } else if (note.md) {
-          entry.mds.push(v$1(MdNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }));
-        } else if (note.download) {
-          entry.downloads.push(v$1(DownloadNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }));
-        } else if (note.control) {
-          entry.controls.push(v$1(ControlNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }));
-        } else if (note.sourceText !== undefined) {
-          entry.editors.push(v$1(EditNote, {
-            key: note.hash,
-            note: note,
-            onChange: sourceText => onChange(note, {
-              sourceText
-            }),
-            onKeyDown: onKeyDown,
-            selected: selected,
-            workspace: workspace
-          }));
-        }
-      }
-      y(() => mermaid.init(undefined, '.mermaid'));
-      const sections = [];
-      const compare = (a, b) => {
-        if (a < b) {
-          return -1;
-        } else if (a > b) {
-          return 1;
-        } else {
-          return 0;
-        }
-      };
-      const ids = [...entries.keys()];
-      ids.sort((a, b) => compare(a.id, b.id));
-      for (const id of ids) {
-        const {
-          downloads = [],
-          errors = [],
-          views = [],
-          mds = [],
-          controls = [],
-          editors = []
-        } = entries.get(id);
-        sections.push(v$1(Card$1, {
-          key: id
-        }, v$1(Card$1.Header, {
-          id: `note-id-${id}`
-        }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
-          key: nth
-        }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, editors)));
-      }
-      return v$1("div", {
-        id: notebookPath,
-        classList: "notebook notes",
-        style: {
-          overflow: 'auto'
-        }
-      }, false && state === 'running' && v$1(SpinnerCircularSplit, {
-        color: "#36d7b7",
-        size: 64,
-        style: {
-          position: 'fixed',
-          right: 32,
-          top: 64,
-          zIndex: 1000
-        }
-      }), sections);
-    } catch (error) {
-      console.log(error.stack);
-      throw error;
-    }
-  }
-}
-
 class DynamicView extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
@@ -5927,6 +1649,59 @@ class DynamicView extends ReactDOM$3.PureComponent {
         }
       }
     });
+  }
+}
+
+class EditNote extends ReactDOM$3.Component {
+  static get propTypes() {
+    return {
+      source: propTypes$2.exports.string,
+      notebookPath: propTypes$2.exports.string,
+      onChange: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+  async componentDidMount() {}
+  async componentWillUnmount() {}
+  onChange(event) {
+    const {
+      onChange,
+      source
+    } = this.props;
+    if (onChange && this.ref && this.ref.innerText !== source) {
+      onChange(this.ref.innerText);
+    }
+  }
+  shouldComponentUpdate(nextProps) {
+    return this.ref === undefined || this.ref.innerText !== nextProps.source;
+  }
+  render() {
+    const {
+      source,
+      onKeyDown
+    } = this.props;
+    return v$1(Card$1, null, v$1("pre", {
+      style: {
+        padding: '1em',
+        outline: 'none'
+      },
+      contenteditable: true,
+      onKeyDown: onKeyDown,
+      onInput: event => this.onChange(event),
+      ref: ref => {
+        if (this.ref === ref) {
+          return;
+        }
+        this.ref = ref;
+        if (ref !== null) {
+          ref.innerText = source;
+        }
+      }
+    }, source));
   }
 }
 
@@ -9060,8 +4835,8 @@ function validate(uuid) {
 
 var byteToHex = [];
 
-for (var i = 0; i < 256; ++i) {
-  byteToHex.push((i + 0x100).toString(16).substr(1));
+for (var i$1 = 0; i$1 < 256; ++i$1) {
+  byteToHex.push((i$1 + 0x100).toString(16).substr(1));
 }
 
 function stringify(arr) {
@@ -12299,6 +8074,524 @@ exports.default = {
 }(lib$1));
 
 var FlexLayout = /*@__PURE__*/getDefaultExportFromCjs(lib$1);
+
+const propTypes$1 = {
+  /**
+   * Specify whether the feedback is for valid or invalid fields
+   *
+   * @type {('valid'|'invalid')}
+   */
+  type: PropTypes$3.string,
+  /** Display feedback as a tooltip. */
+  tooltip: PropTypes$3.bool,
+  as: PropTypes$3.elementType
+};
+const Feedback = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  as: Component = 'div',
+  className,
+  type = 'valid',
+  tooltip = false,
+  ...props
+}, ref) => /*#__PURE__*/e(Component, {
+  ...props,
+  ref: ref,
+  className: classNames(className, `${type}-${tooltip ? 'tooltip' : 'feedback'}`)
+}));
+Feedback.displayName = 'Feedback';
+Feedback.propTypes = propTypes$1;
+var Feedback$1 = Feedback;
+
+// TODO
+
+const FormContext = /*#__PURE__*/D$1({});
+var FormContext$1 = FormContext;
+
+const FormCheckInput = /*#__PURE__*/x(({
+  id,
+  bsPrefix,
+  className,
+  type = 'checkbox',
+  isValid = false,
+  isInvalid = false,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'input',
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-input');
+  return /*#__PURE__*/e(Component, {
+    ...props,
+    ref: ref,
+    type: type,
+    id: id || controlId,
+    className: classNames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
+  });
+});
+FormCheckInput.displayName = 'FormCheckInput';
+var FormCheckInput$1 = FormCheckInput;
+
+const FormCheckLabel = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  htmlFor,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-label');
+  return /*#__PURE__*/e("label", {
+    ...props,
+    ref: ref,
+    htmlFor: htmlFor || controlId,
+    className: classNames(className, bsPrefix)
+  });
+});
+FormCheckLabel.displayName = 'FormCheckLabel';
+var FormCheckLabel$1 = FormCheckLabel;
+
+/**
+ * Finds whether a component's `children` prop includes a React element of the
+ * specified type.
+ */
+function hasChildOfType(children, type) {
+  return k.toArray(children).some(child => /*#__PURE__*/tn(child) && child.type === type);
+}
+
+const FormCheck = /*#__PURE__*/x(({
+  id,
+  bsPrefix,
+  bsSwitchPrefix,
+  inline = false,
+  reverse = false,
+  disabled = false,
+  isValid = false,
+  isInvalid = false,
+  feedbackTooltip = false,
+  feedback,
+  feedbackType,
+  className,
+  style,
+  title = '',
+  type = 'checkbox',
+  label,
+  children,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as = 'input',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check');
+  bsSwitchPrefix = useBootstrapPrefix(bsSwitchPrefix, 'form-switch');
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  const innerFormContext = d(() => ({
+    controlId: id || controlId
+  }), [controlId, id]);
+  const hasLabel = !children && label != null && label !== false || hasChildOfType(children, FormCheckLabel$1);
+  const input = /*#__PURE__*/e(FormCheckInput$1, {
+    ...props,
+    type: type === 'switch' ? 'checkbox' : type,
+    ref: ref,
+    isValid: isValid,
+    isInvalid: isInvalid,
+    disabled: disabled,
+    as: as
+  });
+  return /*#__PURE__*/e(FormContext$1.Provider, {
+    value: innerFormContext,
+    children: /*#__PURE__*/e("div", {
+      style: style,
+      className: classNames(className, hasLabel && bsPrefix, inline && `${bsPrefix}-inline`, reverse && `${bsPrefix}-reverse`, type === 'switch' && bsSwitchPrefix),
+      children: children || /*#__PURE__*/e(d$1, {
+        children: [input, hasLabel && /*#__PURE__*/e(FormCheckLabel$1, {
+          title: title,
+          children: label
+        }), feedback && /*#__PURE__*/e(Feedback$1, {
+          type: feedbackType,
+          tooltip: feedbackTooltip,
+          children: feedback
+        })]
+      })
+    })
+  });
+});
+FormCheck.displayName = 'FormCheck';
+var FormCheck$1 = Object.assign(FormCheck, {
+  Input: FormCheckInput$1,
+  Label: FormCheckLabel$1
+});
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var warning = function() {};
+
+{
+  var printWarning = function printWarning(format, args) {
+    var len = arguments.length;
+    args = new Array(len > 1 ? len - 1 : 0);
+    for (var key = 1; key < len; key++) {
+      args[key - 1] = arguments[key];
+    }
+    var argIndex = 0;
+    var message = 'Warning: ' +
+      format.replace(/%s/g, function() {
+        return args[argIndex++];
+      });
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+
+  warning = function(condition, format, args) {
+    var len = arguments.length;
+    args = new Array(len > 2 ? len - 2 : 0);
+    for (var key = 2; key < len; key++) {
+      args[key - 2] = arguments[key];
+    }
+    if (format === undefined) {
+      throw new Error(
+          '`warning(condition, format, ...args)` requires a warning ' +
+          'message argument'
+      );
+    }
+    if (!condition) {
+      printWarning.apply(null, [format].concat(args));
+    }
+  };
+}
+
+var warning_1 = warning;
+
+const FormControl = /*#__PURE__*/x(({
+  bsPrefix,
+  type,
+  size,
+  htmlSize,
+  id,
+  className,
+  isValid = false,
+  isInvalid = false,
+  plaintext,
+  readOnly,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'input',
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
+  warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
+  return /*#__PURE__*/e(Component, {
+    ...props,
+    type: type,
+    size: htmlSize,
+    ref: ref,
+    readOnly: readOnly,
+    id: id || controlId,
+    className: classNames(className, plaintext ? `${bsPrefix}-plaintext` : bsPrefix, size && `${bsPrefix}-${size}`, type === 'color' && `${bsPrefix}-color`, isValid && 'is-valid', isInvalid && 'is-invalid')
+  });
+});
+FormControl.displayName = 'FormControl';
+var FormControl$1 = Object.assign(FormControl, {
+  Feedback: Feedback$1
+});
+
+const FormFloating = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+FormFloating.displayName = 'FormFloating';
+var FormFloating$1 = FormFloating;
+
+const FormGroup = /*#__PURE__*/x(({
+  controlId,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const context = d(() => ({
+    controlId
+  }), [controlId]);
+  return /*#__PURE__*/e(FormContext$1.Provider, {
+    value: context,
+    children: /*#__PURE__*/e(Component, {
+      ...props,
+      ref: ref
+    })
+  });
+});
+FormGroup.displayName = 'FormGroup';
+var FormGroup$1 = FormGroup;
+
+const FormLabel = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'label',
+  bsPrefix,
+  column = false,
+  visuallyHidden = false,
+  className,
+  htmlFor,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
+  let columnClass = 'col-form-label';
+  if (typeof column === 'string') columnClass = `${columnClass} ${columnClass}-${column}`;
+  const classes = classNames(className, bsPrefix, visuallyHidden && 'visually-hidden', column && columnClass);
+  warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
+  htmlFor = htmlFor || controlId;
+  if (column) return /*#__PURE__*/e(Col, {
+    ref: ref,
+    as: "label",
+    className: classes,
+    htmlFor: htmlFor,
+    ...props
+  });
+  return (
+    /*#__PURE__*/
+    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
+    e(Component, {
+      ref: ref,
+      className: classes,
+      htmlFor: htmlFor,
+      ...props
+    })
+  );
+});
+FormLabel.displayName = 'FormLabel';
+var FormLabel$1 = FormLabel;
+
+const FormRange = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  id,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-range');
+  return /*#__PURE__*/e("input", {
+    ...props,
+    type: "range",
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    id: id || controlId
+  });
+});
+FormRange.displayName = 'FormRange';
+var FormRange$1 = FormRange;
+
+const FormSelect = /*#__PURE__*/x(({
+  bsPrefix,
+  size,
+  htmlSize,
+  className,
+  isValid = false,
+  isInvalid = false,
+  id,
+  ...props
+}, ref) => {
+  const {
+    controlId
+  } = F$1(FormContext$1);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-select');
+  return /*#__PURE__*/e("select", {
+    ...props,
+    size: htmlSize,
+    ref: ref,
+    className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, isValid && `is-valid`, isInvalid && `is-invalid`),
+    id: id || controlId
+  });
+});
+FormSelect.displayName = 'FormSelect';
+var FormSelect$1 = FormSelect;
+
+const FormText = /*#__PURE__*/x(
+// Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+({
+  bsPrefix,
+  className,
+  as: Component = 'small',
+  muted,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
+  return /*#__PURE__*/e(Component, {
+    ...props,
+    ref: ref,
+    className: classNames(className, bsPrefix, muted && 'text-muted')
+  });
+});
+FormText.displayName = 'FormText';
+var FormText$1 = FormText;
+
+const Switch = /*#__PURE__*/x((props, ref) => /*#__PURE__*/e(FormCheck$1, {
+  ...props,
+  ref: ref,
+  type: "switch"
+}));
+Switch.displayName = 'Switch';
+var Switch$1 = Object.assign(Switch, {
+  Input: FormCheck$1.Input,
+  Label: FormCheck$1.Label
+});
+
+const FloatingLabel = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  children,
+  controlId,
+  label,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
+  return /*#__PURE__*/e(FormGroup$1, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    controlId: controlId,
+    ...props,
+    children: [children, /*#__PURE__*/e("label", {
+      htmlFor: controlId,
+      children: label
+    })]
+  });
+});
+FloatingLabel.displayName = 'FloatingLabel';
+var FloatingLabel$1 = FloatingLabel;
+
+const propTypes = {
+  /**
+   * The Form `ref` will be forwarded to the underlying element,
+   * which means, unless it's rendered `as` a composite component,
+   * it will be a DOM node, when resolved.
+   *
+   * @type {ReactRef}
+   * @alias ref
+   */
+  _ref: PropTypes$3.any,
+  /**
+   * Mark a form as having been validated. Setting it to `true` will
+   * toggle any validation styles on the forms elements.
+   */
+  validated: PropTypes$3.bool,
+  as: PropTypes$3.elementType
+};
+const Form = /*#__PURE__*/x(({
+  className,
+  validated,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'form',
+  ...props
+}, ref) => /*#__PURE__*/e(Component, {
+  ...props,
+  ref: ref,
+  className: classNames(className, validated && 'was-validated')
+}));
+Form.displayName = 'Form';
+Form.propTypes = propTypes;
+var Form$1 = Object.assign(Form, {
+  Group: FormGroup$1,
+  Control: FormControl$1,
+  Floating: FormFloating$1,
+  Check: FormCheck$1,
+  Switch: Switch$1,
+  Label: FormLabel$1,
+  Text: FormText$1,
+  Range: FormRange$1,
+  Select: FormSelect$1,
+  FloatingLabel: FloatingLabel$1
+});
+
+const context = /*#__PURE__*/D$1(null);
+context.displayName = 'InputGroupContext';
+var InputGroupContext = context;
+
+const InputGroupText = /*#__PURE__*/x(({
+  className,
+  bsPrefix,
+  as: Component = 'span',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group-text');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    className: classNames(className, bsPrefix),
+    ...props
+  });
+});
+InputGroupText.displayName = 'InputGroupText';
+var InputGroupText$1 = InputGroupText;
+
+const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText$1, {
+  children: /*#__PURE__*/e(FormCheckInput$1, {
+    type: "checkbox",
+    ...props
+  })
+});
+const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText$1, {
+  children: /*#__PURE__*/e(FormCheckInput$1, {
+    type: "radio",
+    ...props
+  })
+});
+const InputGroup = /*#__PURE__*/x(({
+  bsPrefix,
+  size,
+  hasValidation,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
+
+  // Intentionally an empty object. Used in detecting if a dropdown
+  // exists under an input group.
+  const contextValue = d(() => ({}), []);
+  return /*#__PURE__*/e(InputGroupContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, hasValidation && 'has-validation')
+    })
+  });
+});
+InputGroup.displayName = 'InputGroup';
+var InputGroup$1 = Object.assign(InputGroup, {
+  Text: InputGroupText$1,
+  Radio: InputGroupRadio,
+  Checkbox: InputGroupCheckbox
+});
 
 var lib = {};
 
@@ -45446,6 +41739,3407 @@ var ListGroup$1 = Object.assign(ListGroup, {
   Item: ListGroupItem$1
 });
 
+const Container = /*#__PURE__*/x(({
+  bsPrefix,
+  fluid = false,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  className,
+  ...props
+}, ref) => {
+  const prefix = useBootstrapPrefix(bsPrefix, 'container');
+  const suffix = typeof fluid === 'string' ? `-${fluid}` : '-fluid';
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, fluid ? `${prefix}${suffix}` : prefix)
+  });
+});
+Container.displayName = 'Container';
+
+class ControlNote extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object,
+      selected: propTypes$2.exports.boolean
+    };
+  }
+  render() {
+    const {
+      note,
+      selected
+    } = this.props;
+    const {
+      blur,
+      control
+    } = note;
+    const {
+      label,
+      options,
+      type,
+      value
+    } = control;
+    const ref = selected && /*#__PURE__*/p$1();
+    if (selected) {
+      y(() => ref.current.scrollIntoView(true));
+    }
+    const border = selected ? '1px dashed dodgerblue' : '0px';
+    // TODO: Slider.
+    switch (type) {
+      case 'check':
+        return v$1(InputGroup$1, {
+          ref: ref,
+          style: {
+            border,
+            opacity: blur ? 0.5 : 1
+          }
+        }, v$1(Form$1.Check, {
+          label: label,
+          type: "checkbox",
+          name: label,
+          checked: value,
+          className: `note control check ${blur ? 'disabled' : 'enabled'}`
+        }));
+      case 'input':
+        return v$1(InputGroup$1, {
+          ref: ref,
+          style: {
+            border,
+            opacity: blur ? 0.5 : 1
+          }
+        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
+          className: `note control input ${blur ? 'disabled' : 'enabled'}`,
+          value: value,
+          name: label
+        }));
+      case 'select':
+        return v$1(InputGroup$1, {
+          ref: ref,
+          style: {
+            border,
+            opacity: blur ? 0.5 : 1
+          }
+        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
+          as: "select",
+          className: `note control select ${blur ? 'disabled' : 'enabled'}`,
+          name: label
+        }, options.map((option, nth) => v$1("option", {
+          key: nth,
+          value: option,
+          selected: option === value
+        }, option))));
+      default:
+        return v$1("div", {
+          ref: ref,
+          style: {
+            border,
+            opacity: blur ? 0.5 : 1
+          }
+        }, "Unsupported control type");
+    }
+  }
+}
+
+/*
+ * base64-arraybuffer 1.0.2 <https://github.com/niklasvh/base64-arraybuffer>
+ * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
+ * Released under MIT License
+ */
+var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+// Use a lookup table to find the index.
+var lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
+for (var i = 0; i < chars.length; i++) {
+    lookup[chars.charCodeAt(i)] = i;
+}
+var decode = function (base64) {
+    var bufferLength = base64.length * 0.75, len = base64.length, i, p = 0, encoded1, encoded2, encoded3, encoded4;
+    if (base64[base64.length - 1] === '=') {
+        bufferLength--;
+        if (base64[base64.length - 2] === '=') {
+            bufferLength--;
+        }
+    }
+    var arraybuffer = new ArrayBuffer(bufferLength), bytes = new Uint8Array(arraybuffer);
+    for (i = 0; i < len; i += 4) {
+        encoded1 = lookup[base64.charCodeAt(i)];
+        encoded2 = lookup[base64.charCodeAt(i + 1)];
+        encoded3 = lookup[base64.charCodeAt(i + 2)];
+        encoded4 = lookup[base64.charCodeAt(i + 3)];
+        bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+        bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+        bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+    }
+    return arraybuffer;
+};
+
+var FileSaver_min = {exports: {}};
+
+(function (module, exports) {
+(function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(a,b,c){var d=new XMLHttpRequest;d.open("GET",a),d.responseType="blob",d.onload=function(){g(d.response,b,c);},d.onerror=function(){console.error("could not download file");},d.send();}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send();}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.navigator&&/Macintosh/.test(navigator.userAgent)&&/AppleWebKit/.test(navigator.userAgent)&&!/Safari/.test(navigator.userAgent),g=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype&&!a?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else {var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(b,d,e,g){if(g=g||open("","_blank"),g&&(g.document.title=g.document.body.innerText="downloading..."),"string"==typeof b)return c(b,d,e);var h="application/octet-stream"===b.type,i=/constructor/i.test(f.HTMLElement)||f.safari,j=/CriOS\/[\d]+/.test(navigator.userAgent);if((j||h&&i||a)&&"undefined"!=typeof FileReader){var k=new FileReader;k.onloadend=function(){var a=k.result;a=j?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),g?g.location.href=a:location=a,g=null;},k.readAsDataURL(b);}else {var l=f.URL||f.webkitURL,m=l.createObjectURL(b);g?g.location=m:location.href=m,g=null,setTimeout(function(){l.revokeObjectURL(m);},4E4);}});f.saveAs=g.saveAs=g,(module.exports=g);});
+
+
+}(FileSaver_min));
+
+var saveAs = FileSaver_min.exports;
+
+const downloadFile = async ({
+  filename,
+  path,
+  data,
+  type,
+  workspace
+}) => {
+  if (path && !data) {
+    data = await readOrWatch(path, {
+      workspace
+    });
+  }
+  const blob = new Blob([data], {
+    type
+  });
+  saveAs(blob, filename);
+};
+class DownloadNote extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object,
+      selected: propTypes$2.exports.boolean,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    const {
+      note,
+      selected,
+      workspace
+    } = this.props;
+    const {
+      blur,
+      download
+    } = note;
+    const buttons = [];
+    for (let {
+      path,
+      base64Data,
+      data,
+      filename,
+      type
+    } of download.entries) {
+      if (base64Data) {
+        data = decode(base64Data);
+      }
+      buttons.push(v$1(Button, {
+        onClick: event => downloadFile({
+          event,
+          filename,
+          path,
+          data,
+          type,
+          workspace
+        })
+      }, v$1("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "16",
+        height: "16",
+        fill: "currentColor",
+        class: "bi bi-download",
+        viewBox: "0 0 16 16"
+      }, v$1("path", {
+        d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
+      }), v$1("path", {
+        d: "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
+      })), ' ', filename));
+    }
+    const ref = selected && /*#__PURE__*/p$1();
+    if (selected) {
+      y(() => ref.current.scrollIntoView(true));
+    }
+    const border = selected ? '1px dashed dodgerblue' : '0px';
+    return v$1(ButtonGroup, {
+      ref: ref,
+      style: {
+        border,
+        opacity: blur ? 0.5 : 1
+      }
+    }, buttons);
+  }
+}
+
+class ErrorNote extends ReactDOM$3.Component {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.string,
+      notebookPath: propTypes$2.exports.string
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+  async componentDidMount() {}
+  async componentWillUnmount() {}
+  render() {
+    const {
+      note
+    } = this.props;
+    const {
+      error
+    } = note;
+    const {
+      text
+    } = error;
+    return v$1("div", {
+      class: "note error"
+    }, v$1("p", null, text));
+  }
+}
+
+/**
+ * marked v4.3.0 - a markdown parser
+ * Copyright (c) 2011-2023, Christopher Jeffrey. (MIT Licensed)
+ * https://github.com/markedjs/marked
+ */
+
+/**
+ * DO NOT EDIT THIS FILE
+ * The code in this file is generated from files in ./src/
+ */
+
+function getDefaults() {
+  return {
+    async: false,
+    baseUrl: null,
+    breaks: false,
+    extensions: null,
+    gfm: true,
+    headerIds: true,
+    headerPrefix: '',
+    highlight: null,
+    hooks: null,
+    langPrefix: 'language-',
+    mangle: true,
+    pedantic: false,
+    renderer: null,
+    sanitize: false,
+    sanitizer: null,
+    silent: false,
+    smartypants: false,
+    tokenizer: null,
+    walkTokens: null,
+    xhtml: false
+  };
+}
+
+let defaults = getDefaults();
+
+function changeDefaults(newDefaults) {
+  defaults = newDefaults;
+}
+
+/**
+ * Helpers
+ */
+const escapeTest = /[&<>"']/;
+const escapeReplace = new RegExp(escapeTest.source, 'g');
+const escapeTestNoEncode = /[<>"']|&(?!(#\d{1,7}|#[Xx][a-fA-F0-9]{1,6}|\w+);)/;
+const escapeReplaceNoEncode = new RegExp(escapeTestNoEncode.source, 'g');
+const escapeReplacements = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+const getEscapeReplacement = (ch) => escapeReplacements[ch];
+function escape(html, encode) {
+  if (encode) {
+    if (escapeTest.test(html)) {
+      return html.replace(escapeReplace, getEscapeReplacement);
+    }
+  } else {
+    if (escapeTestNoEncode.test(html)) {
+      return html.replace(escapeReplaceNoEncode, getEscapeReplacement);
+    }
+  }
+
+  return html;
+}
+
+const unescapeTest = /&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/ig;
+
+/**
+ * @param {string} html
+ */
+function unescape$1(html) {
+  // explicitly match decimal, hex, and named HTML entities
+  return html.replace(unescapeTest, (_, n) => {
+    n = n.toLowerCase();
+    if (n === 'colon') return ':';
+    if (n.charAt(0) === '#') {
+      return n.charAt(1) === 'x'
+        ? String.fromCharCode(parseInt(n.substring(2), 16))
+        : String.fromCharCode(+n.substring(1));
+    }
+    return '';
+  });
+}
+
+const caret = /(^|[^\[])\^/g;
+
+/**
+ * @param {string | RegExp} regex
+ * @param {string} opt
+ */
+function edit(regex, opt) {
+  regex = typeof regex === 'string' ? regex : regex.source;
+  opt = opt || '';
+  const obj = {
+    replace: (name, val) => {
+      val = val.source || val;
+      val = val.replace(caret, '$1');
+      regex = regex.replace(name, val);
+      return obj;
+    },
+    getRegex: () => {
+      return new RegExp(regex, opt);
+    }
+  };
+  return obj;
+}
+
+const nonWordAndColonTest = /[^\w:]/g;
+const originIndependentUrl = /^$|^[a-z][a-z0-9+.-]*:|^[?#]/i;
+
+/**
+ * @param {boolean} sanitize
+ * @param {string} base
+ * @param {string} href
+ */
+function cleanUrl(sanitize, base, href) {
+  if (sanitize) {
+    let prot;
+    try {
+      prot = decodeURIComponent(unescape$1(href))
+        .replace(nonWordAndColonTest, '')
+        .toLowerCase();
+    } catch (e) {
+      return null;
+    }
+    if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0 || prot.indexOf('data:') === 0) {
+      return null;
+    }
+  }
+  if (base && !originIndependentUrl.test(href)) {
+    href = resolveUrl(base, href);
+  }
+  try {
+    href = encodeURI(href).replace(/%25/g, '%');
+  } catch (e) {
+    return null;
+  }
+  return href;
+}
+
+const baseUrls = {};
+const justDomain = /^[^:]+:\/*[^/]*$/;
+const protocol = /^([^:]+:)[\s\S]*$/;
+const domain = /^([^:]+:\/*[^/]*)[\s\S]*$/;
+
+/**
+ * @param {string} base
+ * @param {string} href
+ */
+function resolveUrl(base, href) {
+  if (!baseUrls[' ' + base]) {
+    // we can ignore everything in base after the last slash of its path component,
+    // but we might need to add _that_
+    // https://tools.ietf.org/html/rfc3986#section-3
+    if (justDomain.test(base)) {
+      baseUrls[' ' + base] = base + '/';
+    } else {
+      baseUrls[' ' + base] = rtrim(base, '/', true);
+    }
+  }
+  base = baseUrls[' ' + base];
+  const relativeBase = base.indexOf(':') === -1;
+
+  if (href.substring(0, 2) === '//') {
+    if (relativeBase) {
+      return href;
+    }
+    return base.replace(protocol, '$1') + href;
+  } else if (href.charAt(0) === '/') {
+    if (relativeBase) {
+      return href;
+    }
+    return base.replace(domain, '$1') + href;
+  } else {
+    return base + href;
+  }
+}
+
+const noopTest = { exec: function noopTest() {} };
+
+function splitCells(tableRow, count) {
+  // ensure that every cell-delimiting pipe has a space
+  // before it to distinguish it from an escaped pipe
+  const row = tableRow.replace(/\|/g, (match, offset, str) => {
+      let escaped = false,
+        curr = offset;
+      while (--curr >= 0 && str[curr] === '\\') escaped = !escaped;
+      if (escaped) {
+        // odd number of slashes means | is escaped
+        // so we leave it alone
+        return '|';
+      } else {
+        // add space before unescaped |
+        return ' |';
+      }
+    }),
+    cells = row.split(/ \|/);
+  let i = 0;
+
+  // First/last cell in a row cannot be empty if it has no leading/trailing pipe
+  if (!cells[0].trim()) { cells.shift(); }
+  if (cells.length > 0 && !cells[cells.length - 1].trim()) { cells.pop(); }
+
+  if (cells.length > count) {
+    cells.splice(count);
+  } else {
+    while (cells.length < count) cells.push('');
+  }
+
+  for (; i < cells.length; i++) {
+    // leading or trailing whitespace is ignored per the gfm spec
+    cells[i] = cells[i].trim().replace(/\\\|/g, '|');
+  }
+  return cells;
+}
+
+/**
+ * Remove trailing 'c's. Equivalent to str.replace(/c*$/, '').
+ * /c*$/ is vulnerable to REDOS.
+ *
+ * @param {string} str
+ * @param {string} c
+ * @param {boolean} invert Remove suffix of non-c chars instead. Default falsey.
+ */
+function rtrim(str, c, invert) {
+  const l = str.length;
+  if (l === 0) {
+    return '';
+  }
+
+  // Length of suffix matching the invert condition.
+  let suffLen = 0;
+
+  // Step left until we fail to match the invert condition.
+  while (suffLen < l) {
+    const currChar = str.charAt(l - suffLen - 1);
+    if (currChar === c && !invert) {
+      suffLen++;
+    } else if (currChar !== c && invert) {
+      suffLen++;
+    } else {
+      break;
+    }
+  }
+
+  return str.slice(0, l - suffLen);
+}
+
+function findClosingBracket(str, b) {
+  if (str.indexOf(b[1]) === -1) {
+    return -1;
+  }
+  const l = str.length;
+  let level = 0,
+    i = 0;
+  for (; i < l; i++) {
+    if (str[i] === '\\') {
+      i++;
+    } else if (str[i] === b[0]) {
+      level++;
+    } else if (str[i] === b[1]) {
+      level--;
+      if (level < 0) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+function checkSanitizeDeprecation(opt) {
+  if (opt && opt.sanitize && !opt.silent) {
+    console.warn('marked(): sanitize and sanitizer parameters are deprecated since version 0.7.0, should not be used and will be removed in the future. Read more here: https://marked.js.org/#/USING_ADVANCED.md#options');
+  }
+}
+
+// copied from https://stackoverflow.com/a/5450113/806777
+/**
+ * @param {string} pattern
+ * @param {number} count
+ */
+function repeatString(pattern, count) {
+  if (count < 1) {
+    return '';
+  }
+  let result = '';
+  while (count > 1) {
+    if (count & 1) {
+      result += pattern;
+    }
+    count >>= 1;
+    pattern += pattern;
+  }
+  return result + pattern;
+}
+
+function outputLink(cap, link, raw, lexer) {
+  const href = link.href;
+  const title = link.title ? escape(link.title) : null;
+  const text = cap[1].replace(/\\([\[\]])/g, '$1');
+
+  if (cap[0].charAt(0) !== '!') {
+    lexer.state.inLink = true;
+    const token = {
+      type: 'link',
+      raw,
+      href,
+      title,
+      text,
+      tokens: lexer.inlineTokens(text)
+    };
+    lexer.state.inLink = false;
+    return token;
+  }
+  return {
+    type: 'image',
+    raw,
+    href,
+    title,
+    text: escape(text)
+  };
+}
+
+function indentCodeCompensation(raw, text) {
+  const matchIndentToCode = raw.match(/^(\s+)(?:```)/);
+
+  if (matchIndentToCode === null) {
+    return text;
+  }
+
+  const indentToCode = matchIndentToCode[1];
+
+  return text
+    .split('\n')
+    .map(node => {
+      const matchIndentInNode = node.match(/^\s+/);
+      if (matchIndentInNode === null) {
+        return node;
+      }
+
+      const [indentInNode] = matchIndentInNode;
+
+      if (indentInNode.length >= indentToCode.length) {
+        return node.slice(indentToCode.length);
+      }
+
+      return node;
+    })
+    .join('\n');
+}
+
+/**
+ * Tokenizer
+ */
+class Tokenizer {
+  constructor(options) {
+    this.options = options || defaults;
+  }
+
+  space(src) {
+    const cap = this.rules.block.newline.exec(src);
+    if (cap && cap[0].length > 0) {
+      return {
+        type: 'space',
+        raw: cap[0]
+      };
+    }
+  }
+
+  code(src) {
+    const cap = this.rules.block.code.exec(src);
+    if (cap) {
+      const text = cap[0].replace(/^ {1,4}/gm, '');
+      return {
+        type: 'code',
+        raw: cap[0],
+        codeBlockStyle: 'indented',
+        text: !this.options.pedantic
+          ? rtrim(text, '\n')
+          : text
+      };
+    }
+  }
+
+  fences(src) {
+    const cap = this.rules.block.fences.exec(src);
+    if (cap) {
+      const raw = cap[0];
+      const text = indentCodeCompensation(raw, cap[3] || '');
+
+      return {
+        type: 'code',
+        raw,
+        lang: cap[2] ? cap[2].trim().replace(this.rules.inline._escapes, '$1') : cap[2],
+        text
+      };
+    }
+  }
+
+  heading(src) {
+    const cap = this.rules.block.heading.exec(src);
+    if (cap) {
+      let text = cap[2].trim();
+
+      // remove trailing #s
+      if (/#$/.test(text)) {
+        const trimmed = rtrim(text, '#');
+        if (this.options.pedantic) {
+          text = trimmed.trim();
+        } else if (!trimmed || / $/.test(trimmed)) {
+          // CommonMark requires space before trailing #s
+          text = trimmed.trim();
+        }
+      }
+
+      return {
+        type: 'heading',
+        raw: cap[0],
+        depth: cap[1].length,
+        text,
+        tokens: this.lexer.inline(text)
+      };
+    }
+  }
+
+  hr(src) {
+    const cap = this.rules.block.hr.exec(src);
+    if (cap) {
+      return {
+        type: 'hr',
+        raw: cap[0]
+      };
+    }
+  }
+
+  blockquote(src) {
+    const cap = this.rules.block.blockquote.exec(src);
+    if (cap) {
+      const text = cap[0].replace(/^ *>[ \t]?/gm, '');
+      const top = this.lexer.state.top;
+      this.lexer.state.top = true;
+      const tokens = this.lexer.blockTokens(text);
+      this.lexer.state.top = top;
+      return {
+        type: 'blockquote',
+        raw: cap[0],
+        tokens,
+        text
+      };
+    }
+  }
+
+  list(src) {
+    let cap = this.rules.block.list.exec(src);
+    if (cap) {
+      let raw, istask, ischecked, indent, i, blankLine, endsWithBlankLine,
+        line, nextLine, rawLine, itemContents, endEarly;
+
+      let bull = cap[1].trim();
+      const isordered = bull.length > 1;
+
+      const list = {
+        type: 'list',
+        raw: '',
+        ordered: isordered,
+        start: isordered ? +bull.slice(0, -1) : '',
+        loose: false,
+        items: []
+      };
+
+      bull = isordered ? `\\d{1,9}\\${bull.slice(-1)}` : `\\${bull}`;
+
+      if (this.options.pedantic) {
+        bull = isordered ? bull : '[*+-]';
+      }
+
+      // Get next list item
+      const itemRegex = new RegExp(`^( {0,3}${bull})((?:[\t ][^\\n]*)?(?:\\n|$))`);
+
+      // Check if current bullet point can start a new List Item
+      while (src) {
+        endEarly = false;
+        if (!(cap = itemRegex.exec(src))) {
+          break;
+        }
+
+        if (this.rules.block.hr.test(src)) { // End list if bullet was actually HR (possibly move into itemRegex?)
+          break;
+        }
+
+        raw = cap[0];
+        src = src.substring(raw.length);
+
+        line = cap[2].split('\n', 1)[0].replace(/^\t+/, (t) => ' '.repeat(3 * t.length));
+        nextLine = src.split('\n', 1)[0];
+
+        if (this.options.pedantic) {
+          indent = 2;
+          itemContents = line.trimLeft();
+        } else {
+          indent = cap[2].search(/[^ ]/); // Find first non-space char
+          indent = indent > 4 ? 1 : indent; // Treat indented code blocks (> 4 spaces) as having only 1 indent
+          itemContents = line.slice(indent);
+          indent += cap[1].length;
+        }
+
+        blankLine = false;
+
+        if (!line && /^ *$/.test(nextLine)) { // Items begin with at most one blank line
+          raw += nextLine + '\n';
+          src = src.substring(nextLine.length + 1);
+          endEarly = true;
+        }
+
+        if (!endEarly) {
+          const nextBulletRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}(?:[*+-]|\\d{1,9}[.)])((?:[ \t][^\\n]*)?(?:\\n|$))`);
+          const hrRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)`);
+          const fencesBeginRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}(?:\`\`\`|~~~)`);
+          const headingBeginRegex = new RegExp(`^ {0,${Math.min(3, indent - 1)}}#`);
+
+          // Check if following lines should be included in List Item
+          while (src) {
+            rawLine = src.split('\n', 1)[0];
+            nextLine = rawLine;
+
+            // Re-align to follow commonmark nesting rules
+            if (this.options.pedantic) {
+              nextLine = nextLine.replace(/^ {1,4}(?=( {4})*[^ ])/g, '  ');
+            }
+
+            // End list item if found code fences
+            if (fencesBeginRegex.test(nextLine)) {
+              break;
+            }
+
+            // End list item if found start of new heading
+            if (headingBeginRegex.test(nextLine)) {
+              break;
+            }
+
+            // End list item if found start of new bullet
+            if (nextBulletRegex.test(nextLine)) {
+              break;
+            }
+
+            // Horizontal rule found
+            if (hrRegex.test(src)) {
+              break;
+            }
+
+            if (nextLine.search(/[^ ]/) >= indent || !nextLine.trim()) { // Dedent if possible
+              itemContents += '\n' + nextLine.slice(indent);
+            } else {
+              // not enough indentation
+              if (blankLine) {
+                break;
+              }
+
+              // paragraph continuation unless last line was a different block level element
+              if (line.search(/[^ ]/) >= 4) { // indented code block
+                break;
+              }
+              if (fencesBeginRegex.test(line)) {
+                break;
+              }
+              if (headingBeginRegex.test(line)) {
+                break;
+              }
+              if (hrRegex.test(line)) {
+                break;
+              }
+
+              itemContents += '\n' + nextLine;
+            }
+
+            if (!blankLine && !nextLine.trim()) { // Check if current line is blank
+              blankLine = true;
+            }
+
+            raw += rawLine + '\n';
+            src = src.substring(rawLine.length + 1);
+            line = nextLine.slice(indent);
+          }
+        }
+
+        if (!list.loose) {
+          // If the previous item ended with a blank line, the list is loose
+          if (endsWithBlankLine) {
+            list.loose = true;
+          } else if (/\n *\n *$/.test(raw)) {
+            endsWithBlankLine = true;
+          }
+        }
+
+        // Check for task list items
+        if (this.options.gfm) {
+          istask = /^\[[ xX]\] /.exec(itemContents);
+          if (istask) {
+            ischecked = istask[0] !== '[ ] ';
+            itemContents = itemContents.replace(/^\[[ xX]\] +/, '');
+          }
+        }
+
+        list.items.push({
+          type: 'list_item',
+          raw,
+          task: !!istask,
+          checked: ischecked,
+          loose: false,
+          text: itemContents
+        });
+
+        list.raw += raw;
+      }
+
+      // Do not consume newlines at end of final item. Alternatively, make itemRegex *start* with any newlines to simplify/speed up endsWithBlankLine logic
+      list.items[list.items.length - 1].raw = raw.trimRight();
+      list.items[list.items.length - 1].text = itemContents.trimRight();
+      list.raw = list.raw.trimRight();
+
+      const l = list.items.length;
+
+      // Item child tokens handled here at end because we needed to have the final item to trim it first
+      for (i = 0; i < l; i++) {
+        this.lexer.state.top = false;
+        list.items[i].tokens = this.lexer.blockTokens(list.items[i].text, []);
+
+        if (!list.loose) {
+          // Check if list should be loose
+          const spacers = list.items[i].tokens.filter(t => t.type === 'space');
+          const hasMultipleLineBreaks = spacers.length > 0 && spacers.some(t => /\n.*\n/.test(t.raw));
+
+          list.loose = hasMultipleLineBreaks;
+        }
+      }
+
+      // Set all items to loose if list is loose
+      if (list.loose) {
+        for (i = 0; i < l; i++) {
+          list.items[i].loose = true;
+        }
+      }
+
+      return list;
+    }
+  }
+
+  html(src) {
+    const cap = this.rules.block.html.exec(src);
+    if (cap) {
+      const token = {
+        type: 'html',
+        raw: cap[0],
+        pre: !this.options.sanitizer
+          && (cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style'),
+        text: cap[0]
+      };
+      if (this.options.sanitize) {
+        const text = this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape(cap[0]);
+        token.type = 'paragraph';
+        token.text = text;
+        token.tokens = this.lexer.inline(text);
+      }
+      return token;
+    }
+  }
+
+  def(src) {
+    const cap = this.rules.block.def.exec(src);
+    if (cap) {
+      const tag = cap[1].toLowerCase().replace(/\s+/g, ' ');
+      const href = cap[2] ? cap[2].replace(/^<(.*)>$/, '$1').replace(this.rules.inline._escapes, '$1') : '';
+      const title = cap[3] ? cap[3].substring(1, cap[3].length - 1).replace(this.rules.inline._escapes, '$1') : cap[3];
+      return {
+        type: 'def',
+        tag,
+        raw: cap[0],
+        href,
+        title
+      };
+    }
+  }
+
+  table(src) {
+    const cap = this.rules.block.table.exec(src);
+    if (cap) {
+      const item = {
+        type: 'table',
+        header: splitCells(cap[1]).map(c => { return { text: c }; }),
+        align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
+        rows: cap[3] && cap[3].trim() ? cap[3].replace(/\n[ \t]*$/, '').split('\n') : []
+      };
+
+      if (item.header.length === item.align.length) {
+        item.raw = cap[0];
+
+        let l = item.align.length;
+        let i, j, k, row;
+        for (i = 0; i < l; i++) {
+          if (/^ *-+: *$/.test(item.align[i])) {
+            item.align[i] = 'right';
+          } else if (/^ *:-+: *$/.test(item.align[i])) {
+            item.align[i] = 'center';
+          } else if (/^ *:-+ *$/.test(item.align[i])) {
+            item.align[i] = 'left';
+          } else {
+            item.align[i] = null;
+          }
+        }
+
+        l = item.rows.length;
+        for (i = 0; i < l; i++) {
+          item.rows[i] = splitCells(item.rows[i], item.header.length).map(c => { return { text: c }; });
+        }
+
+        // parse child tokens inside headers and cells
+
+        // header child tokens
+        l = item.header.length;
+        for (j = 0; j < l; j++) {
+          item.header[j].tokens = this.lexer.inline(item.header[j].text);
+        }
+
+        // cell child tokens
+        l = item.rows.length;
+        for (j = 0; j < l; j++) {
+          row = item.rows[j];
+          for (k = 0; k < row.length; k++) {
+            row[k].tokens = this.lexer.inline(row[k].text);
+          }
+        }
+
+        return item;
+      }
+    }
+  }
+
+  lheading(src) {
+    const cap = this.rules.block.lheading.exec(src);
+    if (cap) {
+      return {
+        type: 'heading',
+        raw: cap[0],
+        depth: cap[2].charAt(0) === '=' ? 1 : 2,
+        text: cap[1],
+        tokens: this.lexer.inline(cap[1])
+      };
+    }
+  }
+
+  paragraph(src) {
+    const cap = this.rules.block.paragraph.exec(src);
+    if (cap) {
+      const text = cap[1].charAt(cap[1].length - 1) === '\n'
+        ? cap[1].slice(0, -1)
+        : cap[1];
+      return {
+        type: 'paragraph',
+        raw: cap[0],
+        text,
+        tokens: this.lexer.inline(text)
+      };
+    }
+  }
+
+  text(src) {
+    const cap = this.rules.block.text.exec(src);
+    if (cap) {
+      return {
+        type: 'text',
+        raw: cap[0],
+        text: cap[0],
+        tokens: this.lexer.inline(cap[0])
+      };
+    }
+  }
+
+  escape(src) {
+    const cap = this.rules.inline.escape.exec(src);
+    if (cap) {
+      return {
+        type: 'escape',
+        raw: cap[0],
+        text: escape(cap[1])
+      };
+    }
+  }
+
+  tag(src) {
+    const cap = this.rules.inline.tag.exec(src);
+    if (cap) {
+      if (!this.lexer.state.inLink && /^<a /i.test(cap[0])) {
+        this.lexer.state.inLink = true;
+      } else if (this.lexer.state.inLink && /^<\/a>/i.test(cap[0])) {
+        this.lexer.state.inLink = false;
+      }
+      if (!this.lexer.state.inRawBlock && /^<(pre|code|kbd|script)(\s|>)/i.test(cap[0])) {
+        this.lexer.state.inRawBlock = true;
+      } else if (this.lexer.state.inRawBlock && /^<\/(pre|code|kbd|script)(\s|>)/i.test(cap[0])) {
+        this.lexer.state.inRawBlock = false;
+      }
+
+      return {
+        type: this.options.sanitize
+          ? 'text'
+          : 'html',
+        raw: cap[0],
+        inLink: this.lexer.state.inLink,
+        inRawBlock: this.lexer.state.inRawBlock,
+        text: this.options.sanitize
+          ? (this.options.sanitizer
+            ? this.options.sanitizer(cap[0])
+            : escape(cap[0]))
+          : cap[0]
+      };
+    }
+  }
+
+  link(src) {
+    const cap = this.rules.inline.link.exec(src);
+    if (cap) {
+      const trimmedUrl = cap[2].trim();
+      if (!this.options.pedantic && /^</.test(trimmedUrl)) {
+        // commonmark requires matching angle brackets
+        if (!(/>$/.test(trimmedUrl))) {
+          return;
+        }
+
+        // ending angle bracket cannot be escaped
+        const rtrimSlash = rtrim(trimmedUrl.slice(0, -1), '\\');
+        if ((trimmedUrl.length - rtrimSlash.length) % 2 === 0) {
+          return;
+        }
+      } else {
+        // find closing parenthesis
+        const lastParenIndex = findClosingBracket(cap[2], '()');
+        if (lastParenIndex > -1) {
+          const start = cap[0].indexOf('!') === 0 ? 5 : 4;
+          const linkLen = start + cap[1].length + lastParenIndex;
+          cap[2] = cap[2].substring(0, lastParenIndex);
+          cap[0] = cap[0].substring(0, linkLen).trim();
+          cap[3] = '';
+        }
+      }
+      let href = cap[2];
+      let title = '';
+      if (this.options.pedantic) {
+        // split pedantic href and title
+        const link = /^([^'"]*[^\s])\s+(['"])(.*)\2/.exec(href);
+
+        if (link) {
+          href = link[1];
+          title = link[3];
+        }
+      } else {
+        title = cap[3] ? cap[3].slice(1, -1) : '';
+      }
+
+      href = href.trim();
+      if (/^</.test(href)) {
+        if (this.options.pedantic && !(/>$/.test(trimmedUrl))) {
+          // pedantic allows starting angle bracket without ending angle bracket
+          href = href.slice(1);
+        } else {
+          href = href.slice(1, -1);
+        }
+      }
+      return outputLink(cap, {
+        href: href ? href.replace(this.rules.inline._escapes, '$1') : href,
+        title: title ? title.replace(this.rules.inline._escapes, '$1') : title
+      }, cap[0], this.lexer);
+    }
+  }
+
+  reflink(src, links) {
+    let cap;
+    if ((cap = this.rules.inline.reflink.exec(src))
+        || (cap = this.rules.inline.nolink.exec(src))) {
+      let link = (cap[2] || cap[1]).replace(/\s+/g, ' ');
+      link = links[link.toLowerCase()];
+      if (!link) {
+        const text = cap[0].charAt(0);
+        return {
+          type: 'text',
+          raw: text,
+          text
+        };
+      }
+      return outputLink(cap, link, cap[0], this.lexer);
+    }
+  }
+
+  emStrong(src, maskedSrc, prevChar = '') {
+    let match = this.rules.inline.emStrong.lDelim.exec(src);
+    if (!match) return;
+
+    // _ can't be between two alphanumerics. \p{L}\p{N} includes non-english alphabet/numbers as well
+    if (match[3] && prevChar.match(/[\p{L}\p{N}]/u)) return;
+
+    const nextChar = match[1] || match[2] || '';
+
+    if (!nextChar || (nextChar && (prevChar === '' || this.rules.inline.punctuation.exec(prevChar)))) {
+      const lLength = match[0].length - 1;
+      let rDelim, rLength, delimTotal = lLength, midDelimTotal = 0;
+
+      const endReg = match[0][0] === '*' ? this.rules.inline.emStrong.rDelimAst : this.rules.inline.emStrong.rDelimUnd;
+      endReg.lastIndex = 0;
+
+      // Clip maskedSrc to same section of string as src (move to lexer?)
+      maskedSrc = maskedSrc.slice(-1 * src.length + lLength);
+
+      while ((match = endReg.exec(maskedSrc)) != null) {
+        rDelim = match[1] || match[2] || match[3] || match[4] || match[5] || match[6];
+
+        if (!rDelim) continue; // skip single * in __abc*abc__
+
+        rLength = rDelim.length;
+
+        if (match[3] || match[4]) { // found another Left Delim
+          delimTotal += rLength;
+          continue;
+        } else if (match[5] || match[6]) { // either Left or Right Delim
+          if (lLength % 3 && !((lLength + rLength) % 3)) {
+            midDelimTotal += rLength;
+            continue; // CommonMark Emphasis Rules 9-10
+          }
+        }
+
+        delimTotal -= rLength;
+
+        if (delimTotal > 0) continue; // Haven't found enough closing delimiters
+
+        // Remove extra characters. *a*** -> *a*
+        rLength = Math.min(rLength, rLength + delimTotal + midDelimTotal);
+
+        const raw = src.slice(0, lLength + match.index + (match[0].length - rDelim.length) + rLength);
+
+        // Create `em` if smallest delimiter has odd char count. *a***
+        if (Math.min(lLength, rLength) % 2) {
+          const text = raw.slice(1, -1);
+          return {
+            type: 'em',
+            raw,
+            text,
+            tokens: this.lexer.inlineTokens(text)
+          };
+        }
+
+        // Create 'strong' if smallest delimiter has even char count. **a***
+        const text = raw.slice(2, -2);
+        return {
+          type: 'strong',
+          raw,
+          text,
+          tokens: this.lexer.inlineTokens(text)
+        };
+      }
+    }
+  }
+
+  codespan(src) {
+    const cap = this.rules.inline.code.exec(src);
+    if (cap) {
+      let text = cap[2].replace(/\n/g, ' ');
+      const hasNonSpaceChars = /[^ ]/.test(text);
+      const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
+      if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
+        text = text.substring(1, text.length - 1);
+      }
+      text = escape(text, true);
+      return {
+        type: 'codespan',
+        raw: cap[0],
+        text
+      };
+    }
+  }
+
+  br(src) {
+    const cap = this.rules.inline.br.exec(src);
+    if (cap) {
+      return {
+        type: 'br',
+        raw: cap[0]
+      };
+    }
+  }
+
+  del(src) {
+    const cap = this.rules.inline.del.exec(src);
+    if (cap) {
+      return {
+        type: 'del',
+        raw: cap[0],
+        text: cap[2],
+        tokens: this.lexer.inlineTokens(cap[2])
+      };
+    }
+  }
+
+  autolink(src, mangle) {
+    const cap = this.rules.inline.autolink.exec(src);
+    if (cap) {
+      let text, href;
+      if (cap[2] === '@') {
+        text = escape(this.options.mangle ? mangle(cap[1]) : cap[1]);
+        href = 'mailto:' + text;
+      } else {
+        text = escape(cap[1]);
+        href = text;
+      }
+
+      return {
+        type: 'link',
+        raw: cap[0],
+        text,
+        href,
+        tokens: [
+          {
+            type: 'text',
+            raw: text,
+            text
+          }
+        ]
+      };
+    }
+  }
+
+  url(src, mangle) {
+    let cap;
+    if (cap = this.rules.inline.url.exec(src)) {
+      let text, href;
+      if (cap[2] === '@') {
+        text = escape(this.options.mangle ? mangle(cap[0]) : cap[0]);
+        href = 'mailto:' + text;
+      } else {
+        // do extended autolink path validation
+        let prevCapZero;
+        do {
+          prevCapZero = cap[0];
+          cap[0] = this.rules.inline._backpedal.exec(cap[0])[0];
+        } while (prevCapZero !== cap[0]);
+        text = escape(cap[0]);
+        if (cap[1] === 'www.') {
+          href = 'http://' + cap[0];
+        } else {
+          href = cap[0];
+        }
+      }
+      return {
+        type: 'link',
+        raw: cap[0],
+        text,
+        href,
+        tokens: [
+          {
+            type: 'text',
+            raw: text,
+            text
+          }
+        ]
+      };
+    }
+  }
+
+  inlineText(src, smartypants) {
+    const cap = this.rules.inline.text.exec(src);
+    if (cap) {
+      let text;
+      if (this.lexer.state.inRawBlock) {
+        text = this.options.sanitize ? (this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape(cap[0])) : cap[0];
+      } else {
+        text = escape(this.options.smartypants ? smartypants(cap[0]) : cap[0]);
+      }
+      return {
+        type: 'text',
+        raw: cap[0],
+        text
+      };
+    }
+  }
+}
+
+/**
+ * Block-Level Grammar
+ */
+const block = {
+  newline: /^(?: *(?:\n|$))+/,
+  code: /^( {4}[^\n]+(?:\n(?: *(?:\n|$))*)?)+/,
+  fences: /^ {0,3}(`{3,}(?=[^`\n]*(?:\n|$))|~{3,})([^\n]*)(?:\n|$)(?:|([\s\S]*?)(?:\n|$))(?: {0,3}\1[~`]* *(?=\n|$)|$)/,
+  hr: /^ {0,3}((?:-[\t ]*){3,}|(?:_[ \t]*){3,}|(?:\*[ \t]*){3,})(?:\n+|$)/,
+  heading: /^ {0,3}(#{1,6})(?=\s|$)(.*)(?:\n+|$)/,
+  blockquote: /^( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/,
+  list: /^( {0,3}bull)([ \t][^\n]+?)?(?:\n|$)/,
+  html: '^ {0,3}(?:' // optional indentation
+    + '<(script|pre|style|textarea)[\\s>][\\s\\S]*?(?:</\\1>[^\\n]*\\n+|$)' // (1)
+    + '|comment[^\\n]*(\\n+|$)' // (2)
+    + '|<\\?[\\s\\S]*?(?:\\?>\\n*|$)' // (3)
+    + '|<![A-Z][\\s\\S]*?(?:>\\n*|$)' // (4)
+    + '|<!\\[CDATA\\[[\\s\\S]*?(?:\\]\\]>\\n*|$)' // (5)
+    + '|</?(tag)(?: +|\\n|/?>)[\\s\\S]*?(?:(?:\\n *)+\\n|$)' // (6)
+    + '|<(?!script|pre|style|textarea)([a-z][\\w-]*)(?:attribute)*? */?>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n *)+\\n|$)' // (7) open tag
+    + '|</(?!script|pre|style|textarea)[a-z][\\w-]*\\s*>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n *)+\\n|$)' // (7) closing tag
+    + ')',
+  def: /^ {0,3}\[(label)\]: *(?:\n *)?([^<\s][^\s]*|<.*?>)(?:(?: +(?:\n *)?| *\n *)(title))? *(?:\n+|$)/,
+  table: noopTest,
+  lheading: /^((?:.|\n(?!\n))+?)\n {0,3}(=+|-+) *(?:\n+|$)/,
+  // regex template, placeholders will be replaced according to different paragraph
+  // interruption rules of commonmark and the original markdown spec:
+  _paragraph: /^([^\n]+(?:\n(?!hr|heading|lheading|blockquote|fences|list|html|table| +\n)[^\n]+)*)/,
+  text: /^[^\n]+/
+};
+
+block._label = /(?!\s*\])(?:\\.|[^\[\]\\])+/;
+block._title = /(?:"(?:\\"?|[^"\\])*"|'[^'\n]*(?:\n[^'\n]+)*\n?'|\([^()]*\))/;
+block.def = edit(block.def)
+  .replace('label', block._label)
+  .replace('title', block._title)
+  .getRegex();
+
+block.bullet = /(?:[*+-]|\d{1,9}[.)])/;
+block.listItemStart = edit(/^( *)(bull) */)
+  .replace('bull', block.bullet)
+  .getRegex();
+
+block.list = edit(block.list)
+  .replace(/bull/g, block.bullet)
+  .replace('hr', '\\n+(?=\\1?(?:(?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$))')
+  .replace('def', '\\n+(?=' + block.def.source + ')')
+  .getRegex();
+
+block._tag = 'address|article|aside|base|basefont|blockquote|body|caption'
+  + '|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption'
+  + '|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe'
+  + '|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option'
+  + '|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr'
+  + '|track|ul';
+block._comment = /<!--(?!-?>)[\s\S]*?(?:-->|$)/;
+block.html = edit(block.html, 'i')
+  .replace('comment', block._comment)
+  .replace('tag', block._tag)
+  .replace('attribute', / +[a-zA-Z:_][\w.:-]*(?: *= *"[^"\n]*"| *= *'[^'\n]*'| *= *[^\s"'=<>`]+)?/)
+  .getRegex();
+
+block.paragraph = edit(block._paragraph)
+  .replace('hr', block.hr)
+  .replace('heading', ' {0,3}#{1,6} ')
+  .replace('|lheading', '') // setex headings don't interrupt commonmark paragraphs
+  .replace('|table', '')
+  .replace('blockquote', ' {0,3}>')
+  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
+  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
+  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)')
+  .replace('tag', block._tag) // pars can be interrupted by type (6) html blocks
+  .getRegex();
+
+block.blockquote = edit(block.blockquote)
+  .replace('paragraph', block.paragraph)
+  .getRegex();
+
+/**
+ * Normal Block Grammar
+ */
+
+block.normal = { ...block };
+
+/**
+ * GFM Block Grammar
+ */
+
+block.gfm = {
+  ...block.normal,
+  table: '^ *([^\\n ].*\\|.*)\\n' // Header
+    + ' {0,3}(?:\\| *)?(:?-+:? *(?:\\| *:?-+:? *)*)(?:\\| *)?' // Align
+    + '(?:\\n((?:(?! *\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)' // Cells
+};
+
+block.gfm.table = edit(block.gfm.table)
+  .replace('hr', block.hr)
+  .replace('heading', ' {0,3}#{1,6} ')
+  .replace('blockquote', ' {0,3}>')
+  .replace('code', ' {4}[^\\n]')
+  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
+  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
+  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)')
+  .replace('tag', block._tag) // tables can be interrupted by type (6) html blocks
+  .getRegex();
+
+block.gfm.paragraph = edit(block._paragraph)
+  .replace('hr', block.hr)
+  .replace('heading', ' {0,3}#{1,6} ')
+  .replace('|lheading', '') // setex headings don't interrupt commonmark paragraphs
+  .replace('table', block.gfm.table) // interrupt paragraphs with table
+  .replace('blockquote', ' {0,3}>')
+  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
+  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
+  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)')
+  .replace('tag', block._tag) // pars can be interrupted by type (6) html blocks
+  .getRegex();
+/**
+ * Pedantic grammar (original John Gruber's loose markdown specification)
+ */
+
+block.pedantic = {
+  ...block.normal,
+  html: edit(
+    '^ *(?:comment *(?:\\n|\\s*$)'
+    + '|<(tag)[\\s\\S]+?</\\1> *(?:\\n{2,}|\\s*$)' // closed tag
+    + '|<tag(?:"[^"]*"|\'[^\']*\'|\\s[^\'"/>\\s]*)*?/?> *(?:\\n{2,}|\\s*$))')
+    .replace('comment', block._comment)
+    .replace(/tag/g, '(?!(?:'
+      + 'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub'
+      + '|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)'
+      + '\\b)\\w+(?!:|[^\\w\\s@]*@)\\b')
+    .getRegex(),
+  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,
+  heading: /^(#{1,6})(.*)(?:\n+|$)/,
+  fences: noopTest, // fences not supported
+  lheading: /^(.+?)\n {0,3}(=+|-+) *(?:\n+|$)/,
+  paragraph: edit(block.normal._paragraph)
+    .replace('hr', block.hr)
+    .replace('heading', ' *#{1,6} *[^\n]')
+    .replace('lheading', block.lheading)
+    .replace('blockquote', ' {0,3}>')
+    .replace('|fences', '')
+    .replace('|list', '')
+    .replace('|html', '')
+    .getRegex()
+};
+
+/**
+ * Inline-Level Grammar
+ */
+const inline = {
+  escape: /^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/,
+  autolink: /^<(scheme:[^\s\x00-\x1f<>]*|email)>/,
+  url: noopTest,
+  tag: '^comment'
+    + '|^</[a-zA-Z][\\w:-]*\\s*>' // self-closing tag
+    + '|^<[a-zA-Z][\\w-]*(?:attribute)*?\\s*/?>' // open tag
+    + '|^<\\?[\\s\\S]*?\\?>' // processing instruction, e.g. <?php ?>
+    + '|^<![a-zA-Z]+\\s[\\s\\S]*?>' // declaration, e.g. <!DOCTYPE html>
+    + '|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>', // CDATA section
+  link: /^!?\[(label)\]\(\s*(href)(?:\s+(title))?\s*\)/,
+  reflink: /^!?\[(label)\]\[(ref)\]/,
+  nolink: /^!?\[(ref)\](?:\[\])?/,
+  reflinkSearch: 'reflink|nolink(?!\\()',
+  emStrong: {
+    lDelim: /^(?:\*+(?:([punct_])|[^\s*]))|^_+(?:([punct*])|([^\s_]))/,
+    //        (1) and (2) can only be a Right Delimiter. (3) and (4) can only be Left.  (5) and (6) can be either Left or Right.
+    //          () Skip orphan inside strong                                      () Consume to delim     (1) #***                (2) a***#, a***                             (3) #***a, ***a                 (4) ***#              (5) #***#                 (6) a***a
+    rDelimAst: /^(?:[^_*\\]|\\.)*?\_\_(?:[^_*\\]|\\.)*?\*(?:[^_*\\]|\\.)*?(?=\_\_)|(?:[^*\\]|\\.)+(?=[^*])|[punct_](\*+)(?=[\s]|$)|(?:[^punct*_\s\\]|\\.)(\*+)(?=[punct_\s]|$)|[punct_\s](\*+)(?=[^punct*_\s])|[\s](\*+)(?=[punct_])|[punct_](\*+)(?=[punct_])|(?:[^punct*_\s\\]|\\.)(\*+)(?=[^punct*_\s])/,
+    rDelimUnd: /^(?:[^_*\\]|\\.)*?\*\*(?:[^_*\\]|\\.)*?\_(?:[^_*\\]|\\.)*?(?=\*\*)|(?:[^_\\]|\\.)+(?=[^_])|[punct*](\_+)(?=[\s]|$)|(?:[^punct*_\s\\]|\\.)(\_+)(?=[punct*\s]|$)|[punct*\s](\_+)(?=[^punct*_\s])|[\s](\_+)(?=[punct*])|[punct*](\_+)(?=[punct*])/ // ^- Not allowed for _
+  },
+  code: /^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/,
+  br: /^( {2,}|\\)\n(?!\s*$)/,
+  del: noopTest,
+  text: /^(`+|[^`])(?:(?= {2,}\n)|[\s\S]*?(?:(?=[\\<!\[`*_]|\b_|$)|[^ ](?= {2,}\n)))/,
+  punctuation: /^([\spunctuation])/
+};
+
+// list of punctuation marks from CommonMark spec
+// without * and _ to handle the different emphasis markers * and _
+inline._punctuation = '!"#$%&\'()+\\-.,/:;<=>?@\\[\\]`^{|}~';
+inline.punctuation = edit(inline.punctuation).replace(/punctuation/g, inline._punctuation).getRegex();
+
+// sequences em should skip over [title](link), `code`, <html>
+inline.blockSkip = /\[[^\]]*?\]\([^\)]*?\)|`[^`]*?`|<[^>]*?>/g;
+// lookbehind is not available on Safari as of version 16
+// inline.escapedEmSt = /(?<=(?:^|[^\\)(?:\\[^])*)\\[*_]/g;
+inline.escapedEmSt = /(?:^|[^\\])(?:\\\\)*\\[*_]/g;
+
+inline._comment = edit(block._comment).replace('(?:-->|$)', '-->').getRegex();
+
+inline.emStrong.lDelim = edit(inline.emStrong.lDelim)
+  .replace(/punct/g, inline._punctuation)
+  .getRegex();
+
+inline.emStrong.rDelimAst = edit(inline.emStrong.rDelimAst, 'g')
+  .replace(/punct/g, inline._punctuation)
+  .getRegex();
+
+inline.emStrong.rDelimUnd = edit(inline.emStrong.rDelimUnd, 'g')
+  .replace(/punct/g, inline._punctuation)
+  .getRegex();
+
+inline._escapes = /\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/g;
+
+inline._scheme = /[a-zA-Z][a-zA-Z0-9+.-]{1,31}/;
+inline._email = /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/;
+inline.autolink = edit(inline.autolink)
+  .replace('scheme', inline._scheme)
+  .replace('email', inline._email)
+  .getRegex();
+
+inline._attribute = /\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/;
+
+inline.tag = edit(inline.tag)
+  .replace('comment', inline._comment)
+  .replace('attribute', inline._attribute)
+  .getRegex();
+
+inline._label = /(?:\[(?:\\.|[^\[\]\\])*\]|\\.|`[^`]*`|[^\[\]\\`])*?/;
+inline._href = /<(?:\\.|[^\n<>\\])+>|[^\s\x00-\x1f]*/;
+inline._title = /"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/;
+
+inline.link = edit(inline.link)
+  .replace('label', inline._label)
+  .replace('href', inline._href)
+  .replace('title', inline._title)
+  .getRegex();
+
+inline.reflink = edit(inline.reflink)
+  .replace('label', inline._label)
+  .replace('ref', block._label)
+  .getRegex();
+
+inline.nolink = edit(inline.nolink)
+  .replace('ref', block._label)
+  .getRegex();
+
+inline.reflinkSearch = edit(inline.reflinkSearch, 'g')
+  .replace('reflink', inline.reflink)
+  .replace('nolink', inline.nolink)
+  .getRegex();
+
+/**
+ * Normal Inline Grammar
+ */
+
+inline.normal = { ...inline };
+
+/**
+ * Pedantic Inline Grammar
+ */
+
+inline.pedantic = {
+  ...inline.normal,
+  strong: {
+    start: /^__|\*\*/,
+    middle: /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
+    endAst: /\*\*(?!\*)/g,
+    endUnd: /__(?!_)/g
+  },
+  em: {
+    start: /^_|\*/,
+    middle: /^()\*(?=\S)([\s\S]*?\S)\*(?!\*)|^_(?=\S)([\s\S]*?\S)_(?!_)/,
+    endAst: /\*(?!\*)/g,
+    endUnd: /_(?!_)/g
+  },
+  link: edit(/^!?\[(label)\]\((.*?)\)/)
+    .replace('label', inline._label)
+    .getRegex(),
+  reflink: edit(/^!?\[(label)\]\s*\[([^\]]*)\]/)
+    .replace('label', inline._label)
+    .getRegex()
+};
+
+/**
+ * GFM Inline Grammar
+ */
+
+inline.gfm = {
+  ...inline.normal,
+  escape: edit(inline.escape).replace('])', '~|])').getRegex(),
+  _extended_email: /[A-Za-z0-9._+-]+(@)[a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]*[a-zA-Z0-9])+(?![-_])/,
+  url: /^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/,
+  _backpedal: /(?:[^?!.,:;*_'"~()&]+|\([^)]*\)|&(?![a-zA-Z0-9]+;$)|[?!.,:;*_'"~)]+(?!$))+/,
+  del: /^(~~?)(?=[^\s~])([\s\S]*?[^\s~])\1(?=[^~]|$)/,
+  text: /^([`~]+|[^`~])(?:(?= {2,}\n)|(?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@)|[\s\S]*?(?:(?=[\\<!\[`*~_]|\b_|https?:\/\/|ftp:\/\/|www\.|$)|[^ ](?= {2,}\n)|[^a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-](?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@)))/
+};
+
+inline.gfm.url = edit(inline.gfm.url, 'i')
+  .replace('email', inline.gfm._extended_email)
+  .getRegex();
+/**
+ * GFM + Line Breaks Inline Grammar
+ */
+
+inline.breaks = {
+  ...inline.gfm,
+  br: edit(inline.br).replace('{2,}', '*').getRegex(),
+  text: edit(inline.gfm.text)
+    .replace('\\b_', '\\b_| {2,}\\n')
+    .replace(/\{2,\}/g, '*')
+    .getRegex()
+};
+
+/**
+ * smartypants text replacement
+ * @param {string} text
+ */
+function smartypants(text) {
+  return text
+    // em-dashes
+    .replace(/---/g, '\u2014')
+    // en-dashes
+    .replace(/--/g, '\u2013')
+    // opening singles
+    .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
+    // closing singles & apostrophes
+    .replace(/'/g, '\u2019')
+    // opening doubles
+    .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
+    // closing doubles
+    .replace(/"/g, '\u201d')
+    // ellipses
+    .replace(/\.{3}/g, '\u2026');
+}
+
+/**
+ * mangle email addresses
+ * @param {string} text
+ */
+function mangle(text) {
+  let out = '',
+    i,
+    ch;
+
+  const l = text.length;
+  for (i = 0; i < l; i++) {
+    ch = text.charCodeAt(i);
+    if (Math.random() > 0.5) {
+      ch = 'x' + ch.toString(16);
+    }
+    out += '&#' + ch + ';';
+  }
+
+  return out;
+}
+
+/**
+ * Block Lexer
+ */
+class Lexer {
+  constructor(options) {
+    this.tokens = [];
+    this.tokens.links = Object.create(null);
+    this.options = options || defaults;
+    this.options.tokenizer = this.options.tokenizer || new Tokenizer();
+    this.tokenizer = this.options.tokenizer;
+    this.tokenizer.options = this.options;
+    this.tokenizer.lexer = this;
+    this.inlineQueue = [];
+    this.state = {
+      inLink: false,
+      inRawBlock: false,
+      top: true
+    };
+
+    const rules = {
+      block: block.normal,
+      inline: inline.normal
+    };
+
+    if (this.options.pedantic) {
+      rules.block = block.pedantic;
+      rules.inline = inline.pedantic;
+    } else if (this.options.gfm) {
+      rules.block = block.gfm;
+      if (this.options.breaks) {
+        rules.inline = inline.breaks;
+      } else {
+        rules.inline = inline.gfm;
+      }
+    }
+    this.tokenizer.rules = rules;
+  }
+
+  /**
+   * Expose Rules
+   */
+  static get rules() {
+    return {
+      block,
+      inline
+    };
+  }
+
+  /**
+   * Static Lex Method
+   */
+  static lex(src, options) {
+    const lexer = new Lexer(options);
+    return lexer.lex(src);
+  }
+
+  /**
+   * Static Lex Inline Method
+   */
+  static lexInline(src, options) {
+    const lexer = new Lexer(options);
+    return lexer.inlineTokens(src);
+  }
+
+  /**
+   * Preprocessing
+   */
+  lex(src) {
+    src = src
+      .replace(/\r\n|\r/g, '\n');
+
+    this.blockTokens(src, this.tokens);
+
+    let next;
+    while (next = this.inlineQueue.shift()) {
+      this.inlineTokens(next.src, next.tokens);
+    }
+
+    return this.tokens;
+  }
+
+  /**
+   * Lexing
+   */
+  blockTokens(src, tokens = []) {
+    if (this.options.pedantic) {
+      src = src.replace(/\t/g, '    ').replace(/^ +$/gm, '');
+    } else {
+      src = src.replace(/^( *)(\t+)/gm, (_, leading, tabs) => {
+        return leading + '    '.repeat(tabs.length);
+      });
+    }
+
+    let token, lastToken, cutSrc, lastParagraphClipped;
+
+    while (src) {
+      if (this.options.extensions
+        && this.options.extensions.block
+        && this.options.extensions.block.some((extTokenizer) => {
+          if (token = extTokenizer.call({ lexer: this }, src, tokens)) {
+            src = src.substring(token.raw.length);
+            tokens.push(token);
+            return true;
+          }
+          return false;
+        })) {
+        continue;
+      }
+
+      // newline
+      if (token = this.tokenizer.space(src)) {
+        src = src.substring(token.raw.length);
+        if (token.raw.length === 1 && tokens.length > 0) {
+          // if there's a single \n as a spacer, it's terminating the last line,
+          // so move it there so that we don't get unecessary paragraph tags
+          tokens[tokens.length - 1].raw += '\n';
+        } else {
+          tokens.push(token);
+        }
+        continue;
+      }
+
+      // code
+      if (token = this.tokenizer.code(src)) {
+        src = src.substring(token.raw.length);
+        lastToken = tokens[tokens.length - 1];
+        // An indented code block cannot interrupt a paragraph.
+        if (lastToken && (lastToken.type === 'paragraph' || lastToken.type === 'text')) {
+          lastToken.raw += '\n' + token.raw;
+          lastToken.text += '\n' + token.text;
+          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
+        } else {
+          tokens.push(token);
+        }
+        continue;
+      }
+
+      // fences
+      if (token = this.tokenizer.fences(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // heading
+      if (token = this.tokenizer.heading(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // hr
+      if (token = this.tokenizer.hr(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // blockquote
+      if (token = this.tokenizer.blockquote(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // list
+      if (token = this.tokenizer.list(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // html
+      if (token = this.tokenizer.html(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // def
+      if (token = this.tokenizer.def(src)) {
+        src = src.substring(token.raw.length);
+        lastToken = tokens[tokens.length - 1];
+        if (lastToken && (lastToken.type === 'paragraph' || lastToken.type === 'text')) {
+          lastToken.raw += '\n' + token.raw;
+          lastToken.text += '\n' + token.raw;
+          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
+        } else if (!this.tokens.links[token.tag]) {
+          this.tokens.links[token.tag] = {
+            href: token.href,
+            title: token.title
+          };
+        }
+        continue;
+      }
+
+      // table (gfm)
+      if (token = this.tokenizer.table(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // lheading
+      if (token = this.tokenizer.lheading(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // top-level paragraph
+      // prevent paragraph consuming extensions by clipping 'src' to extension start
+      cutSrc = src;
+      if (this.options.extensions && this.options.extensions.startBlock) {
+        let startIndex = Infinity;
+        const tempSrc = src.slice(1);
+        let tempStart;
+        this.options.extensions.startBlock.forEach(function(getStartIndex) {
+          tempStart = getStartIndex.call({ lexer: this }, tempSrc);
+          if (typeof tempStart === 'number' && tempStart >= 0) { startIndex = Math.min(startIndex, tempStart); }
+        });
+        if (startIndex < Infinity && startIndex >= 0) {
+          cutSrc = src.substring(0, startIndex + 1);
+        }
+      }
+      if (this.state.top && (token = this.tokenizer.paragraph(cutSrc))) {
+        lastToken = tokens[tokens.length - 1];
+        if (lastParagraphClipped && lastToken.type === 'paragraph') {
+          lastToken.raw += '\n' + token.raw;
+          lastToken.text += '\n' + token.text;
+          this.inlineQueue.pop();
+          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
+        } else {
+          tokens.push(token);
+        }
+        lastParagraphClipped = (cutSrc.length !== src.length);
+        src = src.substring(token.raw.length);
+        continue;
+      }
+
+      // text
+      if (token = this.tokenizer.text(src)) {
+        src = src.substring(token.raw.length);
+        lastToken = tokens[tokens.length - 1];
+        if (lastToken && lastToken.type === 'text') {
+          lastToken.raw += '\n' + token.raw;
+          lastToken.text += '\n' + token.text;
+          this.inlineQueue.pop();
+          this.inlineQueue[this.inlineQueue.length - 1].src = lastToken.text;
+        } else {
+          tokens.push(token);
+        }
+        continue;
+      }
+
+      if (src) {
+        const errMsg = 'Infinite loop on byte: ' + src.charCodeAt(0);
+        if (this.options.silent) {
+          console.error(errMsg);
+          break;
+        } else {
+          throw new Error(errMsg);
+        }
+      }
+    }
+
+    this.state.top = true;
+    return tokens;
+  }
+
+  inline(src, tokens = []) {
+    this.inlineQueue.push({ src, tokens });
+    return tokens;
+  }
+
+  /**
+   * Lexing/Compiling
+   */
+  inlineTokens(src, tokens = []) {
+    let token, lastToken, cutSrc;
+
+    // String with links masked to avoid interference with em and strong
+    let maskedSrc = src;
+    let match;
+    let keepPrevChar, prevChar;
+
+    // Mask out reflinks
+    if (this.tokens.links) {
+      const links = Object.keys(this.tokens.links);
+      if (links.length > 0) {
+        while ((match = this.tokenizer.rules.inline.reflinkSearch.exec(maskedSrc)) != null) {
+          if (links.includes(match[0].slice(match[0].lastIndexOf('[') + 1, -1))) {
+            maskedSrc = maskedSrc.slice(0, match.index) + '[' + repeatString('a', match[0].length - 2) + ']' + maskedSrc.slice(this.tokenizer.rules.inline.reflinkSearch.lastIndex);
+          }
+        }
+      }
+    }
+    // Mask out other blocks
+    while ((match = this.tokenizer.rules.inline.blockSkip.exec(maskedSrc)) != null) {
+      maskedSrc = maskedSrc.slice(0, match.index) + '[' + repeatString('a', match[0].length - 2) + ']' + maskedSrc.slice(this.tokenizer.rules.inline.blockSkip.lastIndex);
+    }
+
+    // Mask out escaped em & strong delimiters
+    while ((match = this.tokenizer.rules.inline.escapedEmSt.exec(maskedSrc)) != null) {
+      maskedSrc = maskedSrc.slice(0, match.index + match[0].length - 2) + '++' + maskedSrc.slice(this.tokenizer.rules.inline.escapedEmSt.lastIndex);
+      this.tokenizer.rules.inline.escapedEmSt.lastIndex--;
+    }
+
+    while (src) {
+      if (!keepPrevChar) {
+        prevChar = '';
+      }
+      keepPrevChar = false;
+
+      // extensions
+      if (this.options.extensions
+        && this.options.extensions.inline
+        && this.options.extensions.inline.some((extTokenizer) => {
+          if (token = extTokenizer.call({ lexer: this }, src, tokens)) {
+            src = src.substring(token.raw.length);
+            tokens.push(token);
+            return true;
+          }
+          return false;
+        })) {
+        continue;
+      }
+
+      // escape
+      if (token = this.tokenizer.escape(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // tag
+      if (token = this.tokenizer.tag(src)) {
+        src = src.substring(token.raw.length);
+        lastToken = tokens[tokens.length - 1];
+        if (lastToken && token.type === 'text' && lastToken.type === 'text') {
+          lastToken.raw += token.raw;
+          lastToken.text += token.text;
+        } else {
+          tokens.push(token);
+        }
+        continue;
+      }
+
+      // link
+      if (token = this.tokenizer.link(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // reflink, nolink
+      if (token = this.tokenizer.reflink(src, this.tokens.links)) {
+        src = src.substring(token.raw.length);
+        lastToken = tokens[tokens.length - 1];
+        if (lastToken && token.type === 'text' && lastToken.type === 'text') {
+          lastToken.raw += token.raw;
+          lastToken.text += token.text;
+        } else {
+          tokens.push(token);
+        }
+        continue;
+      }
+
+      // em & strong
+      if (token = this.tokenizer.emStrong(src, maskedSrc, prevChar)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // code
+      if (token = this.tokenizer.codespan(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // br
+      if (token = this.tokenizer.br(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // del (gfm)
+      if (token = this.tokenizer.del(src)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // autolink
+      if (token = this.tokenizer.autolink(src, mangle)) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // url (gfm)
+      if (!this.state.inLink && (token = this.tokenizer.url(src, mangle))) {
+        src = src.substring(token.raw.length);
+        tokens.push(token);
+        continue;
+      }
+
+      // text
+      // prevent inlineText consuming extensions by clipping 'src' to extension start
+      cutSrc = src;
+      if (this.options.extensions && this.options.extensions.startInline) {
+        let startIndex = Infinity;
+        const tempSrc = src.slice(1);
+        let tempStart;
+        this.options.extensions.startInline.forEach(function(getStartIndex) {
+          tempStart = getStartIndex.call({ lexer: this }, tempSrc);
+          if (typeof tempStart === 'number' && tempStart >= 0) { startIndex = Math.min(startIndex, tempStart); }
+        });
+        if (startIndex < Infinity && startIndex >= 0) {
+          cutSrc = src.substring(0, startIndex + 1);
+        }
+      }
+      if (token = this.tokenizer.inlineText(cutSrc, smartypants)) {
+        src = src.substring(token.raw.length);
+        if (token.raw.slice(-1) !== '_') { // Track prevChar before string of ____ started
+          prevChar = token.raw.slice(-1);
+        }
+        keepPrevChar = true;
+        lastToken = tokens[tokens.length - 1];
+        if (lastToken && lastToken.type === 'text') {
+          lastToken.raw += token.raw;
+          lastToken.text += token.text;
+        } else {
+          tokens.push(token);
+        }
+        continue;
+      }
+
+      if (src) {
+        const errMsg = 'Infinite loop on byte: ' + src.charCodeAt(0);
+        if (this.options.silent) {
+          console.error(errMsg);
+          break;
+        } else {
+          throw new Error(errMsg);
+        }
+      }
+    }
+
+    return tokens;
+  }
+}
+
+/**
+ * Renderer
+ */
+class Renderer {
+  constructor(options) {
+    this.options = options || defaults;
+  }
+
+  code(code, infostring, escaped) {
+    const lang = (infostring || '').match(/\S*/)[0];
+    if (this.options.highlight) {
+      const out = this.options.highlight(code, lang);
+      if (out != null && out !== code) {
+        escaped = true;
+        code = out;
+      }
+    }
+
+    code = code.replace(/\n$/, '') + '\n';
+
+    if (!lang) {
+      return '<pre><code>'
+        + (escaped ? code : escape(code, true))
+        + '</code></pre>\n';
+    }
+
+    return '<pre><code class="'
+      + this.options.langPrefix
+      + escape(lang)
+      + '">'
+      + (escaped ? code : escape(code, true))
+      + '</code></pre>\n';
+  }
+
+  /**
+   * @param {string} quote
+   */
+  blockquote(quote) {
+    return `<blockquote>\n${quote}</blockquote>\n`;
+  }
+
+  html(html) {
+    return html;
+  }
+
+  /**
+   * @param {string} text
+   * @param {string} level
+   * @param {string} raw
+   * @param {any} slugger
+   */
+  heading(text, level, raw, slugger) {
+    if (this.options.headerIds) {
+      const id = this.options.headerPrefix + slugger.slug(raw);
+      return `<h${level} id="${id}">${text}</h${level}>\n`;
+    }
+
+    // ignore IDs
+    return `<h${level}>${text}</h${level}>\n`;
+  }
+
+  hr() {
+    return this.options.xhtml ? '<hr/>\n' : '<hr>\n';
+  }
+
+  list(body, ordered, start) {
+    const type = ordered ? 'ol' : 'ul',
+      startatt = (ordered && start !== 1) ? (' start="' + start + '"') : '';
+    return '<' + type + startatt + '>\n' + body + '</' + type + '>\n';
+  }
+
+  /**
+   * @param {string} text
+   */
+  listitem(text) {
+    return `<li>${text}</li>\n`;
+  }
+
+  checkbox(checked) {
+    return '<input '
+      + (checked ? 'checked="" ' : '')
+      + 'disabled="" type="checkbox"'
+      + (this.options.xhtml ? ' /' : '')
+      + '> ';
+  }
+
+  /**
+   * @param {string} text
+   */
+  paragraph(text) {
+    return `<p>${text}</p>\n`;
+  }
+
+  /**
+   * @param {string} header
+   * @param {string} body
+   */
+  table(header, body) {
+    if (body) body = `<tbody>${body}</tbody>`;
+
+    return '<table>\n'
+      + '<thead>\n'
+      + header
+      + '</thead>\n'
+      + body
+      + '</table>\n';
+  }
+
+  /**
+   * @param {string} content
+   */
+  tablerow(content) {
+    return `<tr>\n${content}</tr>\n`;
+  }
+
+  tablecell(content, flags) {
+    const type = flags.header ? 'th' : 'td';
+    const tag = flags.align
+      ? `<${type} align="${flags.align}">`
+      : `<${type}>`;
+    return tag + content + `</${type}>\n`;
+  }
+
+  /**
+   * span level renderer
+   * @param {string} text
+   */
+  strong(text) {
+    return `<strong>${text}</strong>`;
+  }
+
+  /**
+   * @param {string} text
+   */
+  em(text) {
+    return `<em>${text}</em>`;
+  }
+
+  /**
+   * @param {string} text
+   */
+  codespan(text) {
+    return `<code>${text}</code>`;
+  }
+
+  br() {
+    return this.options.xhtml ? '<br/>' : '<br>';
+  }
+
+  /**
+   * @param {string} text
+   */
+  del(text) {
+    return `<del>${text}</del>`;
+  }
+
+  /**
+   * @param {string} href
+   * @param {string} title
+   * @param {string} text
+   */
+  link(href, title, text) {
+    href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
+    if (href === null) {
+      return text;
+    }
+    let out = '<a href="' + href + '"';
+    if (title) {
+      out += ' title="' + title + '"';
+    }
+    out += '>' + text + '</a>';
+    return out;
+  }
+
+  /**
+   * @param {string} href
+   * @param {string} title
+   * @param {string} text
+   */
+  image(href, title, text) {
+    href = cleanUrl(this.options.sanitize, this.options.baseUrl, href);
+    if (href === null) {
+      return text;
+    }
+
+    let out = `<img src="${href}" alt="${text}"`;
+    if (title) {
+      out += ` title="${title}"`;
+    }
+    out += this.options.xhtml ? '/>' : '>';
+    return out;
+  }
+
+  text(text) {
+    return text;
+  }
+}
+
+/**
+ * TextRenderer
+ * returns only the textual part of the token
+ */
+class TextRenderer {
+  // no need for block level renderers
+  strong(text) {
+    return text;
+  }
+
+  em(text) {
+    return text;
+  }
+
+  codespan(text) {
+    return text;
+  }
+
+  del(text) {
+    return text;
+  }
+
+  html(text) {
+    return text;
+  }
+
+  text(text) {
+    return text;
+  }
+
+  link(href, title, text) {
+    return '' + text;
+  }
+
+  image(href, title, text) {
+    return '' + text;
+  }
+
+  br() {
+    return '';
+  }
+}
+
+/**
+ * Slugger generates header id
+ */
+class Slugger {
+  constructor() {
+    this.seen = {};
+  }
+
+  /**
+   * @param {string} value
+   */
+  serialize(value) {
+    return value
+      .toLowerCase()
+      .trim()
+      // remove html tags
+      .replace(/<[!\/a-z].*?>/ig, '')
+      // remove unwanted chars
+      .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
+      .replace(/\s/g, '-');
+  }
+
+  /**
+   * Finds the next safe (unique) slug to use
+   * @param {string} originalSlug
+   * @param {boolean} isDryRun
+   */
+  getNextSafeSlug(originalSlug, isDryRun) {
+    let slug = originalSlug;
+    let occurenceAccumulator = 0;
+    if (this.seen.hasOwnProperty(slug)) {
+      occurenceAccumulator = this.seen[originalSlug];
+      do {
+        occurenceAccumulator++;
+        slug = originalSlug + '-' + occurenceAccumulator;
+      } while (this.seen.hasOwnProperty(slug));
+    }
+    if (!isDryRun) {
+      this.seen[originalSlug] = occurenceAccumulator;
+      this.seen[slug] = 0;
+    }
+    return slug;
+  }
+
+  /**
+   * Convert string to unique id
+   * @param {object} [options]
+   * @param {boolean} [options.dryrun] Generates the next unique slug without
+   * updating the internal accumulator.
+   */
+  slug(value, options = {}) {
+    const slug = this.serialize(value);
+    return this.getNextSafeSlug(slug, options.dryrun);
+  }
+}
+
+/**
+ * Parsing & Compiling
+ */
+class Parser {
+  constructor(options) {
+    this.options = options || defaults;
+    this.options.renderer = this.options.renderer || new Renderer();
+    this.renderer = this.options.renderer;
+    this.renderer.options = this.options;
+    this.textRenderer = new TextRenderer();
+    this.slugger = new Slugger();
+  }
+
+  /**
+   * Static Parse Method
+   */
+  static parse(tokens, options) {
+    const parser = new Parser(options);
+    return parser.parse(tokens);
+  }
+
+  /**
+   * Static Parse Inline Method
+   */
+  static parseInline(tokens, options) {
+    const parser = new Parser(options);
+    return parser.parseInline(tokens);
+  }
+
+  /**
+   * Parse Loop
+   */
+  parse(tokens, top = true) {
+    let out = '',
+      i,
+      j,
+      k,
+      l2,
+      l3,
+      row,
+      cell,
+      header,
+      body,
+      token,
+      ordered,
+      start,
+      loose,
+      itemBody,
+      item,
+      checked,
+      task,
+      checkbox,
+      ret;
+
+    const l = tokens.length;
+    for (i = 0; i < l; i++) {
+      token = tokens[i];
+
+      // Run any renderer extensions
+      if (this.options.extensions && this.options.extensions.renderers && this.options.extensions.renderers[token.type]) {
+        ret = this.options.extensions.renderers[token.type].call({ parser: this }, token);
+        if (ret !== false || !['space', 'hr', 'heading', 'code', 'table', 'blockquote', 'list', 'html', 'paragraph', 'text'].includes(token.type)) {
+          out += ret || '';
+          continue;
+        }
+      }
+
+      switch (token.type) {
+        case 'space': {
+          continue;
+        }
+        case 'hr': {
+          out += this.renderer.hr();
+          continue;
+        }
+        case 'heading': {
+          out += this.renderer.heading(
+            this.parseInline(token.tokens),
+            token.depth,
+            unescape$1(this.parseInline(token.tokens, this.textRenderer)),
+            this.slugger);
+          continue;
+        }
+        case 'code': {
+          out += this.renderer.code(token.text,
+            token.lang,
+            token.escaped);
+          continue;
+        }
+        case 'table': {
+          header = '';
+
+          // header
+          cell = '';
+          l2 = token.header.length;
+          for (j = 0; j < l2; j++) {
+            cell += this.renderer.tablecell(
+              this.parseInline(token.header[j].tokens),
+              { header: true, align: token.align[j] }
+            );
+          }
+          header += this.renderer.tablerow(cell);
+
+          body = '';
+          l2 = token.rows.length;
+          for (j = 0; j < l2; j++) {
+            row = token.rows[j];
+
+            cell = '';
+            l3 = row.length;
+            for (k = 0; k < l3; k++) {
+              cell += this.renderer.tablecell(
+                this.parseInline(row[k].tokens),
+                { header: false, align: token.align[k] }
+              );
+            }
+
+            body += this.renderer.tablerow(cell);
+          }
+          out += this.renderer.table(header, body);
+          continue;
+        }
+        case 'blockquote': {
+          body = this.parse(token.tokens);
+          out += this.renderer.blockquote(body);
+          continue;
+        }
+        case 'list': {
+          ordered = token.ordered;
+          start = token.start;
+          loose = token.loose;
+          l2 = token.items.length;
+
+          body = '';
+          for (j = 0; j < l2; j++) {
+            item = token.items[j];
+            checked = item.checked;
+            task = item.task;
+
+            itemBody = '';
+            if (item.task) {
+              checkbox = this.renderer.checkbox(checked);
+              if (loose) {
+                if (item.tokens.length > 0 && item.tokens[0].type === 'paragraph') {
+                  item.tokens[0].text = checkbox + ' ' + item.tokens[0].text;
+                  if (item.tokens[0].tokens && item.tokens[0].tokens.length > 0 && item.tokens[0].tokens[0].type === 'text') {
+                    item.tokens[0].tokens[0].text = checkbox + ' ' + item.tokens[0].tokens[0].text;
+                  }
+                } else {
+                  item.tokens.unshift({
+                    type: 'text',
+                    text: checkbox
+                  });
+                }
+              } else {
+                itemBody += checkbox;
+              }
+            }
+
+            itemBody += this.parse(item.tokens, loose);
+            body += this.renderer.listitem(itemBody, task, checked);
+          }
+
+          out += this.renderer.list(body, ordered, start);
+          continue;
+        }
+        case 'html': {
+          // TODO parse inline content if parameter markdown=1
+          out += this.renderer.html(token.text);
+          continue;
+        }
+        case 'paragraph': {
+          out += this.renderer.paragraph(this.parseInline(token.tokens));
+          continue;
+        }
+        case 'text': {
+          body = token.tokens ? this.parseInline(token.tokens) : token.text;
+          while (i + 1 < l && tokens[i + 1].type === 'text') {
+            token = tokens[++i];
+            body += '\n' + (token.tokens ? this.parseInline(token.tokens) : token.text);
+          }
+          out += top ? this.renderer.paragraph(body) : body;
+          continue;
+        }
+
+        default: {
+          const errMsg = 'Token with "' + token.type + '" type was not found.';
+          if (this.options.silent) {
+            console.error(errMsg);
+            return;
+          } else {
+            throw new Error(errMsg);
+          }
+        }
+      }
+    }
+
+    return out;
+  }
+
+  /**
+   * Parse Inline Tokens
+   */
+  parseInline(tokens, renderer) {
+    renderer = renderer || this.renderer;
+    let out = '',
+      i,
+      token,
+      ret;
+
+    const l = tokens.length;
+    for (i = 0; i < l; i++) {
+      token = tokens[i];
+
+      // Run any renderer extensions
+      if (this.options.extensions && this.options.extensions.renderers && this.options.extensions.renderers[token.type]) {
+        ret = this.options.extensions.renderers[token.type].call({ parser: this }, token);
+        if (ret !== false || !['escape', 'html', 'link', 'image', 'strong', 'em', 'codespan', 'br', 'del', 'text'].includes(token.type)) {
+          out += ret || '';
+          continue;
+        }
+      }
+
+      switch (token.type) {
+        case 'escape': {
+          out += renderer.text(token.text);
+          break;
+        }
+        case 'html': {
+          out += renderer.html(token.text);
+          break;
+        }
+        case 'link': {
+          out += renderer.link(token.href, token.title, this.parseInline(token.tokens, renderer));
+          break;
+        }
+        case 'image': {
+          out += renderer.image(token.href, token.title, token.text);
+          break;
+        }
+        case 'strong': {
+          out += renderer.strong(this.parseInline(token.tokens, renderer));
+          break;
+        }
+        case 'em': {
+          out += renderer.em(this.parseInline(token.tokens, renderer));
+          break;
+        }
+        case 'codespan': {
+          out += renderer.codespan(token.text);
+          break;
+        }
+        case 'br': {
+          out += renderer.br();
+          break;
+        }
+        case 'del': {
+          out += renderer.del(this.parseInline(token.tokens, renderer));
+          break;
+        }
+        case 'text': {
+          out += renderer.text(token.text);
+          break;
+        }
+        default: {
+          const errMsg = 'Token with "' + token.type + '" type was not found.';
+          if (this.options.silent) {
+            console.error(errMsg);
+            return;
+          } else {
+            throw new Error(errMsg);
+          }
+        }
+      }
+    }
+    return out;
+  }
+}
+
+class Hooks {
+  constructor(options) {
+    this.options = options || defaults;
+  }
+
+  static passThroughHooks = new Set([
+    'preprocess',
+    'postprocess'
+  ]);
+
+  /**
+   * Process markdown before marked
+   */
+  preprocess(markdown) {
+    return markdown;
+  }
+
+  /**
+   * Process HTML after marked is finished
+   */
+  postprocess(html) {
+    return html;
+  }
+}
+
+function onError(silent, async, callback) {
+  return (e) => {
+    e.message += '\nPlease report this to https://github.com/markedjs/marked.';
+
+    if (silent) {
+      const msg = '<p>An error occurred:</p><pre>'
+        + escape(e.message + '', true)
+        + '</pre>';
+      if (async) {
+        return Promise.resolve(msg);
+      }
+      if (callback) {
+        callback(null, msg);
+        return;
+      }
+      return msg;
+    }
+
+    if (async) {
+      return Promise.reject(e);
+    }
+    if (callback) {
+      callback(e);
+      return;
+    }
+    throw e;
+  };
+}
+
+function parseMarkdown(lexer, parser) {
+  return (src, opt, callback) => {
+    if (typeof opt === 'function') {
+      callback = opt;
+      opt = null;
+    }
+
+    const origOpt = { ...opt };
+    opt = { ...marked.defaults, ...origOpt };
+    const throwError = onError(opt.silent, opt.async, callback);
+
+    // throw error in case of non string input
+    if (typeof src === 'undefined' || src === null) {
+      return throwError(new Error('marked(): input parameter is undefined or null'));
+    }
+    if (typeof src !== 'string') {
+      return throwError(new Error('marked(): input parameter is of type '
+        + Object.prototype.toString.call(src) + ', string expected'));
+    }
+
+    checkSanitizeDeprecation(opt);
+
+    if (opt.hooks) {
+      opt.hooks.options = opt;
+    }
+
+    if (callback) {
+      const highlight = opt.highlight;
+      let tokens;
+
+      try {
+        if (opt.hooks) {
+          src = opt.hooks.preprocess(src);
+        }
+        tokens = lexer(src, opt);
+      } catch (e) {
+        return throwError(e);
+      }
+
+      const done = function(err) {
+        let out;
+
+        if (!err) {
+          try {
+            if (opt.walkTokens) {
+              marked.walkTokens(tokens, opt.walkTokens);
+            }
+            out = parser(tokens, opt);
+            if (opt.hooks) {
+              out = opt.hooks.postprocess(out);
+            }
+          } catch (e) {
+            err = e;
+          }
+        }
+
+        opt.highlight = highlight;
+
+        return err
+          ? throwError(err)
+          : callback(null, out);
+      };
+
+      if (!highlight || highlight.length < 3) {
+        return done();
+      }
+
+      delete opt.highlight;
+
+      if (!tokens.length) return done();
+
+      let pending = 0;
+      marked.walkTokens(tokens, function(token) {
+        if (token.type === 'code') {
+          pending++;
+          setTimeout(() => {
+            highlight(token.text, token.lang, function(err, code) {
+              if (err) {
+                return done(err);
+              }
+              if (code != null && code !== token.text) {
+                token.text = code;
+                token.escaped = true;
+              }
+
+              pending--;
+              if (pending === 0) {
+                done();
+              }
+            });
+          }, 0);
+        }
+      });
+
+      if (pending === 0) {
+        done();
+      }
+
+      return;
+    }
+
+    if (opt.async) {
+      return Promise.resolve(opt.hooks ? opt.hooks.preprocess(src) : src)
+        .then(src => lexer(src, opt))
+        .then(tokens => opt.walkTokens ? Promise.all(marked.walkTokens(tokens, opt.walkTokens)).then(() => tokens) : tokens)
+        .then(tokens => parser(tokens, opt))
+        .then(html => opt.hooks ? opt.hooks.postprocess(html) : html)
+        .catch(throwError);
+    }
+
+    try {
+      if (opt.hooks) {
+        src = opt.hooks.preprocess(src);
+      }
+      const tokens = lexer(src, opt);
+      if (opt.walkTokens) {
+        marked.walkTokens(tokens, opt.walkTokens);
+      }
+      let html = parser(tokens, opt);
+      if (opt.hooks) {
+        html = opt.hooks.postprocess(html);
+      }
+      return html;
+    } catch (e) {
+      return throwError(e);
+    }
+  };
+}
+
+/**
+ * Marked
+ */
+function marked(src, opt, callback) {
+  return parseMarkdown(Lexer.lex, Parser.parse)(src, opt, callback);
+}
+
+/**
+ * Options
+ */
+
+marked.options =
+marked.setOptions = function(opt) {
+  marked.defaults = { ...marked.defaults, ...opt };
+  changeDefaults(marked.defaults);
+  return marked;
+};
+
+marked.getDefaults = getDefaults;
+
+marked.defaults = defaults;
+
+/**
+ * Use Extension
+ */
+
+marked.use = function(...args) {
+  const extensions = marked.defaults.extensions || { renderers: {}, childTokens: {} };
+
+  args.forEach((pack) => {
+    // copy options to new object
+    const opts = { ...pack };
+
+    // set async to true if it was set to true before
+    opts.async = marked.defaults.async || opts.async || false;
+
+    // ==-- Parse "addon" extensions --== //
+    if (pack.extensions) {
+      pack.extensions.forEach((ext) => {
+        if (!ext.name) {
+          throw new Error('extension name required');
+        }
+        if (ext.renderer) { // Renderer extensions
+          const prevRenderer = extensions.renderers[ext.name];
+          if (prevRenderer) {
+            // Replace extension with func to run new extension but fall back if false
+            extensions.renderers[ext.name] = function(...args) {
+              let ret = ext.renderer.apply(this, args);
+              if (ret === false) {
+                ret = prevRenderer.apply(this, args);
+              }
+              return ret;
+            };
+          } else {
+            extensions.renderers[ext.name] = ext.renderer;
+          }
+        }
+        if (ext.tokenizer) { // Tokenizer Extensions
+          if (!ext.level || (ext.level !== 'block' && ext.level !== 'inline')) {
+            throw new Error("extension level must be 'block' or 'inline'");
+          }
+          if (extensions[ext.level]) {
+            extensions[ext.level].unshift(ext.tokenizer);
+          } else {
+            extensions[ext.level] = [ext.tokenizer];
+          }
+          if (ext.start) { // Function to check for start of token
+            if (ext.level === 'block') {
+              if (extensions.startBlock) {
+                extensions.startBlock.push(ext.start);
+              } else {
+                extensions.startBlock = [ext.start];
+              }
+            } else if (ext.level === 'inline') {
+              if (extensions.startInline) {
+                extensions.startInline.push(ext.start);
+              } else {
+                extensions.startInline = [ext.start];
+              }
+            }
+          }
+        }
+        if (ext.childTokens) { // Child tokens to be visited by walkTokens
+          extensions.childTokens[ext.name] = ext.childTokens;
+        }
+      });
+      opts.extensions = extensions;
+    }
+
+    // ==-- Parse "overwrite" extensions --== //
+    if (pack.renderer) {
+      const renderer = marked.defaults.renderer || new Renderer();
+      for (const prop in pack.renderer) {
+        const prevRenderer = renderer[prop];
+        // Replace renderer with func to run extension, but fall back if false
+        renderer[prop] = (...args) => {
+          let ret = pack.renderer[prop].apply(renderer, args);
+          if (ret === false) {
+            ret = prevRenderer.apply(renderer, args);
+          }
+          return ret;
+        };
+      }
+      opts.renderer = renderer;
+    }
+    if (pack.tokenizer) {
+      const tokenizer = marked.defaults.tokenizer || new Tokenizer();
+      for (const prop in pack.tokenizer) {
+        const prevTokenizer = tokenizer[prop];
+        // Replace tokenizer with func to run extension, but fall back if false
+        tokenizer[prop] = (...args) => {
+          let ret = pack.tokenizer[prop].apply(tokenizer, args);
+          if (ret === false) {
+            ret = prevTokenizer.apply(tokenizer, args);
+          }
+          return ret;
+        };
+      }
+      opts.tokenizer = tokenizer;
+    }
+
+    // ==-- Parse Hooks extensions --== //
+    if (pack.hooks) {
+      const hooks = marked.defaults.hooks || new Hooks();
+      for (const prop in pack.hooks) {
+        const prevHook = hooks[prop];
+        if (Hooks.passThroughHooks.has(prop)) {
+          hooks[prop] = (arg) => {
+            if (marked.defaults.async) {
+              return Promise.resolve(pack.hooks[prop].call(hooks, arg)).then(ret => {
+                return prevHook.call(hooks, ret);
+              });
+            }
+
+            const ret = pack.hooks[prop].call(hooks, arg);
+            return prevHook.call(hooks, ret);
+          };
+        } else {
+          hooks[prop] = (...args) => {
+            let ret = pack.hooks[prop].apply(hooks, args);
+            if (ret === false) {
+              ret = prevHook.apply(hooks, args);
+            }
+            return ret;
+          };
+        }
+      }
+      opts.hooks = hooks;
+    }
+
+    // ==-- Parse WalkTokens extensions --== //
+    if (pack.walkTokens) {
+      const walkTokens = marked.defaults.walkTokens;
+      opts.walkTokens = function(token) {
+        let values = [];
+        values.push(pack.walkTokens.call(this, token));
+        if (walkTokens) {
+          values = values.concat(walkTokens.call(this, token));
+        }
+        return values;
+      };
+    }
+
+    marked.setOptions(opts);
+  });
+};
+
+/**
+ * Run callback for every token
+ */
+
+marked.walkTokens = function(tokens, callback) {
+  let values = [];
+  for (const token of tokens) {
+    values = values.concat(callback.call(marked, token));
+    switch (token.type) {
+      case 'table': {
+        for (const cell of token.header) {
+          values = values.concat(marked.walkTokens(cell.tokens, callback));
+        }
+        for (const row of token.rows) {
+          for (const cell of row) {
+            values = values.concat(marked.walkTokens(cell.tokens, callback));
+          }
+        }
+        break;
+      }
+      case 'list': {
+        values = values.concat(marked.walkTokens(token.items, callback));
+        break;
+      }
+      default: {
+        if (marked.defaults.extensions && marked.defaults.extensions.childTokens && marked.defaults.extensions.childTokens[token.type]) { // Walk any extensions
+          marked.defaults.extensions.childTokens[token.type].forEach(function(childTokens) {
+            values = values.concat(marked.walkTokens(token[childTokens], callback));
+          });
+        } else if (token.tokens) {
+          values = values.concat(marked.walkTokens(token.tokens, callback));
+        }
+      }
+    }
+  }
+  return values;
+};
+
+/**
+ * Parse Inline
+ * @param {string} src
+ */
+marked.parseInline = parseMarkdown(Lexer.lexInline, Parser.parseInline);
+
+/**
+ * Expose
+ */
+marked.Parser = Parser;
+marked.parser = Parser.parse;
+marked.Renderer = Renderer;
+marked.TextRenderer = TextRenderer;
+marked.Lexer = Lexer;
+marked.lexer = Lexer.lex;
+marked.Tokenizer = Tokenizer;
+marked.Slugger = Slugger;
+marked.Hooks = Hooks;
+marked.parse = marked;
+
+marked.options;
+marked.setOptions;
+marked.use;
+marked.walkTokens;
+marked.parseInline;
+Parser.parse;
+Lexer.lex;
+
+marked.use({
+  renderer: {
+    code(code, language) {
+      if (language === 'mermaid') {
+        return '<div class="mermaid">' + code + '</div>';
+      } else {
+        return '<pre><code>' + code + '</code></pre>';
+      }
+    }
+  }
+});
+class MdNote extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object,
+      selected: propTypes$2.exports.boolean
+    };
+  }
+  render() {
+    const {
+      note,
+      selected
+    } = this.props;
+    const {
+      blur = false,
+      md
+    } = note;
+    const html = marked(md);
+    const ref = selected && /*#__PURE__*/p$1();
+    if (selected) {
+      y(() => ref.current.scrollIntoView(true));
+    }
+    const border = selected ? '1px dashed dodgerblue' : '0px';
+    return v$1("div", {
+      ref: ref,
+      dangerouslySetInnerHTML: {
+        __html: html
+      },
+      style: {
+        border,
+        opacity: blur ? 0.5 : 1
+      }
+    });
+  }
+}
+
+const Row = /*#__PURE__*/x(({
+  bsPrefix,
+  className,
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  ...props
+}, ref) => {
+  const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
+  const breakpoints = useBootstrapBreakpoints();
+  const minBreakpoint = useBootstrapMinBreakpoint();
+  const sizePrefix = `${decoratedBsPrefix}-cols`;
+  const classes = [];
+  breakpoints.forEach(brkPoint => {
+    const propValue = props[brkPoint];
+    delete props[brkPoint];
+    let cols;
+    if (propValue != null && typeof propValue === 'object') {
+      ({
+        cols
+      } = propValue);
+    } else {
+      cols = propValue;
+    }
+    const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
+    if (cols != null) classes.push(`${sizePrefix}${infix}-${cols}`);
+  });
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, decoratedBsPrefix, ...classes)
+  });
+});
+Row.displayName = 'Row';
+
+class ViewNote extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      note: propTypes$2.exports.object,
+      notebookPath: propTypes$2.exports.string,
+      onClickView: propTypes$2.exports.func,
+      selected: propTypes$2.exports.boolean,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    const {
+      notebookPath,
+      note,
+      onClickView,
+      workspace
+    } = this.props;
+    const {
+      view,
+      sourceLocation
+    } = note;
+    const {
+      height,
+      width,
+      viewId
+    } = view;
+    const onClick = event => {
+      if (onClickView) {
+        onClickView({
+          event,
+          notebookPath,
+          note,
+          path: note.path,
+          view: note.view,
+          workspace,
+          sourceLocation
+        });
+      }
+    };
+    const viewIdClass = viewId ? `viewId_${viewId}` : '';
+    if (!note.url) {
+      return v$1("div", null);
+    }
+    return v$1("img", {
+      class: viewIdClass,
+      style: {
+        width,
+        height
+      },
+      variant: "top",
+      src: note.url,
+      onClick: onClick
+    });
+  }
+}
+
+class Section extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      id: propTypes$2.exports.string,
+      onChange: propTypes$2.exports.func,
+      onClickView: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func,
+      path: propTypes$2.exports.string,
+      section: propTypes$2.exports.object,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    try {
+      const {
+        id,
+        path,
+        onChange,
+        onClickView,
+        onKeyDown,
+        section,
+        workspace
+      } = this.props;
+      const controls = section.controls.map(note => v$1(ControlNote, {
+        key: note.hash,
+        note: note,
+        workspace: workspace
+      }));
+      const downloads = section.downloads.map(note => v$1(DownloadNote, {
+        key: note.hash,
+        note: note,
+        workspace: workspace
+      }));
+      const errors = section.errors.map((note, key) => v$1(Card$1.Body, {
+        key: key,
+        variant: "danger"
+      }, v$1(Card$1.Text, null, v$1(ErrorNote, {
+        key: note.hash,
+        note: note
+      }))));
+      const mds = section.mds.map(note => v$1(MdNote, {
+        key: note.hash,
+        note: note
+      }));
+      const views = section.views.map(note => v$1(ViewNote, {
+        key: note.hash,
+        note: note,
+        onClickView: onClickView
+      }));
+      const editor = v$1(EditNote, {
+        key: id,
+        source: section.source,
+        onChange: code => {
+          if (onChange) {
+            return onChange(path, id, code);
+          }
+        },
+        onKeyDown: onKeyDown,
+        workspace: workspace
+      });
+      return v$1(Card$1, {
+        key: id
+      }, v$1(Card$1.Header, {
+        id: `note-id-${id}`
+      }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
+        key: nth
+      }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, editor));
+    } catch (error) {
+      console.log(error.stack);
+      throw error;
+    }
+  }
+}
+
+class Notebook extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      sections: propTypes$2.exports.object,
+      onChange: propTypes$2.exports.func,
+      onClickView: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func,
+      notebookPath: propTypes$2.exports.string,
+      notebookText: propTypes$2.exports.string,
+      state: propTypes$2.exports.string,
+      version: propTypes$2.exports.number,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  render() {
+    try {
+      const {
+        notebookPath,
+        onChange,
+        onClickView,
+        onKeyDown,
+        sections,
+        workspace
+      } = this.props;
+      const children = [];
+      for (const id of [...sections.keys()].sort()) {
+        const section = sections.get(id);
+        children.push(v$1(Section, {
+          id: id,
+          path: notebookPath,
+          onChange: onChange,
+          onClickView: onClickView,
+          onKeyDown: onKeyDown,
+          section: section,
+          workspace: workspace
+        }));
+      }
+      return v$1("div", {
+        id: notebookPath,
+        classList: "notebook notes",
+        style: {
+          overflow: 'auto'
+        }
+      }, children);
+    } catch (error) {
+      console.log(error.stack);
+      throw error;
+    }
+  }
+}
+
 var dist = {};
 
 var SplitPane$1 = {};
@@ -45779,43 +45473,33 @@ const Table = /*#__PURE__*/x(({
   return table;
 });
 
+const kHourglassFlowingSand = '\u23f3';
+const kSpace = '\u00A0';
 class TableOfContents extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
-      notes: propTypes$2.exports.object
+      path: propTypes$2.exports.string,
+      sections: propTypes$2.exports.object,
+      state: propTypes$2.exports.object,
+      version: propTypes$2.exports.string
     };
   }
   render() {
     try {
       const {
-        notes
+        path,
+        sections,
+        state
       } = this.props;
-      const uniqueIds = new Set();
-      for (const note of Object.values(notes)) {
-        if (!note.sourceLocation || !note.sourceLocation.id) {
-          continue;
-        }
-        uniqueIds.add(note.sourceLocation.id);
-      }
-      const ids = [...uniqueIds];
-      const compare = (a, b) => {
-        if (a < b) {
-          return -1;
-        } else if (a > b) {
-          return 1;
-        } else {
-          return 0;
-        }
-      };
-      ids.sort(compare);
       const contents = [];
-      for (const id of ids) {
+      for (const id of [...sections.keys()].sort()) {
+        const sign = state[`${path}/${id}`] === 'running' ? kHourglassFlowingSand : kSpace;
         contents.push(v$1(Button, {
           variant: "light",
           onClick: () => document.querySelector(`#note-id-${CSS.escape(id)}`).scrollIntoView({
             behavior: 'smooth'
           })
-        }, id));
+        }, sign, " ", id, " ", sign));
       }
       return v$1(ButtonGroup, {
         vertical: true,
@@ -45986,10 +45670,8 @@ class App extends ReactDOM$3.Component {
         op,
         entry,
         identifier,
-        notes,
         options,
-        path,
-        sourceLocation
+        path
       } = message;
       switch (op) {
         case 'ask':
@@ -46000,11 +45682,14 @@ class App extends ReactDOM$3.Component {
           return log(entry);
         case 'notes':
           // console.log(`QQ/id: ${sourceLocation.id}`);
+          /*
           return updateNotebookState(this, {
             notes,
             sourceLocation,
-            workspace
+            workspace,
           });
+          */
+          break;
         default:
           throw Error(`Unknown operation ${op}`);
       }
@@ -46268,6 +45953,110 @@ class App extends ReactDOM$3.Component {
         }
       });
     };
+    this.Notebook.updateSections = async (path, workspace) => {
+      const notebookFile = `source/${path}`;
+      const topLevel = new Map();
+      const updates = {};
+      const replays = {};
+      const exports = [];
+      const data = await read(notebookFile, {
+        workspace
+      });
+      const script = typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
+      await toEcmascript(script, {
+        exports,
+        path,
+        replays,
+        topLevel,
+        updates,
+        workspace
+      });
+      const sections = new Map();
+      topLevel.forEach(({
+        text
+      }, id) => {
+        sections.set(id, {
+          source: text,
+          controls: [],
+          downloads: [],
+          errors: [],
+          mds: [],
+          views: []
+        });
+      });
+      await this.updateState({
+        [`NotebookSections/${path}`]: sections
+      });
+    };
+    this.Notebook.updateSection = async (path, id, section) => {
+      const {
+        [`NotebookSections/${path}`]: NotebookSections = new Map(),
+        [`NotebookVersion/${path}`]: NotebookVersion = 0
+      } = this.state;
+      for (const view of section.views) {
+        await this.Notebook.ensureThumbnail(view);
+      }
+
+      // How will this trigger an update?
+      NotebookSections.set(id, {
+        source: NotebookSections.get(id).source,
+        ...section
+      });
+      await this.updateState({
+        [`NotebookVersion/${path}`]: NotebookVersion + 1
+      });
+    };
+    this.Notebook.ensureThumbnail = async note => {
+      if (!note.url) {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
+            workspace
+          });
+          if (!url) {
+            const {
+              path,
+              view
+            } = note;
+            const {
+              width,
+              height
+            } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                console.log(`QQ/ask staticView nth=${nth}`);
+                url = await this.ask({
+                  op: 'app/staticView',
+                  path,
+                  workspace,
+                  view,
+                  offscreenCanvas
+                }, {
+                  path
+                }, [offscreenCanvas]);
+                // Cache the thumbnail for next time.
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace
+                });
+                note.url = url;
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
+            }
+          }
+          if (url) {
+            note.url = url;
+          }
+        };
+        await loadThumbnail();
+      }
+    };
     this.Notebook.runStart = {};
     this.Notebook.getSelectedPath = () => {
       const {
@@ -46285,43 +46074,18 @@ class App extends ReactDOM$3.Component {
     };
     this.Notebook.getText = path => {
       const {
-        [`NotebookNotes/${path}`]: NotebookNotes,
-        [`NotebookText/${path}`]: NotebookText
+        [`NotebookSections/${path}`]: NotebookSections = new Map(),
+        [`NotebookText/${path}`]: NotebookText = ''
       } = this.state;
-      if (Object.keys(NotebookNotes).length === 0) {
+
+      // Ideally we would use a topographical sort here.
+
+      const statements = [...NotebookSections.values()].map(({
+        source
+      }) => source);
+      if (statements.length === 0) {
+        // Note: bootstrapping.
         return NotebookText;
-      }
-      const ordered = Object.values(NotebookNotes);
-      const getLine = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      const statements = [];
-      for (const note of ordered) {
-        if (note.sourceText) {
-          statements.push(note.sourceText);
-        }
       }
       return statements.join('\n\n');
     };
@@ -46350,10 +46114,7 @@ class App extends ReactDOM$3.Component {
       } = this.props;
       const NotebookAdvice = this.Notebook.ensureAdvice(path);
       const NotebookPath = path;
-      await blurNotebookState(this, {
-        path,
-        workspace
-      });
+      // await blurNotebookState(this, { path, workspace });
       const topLevel = new Map();
       const profile = new Map();
       const updateProfile = times => {
@@ -46390,28 +46151,46 @@ class App extends ReactDOM$3.Component {
         }
         let script = NotebookText;
         const version = new Date().getTime();
-        const evaluate = async script => {
+        const evaluate = async (script, {
+          id
+        }) => {
           try {
-            // console.log(`QQ/evaluate: ${script}`);
-            const result = await this.ask({
+            await this.setState(state => ({
+              WorkerState: {
+                ...state.WorkerState,
+                [`${path}/${id}`]: 'running'
+              }
+            }));
+            console.log(`Running: ${path}/${id}: ${JSON.stringify(this.state.WorkerState)}`);
+            const section = await this.ask({
               op: 'app/evaluate',
-              script,
-              workspace,
               path: NotebookPath,
+              script,
               sha,
-              version
+              version,
+              workspace
             }, {
               path
             });
-            if (result) {
-              updateProfile(result);
-              return result;
-            } else {
+            if (section === undefined) {
               // The error will have come back via a note.
               throw Error('Evaluation failed');
             }
+            if (section.profile) {
+              updateProfile(section.profile);
+            }
+            await this.Notebook.updateSection(path, id, section);
+            return section;
           } catch (error) {
             throw error;
+          } finally {
+            await this.setState(state => ({
+              WorkerState: {
+                ...state.WorkerState,
+                [`${path}/${id}`]: 'done'
+              }
+            }));
+            console.log(`Done: ${JSON.stringify(this.state.WorkerState)}`);
           }
         };
         const replay = async script => {
@@ -46440,7 +46219,7 @@ class App extends ReactDOM$3.Component {
         };
         NotebookAdvice.definitions = topLevel;
         try {
-          await execute(script + this.Draft.getCode(), {
+          await execute(script, {
             evaluate,
             replay,
             path: NotebookPath,
@@ -46453,14 +46232,15 @@ class App extends ReactDOM$3.Component {
         }
 
         // A bit of a race condition here.
-        // this.Draft().change('');
-
+        this.Draft.change('');
         await resolvePending();
+        /*
         clearNotebookState(this, {
           path: NotebookPath,
           workspace,
-          isToBeKept: note => !note.blur
+          isToBeKept: (note) => !note.blur,
         });
+        */
       } catch (error) {
         // Include any high level notebook errors in the output.
         // window.alert(error.stack);
@@ -46481,30 +46261,34 @@ class App extends ReactDOM$3.Component {
       await ensureFile(notebookFile, notebookPath, {
         workspace
       });
-      const data = await read(notebookFile, {
-        workspace
-      });
-      const notebookText = typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-      this.Notebook.ensureAdvice(path);
-      await this.updateState({
-        [`NotebookText/${path}`]: notebookText
-      });
+      // const data = await read(notebookFile, { workspace });
+      await this.Notebook.updateSections(path, workspace);
+      /*
+      const notebookText =
+        typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
+       this.Notebook.ensureAdvice(path);
+      await this.updateState({ [`NotebookText/${path}`]: notebookText });
+      */
 
       // Let state propagate.
       await animationFrame();
 
       // Automatically run the notebook on first load.
+      /*
       if (!this.Notebook.runStart[path]) {
         this.Notebook.run(path);
       }
-      return notebookText;
+      */
+
+      // return notebookText;
     };
+
     this.Notebook.save = async path => {
       logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const {
         workspace
       } = this.props;
-      const NotebookText = this.Notebook.getText(path);
+      const NotebookText = this.Notebook.getText(path) + '\n\n' + this.Draft.getCode();
       // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;
@@ -46530,6 +46314,7 @@ class App extends ReactDOM$3.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace
       });
+      await this.Notebook.updateSections(path, workspace);
       logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({
         [`NotebookText/${path}`]: cleanText
@@ -46870,8 +46655,8 @@ class App extends ReactDOM$3.Component {
     this.Workspace.loadWorkingPath = async path => {
       const {
         model,
-        WorkspaceOpenPaths = [],
-        [`NotebookMode/${path}`]: mode
+        WorkspaceOpenPaths = []
+        // [`NotebookMode/${path}`]: mode,
       } = this.state;
       if (WorkspaceOpenPaths.includes(path)) {
         // FIX: Add indication?
@@ -46880,12 +46665,15 @@ class App extends ReactDOM$3.Component {
       await this.updateState({
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path]
       });
+      await this.Notebook.load(path);
+      /*
       const text = await this.Notebook.load(path);
       if (!mode) {
         await this.updateState({
-          [`NotebookMode/${path}`]: text ? 'view' : 'edit'
+          [`NotebookMode/${path}`]: text ? 'view' : 'edit',
         });
       }
+      */
       const nodeId = `Notebook/${path}`;
       const toNameFromPath = path => {
         const pieces = path.split('/');
@@ -47015,16 +46803,12 @@ class App extends ReactDOM$3.Component {
       }
       await this.Workspace.store();
     };
-    const onCodeChange = (note, {
-      sourceText
-    }) => updateNotebookState(this, {
-      notes: [{
-        ...note,
-        sourceText
-      }],
-      sourceLocation: note.sourceLocation,
-      workspace
-    });
+    const onCodeChange = (path, id, code) => {
+      const {
+        [`NotebookSections/${path}`]: NotebookSections = new Map()
+      } = this.state;
+      NotebookSections.get(id).source = code;
+    };
     this.factory = node => {
       switch (node.getComponent()) {
         case 'Workspace':
@@ -47130,10 +46914,10 @@ class App extends ReactDOM$3.Component {
             const path = this.Notebook.getSelectedPath();
             const {
               [`NotebookMode/${path}`]: NotebookMode = 'view',
-              [`NotebookState/${path}`]: NotebookState = 'idle',
               [`NotebookText/${path}`]: NotebookText,
               [`NotebookNotes/${path}`]: NotebookNotes = {},
-              [`NotebookLine/${path}`]: NotebookLine
+              [`NotebookSections/${path}`]: NotebookSections = new Map(),
+              [`NotebookVersion/${path}`]: NotebookVersion = 0
             } = this.state;
             const NotebookAdvice = this.Notebook.ensureAdvice(path);
             switch (NotebookMode) {
@@ -47141,13 +46925,13 @@ class App extends ReactDOM$3.Component {
                 {
                   return v$1(SplitPane, null, v$1(Notebook, {
                     notebookPath: path,
-                    notes: NotebookNotes,
+                    notebookText: NotebookText,
                     onChange: onCodeChange,
                     onClickView: this.Notebook.clickView,
                     onKeyDown: e => this.onKeyDown(e),
-                    selectedLine: NotebookLine,
-                    workspace: workspace,
-                    state: NotebookState
+                    sections: NotebookSections,
+                    version: NotebookVersion,
+                    workspace: workspace
                   }), v$1(JsEditorUi, {
                     mode: NotebookMode,
                     onRun: () => this.Notebook.run(path),
@@ -47166,13 +46950,13 @@ class App extends ReactDOM$3.Component {
                 {
                   return v$1(Notebook, {
                     notebookPath: path,
-                    notes: NotebookNotes,
+                    notebookText: NotebookText,
                     onClickView: this.Notebook.clickView,
                     onChange: onCodeChange,
                     onKeyDown: e => this.onKeyDown(e),
-                    selectedLine: NotebookLine,
-                    workspace: workspace,
-                    state: NotebookState
+                    sections: NotebookSections,
+                    version: NotebookVersion,
+                    workspace: workspace
                   });
                 }
             }
@@ -47181,29 +46965,21 @@ class App extends ReactDOM$3.Component {
           {
             const path = this.Notebook.getSelectedPath();
             const {
-              [`NotebookNotes/${path}`]: NotebookNotes = {}
+              [`NotebookSections/${path}`]: NotebookSections = {},
+              WorkerState = {}
             } = this.state;
             return v$1(TableOfContents, {
-              notes: NotebookNotes
+              path: path,
+              sections: NotebookSections,
+              state: WorkerState
             });
           }
         case 'Draft':
           {
-            const path = this.Notebook.getSelectedPath();
-            const note = {
-              hash: '$Draft',
-              sourceText: this.Draft.getCode(),
-              sourceLocation: {
-                path,
-                line: 0,
-                id: '$Draft'
-              }
-            };
             return v$1(EditNote, {
-              isDraft: true,
-              notebookPath: path,
+              notebookPath: this.Notebook.getSelectedPath(),
               key: "$Draft",
-              note: note,
+              source: this.Draft.getCode(),
               onChange: sourceText => this.Draft.change(sourceText),
               onKeyDown: e => this.onKeyDown(e),
               workspace: workspace

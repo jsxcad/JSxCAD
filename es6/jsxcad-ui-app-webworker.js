@@ -138,7 +138,30 @@ const agent = async ({
         sys.clearTimes();
         // Note we assume a consistent version is used for a given session (i.e., for a given id there is one version).
         self.version = version;
+        const section = {
+          controls: [],
+          downloads: [],
+          errors: [],
+          mds: [],
+          views: []
+        };
+        const sectionBuilder = notes => {
+          for (const note of notes) {
+            if (note.control) {
+              section.controls.push(note);
+            } else if (note.download) {
+              section.downloads.push(note);
+            } else if (note.error) {
+              section.errors.push(note);
+            } else if (note.md) {
+              section.mds.push(note);
+            } else if (note.view) {
+              section.views.push(note);
+            }
+          }
+        };
         try {
+          sys.addOnEmitHandler(sectionBuilder);
           // console.log({ op: 'text', text: `QQ/script: ${script}` });
           const api = {
             ...baseApi,
@@ -155,7 +178,7 @@ const agent = async ({
           });
           // Wait for any pending operations.
           // Finally answer the top level question.
-          return sys.getTimes();
+          section.profile = sys.getTimes();
         } catch (error) {
           reportError(error);
           await sys.log({
@@ -165,7 +188,9 @@ const agent = async ({
           throw error;
         } finally {
           await sys.resolvePending();
+          sys.removeOnEmitHandler(sectionBuilder);
         }
+        return section;
       default:
         throw Error(`Unknown operation ${op}`);
     }

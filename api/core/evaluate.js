@@ -9,7 +9,7 @@ import {
 import { getApi } from './api.js';
 import { toEcmascript } from '@jsxcad/compiler';
 
-export const evaluate = async (ecmascript, { api, path }) => {
+export const evaluate = async (ecmascript, { api, id, path }) => {
   const where = isWebWorker ? 'worker' : 'browser';
   let emitGroup;
   try {
@@ -123,7 +123,7 @@ export const execute = async (
             const task = async () => {
               try {
                 console.log(`Evaluating ${id}`);
-                await evaluate(updates[id].program, { path });
+                await evaluate(updates[id].program, { id, path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {
@@ -143,8 +143,9 @@ export const execute = async (
         }
       }
       // Finally compute the exports.
+      // CHECK: Could this be evaluating things twice?
       for (const entry of exports) {
-        return await evaluate(entry, { path });
+        return await evaluate(entry, { id: entry.id, path });
       }
       return;
     }

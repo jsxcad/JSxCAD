@@ -5,11 +5,6 @@ import './react-multi-split-pane.css';
 
 import * as PropTypes from 'prop-types';
 
-import Notebook, {
-  blurNotebookState,
-  clearNotebookState,
-  updateNotebookState,
-} from './Notebook.js';
 import {
   askService,
   ask as askSys,
@@ -21,6 +16,7 @@ import {
   log,
   logInfo,
   read,
+  readOrWatch,
   remove,
   resolvePending,
   setConfig,
@@ -43,6 +39,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Notebook from './Notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import React from 'react';
@@ -54,6 +51,7 @@ import TableOfContents from './TableOfContents.js';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
+import { toEcmascript } from '@jsxcad/compiler';
 
 const { SplitPane } = SplitPaneModule;
 
@@ -222,8 +220,7 @@ class App extends React.Component {
 
     this.agent = async ({ ask, message, type }) => {
       // const { op, entry, identifier, notes, options, path, sourceLocation } =
-      const { op, entry, identifier, notes, options, path, sourceLocation } =
-        message;
+      const { op, entry, identifier, options, path } = message;
       switch (op) {
         case 'ask':
           return askSys(identifier, options);
@@ -233,11 +230,14 @@ class App extends React.Component {
           return log(entry);
         case 'notes':
           // console.log(`QQ/id: ${sourceLocation.id}`);
+          /*
           return updateNotebookState(this, {
             notes,
             sourceLocation,
             workspace,
           });
+*/
+          break;
         default:
           throw Error(`Unknown operation ${op}`);
       }
@@ -463,6 +463,111 @@ class App extends React.Component {
       await this.updateState({ Make: { path, id, sourceLocation } });
     };
 
+    this.Notebook.updateSections = async (path, workspace) => {
+      const notebookFile = `source/${path}`;
+      const topLevel = new Map();
+      const updates = {};
+      const replays = {};
+      const exports = [];
+      const data = await read(notebookFile, { workspace });
+      const script =
+        typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
+      await toEcmascript(script, {
+        exports,
+        path,
+        replays,
+        topLevel,
+        updates,
+        workspace,
+      });
+      const sections = new Map();
+      topLevel.forEach(({ text }, id) => {
+        sections.set(id, {
+          source: text,
+          controls: [],
+          downloads: [],
+          errors: [],
+          mds: [],
+          views: [],
+        });
+      });
+      await this.updateState({
+        [`NotebookSections/${path}`]: sections,
+      });
+    };
+
+    this.Notebook.updateSection = async (path, id, section) => {
+      const {
+        [`NotebookSections/${path}`]: NotebookSections = new Map(),
+        [`NotebookVersion/${path}`]: NotebookVersion = 0,
+      } = this.state;
+
+      for (const view of section.views) {
+        await this.Notebook.ensureThumbnail(view);
+      }
+
+      // How will this trigger an update?
+      NotebookSections.set(id, {
+        source: NotebookSections.get(id).source,
+        ...section,
+      });
+
+      await this.updateState({
+        [`NotebookVersion/${path}`]: NotebookVersion + 1,
+      });
+    };
+
+    this.Notebook.ensureThumbnail = async (note) => {
+      if (!note.url) {
+        const loadThumbnail = async () => {
+          let url = await (note.needsThumbnail ? read : readOrWatch)(
+            note.view.thumbnailPath,
+            {
+              workspace,
+            }
+          );
+          if (!url) {
+            const { path, view } = note;
+            const { width, height } = view;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const offscreenCanvas = canvas.transferControlToOffscreen();
+            for (let nth = 0; nth < 3; nth++) {
+              try {
+                console.log(`QQ/ask staticView nth=${nth}`);
+                url = await this.ask(
+                  {
+                    op: 'app/staticView',
+                    path,
+                    workspace,
+                    view,
+                    offscreenCanvas,
+                  },
+                  { path },
+                  [offscreenCanvas]
+                );
+                // Cache the thumbnail for next time.
+                await write(`thumbnail/${note.hash}`, url, {
+                  workspace,
+                });
+                note.url = url;
+              } catch (error) {
+                if (error.message === 'Terminated') {
+                  // Try again.
+                  continue;
+                }
+              }
+            }
+          }
+          if (url) {
+            note.url = url;
+          }
+        };
+        await loadThumbnail();
+      }
+    };
+
     this.Notebook.runStart = {};
 
     this.Notebook.getSelectedPath = () => {
@@ -478,45 +583,21 @@ class App extends React.Component {
 
     this.Notebook.getText = (path) => {
       const {
-        [`NotebookNotes/${path}`]: NotebookNotes,
-        [`NotebookText/${path}`]: NotebookText,
+        [`NotebookSections/${path}`]: NotebookSections = new Map(),
+        [`NotebookText/${path}`]: NotebookText = '',
       } = this.state;
-      if (Object.keys(NotebookNotes).length === 0) {
+
+      // Ideally we would use a topographical sort here.
+
+      const statements = [...NotebookSections.values()].map(
+        ({ source }) => source
+      );
+
+      if (statements.length === 0) {
+        // Note: bootstrapping.
         return NotebookText;
       }
 
-      const ordered = Object.values(NotebookNotes);
-      const getLine = (note) => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = (note) => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      const statements = [];
-      for (const note of ordered) {
-        if (note.sourceText) {
-          statements.push(note.sourceText);
-        }
-      }
       return statements.join('\n\n');
     };
 
@@ -544,7 +625,7 @@ class App extends React.Component {
       const { sha, workspace } = this.props;
       const NotebookAdvice = this.Notebook.ensureAdvice(path);
       const NotebookPath = path;
-      await blurNotebookState(this, { path, workspace });
+      // await blurNotebookState(this, { path, workspace });
       const topLevel = new Map();
       const profile = new Map();
       const updateProfile = (times) => {
@@ -584,29 +665,46 @@ class App extends React.Component {
 
         const version = new Date().getTime();
 
-        const evaluate = async (script) => {
+        const evaluate = async (script, { id }) => {
           try {
-            // console.log(`QQ/evaluate: ${script}`);
-            const result = await this.ask(
+            await this.setState((state) => ({
+              WorkerState: {
+                ...state.WorkerState,
+                [`${path}/${id}`]: 'running',
+              },
+            }));
+            console.log(
+              `Running: ${path}/${id}: ${JSON.stringify(
+                this.state.WorkerState
+              )}`
+            );
+            const section = await this.ask(
               {
                 op: 'app/evaluate',
-                script,
-                workspace,
                 path: NotebookPath,
+                script,
                 sha,
                 version,
+                workspace,
               },
               { path }
             );
-            if (result) {
-              updateProfile(result);
-              return result;
-            } else {
+            if (section === undefined) {
               // The error will have come back via a note.
               throw Error('Evaluation failed');
             }
+            if (section.profile) {
+              updateProfile(section.profile);
+            }
+            await this.Notebook.updateSection(path, id, section);
+            return section;
           } catch (error) {
             throw error;
+          } finally {
+            await this.setState((state) => ({
+              WorkerState: { ...state.WorkerState, [`${path}/${id}`]: 'done' },
+            }));
+            console.log(`Done: ${JSON.stringify(this.state.WorkerState)}`);
           }
         };
 
@@ -639,7 +737,7 @@ class App extends React.Component {
         NotebookAdvice.definitions = topLevel;
 
         try {
-          await execute(script + this.Draft.getCode(), {
+          await execute(script, {
             evaluate,
             replay,
             path: NotebookPath,
@@ -652,14 +750,16 @@ class App extends React.Component {
         }
 
         // A bit of a race condition here.
-        // this.Draft().change('');
+        this.Draft.change('');
 
         await resolvePending();
+        /*
         clearNotebookState(this, {
           path: NotebookPath,
           workspace,
           isToBeKept: (note) => !note.blur,
         });
+        */
       } catch (error) {
         // Include any high level notebook errors in the output.
         // window.alert(error.stack);
@@ -675,28 +775,34 @@ class App extends React.Component {
       const notebookPath = path;
       const notebookFile = `source/${notebookPath}`;
       await ensureFile(notebookFile, notebookPath, { workspace });
-      const data = await read(notebookFile, { workspace });
+      // const data = await read(notebookFile, { workspace });
+      await this.Notebook.updateSections(path, workspace);
+      /*
       const notebookText =
         typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
 
       this.Notebook.ensureAdvice(path);
       await this.updateState({ [`NotebookText/${path}`]: notebookText });
+      */
 
       // Let state propagate.
       await animationFrame();
 
       // Automatically run the notebook on first load.
+      /*
       if (!this.Notebook.runStart[path]) {
         this.Notebook.run(path);
       }
+      */
 
-      return notebookText;
+      // return notebookText;
     };
 
     this.Notebook.save = async (path) => {
       logInfo('app/App/Notebook/save', `Saving Notebook ${path}`);
       const { workspace } = this.props;
-      const NotebookText = this.Notebook.getText(path);
+      const NotebookText =
+        this.Notebook.getText(path) + '\n\n' + this.Draft.getCode();
       // const { [`NotebookText/${path}`]: NotebookText } = this.state;
       const NotebookPath = path;
       const NotebookFile = `source/${NotebookPath}`;
@@ -722,6 +828,7 @@ class App extends React.Component {
       await write(NotebookFile, new TextEncoder('utf8').encode(cleanText), {
         workspace,
       });
+      await this.Notebook.updateSections(path, workspace);
       logInfo('app/App/Notebook/save', `Updating state for Notebook ${path}`);
       await this.updateState({ [`NotebookText/${path}`]: cleanText });
 
@@ -1012,7 +1119,7 @@ class App extends React.Component {
       const {
         model,
         WorkspaceOpenPaths = [],
-        [`NotebookMode/${path}`]: mode,
+        // [`NotebookMode/${path}`]: mode,
       } = this.state;
       if (WorkspaceOpenPaths.includes(path)) {
         // FIX: Add indication?
@@ -1021,12 +1128,15 @@ class App extends React.Component {
       await this.updateState({
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path],
       });
+      await this.Notebook.load(path);
+      /*
       const text = await this.Notebook.load(path);
       if (!mode) {
         await this.updateState({
           [`NotebookMode/${path}`]: text ? 'view' : 'edit',
         });
       }
+      */
       const nodeId = `Notebook/${path}`;
       const toNameFromPath = (path) => {
         const pieces = path.split('/');
@@ -1140,12 +1250,11 @@ class App extends React.Component {
       await this.Workspace.store();
     };
 
-    const onCodeChange = (note, { sourceText }) =>
-      updateNotebookState(this, {
-        notes: [{ ...note, sourceText }],
-        sourceLocation: note.sourceLocation,
-        workspace,
-      });
+    const onCodeChange = (path, id, code) => {
+      const { [`NotebookSections/${path}`]: NotebookSections = new Map() } =
+        this.state;
+      NotebookSections.get(id).source = code;
+    };
 
     this.factory = (node) => {
       switch (node.getComponent()) {
@@ -1339,10 +1448,10 @@ class App extends React.Component {
           const path = this.Notebook.getSelectedPath();
           const {
             [`NotebookMode/${path}`]: NotebookMode = 'view',
-            [`NotebookState/${path}`]: NotebookState = 'idle',
             [`NotebookText/${path}`]: NotebookText,
             [`NotebookNotes/${path}`]: NotebookNotes = {},
-            [`NotebookLine/${path}`]: NotebookLine,
+            [`NotebookSections/${path}`]: NotebookSections = new Map(),
+            [`NotebookVersion/${path}`]: NotebookVersion = 0,
           } = this.state;
           const NotebookAdvice = this.Notebook.ensureAdvice(path);
           switch (NotebookMode) {
@@ -1351,13 +1460,13 @@ class App extends React.Component {
                 <SplitPane>
                   <Notebook
                     notebookPath={path}
-                    notes={NotebookNotes}
+                    notebookText={NotebookText}
                     onChange={onCodeChange}
                     onClickView={this.Notebook.clickView}
                     onKeyDown={(e) => this.onKeyDown(e)}
-                    selectedLine={NotebookLine}
+                    sections={NotebookSections}
+                    version={NotebookVersion}
                     workspace={workspace}
-                    state={NotebookState}
                   />
                   <JsEditorUi
                     mode={NotebookMode}
@@ -1381,13 +1490,13 @@ class App extends React.Component {
               return (
                 <Notebook
                   notebookPath={path}
-                  notes={NotebookNotes}
+                  notebookText={NotebookText}
                   onClickView={this.Notebook.clickView}
                   onChange={onCodeChange}
                   onKeyDown={(e) => this.onKeyDown(e)}
-                  selectedLine={NotebookLine}
+                  sections={NotebookSections}
+                  version={NotebookVersion}
                   workspace={workspace}
-                  state={NotebookState}
                 />
               );
             }
@@ -1395,22 +1504,24 @@ class App extends React.Component {
         }
         case 'ToC': {
           const path = this.Notebook.getSelectedPath();
-          const { [`NotebookNotes/${path}`]: NotebookNotes = {} } = this.state;
-          return <TableOfContents notes={NotebookNotes} />;
+          const {
+            [`NotebookSections/${path}`]: NotebookSections = {},
+            WorkerState = {},
+          } = this.state;
+          return (
+            <TableOfContents
+              path={path}
+              sections={NotebookSections}
+              state={WorkerState}
+            />
+          );
         }
         case 'Draft': {
-          const path = this.Notebook.getSelectedPath();
-          const note = {
-            hash: '$Draft',
-            sourceText: this.Draft.getCode(),
-            sourceLocation: { path, line: 0, id: '$Draft' },
-          };
           return (
             <EditNote
-              isDraft={true}
-              notebookPath={path}
+              notebookPath={this.Notebook.getSelectedPath()}
               key="$Draft"
-              note={note}
+              source={this.Draft.getCode()}
               onChange={(sourceText) => this.Draft.change(sourceText)}
               onKeyDown={(e) => this.onKeyDown(e)}
               workspace={workspace}
