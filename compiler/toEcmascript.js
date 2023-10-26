@@ -42,6 +42,7 @@ export const strip = (ast) => {
 const collectDependencies = (declarator, sideEffectors) => {
   const dependencies = [...sideEffectors];
 
+  // FIX: This needs to exclude local bindings.
   const Identifier = (node, state, c) => {
     if (!dependencies.includes(node.name)) {
       dependencies.push(node.name);
