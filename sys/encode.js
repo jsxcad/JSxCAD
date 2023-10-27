@@ -15,7 +15,11 @@ export const decode = (string) => new Uint8Array(decodeToArrayBuffer(string));
 export const encodeFiles = (unencoded) => {
   const encoded = {};
   for (const key of Object.keys(unencoded)) {
-    encoded[key] = encode(unencoded[key]);
+    const value = unencoded[key];
+    if (value === undefined) {
+      continue;
+    }
+    encoded[key] = encode(value);
   }
   return encoded;
 };

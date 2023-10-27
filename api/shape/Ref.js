@@ -6,6 +6,7 @@ export const ref = Shape.registerMethod3(
   'ref',
   [
     'inputGeometry',
+    'string',
     'number',
     'number',
     'number',
@@ -18,6 +19,15 @@ export const ref = Shape.registerMethod3(
 );
 export const Ref = Shape.registerMethod3(
   'Ref',
-  ['number', 'number', 'number', 'number', 'number', 'number', 'coordinate'],
+  [
+    'string',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'coordinate',
+  ],
   RefOp
 );

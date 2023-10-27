@@ -149,7 +149,7 @@ const setApi = (value) => {
 
 const getApi = () => api$1;
 
-const evaluate = async (ecmascript, { api, path }) => {
+const evaluate = async (ecmascript, { api, id, path }) => {
   const where = isWebWorker ? 'worker' : 'browser';
   let emitGroup;
   try {
@@ -263,7 +263,7 @@ const execute = async (
             const task = async () => {
               try {
                 console.log(`Evaluating ${id}`);
-                await evaluate(updates[id].program, { path });
+                await evaluate(updates[id].program, { id, path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {
@@ -283,8 +283,9 @@ const execute = async (
         }
       }
       // Finally compute the exports.
+      // CHECK: Could this be evaluating things twice?
       for (const entry of exports) {
-        return await evaluate(entry, { path });
+        return await evaluate(entry, { id: entry.id, path });
       }
       return;
     }

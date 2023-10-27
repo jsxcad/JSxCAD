@@ -1,4 +1,4 @@
-import { readOrWatch, read, write, watchFile, unwatchFile, setupWorkspace, decodeFiles, boot, addOnEmitHandler, resolvePending, removeOnEmitHandler } from './jsxcad-sys.js';
+import { readOrWatch, read, watchFile, unwatchFile, setupWorkspace, write, decodeFiles, boot, addOnEmitHandler, resolvePending, removeOnEmitHandler } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import api from './jsxcad-api.js';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
@@ -1046,6 +1046,122 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
 
 var PropTypes = propTypes$2.exports;
 
+var t,u,r,o$1=0,i$1=[],c=l$1.__b,f=l$1.__r,e$1=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o$1||r),o$1=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o$1=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o$1=5,d(function(){return {current:n}},[])}function _(n,t,u){o$1=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o$1=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function q$1(n){var r=m(t++,10),o=l();return r.__=n,u.componentDidCatch||(u.componentDidCatch=function(n){r.__&&r.__(n),o[1](n);}),[o[0],function(){o[1](void 0);}]}function x$1(){i$1.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$1=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f&&f(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e$1&&e$1(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$1.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
+
+function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}},X="17.0.2";function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)},fn=d$1;var ReactDOM$1 = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
+
+var compat_module = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	'default': ReactDOM$1,
+	version: X,
+	Children: k,
+	render: z,
+	hydrate: B,
+	unmountComponentAtNode: rn,
+	createPortal: W,
+	createFactory: nn,
+	cloneElement: en,
+	isValidElement: tn,
+	findDOMNode: un,
+	PureComponent: E,
+	memo: g,
+	forwardRef: x,
+	flushSync: ln,
+	unstable_batchedUpdates: on,
+	StrictMode: fn,
+	Suspense: L,
+	SuspenseList: M,
+	lazy: F,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: Q,
+	createElement: v$1,
+	createContext: D$1,
+	createRef: p$1,
+	Fragment: d$1,
+	Component: _$1,
+	useState: l,
+	useReducer: p,
+	useEffect: y,
+	useLayoutEffect: h,
+	useRef: s,
+	useImperativeHandle: _,
+	useMemo: d,
+	useCallback: A$1,
+	useContext: F$1,
+	useDebugValue: T$1,
+	useErrorBoundary: q$1
+});
+
+class DynamicView extends ReactDOM$1.PureComponent {
+  static get propTypes() {
+    return {
+      onIndicatePoint: propTypes$2.exports.func,
+      path: propTypes$2.exports.string,
+      view: propTypes$2.exports.object,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  async buildElement(container) {
+    const {
+      onIndicatePoint,
+      path,
+      view,
+      workspace
+    } = this.props;
+    if (!path) {
+      return;
+    }
+    const geometry = await readOrWatch(path, {
+      workspace
+    });
+    const {
+      anchorControls,
+      updateGeometry
+    } = await orbitDisplay({
+      path,
+      geometry,
+      view
+    }, container);
+    anchorControls.addEventListener('indicatePoint', ({
+      point
+    }) => {
+      if (onIndicatePoint) onIndicatePoint(point);
+    });
+    this.watcher = async () => {
+      updateGeometry(await read(path, {
+        workspace
+      }));
+    };
+    watchFile(path, workspace, this.watcher);
+  }
+  componentWillUnmount() {
+    const {
+      workspace
+    } = this.props;
+    if (this.watcher) {
+      unwatchFile(this.path, workspace, this.watcher);
+    }
+    while (this.container.firstChild !== this.container.lastChild) {
+      this.container.removeChild(this.container.firstChild);
+    }
+  }
+  shouldComponentUpdate(nextProps) {
+    if (this.props.path !== nextProps.path) {
+      return true;
+    }
+    return false;
+  }
+  render() {
+    return v$1("div", {
+      classList: "note orbitView",
+      ref: async container => {
+        if (container) {
+          await this.buildElement(container);
+        }
+      }
+    });
+  }
+}
+
 var classnames = {exports: {}};
 
 /*!
@@ -1106,51 +1222,6 @@ var classnames = {exports: {}};
 }(classnames));
 
 var classNames = classnames.exports;
-
-var t,u,r,o$1=0,i$1=[],c=l$1.__b,f=l$1.__r,e$1=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o$1||r),o$1=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o$1=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o$1=5,d(function(){return {current:n}},[])}function _(n,t,u){o$1=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o$1=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function q$1(n){var r=m(t++,10),o=l();return r.__=n,u.componentDidCatch||(u.componentDidCatch=function(n){r.__&&r.__(n),o[1](n);}),[o[0],function(){o[1](void 0);}]}function x$1(){i$1.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$1=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f&&f(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e$1&&e$1(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$1.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
-
-function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}},X="17.0.2";function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)},fn=d$1;var ReactDOM$1 = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
-
-var compat_module = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	'default': ReactDOM$1,
-	version: X,
-	Children: k,
-	render: z,
-	hydrate: B,
-	unmountComponentAtNode: rn,
-	createPortal: W,
-	createFactory: nn,
-	cloneElement: en,
-	isValidElement: tn,
-	findDOMNode: un,
-	PureComponent: E,
-	memo: g,
-	forwardRef: x,
-	flushSync: ln,
-	unstable_batchedUpdates: on,
-	StrictMode: fn,
-	Suspense: L,
-	SuspenseList: M,
-	lazy: F,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: Q,
-	createElement: v$1,
-	createContext: D$1,
-	createRef: p$1,
-	Fragment: d$1,
-	Component: _$1,
-	useState: l,
-	useReducer: p,
-	useEffect: y,
-	useLayoutEffect: h,
-	useRef: s,
-	useImperativeHandle: _,
-	useMemo: d,
-	useCallback: A$1,
-	useContext: F$1,
-	useDebugValue: T$1,
-	useErrorBoundary: q$1
-});
 
 var o=0;function e(_,e,n,t,f){var l,s,u={};for(s in e)"ref"==s?l=e[s]:u[s]=e[s];var a={type:_,props:u,key:n,ref:l,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:--o,__source:t,__self:f};if("function"==typeof _&&(l=_.defaultProps))for(s in l)void 0===u[s]&&(u[s]=l[s]);return l$1.vnode&&l$1.vnode(a),a}
 
@@ -2325,9 +2396,8 @@ class DownloadNote extends ReactDOM$1.PureComponent {
 class EditNote extends ReactDOM$1.Component {
   static get propTypes() {
     return {
-      note: propTypes$2.exports.string,
+      source: propTypes$2.exports.string,
       notebookPath: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string,
       onChange: propTypes$2.exports.func,
       onKeyDown: propTypes$2.exports.func
     };
@@ -2341,23 +2411,20 @@ class EditNote extends ReactDOM$1.Component {
   onChange(event) {
     const {
       onChange,
-      note
+      source
     } = this.props;
-    if (onChange && this.ref && this.ref.innerText !== note.sourceText) {
-      onChange(this.ref.innerText, note);
+    if (onChange && this.ref && this.ref.innerText !== source) {
+      onChange(this.ref.innerText);
     }
   }
   shouldComponentUpdate(nextProps) {
-    return this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText;
+    return this.ref === undefined || this.ref.innerText !== nextProps.source;
   }
   render() {
     const {
-      note,
+      source,
       onKeyDown
     } = this.props;
-    const {
-      sourceText
-    } = note;
     return v$1(Card$1, null, v$1("pre", {
       style: {
         padding: '1em',
@@ -2372,10 +2439,10 @@ class EditNote extends ReactDOM$1.Component {
         }
         this.ref = ref;
         if (ref !== null) {
-          ref.innerText = sourceText;
+          ref.innerText = source;
         }
       }
-    }, sourceText));
+    }, source));
   }
 }
 
@@ -2383,8 +2450,7 @@ class ErrorNote extends ReactDOM$1.Component {
   static get propTypes() {
     return {
       note: propTypes$2.exports.string,
-      notebookPath: propTypes$2.exports.string,
-      workspace: propTypes$2.exports.string
+      notebookPath: propTypes$2.exports.string
     };
   }
   constructor(props) {
@@ -5374,117 +5440,6 @@ const Row = /*#__PURE__*/x(({
 });
 Row.displayName = 'Row';
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-
-var __assign = function() {
-    __assign = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-
-function __rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-}
-
-var defaultProps$1 = {
-    color: '#38ad48',
-    enabled: true,
-    size: 50,
-    style: {},
-};
-var normalizeSize = function (size) { return (parseFloat(size.toString()).toString() === size.toString()
-    ? size + "px"
-    : size.toString()); };
-var withSharedProps = function (Component) {
-    var Wrapper = function (props) {
-        var color = props.color, enabled = props.enabled, size = props.size, style = props.style, otherProps = __rest(props, ["color", "enabled", "size", "style"]);
-        var componentProps = __assign(__assign({}, otherProps), { style: __assign({ color: color, overflow: 'visible', width: normalizeSize(size) }, style) });
-        if (!enabled)
-            return null;
-        return ReactDOM$1.createElement(Component, __assign({}, componentProps));
-    };
-    Wrapper.defaultProps = defaultProps$1;
-    return Wrapper;
-};
-
-var defaultProps = {
-    speed: 100,
-    still: false,
-    thickness: 100,
-};
-var secondaryColorDefaultProps = __assign(__assign({}, defaultProps), { secondaryColor: 'rgba(0,0,0,0.44)' });
-
-function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (!css || typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}
-
-var css_248z = "@keyframes spinners-react-circular-split{0%{stroke-dashoffset:1;stroke-dasharray:5,170}10%{stroke-dashoffset:13;stroke-dasharray:30,145}13%{stroke-dashoffset:-11;stroke-dasharray:5,145}50%{stroke-dasharray:5,0,5,165;stroke-dashoffset:-82}51%{stroke-dasharray:2,0,2,139;stroke-dashoffset:-85}61%{stroke-dasharray:15,0,15,165;stroke-dashoffset:-72}64%{stroke-dasharray:5,20,5,145;stroke-dashoffset:-72}}";
-styleInject(css_248z);
-
-var Component = function (_a) {
-    var secondaryColor = _a.secondaryColor, speed = _a.speed, still = _a.still, thickness = _a.thickness, svgProps = __rest(_a, ["secondaryColor", "speed", "still", "thickness"]);
-    var strokeWidth = 4 * (thickness / 100);
-    var circleStyle = !still
-        ? { animation: "spinners-react-circular-split " + 140 / speed + "s linear infinite" }
-        : {};
-    return (ReactDOM$1.createElement("svg", __assign({ fill: "none" }, svgProps, { viewBox: "0 0 66 66" }),
-        ReactDOM$1.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: secondaryColor, strokeWidth: strokeWidth }),
-        ReactDOM$1.createElement("circle", { cx: "33", cy: "33", fill: "none", r: "28", stroke: "currentColor", strokeDasharray: "5, 170", strokeDashoffset: "1", strokeLinecap: "round", strokeWidth: strokeWidth, style: circleStyle, transform: "rotate(-90 33 33)" })));
-};
-Component.defaultProps = secondaryColorDefaultProps;
-var SpinnerCircularSplit = withSharedProps(Component);
-
-// import { SpinnerCircularSplit } from 'spinners-react';
-
 class ViewNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
@@ -5541,294 +5496,73 @@ class ViewNote extends ReactDOM$1.PureComponent {
   }
 }
 
-const clearNotebookState = async (application, {
-  path,
-  workspace,
-  isToBeKept
-}) => {
-  application.setState(state => {
-    const {
-      [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-    } = state;
-    const newNotebookNotes = {};
-    for (const key of Object.keys(oldNotebookNotes)) {
-      const note = oldNotebookNotes[key];
-      if (isToBeKept(note)) {
-        newNotebookNotes[key] = note;
-      }
-    }
-    return {
-      [`NotebookNotes/${path}`]: newNotebookNotes
-    };
-  });
-};
-const updateNotebookState = async (application, {
-  notes,
-  sourceLocation,
-  workspace
-}) => {
-  const updateNote = note => {
-    const {
-      sourceLocation
-    } = note;
-    if (!sourceLocation) {
-      return;
-    }
-    const {
-      path
-    } = sourceLocation;
-    if (!note.hash) {
-      return;
-    }
-    const op = state => {
-      const {
-        [`NotebookNotes/${path}`]: oldNotebookNotes = {}
-      } = state;
-      const oldNote = oldNotebookNotes[note.hash] || {};
-      const newNotebookNotes = {
-        ...oldNotebookNotes,
-        [note.hash]: {
-          ...oldNote,
-          blur: false,
-          ...note
-        }
-      };
-      return {
-        [`NotebookNotes/${path}`]: newNotebookNotes
-      };
-    };
-    application.setState(op);
-  };
-  for (const note of notes) {
-    updateNote(note);
-    if (note.view) {
-      if (!note.url) {
-        const loadThumbnail = async () => {
-          let url = await (note.needsThumbnail ? read : readOrWatch)(note.view.thumbnailPath, {
-            workspace
-          });
-          if (!url) {
-            const {
-              path,
-              view,
-              sourceLocation
-            } = note;
-            const {
-              width,
-              height
-            } = view;
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const offscreenCanvas = canvas.transferControlToOffscreen();
-            for (let nth = 0; nth < 3; nth++) {
-              try {
-                console.log(`QQ/ask staticView nth=${nth}`);
-                url = await application.ask({
-                  op: 'app/staticView',
-                  path,
-                  workspace,
-                  view,
-                  offscreenCanvas
-                }, {
-                  path
-                }, [offscreenCanvas]);
-                // Cache the thumbnail for next time.
-                await write(`thumbnail/${note.hash}`, url, {
-                  workspace
-                });
-                updateNote({
-                  hash: note.hash,
-                  url,
-                  sourceLocation
-                });
-              } catch (error) {
-                if (error.message === 'Terminated') {
-                  // Try again.
-                  continue;
-                }
-              }
-            }
-          }
-          if (url) {
-            note.url = url;
-            updateNote({
-              hash: note.hash,
-              url,
-              sourceLocation
-            });
-          }
-        };
-        // Introduce a delay before rendering thumbnails to allow execution to proceed in the unthreaded cases.
-        setTimeout(loadThumbnail, 200);
-      }
-    }
-  }
-};
-class Notebook extends ReactDOM$1.PureComponent {
+class Section extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
-      notes: propTypes$2.exports.object,
+      id: propTypes$2.exports.string,
       onChange: propTypes$2.exports.func,
       onClickView: propTypes$2.exports.func,
       onKeyDown: propTypes$2.exports.func,
-      selectedLine: propTypes$2.exports.number,
-      notebookPath: propTypes$2.exports.string,
-      state: propTypes$2.exports.string,
+      path: propTypes$2.exports.string,
+      section: propTypes$2.exports.object,
       workspace: propTypes$2.exports.string
     };
   }
   render() {
     try {
       const {
-        notebookPath,
-        notes,
+        id,
+        path,
         onChange,
         onClickView,
         onKeyDown,
-        // selectedLine,
-        state = 'idle',
+        section,
         workspace
       } = this.props;
-      const ordered = Object.values(notes);
-      const getLine = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.line;
-        } else {
-          return 0;
-        }
-      };
-      const getNth = note => {
-        if (note.sourceLocation) {
-          return note.sourceLocation.nth;
-        } else {
-          return 0;
-        }
-      };
-      const order = (a, b) => {
-        const lineA = getLine(a);
-        const lineB = getLine(b);
-        if (lineA !== lineB) {
-          return lineA - lineB;
-        }
-        const nthA = getNth(a);
-        const nthB = getNth(b);
-        return nthA - nthB;
-      };
-      ordered.sort(order);
-      const entries = new Map();
-      for (const note of ordered) {
-        const id = note.sourceLocation.id;
-        if (!entries.has(id)) {
-          entries.set(id, {
-            blur: false,
-            downloads: [],
-            errors: [],
-            views: [],
-            mds: [],
-            controls: [],
-            editors: []
-          });
-        }
-        const entry = entries.get(id);
-        // FIX: This seems wasteful.
-        const selected = false;
-        if (note.view) {
-          entry.views.push(v$1(ViewNote, {
-            key: note.hash,
-            note: note,
-            onClickView: onClickView,
-            selected: selected
-          }));
-        } else if (note.error) {
-          entry.errors.push(v$1(Card$1.Body, {
-            variant: "danger"
-          }, v$1(Card$1.Text, null, v$1(ErrorNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }))));
-        } else if (note.md) {
-          entry.mds.push(v$1(MdNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }));
-        } else if (note.download) {
-          entry.downloads.push(v$1(DownloadNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }));
-        } else if (note.control) {
-          entry.controls.push(v$1(ControlNote, {
-            key: note.hash,
-            note: note,
-            selected: selected,
-            workspace: workspace
-          }));
-        } else if (note.sourceText !== undefined) {
-          entry.editors.push(v$1(EditNote, {
-            key: note.hash,
-            note: note,
-            onChange: sourceText => onChange(note, {
-              sourceText
-            }),
-            onKeyDown: onKeyDown,
-            selected: selected,
-            workspace: workspace
-          }));
-        }
-      }
-      y(() => mermaid.init(undefined, '.mermaid'));
-      const sections = [];
-      const compare = (a, b) => {
-        if (a < b) {
-          return -1;
-        } else if (a > b) {
-          return 1;
-        } else {
-          return 0;
-        }
-      };
-      const ids = [...entries.keys()];
-      ids.sort((a, b) => compare(a.id, b.id));
-      for (const id of ids) {
-        const {
-          downloads = [],
-          errors = [],
-          views = [],
-          mds = [],
-          controls = [],
-          editors = []
-        } = entries.get(id);
-        sections.push(v$1(Card$1, {
-          key: id
-        }, v$1(Card$1.Header, {
-          id: `note-id-${id}`
-        }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
-          key: nth
-        }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, editors)));
-      }
-      return v$1("div", {
-        id: notebookPath,
-        classList: "notebook notes",
-        style: {
-          overflow: 'auto'
-        }
-      }, false && state === 'running' && v$1(SpinnerCircularSplit, {
-        color: "#36d7b7",
-        size: 64,
-        style: {
-          position: 'fixed',
-          right: 32,
-          top: 64,
-          zIndex: 1000
-        }
-      }), sections);
+      const controls = section.controls.map(note => v$1(ControlNote, {
+        key: note.hash,
+        note: note,
+        workspace: workspace
+      }));
+      const downloads = section.downloads.map(note => v$1(DownloadNote, {
+        key: note.hash,
+        note: note,
+        workspace: workspace
+      }));
+      const errors = section.errors.map((note, key) => v$1(Card$1.Body, {
+        key: key,
+        variant: "danger"
+      }, v$1(Card$1.Text, null, v$1(ErrorNote, {
+        key: note.hash,
+        note: note
+      }))));
+      const mds = section.mds.map(note => v$1(MdNote, {
+        key: note.hash,
+        note: note
+      }));
+      const views = section.views.map(note => v$1(ViewNote, {
+        key: note.hash,
+        note: note,
+        onClickView: onClickView
+      }));
+      const editor = v$1(EditNote, {
+        key: id,
+        source: section.source,
+        onChange: code => {
+          if (onChange) {
+            return onChange(path, id, code);
+          }
+        },
+        onKeyDown: onKeyDown,
+        workspace: workspace
+      });
+      return v$1(Card$1, {
+        key: id
+      }, v$1(Card$1.Header, {
+        id: `note-id-${id}`
+      }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
+        key: nth
+      }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, editor));
     } catch (error) {
       console.log(error.stack);
       throw error;
@@ -5836,74 +5570,54 @@ class Notebook extends ReactDOM$1.PureComponent {
   }
 }
 
-class DynamicView extends ReactDOM$1.PureComponent {
+class Notebook extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
-      onIndicatePoint: propTypes$2.exports.func,
-      path: propTypes$2.exports.string,
-      view: propTypes$2.exports.object,
+      sections: propTypes$2.exports.object,
+      onChange: propTypes$2.exports.func,
+      onClickView: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func,
+      notebookPath: propTypes$2.exports.string,
+      notebookText: propTypes$2.exports.string,
+      state: propTypes$2.exports.string,
+      version: propTypes$2.exports.number,
       workspace: propTypes$2.exports.string
     };
   }
-  async buildElement(container) {
-    const {
-      onIndicatePoint,
-      path,
-      view,
-      workspace
-    } = this.props;
-    if (!path) {
-      return;
-    }
-    const geometry = await readOrWatch(path, {
-      workspace
-    });
-    const {
-      anchorControls,
-      updateGeometry
-    } = await orbitDisplay({
-      path,
-      geometry,
-      view
-    }, container);
-    anchorControls.addEventListener('indicatePoint', ({
-      point
-    }) => {
-      if (onIndicatePoint) onIndicatePoint(point);
-    });
-    this.watcher = async () => {
-      updateGeometry(await read(path, {
-        workspace
-      }));
-    };
-    watchFile(path, workspace, this.watcher);
-  }
-  componentWillUnmount() {
-    const {
-      workspace
-    } = this.props;
-    if (this.watcher) {
-      unwatchFile(this.path, workspace, this.watcher);
-    }
-    while (this.container.firstChild !== this.container.lastChild) {
-      this.container.removeChild(this.container.firstChild);
-    }
-  }
-  shouldComponentUpdate(nextProps) {
-    if (this.props.path !== nextProps.path) {
-      return true;
-    }
-    return false;
-  }
   render() {
-    return v$1("div", {
-      classList: "note orbitView",
-      ref: async container => {
-        if (container) {
-          await this.buildElement(container);
-        }
+    try {
+      const {
+        notebookPath,
+        onChange,
+        onClickView,
+        onKeyDown,
+        sections,
+        workspace
+      } = this.props;
+      const children = [];
+      for (const id of [...sections.keys()].sort()) {
+        const section = sections.get(id);
+        children.push(v$1(Section, {
+          id: id,
+          path: notebookPath,
+          onChange: onChange,
+          onClickView: onClickView,
+          onKeyDown: onKeyDown,
+          section: section,
+          workspace: workspace
+        }));
       }
-    });
+      return v$1("div", {
+        id: notebookPath,
+        classList: "notebook notes",
+        style: {
+          overflow: 'auto'
+        }
+      }, children);
+    } catch (error) {
+      console.log(error.stack);
+      throw error;
+    }
   }
 }
 
@@ -6278,18 +5992,15 @@ class Standalone extends ReactDOM$1.Component {
         if (notes.length === 0) {
           return;
         }
-        const sourceLocation = notes[0].sourceLocation;
+        // const sourceLocation = notes[0].sourceLocation;
         // TODO: Parallelize these operations.
         setVersion(notes, version);
         await renderViews(notes);
         await fixLinks(notes);
         await prepareDownloads(notes);
-        updateNotebookState(this, {
-          notes,
-          sourceLocation,
-          workspace
-        });
+        // updateNotebookState(this, { notes, sourceLocation, workspace });
       };
+
       const onEmitHandler = addOnEmitHandler(addNotes);
       if (isRerun) {
         const notebookControlData = await getNotebookControlData();
@@ -6313,12 +6024,15 @@ class Standalone extends ReactDOM$1.Component {
         [`NotebookState/${module}`]: 'idle'
       });
       removeOnEmitHandler(onEmitHandler);
+      /*
       clearNotebookState(this, {
         path: module,
         workspace,
-        isToBeKept: note => note.version === version
+        isToBeKept: (note) => note.version === version,
       });
+      */
     };
+
     const onKeyDown = e => {
       const CONTROL = 17;
       // const E = 69;

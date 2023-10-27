@@ -245,6 +245,7 @@ export { Stl } from './stl.js';
 export { Stroke } from './Stroke.js';
 export { SurfaceMesh } from './SurfaceMesh.js';
 export { Svg } from './svg.js';
+export { To } from './to.js';
 export { Triangle } from './Triangle.js';
 export { Voxels } from './voxels.js';
 export { Wave } from './Wave.js';

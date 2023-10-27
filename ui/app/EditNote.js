@@ -6,9 +6,8 @@ import React from 'react';
 export class EditNote extends React.Component {
   static get propTypes() {
     return {
-      note: PropTypes.string,
+      source: PropTypes.string,
       notebookPath: PropTypes.string,
-      workspace: PropTypes.string,
       onChange: PropTypes.func,
       onKeyDown: PropTypes.func,
     };
@@ -24,21 +23,18 @@ export class EditNote extends React.Component {
   async componentWillUnmount() {}
 
   onChange(event) {
-    const { onChange, note } = this.props;
-    if (onChange && this.ref && this.ref.innerText !== note.sourceText) {
-      onChange(this.ref.innerText, note);
+    const { onChange, source } = this.props;
+    if (onChange && this.ref && this.ref.innerText !== source) {
+      onChange(this.ref.innerText);
     }
   }
 
   shouldComponentUpdate(nextProps) {
-    return (
-      this.ref === undefined || this.ref.innerText !== nextProps.note.sourceText
-    );
+    return this.ref === undefined || this.ref.innerText !== nextProps.source;
   }
 
   render() {
-    const { note, onKeyDown } = this.props;
-    const { sourceText } = note;
+    const { source, onKeyDown } = this.props;
     return (
       <Card>
         <pre
@@ -52,11 +48,11 @@ export class EditNote extends React.Component {
             }
             this.ref = ref;
             if (ref !== null) {
-              ref.innerText = sourceText;
+              ref.innerText = source;
             }
           }}
         >
-          {sourceText}
+          {source}
         </pre>
       </Card>
     );

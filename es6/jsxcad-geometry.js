@@ -4809,75 +4809,14 @@ const fix = (geometry, selfIntersection = true) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const Ref = (
-  x = 0,
-  y = 0,
-  z = 0,
-  nx = 0,
-  ny = 0,
-  nz = 1,
-  coordinate
-) => {
-  if (coordinate) {
-    [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
-  }
-  // Disorient the point as though the source of a segment.
-  const inverse = fromSegmentToInverseTransform(
-    [
-      [x, y, z],
-      [x + nx, y + ny, z + nz],
-    ],
-    [0, 0, 1]
-  );
-  const basePoint = transformCoordinate([x, y, z], inverse);
-  const matrix = invertTransform(inverse);
-  return hasTypeReference(taggedPoints({ matrix }, [basePoint]));
-};
-
-const ref = (
-  geometry,
-  x = 0,
-  y = 0,
-  z = 0,
-  nx = 0,
-  ny = 0,
-  nz = 1,
-  coordinate
-) =>
-  transform(
-    Ref((x = 0), (y = 0), (z = 0), (nx = 0), (ny = 0), (nz = 1), coordinate),
-    transform(geometry.matrix)
-  );
-
-const X$3 = (x = 0) => Ref(x, 0, 0, 0, 0, 1);
-const Y$3 = (y = 0) => Ref(0, y, 0, 0, 0, 1);
-const Z$3 = (z = 0) => Ref(0, 0, z, 0, 0, 1);
-const XY = (z = 0) => Ref(0, 0, z, 0, 0, 1);
-const YX = (z = 0) => Ref(0, 0, z, 0, 0, -1);
-const XZ = (y = 0) => Ref(0, y, 0, 0, 1, 0);
-const ZX = (y = 0) => Ref(0, y, 0, 0, -1, 0);
-const YZ = (x = 0) => Ref(x, 0, 0, 1, 0, 0);
-const ZY = (x = 0) => Ref(x, 0, 0, -1, 0, 0);
-
-const RX = (t = 0) => rotateX(Ref(0, 0, 0, 0, 0, 1), t);
-const RY = (t = 0) => rotateY(Ref(0, 0, 0, 0, 0, 1), t);
-const RZ = (t = 0) => rotateZ(Ref(0, 0, 0, 0, 0, 1), t);
-
 const origin = (geometry) => {
   const { local } = getInverseMatrices(geometry);
   return transform(Point(), local);
 };
 
-const to = (geometry, references) => {
-  const atOrigin = by(geometry, [origin(geometry)]);
-  const collected = [];
-  for (const reference of references) {
-    collected.push(by(atOrigin, [reference]));
-  }
-  return Group(collected);
-};
-
-const flat = (geometry) => to(geometry, [XY()]);
+// FIX: This really needs a better name.
+const flat = (geometry, reference = geometry) =>
+  by(geometry, [origin(reference)]);
 
 // Remove any symbols (which refer to cached values).
 const fresh = (geometry) => {
@@ -5027,6 +4966,49 @@ const getTags = (geometry) => {
     return geometry.tags;
   }
 };
+
+const Ref = (
+  name,
+  x = 0,
+  y = 0,
+  z = 0,
+  nx = 0,
+  ny = 0,
+  nz = 1,
+  coordinate
+) => {
+  if (coordinate) {
+    [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
+  }
+  // Disorient the point as though the source of a segment.
+  const inverse = fromSegmentToInverseTransform(
+    [
+      [x, y, z],
+      [x + nx, y + ny, z + nz],
+    ],
+    [0, 0, 1]
+  );
+  const matrix = invertTransform(inverse);
+  const point = Point(0, 0, 0);
+  const content = name ? as(point, [name]) : point;
+  return hasTypeReference(transform(content, matrix));
+};
+
+const ref = (geometry, name) => transform(Ref(name), geometry.matrix);
+
+const X$3 = (x = 0) => Ref(undefined, x, 0, 0, 0, 0, 1);
+const Y$3 = (y = 0) => Ref(undefined, 0, y, 0, 0, 0, 1);
+const Z$3 = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, 1);
+const XY = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, 1);
+const YX = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, -1);
+const XZ = (y = 0) => Ref(undefined, 0, y, 0, 0, 1, 0);
+const ZX = (y = 0) => Ref(undefined, 0, y, 0, 0, -1, 0);
+const YZ = (x = 0) => Ref(undefined, x, 0, 0, 1, 0, 0);
+const ZY = (x = 0) => Ref(undefined, x, 0, 0, -1, 0, 0);
+
+const RX = (t = 0) => rotateX(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
+const RY = (t = 0) => rotateY(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
+const RZ = (t = 0) => rotateZ(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
 
 const filter$h = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
@@ -5780,6 +5762,11 @@ const taggedTriangles = (
   triangles
 ) => {
   return { type: 'triangles', tags, matrix, provenance, triangles };
+};
+
+const to = (geometry, target, connector = geometry) => {
+  const oriented = by(geometry, [origin(connector)]);
+  return by(oriented, [target]);
 };
 
 const toTransformedGeometry = (geometry) => geometry;

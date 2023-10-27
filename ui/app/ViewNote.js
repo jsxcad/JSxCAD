@@ -1,8 +1,6 @@
 import * as PropTypes from 'prop-types';
 
-// import Card from 'react-bootstrap/Card';
 import React from 'react';
-// import { SpinnerCircularSplit } from 'spinners-react';
 
 export class ViewNote extends React.PureComponent {
   static get propTypes() {

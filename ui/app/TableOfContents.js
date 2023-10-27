@@ -8,36 +8,26 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import React from 'react';
 
+const kHourglassFlowingSand = '\u23f3';
+const kSpace = '\u00A0';
+
 export class TableOfContents extends React.PureComponent {
   static get propTypes() {
     return {
-      notes: PropTypes.object,
+      path: PropTypes.string,
+      sections: PropTypes.object,
+      state: PropTypes.object,
+      version: PropTypes.string,
     };
   }
 
   render() {
     try {
-      const { notes } = this.props;
-      const uniqueIds = new Set();
-      for (const note of Object.values(notes)) {
-        if (!note.sourceLocation || !note.sourceLocation.id) {
-          continue;
-        }
-        uniqueIds.add(note.sourceLocation.id);
-      }
-      const ids = [...uniqueIds];
-      const compare = (a, b) => {
-        if (a < b) {
-          return -1;
-        } else if (a > b) {
-          return 1;
-        } else {
-          return 0;
-        }
-      };
-      ids.sort(compare);
+      const { path, sections, state } = this.props;
       const contents = [];
-      for (const id of ids) {
+      for (const id of [...sections.keys()].sort()) {
+        const sign =
+          state[`${path}/${id}`] === 'running' ? kHourglassFlowingSand : kSpace;
         contents.push(
           <Button
             variant="light"
@@ -47,7 +37,7 @@ export class TableOfContents extends React.PureComponent {
                 .scrollIntoView({ behavior: 'smooth' })
             }
           >
-            {id}
+            {sign} {id} {sign}
           </Button>
         );
       }

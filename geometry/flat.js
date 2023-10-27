@@ -1,4 +1,6 @@
-import { XY } from './Ref.js';
-import { to } from './to.js';
+import { by } from './by.js';
+import { origin } from './origin.js';
 
-export const flat = (geometry) => to(geometry, [XY()]);
+// FIX: This really needs a better name.
+export const flat = (geometry, reference = geometry) =>
+  by(geometry, [origin(reference)]);

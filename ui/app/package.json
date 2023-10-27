@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api": "^0.0.79",
+    "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "@jsxcad/ui-notebook": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",
@@ -40,8 +41,7 @@
     "prop-types": "^15.7.2",
     "react-ace": "^9.5.0",
     "react-bootstrap": "^2.8.0",
-    "react-multi-split-pane": "^0.3.3",
-    "spinners-react": "^1.0.7"
+    "react-multi-split-pane": "^0.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
