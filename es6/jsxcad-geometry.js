@@ -2868,7 +2868,11 @@ const getValue = (geometry, tags) => {
   return values;
 };
 
-const getList = (geometry, tags, { inItem, not } = {}) => {
+const getSimpleList = (
+  geometry,
+  tags,
+  { inItem = false, not = false } = {}
+) => {
   const isMatch = oneOfTagMatcher(tags, 'item');
   const picks = [];
   const walk = (geometry, descend) => {
@@ -2901,6 +2905,50 @@ const getList = (geometry, tags, { inItem, not } = {}) => {
     }
   };
   visit(geometry, walk);
+  return picks;
+};
+
+const getList = (geometry, tags, options) => {
+  const simple = [];
+  const complex = [];
+  for (const tag of tags) {
+    if (tag.includes('/')) {
+      complex.push(tag);
+    } else {
+      simple.push(tag);
+    }
+  }
+  const picks =
+    simple.length > 0 ? getSimpleList(geometry, simple, options) : [];
+  if (complex.length === 0) {
+    return picks;
+  }
+  for (const tag of complex) {
+    const parts = tag.split('/');
+    let last = [geometry];
+    while (parts.length > 1) {
+      const next = [];
+      const part = parts.shift();
+      for (const geometry of last) {
+        for (const item of getSimpleList(geometry, [part], options)) {
+          if (item.type !== 'item') {
+            continue;
+          }
+          next.push(item.content[0]);
+        }
+      }
+      last = next;
+    }
+    // parts now contains just the final part.
+    for (const geometry of last) {
+      for (const value of getSimpleList(geometry, parts, options)) {
+        picks.push(value);
+      }
+    }
+  }
+  if (picks.length === 0 && !options.pass) {
+    throw Error(`getList found no matches for ${tags.join(', ')}`);
+  }
   return picks;
 };
 
@@ -5032,16 +5080,24 @@ const grow = (geometry, offset, axes = 'xyz', selections) => {
   return Group([replacer(inputs, outputs)(geometry), ...ghosts]);
 };
 
-const inItem = (geometry) => {
+const hold = (geometry, geometries) => {
   if (geometry.type === 'item') {
-    return geometry.content[0];
+    // FIX: Should use a better abstraction.
+    return {
+      ...geometry,
+      content: [Group([geometry.content[0], ...geometries])],
+    };
   } else {
-    return geometry;
+    return Group([geometry, ...geometries]);
   }
 };
 
-const hold = (geometry, geometries) =>
-  on(geometry, inItem(geometry), (inside) => Group([inside, ...geometries]));
+const inItem = (geometry) => {
+  if (geometry.type === 'item') {
+    return geometry.content[0];
+  }
+  throw Error(`inItem: Not an item`);
+};
 
 const filter$g = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&

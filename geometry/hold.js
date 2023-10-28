@@ -1,6 +1,13 @@
 import { Group } from './Group.js';
-import { inItem } from './inItem.js';
-import { on } from './on.js';
 
-export const hold = (geometry, geometries) =>
-  on(geometry, inItem(geometry), (inside) => Group([inside, ...geometries]));
+export const hold = (geometry, geometries) => {
+  if (geometry.type === 'item') {
+    // FIX: Should use a better abstraction.
+    return {
+      ...geometry,
+      content: [Group([geometry.content[0], ...geometries])],
+    };
+  } else {
+    return Group([geometry, ...geometries]);
+  }
+};
