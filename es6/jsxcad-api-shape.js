@@ -1684,7 +1684,14 @@ const baseViewOp = async (
   geometry,
   name,
   op = (_x) => (s) => s,
-  { size = 256, inline, width, height, position = [100, -100, 100] } = {}
+  {
+    download,
+    size = 256,
+    inline,
+    width,
+    height,
+    position = [100, -100, 100],
+  } = {}
 ) => {
   if (size !== undefined) {
     width = size;
@@ -1702,6 +1709,7 @@ const baseViewOp = async (
     const hash = generateUniqueId();
     const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
     const view = {
+      name,
       viewId,
       width,
       height,
@@ -1709,6 +1717,7 @@ const baseViewOp = async (
       inline,
       needsThumbnail: isNode,
       thumbnailPath,
+      download,
     };
     emit({ hash, path: viewPath, view });
     await write(viewPath, pageGeometry);
@@ -2313,9 +2322,10 @@ const pdf = Shape.registerMethod3(
         filename,
         type: 'application/pdf',
       };
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await gridView(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
+      await gridView(name, {
+        ...options.view,
+        download: { entries: [record] },
+      })(Shape.fromGeometry(entry));
     }
     return geometry;
   }
@@ -2890,9 +2900,9 @@ const stl = Shape.registerMethod3(
         type: 'application/sla',
       };
       // Produce a view of what will be downloaded.
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await view(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
+      await view(name, { ...options.view, download: { entries: [record] } })(
+        Shape.fromGeometry(entry)
+      );
     }
     return geometry;
   }
@@ -2951,7 +2961,10 @@ const svg = Shape.registerMethod3(
         type: 'image/svg+xml',
       };
       const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await gridView(name, options.view)(Shape.fromGeometry(entry));
+      await gridView(name, {
+        ...options.view,
+        download: { entries: [record] },
+      })(Shape.fromGeometry(entry));
       emit({ download: { entries: [record] }, hash: hash$1 });
     }
     return geometry;

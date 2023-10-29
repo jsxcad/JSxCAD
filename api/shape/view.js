@@ -53,7 +53,14 @@ export const baseViewOp = async (
   geometry,
   name,
   op = (_x) => (s) => s,
-  { size = 256, inline, width, height, position = [100, -100, 100] } = {}
+  {
+    download,
+    size = 256,
+    inline,
+    width,
+    height,
+    position = [100, -100, 100],
+  } = {}
 ) => {
   if (size !== undefined) {
     width = size;
@@ -71,6 +78,7 @@ export const baseViewOp = async (
     const hash = generateUniqueId();
     const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
     const view = {
+      name,
       viewId,
       width,
       height,
@@ -78,6 +86,7 @@ export const baseViewOp = async (
       inline,
       needsThumbnail: isNode,
       thumbnailPath,
+      download,
     };
     emit({ hash, path: viewPath, view });
     await write(viewPath, pageGeometry);
@@ -97,6 +106,7 @@ const topViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -107,7 +117,7 @@ const topViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = { download, size, skin, outline, wireframe, width, height, position };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -122,6 +132,7 @@ const gridViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -132,7 +143,7 @@ const gridViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = { download, size, skin, outline, wireframe, width, height, position };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -147,6 +158,7 @@ const frontViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -157,7 +169,7 @@ const frontViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = { download, size, skin, outline, wireframe, width, height, position };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -172,6 +184,7 @@ const sideViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -182,7 +195,7 @@ const sideViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = { download, size, skin, outline, wireframe, width, height, position };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 

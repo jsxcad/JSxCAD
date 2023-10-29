@@ -1,9 +1,9 @@
-import { computeHash, emit, getSourceLocation, read, write } from '@jsxcad/sys';
-import { ensurePages, hash as hashGeometry } from '@jsxcad/geometry';
+import { computeHash, getSourceLocation, read, write } from '@jsxcad/sys';
 import { fromSvg, toSvg } from '@jsxcad/convert-svg';
 import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';
+import { ensurePages } from '@jsxcad/geometry';
 
 export const LoadSvg = Shape.registerMethod3(
   'LoadSvg',
@@ -45,9 +45,10 @@ export const svg = Shape.registerMethod3(
         filename,
         type: 'image/svg+xml',
       };
-      const hash = computeHash({ filename, options }) + hashGeometry(entry);
-      await gridView(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash });
+      await gridView(name, {
+        ...options.view,
+        download: { entries: [record] },
+      })(Shape.fromGeometry(entry));
     }
     return geometry;
   }

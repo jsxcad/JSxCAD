@@ -7,7 +7,6 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { decode } from 'base64-arraybuffer';
 import { readOrWatch } from '@jsxcad/sys';
 import saveAs from 'file-saver';
-import { useEffect } from 'preact/hooks';
 
 const downloadFile = async ({ filename, path, data, type, workspace }) => {
   if (path && !data) {
@@ -20,15 +19,15 @@ const downloadFile = async ({ filename, path, data, type, workspace }) => {
 export class DownloadNote extends React.PureComponent {
   static get propTypes() {
     return {
-      note: PropTypes.object,
+      download: PropTypes.object,
       selected: PropTypes.boolean,
+      style: PropTypes.object,
       workspace: PropTypes.string,
     };
   }
 
   render() {
-    const { note, selected, workspace } = this.props;
-    const { blur, download } = note;
+    const { download, selected, style = {}, workspace } = this.props;
     const buttons = [];
     for (let { path, base64Data, data, filename, type } of download.entries) {
       if (base64Data) {
@@ -56,12 +55,8 @@ export class DownloadNote extends React.PureComponent {
       );
     }
     const ref = selected && createRef();
-    if (selected) {
-      useEffect(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
     return (
-      <ButtonGroup ref={ref} style={{ border, opacity: blur ? 0.5 : 1 }}>
+      <ButtonGroup ref={ref} style={style}>
         {buttons}
       </ButtonGroup>
     );

@@ -2330,21 +2330,19 @@ const downloadFile = async ({
 class DownloadNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
-      note: propTypes$2.exports.object,
+      download: propTypes$2.exports.object,
       selected: propTypes$2.exports.boolean,
+      style: propTypes$2.exports.object,
       workspace: propTypes$2.exports.string
     };
   }
   render() {
     const {
-      note,
+      download,
       selected,
+      style = {},
       workspace
     } = this.props;
-    const {
-      blur,
-      download
-    } = note;
     const buttons = [];
     for (let {
       path,
@@ -2379,16 +2377,9 @@ class DownloadNote extends ReactDOM$1.PureComponent {
       })), ' ', filename));
     }
     const ref = selected && /*#__PURE__*/p$1();
-    if (selected) {
-      y(() => ref.current.scrollIntoView(true));
-    }
-    const border = selected ? '1px dashed dodgerblue' : '0px';
     return v$1(ButtonGroup, {
       ref: ref,
-      style: {
-        border,
-        opacity: blur ? 0.5 : 1
-      }
+      style: style
     }, buttons);
   }
 }
@@ -5462,9 +5453,8 @@ class ViewNote extends ReactDOM$1.PureComponent {
       sourceLocation
     } = note;
     const {
-      height,
-      width,
-      viewId
+      name,
+      download
     } = view;
     const onClick = event => {
       if (onClickView) {
@@ -5479,20 +5469,26 @@ class ViewNote extends ReactDOM$1.PureComponent {
         });
       }
     };
-    const viewIdClass = viewId ? `viewId_${viewId}` : '';
     if (!note.url) {
       return v$1("div", null);
     }
-    return v$1("img", {
-      class: viewIdClass,
-      style: {
-        width,
-        height
-      },
-      variant: "top",
-      src: note.url,
+    let downloadNote;
+    if (download) {
+      downloadNote = v$1(DownloadNote, {
+        key: note.hash,
+        download: download,
+        workspace: workspace,
+        style: {
+          float: 'right'
+        }
+      });
+    }
+    return v$1(Card$1, {
       onClick: onClick
-    });
+    }, v$1(Card$1.Text, null, name, downloadNote), v$1(Card$1.Img, {
+      src: note.url,
+      variant: "top"
+    }));
   }
 }
 
@@ -5526,7 +5522,7 @@ class Section extends ReactDOM$1.PureComponent {
       }));
       const downloads = section.downloads.map(note => v$1(DownloadNote, {
         key: note.hash,
-        note: note,
+        download: note.download,
         workspace: workspace
       }));
       const errors = section.errors.map((note, key) => v$1(Card$1.Body, {
