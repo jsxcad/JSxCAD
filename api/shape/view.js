@@ -117,7 +117,16 @@ const topViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { download, size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -143,7 +152,16 @@ const gridViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { download, size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -169,7 +187,16 @@ const frontViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { download, size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -195,7 +222,16 @@ const sideViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { download, size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 

@@ -59,7 +59,7 @@ export const sort = Shape.registerMethod3(
           break;
       }
       leafs.sort(compare);
-    };
+    }
     return Group(leafs.map(({ leaf }) => leaf));
   }
 );

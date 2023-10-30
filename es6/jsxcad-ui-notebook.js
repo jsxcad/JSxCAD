@@ -2842,6 +2842,8 @@ marked.use({
     }
   }
 });
+
+// TODO: Move the ~Note classes here from ../app/
 const toDomElement = (notebook = [], {
   onClickView,
   onClickMake = sendFile,
@@ -2914,6 +2916,7 @@ const toDomElement = (notebook = [], {
         sourceLocation
       } = note;
       const {
+        download,
         height,
         width,
         viewId
@@ -2950,6 +2953,49 @@ const toDomElement = (notebook = [], {
         }
       });
       container.appendChild(image);
+      if (download) {
+        for (let {
+          path,
+          base64Data,
+          data,
+          filename,
+          type
+        } of download.entries) {
+          if (base64Data) {
+            data = decode(base64Data);
+          }
+          {
+            const button = document.createElement('button');
+            button.classList.add('note', 'download');
+            const text = document.createTextNode(`Download "${filename}"`);
+            button.appendChild(text);
+            button.addEventListener('click', event => onClickDownload({
+              event,
+              filename,
+              path,
+              data,
+              type,
+              workspace
+            }));
+            container.appendChild(button);
+          }
+          if (filename.endsWith('gcode')) {
+            const button = document.createElement('button');
+            button.classList.add('note', 'print');
+            const text = document.createTextNode(`Make "${filename}"`);
+            button.appendChild(text);
+            button.addEventListener('click', event => onClickMake({
+              event,
+              filename,
+              path,
+              data,
+              type,
+              workspace
+            }));
+            container.appendChild(button);
+          }
+        }
+      }
     }
     if (note.md) {
       const markup = document.createElement('div');
@@ -2976,49 +3022,6 @@ const toDomElement = (notebook = [], {
       entry.appendChild(text);
       entry.classList.add('note', 'error');
       container.appendChild(entry);
-    }
-    if (note.download) {
-      for (let {
-        path,
-        base64Data,
-        data,
-        filename,
-        type
-      } of note.download.entries) {
-        if (base64Data) {
-          data = decode(base64Data);
-        }
-        {
-          const button = document.createElement('button');
-          button.classList.add('note', 'download');
-          const text = document.createTextNode(`Download "${filename}"`);
-          button.appendChild(text);
-          button.addEventListener('click', event => onClickDownload({
-            event,
-            filename,
-            path,
-            data,
-            type,
-            workspace
-          }));
-          container.appendChild(button);
-        }
-        if (filename.endsWith('gcode')) {
-          const button = document.createElement('button');
-          button.classList.add('note', 'print');
-          const text = document.createTextNode(`Make "${filename}"`);
-          button.appendChild(text);
-          button.addEventListener('click', event => onClickMake({
-            event,
-            filename,
-            path,
-            data,
-            type,
-            workspace
-          }));
-          container.appendChild(button);
-        }
-      }
     }
     if (note.control) {
       const div = document.createElement('div');

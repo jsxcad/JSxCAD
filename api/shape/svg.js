@@ -1,5 +1,5 @@
-import { computeHash, getSourceLocation, read, write } from '@jsxcad/sys';
 import { fromSvg, toSvg } from '@jsxcad/convert-svg';
+import { getSourceLocation, read, write } from '@jsxcad/sys';
 import { gridView, qualifyViewId } from './view.js';
 
 import Shape from './Shape.js';

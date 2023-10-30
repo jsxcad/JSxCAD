@@ -44968,12 +44968,13 @@ class ViewNote extends ReactDOM$3.PureComponent {
       workspace
     } = this.props;
     const {
-      view,
-      sourceLocation
+      sourceLocation,
+      view
     } = note;
     const {
+      download,
       name,
-      download
+      width
     } = view;
     const onClick = event => {
       if (onClickView) {
@@ -45003,7 +45004,10 @@ class ViewNote extends ReactDOM$3.PureComponent {
       });
     }
     return v$1(Card$1, {
-      onClick: onClick
+      onClick: onClick,
+      style: {
+        maxWidth: width
+      }
     }, v$1(Card$1.Text, null, name, downloadNote), v$1(Card$1.Img, {
       src: note.url,
       variant: "top"

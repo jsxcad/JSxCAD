@@ -1737,6 +1737,7 @@ const topViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1747,7 +1748,16 @@ const topViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1762,6 +1772,7 @@ const gridViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1772,7 +1783,16 @@ const gridViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1787,6 +1807,7 @@ const frontViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1797,7 +1818,16 @@ const frontViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1812,6 +1842,7 @@ const sideViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1822,7 +1853,16 @@ const sideViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -2763,11 +2803,7 @@ const sort = Shape.registerMethod3(
       ops.unshift({ dimension, order, limit });
       spec = rest;
     }
-    const sort = (list, depth = 0) => {
-      if (depth === ops.length) {
-        return Group$1(list);
-      }
-      const { dimension, order, limit } = ops[depth];
+    for (const { dimension, order, limit } of ops) {
       let axis;
       switch (dimension) {
         case 'x':
@@ -2783,10 +2819,10 @@ const sort = Shape.registerMethod3(
       if (limit !== undefined) {
         switch (order) {
           case '>':
-            list = list.filter(({ min }) => min[axis] > limit);
+            leafs = leafs.filter(({ min }) => min[axis] > limit);
             break;
           case '<':
-            list = list.filter(({ max }) => max[axis] < limit);
+            leafs = leafs.filter(({ max }) => max[axis] < limit);
             break;
         }
       }
@@ -2799,28 +2835,9 @@ const sort = Shape.registerMethod3(
           compare = (a, b) => a.max[axis] - b.max[axis];
           break;
       }
-      if (compare) {
-        // Fold.
-        list.sort(compare);
-        const folded = [];
-        let matching = [];
-        for (const item of list) {
-          if (matching.length === 0 || compare(item, matching[0]) === 0) {
-            matching.push(item);
-          } else {
-            folded.push(matching.map(({ leaf }) => leaf));
-            matching = [item];
-          }
-        }
-        if (matching.length > 0) {
-          folded.push(matching.map(({ leaf }) => leaf));
-        }
-        return Group$1(folded.map((matches) => sort(matches, depth + 1)));
-      }
-    };
-    const result = sort(leafs);
-    console.log(`QQ/sort: result=${JSON.stringify(result)}`);
-    return result;
+      leafs.sort(compare);
+    }
+    return Group$1(leafs.map(({ leaf }) => leaf));
   }
 );
 
@@ -2960,12 +2977,10 @@ const svg = Shape.registerMethod3(
         filename,
         type: 'image/svg+xml',
       };
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
       await gridView(name, {
         ...options.view,
         download: { entries: [record] },
       })(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
     }
     return geometry;
   }

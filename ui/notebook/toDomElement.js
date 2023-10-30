@@ -152,8 +152,13 @@ export const toDomElement = (
       });
       container.appendChild(image);
       if (download) {
-        for (let { path, base64Data, data, filename, type } of download
-          .entries) {
+        for (let {
+          path,
+          base64Data,
+          data,
+          filename,
+          type,
+        } of download.entries) {
           if (base64Data) {
             data = decode(base64Data);
           }
