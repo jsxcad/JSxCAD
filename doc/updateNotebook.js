@@ -49,7 +49,7 @@ const writeMarkdown = async (
   let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
     const note = notebook[nth];
-    const { download, md, sourceText, view } = note;
+    const { md, sourceText, view } = note;
     if (md) {
       output.push(ensureNewline(notebook[nth].md.trim()));
     }
@@ -69,47 +69,52 @@ const writeMarkdown = async (
         output.push(`![Image](${pathModule.basename(imagePath)})`);
         output.push('');
       }
-    }
-    if (download) {
-      const { entries } = download;
-      for (let { base64Data, filename, data, path } of entries) {
-        if (!data && base64Data) {
-          data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
-        }
-        if (!data) {
-          data = await read(path, { workspace });
-        }
-        const observedPath = `${modulePath}.observed.${filename}`;
-        const expectedPath = `${modulePath}.${filename}`;
-        if (!filename.endsWith('stl')) {
-          // STL output has become unstable; skip for now.
-          try {
-            const observed = new TextDecoder('utf8').decode(data);
-            const expected = readFileSync(expectedPath, 'utf8');
-            if (observed !== expected) {
-              failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
-            }
-          } catch (error) {
-            console.log(`EE/3: ${JSON.stringify(error)}`);
-            if (error.code === 'ENOENT') {
-              failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
-              failedExpectations.push(`git add '${expectedPath}'`);
-            } else {
-              throw error;
+      const { download } = view;
+      if (download) {
+        const { entries } = download;
+        for (let { base64Data, filename, data, path } of entries) {
+          if (!data && base64Data) {
+            data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
+          }
+          if (!data) {
+            data = await read(path, { workspace });
+          }
+          const observedPath = `${modulePath}.observed.${filename}`;
+          const expectedPath = `${modulePath}.${filename}`;
+          if (!filename.endsWith('stl')) {
+            // STL output has become unstable; skip for now.
+            try {
+              const observed = new TextDecoder('utf8').decode(data);
+              const expected = readFileSync(expectedPath, 'utf8');
+              if (observed !== expected) {
+                failedExpectations.push(
+                  `cp '${observedPath}' '${expectedPath}'`
+                );
+              }
+            } catch (error) {
+              console.log(`EE/3: ${JSON.stringify(error)}`);
+              if (error.code === 'ENOENT') {
+                failedExpectations.push(
+                  `cp '${observedPath}' '${expectedPath}'`
+                );
+                failedExpectations.push(`git add '${expectedPath}'`);
+              } else {
+                throw error;
+              }
             }
           }
-        }
-        output.push(
-          `[${filename}](${escapeMarkdownLink(
-            pathModule.basename(expectedPath)
-          )})`
-        );
-        output.push('');
-        try {
-          writeFileSync(observedPath, data);
-        } catch (e) {
-          console.log(`QQ/entries: ${JSON.stringify(entries)}`);
-          throw e;
+          output.push(
+            `[${filename}](${escapeMarkdownLink(
+              pathModule.basename(expectedPath)
+            )})`
+          );
+          output.push('');
+          try {
+            writeFileSync(observedPath, data);
+          } catch (e) {
+            console.log(`QQ/entries: ${JSON.stringify(entries)}`);
+            throw e;
+          }
         }
       }
     }

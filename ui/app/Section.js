@@ -35,7 +35,11 @@ export class Section extends React.PureComponent {
         <ControlNote key={note.hash} note={note} workspace={workspace} />
       ));
       const downloads = section.downloads.map((note) => (
-        <DownloadNote key={note.hash} note={note} workspace={workspace} />
+        <DownloadNote
+          key={note.hash}
+          download={note.download}
+          workspace={workspace}
+        />
       ));
       const errors = section.errors.map((note, key) => (
         <Card.Body key={key} variant="danger">

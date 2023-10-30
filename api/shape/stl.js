@@ -1,15 +1,8 @@
-import {
-  computeHash,
-  emit,
-  generateUniqueId,
-  getSourceLocation,
-  read,
-  write,
-} from '@jsxcad/sys';
-import { ensurePages, hash as hashGeometry } from '@jsxcad/geometry';
 import { fromStl, toStl } from '@jsxcad/convert-stl';
+import { generateUniqueId, getSourceLocation, read, write } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
+import { ensurePages } from '@jsxcad/geometry';
 import { view } from './view.js';
 
 export const LoadStl = Shape.registerMethod3(
@@ -88,9 +81,9 @@ export const stl = Shape.registerMethod3(
         type: 'application/sla',
       };
       // Produce a view of what will be downloaded.
-      const hash = computeHash({ filename, options }) + hashGeometry(entry);
-      await view(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash });
+      await view(name, { ...options.view, download: { entries: [record] } })(
+        Shape.fromGeometry(entry)
+      );
     }
     return geometry;
   }

@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { inItem as op } from '@jsxcad/geometry';
+import { hold as op } from '@jsxcad/geometry';
 
 export const hold = Shape.registerMethod3(
   'hold',

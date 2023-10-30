@@ -79,6 +79,9 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
+  if (names.includes('on')) {
+    console.log(`QQ/on`);
+  }
   for (const baseSpec of specs) {
     const [spec, specOptionText] = baseSpec.split(':');
     const specOptions = {};
@@ -238,15 +241,17 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'geometry': {
         let result;
         for (const arg of args) {
-          let value = await resolve(input, arg, specOptions);
-          if (result === undefined && Shape.isShape(value)) {
-            result = await value.toGeometry();
-            if (!Shape.isGeometry(result)) {
-              throw Error('die');
+          if (result === undefined) {
+            let value = await resolve(input, arg, specOptions);
+            if (Shape.isShape(value)) {
+              result = await value.toGeometry();
+              if (!Shape.isGeometry(result)) {
+                throw Error('die');
+              }
+              continue;
             }
-          } else {
-            rest.push(arg);
           }
+          rest.push(arg);
         }
         output.push(result);
         break;

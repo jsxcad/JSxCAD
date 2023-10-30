@@ -1,5 +1,7 @@
 import * as PropTypes from 'prop-types';
 
+import Card from 'react-bootstrap/Card';
+import DownloadNote from './DownloadNote.js';
 import React from 'react';
 
 export class ViewNote extends React.PureComponent {
@@ -15,8 +17,8 @@ export class ViewNote extends React.PureComponent {
 
   render() {
     const { notebookPath, note, onClickView, workspace } = this.props;
-    const { view, sourceLocation } = note;
-    const { height, width, viewId } = view;
+    const { sourceLocation, view } = note;
+    const { download, name, width } = view;
     const onClick = (event) => {
       if (onClickView) {
         onClickView({
@@ -30,18 +32,28 @@ export class ViewNote extends React.PureComponent {
         });
       }
     };
-    const viewIdClass = viewId ? `viewId_${viewId}` : '';
     if (!note.url) {
       return <div></div>;
     }
+    let downloadNote;
+    if (download) {
+      downloadNote = (
+        <DownloadNote
+          key={note.hash}
+          download={download}
+          workspace={workspace}
+          style={{ float: 'right' }}
+        />
+      );
+    }
     return (
-      <img
-        class={viewIdClass}
-        style={{ width, height }}
-        variant="top"
-        src={note.url}
-        onClick={onClick}
-      />
+      <Card onClick={onClick} style={{ maxWidth: width }}>
+        <Card.Text>
+          {name}
+          {downloadNote}
+        </Card.Text>
+        <Card.Img src={note.url} variant="top" />
+      </Card>
     );
   }
 }

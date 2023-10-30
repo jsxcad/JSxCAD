@@ -1,7 +1,7 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, logInfo, read } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import * as g$1 from './jsxcad-geometry.js';
-import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, samplePointCloud, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, hash, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, inItem, ConvexHull, convexHull, inset as inset$1, involute as involute$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, masked as masked$1, masking as masking$1, hasMaterial, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, pack as pack$1, Page as Page$1, page as page$1, toPoints, ref as ref$1, Ref as Ref$1, repair as repair$1, reconstruct as reconstruct$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, separate as separate$1, seq as seq$1, serialize as serialize$1, rewriteTags, cast, XY as XY$1, shell as shell$1, simplify as simplify$1, measureBoundingBox, taggedSketch, smooth as smooth$1, getLeafs, Stroke as Stroke$1, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, validate as validate$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, computeReliefFromImage, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, Triangle as Triangle$1 } from './jsxcad-geometry.js';
+import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, as as as$1, asPart as asPart$1, And as And$1, at as at$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, samplePointCloud, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, hash, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, hold as hold$1, ConvexHull, convexHull, inItem, inset as inset$1, involute as involute$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, hasShowOverlay, computeOrientedBoundingBox, masked as masked$1, masking as masking$1, hasMaterial, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, pack as pack$1, Page as Page$1, page as page$1, toPoints, ref as ref$1, Ref as Ref$1, repair as repair$1, reconstruct as reconstruct$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, separate as separate$1, seq as seq$1, serialize as serialize$1, rewriteTags, cast, XY as XY$1, shell as shell$1, simplify as simplify$1, measureBoundingBox, taggedSketch, smooth as smooth$1, getLeafs, Stroke as Stroke$1, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, validate as validate$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, computeReliefFromImage, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, Triangle as Triangle$1 } from './jsxcad-geometry.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
@@ -630,6 +630,9 @@ const destructure2 = async (names, input, originalArgs, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
+  if (names.includes('on')) {
+    console.log(`QQ/on`);
+  }
   for (const baseSpec of specs) {
     const [spec, specOptionText] = baseSpec.split(':');
     const specOptions = {};
@@ -789,15 +792,17 @@ const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'geometry': {
         let result;
         for (const arg of args) {
-          let value = await resolve(input, arg, specOptions);
-          if (result === undefined && Shape.isShape(value)) {
-            result = await value.toGeometry();
-            if (!Shape.isGeometry(result)) {
-              throw Error('die');
+          if (result === undefined) {
+            let value = await resolve(input, arg, specOptions);
+            if (Shape.isShape(value)) {
+              result = await value.toGeometry();
+              if (!Shape.isGeometry(result)) {
+                throw Error('die');
+              }
+              continue;
             }
-          } else {
-            rest.push(arg);
           }
+          rest.push(arg);
         }
         output.push(result);
         break;
@@ -1679,7 +1684,14 @@ const baseViewOp = async (
   geometry,
   name,
   op = (_x) => (s) => s,
-  { size = 256, inline, width, height, position = [100, -100, 100] } = {}
+  {
+    download,
+    size = 256,
+    inline,
+    width,
+    height,
+    position = [100, -100, 100],
+  } = {}
 ) => {
   if (size !== undefined) {
     width = size;
@@ -1697,6 +1709,7 @@ const baseViewOp = async (
     const hash = generateUniqueId();
     const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
     const view = {
+      name,
       viewId,
       width,
       height,
@@ -1704,6 +1717,7 @@ const baseViewOp = async (
       inline,
       needsThumbnail: isNode,
       thumbnailPath,
+      download,
     };
     emit({ hash, path: viewPath, view });
     await write(viewPath, pageGeometry);
@@ -1723,6 +1737,7 @@ const topViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1733,7 +1748,16 @@ const topViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1748,6 +1772,7 @@ const gridViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1758,7 +1783,16 @@ const gridViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1773,6 +1807,7 @@ const frontViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1783,7 +1818,16 @@ const frontViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1798,6 +1842,7 @@ const sideViewOp = (
   modes,
   op = (_x) => (s) => s,
   {
+    download,
     size = 256,
     skin = true,
     outline = true,
@@ -1808,7 +1853,16 @@ const sideViewOp = (
   } = {},
   viewId
 ) => {
-  const options = { size, skin, outline, wireframe, width, height, position };
+  const options = {
+    download,
+    size,
+    skin,
+    outline,
+    wireframe,
+    width,
+    height,
+    position,
+  };
   return baseViewOp(applyModes(geometry, options, modes), viewId, op, options);
 };
 
@@ -1918,9 +1972,9 @@ const fuse = Shape.registerMethod3(
 
 const get = Shape.registerMethod3(
   ['get', 'g'],
-  ['inputGeometry', 'strings', 'function'],
+  ['inputGeometry', 'strings', 'modes:inItem,not,pass', 'function'],
   getList,
-  async (results, [geometry, _tags, groupOp = Group]) => {
+  async (results, [geometry, _tags, _mode, groupOp = Group]) => {
     const input = Shape.fromGeometry(geometry);
     const leafShapes = [];
     for (const result of results) {
@@ -1991,7 +2045,7 @@ const grow = Shape.registerMethod3(
 const hold = Shape.registerMethod3(
   'hold',
   ['inputGeometry', 'geometries'],
-  inItem
+  hold$1
 );
 
 const Hull = Shape.registerMethod3('Hull', ['geometries'], ConvexHull);
@@ -2308,9 +2362,10 @@ const pdf = Shape.registerMethod3(
         filename,
         type: 'application/pdf',
       };
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await gridView(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
+      await gridView(name, {
+        ...options.view,
+        download: { entries: [record] },
+      })(Shape.fromGeometry(entry));
     }
     return geometry;
   }
@@ -2748,11 +2803,7 @@ const sort = Shape.registerMethod3(
       ops.unshift({ dimension, order, limit });
       spec = rest;
     }
-    const sort = (list, depth = 0) => {
-      if (depth === ops.length) {
-        return Group$1(list);
-      }
-      const { dimension, order, limit } = ops[depth];
+    for (const { dimension, order, limit } of ops) {
       let axis;
       switch (dimension) {
         case 'x':
@@ -2768,10 +2819,10 @@ const sort = Shape.registerMethod3(
       if (limit !== undefined) {
         switch (order) {
           case '>':
-            list = list.filter(({ min }) => min[axis] > limit);
+            leafs = leafs.filter(({ min }) => min[axis] > limit);
             break;
           case '<':
-            list = list.filter(({ max }) => max[axis] < limit);
+            leafs = leafs.filter(({ max }) => max[axis] < limit);
             break;
         }
       }
@@ -2784,28 +2835,9 @@ const sort = Shape.registerMethod3(
           compare = (a, b) => a.max[axis] - b.max[axis];
           break;
       }
-      if (compare) {
-        // Fold.
-        list.sort(compare);
-        const folded = [];
-        let matching = [];
-        for (const item of list) {
-          if (matching.length === 0 || compare(item, matching[0]) === 0) {
-            matching.push(item);
-          } else {
-            folded.push(matching.map(({ leaf }) => leaf));
-            matching = [item];
-          }
-        }
-        if (matching.length > 0) {
-          folded.push(matching.map(({ leaf }) => leaf));
-        }
-        return Group$1(folded.map((matches) => sort(matches, depth + 1)));
-      }
-    };
-    const result = sort(leafs);
-    console.log(`QQ/sort: result=${JSON.stringify(result)}`);
-    return result;
+      leafs.sort(compare);
+    }
+    return Group$1(leafs.map(({ leaf }) => leaf));
   }
 );
 
@@ -2885,9 +2917,9 @@ const stl = Shape.registerMethod3(
         type: 'application/sla',
       };
       // Produce a view of what will be downloaded.
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await view(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
+      await view(name, { ...options.view, download: { entries: [record] } })(
+        Shape.fromGeometry(entry)
+      );
     }
     return geometry;
   }
@@ -2945,9 +2977,10 @@ const svg = Shape.registerMethod3(
         filename,
         type: 'image/svg+xml',
       };
-      const hash$1 = computeHash({ filename, options }) + hash(entry);
-      await gridView(name, options.view)(Shape.fromGeometry(entry));
-      emit({ download: { entries: [record] }, hash: hash$1 });
+      await gridView(name, {
+        ...options.view,
+        download: { entries: [record] },
+      })(Shape.fromGeometry(entry));
     }
     return geometry;
   }

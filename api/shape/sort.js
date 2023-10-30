@@ -26,11 +26,7 @@ export const sort = Shape.registerMethod3(
       ops.unshift({ dimension, order, limit });
       spec = rest;
     }
-    const sort = (list, depth = 0) => {
-      if (depth === ops.length) {
-        return Group(list);
-      }
-      const { dimension, order, limit } = ops[depth];
+    for (const { dimension, order, limit } of ops) {
       let axis;
       switch (dimension) {
         case 'x':
@@ -46,10 +42,10 @@ export const sort = Shape.registerMethod3(
       if (limit !== undefined) {
         switch (order) {
           case '>':
-            list = list.filter(({ min }) => min[axis] > limit);
+            leafs = leafs.filter(({ min }) => min[axis] > limit);
             break;
           case '<':
-            list = list.filter(({ max }) => max[axis] < limit);
+            leafs = leafs.filter(({ max }) => max[axis] < limit);
             break;
         }
       }
@@ -62,28 +58,9 @@ export const sort = Shape.registerMethod3(
           compare = (a, b) => a.max[axis] - b.max[axis];
           break;
       }
-      if (compare) {
-        // Fold.
-        list.sort(compare);
-        const folded = [];
-        let matching = [];
-        for (const item of list) {
-          if (matching.length === 0 || compare(item, matching[0]) === 0) {
-            matching.push(item);
-          } else {
-            folded.push(matching.map(({ leaf }) => leaf));
-            matching = [item];
-          }
-        }
-        if (matching.length > 0) {
-          folded.push(matching.map(({ leaf }) => leaf));
-        }
-        return Group(folded.map((matches) => sort(matches, depth + 1)));
-      }
-    };
-    const result = sort(leafs);
-    console.log(`QQ/sort: result=${JSON.stringify(result)}`);
-    return result;
+      leafs.sort(compare);
+    }
+    return Group(leafs.map(({ leaf }) => leaf));
   }
 );
 
