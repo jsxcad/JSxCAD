@@ -946,6 +946,272 @@ const createConversation = ({ agent, say }) => {
   return conversation;
 };
 
+var empty = {};
+
+var fs = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': empty
+});
+
+var v8 = {};
+
+var v8$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': v8
+});
+
+var nodeFetch = _ => _;
+
+/* global FileReader, self */
+
+const { deserialize } = v8$1;
+const { promises: promises$3 } = fs;
+
+// When base is undefined the persistent filesystem is disabled.
+let base;
+
+const qualifyPath = (path = '', workspace) => {
+  if (workspace !== undefined) {
+    return `jsxcad/${workspace}/${path}`;
+  } else if (base !== undefined) {
+    return `jsxcad/${base}${path}`;
+  } else {
+    return `jsxcad//${path}`;
+  }
+};
+
+const setupFilesystem = ({ fileBase } = {}) => {
+  // A prefix used to partition the persistent filesystem for multiple workspaces.
+  if (fileBase !== undefined) {
+    if (fileBase.endsWith('/')) {
+      base = fileBase;
+    } else {
+      base = `${fileBase}/`;
+    }
+  } else {
+    base = undefined;
+  }
+};
+
+const setupWorkspace = (workspace) =>
+  setupFilesystem({ fileBase: workspace });
+
+const getFilesystem = () => {
+  if (base !== undefined) {
+    const [filesystem] = base.split('/');
+    return filesystem;
+  }
+};
+
+const getWorkspace = () => getFilesystem();
+
+// This is keyed by prefix url and valued as FileSystemDirectoryHandle on browser and worker, or base path string on node.
+const localFilesystems = new Map();
+
+const setLocalFilesystem = (prefix, value) => {
+  localFilesystems.set(prefix, value);
+};
+
+const getLocalFilesystems = () => localFilesystems.entries();
+
+const fetchWithTimeout =
+  (fetch, AbortError) =>
+  async (resource, options = {}) => {
+    if (isBrowser || isWebWorker) {
+      // Bypass for local files.
+      for (const [prefix, handle] of localFilesystems) {
+        if (resource.startsWith(prefix)) {
+          try {
+            const fileSystemFileHandle = await handle.getFileHandle(
+              resource.substring(prefix.length)
+            );
+            const file = await fileSystemFileHandle.getFile();
+            return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (e) =>
+                resolve({ ok: true, arrayBuffer: () => e.target.result });
+              reader.readAsArrayBuffer(file);
+            });
+          } catch (e) {
+            // FIX: Check the error.
+          }
+        }
+      }
+    } else if (isNode) {
+      for (const [prefix, basePath] of localFilesystems) {
+        if (resource.startsWith(prefix)) {
+          const path = `${basePath}/${resource.substring(prefix.length)}`;
+          return { ok: true, arrayBuffer: () => externalFileFetcher(path) };
+        }
+      }
+    }
+    const { timeout = 8000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => {
+      controller.abort();
+    }, timeout);
+    try {
+      const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal,
+      });
+      return response;
+    } finally {
+      clearTimeout(id);
+    }
+  };
+
+const getUrlFetcher = () => {
+  if (isBrowser) {
+    return fetchWithTimeout(window.fetch);
+  }
+  if (isWebWorker) {
+    return fetchWithTimeout(self.fetch);
+  }
+  if (isNode) {
+    return fetchWithTimeout(nodeFetch);
+  }
+  throw Error('Expected browser or web worker or node');
+};
+
+const urlFetcher = getUrlFetcher();
+
+const getExternalFileFetcher = () => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (qualifiedPath) => {
+      try {
+        let data = await promises$3.readFile(qualifiedPath);
+        return data;
+      } catch (e) {
+        if (e.code && e.code === 'ENOENT') {
+          return {};
+        }
+        logError(
+          'sys/getExternalFile/error',
+          `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+        );
+      }
+    };
+  } else if (isBrowser || isWebWorker) {
+    return async (qualifiedPath) => {};
+  } else {
+    throw Error('Expected node or browser or web worker');
+  }
+};
+
+const externalFileFetcher = getExternalFileFetcher();
+
+const getInternalFileFetcher = () => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (qualifiedPath) => {
+      try {
+        let data = await promises$3.readFile(qualifiedPath);
+        // FIX: Use a proper version.
+        return { data: deserialize(data), version: 0 };
+      } catch (e) {
+        if (e.code && e.code === 'ENOENT') {
+          return {};
+        }
+        logError(
+          'sys/getInternalFile/error',
+          `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+        );
+        return {};
+      }
+    };
+  } else if (isBrowser || isWebWorker) {
+    return (qualifiedPath) =>
+      db(qualifiedPath).getItemAndVersion(qualifiedPath);
+  } else {
+    throw Error('Expected node or browser or web worker');
+  }
+};
+
+const internalFileFetcher = getInternalFileFetcher();
+
+const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return (qualifiedPath) => {
+      // FIX: Use a proper version.
+      return 0;
+    };
+  } else if (isBrowser || isWebWorker) {
+    return (qualifiedPath) => db(qualifiedPath).getItemVersion(qualifiedPath);
+  } else {
+    throw Error('Expected node or browser or web worker');
+  }
+};
+
+const internalFileVersionFetcher = getInternalFileVersionFetcher();
+
+// Fetch from internal store.
+const fetchPersistent = (qualifiedPath, { workspace }) => {
+  try {
+    if (workspace) {
+      return internalFileFetcher(qualifiedPath);
+    } else {
+      return {};
+    }
+  } catch (e) {
+    if (e.code && e.code === 'ENOENT') {
+      return {};
+    }
+    logError(
+      'sys/fetchPersistent/error',
+      `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+    );
+    console.log(
+      `sys/fetchPersistent/error: qualifiedPath=${qualifiedPath} error=${e.toString()}`
+    );
+  }
+};
+
+const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
+  try {
+    if (workspace) {
+      return internalFileVersionFetcher(qualifiedPath);
+    }
+  } catch (e) {
+    if (e.code && e.code === 'ENOENT') {
+      return;
+    }
+    logError(
+      'sys/fetchPersistentVersion/error',
+      `qualifiedPath=${qualifiedPath} error=${e.toString()}`
+    );
+  }
+};
+
+// Fetch from external sources.
+const fetchSources = async (sources, { workspace }) => {
+  // Try to load the data from a source.
+  for (const source of sources) {
+    if (typeof source === 'string') {
+      try {
+        if (source.startsWith('http:') || source.startsWith('https:')) {
+          logInfo('sys/fetchSources/url', source);
+          const response = await urlFetcher(source, { cache: 'reload' });
+          if (response.ok) {
+            return new Uint8Array(await response.arrayBuffer());
+          }
+        } else {
+          logInfo('sys/fetchSources/file', source);
+          // Assume a file path.
+          const data = await externalFileFetcher(source);
+          if (data !== undefined) {
+            return new Uint8Array(data);
+          }
+        }
+      } catch (e) {}
+    } else {
+      throw Error('Expected file source to be a string');
+    }
+  }
+};
+
 const nodeWorker = () => {};
 
 /* global Worker */
@@ -1024,6 +1290,9 @@ const createService = (spec, worker) => {
     };
     service.terminate = () => service.release(true);
     service.tell({ op: 'sys/attach', config: getConfig(), id: service.id });
+    for (const [path, handle] of getLocalFilesystems()) {
+      service.tell({ op: 'sys/setLocalFilesystemHandle', path, handle });
+    }
     return service;
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
@@ -1046,58 +1315,6 @@ const getControlValue = (module, label, defaultValue) => {
     return result;
   }
 };
-
-var empty = {};
-
-var fs = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': empty
-});
-
-var v8 = {};
-
-var v8$1 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': v8
-});
-
-// When base is undefined the persistent filesystem is disabled.
-let base;
-
-const qualifyPath = (path = '', workspace) => {
-  if (workspace !== undefined) {
-    return `jsxcad/${workspace}/${path}`;
-  } else if (base !== undefined) {
-    return `jsxcad/${base}${path}`;
-  } else {
-    return `jsxcad//${path}`;
-  }
-};
-
-const setupFilesystem = ({ fileBase } = {}) => {
-  // A prefix used to partition the persistent filesystem for multiple workspaces.
-  if (fileBase !== undefined) {
-    if (fileBase.endsWith('/')) {
-      base = fileBase;
-    } else {
-      base = `${fileBase}/`;
-    }
-  } else {
-    base = undefined;
-  }
-};
-
-const setupWorkspace = (workspace) =>
-  setupFilesystem({ fileBase: workspace });
-
-const getFilesystem = () => {
-  if (base !== undefined) {
-    const [filesystem] = base.split('/');
-    return filesystem;
-  }
-};
-
-const getWorkspace = () => getFilesystem();
 
 const fileChangeWatchers = new Set();
 const fileChangeWatchersByPath = new Map();
@@ -1239,8 +1456,6 @@ watchFileDeletion((path, workspace) => {
   }
   files.delete(qualifiedPath);
 });
-
-var nodeFetch = _ => _;
 
 /**
  * returns true if the given object is a promise
@@ -2372,19 +2587,19 @@ function dirname(path) {
   return root + dir;
 }
 
-const { promises: promises$3 } = fs;
+const { promises: promises$2 } = fs;
 const { serialize } = v8$1;
 
 const getFileWriter = () => {
   if (isNode) {
     return async (qualifiedPath, data) => {
       try {
-        await promises$3.mkdir(dirname(qualifiedPath), { recursive: true });
+        await promises$2.mkdir(dirname(qualifiedPath), { recursive: true });
       } catch (error) {
         throw error;
       }
       try {
-        await promises$3.writeFile(qualifiedPath, serialize(data));
+        await promises$2.writeFile(qualifiedPath, serialize(data));
         // FIX: Do proper versioning.
         const version = 0;
         return version;
@@ -2453,180 +2668,7 @@ const write = async (path, data, options = {}) => {
   return true;
 };
 
-/* global self */
-
-const { promises: promises$2 } = fs;
-const { deserialize } = v8$1;
-
-const fetchWithTimeout =
-  (fetch, AbortError) =>
-  async (resource, options = {}) => {
-    const { timeout = 8000 } = options;
-    const controller = new AbortController();
-    const id = setTimeout(() => {
-      controller.abort();
-    }, timeout);
-    try {
-      const response = await fetch(resource, {
-        ...options,
-        signal: controller.signal,
-      });
-      return response;
-    } finally {
-      clearTimeout(id);
-    }
-  };
-
-const getUrlFetcher = () => {
-  if (isBrowser) {
-    return fetchWithTimeout(window.fetch);
-  }
-  if (isWebWorker) {
-    return fetchWithTimeout(self.fetch);
-  }
-  if (isNode) {
-    return fetchWithTimeout(nodeFetch);
-  }
-  throw Error('Expected browser or web worker or node');
-};
-
-const urlFetcher = getUrlFetcher();
-
-const getExternalFileFetcher = () => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async (qualifiedPath) => {
-      try {
-        let data = await promises$2.readFile(qualifiedPath);
-        return data;
-      } catch (e) {
-        if (e.code && e.code === 'ENOENT') {
-          return {};
-        }
-        logError(
-          'sys/getExternalFile/error',
-          `qualifiedPath=${qualifiedPath} error=${e.toString()}`
-        );
-      }
-    };
-  } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {};
-  } else {
-    throw Error('Expected node or browser or web worker');
-  }
-};
-
-const externalFileFetcher = getExternalFileFetcher();
-
-const getInternalFileFetcher = () => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async (qualifiedPath) => {
-      try {
-        let data = await promises$2.readFile(qualifiedPath);
-        // FIX: Use a proper version.
-        return { data: deserialize(data), version: 0 };
-      } catch (e) {
-        if (e.code && e.code === 'ENOENT') {
-          return {};
-        }
-        logError(
-          'sys/getInternalFile/error',
-          `qualifiedPath=${qualifiedPath} error=${e.toString()}`
-        );
-        return {};
-      }
-    };
-  } else if (isBrowser || isWebWorker) {
-    return (qualifiedPath) =>
-      db(qualifiedPath).getItemAndVersion(qualifiedPath);
-  } else {
-    throw Error('Expected node or browser or web worker');
-  }
-};
-
-const internalFileFetcher = getInternalFileFetcher();
-
-const getInternalFileVersionFetcher = (qualify = qualifyPath) => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return (qualifiedPath) => {
-      // FIX: Use a proper version.
-      return 0;
-    };
-  } else if (isBrowser || isWebWorker) {
-    return (qualifiedPath) => db(qualifiedPath).getItemVersion(qualifiedPath);
-  } else {
-    throw Error('Expected node or browser or web worker');
-  }
-};
-
-const internalFileVersionFetcher = getInternalFileVersionFetcher();
-
-// Fetch from internal store.
-const fetchPersistent = (qualifiedPath, { workspace }) => {
-  try {
-    if (workspace) {
-      return internalFileFetcher(qualifiedPath);
-    } else {
-      return {};
-    }
-  } catch (e) {
-    if (e.code && e.code === 'ENOENT') {
-      return {};
-    }
-    logError(
-      'sys/fetchPersistent/error',
-      `qualifiedPath=${qualifiedPath} error=${e.toString()}`
-    );
-    console.log(
-      `sys/fetchPersistent/error: qualifiedPath=${qualifiedPath} error=${e.toString()}`
-    );
-  }
-};
-
-const fetchPersistentVersion = (qualifiedPath, { workspace }) => {
-  try {
-    if (workspace) {
-      return internalFileVersionFetcher(qualifiedPath);
-    }
-  } catch (e) {
-    if (e.code && e.code === 'ENOENT') {
-      return;
-    }
-    logError(
-      'sys/fetchPersistentVersion/error',
-      `qualifiedPath=${qualifiedPath} error=${e.toString()}`
-    );
-  }
-};
-
-// Fetch from external sources.
-const fetchSources = async (sources, { workspace }) => {
-  // Try to load the data from a source.
-  for (const source of sources) {
-    if (typeof source === 'string') {
-      try {
-        if (source.startsWith('http:') || source.startsWith('https:')) {
-          logInfo('sys/fetchSources/url', source);
-          const response = await urlFetcher(source, { cache: 'reload' });
-          if (response.ok) {
-            return new Uint8Array(await response.arrayBuffer());
-          }
-        } else {
-          logInfo('sys/fetchSources/file', source);
-          // Assume a file path.
-          const data = await externalFileFetcher(source);
-          if (data !== undefined) {
-            return new Uint8Array(data);
-          }
-        }
-      } catch (e) {}
-    } else {
-      throw Error('Expected file source to be a string');
-    }
-  }
-};
+// FIX: Refactor this once we figure it out.
 
 const readNonblocking = (path, options = {}) => {
   const { workspace = getFilesystem(), errorOnMissing = true } = options;
@@ -3184,4 +3226,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getLocalFilesystems, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setLocalFilesystem, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };

@@ -36,8 +36,10 @@ export { clearFileCache } from './files.js';
 export { decode, decodeFiles, encode, encodeFiles } from './encode.js';
 export {
   getFilesystem,
+  getLocalFilesystems,
   getWorkspace,
   qualifyPath,
+  setLocalFilesystem,
   setupFilesystem,
   setupWorkspace,
 } from './filesystem.js';

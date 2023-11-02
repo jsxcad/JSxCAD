@@ -1,4 +1,10 @@
-import { clearFileCache, getTimes, reportTimes, watchLog } from '@jsxcad/sys';
+import {
+  clearFileCache,
+  getTimes,
+  reportTimes,
+  setLocalFilesystem,
+  watchLog,
+} from '@jsxcad/sys';
 
 import { argv } from 'process';
 import { clearMeshCache } from '@jsxcad/algorithm-cgal';
@@ -45,6 +51,10 @@ const build = async (...args) => {
   });
   const notebookDurations = [];
   const startTime = new Date();
+  setLocalFilesystem(
+    'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/',
+    cwd
+  );
   const logWatcher = ({ type, source, text }) => {
     if (type === 'info' && isQuiet) {
       return;

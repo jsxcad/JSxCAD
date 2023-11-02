@@ -5543,7 +5543,8 @@ class Section extends ReactDOM$1.PureComponent {
       const views = section.views.map(note => v$1(ViewNote, {
         key: note.hash,
         note: note,
-        onClickView: onClickView
+        onClickView: onClickView,
+        workspace: workspace
       }));
       const editor = v$1(EditNote, {
         key: id,

@@ -107,6 +107,7 @@ const agent = async ({
   } = message;
   const {
     config,
+    handle,
     id,
     path,
     workspace,
@@ -125,6 +126,9 @@ const agent = async ({
       case 'sys/attach':
         self.id = id;
         sys.setConfig(config);
+        return;
+      case 'sys/setLocalFilesystemHandle':
+        sys.setLocalFilesystem(path, handle);
         return;
       case 'app/staticView':
         for (;;) {

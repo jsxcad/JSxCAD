@@ -1,4 +1,4 @@
-/* global FileReader */
+/* global FileReader, showDirectoryPicker */
 
 import './react-flexlayout.css';
 import './react-multi-split-pane.css';
@@ -12,6 +12,7 @@ import {
   clearCacheDb,
   clearEmitted,
   getActiveServices,
+  getLocalFilesystems,
   listFiles,
   log,
   logInfo,
@@ -20,6 +21,7 @@ import {
   remove,
   resolvePending,
   setConfig,
+  setLocalFilesystem,
   terminateActiveServices,
   watchFileCreation,
   watchFileDeletion,
@@ -602,6 +604,13 @@ class App extends React.Component {
     };
 
     this.Notebook.run = async (path, options) => {
+      const { LocalFilesystemHandles = [] } = this.state;
+      for (const { handle } of LocalFilesystemHandles) {
+        if ((await handle.queryPermission({ mode: 'read' })) === 'granted') {
+          continue;
+        }
+        await handle.requestPermission({ mode: 'read' });
+      }
       if (this.Notebook.runDebounce) {
         return;
       }
@@ -787,15 +796,6 @@ class App extends React.Component {
 
       // Let state propagate.
       await animationFrame();
-
-      // Automatically run the notebook on first load.
-      /*
-      if (!this.Notebook.runStart[path]) {
-        this.Notebook.run(path);
-      }
-      */
-
-      // return notebookText;
     };
 
     this.Notebook.save = async (path) => {
@@ -877,7 +877,6 @@ class App extends React.Component {
       model.doAction(FlexLayout.Actions.selectTab(nodeId));
       await animationFrame();
       this.View.store();
-      await this.Notebook.run(path);
     };
 
     this.Notebook.close = async (closedPath) => {
@@ -1129,14 +1128,6 @@ class App extends React.Component {
         WorkspaceOpenPaths: [...WorkspaceOpenPaths, path],
       });
       await this.Notebook.load(path);
-      /*
-      const text = await this.Notebook.load(path);
-      if (!mode) {
-        await this.updateState({
-          [`NotebookMode/${path}`]: text ? 'view' : 'edit',
-        });
-      }
-      */
       const nodeId = `Notebook/${path}`;
       const toNameFromPath = (path) => {
         const pieces = path.split('/');
@@ -1166,10 +1157,18 @@ class App extends React.Component {
       reader.readAsArrayBuffer(file);
     };
 
+    this.Workspace.setLocalFilesystem = async (prefix, handle) => {
+      const { LocalFilesystemHandles = [] } = this.state;
+      setLocalFilesystem(prefix, handle);
+      await this.updateState({
+        LocalFilesystemHandles: [...LocalFilesystemHandles, { prefix, handle }],
+      });
+      await this.Workspace.store();
+    };
+
     this.Workspace.openWorkingFile = async (file) => {
       const path = file.substring('source/'.length);
       await this.Notebook.clickLink(path);
-      this.Notebook.run(path);
     };
 
     this.Workspace.closeWorkingFile = async (file) => {
@@ -1189,9 +1188,14 @@ class App extends React.Component {
       try {
         this.Model.saving = true;
         const { workspace } = this.props;
-        const { WorkspaceOpenPaths, WorkspaceLoadPath, WorkspaceLoadPrefix } =
-          this.state;
+        const {
+          LocalFilesystemHandles,
+          WorkspaceOpenPaths,
+          WorkspaceLoadPath,
+          WorkspaceLoadPrefix,
+        } = this.state;
         const config = {
+          LocalFilesystemHandles,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix,
@@ -1209,12 +1213,21 @@ class App extends React.Component {
     };
 
     this.Workspace.restore = async () => {
+      const { workspace } = this.props;
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
+        LocalFilesystemHandles = [],
         WorkspaceLoadPath,
         WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/',
       } = await read('config/Workspace', { workspace, otherwise: {} });
-      await this.updateState({ WorkspaceLoadPath, WorkspaceLoadPrefix });
+      await this.updateState({
+        LocalFilesystemHandles,
+        WorkspaceLoadPath,
+        WorkspaceLoadPrefix,
+      });
+      for (const { prefix, handle } of LocalFilesystemHandles) {
+        setLocalFilesystem(prefix, handle);
+      }
     };
 
     this.Workspace.export = async (prefix) => {
@@ -1270,6 +1283,14 @@ class App extends React.Component {
           const computeListItemVariant = (file) =>
             isOpen(file) ? 'primary' : 'secondary';
           const prefix = `source/${WorkspaceLoadPrefix}`;
+          const localFilesystemEntries = [];
+          for (const [prefix, { directory }] of getLocalFilesystems()) {
+            localFilesystemEntries.push(
+              <div>
+                {prefix} : {directory}
+              </div>
+            );
+          }
           return (
             <div>
               <Card>
@@ -1438,6 +1459,28 @@ class App extends React.Component {
                     <Button variant="primary" onClick={this.Workspace.reset}>
                       Reset
                     </Button>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Local Filesystem</Card.Title>
+                  <Card.Text>
+                    <Form>
+                      <Button
+                        variant="primary"
+                        onClick={async () => {
+                          const handle = await showDirectoryPicker();
+                          this.Workspace.setLocalFilesystem(
+                            WorkspaceLoadPrefix,
+                            handle
+                          );
+                        }}
+                      >
+                        Set Local Filesystem
+                      </Button>
+                      {localFilesystemEntries}
+                    </Form>
                   </Card.Text>
                 </Card.Body>
               </Card>
