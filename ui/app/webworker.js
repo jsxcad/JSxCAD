@@ -36,6 +36,7 @@ const agent = async ({ ask, message, type, tell }) => {
   const { op } = message;
   const {
     config,
+    handle,
     id,
     path,
     workspace,
@@ -54,6 +55,9 @@ const agent = async ({ ask, message, type, tell }) => {
       case 'sys/attach':
         self.id = id;
         sys.setConfig(config);
+        return;
+      case 'sys/setLocalFilesystemHandle':
+        sys.setLocalFilesystem(path, handle);
         return;
       case 'app/staticView':
         for (;;) {

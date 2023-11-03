@@ -2,6 +2,7 @@ import { isBrowser, isNode } from './browserOrNode.js';
 
 import { createConversation } from './conversation.js';
 import { getConfig } from './config.js';
+import { getLocalFilesystems } from './filesystem.js';
 import { log } from './log.js';
 import { nodeWorker } from './nodeWorker.js';
 import { webWorker } from './webWorker.js';
@@ -77,6 +78,9 @@ export const createService = (spec, worker) => {
     };
     service.terminate = () => service.release(true);
     service.tell({ op: 'sys/attach', config: getConfig(), id: service.id });
+    for (const [path, handle] of getLocalFilesystems()) {
+      service.tell({ op: 'sys/setLocalFilesystemHandle', path, handle });
+    }
     return service;
   } catch (e) {
     log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });

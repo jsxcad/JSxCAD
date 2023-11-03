@@ -52,7 +52,12 @@ export class Section extends React.PureComponent {
         <MdNote key={note.hash} note={note} />
       ));
       const views = section.views.map((note) => (
-        <ViewNote key={note.hash} note={note} onClickView={onClickView} />
+        <ViewNote
+          key={note.hash}
+          note={note}
+          onClickView={onClickView}
+          workspace={workspace}
+        />
       ));
       const editor = (
         <EditNote

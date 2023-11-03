@@ -1,7 +1,7 @@
 ### Bear model sliced
 
 ```JavaScript
-const url = control('url', 'https://jsxcad.js.org/stl/bear.stl', 'input');
+const url = control('url', 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/projects/pentacular/bear/bear.stl', 'input');
 ```
 
 ```JavaScript
