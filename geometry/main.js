@@ -86,6 +86,7 @@ export {
   extrudeAlongZ,
   extrudeAlongNormal,
 } from './extrude.js';
+export { fair } from './fair.js';
 export { fix } from './fix.js';
 export { flat } from './flat.js';
 export { fresh } from './tagged/fresh.js';

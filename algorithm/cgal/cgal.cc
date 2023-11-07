@@ -190,6 +190,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("EagerTransform", &EagerTransform,
                        emscripten::allow_raw_pointers());
   emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
+  emscripten::function("Fair", &Fair, emscripten::allow_raw_pointers());
   emscripten::function("FaceEdges", &FaceEdges,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());

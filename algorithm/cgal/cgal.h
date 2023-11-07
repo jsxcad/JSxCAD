@@ -131,6 +131,7 @@ typedef Kernel::Point_3 Point;
 typedef std::vector<Point> Points;
 typedef Kernel::Ray_3 Ray;
 typedef Kernel::Segment_3 Segment;
+typedef Epick_kernel::Segment_3 Epick_segment;
 typedef std::vector<Segment> Segments;
 typedef Kernel::Triangle_2 Triangle_2;
 typedef Kernel::Triangle_3 Triangle;
@@ -202,6 +203,13 @@ typedef boost::optional<AABB_tree::Intersection_and_primitive_id<Point>::Type>
 typedef boost::optional<AABB_tree::Intersection_and_primitive_id<Segment>::Type>
     Segment_intersection;
 typedef CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> Side_of_triangle_mesh;
+
+typedef CGAL::AABB_face_graph_triangle_primitive<Epick_surface_mesh>
+    Epick_primitive;
+typedef CGAL::AABB_traits<Epick_kernel, Epick_primitive> Epick_traits;
+typedef CGAL::AABB_tree<Epick_traits> Epick_AABB_tree;
+typedef CGAL::Side_of_triangle_mesh<Epick_surface_mesh, Epick_kernel>
+    Epick_side_of_triangle_mesh;
 
 typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
     General_polygon_set_2;
@@ -2131,6 +2139,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "EagerTransform.h"
 #include "Extrude.h"
 #include "FaceEdges.h"
+#include "Fair.h"
 #include "Fill.h"
 #include "Fix.h"
 #include "FromPolygonSoup.h"

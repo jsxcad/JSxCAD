@@ -77,6 +77,7 @@ export { edges } from './edges.js';
 export { extrudeX, extrudeY, extrudeZ, ex, ey, ez } from './extrude.js';
 export { extrudeAlong, e } from './extrudeAlong.js';
 export { faces } from './faces.js';
+export { fair } from './fair.js';
 export { fill } from './fill.js';
 export { fit } from './fit.js';
 export { fitTo } from './fitTo.js';

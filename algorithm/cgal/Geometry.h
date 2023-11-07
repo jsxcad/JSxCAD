@@ -44,18 +44,7 @@ std::shared_ptr<const TopoDS_Shape> transformOcctShape(
 
 class Geometry {
  public:
-  Geometry()
-      : test_mode_(false),
-        size_(0),
-        is_absolute_frame_(false),
-        dn1(1),
-        dn2(2),
-        dn3(3),
-        dn4(4),
-        dn5(5),
-        dn6(6),
-        dn7(7),
-        dn8(8) {}
+  Geometry() : test_mode_(false), size_(0), is_absolute_frame_(false) {}
 
   void setSize(int size) {
     types_.clear();
@@ -97,7 +86,9 @@ class Geometry {
     meshes_.resize(size);
     epick_meshes_.resize(size);
     aabb_trees_.resize(size);
+    epick_aabb_trees_.resize(size);
     on_sides_.resize(size);
+    on_epick_sides_.resize(size);
     input_segments_.resize(size);
     segments_.resize(size);
     edges_.resize(size);
@@ -204,9 +195,19 @@ class Geometry {
 
   bool has_aabb_tree(int nth) { return aabb_trees_[nth] != nullptr; }
 
+  bool has_epick_aabb_tree(int nth) {
+    return epick_aabb_trees_[nth] != nullptr;
+  }
+
   void update_aabb_tree(int nth) {
     Surface_mesh& m = mesh(nth);
     aabb_trees_[nth].reset(new AABB_tree(faces(m).first, faces(m).second, m));
+  }
+
+  void update_epick_aabb_tree(int nth) {
+    Epick_surface_mesh& m = epick_mesh(nth);
+    epick_aabb_trees_[nth].reset(
+        new Epick_AABB_tree(faces(m).first, faces(m).second, m));
   }
 
   AABB_tree& aabb_tree(int nth) {
@@ -216,10 +217,24 @@ class Geometry {
     return *aabb_trees_[nth];
   }
 
+  Epick_AABB_tree& epick_aabb_tree(int nth) {
+    if (!has_epick_aabb_tree(nth)) {
+      update_epick_aabb_tree(nth);
+    }
+    return *epick_aabb_trees_[nth];
+  }
+
   bool has_on_side(int nth) { return on_sides_[nth] != nullptr; }
+
+  bool has_on_epick_side(int nth) { return on_epick_sides_[nth] != nullptr; }
 
   void update_on_side(int nth) {
     on_sides_[nth].reset(new Side_of_triangle_mesh(aabb_tree(nth)));
+  }
+
+  void update_on_epick_side(int nth) {
+    on_epick_sides_[nth].reset(
+        new Epick_side_of_triangle_mesh(epick_aabb_tree(nth)));
   }
 
   Side_of_triangle_mesh& on_side(int nth) {
@@ -227,6 +242,13 @@ class Geometry {
       update_on_side(nth);
     }
     return *on_sides_[nth];
+  }
+
+  Epick_side_of_triangle_mesh& on_epick_side(int nth) {
+    if (!has_on_epick_side(nth)) {
+      update_on_epick_side(nth);
+    }
+    return *on_epick_sides_[nth];
   }
 
   bool has_gps(int nth) { return gps_[nth] != nullptr; }
@@ -724,34 +746,28 @@ class Geometry {
   void set_local_frame() { is_absolute_frame_ = false; }
 
   bool test_mode_;
-  DN dn1;
   int size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
   std::vector<std::shared_ptr<const Transformation>> transforms_;
-  DN dn2;
   std::vector<Plane> planes_;
   std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
-  DN dn3;
   std::vector<std::shared_ptr<const Surface_mesh>> input_meshes_;
   std::vector<std::shared_ptr<Surface_mesh>> meshes_;
-  DN dn4;
   std::vector<std::shared_ptr<Epick_surface_mesh>> epick_meshes_;
   std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
+  std::vector<std::unique_ptr<Epick_AABB_tree>> epick_aabb_trees_;
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
-  DN dn5;
+  std::vector<std::unique_ptr<Epick_side_of_triangle_mesh>> on_epick_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;
   std::vector<std::unique_ptr<Segments>> segments_;
-  DN dn6;
   std::vector<std::unique_ptr<Edges>> edges_;
   std::vector<std::unique_ptr<Points>> input_points_;
   std::vector<std::unique_ptr<Points>> points_;
-  DN dn7;
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
-  DN dn8;
 #ifdef ENABLE_OCCT
   std::vector<std::shared_ptr<const TopoDS_Shape>> occt_shape_;
 #endif

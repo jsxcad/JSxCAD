@@ -50,6 +50,7 @@ export { eachTriangle } from './eachTriangle.js';
 export { eagerTransform } from './eagerTransform.js';
 export { extrude } from './extrude.js';
 export { faceEdges } from './faceEdges.js';
+export { fair } from './fair.js';
 export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
