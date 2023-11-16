@@ -123,6 +123,7 @@ typedef CGAL::Cartesian<CGAL::Exact_rational> Exact_rational_kernel;
 typedef Epeck_kernel Kernel;
 
 typedef Kernel::FT FT;
+typedef Epick_kernel::FT Epick_FT;
 typedef Kernel::RT RT;
 typedef Kernel::Line_3 Line;
 typedef Kernel::Plane_3 Plane;
@@ -140,6 +141,8 @@ typedef Kernel::Vector_3 Vector;
 typedef Kernel::Direction_3 Direction;
 typedef Kernel::Direction_2 Direction_2;
 typedef Kernel::Aff_transformation_3 Transformation;
+typedef Epick_kernel::Aff_transformation_3 Epick_transformation;
+typedef Epeck_kernel::Aff_transformation_3 Epeck_transformation;
 typedef std::vector<Point> Points;
 typedef std::vector<Point_2> Point_2s;
 
@@ -257,6 +260,7 @@ Point_2 compute_approximate_point_2(Point_2 p2) {
                  compute_approximate_point_value(p2.y()));
 }
 
+template <typename RT>
 void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
   // Convert angle to radians.
   double radians = turn * 2 * CGAL_PI;
@@ -465,8 +469,11 @@ Transformation orient_along_z(Vector source, Vector source_normal,
   return transform;
 }
 
-Transformation translate(const Vector& vector) {
-  return Transformation(CGAL::TRANSLATION, vector);
+template <typename Vector>
+CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Vector>::Kernel>
+translate(const Vector& vector) {
+  return CGAL::Aff_transformation_3<
+      typename CGAL::Kernel_traits<Vector>::Kernel>(CGAL::TRANSLATION, vector);
 }
 
 Transformation orient_plane(Plane source, Plane target) {
@@ -2154,6 +2161,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Loft.h"
 #include "MakeAbsolute.h"
 #include "MakeUnitSphere.h"
+#include "MinimizeOverhang.h"
 #include "Offset.h"
 #include "Outline.h"
 #include "Reconstruct.h"

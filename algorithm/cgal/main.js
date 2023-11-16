@@ -73,6 +73,7 @@ export { makeAbsolute } from './makeAbsolute.js';
 export { makeOcctBox } from './occt.js';
 export { makeOcctSphere } from './occt.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
+export { minimizeOverhang } from './minimizeOverhang.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { reconstruct } from './reconstruct.js';
 export { remesh } from './remesh.js';

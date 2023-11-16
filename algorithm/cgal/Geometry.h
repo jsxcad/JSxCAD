@@ -330,7 +330,11 @@ class Geometry {
     transforms_[nth] = transform;
   }
 
-  void copyTransform(int nth, const Transformation transform) {
+  void applyTransform(int nth, const Transformation& xform) {
+    copyTransform(nth, xform * transform(nth));
+  }
+
+  void copyTransform(int nth, const Transformation& transform) {
     transforms_[nth].reset(new Transformation(transform));
   }
 

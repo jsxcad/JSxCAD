@@ -192,6 +192,7 @@ export { masking } from './masking.js';
 export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';
 export { measureVolume } from './tagged/measureVolume.js';
+export { minimizeOverhang } from './minimizeOverhang.js';
 export { moveAlong, moveAlongNormal } from './moveAlong.js';
 export { noGhost } from './noGhost.js';
 export { nth } from './nth.js';
