@@ -15,9 +15,15 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Transformation__to_exact", &Transformation__to_exact);
   emscripten::function("Transformation__translate", &Transformation__translate);
   emscripten::function("Transformation__scale", &Transformation__scale);
-  emscripten::function("Transformation__rotate_x", &Transformation__rotate_x);
-  emscripten::function("Transformation__rotate_y", &Transformation__rotate_y);
-  emscripten::function("Transformation__rotate_z", &Transformation__rotate_z);
+  emscripten::function(
+      "Transformation__rotate_x",
+      &Transformation__rotate_x<Epeck_transformation, Epeck_kernel::RT>);
+  emscripten::function(
+      "Transformation__rotate_y",
+      &Transformation__rotate_y<Epeck_transformation, Epeck_kernel::RT>);
+  emscripten::function(
+      "Transformation__rotate_z",
+      &Transformation__rotate_z<Epeck_transformation, Epeck_kernel::RT>);
   emscripten::function("Transformation__rotate_x_to_y0",
                        &Transformation__rotate_x_to_y0);
   emscripten::function("Transformation__rotate_y_to_x0",
@@ -190,6 +196,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("EagerTransform", &EagerTransform,
                        emscripten::allow_raw_pointers());
   emscripten::function("Extrude", &Extrude, emscripten::allow_raw_pointers());
+  emscripten::function("Fair", &Fair, emscripten::allow_raw_pointers());
   emscripten::function("FaceEdges", &FaceEdges,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
@@ -210,6 +217,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("MakeAbsolute", &MakeAbsolute,
                        emscripten::allow_raw_pointers());
   emscripten::function("MakeUnitSphere", &MakeUnitSphere,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("MinimizeOverhang", &MinimizeOverhang,
                        emscripten::allow_raw_pointers());
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());

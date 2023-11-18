@@ -1,47 +1,15 @@
-const Rim = (diameter = 37, thickness = 2) =>
-  Arc(diameter, { start: 1/4 })
-    .eachPoint((p) => (s) => Orb(thickness).to(p), ChainHull);
-
-const Monocle = (
-  diameter = 37,
-  height = 11,
-  frameThickness = 2,
-  lensThickness = 2
-) =>
-  Rim(diameter, frameThickness)
-    .z(0)
-    .join(
-      'exact',
-      Hull(Arc(1.8, 3.6), Arc(3.6).z(height))
-        .join('exact', Orb(3.6, 3.6, 2, { zag: 0.5 }).z(height))
-        .x(37 / 2)
-        .rz(3 / 360, 3 / 8, 267 / 360)
-    )
-    .fitTo(
-      Arc(diameter)
-        .ez([height - lensThickness, height])
-        .masked(grow('z', 0.1))
-        .material('glass')
-        .as('lens')
-    )
-    .view()
-    .stl(
-      getNot('lens'),
-      `frame-${diameter}x${height}x${frameThickness}x${lensThickness}`
-    )
-    .stl(
-      get('lens'),
-      `lens-${diameter}x${height}x${frameThickness}x${lensThickness}`
-    );
-
-const monocle_37x12x2x2 = await Monocle(37, 12, 2, 2);
-
-const simpleMonocle = Arc(35)
-  .cut(inset(1))
-  .ez([0, 2], [8, 10])
-  .join(Arc(33).cut(inset(1)).ez([10]))
-  .clean()
+const mono40e = And(
+  Loft(Arc(40), Arc(34).z(14.5))
+    .cut(Loft(Arc(40).inset(2), Arc(31.75).z(12.5), Arc(31.75).z(14.5)))
+    .cut(Arc(40).ez([3, 12.5])),
+  Loft(
+    Arc(4, 2)
+      .y((40 - 2) / 2 - 0.6)
+      .z(3),
+    Arc(4, 2)
+      .y((34 - 2) / 2 + 0.4)
+      .z(12.5)
+  ).seq({ by: 1 / 3 }, rz)
+)
   .fuse()
-  .clip(ArcX(35, [16, -16], [-12, 12]).y(20 / 2))
-  .join(Arc(35).cut(inset(1)).ez([0, 2]))
-  .stl('s2');
+  .stl('mono40e');

@@ -86,13 +86,7 @@ std::shared_ptr<const Transformation> Transformation__scale(double x, double y,
       0, compute_scaling_factor(z), 0, 1));
 }
 
-std::shared_ptr<const Transformation> Transformation__rotate_x(double a) {
-  RT sin_alpha, cos_alpha, w;
-  compute_turn(a, sin_alpha, cos_alpha, w);
-  return std::shared_ptr<const Transformation>(new Transformation(
-      w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0, sin_alpha, cos_alpha, 0, w));
-}
-
+template <typename Transformation, typename RT>
 Transformation TransformationFromXTurn(double turn) {
   RT sin_alpha, cos_alpha, w;
   compute_turn(turn, sin_alpha, cos_alpha, w);
@@ -100,25 +94,44 @@ Transformation TransformationFromXTurn(double turn) {
                         cos_alpha, 0, w);
 }
 
+template <typename Transformation, typename RT>
+std::shared_ptr<const Transformation> Transformation__rotate_x(double a) {
+  RT sin_alpha, cos_alpha, w;
+  compute_turn(a, sin_alpha, cos_alpha, w);
+  return std::shared_ptr<const Transformation>(
+      new Transformation(TransformationFromXTurn<Transformation, RT>(a)));
+}
+
+template <typename Transformation, typename RT>
+Transformation TransformationFromYTurn(double turn) {
+  RT sin_alpha, cos_alpha, w;
+  compute_turn(turn, sin_alpha, cos_alpha, w);
+  return Transformation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha, 0,
+                        cos_alpha, 0, w);
+}
+
+template <typename Transformation, typename RT>
 std::shared_ptr<const Transformation> Transformation__rotate_y(double a) {
   RT sin_alpha, cos_alpha, w;
   compute_turn(a, sin_alpha, cos_alpha, w);
-  return std::shared_ptr<const Transformation>(new Transformation(
-      cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha, 0, cos_alpha, 0, w));
+  return std::shared_ptr<const Transformation>(
+      new Transformation(TransformationFromYTurn<Transformation, RT>(a)));
 }
 
+template <typename Transformation, typename RT>
+Transformation TransformationFromZTurn(double turn) {
+  RT sin_alpha, cos_alpha, w;
+  compute_turn(turn, sin_alpha, cos_alpha, w);
+  return Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0, 0,
+                        0, 0, w, 0, w);
+}
+
+template <typename Transformation, typename RT>
 std::shared_ptr<const Transformation> Transformation__rotate_z(double a) {
-  try {
-    RT sin_alpha, cos_alpha, w;
-    compute_turn(a, sin_alpha, cos_alpha, w);
-    return std::shared_ptr<const Transformation>(
-        new Transformation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha, 0,
-                           0, 0, 0, w, 0, w));
-  } catch (const std::exception& e) {
-    std::cout << "QQ/Transformation__rotate_z/exception" << std::endl;
-    std::cout << e.what() << std::endl;
-    throw;
-  }
+  RT sin_alpha, cos_alpha, w;
+  compute_turn(a, sin_alpha, cos_alpha, w);
+  return std::shared_ptr<const Transformation>(
+      new Transformation(TransformationFromZTurn<Transformation, RT>(a)));
 }
 
 std::shared_ptr<const Transformation> Transformation__rotate_x_to_y0(double x,
