@@ -1,4 +1,4 @@
-import { readOrWatch, read, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystem, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, read, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystems, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
@@ -46094,9 +46094,7 @@ class App extends ReactDOM$3.Component {
       const {
         LocalFilesystemHandles = []
       } = this.state;
-      for (const {
-        handle
-      } of LocalFilesystemHandles) {
+      for (const [, handle] of LocalFilesystemHandles) {
         if ((await handle.queryPermission({
           mode: 'read'
         })) === 'granted') {
@@ -46701,14 +46699,17 @@ class App extends ReactDOM$3.Component {
     };
     this.Workspace.setLocalFilesystem = async (prefix, handle) => {
       const {
-        LocalFilesystemHandles = []
+        LocalFilesystemHandles = new Map()
       } = this.state;
-      setLocalFilesystem(prefix, handle);
+      const updatedLocalFilesystemHandles = new Map(LocalFilesystemHandles);
+      if (handle === undefined) {
+        updatedLocalFilesystemHandles.delete(prefix);
+      } else {
+        updatedLocalFilesystemHandles.set(prefix, handle);
+      }
+      setLocalFilesystems(updatedLocalFilesystemHandles);
       await this.updateState({
-        LocalFilesystemHandles: [...LocalFilesystemHandles, {
-          prefix,
-          handle
-        }]
+        LocalFilesystemHandles: updatedLocalFilesystemHandles
       });
       await this.Workspace.store();
     };
@@ -46769,24 +46770,24 @@ class App extends ReactDOM$3.Component {
       } = this.props;
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
-        LocalFilesystemHandles = [],
+        LocalFilesystemHandles = new Map(),
         WorkspaceLoadPath,
         WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/'
       } = await read('config/Workspace', {
         workspace,
         otherwise: {}
       });
+      for (const [key, value] of [...LocalFilesystemHandles]) {
+        if (key === undefined || typeof value === 'string') {
+          LocalFilesystemHandles.delete(key);
+        }
+      }
       await this.updateState({
         LocalFilesystemHandles,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix
       });
-      for (const {
-        prefix,
-        handle
-      } of LocalFilesystemHandles) {
-        setLocalFilesystem(prefix, handle);
-      }
+      setLocalFilesystems(LocalFilesystemHandles);
     };
     this.Workspace.export = async prefix => {
       const {
@@ -46845,10 +46846,13 @@ class App extends ReactDOM$3.Component {
             const computeListItemVariant = file => isOpen(file) ? 'primary' : 'secondary';
             const prefix = `source/${WorkspaceLoadPrefix}`;
             const localFilesystemEntries = [];
-            for (const [prefix, {
-              directory
-            }] of getLocalFilesystems()) {
-              localFilesystemEntries.push(v$1("div", null, prefix, " : ", directory));
+            for (const [prefix] of getLocalFilesystems()) {
+              if (prefix === undefined) {
+                continue;
+              }
+              localFilesystemEntries.push(v$1(Button, {
+                onClick: () => this.Workspace.setLocalFilesystem(prefix)
+              }, "Remove ", prefix));
             }
             return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Set Base Path"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
               controlId: "WorkspaceLoadPrefixId"
@@ -46935,13 +46939,19 @@ class App extends ReactDOM$3.Component {
             }, "Upload from Computer"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Workspace"), v$1(Card$1.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Workspace.reset
-            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Button, {
+            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
+              controlId: "AddLocalFilesystemPrefixId"
+            }, v$1(Form$1.Control, {
+              id: "AddLocalFilesystemPrefix",
+              placeholder: "Prefix",
+              value: ""
+            })), v$1(Button, {
               variant: "primary",
               onClick: async () => {
                 const handle = await showDirectoryPicker();
-                this.Workspace.setLocalFilesystem(WorkspaceLoadPrefix, handle);
+                this.Workspace.setLocalFilesystem(document.getElementById('AddLocalFilesystemPrefix').value, handle);
               }
-            }, "Set Local Filesystem"), localFilesystemEntries)))));
+            }, "Add Local Filesystem"), localFilesystemEntries)))));
           }
         case 'Notebook':
           {

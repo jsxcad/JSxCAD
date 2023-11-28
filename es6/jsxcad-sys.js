@@ -1006,44 +1006,62 @@ const getFilesystem = () => {
 const getWorkspace = () => getFilesystem();
 
 // This is keyed by prefix url and valued as FileSystemDirectoryHandle on browser and worker, or base path string on node.
-const localFilesystems = new Map();
+let localFilesystems = new Map();
 
 const setLocalFilesystem = (prefix, value) => {
-  localFilesystems.set(prefix, value);
+  if (value === undefined) {
+    localFilesystems.delete(prefix);
+  } else {
+    localFilesystems.set(prefix, value);
+  }
+};
+
+const setLocalFilesystems = (map) => {
+  localFilesystems = map;
 };
 
 const getLocalFilesystems = () => localFilesystems.entries();
 
+const maybeFetchLocalFile = async (resource) => {
+  // Bypass for local files.
+  if (isBrowser || isWebWorker) {
+    for (const [prefix, handle] of localFilesystems) {
+      if (resource.startsWith(prefix)) {
+        try {
+          const fileSystemFileHandle = await handle.getFileHandle(
+            resource.substring(prefix.length)
+          );
+          const file = await fileSystemFileHandle.getFile();
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) =>
+              resolve({ ok: true, arrayBuffer: () => e.target.result });
+            reader.readAsArrayBuffer(file);
+          });
+        } catch (e) {
+          console.log(e);
+          const entries = [...(await handle.entries())];
+          console.log(entries);
+          // FIX: Check the error.
+        }
+      }
+    }
+  } else if (isNode) {
+    for (const [prefix, basePath] of localFilesystems) {
+      if (resource.startsWith(prefix)) {
+        const path = `${basePath}/${resource.substring(prefix.length)}`;
+        return { ok: true, arrayBuffer: () => externalFileFetcher(path) };
+      }
+    }
+  }
+};
+
 const fetchWithTimeout =
   (fetch, AbortError) =>
   async (resource, options = {}) => {
-    if (isBrowser || isWebWorker) {
-      // Bypass for local files.
-      for (const [prefix, handle] of localFilesystems) {
-        if (resource.startsWith(prefix)) {
-          try {
-            const fileSystemFileHandle = await handle.getFileHandle(
-              resource.substring(prefix.length)
-            );
-            const file = await fileSystemFileHandle.getFile();
-            return new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = (e) =>
-                resolve({ ok: true, arrayBuffer: () => e.target.result });
-              reader.readAsArrayBuffer(file);
-            });
-          } catch (e) {
-            // FIX: Check the error.
-          }
-        }
-      }
-    } else if (isNode) {
-      for (const [prefix, basePath] of localFilesystems) {
-        if (resource.startsWith(prefix)) {
-          const path = `${basePath}/${resource.substring(prefix.length)}`;
-          return { ok: true, arrayBuffer: () => externalFileFetcher(path) };
-        }
-      }
+    const local = await maybeFetchLocalFile(resource);
+    if (local) {
+      return local;
     }
     const { timeout = 8000 } = options;
     const controller = new AbortController();
@@ -1080,6 +1098,13 @@ const getExternalFileFetcher = () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (qualifiedPath) => {
+      const local = await maybeFetchLocalFile(qualifiedPath);
+      if (local) {
+        const { ok, arrayBuffer } = local;
+        if (ok) {
+          return arrayBuffer();
+        }
+      }
       try {
         let data = await promises$3.readFile(qualifiedPath);
         return data;
@@ -1094,7 +1119,15 @@ const getExternalFileFetcher = () => {
       }
     };
   } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {};
+    return async (qualifiedPath) => {
+      const local = await maybeFetchLocalFile(qualifiedPath);
+      if (local) {
+        const { ok, arrayBuffer } = local;
+        if (ok) {
+          return arrayBuffer();
+        }
+      }
+    };
   } else {
     throw Error('Expected node or browser or web worker');
   }
@@ -3226,4 +3259,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getLocalFilesystems, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setLocalFilesystem, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getLocalFilesystems, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setLocalFilesystem, setLocalFilesystems, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };

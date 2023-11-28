@@ -2047,9 +2047,9 @@ const makeUnitSphere = (angularBound, radiusBound, distanceBound) =>
     }
   });
 
-const minimizeOverhang = (inputs, threshold) =>
+const minimizeOverhang = (inputs, threshold, split = false) =>
   withCgalGeometry('minimizeOverhang', inputs, (cgalGeometry, g) => {
-    const status = g.MinimizeOverhang(cgalGeometry, threshold);
+    const status = g.MinimizeOverhang(cgalGeometry, threshold, split);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by overhang');

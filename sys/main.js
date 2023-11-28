@@ -40,6 +40,7 @@ export {
   getWorkspace,
   qualifyPath,
   setLocalFilesystem,
+  setLocalFilesystems,
   setupFilesystem,
   setupWorkspace,
 } from './filesystem.js';

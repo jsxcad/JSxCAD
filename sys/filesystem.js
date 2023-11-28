@@ -53,44 +53,62 @@ export const getFilesystem = () => {
 export const getWorkspace = () => getFilesystem();
 
 // This is keyed by prefix url and valued as FileSystemDirectoryHandle on browser and worker, or base path string on node.
-const localFilesystems = new Map();
+let localFilesystems = new Map();
 
 export const setLocalFilesystem = (prefix, value) => {
-  localFilesystems.set(prefix, value);
+  if (value === undefined) {
+    localFilesystems.delete(prefix);
+  } else {
+    localFilesystems.set(prefix, value);
+  }
+};
+
+export const setLocalFilesystems = (map) => {
+  localFilesystems = map;
 };
 
 export const getLocalFilesystems = () => localFilesystems.entries();
 
+export const maybeFetchLocalFile = async (resource) => {
+  // Bypass for local files.
+  if (isBrowser || isWebWorker) {
+    for (const [prefix, handle] of localFilesystems) {
+      if (resource.startsWith(prefix)) {
+        try {
+          const fileSystemFileHandle = await handle.getFileHandle(
+            resource.substring(prefix.length)
+          );
+          const file = await fileSystemFileHandle.getFile();
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) =>
+              resolve({ ok: true, arrayBuffer: () => e.target.result });
+            reader.readAsArrayBuffer(file);
+          });
+        } catch (e) {
+          console.log(e);
+          const entries = [...(await handle.entries())];
+          console.log(entries);
+          // FIX: Check the error.
+        }
+      }
+    }
+  } else if (isNode) {
+    for (const [prefix, basePath] of localFilesystems) {
+      if (resource.startsWith(prefix)) {
+        const path = `${basePath}/${resource.substring(prefix.length)}`;
+        return { ok: true, arrayBuffer: () => externalFileFetcher(path) };
+      }
+    }
+  }
+};
+
 export const fetchWithTimeout =
   (fetch, AbortError) =>
   async (resource, options = {}) => {
-    if (isBrowser || isWebWorker) {
-      // Bypass for local files.
-      for (const [prefix, handle] of localFilesystems) {
-        if (resource.startsWith(prefix)) {
-          try {
-            const fileSystemFileHandle = await handle.getFileHandle(
-              resource.substring(prefix.length)
-            );
-            const file = await fileSystemFileHandle.getFile();
-            return new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = (e) =>
-                resolve({ ok: true, arrayBuffer: () => e.target.result });
-              reader.readAsArrayBuffer(file);
-            });
-          } catch (e) {
-            // FIX: Check the error.
-          }
-        }
-      }
-    } else if (isNode) {
-      for (const [prefix, basePath] of localFilesystems) {
-        if (resource.startsWith(prefix)) {
-          const path = `${basePath}/${resource.substring(prefix.length)}`;
-          return { ok: true, arrayBuffer: () => externalFileFetcher(path) };
-        }
-      }
+    const local = await maybeFetchLocalFile(resource);
+    if (local) {
+      return local;
     }
     const { timeout = 8000 } = options;
     const controller = new AbortController();
@@ -127,6 +145,13 @@ export const getExternalFileFetcher = () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (qualifiedPath) => {
+      const local = await maybeFetchLocalFile(qualifiedPath);
+      if (local) {
+        const { ok, arrayBuffer } = local;
+        if (ok) {
+          return arrayBuffer();
+        }
+      }
       try {
         let data = await promises.readFile(qualifiedPath);
         return data;
@@ -141,7 +166,15 @@ export const getExternalFileFetcher = () => {
       }
     };
   } else if (isBrowser || isWebWorker) {
-    return async (qualifiedPath) => {};
+    return async (qualifiedPath) => {
+      const local = await maybeFetchLocalFile(qualifiedPath);
+      if (local) {
+        const { ok, arrayBuffer } = local;
+        if (ok) {
+          return arrayBuffer();
+        }
+      }
+    };
   } else {
     throw Error('Expected node or browser or web worker');
   }
