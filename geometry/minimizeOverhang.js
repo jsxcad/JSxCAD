@@ -11,10 +11,14 @@ const filter = (geometry) =>
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
-export const minimizeOverhang = (geometry, threshold = 130) => {
+export const minimizeOverhang = (
+  geometry,
+  threshold = 130,
+  { split = false } = {}
+) => {
   const inputs = linearize(geometry, filter);
   const count = inputs.length;
-  const outputs = minimizeOverhangWithCgal(inputs, threshold);
+  const outputs = minimizeOverhangWithCgal(inputs, threshold, split);
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));

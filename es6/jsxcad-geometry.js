@@ -1134,16 +1134,19 @@ const ConvexHull = (geometries) => {
 const convexHull = (geometry, geometries) =>
   ConvexHull([geometry, ...geometries]);
 
-const ChainConvexHull = (geometries) => {
+const ChainConvexHull = (geometries, { close = false } = {}) => {
   const chain = [];
   for (let nth = 1; nth < geometries.length; nth++) {
     chain.push(ConvexHull([geometries[nth - 1], geometries[nth]]));
   }
+  if (close) {
+    chain.push(ConvexHull([geometries[geometries.length - 1], geometries[0]]));
+  }
   return Fuse(chain);
 };
 
-const chainConvexHull = (geometry, geometries) =>
-  ChainConvexHull([geometry, ...geometries]);
+const chainConvexHull = (geometry, geometries, { close = false } = {}) =>
+  ChainConvexHull([geometry, ...geometries], { close });
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -5260,10 +5263,14 @@ const filter$c = (geometry) =>
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
-const minimizeOverhang = (geometry, threshold = 130) => {
+const minimizeOverhang = (
+  geometry,
+  threshold = 130,
+  { split = false } = {}
+) => {
   const inputs = linearize(geometry, filter$c);
   const count = inputs.length;
-  const outputs = minimizeOverhang$1(inputs, threshold);
+  const outputs = minimizeOverhang$1(inputs, threshold, split);
   const ghosts = [];
   for (let nth = 0; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));

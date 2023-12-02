@@ -21,7 +21,7 @@ import {
   remove,
   resolvePending,
   setConfig,
-  setLocalFilesystem,
+  setLocalFilesystems,
   terminateActiveServices,
   watchFileCreation,
   watchFileDeletion,
@@ -605,7 +605,7 @@ class App extends React.Component {
 
     this.Notebook.run = async (path, options) => {
       const { LocalFilesystemHandles = [] } = this.state;
-      for (const { handle } of LocalFilesystemHandles) {
+      for (const [, handle] of LocalFilesystemHandles) {
         if ((await handle.queryPermission({ mode: 'read' })) === 'granted') {
           continue;
         }
@@ -1158,10 +1158,16 @@ class App extends React.Component {
     };
 
     this.Workspace.setLocalFilesystem = async (prefix, handle) => {
-      const { LocalFilesystemHandles = [] } = this.state;
-      setLocalFilesystem(prefix, handle);
+      const { LocalFilesystemHandles = new Map() } = this.state;
+      const updatedLocalFilesystemHandles = new Map(LocalFilesystemHandles);
+      if (handle === undefined) {
+        updatedLocalFilesystemHandles.delete(prefix);
+      } else {
+        updatedLocalFilesystemHandles.set(prefix, handle);
+      }
+      setLocalFilesystems(updatedLocalFilesystemHandles);
       await this.updateState({
-        LocalFilesystemHandles: [...LocalFilesystemHandles, { prefix, handle }],
+        LocalFilesystemHandles: updatedLocalFilesystemHandles,
       });
       await this.Workspace.store();
     };
@@ -1216,18 +1222,21 @@ class App extends React.Component {
       const { workspace } = this.props;
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
-        LocalFilesystemHandles = [],
+        LocalFilesystemHandles = new Map(),
         WorkspaceLoadPath,
         WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/',
       } = await read('config/Workspace', { workspace, otherwise: {} });
+      for (const [key, value] of [...LocalFilesystemHandles]) {
+        if (key === undefined || typeof value === 'string') {
+          LocalFilesystemHandles.delete(key);
+        }
+      }
       await this.updateState({
         LocalFilesystemHandles,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix,
       });
-      for (const { prefix, handle } of LocalFilesystemHandles) {
-        setLocalFilesystem(prefix, handle);
-      }
+      setLocalFilesystems(LocalFilesystemHandles);
     };
 
     this.Workspace.export = async (prefix) => {
@@ -1284,11 +1293,14 @@ class App extends React.Component {
             isOpen(file) ? 'primary' : 'secondary';
           const prefix = `source/${WorkspaceLoadPrefix}`;
           const localFilesystemEntries = [];
-          for (const [prefix, { directory }] of getLocalFilesystems()) {
+          for (const [prefix] of getLocalFilesystems()) {
+            if (prefix === undefined) {
+              continue;
+            }
             localFilesystemEntries.push(
-              <div>
-                {prefix} : {directory}
-              </div>
+              <Button onClick={() => this.Workspace.setLocalFilesystem(prefix)}>
+                Remove {prefix}
+              </Button>
             );
           }
           return (
@@ -1467,17 +1479,25 @@ class App extends React.Component {
                   <Card.Title>Local Filesystem</Card.Title>
                   <Card.Text>
                     <Form>
+                      <Form.Group controlId="AddLocalFilesystemPrefixId">
+                        <Form.Control
+                          id="AddLocalFilesystemPrefix"
+                          placeholder="Prefix"
+                          value=""
+                        />
+                      </Form.Group>
                       <Button
                         variant="primary"
                         onClick={async () => {
                           const handle = await showDirectoryPicker();
                           this.Workspace.setLocalFilesystem(
-                            WorkspaceLoadPrefix,
+                            document.getElementById('AddLocalFilesystemPrefix')
+                              .value,
                             handle
                           );
                         }}
                       >
-                        Set Local Filesystem
+                        Add Local Filesystem
                       </Button>
                       {localFilesystemEntries}
                     </Form>

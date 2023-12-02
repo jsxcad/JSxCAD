@@ -1271,13 +1271,13 @@ const centroid = Shape.registerMethod3(
 
 const ChainHull = Shape.registerMethod3(
   'ChainHull',
-  ['geometries'],
+  ['geometries', 'modes:close'],
   ChainConvexHull
 );
 
 const chainHull = Shape.registerMethod3(
   'chainHull',
-  ['inputGeometry', 'geometries'],
+  ['inputGeometry', 'geometries', 'modes:close'],
   chainConvexHull
 );
 
@@ -2218,7 +2218,7 @@ const material = Shape.registerMethod3(
 
 const minimizeOverhang = Shape.registerMethod3(
   'minimizeOverhang',
-  ['inputGeometry', 'number'],
+  ['inputGeometry', 'number', 'modes:split'],
   minimizeOverhang$1
 );
 

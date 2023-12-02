@@ -3,9 +3,9 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const minimizeOverhang = (inputs, threshold) =>
+export const minimizeOverhang = (inputs, threshold, split = false) =>
   withCgalGeometry('minimizeOverhang', inputs, (cgalGeometry, g) => {
-    const status = g.MinimizeOverhang(cgalGeometry, threshold);
+    const status = g.MinimizeOverhang(cgalGeometry, threshold, split);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by overhang');
