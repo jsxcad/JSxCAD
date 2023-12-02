@@ -1,15 +1,3 @@
-![Image](test.md.joint_a.png)
-
-[a.stl](test.a.stl)
-
-![Image](test.md.joint_b.png)
-
-[b.stl](test.b.stl)
-
-![Image](test.md.joint_c.png)
-
-[c.stl](test.c.stl)
-
 ```JavaScript
 const joint = Joint({
   armLength: 60,

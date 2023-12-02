@@ -474,15 +474,32 @@ class App extends React.Component {
       const data = await read(notebookFile, { workspace });
       const script =
         typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-      await toEcmascript(script, {
-        exports,
-        path,
-        replays,
-        topLevel,
-        updates,
-        workspace,
-      });
       const sections = new Map();
+      try {
+        await toEcmascript(script, {
+          exports,
+          path,
+          replays,
+          topLevel,
+          updates,
+          workspace,
+        });
+      } catch (error) {
+        // FIX: Report this error properly.
+        console.log(error.stack);
+        sections.set('$', {
+          source: script,
+          controls: [],
+          downloads: [],
+          errors: [],
+          mds: [],
+          views: [],
+        });
+        await this.updateState({
+          [`NotebookSections/${path}`]: sections,
+        });
+        return;
+      }
       topLevel.forEach(({ text }, id) => {
         sections.set(id, {
           source: text,

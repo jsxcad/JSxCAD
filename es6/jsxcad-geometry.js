@@ -235,6 +235,9 @@ const hasTypeGhost = hasType(typeGhost);
 const isNotTypeGhost = isNotType(typeGhost);
 const isTypeGhost = isType(typeGhost);
 
+const typeLabel = 'type:label';
+const hasTypeLabel = hasType(typeLabel);
+
 const typeMasked = 'type:masked';
 const hasNotTypeMasked = hasNotType(typeMasked);
 const hasTypeMasked = hasType(typeMasked);
@@ -435,6 +438,184 @@ const And = (geometries) => taggedGroup({}, ...geometries);
 const and = (geometry, geometries) =>
   taggedGroup({}, geometry, ...geometries);
 
+// Retrieve leaf geometry.
+
+const getLeafs = (geometry) => {
+  const leafs = [];
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+      case 'layout':
+        return descend();
+      default:
+        return leafs.push(geometry);
+    }
+  };
+  visit(geometry, op);
+  return leafs;
+};
+
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var parseNumber = createCommonjsModule(function (module) {
+/**
+ * More correct array check
+ */
+var parser = module.exports = function(str) {
+  if (Array.isArray(str)) return NaN;
+  return parser.str(str);
+};
+
+/**
+ * Simple check, assumes non-array inputs
+ */
+parser.str = function(str) {
+  if (str == null || str === "") return NaN;
+  return +str;
+};
+});
+
+const taggedItem = ({ tags = [], matrix, provenance }, ...content) => {
+  if (tags !== undefined && tags.length === undefined) {
+    throw Error(`Bad tags: ${tags}`);
+  }
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined Item content`);
+  }
+  if (content.length !== 1) {
+    throw Error(`Item expects a single content geometry`);
+  }
+  return { type: 'item', tags, matrix, provenance, content };
+};
+
+const qualifyTag = (tag, namespace = 'user') => {
+  if (tag.includes(':')) {
+    return tag;
+  }
+  return `${namespace}:${tag}`;
+};
+
+const tagMatcher = (tag, namespace = 'user') => {
+  let qualifiedTag = qualifyTag(tag, namespace);
+  if (qualifiedTag.endsWith('=*')) {
+    const [base] = qualifiedTag.split('=');
+    const prefix = `${base}=`;
+    return (tag) => tag.startsWith(prefix);
+  } else if (qualifiedTag.endsWith(':*')) {
+    const [namespace] = qualifiedTag.split(':');
+    const prefix = `${namespace}:`;
+    return (tag) => tag.startsWith(prefix);
+  } else {
+    return (tag) => tag === qualifiedTag;
+  }
+};
+
+const oneOfTagMatcher = (tags, namespace = 'user') => {
+  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
+  const isMatch = (tag) => {
+    for (const matcher of matchers) {
+      if (matcher(tag)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return isMatch;
+};
+
+const retag = (geometry, oldTags, newTags) => {
+  oldTags = oldTags.map((tag) => qualifyTag(tag));
+  newTags = newTags.map((tag) => qualifyTag(tag));
+
+  const isOldTagMatch = oneOfTagMatcher(oldTags, 'user');
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+      case 'layout':
+        return descend();
+      default: {
+        const { tags = [] } = geometry;
+        const remaining = [];
+        for (const tag of tags) {
+          if (!isOldTagMatch(tag)) {
+            remaining.push(tag);
+          }
+        }
+        for (const newTag of newTags) {
+          if (!remaining.includes(newTag)) {
+            remaining.push(newTag);
+          }
+        }
+        return descend({ tags: remaining });
+      }
+    }
+  };
+  const result = rewrite(geometry, op);
+  return result;
+};
+
+const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
+
+const tag = (geometry, newTags) => retag(geometry, [], newTags);
+
+const tags = (geometry, tag = '*') => {
+  const isMatchingTag = tagMatcher(tag, 'user');
+  const collected = [];
+  for (const { tags } of getLeafs(geometry)) {
+    for (const tag of tags) {
+      if (isMatchingTag(tag)) {
+        collected.push(tag);
+      }
+    }
+  }
+  return collected;
+};
+
+const As = (names, geometries) =>
+  taggedItem({ tags: names.map((name) => `item:${name}`) }, Group(geometries));
+
+const as = (geometry, names, geometries) =>
+  taggedItem(
+    { tags: names.map((name) => `item:${name}`) },
+    Group([geometry, ...geometries])
+  );
+
+const AsPart = (names, geometries) =>
+  taggedItem({ tags: names.map((name) => `part:${name}`) }, Group(geometries));
+
+const asPart = (geometry, names, geometries) =>
+  taggedItem(
+    { tags: names.map((name) => `part:${name}`) },
+    Group([geometry, ...geometries])
+  );
+
+const getValue = (geometry, tags) => {
+  const values = [];
+  for (const tag of tags) {
+    const matches = tags(geometry, `${tag}=*`);
+    if (matches.length === 0) {
+      values.push(undefined);
+      continue;
+    }
+    const [, value] = matches[0].split('=');
+    const number = parseNumber(value);
+    if (isFinite(number)) {
+      values.push(value);
+      continue;
+    }
+    values.push(value);
+  }
+  return values;
+};
+
 const filter$J = (geometry) =>
   ['points', 'segments'].includes(geometry.type) && isNotTypeGhost(geometry);
 
@@ -570,23 +751,6 @@ const computeNormal = (geometry) =>
 // TODO: Make this more robust.
 const computeNormalCoordinate = (geometry) =>
   transformCoordinate([0, 0, 0], computeNormal(geometry).matrix);
-
-// Retrieve leaf geometry.
-
-const getLeafs = (geometry) => {
-  const leafs = [];
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-      case 'layout':
-        return descend();
-      default:
-        return leafs.push(geometry);
-    }
-  };
-  visit(geometry, op);
-  return leafs;
-};
 
 const filter$H = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
@@ -2705,6 +2869,18 @@ const Icosahedron = ([x = 1, y = x, z = x]) => {
   return translate(scale$1(ConvexHull([points]), scale), middle);
 };
 
+const ghost = (geometry) => hasTypeGhost(geometry);
+
+const Label = (text, distance) =>
+  hasTypeLabel(
+    ghost(
+      Group([
+        Edge([0, 0, 0], [distance, 0, 0]),
+        translate(Hershey(text, 10), [distance, 0, 0]),
+      ])
+    )
+  );
+
 // 1mm seems reasonable for spheres.
 const DEFAULT_ORB_ZAG = 1;
 
@@ -2720,155 +2896,6 @@ const Orb = ([x = 1, y = x, z = x], { zag = DEFAULT_ORB_ZAG } = {}) => {
     tolerance
   );
   return makeAbsolute(translate(scale$1(unitSphere, scale$2), middle));
-};
-
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var parseNumber = createCommonjsModule(function (module) {
-/**
- * More correct array check
- */
-var parser = module.exports = function(str) {
-  if (Array.isArray(str)) return NaN;
-  return parser.str(str);
-};
-
-/**
- * Simple check, assumes non-array inputs
- */
-parser.str = function(str) {
-  if (str == null || str === "") return NaN;
-  return +str;
-};
-});
-
-const taggedItem = ({ tags = [], matrix, provenance }, ...content) => {
-  if (tags !== undefined && tags.length === undefined) {
-    throw Error(`Bad tags: ${tags}`);
-  }
-  if (content.some((value) => value === undefined)) {
-    throw Error(`Undefined Item content`);
-  }
-  if (content.length !== 1) {
-    throw Error(`Item expects a single content geometry`);
-  }
-  return { type: 'item', tags, matrix, provenance, content };
-};
-
-const qualifyTag = (tag, namespace = 'user') => {
-  if (tag.includes(':')) {
-    return tag;
-  }
-  return `${namespace}:${tag}`;
-};
-
-const tagMatcher = (tag, namespace = 'user') => {
-  let qualifiedTag = qualifyTag(tag, namespace);
-  if (qualifiedTag.endsWith('=*')) {
-    const [base] = qualifiedTag.split('=');
-    const prefix = `${base}=`;
-    return (tag) => tag.startsWith(prefix);
-  } else if (qualifiedTag.endsWith(':*')) {
-    const [namespace] = qualifiedTag.split(':');
-    const prefix = `${namespace}:`;
-    return (tag) => tag.startsWith(prefix);
-  } else {
-    return (tag) => tag === qualifiedTag;
-  }
-};
-
-const oneOfTagMatcher = (tags, namespace = 'user') => {
-  const matchers = tags.map((tag) => tagMatcher(tag, namespace));
-  const isMatch = (tag) => {
-    for (const matcher of matchers) {
-      if (matcher(tag)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  return isMatch;
-};
-
-const retag = (geometry, oldTags, newTags) => {
-  oldTags = oldTags.map((tag) => qualifyTag(tag));
-  newTags = newTags.map((tag) => qualifyTag(tag));
-
-  const isOldTagMatch = oneOfTagMatcher(oldTags, 'user');
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-      case 'layout':
-        return descend();
-      default: {
-        const { tags = [] } = geometry;
-        const remaining = [];
-        for (const tag of tags) {
-          if (!isOldTagMatch(tag)) {
-            remaining.push(tag);
-          }
-        }
-        for (const newTag of newTags) {
-          if (!remaining.includes(newTag)) {
-            remaining.push(newTag);
-          }
-        }
-        return descend({ tags: remaining });
-      }
-    }
-  };
-  const result = rewrite(geometry, op);
-  return result;
-};
-
-const untag = (geometry, oldTags) => retag(geometry, oldTags, []);
-
-const tag = (geometry, newTags) => retag(geometry, [], newTags);
-
-const tags = (geometry, tag = '*') => {
-  const isMatchingTag = tagMatcher(tag, 'user');
-  const collected = [];
-  for (const { tags } of getLeafs(geometry)) {
-    for (const tag of tags) {
-      if (isMatchingTag(tag)) {
-        collected.push(tag);
-      }
-    }
-  }
-  return collected;
-};
-
-const as = (geometry, names) =>
-  taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry);
-
-const asPart = (geometry, names) =>
-  taggedItem({ tags: names.map((name) => `part:${name}`) }, geometry);
-
-const getValue = (geometry, tags) => {
-  const values = [];
-  for (const tag of tags) {
-    const matches = tags(geometry, `${tag}=*`);
-    if (matches.length === 0) {
-      values.push(undefined);
-      continue;
-    }
-    const [, value] = matches[0].split('=');
-    const number = parseNumber(value);
-    if (isFinite(number)) {
-      values.push(value);
-      continue;
-    }
-    values.push(value);
-  }
-  return values;
 };
 
 const getSimpleList = (
@@ -3111,8 +3138,6 @@ const getLayouts = (geometry) => {
   });
   return layouts;
 };
-
-const ghost = (geometry) => hasTypeGhost(geometry);
 
 const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
   if (set === undefined) {
@@ -5976,4 +6001,4 @@ const Wrap = (geometries, offset = 1, alpha = 0.1) => {
 const wrap = (geometry, geometries, offset, alpha) =>
   tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
 
-export { And, Arc, ArcX, ArcY, ArcZ, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

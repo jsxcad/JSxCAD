@@ -11,6 +11,8 @@ export { scale, scaleLazy, scaleToFit } from './scale.js';
 export { replacer, rewrite, visit } from './tagged/visit.js';
 
 export { And, and } from './and.js';
+export { As } from './tag.js';
+export { AsPart } from './tag.js';
 export {
   Arc,
   ArcX,
@@ -34,6 +36,7 @@ export { Empty } from './Empty.js';
 export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';
 export { Icosahedron } from './Icosahedron.js';
+export { Label } from './label.js';
 export { Orb } from './Orb.js';
 export { OrientedPoint } from './Point.js';
 export { Page, ensurePages, page } from './Page.js';

@@ -1,3 +1,4 @@
+import { Group } from './Group.js';
 import { getLeafs } from './tagged/getLeafs.js';
 import parseNumber from 'parse-number';
 import { rewrite } from './tagged/visit.js';
@@ -98,11 +99,23 @@ export const tags = (geometry, tag = '*') => {
   return collected;
 };
 
-export const as = (geometry, names) =>
-  taggedItem({ tags: names.map((name) => `item:${name}`) }, geometry);
+export const As = (names, geometries) =>
+  taggedItem({ tags: names.map((name) => `item:${name}`) }, Group(geometries));
 
-export const asPart = (geometry, names) =>
-  taggedItem({ tags: names.map((name) => `part:${name}`) }, geometry);
+export const as = (geometry, names, geometries) =>
+  taggedItem(
+    { tags: names.map((name) => `item:${name}`) },
+    Group([geometry, ...geometries])
+  );
+
+export const AsPart = (names, geometries) =>
+  taggedItem({ tags: names.map((name) => `part:${name}`) }, Group(geometries));
+
+export const asPart = (geometry, names, geometries) =>
+  taggedItem(
+    { tags: names.map((name) => `part:${name}`) },
+    Group([geometry, ...geometries])
+  );
 
 export const getValue = (geometry, tags) => {
   const values = [];

@@ -42,6 +42,12 @@ export const hasTypeGhost = hasType(typeGhost);
 export const isNotTypeGhost = isNotType(typeGhost);
 export const isTypeGhost = isType(typeGhost);
 
+export const typeLabel = 'type:label';
+export const hasNotTypeLabel = hasNotType(typeLabel);
+export const hasTypeLabel = hasType(typeLabel);
+export const isNotTypeLabel = isNotType(typeLabel);
+export const isTypeLabel = isType(typeLabel);
+
 export const typeMasked = 'type:masked';
 export const hasNotTypeMasked = hasNotType(typeMasked);
 export const hasTypeMasked = hasType(typeMasked);

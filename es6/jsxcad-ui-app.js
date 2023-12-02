@@ -45964,15 +45964,32 @@ class App extends ReactDOM$3.Component {
         workspace
       });
       const script = typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-      await toEcmascript(script, {
-        exports,
-        path,
-        replays,
-        topLevel,
-        updates,
-        workspace
-      });
       const sections = new Map();
+      try {
+        await toEcmascript(script, {
+          exports,
+          path,
+          replays,
+          topLevel,
+          updates,
+          workspace
+        });
+      } catch (error) {
+        // FIX: Report this error properly.
+        console.log(error.stack);
+        sections.set('$', {
+          source: script,
+          controls: [],
+          downloads: [],
+          errors: [],
+          mds: [],
+          views: []
+        });
+        await this.updateState({
+          [`NotebookSections/${path}`]: sections
+        });
+        return;
+      }
       topLevel.forEach(({
         text
       }, id) => {
