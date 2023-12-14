@@ -500,22 +500,35 @@ class App extends React.Component {
         });
         return;
       }
-      topLevel.forEach(({ text }, id) => {
+      for (const [id, { text }] of topLevel) {
+        const {
+          controls = [],
+          downloads = [],
+          errors = [],
+          mds = [],
+          views = [],
+        } = await read(`section/${path}/${id}`, { workspace, otherwise: {} });
         sections.set(id, {
           source: text,
-          controls: [],
-          downloads: [],
-          errors: [],
-          mds: [],
-          views: [],
+          controls,
+          downloads,
+          errors,
+          mds,
+          views,
         });
-      });
+      }
       await this.updateState({
         [`NotebookSections/${path}`]: sections,
       });
     };
 
     this.Notebook.updateSection = async (path, id, section) => {
+      const { workspace } = this.props;
+
+      if (id === undefined) {
+        return;
+      }
+
       const {
         [`NotebookSections/${path}`]: NotebookSections = new Map(),
         [`NotebookVersion/${path}`]: NotebookVersion = 0,
@@ -530,6 +543,8 @@ class App extends React.Component {
         source: NotebookSections.get(id).source,
         ...section,
       });
+
+      await write(`section/${path}/${id}`, section, { workspace });
 
       await this.updateState({
         [`NotebookVersion/${path}`]: NotebookVersion + 1,
@@ -801,15 +816,7 @@ class App extends React.Component {
       const notebookPath = path;
       const notebookFile = `source/${notebookPath}`;
       await ensureFile(notebookFile, notebookPath, { workspace });
-      // const data = await read(notebookFile, { workspace });
       await this.Notebook.updateSections(path, workspace);
-      /*
-      const notebookText =
-        typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-
-      this.Notebook.ensureAdvice(path);
-      await this.updateState({ [`NotebookText/${path}`]: notebookText });
-      */
 
       // Let state propagate.
       await animationFrame();
@@ -1496,7 +1503,7 @@ class App extends React.Component {
                   <Card.Title>Local Filesystem</Card.Title>
                   <Card.Text>
                     <Form>
-                      <Form.Group controlId="AddLocalFilesystemPrefixId">
+                      <Form.Group QQcontrolId="AddLocalFilesystemPrefixId">
                         <Form.Control
                           id="AddLocalFilesystemPrefix"
                           placeholder="Prefix"
