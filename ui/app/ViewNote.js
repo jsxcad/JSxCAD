@@ -18,7 +18,7 @@ export class ViewNote extends React.PureComponent {
   render() {
     const { notebookPath, note, onClickView, workspace } = this.props;
     const { sourceLocation, view } = note;
-    const { download, name, width } = view;
+    const { download, name = '', width } = view;
     const onClick = (event) => {
       if (onClickView) {
         onClickView({
@@ -42,17 +42,16 @@ export class ViewNote extends React.PureComponent {
           key={note.hash}
           download={download}
           workspace={workspace}
-          style={{ float: 'right' }}
         />
       );
     }
     return (
-      <Card onClick={onClick} style={{ maxWidth: width }}>
-        <Card.Text>
-          {name}
-          {downloadNote}
-        </Card.Text>
-        <Card.Img src={note.url} variant="top" />
+      <Card border="primary" onClick={onClick} style={{ maxWidth: width }}>
+        <Card.Header>{name}</Card.Header>
+        <Card.Body>
+          <Card.Img src={note.url} variant="top" />
+          <Card.Text>{downloadNote}</Card.Text>
+        </Card.Body>
       </Card>
     );
   }

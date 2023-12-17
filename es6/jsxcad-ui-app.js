@@ -1353,9 +1353,9 @@ const CardFooter = /*#__PURE__*/x(({
 CardFooter.displayName = 'CardFooter';
 var CardFooter$1 = CardFooter;
 
-const context$1 = /*#__PURE__*/D$1(null);
-context$1.displayName = 'CardHeaderContext';
-var CardHeaderContext = context$1;
+const context$3 = /*#__PURE__*/D$1(null);
+context$3.displayName = 'CardHeaderContext';
+var CardHeaderContext = context$3;
 
 const CardHeader = /*#__PURE__*/x(({
   bsPrefix,
@@ -1946,7 +1946,7 @@ var DragDrop$1 = {};
 Object.defineProperty(DragDrop$1, "__esModule", { value: true });
 var Rect_1$9 = Rect$1;
 /** @hidden @internal */
-var canUseDOM = !!(typeof window !== "undefined" && window.document && window.document.createElement);
+var canUseDOM$1 = !!(typeof window !== "undefined" && window.document && window.document.createElement);
 var DragDrop = /** @class */ (function () {
     /** @hidden @internal */
     function DragDrop() {
@@ -1964,7 +1964,7 @@ var DragDrop = /** @class */ (function () {
         this._dragging = false;
         /** @hidden @internal */
         this._active = false; // drag and drop is in progress, can be used on ios to prevent body scrolling (see demo)
-        if (canUseDOM) {
+        if (canUseDOM$1) {
             // check for serverside rendering
             this._glass = document.createElement("div");
             this._glass.style.zIndex = "998";
@@ -8531,9 +8531,9 @@ var Form$1 = Object.assign(Form, {
   FloatingLabel: FloatingLabel$1
 });
 
-const context = /*#__PURE__*/D$1(null);
-context.displayName = 'InputGroupContext';
-var InputGroupContext = context;
+const context$2 = /*#__PURE__*/D$1(null);
+context$2.displayName = 'InputGroupContext';
+var InputGroupContext = context$2;
 
 const InputGroupText = /*#__PURE__*/x(({
   className,
@@ -41365,6 +41365,20 @@ function useUncontrolled(props, config) {
   }, props);
 }
 
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
+
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  _setPrototypeOf(subClass, superClass);
+}
+
 var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
 /**
  * Runs `querySelectorAll` on a given element.
@@ -41564,7 +41578,7 @@ var NavItem$1 = NavItem;
 const _excluded = ["as", "onSelect", "activeKey", "role", "onKeyDown"];
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {};
+const noop$1 = () => {};
 const EVENT_KEY_ATTR = dataAttr('event-key');
 const Nav = /*#__PURE__*/x((_ref, ref) => {
   let {
@@ -41648,8 +41662,8 @@ const Nav = /*#__PURE__*/x((_ref, ref) => {
         role,
         // used by NavLink to determine it's role
         activeKey: makeEventKey(activeKey),
-        getControlledId: getControlledId || noop,
-        getControllerId: getControllerId || noop
+        getControlledId: getControlledId || noop$1,
+        getControllerId: getControllerId || noop$1
       },
       children: /*#__PURE__*/e(Component, Object.assign({}, props, {
         onKeyDown: handleKeyDown,
@@ -41738,6 +41752,1368 @@ ListGroup.displayName = 'ListGroup';
 var ListGroup$1 = Object.assign(ListGroup, {
   Item: ListGroupItem$1
 });
+
+/**
+ * Returns the owner document of a given element.
+ * 
+ * @param node the element
+ */
+function ownerDocument(node) {
+  return node && node.ownerDocument || document;
+}
+
+/**
+ * Returns the owner window of a given element.
+ * 
+ * @param node the element
+ */
+
+function ownerWindow(node) {
+  var doc = ownerDocument(node);
+  return doc && doc.defaultView || window;
+}
+
+/**
+ * Returns one or all computed style properties of an element.
+ * 
+ * @param node the element
+ * @param psuedoElement the style property
+ */
+
+function getComputedStyle$1(node, psuedoElement) {
+  return ownerWindow(node).getComputedStyle(node, psuedoElement);
+}
+
+var rUpper = /([A-Z])/g;
+function hyphenate(string) {
+  return string.replace(rUpper, '-$1').toLowerCase();
+}
+
+/**
+ * Copyright 2013-2014, Facebook, Inc.
+ * All rights reserved.
+ * https://github.com/facebook/react/blob/2aeb8a2a6beb00617a4217f7f8284924fa2ad819/src/vendor/core/hyphenateStyleName.js
+ */
+var msPattern = /^ms-/;
+function hyphenateStyleName(string) {
+  return hyphenate(string).replace(msPattern, '-ms-');
+}
+
+var supportedTransforms = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i;
+function isTransform(value) {
+  return !!(value && supportedTransforms.test(value));
+}
+
+function style(node, property) {
+  var css = '';
+  var transforms = '';
+
+  if (typeof property === 'string') {
+    return node.style.getPropertyValue(hyphenateStyleName(property)) || getComputedStyle$1(node).getPropertyValue(hyphenateStyleName(property));
+  }
+
+  Object.keys(property).forEach(function (key) {
+    var value = property[key];
+
+    if (!value && value !== 0) {
+      node.style.removeProperty(hyphenateStyleName(key));
+    } else if (isTransform(key)) {
+      transforms += key + "(" + value + ") ";
+    } else {
+      css += hyphenateStyleName(key) + ": " + value + ";";
+    }
+  });
+
+  if (transforms) {
+    css += "transform: " + transforms + ";";
+  }
+
+  node.style.cssText += ";" + css;
+}
+
+var config = {
+  disabled: false
+};
+
+var timeoutsShape = PropTypes$3.oneOfType([PropTypes$3.number, PropTypes$3.shape({
+  enter: PropTypes$3.number,
+  exit: PropTypes$3.number,
+  appear: PropTypes$3.number
+}).isRequired]) ;
+PropTypes$3.oneOfType([PropTypes$3.string, PropTypes$3.shape({
+  enter: PropTypes$3.string,
+  exit: PropTypes$3.string,
+  active: PropTypes$3.string
+}), PropTypes$3.shape({
+  enter: PropTypes$3.string,
+  enterDone: PropTypes$3.string,
+  enterActive: PropTypes$3.string,
+  exit: PropTypes$3.string,
+  exitDone: PropTypes$3.string,
+  exitActive: PropTypes$3.string
+})]) ;
+
+var TransitionGroupContext = ReactDOM$3.createContext(null);
+
+var forceReflow = function forceReflow(node) {
+  return node.scrollTop;
+};
+
+var UNMOUNTED = 'unmounted';
+var EXITED = 'exited';
+var ENTERING = 'entering';
+var ENTERED = 'entered';
+var EXITING = 'exiting';
+/**
+ * The Transition component lets you describe a transition from one component
+ * state to another _over time_ with a simple declarative API. Most commonly
+ * it's used to animate the mounting and unmounting of a component, but can also
+ * be used to describe in-place transition states as well.
+ *
+ * ---
+ *
+ * **Note**: `Transition` is a platform-agnostic base component. If you're using
+ * transitions in CSS, you'll probably want to use
+ * [`CSSTransition`](https://reactcommunity.org/react-transition-group/css-transition)
+ * instead. It inherits all the features of `Transition`, but contains
+ * additional features necessary to play nice with CSS transitions (hence the
+ * name of the component).
+ *
+ * ---
+ *
+ * By default the `Transition` component does not alter the behavior of the
+ * component it renders, it only tracks "enter" and "exit" states for the
+ * components. It's up to you to give meaning and effect to those states. For
+ * example we can add styles to a component when it enters or exits:
+ *
+ * ```jsx
+ * import { Transition } from 'react-transition-group';
+ *
+ * const duration = 300;
+ *
+ * const defaultStyle = {
+ *   transition: `opacity ${duration}ms ease-in-out`,
+ *   opacity: 0,
+ * }
+ *
+ * const transitionStyles = {
+ *   entering: { opacity: 1 },
+ *   entered:  { opacity: 1 },
+ *   exiting:  { opacity: 0 },
+ *   exited:  { opacity: 0 },
+ * };
+ *
+ * const Fade = ({ in: inProp }) => (
+ *   <Transition in={inProp} timeout={duration}>
+ *     {state => (
+ *       <div style={{
+ *         ...defaultStyle,
+ *         ...transitionStyles[state]
+ *       }}>
+ *         I'm a fade Transition!
+ *       </div>
+ *     )}
+ *   </Transition>
+ * );
+ * ```
+ *
+ * There are 4 main states a Transition can be in:
+ *  - `'entering'`
+ *  - `'entered'`
+ *  - `'exiting'`
+ *  - `'exited'`
+ *
+ * Transition state is toggled via the `in` prop. When `true` the component
+ * begins the "Enter" stage. During this stage, the component will shift from
+ * its current transition state, to `'entering'` for the duration of the
+ * transition and then to the `'entered'` stage once it's complete. Let's take
+ * the following example (we'll use the
+ * [useState](https://reactjs.org/docs/hooks-reference.html#usestate) hook):
+ *
+ * ```jsx
+ * function App() {
+ *   const [inProp, setInProp] = useState(false);
+ *   return (
+ *     <div>
+ *       <Transition in={inProp} timeout={500}>
+ *         {state => (
+ *           // ...
+ *         )}
+ *       </Transition>
+ *       <button onClick={() => setInProp(true)}>
+ *         Click to Enter
+ *       </button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * When the button is clicked the component will shift to the `'entering'` state
+ * and stay there for 500ms (the value of `timeout`) before it finally switches
+ * to `'entered'`.
+ *
+ * When `in` is `false` the same thing happens except the state moves from
+ * `'exiting'` to `'exited'`.
+ */
+
+var Transition = /*#__PURE__*/function (_React$Component) {
+  _inheritsLoose(Transition, _React$Component);
+
+  function Transition(props, context) {
+    var _this;
+
+    _this = _React$Component.call(this, props, context) || this;
+    var parentGroup = context; // In the context of a TransitionGroup all enters are really appears
+
+    var appear = parentGroup && !parentGroup.isMounting ? props.enter : props.appear;
+    var initialStatus;
+    _this.appearStatus = null;
+
+    if (props.in) {
+      if (appear) {
+        initialStatus = EXITED;
+        _this.appearStatus = ENTERING;
+      } else {
+        initialStatus = ENTERED;
+      }
+    } else {
+      if (props.unmountOnExit || props.mountOnEnter) {
+        initialStatus = UNMOUNTED;
+      } else {
+        initialStatus = EXITED;
+      }
+    }
+
+    _this.state = {
+      status: initialStatus
+    };
+    _this.nextCallback = null;
+    return _this;
+  }
+
+  Transition.getDerivedStateFromProps = function getDerivedStateFromProps(_ref, prevState) {
+    var nextIn = _ref.in;
+
+    if (nextIn && prevState.status === UNMOUNTED) {
+      return {
+        status: EXITED
+      };
+    }
+
+    return null;
+  } // getSnapshotBeforeUpdate(prevProps) {
+  //   let nextStatus = null
+  //   if (prevProps !== this.props) {
+  //     const { status } = this.state
+  //     if (this.props.in) {
+  //       if (status !== ENTERING && status !== ENTERED) {
+  //         nextStatus = ENTERING
+  //       }
+  //     } else {
+  //       if (status === ENTERING || status === ENTERED) {
+  //         nextStatus = EXITING
+  //       }
+  //     }
+  //   }
+  //   return { nextStatus }
+  // }
+  ;
+
+  var _proto = Transition.prototype;
+
+  _proto.componentDidMount = function componentDidMount() {
+    this.updateStatus(true, this.appearStatus);
+  };
+
+  _proto.componentDidUpdate = function componentDidUpdate(prevProps) {
+    var nextStatus = null;
+
+    if (prevProps !== this.props) {
+      var status = this.state.status;
+
+      if (this.props.in) {
+        if (status !== ENTERING && status !== ENTERED) {
+          nextStatus = ENTERING;
+        }
+      } else {
+        if (status === ENTERING || status === ENTERED) {
+          nextStatus = EXITING;
+        }
+      }
+    }
+
+    this.updateStatus(false, nextStatus);
+  };
+
+  _proto.componentWillUnmount = function componentWillUnmount() {
+    this.cancelNextCallback();
+  };
+
+  _proto.getTimeouts = function getTimeouts() {
+    var timeout = this.props.timeout;
+    var exit, enter, appear;
+    exit = enter = appear = timeout;
+
+    if (timeout != null && typeof timeout !== 'number') {
+      exit = timeout.exit;
+      enter = timeout.enter; // TODO: remove fallback for next major
+
+      appear = timeout.appear !== undefined ? timeout.appear : enter;
+    }
+
+    return {
+      exit: exit,
+      enter: enter,
+      appear: appear
+    };
+  };
+
+  _proto.updateStatus = function updateStatus(mounting, nextStatus) {
+    if (mounting === void 0) {
+      mounting = false;
+    }
+
+    if (nextStatus !== null) {
+      // nextStatus will always be ENTERING or EXITING.
+      this.cancelNextCallback();
+
+      if (nextStatus === ENTERING) {
+        if (this.props.unmountOnExit || this.props.mountOnEnter) {
+          var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this); // https://github.com/reactjs/react-transition-group/pull/749
+          // With unmountOnExit or mountOnEnter, the enter animation should happen at the transition between `exited` and `entering`.
+          // To make the animation happen,  we have to separate each rendering and avoid being processed as batched.
+
+          if (node) forceReflow(node);
+        }
+
+        this.performEnter(mounting);
+      } else {
+        this.performExit();
+      }
+    } else if (this.props.unmountOnExit && this.state.status === EXITED) {
+      this.setState({
+        status: UNMOUNTED
+      });
+    }
+  };
+
+  _proto.performEnter = function performEnter(mounting) {
+    var _this2 = this;
+
+    var enter = this.props.enter;
+    var appearing = this.context ? this.context.isMounting : mounting;
+
+    var _ref2 = this.props.nodeRef ? [appearing] : [ReactDOM$3.findDOMNode(this), appearing],
+        maybeNode = _ref2[0],
+        maybeAppearing = _ref2[1];
+
+    var timeouts = this.getTimeouts();
+    var enterTimeout = appearing ? timeouts.appear : timeouts.enter; // no enter animation skip right to ENTERED
+    // if we are mounting and running this it means appear _must_ be set
+
+    if (!mounting && !enter || config.disabled) {
+      this.safeSetState({
+        status: ENTERED
+      }, function () {
+        _this2.props.onEntered(maybeNode);
+      });
+      return;
+    }
+
+    this.props.onEnter(maybeNode, maybeAppearing);
+    this.safeSetState({
+      status: ENTERING
+    }, function () {
+      _this2.props.onEntering(maybeNode, maybeAppearing);
+
+      _this2.onTransitionEnd(enterTimeout, function () {
+        _this2.safeSetState({
+          status: ENTERED
+        }, function () {
+          _this2.props.onEntered(maybeNode, maybeAppearing);
+        });
+      });
+    });
+  };
+
+  _proto.performExit = function performExit() {
+    var _this3 = this;
+
+    var exit = this.props.exit;
+    var timeouts = this.getTimeouts();
+    var maybeNode = this.props.nodeRef ? undefined : ReactDOM$3.findDOMNode(this); // no exit animation skip right to EXITED
+
+    if (!exit || config.disabled) {
+      this.safeSetState({
+        status: EXITED
+      }, function () {
+        _this3.props.onExited(maybeNode);
+      });
+      return;
+    }
+
+    this.props.onExit(maybeNode);
+    this.safeSetState({
+      status: EXITING
+    }, function () {
+      _this3.props.onExiting(maybeNode);
+
+      _this3.onTransitionEnd(timeouts.exit, function () {
+        _this3.safeSetState({
+          status: EXITED
+        }, function () {
+          _this3.props.onExited(maybeNode);
+        });
+      });
+    });
+  };
+
+  _proto.cancelNextCallback = function cancelNextCallback() {
+    if (this.nextCallback !== null) {
+      this.nextCallback.cancel();
+      this.nextCallback = null;
+    }
+  };
+
+  _proto.safeSetState = function safeSetState(nextState, callback) {
+    // This shouldn't be necessary, but there are weird race conditions with
+    // setState callbacks and unmounting in testing, so always make sure that
+    // we can cancel any pending setState callbacks after we unmount.
+    callback = this.setNextCallback(callback);
+    this.setState(nextState, callback);
+  };
+
+  _proto.setNextCallback = function setNextCallback(callback) {
+    var _this4 = this;
+
+    var active = true;
+
+    this.nextCallback = function (event) {
+      if (active) {
+        active = false;
+        _this4.nextCallback = null;
+        callback(event);
+      }
+    };
+
+    this.nextCallback.cancel = function () {
+      active = false;
+    };
+
+    return this.nextCallback;
+  };
+
+  _proto.onTransitionEnd = function onTransitionEnd(timeout, handler) {
+    this.setNextCallback(handler);
+    var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this);
+    var doesNotHaveTimeoutOrListener = timeout == null && !this.props.addEndListener;
+
+    if (!node || doesNotHaveTimeoutOrListener) {
+      setTimeout(this.nextCallback, 0);
+      return;
+    }
+
+    if (this.props.addEndListener) {
+      var _ref3 = this.props.nodeRef ? [this.nextCallback] : [node, this.nextCallback],
+          maybeNode = _ref3[0],
+          maybeNextCallback = _ref3[1];
+
+      this.props.addEndListener(maybeNode, maybeNextCallback);
+    }
+
+    if (timeout != null) {
+      setTimeout(this.nextCallback, timeout);
+    }
+  };
+
+  _proto.render = function render() {
+    var status = this.state.status;
+
+    if (status === UNMOUNTED) {
+      return null;
+    }
+
+    var _this$props = this.props,
+        children = _this$props.children;
+        _this$props.in;
+        _this$props.mountOnEnter;
+        _this$props.unmountOnExit;
+        _this$props.appear;
+        _this$props.enter;
+        _this$props.exit;
+        _this$props.timeout;
+        _this$props.addEndListener;
+        _this$props.onEnter;
+        _this$props.onEntering;
+        _this$props.onEntered;
+        _this$props.onExit;
+        _this$props.onExiting;
+        _this$props.onExited;
+        _this$props.nodeRef;
+        var childProps = _objectWithoutPropertiesLoose$2(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
+
+    return (
+      /*#__PURE__*/
+      // allows for nested Transitions
+      ReactDOM$3.createElement(TransitionGroupContext.Provider, {
+        value: null
+      }, typeof children === 'function' ? children(status, childProps) : ReactDOM$3.cloneElement(ReactDOM$3.Children.only(children), childProps))
+    );
+  };
+
+  return Transition;
+}(ReactDOM$3.Component);
+
+Transition.contextType = TransitionGroupContext;
+Transition.propTypes = {
+  /**
+   * A React reference to DOM element that need to transition:
+   * https://stackoverflow.com/a/51127130/4671932
+   *
+   *   - When `nodeRef` prop is used, `node` is not passed to callback functions
+   *      (e.g. `onEnter`) because user already has direct access to the node.
+   *   - When changing `key` prop of `Transition` in a `TransitionGroup` a new
+   *     `nodeRef` need to be provided to `Transition` with changed `key` prop
+   *     (see
+   *     [test/CSSTransition-test.js](https://github.com/reactjs/react-transition-group/blob/13435f897b3ab71f6e19d724f145596f5910581c/test/CSSTransition-test.js#L362-L437)).
+   */
+  nodeRef: PropTypes$3.shape({
+    current: typeof Element === 'undefined' ? PropTypes$3.any : function (propValue, key, componentName, location, propFullName, secret) {
+      var value = propValue[key];
+      return PropTypes$3.instanceOf(value && 'ownerDocument' in value ? value.ownerDocument.defaultView.Element : Element)(propValue, key, componentName, location, propFullName, secret);
+    }
+  }),
+
+  /**
+   * A `function` child can be used instead of a React element. This function is
+   * called with the current transition status (`'entering'`, `'entered'`,
+   * `'exiting'`, `'exited'`), which can be used to apply context
+   * specific props to a component.
+   *
+   * ```jsx
+   * <Transition in={this.state.in} timeout={150}>
+   *   {state => (
+   *     <MyComponent className={`fade fade-${state}`} />
+   *   )}
+   * </Transition>
+   * ```
+   */
+  children: PropTypes$3.oneOfType([PropTypes$3.func.isRequired, PropTypes$3.element.isRequired]).isRequired,
+
+  /**
+   * Show the component; triggers the enter or exit states
+   */
+  in: PropTypes$3.bool,
+
+  /**
+   * By default the child component is mounted immediately along with
+   * the parent `Transition` component. If you want to "lazy mount" the component on the
+   * first `in={true}` you can set `mountOnEnter`. After the first enter transition the component will stay
+   * mounted, even on "exited", unless you also specify `unmountOnExit`.
+   */
+  mountOnEnter: PropTypes$3.bool,
+
+  /**
+   * By default the child component stays mounted after it reaches the `'exited'` state.
+   * Set `unmountOnExit` if you'd prefer to unmount the component after it finishes exiting.
+   */
+  unmountOnExit: PropTypes$3.bool,
+
+  /**
+   * By default the child component does not perform the enter transition when
+   * it first mounts, regardless of the value of `in`. If you want this
+   * behavior, set both `appear` and `in` to `true`.
+   *
+   * > **Note**: there are no special appear states like `appearing`/`appeared`, this prop
+   * > only adds an additional enter transition. However, in the
+   * > `<CSSTransition>` component that first enter transition does result in
+   * > additional `.appear-*` classes, that way you can choose to style it
+   * > differently.
+   */
+  appear: PropTypes$3.bool,
+
+  /**
+   * Enable or disable enter transitions.
+   */
+  enter: PropTypes$3.bool,
+
+  /**
+   * Enable or disable exit transitions.
+   */
+  exit: PropTypes$3.bool,
+
+  /**
+   * The duration of the transition, in milliseconds.
+   * Required unless `addEndListener` is provided.
+   *
+   * You may specify a single timeout for all transitions:
+   *
+   * ```jsx
+   * timeout={500}
+   * ```
+   *
+   * or individually:
+   *
+   * ```jsx
+   * timeout={{
+   *  appear: 500,
+   *  enter: 300,
+   *  exit: 500,
+   * }}
+   * ```
+   *
+   * - `appear` defaults to the value of `enter`
+   * - `enter` defaults to `0`
+   * - `exit` defaults to `0`
+   *
+   * @type {number | { enter?: number, exit?: number, appear?: number }}
+   */
+  timeout: function timeout(props) {
+    var pt = timeoutsShape;
+    if (!props.addEndListener) pt = pt.isRequired;
+
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    return pt.apply(void 0, [props].concat(args));
+  },
+
+  /**
+   * Add a custom transition end trigger. Called with the transitioning
+   * DOM node and a `done` callback. Allows for more fine grained transition end
+   * logic. Timeouts are still used as a fallback if provided.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * ```jsx
+   * addEndListener={(node, done) => {
+   *   // use the css transitionend event to mark the finish of a transition
+   *   node.addEventListener('transitionend', done, false);
+   * }}
+   * ```
+   */
+  addEndListener: PropTypes$3.func,
+
+  /**
+   * Callback fired before the "entering" status is applied. An extra parameter
+   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement, isAppearing: bool) -> void
+   */
+  onEnter: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "entering" status is applied. An extra parameter
+   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement, isAppearing: bool)
+   */
+  onEntering: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "entered" status is applied. An extra parameter
+   * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement, isAppearing: bool) -> void
+   */
+  onEntered: PropTypes$3.func,
+
+  /**
+   * Callback fired before the "exiting" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement) -> void
+   */
+  onExit: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "exiting" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
+   * @type Function(node: HtmlElement) -> void
+   */
+  onExiting: PropTypes$3.func,
+
+  /**
+   * Callback fired after the "exited" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed
+   *
+   * @type Function(node: HtmlElement) -> void
+   */
+  onExited: PropTypes$3.func
+} ; // Name the function so it is clearer in the documentation
+
+function noop() {}
+
+Transition.defaultProps = {
+  in: false,
+  mountOnEnter: false,
+  unmountOnExit: false,
+  appear: false,
+  enter: true,
+  exit: true,
+  onEnter: noop,
+  onEntering: noop,
+  onEntered: noop,
+  onExit: noop,
+  onExiting: noop,
+  onExited: noop
+};
+Transition.UNMOUNTED = UNMOUNTED;
+Transition.EXITED = EXITED;
+Transition.ENTERING = ENTERING;
+Transition.ENTERED = ENTERED;
+Transition.EXITING = EXITING;
+
+var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
+
+/* eslint-disable no-return-assign */
+var optionsSupported = false;
+var onceSupported = false;
+
+try {
+  var options = {
+    get passive() {
+      return optionsSupported = true;
+    },
+
+    get once() {
+      // eslint-disable-next-line no-multi-assign
+      return onceSupported = optionsSupported = true;
+    }
+
+  };
+
+  if (canUseDOM) {
+    window.addEventListener('test', options, options);
+    window.removeEventListener('test', options, true);
+  }
+} catch (e) {
+  /* */
+}
+
+/**
+ * An `addEventListener` ponyfill, supports the `once` option
+ * 
+ * @param node the element
+ * @param eventName the event name
+ * @param handle the handler
+ * @param options event options
+ */
+function addEventListener(node, eventName, handler, options) {
+  if (options && typeof options !== 'boolean' && !onceSupported) {
+    var once = options.once,
+        capture = options.capture;
+    var wrappedHandler = handler;
+
+    if (!onceSupported && once) {
+      wrappedHandler = handler.__once || function onceHandler(event) {
+        this.removeEventListener(eventName, onceHandler, capture);
+        handler.call(this, event);
+      };
+
+      handler.__once = wrappedHandler;
+    }
+
+    node.addEventListener(eventName, wrappedHandler, optionsSupported ? options : capture);
+  }
+
+  node.addEventListener(eventName, handler, options);
+}
+
+/**
+ * A `removeEventListener` ponyfill
+ * 
+ * @param node the element
+ * @param eventName the event name
+ * @param handle the handler
+ * @param options event options
+ */
+function removeEventListener(node, eventName, handler, options) {
+  var capture = options && typeof options !== 'boolean' ? options.capture : options;
+  node.removeEventListener(eventName, handler, capture);
+
+  if (handler.__once) {
+    node.removeEventListener(eventName, handler.__once, capture);
+  }
+}
+
+function listen(node, eventName, handler, options) {
+  addEventListener(node, eventName, handler, options);
+  return function () {
+    removeEventListener(node, eventName, handler, options);
+  };
+}
+
+/**
+ * Triggers an event on a given element.
+ * 
+ * @param node the element
+ * @param eventName the event name to trigger
+ * @param bubbles whether the event should bubble up
+ * @param cancelable whether the event should be cancelable
+ */
+function triggerEvent(node, eventName, bubbles, cancelable) {
+  if (bubbles === void 0) {
+    bubbles = false;
+  }
+
+  if (cancelable === void 0) {
+    cancelable = true;
+  }
+
+  if (node) {
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent(eventName, bubbles, cancelable);
+    node.dispatchEvent(event);
+  }
+}
+
+function parseDuration$1(node) {
+  var str = style(node, 'transitionDuration') || '';
+  var mult = str.indexOf('ms') === -1 ? 1000 : 1;
+  return parseFloat(str) * mult;
+}
+
+function emulateTransitionEnd(element, duration, padding) {
+  if (padding === void 0) {
+    padding = 5;
+  }
+
+  var called = false;
+  var handle = setTimeout(function () {
+    if (!called) triggerEvent(element, 'transitionend', true);
+  }, duration + padding);
+  var remove = listen(element, 'transitionend', function () {
+    called = true;
+  }, {
+    once: true
+  });
+  return function () {
+    clearTimeout(handle);
+    remove();
+  };
+}
+
+function transitionEnd(element, handler, duration, padding) {
+  if (duration == null) duration = parseDuration$1(element) || 0;
+  var removeEmulate = emulateTransitionEnd(element, duration, padding);
+  var remove = listen(element, 'transitionend', handler);
+  return function () {
+    removeEmulate();
+    remove();
+  };
+}
+
+function parseDuration(node, property) {
+  const str = style(node, property) || '';
+  const mult = str.indexOf('ms') === -1 ? 1000 : 1;
+  return parseFloat(str) * mult;
+}
+function transitionEndListener(element, handler) {
+  const duration = parseDuration(element, 'transitionDuration');
+  const delay = parseDuration(element, 'transitionDelay');
+  const remove = transitionEnd(element, e => {
+    if (e.target === element) {
+      remove();
+      handler(e);
+    }
+  }, duration + delay);
+}
+
+/**
+ * Safe chained function
+ *
+ * Will only create a new function if needed,
+ * otherwise will pass back existing functions or null.
+ *
+ * @param {function} functions to chain
+ * @returns {function|null}
+ */
+function createChainedFunction(...funcs) {
+  return funcs.filter(f => f != null).reduce((acc, f) => {
+    if (typeof f !== 'function') {
+      throw new Error('Invalid Argument Type, must only provide functions, undefined, or null.');
+    }
+    if (acc === null) return f;
+    return function chainedFunction(...args) {
+      // @ts-ignore
+      acc.apply(this, args);
+      // @ts-ignore
+      f.apply(this, args);
+    };
+  }, null);
+}
+
+// reading a dimension prop will cause the browser to recalculate,
+// which will let our animations work
+function triggerBrowserReflow(node) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  node.offsetHeight;
+}
+
+function safeFindDOMNode(componentOrElement) {
+  if (componentOrElement && 'setState' in componentOrElement) {
+    return ReactDOM$3.findDOMNode(componentOrElement);
+  }
+  return componentOrElement != null ? componentOrElement : null;
+}
+
+// Normalizes Transition callbacks when nodeRef is used.
+const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
+  onEnter,
+  onEntering,
+  onEntered,
+  onExit,
+  onExiting,
+  onExited,
+  addEndListener,
+  children,
+  childRef,
+  ...props
+}, ref) => {
+  const nodeRef = s(null);
+  const mergedRef = useMergedRefs(nodeRef, childRef);
+  const attachRef = r => {
+    mergedRef(safeFindDOMNode(r));
+  };
+  const normalize = callback => param => {
+    if (callback && nodeRef.current) {
+      callback(nodeRef.current, param);
+    }
+  };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const handleEnter = A$1(normalize(onEnter), [onEnter]);
+  const handleEntering = A$1(normalize(onEntering), [onEntering]);
+  const handleEntered = A$1(normalize(onEntered), [onEntered]);
+  const handleExit = A$1(normalize(onExit), [onExit]);
+  const handleExiting = A$1(normalize(onExiting), [onExiting]);
+  const handleExited = A$1(normalize(onExited), [onExited]);
+  const handleAddEndListener = A$1(normalize(addEndListener), [addEndListener]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  return /*#__PURE__*/e(Transition, {
+    ref: ref,
+    ...props,
+    onEnter: handleEnter,
+    onEntered: handleEntered,
+    onEntering: handleEntering,
+    onExit: handleExit,
+    onExited: handleExited,
+    onExiting: handleExiting,
+    addEndListener: handleAddEndListener,
+    nodeRef: nodeRef,
+    children: typeof children === 'function' ? (status, innerProps) =>
+    // TODO: Types for RTG missing innerProps, so need to cast.
+    children(status, {
+      ...innerProps,
+      ref: attachRef
+    }) : /*#__PURE__*/ReactDOM$3.cloneElement(children, {
+      ref: attachRef
+    })
+  });
+});
+var TransitionWrapper$1 = TransitionWrapper;
+
+const MARGINS = {
+  height: ['marginTop', 'marginBottom'],
+  width: ['marginLeft', 'marginRight']
+};
+function getDefaultDimensionValue(dimension, elem) {
+  const offset = `offset${dimension[0].toUpperCase()}${dimension.slice(1)}`;
+  const value = elem[offset];
+  const margins = MARGINS[dimension];
+  return value +
+  // @ts-ignore
+  parseInt(style(elem, margins[0]), 10) +
+  // @ts-ignore
+  parseInt(style(elem, margins[1]), 10);
+}
+const collapseStyles = {
+  [EXITED]: 'collapse',
+  [EXITING]: 'collapsing',
+  [ENTERING]: 'collapsing',
+  [ENTERED]: 'collapse show'
+};
+const Collapse = /*#__PURE__*/ReactDOM$3.forwardRef(({
+  onEnter,
+  onEntering,
+  onEntered,
+  onExit,
+  onExiting,
+  className,
+  children,
+  dimension = 'height',
+  in: inProp = false,
+  timeout = 300,
+  mountOnEnter = false,
+  unmountOnExit = false,
+  appear = false,
+  getDimensionValue = getDefaultDimensionValue,
+  ...props
+}, ref) => {
+  /* Compute dimension */
+  const computedDimension = typeof dimension === 'function' ? dimension() : dimension;
+
+  /* -- Expanding -- */
+  const handleEnter = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = '0';
+  }, onEnter), [computedDimension, onEnter]);
+  const handleEntering = d(() => createChainedFunction(elem => {
+    const scroll = `scroll${computedDimension[0].toUpperCase()}${computedDimension.slice(1)}`;
+    elem.style[computedDimension] = `${elem[scroll]}px`;
+  }, onEntering), [computedDimension, onEntering]);
+  const handleEntered = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = null;
+  }, onEntered), [computedDimension, onEntered]);
+
+  /* -- Collapsing -- */
+  const handleExit = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = `${getDimensionValue(computedDimension, elem)}px`;
+    triggerBrowserReflow(elem);
+  }, onExit), [onExit, getDimensionValue, computedDimension]);
+  const handleExiting = d(() => createChainedFunction(elem => {
+    elem.style[computedDimension] = null;
+  }, onExiting), [computedDimension, onExiting]);
+  return /*#__PURE__*/e(TransitionWrapper$1, {
+    ref: ref,
+    addEndListener: transitionEndListener,
+    ...props,
+    "aria-expanded": props.role ? inProp : null,
+    onEnter: handleEnter,
+    onEntering: handleEntering,
+    onEntered: handleEntered,
+    onExit: handleExit,
+    onExiting: handleExiting,
+    childRef: children.ref,
+    in: inProp,
+    timeout: timeout,
+    mountOnEnter: mountOnEnter,
+    unmountOnExit: unmountOnExit,
+    appear: appear,
+    children: (state, innerProps) => /*#__PURE__*/ReactDOM$3.cloneElement(children, {
+      ...innerProps,
+      className: classNames(className, children.props.className, collapseStyles[state], computedDimension === 'width' && 'collapse-horizontal')
+    })
+  });
+});
+
+// @ts-ignore
+
+var Collapse$1 = Collapse;
+
+function isAccordionItemSelected(activeEventKey, eventKey) {
+  return Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : activeEventKey === eventKey;
+}
+const context$1 = /*#__PURE__*/D$1({});
+context$1.displayName = 'AccordionContext';
+var AccordionContext = context$1;
+
+/**
+ * This component accepts all of [`Collapse`'s props](/docs/utilities/transitions#collapse-1).
+ */
+const AccordionCollapse = /*#__PURE__*/x(({
+  as: Component = 'div',
+  bsPrefix,
+  className,
+  children,
+  eventKey,
+  ...props
+}, ref) => {
+  const {
+    activeEventKey
+  } = F$1(AccordionContext);
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-collapse');
+  return /*#__PURE__*/e(Collapse$1, {
+    ref: ref,
+    in: isAccordionItemSelected(activeEventKey, eventKey),
+    ...props,
+    className: classNames(className, bsPrefix),
+    children: /*#__PURE__*/e(Component, {
+      children: k.only(children)
+    })
+  });
+});
+AccordionCollapse.displayName = 'AccordionCollapse';
+var AccordionCollapse$1 = AccordionCollapse;
+
+const context = /*#__PURE__*/D$1({
+  eventKey: ''
+});
+context.displayName = 'AccordionItemContext';
+var AccordionItemContext = context;
+
+const AccordionBody = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  bsPrefix,
+  className,
+  onEnter,
+  onEntering,
+  onEntered,
+  onExit,
+  onExiting,
+  onExited,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-body');
+  const {
+    eventKey
+  } = F$1(AccordionItemContext);
+  return /*#__PURE__*/e(AccordionCollapse$1, {
+    eventKey: eventKey,
+    onEnter: onEnter,
+    onEntering: onEntering,
+    onEntered: onEntered,
+    onExit: onExit,
+    onExiting: onExiting,
+    onExited: onExited,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, bsPrefix)
+    })
+  });
+});
+AccordionBody.displayName = 'AccordionBody';
+var AccordionBody$1 = AccordionBody;
+
+function useAccordionButton(eventKey, onClick) {
+  const {
+    activeEventKey,
+    onSelect,
+    alwaysOpen
+  } = F$1(AccordionContext);
+  return e => {
+    /*
+      Compare the event key in context with the given event key.
+      If they are the same, then collapse the component.
+    */
+    let eventKeyPassed = eventKey === activeEventKey ? null : eventKey;
+    if (alwaysOpen) {
+      if (Array.isArray(activeEventKey)) {
+        if (activeEventKey.includes(eventKey)) {
+          eventKeyPassed = activeEventKey.filter(k => k !== eventKey);
+        } else {
+          eventKeyPassed = [...activeEventKey, eventKey];
+        }
+      } else {
+        // activeEventKey is undefined.
+        eventKeyPassed = [eventKey];
+      }
+    }
+    onSelect == null ? void 0 : onSelect(eventKeyPassed, e);
+    onClick == null ? void 0 : onClick(e);
+  };
+}
+const AccordionButton = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'button',
+  bsPrefix,
+  className,
+  onClick,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-button');
+  const {
+    eventKey
+  } = F$1(AccordionItemContext);
+  const accordionOnClick = useAccordionButton(eventKey, onClick);
+  const {
+    activeEventKey
+  } = F$1(AccordionContext);
+  if (Component === 'button') {
+    props.type = 'button';
+  }
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    onClick: accordionOnClick,
+    ...props,
+    "aria-expanded": Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : eventKey === activeEventKey,
+    className: classNames(className, bsPrefix, !isAccordionItemSelected(activeEventKey, eventKey) && 'collapsed')
+  });
+});
+AccordionButton.displayName = 'AccordionButton';
+var AccordionButton$1 = AccordionButton;
+
+const AccordionHeader = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'h2',
+  bsPrefix,
+  className,
+  children,
+  onClick,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-header');
+  return /*#__PURE__*/e(Component, {
+    ref: ref,
+    ...props,
+    className: classNames(className, bsPrefix),
+    children: /*#__PURE__*/e(AccordionButton$1, {
+      onClick: onClick,
+      children: children
+    })
+  });
+});
+AccordionHeader.displayName = 'AccordionHeader';
+var AccordionHeader$1 = AccordionHeader;
+
+const AccordionItem = /*#__PURE__*/x(({
+  // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+  as: Component = 'div',
+  bsPrefix,
+  className,
+  eventKey,
+  ...props
+}, ref) => {
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-item');
+  const contextValue = d(() => ({
+    eventKey
+  }), [eventKey]);
+  return /*#__PURE__*/e(AccordionItemContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...props,
+      className: classNames(className, bsPrefix)
+    })
+  });
+});
+AccordionItem.displayName = 'AccordionItem';
+var AccordionItem$1 = AccordionItem;
+
+const Accordion = /*#__PURE__*/x((props, ref) => {
+  const {
+    // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+    as: Component = 'div',
+    activeKey,
+    bsPrefix,
+    className,
+    onSelect,
+    flush,
+    alwaysOpen,
+    ...controlledProps
+  } = useUncontrolled(props, {
+    activeKey: 'onSelect'
+  });
+  const prefix = useBootstrapPrefix(bsPrefix, 'accordion');
+  const contextValue = d(() => ({
+    activeEventKey: activeKey,
+    onSelect,
+    alwaysOpen
+  }), [activeKey, onSelect, alwaysOpen]);
+  return /*#__PURE__*/e(AccordionContext.Provider, {
+    value: contextValue,
+    children: /*#__PURE__*/e(Component, {
+      ref: ref,
+      ...controlledProps,
+      className: classNames(className, prefix, flush && `${prefix}-flush`)
+    })
+  });
+});
+Accordion.displayName = 'Accordion';
+var Accordion$1 = Object.assign(Accordion, {
+  Button: AccordionButton$1,
+  Collapse: AccordionCollapse$1,
+  Item: AccordionItem$1,
+  Header: AccordionHeader$1,
+  Body: AccordionBody$1
+});
+
+class AceEditNote extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      notebookPath: propTypes$2.exports.string,
+      source: propTypes$2.exports.string,
+      onChange: propTypes$2.exports.func,
+      onClickLink: propTypes$2.exports.func,
+      onKeyDown: propTypes$2.exports.func
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.onValueChange = this.onValueChange.bind(this);
+  }
+  async componentDidMount() {
+    const {
+      editor
+    } = this.aceEditor;
+    editor.on('linkClick', ({
+      token
+    }) => {
+      const {
+        value = ''
+      } = token;
+      const [url = ''] = extractUrls(value) || [];
+      if (url) {
+        return this.props.onClickLink(url);
+      }
+      // Match './xxx' and '../xxx'.
+      const match = value.match(/^'([.][.]?[/].*)'$/);
+      if (match) {
+        const uri = new URL(match[1], this.props.notebookPath);
+        return this.props.onClickLink(uri.toString());
+      }
+    });
+  }
+  async update() {}
+  async componentWillUnmount() {}
+  onValueChange(data) {
+    this.props.onChange(data);
+  }
+  highlight(data) {
+    return PrismJS.highlight(data, PrismJS.languages.js);
+  }
+  render() {
+    try {
+      const {
+        source = ''
+      } = this.props;
+      return v$1(_default, {
+        ref: ref => {
+          this.aceEditor = ref;
+        },
+        editorProps: {
+          $blockScrolling: true
+        },
+        setOptions: {
+          enableLinking: true,
+          useWorker: false
+        },
+        style: {
+          minHeight: '30rem'
+        },
+        highlightActiveLine: true,
+        mode: "javascript",
+        onChange: this.onValueChange,
+        showGutter: true,
+        showPrintMargin: true,
+        theme: "github",
+        fontSize: 18,
+        value: source,
+        height: "auto",
+        width: "100%",
+        wrapEnabled: true
+      });
+    } catch (e) {
+      console.log(e.stack);
+      throw e;
+    }
+  }
+}
 
 const Container = /*#__PURE__*/x(({
   bsPrefix,
@@ -44973,7 +46349,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
     } = note;
     const {
       download,
-      name,
+      name = '',
       width
     } = view;
     const onClick = event => {
@@ -44997,21 +46373,19 @@ class ViewNote extends ReactDOM$3.PureComponent {
       downloadNote = v$1(DownloadNote, {
         key: note.hash,
         download: download,
-        workspace: workspace,
-        style: {
-          float: 'right'
-        }
+        workspace: workspace
       });
     }
     return v$1(Card$1, {
+      border: "primary",
       onClick: onClick,
       style: {
         maxWidth: width
       }
-    }, v$1(Card$1.Text, null, name, downloadNote), v$1(Card$1.Img, {
+    }, v$1(Card$1.Header, null, name), v$1(Card$1.Body, null, v$1(Card$1.Img, {
       src: note.url,
       variant: "top"
-    }));
+    }), v$1(Card$1.Text, null, downloadNote)));
   }
 }
 
@@ -45065,7 +46439,7 @@ class Section extends ReactDOM$3.PureComponent {
         onClickView: onClickView,
         workspace: workspace
       }));
-      const editor = v$1(EditNote, {
+      const editor = v$1(AceEditNote, {
         key: id,
         source: section.source,
         onChange: code => {
@@ -45077,12 +46451,17 @@ class Section extends ReactDOM$3.PureComponent {
         workspace: workspace
       });
       return v$1(Card$1, {
-        key: id
+        key: id,
+        onKeyDown: onKeyDown
       }, v$1(Card$1.Header, {
         id: `note-id-${id}`
       }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
         key: nth
-      }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, editor));
+      }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, v$1(Accordion$1, {
+        defaultActiveKey: "0"
+      }, v$1(Accordion$1.Item, {
+        eventKey: "1"
+      }, v$1(Accordion$1.Header, null, "Code"), v$1(Accordion$1.Body, null, editor)))));
     } catch (error) {
       console.log(error.stack);
       throw error;
@@ -45990,23 +47369,39 @@ class App extends ReactDOM$3.Component {
         });
         return;
       }
-      topLevel.forEach(({
+      for (const [id, {
         text
-      }, id) => {
+      }] of topLevel) {
+        const {
+          controls = [],
+          downloads = [],
+          errors = [],
+          mds = [],
+          views = []
+        } = await read(`section/${path}/${id}`, {
+          workspace,
+          otherwise: {}
+        });
         sections.set(id, {
           source: text,
-          controls: [],
-          downloads: [],
-          errors: [],
-          mds: [],
-          views: []
+          controls,
+          downloads,
+          errors,
+          mds,
+          views
         });
-      });
+      }
       await this.updateState({
         [`NotebookSections/${path}`]: sections
       });
     };
     this.Notebook.updateSection = async (path, id, section) => {
+      const {
+        workspace
+      } = this.props;
+      if (id === undefined) {
+        return;
+      }
       const {
         [`NotebookSections/${path}`]: NotebookSections = new Map(),
         [`NotebookVersion/${path}`]: NotebookVersion = 0
@@ -46019,6 +47414,9 @@ class App extends ReactDOM$3.Component {
       NotebookSections.set(id, {
         source: NotebookSections.get(id).source,
         ...section
+      });
+      await write(`section/${path}/${id}`, section, {
+        workspace
       });
       await this.updateState({
         [`NotebookVersion/${path}`]: NotebookVersion + 1
@@ -46292,14 +47690,7 @@ class App extends ReactDOM$3.Component {
       await ensureFile(notebookFile, notebookPath, {
         workspace
       });
-      // const data = await read(notebookFile, { workspace });
       await this.Notebook.updateSections(path, workspace);
-      /*
-      const notebookText =
-        typeof data === 'string' ? data : new TextDecoder('utf8').decode(data);
-       this.Notebook.ensureAdvice(path);
-      await this.updateState({ [`NotebookText/${path}`]: notebookText });
-      */
 
       // Let state propagate.
       await animationFrame();
@@ -46957,7 +48348,7 @@ class App extends ReactDOM$3.Component {
               variant: "primary",
               onClick: this.Workspace.reset
             }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
-              controlId: "AddLocalFilesystemPrefixId"
+              QQcontrolId: "AddLocalFilesystemPrefixId"
             }, v$1(Form$1.Control, {
               id: "AddLocalFilesystemPrefix",
               placeholder: "Prefix",

@@ -2,12 +2,13 @@ import './Notebook.css';
 
 import * as PropTypes from 'prop-types';
 
+import Accordion from 'react-bootstrap/Accordion';
+import AceEditNote from './AceEditNote.js';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import ControlNote from './ControlNote.js';
 import DownloadNote from './DownloadNote.js';
-import EditNote from './EditNote.js';
 import ErrorNote from './ErrorNote.js';
 import MdNote from './MdNote.js';
 import React from 'react';
@@ -60,7 +61,7 @@ export class Section extends React.PureComponent {
         />
       ));
       const editor = (
-        <EditNote
+        <AceEditNote
           key={id}
           source={section.source}
           onChange={(code) => {
@@ -74,7 +75,7 @@ export class Section extends React.PureComponent {
       );
 
       return (
-        <Card key={id}>
+        <Card key={id} onKeyDown={onKeyDown}>
           <Card.Header id={`note-id-${id}`}>{id}</Card.Header>
           {errors}
           <Container>
@@ -100,7 +101,12 @@ export class Section extends React.PureComponent {
           </Container>
           <Card.Body>
             {mds}
-            {editor}
+            <Accordion defaultActiveKey="0">
+              <Accordion.Item eventKey="1">
+                <Accordion.Header>Code</Accordion.Header>
+                <Accordion.Body>{editor}</Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
           </Card.Body>
         </Card>
       );
