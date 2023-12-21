@@ -8,9 +8,6 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import React from 'react';
 
-const kHourglassFlowingSand = '\u23f3';
-const kSpace = '\u00A0';
-
 export class TableOfContents extends React.PureComponent {
   static get propTypes() {
     return {
@@ -26,8 +23,9 @@ export class TableOfContents extends React.PureComponent {
       const { path, sections, state } = this.props;
       const contents = [];
       for (const id of [...sections.keys()].sort()) {
-        const sign =
-          state[`${path}/${id}`] === 'running' ? kHourglassFlowingSand : kSpace;
+        const color = state[`${path}/${id}`] === 'running' ? 'red' : 'black';
+        const fontWeight =
+          state[`${path}/${id}`] === 'running' ? 'bold' : undefined;
         contents.push(
           <Button
             variant="light"
@@ -37,7 +35,7 @@ export class TableOfContents extends React.PureComponent {
                 .scrollIntoView({ behavior: 'smooth' })
             }
           >
-            {sign} {id} {sign}
+            <span style={{ color, fontWeight }}> {id} </span>
           </Button>
         );
       }

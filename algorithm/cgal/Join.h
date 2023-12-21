@@ -44,10 +44,8 @@ int Join(Geometry* geometry, int targets, bool exact) {
           } else if (exact) {
             Surface_mesh cutMeshCopy(geometry->mesh(nth));
             if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                    geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default())) {
+                    geometry->mesh(target), cutMeshCopy,
+                    geometry->mesh(target))) {
               return STATUS_ZERO_THICKNESS;
             }
           } else {

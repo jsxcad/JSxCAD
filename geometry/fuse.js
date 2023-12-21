@@ -16,5 +16,5 @@ export const Fuse = (geometries, { exact } = {}) => {
   return Group(outputs);
 };
 
-export const fuse = (geometry, geometries, { exact }) =>
+export const fuse = (geometry, geometries, { exact } = {}) =>
   Fuse([geometry, ...geometries], { exact });

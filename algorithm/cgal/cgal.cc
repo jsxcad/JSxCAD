@@ -176,6 +176,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeReliefFromImage", &ComputeReliefFromImage,
                        emscripten::allow_raw_pointers());
+  emscripten::function("ComputeSkeleton", &ComputeSkeleton,
+                       emscripten::allow_raw_pointers());
   emscripten::function("ComputeToolpath", &ComputeToolpath,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeVolume", &ComputeVolume,
@@ -226,6 +228,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
   emscripten::function("Repair", &Repair, emscripten::allow_raw_pointers());
+  emscripten::function("Route", &Route, emscripten::allow_raw_pointers());
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());

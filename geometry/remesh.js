@@ -1,8 +1,13 @@
+import { isNotTypeGhost, isNotTypeVoid } from './tagged/type.js';
+
 import { linearize } from './tagged/linearize.js';
 import { remesh as remeshWithCgal } from '@jsxcad/algorithm-cgal';
 import { replacer } from './tagged/visit.js';
 
-const filter = (geometry) => ['graph'].includes(geometry.type);
+const filter = (geometry) =>
+  ['graph'].includes(geometry.type) &&
+  isNotTypeGhost(geometry) &&
+  isNotTypeVoid(geometry);
 
 export const remesh = (
   geometry,

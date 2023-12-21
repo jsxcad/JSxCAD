@@ -1,3 +1,4 @@
+import { Fuse } from './fuse.js';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { separate as separateWithCgal } from '@jsxcad/algorithm-cgal';
@@ -15,3 +16,6 @@ export const separate = (geometry, { noShapes, noHoles, holesAsShapes }) => {
   const outputs = separateWithCgal(inputs, !noShapes, !noHoles, holesAsShapes);
   return taggedGroup({}, ...outputs);
 };
+
+export const exterior = (geometry) =>
+  Fuse([separate(geometry, { noHoles: true })]);

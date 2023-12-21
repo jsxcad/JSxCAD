@@ -125,10 +125,14 @@ class Geometry {
 
   bool has_transform(int nth) { return transforms_[nth] != nullptr; }
 
-  const Transformation& transform(int nth) {
+  void ensureTransform(int nth) {
     if (!has_transform(nth)) {
       transforms_[nth].reset(new Transformation(CGAL::IDENTITY));
     }
+  }
+
+  const Transformation& transform(int nth) {
+    ensureTransform(nth);
     return *transforms_[nth];
   }
 
@@ -339,6 +343,7 @@ class Geometry {
   }
 
   const std::shared_ptr<const Transformation>& getTransform(int nth) {
+    ensureTransform(nth);
     return transforms_[nth];
   }
 

@@ -46853,8 +46853,6 @@ const Table = /*#__PURE__*/x(({
   return table;
 });
 
-const kHourglassFlowingSand = '\u23f3';
-const kSpace = '\u00A0';
 class TableOfContents extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
@@ -46873,13 +46871,19 @@ class TableOfContents extends ReactDOM$3.PureComponent {
       } = this.props;
       const contents = [];
       for (const id of [...sections.keys()].sort()) {
-        const sign = state[`${path}/${id}`] === 'running' ? kHourglassFlowingSand : kSpace;
+        const color = state[`${path}/${id}`] === 'running' ? 'red' : 'black';
+        const fontWeight = state[`${path}/${id}`] === 'running' ? 'bold' : undefined;
         contents.push(v$1(Button, {
           variant: "light",
           onClick: () => document.querySelector(`#note-id-${CSS.escape(id)}`).scrollIntoView({
             behavior: 'smooth'
           })
-        }, sign, " ", id, " ", sign));
+        }, v$1("span", {
+          style: {
+            color,
+            fontWeight
+          }
+        }, " ", id, " ")));
       }
       return v$1(ButtonGroup, {
         vertical: true,

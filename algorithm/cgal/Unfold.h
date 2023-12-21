@@ -5,8 +5,6 @@
 int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
   size_t size = geometry->getSize();
 
-  CGAL::Cartesian_converter<Cartesian_kernel, Kernel> from_cartesian;
-
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
