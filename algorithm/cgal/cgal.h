@@ -1,14 +1,16 @@
+#pragma once
+
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
-// #define CGAL_NO_UNCERTAIN_CONVERSION_OPERATOR
-// #define BOOST_DISABLE_THREADS
 
 // Still cannot work around the memory access errors with occt.
 // #define ENABLE_OCCT
 
+#define CGAL_EIGEN3_ENABLED
+
 // These are added to make Deform work.
 // FIX: The underlying problem.
 #define EIGEN_DONT_VECTORIZE
-#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
+// #define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
 
 // Used in Deform, but it's unclear if this definition is correct.
 #define FE_UNDERFLOW 0
@@ -132,6 +134,7 @@ typedef Kernel::Point_3 Point;
 typedef std::vector<Point> Points;
 typedef Kernel::Ray_3 Ray;
 typedef Kernel::Segment_3 Segment;
+typedef Kernel::Segment_2 Segment_2;
 typedef Epick_kernel::Segment_3 Epick_segment;
 typedef std::vector<Segment> Segments;
 typedef Kernel::Triangle_2 Triangle_2;
@@ -166,7 +169,7 @@ typedef CGAL::Arr_extended_dcel<Traits_2, size_t, size_t, size_t>
     Dcel_with_regions;
 typedef CGAL::Arrangement_2<Traits_2, Dcel_with_regions>
     Arrangement_with_regions_2;
-typedef Traits_2::X_monotone_curve_2 Segment_2;
+// typedef Traits_2::X_monotone_curve_2 Segment_2;
 typedef std::vector<Point> Polyline;
 typedef std::vector<Polyline> Polylines;
 typedef CGAL::Triple<int, int, int> Triangle_int;
@@ -474,6 +477,14 @@ CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Vector>::Kernel>
 translate(const Vector& vector) {
   return CGAL::Aff_transformation_3<
       typename CGAL::Kernel_traits<Vector>::Kernel>(CGAL::TRANSLATION, vector);
+}
+
+template <typename Point>
+CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Point>::Kernel>
+translate_to(const Point& point) {
+  return CGAL::Aff_transformation_3<
+      typename CGAL::Kernel_traits<Point>::Kernel>(CGAL::TRANSLATION,
+                                                   point - Point(0, 0, 0));
 }
 
 Transformation orient_plane(Plane source, Plane target) {
@@ -836,157 +847,6 @@ void removeCollinearPointsFromPolyline(Polyline& polyline) {
       nth++;
     }
   }
-}
-
-void polygonToSegments(Polygon_2& polygon, Segments& segments) {
-  Plane base(0, 0, 1, 0);
-  for (size_t nth = 0, limit = polygon.size(); nth < limit; nth++) {
-    const Point_2& a = polygon[nth];
-    const Point_2& b = polygon[(nth + 1) % limit];
-    segments.emplace_back(base.to_3d(a), base.to_3d(b));
-  }
-}
-
-void removeRepeatedPointsInPolygon(Polygon_2& polygon) {
-  for (size_t nth = 0, limit = polygon.size(); nth < limit;) {
-    const Point_2& a = polygon[nth];
-    const Point_2& b = polygon[(nth + 1) % limit];
-    if (a == b) {
-      polygon.erase(polygon.begin() + nth);
-      limit--;
-    } else {
-      nth++;
-    }
-  }
-}
-
-void simplifyPolygon(Polygon_2& polygon,
-                     std::vector<Polygon_2>& simple_polygons,
-                     Segments& non_simple) {
-  if (polygon.size() < 3) {
-    polygonToSegments(polygon, non_simple);
-    polygon.clear();
-    return;
-  }
-
-  // Remove duplicate points.
-  for (size_t nth = 0, limit = polygon.size(); nth < limit;) {
-    const Point_2& a = polygon[nth];
-    const Point_2& b = polygon[(nth + 1) % limit];
-
-    if (a == b) {
-      polygon.erase(polygon.begin() + nth);
-      limit--;
-    } else {
-      nth++;
-    }
-  }
-
-  if (polygon.size() < 3) {
-    polygonToSegments(polygon, non_simple);
-    polygon.clear();
-    return;
-  }
-
-  if (polygon.is_simple()) {
-    simple_polygons.push_back(std::move(polygon));
-    polygon.clear();
-    return;
-  }
-
-  // Remove self intersections.
-  std::set<Point_2> seen_points;
-  for (auto to = polygon.begin(); to != polygon.end();) {
-    auto [found, created] = seen_points.insert(*to);
-    if (created) {
-      // Advance iterator to next position.
-      ++to;
-    } else {
-      // This is a duplicate -- cut out the loop.
-      auto from = std::find(polygon.begin(), to, *to);
-      if (from == to) {
-        std::cout << "QQ/Could not find seen point" << std::endl;
-      }
-      Polygon_2 cut(from, to);
-      std::cout << "QQ/Cut loop size=" << cut.size() << std::endl;
-      simplifyPolygon(cut, simple_polygons, non_simple);
-      if (cut.size() != 0) {
-        std::cout << "QQ/cut was not cleared" << std::endl;
-      }
-      for (auto it = from; it != to; ++it) {
-        seen_points.erase(*it);
-      }
-      // Erase advances the iterator to the new position.
-      to = polygon.erase(from, to);
-    }
-  }
-
-  if (polygon.size() < 3) {
-    polygonToSegments(polygon, non_simple);
-    polygon.clear();
-    return;
-  }
-
-  simplifyPolygon(polygon, simple_polygons, non_simple);
-
-  if (polygon.size() != 0) {
-    std::cout << "QQ/polygon was not cleared" << std::endl;
-  }
-
-  for (const auto simple_polygon : simple_polygons) {
-    if (!simple_polygon.is_simple()) {
-      std::cout
-          << "QQ/simplifyPolygon produced non-simple polygon in simple_polygons"
-          << std::endl;
-      print_polygon_nl(simple_polygon);
-    }
-  }
-}
-
-void simplifyPolygon(Polygon_2& polygon,
-                     std::vector<Polygon_2>& simple_polygons) {
-  Segments non_simple;
-  simplifyPolygon(polygon, simple_polygons, non_simple);
-}
-
-bool toPolygonsWithHolesFromBoundariesAndHoles(
-    std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
-    Polygons_with_holes_2& pwhs) {
-  for (auto& boundary : boundaries) {
-    if (boundary.size() == 0) {
-      continue;
-    }
-    if (!boundary.is_simple()) {
-      std::cout << "PWHFBAH/1: ";
-      print_polygon_nl(boundary);
-      return false;
-    }
-    if (boundary.orientation() != CGAL::Sign::POSITIVE) {
-      boundary.reverse_orientation();
-    }
-    std::vector<Polygon_2> local_holes;
-    for (auto& hole : holes) {
-      if (hole.size() == 0) {
-        continue;
-      }
-      if (!hole.is_simple()) {
-        std::cout << "PWHFBAH/2: ";
-        print_polygon_nl(hole);
-        return false;
-      }
-      const Point_2& representative_point = hole[0];
-      if (boundary.has_on_positive_side(representative_point)) {
-        if (hole.orientation() != CGAL::Sign::NEGATIVE) {
-          hole.reverse_orientation();
-        }
-        // TODO: Consider destructively moving.
-        local_holes.push_back(hole);
-      }
-    }
-    pwhs.push_back(
-        Polygon_with_holes_2(boundary, local_holes.begin(), local_holes.end()));
-  }
-  return true;
 }
 
 template <typename Arrangement_2>
@@ -2132,6 +1992,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "ComputeNormal.h"
 #include "ComputeOrientedBoundingBox.h"
 #include "ComputeReliefFromImage.h"
+#include "ComputeSkeleton.h"
 #include "ComputeToolpath.h"
 #include "ComputeVolume.h"
 #include "ConvertPolygonsToMeshes.h"
@@ -2167,6 +2028,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Reconstruct.h"
 #include "Remesh.h"
 #include "Repair.h"
+#include "Route.h"
 #include "Seam.h"
 #include "Section.h"
 #include "Separate.h"

@@ -30,6 +30,7 @@ export {
   chainConvexHull,
   convexHull,
 } from './convexHull.js';
+export { ComputeSkeleton } from './computeSkeleton.js';
 export { Curve, curve } from './Curve.js';
 export { Edge } from './Edge.js';
 export { Empty } from './Empty.js';
@@ -41,6 +42,7 @@ export { Orb } from './Orb.js';
 export { OrientedPoint } from './Point.js';
 export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
+export { Route } from './route.js';
 export { Segments } from './Segments.js';
 export { Stroke } from './stroke.js';
 export { abstract } from './abstract.js';
@@ -62,6 +64,7 @@ export { computeImplicitVolume } from './computeImplicitVolume.js';
 export { computeNormal } from './computeNormal.js';
 export { computeOrientedBoundingBox } from './computeOrientedBoundingBox.js';
 export { computeReliefFromImage } from './computeReliefFromImage.js';
+export { computeSkeleton } from './computeSkeleton.js';
 export { computeToolpath } from './computeToolpath.js';
 export { copy } from './copy.js';
 export { convertPolygonsToMeshes } from './convertPolygonsToMeshes.js';
@@ -89,6 +92,7 @@ export {
   extrudeAlongZ,
   extrudeAlongNormal,
 } from './extrude.js';
+export { exterior } from './separate.js';
 export { fair } from './fair.js';
 export { fix } from './fix.js';
 export { flat } from './flat.js';
