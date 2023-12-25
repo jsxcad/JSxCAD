@@ -1,17 +1,49 @@
 #pragma once
 
-enum ValidateStrategy { VALIDATE_DOES_NOT_SELF_INTERSECT = 0 };
+enum ValidateStrategy {
+  VALIDATE_IS_NOT_SELF_INTERSECTING = 0,
+  VALIDATE_IS_CLOSED = 1,
+  VALIDATE_IS_MANIFOLD = 2,
+};
 
 template <typename Surface_mesh>
 bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
+  bool valid = true;
   for (int strategy : strategies) {
     switch (strategy) {
-      case VALIDATE_DOES_NOT_SELF_INTERSECT:
+      case VALIDATE_IS_NOT_SELF_INTERSECTING: {
         if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
-          std::cout << "validate: self intersection." << std::endl;
-          return false;
+          std::cout << "validate: failed is not self intersecting check."
+                    << std::endl;
+          valid = false;
+          break;
         }
+        std::cout << "validate: passed is not self intersecting check."
+                  << std::endl;
+        break;
+      }
+      case VALIDATE_IS_CLOSED: {
+        if (!CGAL::is_closed(mesh)) {
+          std::cout << "validate: failed is closed check." << std::endl;
+          valid = false;
+          break;
+        }
+        std::cout << "validate: passed is closed check." << std::endl;
+        break;
+      }
+      case VALIDATE_IS_MANIFOLD: {
+        for (auto vertex : CGAL::vertices(mesh)) {
+          if (CGAL::Polygon_mesh_processing::is_non_manifold_vertex(vertex,
+                                                                    mesh)) {
+            std::cout << "validate: failed is manifold check." << std::endl;
+            valid = false;
+            break;
+          }
+        }
+        std::cout << "validate: passed is manifold check." << std::endl;
+        break;
+      }
     }
   }
-  return true;
+  return valid;
 }

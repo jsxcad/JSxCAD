@@ -8,7 +8,7 @@ export const fromPolygonSoup = (
     close = false,
     tolerance,
     faceCountLimit,
-    sharpEdgeThreshold,
+    minErrorDrop,
     strategies = [],
   } = {}
 ) => {
@@ -16,7 +16,7 @@ export const fromPolygonSoup = (
     polygons,
     tolerance,
     faceCountLimit,
-    sharpEdgeThreshold,
+    minErrorDrop,
     strategies
   );
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));

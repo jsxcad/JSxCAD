@@ -714,11 +714,7 @@ class App extends React.Component {
                 [`${path}/${id}`]: 'running',
               },
             }));
-            console.log(
-              `Running: ${path}/${id}: ${JSON.stringify(
-                this.state.WorkerState
-              )}`
-            );
+            // console.log(`Running: ${path}/${id}: ${JSON.stringify( this.state.WorkerState)}`);
             const section = await this.ask(
               {
                 op: 'app/evaluate',
@@ -745,7 +741,7 @@ class App extends React.Component {
             await this.setState((state) => ({
               WorkerState: { ...state.WorkerState, [`${path}/${id}`]: 'done' },
             }));
-            console.log(`Done: ${JSON.stringify(this.state.WorkerState)}`);
+            // console.log(`Done: ${JSON.stringify(this.state.WorkerState)}`);
           }
         };
 

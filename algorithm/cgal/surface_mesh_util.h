@@ -16,6 +16,8 @@ void prepare_selection(Surface_mesh& mesh,
             mesh, working_selection, CGAL::parameters::all_default(),
             CGAL::parameters::all_default());
       }
+    }
+    for (const Surface_mesh* selection : selections) {
       CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(*selection);
       for (Vertex_index vertex : mesh.vertices()) {
         if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {

@@ -4,32 +4,8 @@ import { replacer } from './tagged/visit.js';
 
 const filter = (geometry) => ['graph'].includes(geometry.type);
 
-export const approximate = (
-  geometry,
-  {
-    iterations,
-    relaxationSteps,
-    minimumErrorDrop,
-    subdivisionRatio,
-    relativeToChord,
-    withDihedralAngle,
-    optimizeAnchorLocation,
-    pcaPlane,
-    maxNumberOfProxies,
-  }
-) => {
+export const approximate = (geometry, faceCount, minErrorDrop) => {
   const inputs = linearize(geometry, filter);
-  const outputs = approximateWithCgal(
-    inputs,
-    iterations,
-    relaxationSteps,
-    minimumErrorDrop,
-    subdivisionRatio,
-    relativeToChord,
-    withDihedralAngle,
-    optimizeAnchorLocation,
-    pcaPlane,
-    maxNumberOfProxies
-  );
+  const outputs = approximateWithCgal(inputs, faceCount, minErrorDrop);
   return replacer(inputs, outputs)(geometry);
 };

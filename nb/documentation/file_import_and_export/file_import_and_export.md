@@ -37,12 +37,6 @@ Imports a .stl file which can then be used as geometry. A best effort is made to
 const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl', { cornerThreshold: 20/360 });
 ```
 
-![Image](file_import_and_export.md.$8_teapot.png)
-
-```JavaScript
-importedStl.view('teapot');
-```
-
 ---
 ### Importing .svg
 Imports a .svg file which can then be used as geometry.

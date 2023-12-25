@@ -64,6 +64,7 @@ export { grow } from './grow.js';
 export { initCgal } from './getCgal.js';
 export { inset } from './inset.js';
 export { involute } from './involute.js';
+export { iron } from './iron.js';
 export { join } from './join.js';
 export { link } from './link.js';
 export { loft } from './loft.js';

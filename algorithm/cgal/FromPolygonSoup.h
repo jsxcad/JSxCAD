@@ -1,11 +1,10 @@
 #pragma once
 
+#include "./approximate_util.h"
 #include "./repair_util.h"
-#include "./simplify_util.h"
 
-int FromPolygonSoup(Geometry* geometry, emscripten::val fill,
-                    size_t face_count_limit, double sharp_edge_threshold,
-                    emscripten::val nextStrategy) {
+int FromPolygonSoup(Geometry* geometry, emscripten::val fill, size_t face_count,
+                    double min_error_drop, emscripten::val nextStrategy) {
   std::vector<int> strategies;
 
   for (int strategy = nextStrategy().as<int>(); strategy != -1;
@@ -45,20 +44,14 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill,
           points, polygons, mesh);
     }
 
-    if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
-      std::cout << "QQ/FromPolygonSoup: repair_self_intersections begin"
-                << std::endl;
-      repair_self_intersections<Kernel>(mesh, strategies);
-      std::cout << "QQ/FromPolygonSoup: repair_self_intersections end"
-                << std::endl;
-    }
-
-    if (face_count_limit > 0) {
+    if (face_count > 0 || min_error_drop > 0) {
       // Simplify the non-self-intersecting mesh.
       std::cout << "QQ/FromPolygonSoup/Simplify" << std::endl;
       // Enable simplification to reduce polygon count.
-      simplify(face_count_limit, sharp_edge_threshold, mesh);
+      approximate_mesh(mesh, face_count, min_error_drop);
     }
+
+    repair_self_intersections<Kernel>(mesh, strategies);
 
     std::cout << "QQ/FromPolygonSoup/Demesh" << std::endl;
     demesh(mesh);

@@ -50,14 +50,14 @@ int Fair(Geometry* geometry, size_t count, double density) {
       for (Epick_surface_mesh::Face_index face : mesh.faces()) {
         Halfedge_index start = mesh.halfedge(face);
         Halfedge_index edge = start;
-        bool outside = false;
+        bool outside = true;
         do {
           const Epick_point& p = mesh.point(mesh.source(edge));
           for (size_t selection = count; selection < size; selection++) {
-            if (geometry->on_epick_side(selection)(p) ==
+            if (geometry->on_epick_side(selection)(p) !=
                 CGAL::ON_UNBOUNDED_SIDE) {
-              // This face must not be refined.
-              outside = true;
+              // This face may be refined.
+              outside = false;
               break;
             }
           }
@@ -79,10 +79,15 @@ int Fair(Geometry* geometry, size_t count, double density) {
       std::vector<Epick_surface_mesh::Face_index> new_facets;
       std::vector<Epick_surface_mesh::Vertex_index> new_vertices;
       MakeDeterministic();
+      std::cout << "Mesh=" << mesh << std::endl;
+      for (const auto& face : selected_faces) {
+        std::cout << "Face=" << face << std::endl;
+      }
       CGAL::Polygon_mesh_processing::refine(
           mesh, selected_faces, std::back_inserter(new_facets),
           std::back_inserter(new_vertices),
-          CGAL::parameters::density_control_factor(density));
+          CGAL::parameters::density_control_factor(density).vertex_point_map(
+              mesh.points()));
       std::cout << "New face count: " << new_facets.size() << std::endl;
       std::cout << "New vertex count: " << new_vertices.size() << std::endl;
     }
@@ -114,13 +119,17 @@ int Fair(Geometry* geometry, size_t count, double density) {
 
     MakeDeterministic();
 
+#if 0
     if (!CGAL::Polygon_mesh_processing::fair(mesh, selected_vertices)) {
       std::cout << "Fair: fairing failed" << std::endl;
     }
+#endif
 
     geometry->mesh(nth).clear();
     copy_face_graph(mesh, geometry->mesh(nth));
+#if 0
     demesh(geometry->mesh(nth));
+#endif
   }
 
   geometry->transformToLocalFrame();

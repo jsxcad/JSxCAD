@@ -2017,6 +2017,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Grow.h"
 #include "Inset.h"
 #include "Involute.h"
+#include "Iron.h"
 #include "Join.h"
 #include "Link.h"
 #include "Loft.h"

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <CGAL/Polygon_mesh_processing/merge_border_vertices.h>
+#include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
+
 #include "wrap_util.h"
 
 template <typename Surface_mesh>
@@ -111,6 +115,8 @@ bool repair_self_intersections(Surface_mesh& mesh,
       case REPAIR_CLOSE: {
         try {
           std::cout << "QQ/repair_self_intersections: close" << std::endl;
+          CGAL::Polygon_mesh_processing::stitch_boundary_cycles(mesh);
+          CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(mesh);
           std::vector<typename Surface_mesh::halfedge_index> border_cycles;
           CGAL::Polygon_mesh_processing::extract_boundary_cycles(
               mesh, std::back_inserter(border_cycles));
