@@ -77,6 +77,7 @@ export { makeUnitSphere } from './makeUnitSphere.js';
 export { minimizeOverhang } from './minimizeOverhang.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
 export { reconstruct } from './reconstruct.js';
+export { refine } from './refine.js';
 export { remesh } from './remesh.js';
 export { route } from './route.js';
 export { seam } from './seam.js';

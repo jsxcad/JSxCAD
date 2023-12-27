@@ -546,7 +546,7 @@ Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 
 ```JavaScript
 Box(10, 10, [0, 3])
-  .smooth(1, Box(11).cut(Box(5)).ez([1.5, 3.1]), { iterations: 1, time: 1 })
+  .smooth(10, Box(11).cut(Box(5)).ez([1.5, 3.1]))
   .view();
 ```
 
@@ -556,7 +556,7 @@ Box(10, 10, [0, 3])
 Box(5, 5, 20)
   .rx(0 / 4, 1 / 6)
   .fuse()
-  .smooth(1, ArcX(5, 16, 16))
+  .smooth(50, 1, ArcX(6, 16, 16))
   .view();
 ```
 

@@ -139,6 +139,7 @@ export { put } from './put.js';
 export { ref } from './Ref.js';
 export { repair } from './repair.js';
 export { reconstruct } from './reconstruct.js';
+export { refine } from './refine.js';
 export { remesh } from './remesh.js';
 export { rotateX, rx } from './rx.js';
 export { rotateY, ry } from './ry.js';

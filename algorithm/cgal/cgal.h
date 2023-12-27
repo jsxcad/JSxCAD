@@ -2027,6 +2027,7 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Offset.h"
 #include "Outline.h"
 #include "Reconstruct.h"
+#include "Refine.h"
 #include "Remesh.h"
 #include "Repair.h"
 #include "Route.h"

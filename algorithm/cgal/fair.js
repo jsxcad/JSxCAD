@@ -3,9 +3,23 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const fair = (inputs, count, density = 0) =>
+export const fair = (
+  inputs,
+  count,
+  resolution = 1,
+  numberOfIterations = 1,
+  remeshIterations = 1,
+  remeshRelaxationSteps = 1
+) =>
   withCgalGeometry('fair', inputs, (cgalGeometry, g) => {
-    const status = g.Fair(cgalGeometry, count, density);
+    const status = g.Fair(
+      cgalGeometry,
+      count,
+      resolution,
+      numberOfIterations,
+      remeshIterations,
+      remeshRelaxationSteps
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fair');

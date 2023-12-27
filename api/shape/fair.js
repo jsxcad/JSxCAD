@@ -4,6 +4,21 @@ import { fair as fairGeometry } from '@jsxcad/geometry';
 export const fair = Shape.registerMethod3(
   'fair',
   ['inputGeometry', 'geometries', 'number', 'options'],
-  (geometry, selections, implicitDensity, { density = implicitDensity } = {}) =>
-    fairGeometry(geometry, selections, { density })
+  (
+    geometry,
+    selections,
+    implicitResolution,
+    {
+      numberOfIterations,
+      remeshIterations,
+      remeshRelaxationSteps,
+      resolution = implicitResolution,
+    } = {}
+  ) =>
+    fairGeometry(geometry, selections, {
+      numberOfIterations,
+      remeshIterations,
+      remeshRelaxationSteps,
+      resolution,
+    })
 );

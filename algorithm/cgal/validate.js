@@ -2,7 +2,12 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { STATUS_OK } from './status.js';
 
-const kAllStrategies = ['isNotSelfIntersecting', 'isClosed', 'isManifold'];
+const kAllStrategies = [
+  'isNotSelfIntersecting',
+  'isClosed',
+  'isManifold',
+  'isNotDegenerate',
+];
 
 export const validate = (inputs, strategies = []) => {
   const strategyCodes = [];
@@ -17,6 +22,9 @@ export const validate = (inputs, strategies = []) => {
       case 'isManifold':
         strategyCodes.push(2);
         break;
+      case 'isNotDegenerate':
+        strategyCodes.push(3);
+        break;
       default:
         throw new Error(
           `Repair strategy: ${strategy} not in ${kAllStrategies}.`
@@ -24,7 +32,7 @@ export const validate = (inputs, strategies = []) => {
     }
   }
   if (strategyCodes.length === 0) {
-    strategyCodes.push(0, 1, 2);
+    strategyCodes.push(0, 1, 2, 3);
   }
   return withCgalGeometry('validate', inputs, (cgalGeometry, g) => {
     const status = g.Validate(cgalGeometry, () =>

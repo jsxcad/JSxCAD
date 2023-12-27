@@ -2,7 +2,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const buildCorners = (x, y, z) => {
+export const buildCorners = (x = 1, y = x, z = 0) => {
   const c1 = [0, 0, 0];
   const c2 = [0, 0, 0];
   if (x instanceof Array) {

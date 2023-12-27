@@ -231,6 +231,7 @@ export {
 } from './Ref.js';
 export { reconstruct } from './reconstruct.js';
 export { reify } from './tagged/reify.js';
+export { refine } from './refine.js';
 export { remesh } from './remesh.js';
 export { repair } from './repair.js';
 export {

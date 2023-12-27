@@ -1,3 +1,7 @@
+#define CGAL_EIGEN3_ENABLED
+
+#include <CGAL/Polygon_mesh_processing/smooth_shape.h>
+
 struct Constrained_vertex_map {
  public:
   Constrained_vertex_map(CGAL::Unique_hash_map<Vertex_index, bool>& map)
@@ -12,84 +16,83 @@ struct Constrained_vertex_map {
 
 int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
            double time, int remesh_iterations, int remesh_relaxation_steps) {
+  std::cout << "Smooth: resolution=" << resolution
+            << " iterations=" << iterations << " time=" << time
+            << " remesh_iterations=" << remesh_iterations
+            << " remesh_relaxation_steps=" << remesh_relaxation_steps
+            << std::endl;
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
 
-  std::vector<const Epick_surface_mesh*> selections;
+  std::vector<const Surface_mesh*> selections;
   for (int selection = count; selection < size; selection++) {
-    selections.push_back(&geometry->epick_mesh(selection));
+    selections.push_back(&geometry->mesh(selection));
   }
 
   for (size_t nth = 0; nth < count; nth++) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
+    Surface_mesh& mesh = geometry->mesh(nth);
 
-    CGAL::Unique_hash_map<Vertex_index, bool> constrained_vertices(true);
-    CGAL::Unique_hash_map<Face_index, bool> relevant_faces(false);
+    std::unordered_map<Vertex_index, bool> constrained_vertices;
+
+    std::cout << "Smooth: remesh" << std::endl;
+    remesh<Kernel>(mesh, selections, remesh_iterations, remesh_relaxation_steps,
+                   resolution);
 
     if (count < size) {
+      std::cout << "Smooth: use selected vertices" << std::endl;
       // Apply selections.
       // Remesh will handle adding the selection edges.
-      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
-                           remesh_relaxation_steps, resolution);
-      for (const Epick_surface_mesh* selection : selections) {
-        CGAL::Side_of_triangle_mesh<Epick_surface_mesh, Epick_kernel> inside(
-            *selection);
+      for (const Surface_mesh* selection : selections) {
+        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(*selection);
         for (Vertex_index vertex : mesh.vertices()) {
           if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
             // This vertex may be smoothed.
             constrained_vertices[vertex] = false;
           }
         }
-        for (Face_index face : mesh.faces()) {
-          const Halfedge_index start = mesh.halfedge(face);
-          Halfedge_index edge = start;
-          do {
-            if (inside(mesh.point(mesh.source(edge))) !=
-                CGAL::ON_UNBOUNDED_SIDE) {
-              relevant_faces[face] = true;
-              break;
-            }
-            edge = mesh.next(edge);
-          } while (edge != start);
-        }
       }
     } else {
-      remesh<Epick_kernel>(mesh, selections, remesh_iterations,
-                           remesh_relaxation_steps, resolution);
+      std::cout << "Smooth: use all vertices" << std::endl;
       for (Vertex_index vertex : mesh.vertices()) {
         constrained_vertices[vertex] = false;
       }
-      for (Face_index face : mesh.faces()) {
-        relevant_faces[face] = true;
-      }
     }
 
-    Constrained_vertex_map constrained_vertex_map(constrained_vertices);
-
-    std::vector<Face_index> faces;
-    for (Face_index face : mesh.faces()) {
-      if (true || relevant_faces[face]) {
-        // CHECK: Why do we need all of the faces?
-        faces.push_back(face);
+    std::cout << "Smooth: smooth_shape" << std::endl;
+    Epick_surface_mesh epick_mesh;
+    CGAL::Unique_hash_map<Epick_surface_mesh::Vertex_index, bool>
+        constrained_epick_vertices(true);
+    {
+      std::unordered_map<Surface_mesh::Vertex_index,
+                         Epick_surface_mesh::Vertex_index>
+          vertex_to_epick_vertex_map;
+      copy_face_graph(
+          mesh, epick_mesh,
+          CGAL::parameters::vertex_to_vertex_map(
+              boost::make_assoc_property_map(vertex_to_epick_vertex_map)));
+      for (const auto& [key, value] : constrained_vertices) {
+        constrained_epick_vertices[vertex_to_epick_vertex_map[key]] = value;
       }
     }
 
     MakeDeterministic();
-
-    // Maybe it does work -- it just doesn't try to build a curve ...
     CGAL::Polygon_mesh_processing::smooth_shape(
-        faces, mesh, time,
+        epick_mesh.faces(), epick_mesh, time / 100.0,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
-            .vertex_is_constrained_map(constrained_vertex_map));
-    geometry->mesh(nth).clear();
-    copy_face_graph(mesh, geometry->mesh(nth));
-    demesh(geometry->mesh(nth));
+            .vertex_is_constrained_map(
+                Constrained_vertex_map(constrained_epick_vertices)));
+
+    std::cout << "Smooth: copy output" << std::endl;
+    mesh.clear();
+    copy_face_graph(epick_mesh, mesh);
+    std::cout << "Smooth: done" << std::endl;
+    demesh(mesh);
   }
 
   geometry->transformToLocalFrame();

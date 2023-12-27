@@ -227,6 +227,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
   emscripten::function("Reconstruct", &Reconstruct,
                        emscripten::allow_raw_pointers());
+  emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
   emscripten::function("Repair", &Repair, emscripten::allow_raw_pointers());
   emscripten::function("Route", &Route, emscripten::allow_raw_pointers());
