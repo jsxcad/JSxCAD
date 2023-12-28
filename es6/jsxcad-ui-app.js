@@ -47594,7 +47594,7 @@ class App extends ReactDOM$3.Component {
                 [`${path}/${id}`]: 'running'
               }
             }));
-            console.log(`Running: ${path}/${id}: ${JSON.stringify(this.state.WorkerState)}`);
+            // console.log(`Running: ${path}/${id}: ${JSON.stringify( this.state.WorkerState)}`);
             const section = await this.ask({
               op: 'app/evaluate',
               path: NotebookPath,
@@ -47623,9 +47623,10 @@ class App extends ReactDOM$3.Component {
                 [`${path}/${id}`]: 'done'
               }
             }));
-            console.log(`Done: ${JSON.stringify(this.state.WorkerState)}`);
+            // console.log(`Done: ${JSON.stringify(this.state.WorkerState)}`);
           }
         };
+
         const replay = async script => {
           // FIX: Remove this, since it doesn't get used anymore.
           try {

@@ -213,6 +213,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
   emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());
   emscripten::function("Involute", &Involute, emscripten::allow_raw_pointers());
+  emscripten::function("Iron", &Iron, emscripten::allow_raw_pointers());
   emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
   emscripten::function("Link", &Link, emscripten::allow_raw_pointers());
   emscripten::function("Loft", &Loft, emscripten::allow_raw_pointers());
@@ -226,6 +227,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
   emscripten::function("Reconstruct", &Reconstruct,
                        emscripten::allow_raw_pointers());
+  emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
   emscripten::function("Repair", &Repair, emscripten::allow_raw_pointers());
   emscripten::function("Route", &Route, emscripten::allow_raw_pointers());

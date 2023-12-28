@@ -12,17 +12,14 @@ export const LoadStl = Shape.registerMethod3(
     'modes:binary,ascii',
     'strings:wrap,patch,auto',
     'number',
-    'options',
+    'number',
   ],
   async (
     path,
     { binary, ascii },
     strategies,
-    implicitFaceCountLimit = 0,
-    {
-      faceCountLimit = implicitFaceCountLimit,
-      sharpEdgeThreshold = 120 / 360,
-    } = {}
+    faceCountLimit = 0,
+    minErrorDrop = 0
   ) => {
     const data = await read(`source/${path}`, { sources: [path] });
     if (data === undefined) {
@@ -37,7 +34,7 @@ export const LoadStl = Shape.registerMethod3(
     return fromStl(data, {
       format,
       faceCountLimit,
-      sharpEdgeThreshold,
+      minErrorDrop,
       strategies,
     });
   }
@@ -45,20 +42,12 @@ export const LoadStl = Shape.registerMethod3(
 
 export const Stl = Shape.registerMethod3(
   'Stl',
-  ['string', 'strings:wrap,patch,auto', 'number', 'options'],
-  async (
-    text,
-    strategies,
-    implicitFaceCountLimit = 0,
-    {
-      faceCountLimit = implicitFaceCountLimit,
-      sharpEdgeThreshold = 120 / 360,
-    } = {}
-  ) =>
+  ['string', 'strings:wrap,patch,auto', 'number', 'number'],
+  async (text, strategies, faceCountLimit = 0, minErrorDrop = 0) =>
     fromStl(new TextEncoder('utf8').encode(text), {
       format: 'ascii',
       faceCountLimit,
-      sharpEdgeThreshold,
+      minErrorDrop,
       strategies,
     })
 );

@@ -3,6 +3,6 @@ import { approximate as op } from '@jsxcad/geometry';
 
 export const approximate = Shape.registerMethod3(
   'approximate',
-  ['inputGeometry', 'options'],
+  ['inputGeometry', 'number', 'number'],
   op
 );

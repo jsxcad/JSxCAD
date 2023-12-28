@@ -9,14 +9,30 @@ import { taggedGroup } from './tagged/taggedGroup.js';
 const filter = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-export const fair = (geometry, selections, { density } = {}) => {
+export const fair = (
+  geometry,
+  selections,
+  {
+    numberOfIterations,
+    remeshIterations,
+    remeshRelaxationSteps,
+    resolution,
+  } = {}
+) => {
   const inputs = [];
   linearize(geometry, filter, inputs);
   const count = inputs.length;
   for (const selection of selections) {
     linearize(selection, filter, inputs);
   }
-  const outputs = fairWithCgal(inputs, count, density);
+  const outputs = fairWithCgal(
+    inputs,
+    count,
+    resolution,
+    numberOfIterations,
+    remeshIterations,
+    remeshRelaxationSteps
+  );
   const ghosts = [];
   for (let nth = count; nth < inputs.length; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));

@@ -35,7 +35,7 @@ export const fromStl = async (
   {
     format = 'ascii',
     faceCountLimit = 0,
-    sharpEdgeThreshold = 0,
+    minErrorDrop = 0,
     strategies = [],
   } = {}
 ) => {
@@ -53,7 +53,7 @@ export const fromStl = async (
   return fromPolygonSoup(polygons, {
     tolerance: 0,
     faceCountLimit,
-    sharpEdgeThreshold,
+    minErrorDrop,
     strategies,
   });
 };

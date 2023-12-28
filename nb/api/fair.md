@@ -2,18 +2,19 @@
 ### fair()
 Parameter|Default|Type
 ---|---|---
-density|1|How dense a refinement to fair.
-{density}|density]|How dense a refinement to fair.
+resolution|1|Mesh resolution to apply for fairing.
+...selections|[]|The volume to select for fairing.
 
 Makes curves within the selected region as smooth as possible.
 
 ![Image](fair.md.$2.png)
 
+Box(10, 10, [-5, 3]).join(Box(6, 6, [3, 5])).fair(0.5, outline().route(Box(1, 1, 1)))
+
 ```JavaScript
-Box(10)
-  .cut(Triangle(7))
-  .ez([20])
-  .fair(10, Box(11).ez([15, 21]))
-  .view()
-  .v(5);
+Box(10, 10, [-5, 3])
+  .join(Box(6, 6, [3, 5]))
+  .fair(0.5, outline().route(Box(1, 1, 1)))
+  .view(clean())
+  .note('Box(10, 10, [-5, 3]).join(Box(6, 6, [3, 5])).fair(0.5, outline().route(Box(1, 1, 1)))');
 ```

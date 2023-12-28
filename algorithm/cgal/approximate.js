@@ -3,39 +3,12 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const approximate = (
-  inputs,
-  iterations,
-  relaxationSteps,
-  minimumErrorDrop,
-  subdivisionRatio,
-  relativeToChord = false,
-  withDihedralAngle = false,
-  optimizeAnchorLocation = true,
-  pcaPlane = false,
-  maxNumberOfProxies
-) =>
+export const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
   withCgalGeometry('approximate', inputs, (cgalGeometry, g) => {
-    const status = g.Approximate(
-      cgalGeometry,
-      iterations !== undefined,
-      iterations,
-      relaxationSteps !== undefined,
-      relaxationSteps,
-      minimumErrorDrop !== undefined,
-      minimumErrorDrop,
-      subdivisionRatio !== undefined,
-      subdivisionRatio,
-      relativeToChord,
-      withDihedralAngle,
-      optimizeAnchorLocation,
-      pcaPlane,
-      maxNumberOfProxies !== undefined,
-      maxNumberOfProxies
-    );
+    const status = g.Approximate(cgalGeometry, faceCount, minErrorDrop);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by bend');
+        throw new ErrorZeroThickness('Zero thickness produced by approximate');
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:

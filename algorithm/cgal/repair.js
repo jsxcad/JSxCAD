@@ -25,7 +25,7 @@ export const provideRepairStrategies = (strategies) => {
         );
     }
   }
-  return () => strategyCodes.shift() || -1;
+  return () => (strategyCodes.length >= 1 ? strategyCodes.shift() : -1);
 };
 
 export const repair = (inputs, strategies = []) =>

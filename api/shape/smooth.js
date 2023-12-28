@@ -3,17 +3,19 @@ import { smooth as smoothGeometry } from '@jsxcad/geometry';
 
 export const smooth = Shape.registerMethod3(
   'smooth',
-  ['inputGeometry', 'number', 'options', 'geometries'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'options'],
   (
     geometry,
-    resolution = 1,
+    selections,
+    implicitTime,
+    implicitResolution,
     {
-      iterations = 1,
-      time = 1,
-      remeshIterations = 1,
-      remeshRelaxationSteps = 1,
-    } = {},
-    selections
+      iterations,
+      time = implicitTime,
+      remeshIterations,
+      remeshRelaxationSteps,
+      resolution = implicitResolution,
+    } = {}
   ) =>
     smoothGeometry(
       geometry,

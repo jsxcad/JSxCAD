@@ -8,7 +8,7 @@ export const fromPolygonSoup = (
   jsPolygons,
   tolerance = 0,
   faceCountLimit = 0,
-  sharpEdgeThreshold = 0,
+  minErrorDrop = 0,
   strategies = []
 ) =>
   withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
@@ -28,7 +28,7 @@ export const fromPolygonSoup = (
         }
       },
       faceCountLimit,
-      sharpEdgeThreshold,
+      minErrorDrop,
       provideRepairStrategies(strategies)
     );
     switch (status) {

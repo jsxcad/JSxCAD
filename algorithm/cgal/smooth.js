@@ -6,7 +6,7 @@ import { ErrorZeroThickness } from './error.js';
 export const smooth = (
   inputs,
   count,
-  resolution = 1,
+  resolution = 0.25,
   steps = 1,
   time = 1,
   remeshIterations = 1,
