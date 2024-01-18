@@ -22,14 +22,14 @@ The packaged page is an item, accessing the content will require using in().
 See: [in](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/in.nb)
 `;
 
-Seq({ upto: 10 }, Box, Group)
+Seq({ to: 10 }, Box, Group)
   .pack()
   .view()
   .note(
-    'Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
+    'Seq({ to: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
   );
 
-Seq({ upto: 10 }, Box, Group)
+Seq({ to: 10 }, Box, Group)
   .pack({ size: [20, 20] })
   .each(and(bb(1, 1, 0).outline().color('red')).as('page'))
   .pack()

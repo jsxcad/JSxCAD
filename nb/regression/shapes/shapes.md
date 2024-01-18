@@ -232,8 +232,6 @@ Septagon(5)
 Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 ```
 
-![Image](shapes.md.$22.png)
-
 Spiral()
 
 ```JavaScript
@@ -310,7 +308,7 @@ const q = Group(
 
 ```JavaScript
 Line([15, -15])
-  .seq({ from: -10, to: 11 }, y, Group)
+  .seq({ from: -10, upto: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
   .view();
 ```
@@ -319,7 +317,7 @@ Line([15, -15])
 
 ```JavaScript
 Line([15, -15])
-  .seq({ from: -10, to: 11 }, y, Group)
+  .seq({ from: -10, upto: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 ```
@@ -328,7 +326,7 @@ Line([15, -15])
 
 ```JavaScript
 Line([-15, 15])
-  .seq({ from: -15, to: 15 }, y, Group)
+  .seq({ from: -15, upto: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)))
   .view();
 ```
@@ -337,7 +335,7 @@ Line([-15, 15])
 
 ```JavaScript
 Line([-15, 15])
-  .seq({ from: -15, to: 15 }, y, Group)
+  .seq({ from: -15, upto: 15 }, y, Group)
   .cut(Arc(20).cut(Arc(10)).ez([1]))
   .view();
 ```

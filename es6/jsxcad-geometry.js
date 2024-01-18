@@ -922,25 +922,26 @@ const fill$1 = (geometry, tags = []) => {
 };
 
 const EPSILON = 1e-5;
+const SEQ_KEYS = ['from', 'to', 'by', 'end'];
 
 const seq = (...specs) => {
   const indexes = [];
   for (const spec of specs) {
-    const { from = 0, to = 1, upto, downto, by = 1 } = spec;
+    const { from = 0, to = 1, by = 1, upto, downto } = spec;
 
     let consider;
 
     if (by > 0) {
-      if (upto !== undefined) {
-        consider = (value) => value < upto - EPSILON;
+      if (upto === undefined) {
+        consider = (value) => value < to - EPSILON;
       } else {
-        consider = (value) => value <= to + EPSILON;
+        consider = (value) => value <= upto + EPSILON;
       }
     } else if (by < 0) {
-      if (downto !== undefined) {
-        consider = (value) => value > downto + EPSILON;
+      if (downto === undefined) {
+        consider = (value) => value > to + EPSILON;
       } else {
-        consider = (value) => value >= to - EPSILON;
+        consider = (value) => value >= downto - EPSILON;
       }
     } else {
       throw Error('seq: Expects by != 0');
@@ -972,6 +973,23 @@ const seq = (...specs) => {
   }
 
   return results;
+};
+
+const isSeqSpec = (value) => {
+  if (!(value instanceof Object)) {
+    return false;
+  }
+  let count = 0;
+  for (const key of Object.keys(value)) {
+    if (!SEQ_KEYS.includes(key)) {
+      return false;
+    }
+    count++;
+  }
+  if (count === 0) {
+    return false;
+  }
+  return true;
 };
 
 const toDiameterFromApothem = (apothem, sides = 32) =>
@@ -1007,7 +1025,7 @@ const makeArc =
     let spiral = Link(
       seq({
         from: start - 1 / 4,
-        to: end - 1 / 4,
+        upto: end - 1 / 4,
         by: effectiveStep,
       }).map((t) => rotateZ(Point(0.5), t))
     );
@@ -1126,10 +1144,14 @@ const ArcX = ArcOp('ArcX');
 const ArcY = ArcOp('ArcY');
 const ArcZ = ArcOp('ArcZ');
 
-const Hexagon = ([x, y, z]) => Arc([x, y, z], { sides: 6 });
-const Octagon = ([x, y, z]) => Arc([x, y, z], { sides: 8 });
-const Pentagon = ([x, y, z]) => Arc([x, y, z], { sides: 5 });
-const Triangle = ([x, y, z]) => Arc([x, y, z], { sides: 3 });
+const Hexagon = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 6 });
+const Octagon = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 8 });
+const Pentagon = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 5 });
+const Triangle = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 3 });
 
 const taggedSegments = (
   { tags = [], matrix, provenance, orientation },
@@ -5315,7 +5337,7 @@ const log = (geometry, prefix = '') => {
   return geometry;
 };
 
-const masked = (geometry, masks) => {
+const maskedBy = (geometry, masks) => {
   const gaps = [];
   for (const mask of masks) {
     gaps.push(gap(mask));
@@ -5529,9 +5551,9 @@ const filter$a = () => (geometry) =>
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
-const reconstruct = (geometry) => {
+const reconstruct = (geometry, { offset } = {}) => {
   const inputs = linearize(geometry, filter$a());
-  const outputs = reconstruct$1(inputs);
+  const outputs = reconstruct$1(inputs, offset);
   return replacer(inputs, outputs)(geometry);
 };
 
@@ -6072,4 +6094,4 @@ const Wrap = (geometries, offset = 1, alpha = 0.1) => {
 const wrap = (geometry, geometries, offset, alpha) =>
   tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, masked, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

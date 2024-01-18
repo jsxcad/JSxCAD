@@ -22,14 +22,14 @@ See: [in](../../nb/api/in.md)
 
 ![Image](pack.md.$2.png)
 
-Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
+Seq({ to: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
 
 ```JavaScript
-Seq({ upto: 10 }, Box, Group)
+Seq({ to: 10 }, Box, Group)
   .pack()
   .view()
   .note(
-    'Seq({ upto: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
+    'Seq({ to: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
   );
 ```
 
@@ -38,7 +38,7 @@ Seq({ upto: 10 }, Box, Group)
 pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those.
 
 ```JavaScript
-Seq({ upto: 10 }, Box, Group)
+Seq({ to: 10 }, Box, Group)
   .pack({ size: [20, 20] })
   .each(and(bb(1, 1, 0).outline().color('red')).as('page'))
   .pack()

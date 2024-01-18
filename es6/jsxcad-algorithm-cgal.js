@@ -2100,9 +2100,9 @@ const pushSurfaceMesh = (
   }
 };
 
-const reconstruct = (inputs) =>
+const reconstruct = (inputs, offset = 0) =>
   withCgalGeometry('reconstruct', inputs, (cgalGeometry, g) => {
-    const status = g.Reconstruct(cgalGeometry);
+    const status = g.Reconstruct(cgalGeometry, offset);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by reconstruct');

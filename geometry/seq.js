@@ -1,23 +1,24 @@
 const EPSILON = 1e-5;
+const SEQ_KEYS = ['from', 'to', 'by', 'end'];
 
 export const seq = (...specs) => {
   const indexes = [];
   for (const spec of specs) {
-    const { from = 0, to = 1, upto, downto, by = 1 } = spec;
+    const { from = 0, to = 1, by = 1, upto, downto } = spec;
 
     let consider;
 
     if (by > 0) {
-      if (upto !== undefined) {
-        consider = (value) => value < upto - EPSILON;
+      if (upto === undefined) {
+        consider = (value) => value < to - EPSILON;
       } else {
-        consider = (value) => value <= to + EPSILON;
+        consider = (value) => value <= upto + EPSILON;
       }
     } else if (by < 0) {
-      if (downto !== undefined) {
-        consider = (value) => value > downto + EPSILON;
+      if (downto === undefined) {
+        consider = (value) => value > to + EPSILON;
       } else {
-        consider = (value) => value >= to - EPSILON;
+        consider = (value) => value >= downto - EPSILON;
       }
     } else {
       throw Error('seq: Expects by != 0');
@@ -49,4 +50,21 @@ export const seq = (...specs) => {
   }
 
   return results;
+};
+
+export const isSeqSpec = (value) => {
+  if (!(value instanceof Object)) {
+    return false;
+  }
+  let count = 0;
+  for (const key of Object.keys(value)) {
+    if (!SEQ_KEYS.includes(key)) {
+      return false;
+    }
+    count++;
+  }
+  if (count === 0) {
+    return false;
+  }
+  return true;
 };

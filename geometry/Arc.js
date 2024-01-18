@@ -44,7 +44,7 @@ const makeArc =
     let spiral = Link(
       seq({
         from: start - 1 / 4,
-        to: end - 1 / 4,
+        upto: end - 1 / 4,
         by: effectiveStep,
       }).map((t) => rotateZ(Point(0.5), t))
     );
@@ -165,7 +165,11 @@ export const ArcZ = ArcOp('ArcZ');
 
 export default Arc;
 
-export const Hexagon = ([x, y, z]) => Arc([x, y, z], { sides: 6 });
-export const Octagon = ([x, y, z]) => Arc([x, y, z], { sides: 8 });
-export const Pentagon = ([x, y, z]) => Arc([x, y, z], { sides: 5 });
-export const Triangle = ([x, y, z]) => Arc([x, y, z], { sides: 3 });
+export const Hexagon = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 6 });
+export const Octagon = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 8 });
+export const Pentagon = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 5 });
+export const Triangle = ([x, y, z], options = {}) =>
+  Arc([x, y, z], { ...options, sides: 3 });
