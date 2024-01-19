@@ -9,49 +9,8 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/property_map.h>
 
-#if 0
-namespace CGAL {
-
-template <typename Container>
-class Random_access_property_map {
-  Container& m_container;
-
- public:
-  using Iterator = std::conditional_t<std::is_const<Container>::value,
-                                      typename Container::const_iterator,
-                                      typename Container::iterator>;
-  typedef std::size_t key_type;
-  typedef typename std::iterator_traits<Iterator>::value_type value_type;
-  typedef typename std::iterator_traits<Iterator>::reference reference;
-  typedef boost::lvalue_property_map_tag category;
-
-  Random_access_property_map(Container& container) : m_container(container) {}
-
-  friend reference get(Random_access_property_map map, key_type index) {
-    return map.m_container[index];
-  }
-
-  template <class Key>
-  friend void put(Random_access_property_map map, Key index,
-                  const value_type& value,
-                  std::enable_if_t<!std::is_const<Container>::value>* = 0) {
-    map.m_container[index] = value;
-  }
-
-  decltype(auto) operator[](key_type index) const { return m_container[index]; }
-};
-
-template <class Container>
-Random_access_property_map<Container> make_random_access_property_map(
-    Container& container) {
-  return Random_access_property_map<Container>(container);
-}
-}  // namespace CGAL
-#endif
-
-int Reconstruct(Geometry* geometry) {
+int Reconstruct(Geometry* geometry, double offset) {
   try {
-    std::cout << "QQ/Reconstruct/1" << std::endl;
     size_t size = geometry->size();
 
     geometry->copyInputMeshesToOutputMeshes();
@@ -60,16 +19,9 @@ int Reconstruct(Geometry* geometry) {
     for (int nth = 0; nth < size; nth++) {
       switch (geometry->type(nth)) {
         case GEOMETRY_MESH: {
-          std::cout << "QQ/Reconstruct/2" << std::endl;
-          typedef boost::tuple<Epick_point, Epick_vector,
-                               // Epick_surface_mesh::Face_index,
-                               // Epick_surface_mesh::Vertex_index,
-                               int>
-              PNI;
+          typedef boost::tuple<Epick_point, Epick_vector, int> PNI;
           typedef CGAL::Nth_of_tuple_property_map<0, PNI> Point_map;
           typedef CGAL::Nth_of_tuple_property_map<1, PNI> Normal_map;
-          // typedef CGAL::Nth_of_tuple_property_map<2, PNI> Face_index_map;
-          // typedef CGAL::Nth_of_tuple_property_map<3, PNI> Vertex_index_map;
           typedef CGAL::Nth_of_tuple_property_map<2, PNI> Plane_id_map;
           typedef std::vector<PNI> Point_vector;
 
@@ -87,10 +39,17 @@ int Reconstruct(Geometry* geometry) {
           std::vector<int> plane_indices;
           // FIX: number_of_faces might not equal to the maximum facet value.
           facet_plane.reserve(mesh.number_of_faces());
+          std::unordered_map<Epick_surface_mesh::Face_index, Epick_plane>
+              plane_by_facet;
+          std::unordered_set<Epick_plane> unique_planes;
           for (const auto& facet : mesh.faces()) {
-            Epick_plane plane;
-            PlaneOfSurfaceMeshFacet(mesh, facet, plane);
+            Epick_plane plane =
+                ensureFacetPlane(mesh, plane_by_facet, unique_planes, facet);
+            // PlaneOfSurfaceMeshFacet(mesh, facet, plane);
             plane = unitPlane<Epick_kernel>(plane);
+            Epick_transformation tx =
+                translate(unitVector(plane.orthogonal_vector()) * offset);
+            plane = plane.transform(tx);
             size_t plane_index = planes.size();
             plane_indices.push_back(plane_index);
             // These will remain original.
@@ -103,25 +62,41 @@ int Reconstruct(Geometry* geometry) {
             Epick_surface_mesh::Halfedge_index c = mesh.next(b);
             Epick_point center = CGAL::centroid(mesh.point(mesh.source(a)),
                                                 mesh.point(mesh.source(b)),
-                                                mesh.point(mesh.source(c)));
+                                                mesh.point(mesh.source(c)))
+                                     .transform(tx);
             // A centroid xor corners is insufficient.
             // A centroid and corners are sufficient for reconstruction.
             // Presumably the three midpoints of the centroid and each corner
             // would also work.
+#if 0
+            points.emplace_back(center, plane.orthogonal_vector(),
+                                plane_index);
+            point_plane_index.push_back(plane_index);
+
+            points.emplace_back(mesh.point(mesh.source(a)).transform(tx),
+                                plane.orthogonal_vector(), plane_index);
+            point_plane_index.push_back(plane_index);
+
+            points.emplace_back(mesh.point(mesh.source(b)).transform(tx),
+                                plane.orthogonal_vector(), plane_index);
+            point_plane_index.push_back(plane_index);
+
+            points.emplace_back(mesh.point(mesh.source(c)).transform(tx),
+                                plane.orthogonal_vector(), plane_index);
+            point_plane_index.push_back(plane_index);
+#else
+            // Let's try a tight cluster at the center of the face.
             points.emplace_back(center, plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
 
-            points.emplace_back(mesh.point(mesh.source(a)),
+            points.emplace_back(center + (unitVector(plane.base1()) * 0.01),
                                 plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
 
-            points.emplace_back(mesh.point(mesh.source(b)),
+            points.emplace_back(center + (unitVector(plane.base2()) * 0.01),
                                 plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(c)),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
+#endif
           }
 
           std::cout << "QQ/Reconstruct/3" << std::endl;
@@ -145,7 +120,7 @@ int Reconstruct(Geometry* geometry) {
           CGAL::Random_access_property_map regulated_facet_plane_map(
               regulated_planes);
 
-#if 0
+#if 1
           std::cout << "QQ/Reconstruct/4" << std::endl;
           CGAL::Shape_regularization::Planes::regularize_planes(
               points, point_map, plane_indices, /* plane index to plane */
@@ -218,7 +193,7 @@ int Reconstruct(Geometry* geometry) {
 
     return STATUS_OK;
   } catch (const std::exception& e) {
-    std::cout << "QQ/EachPoint/exception" << std::endl;
+    std::cout << "QQ/Reconstruct/exception" << std::endl;
     std::cout << e.what() << std::endl;
     throw;
   }

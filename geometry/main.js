@@ -136,6 +136,7 @@ export { iron } from './iron.js';
 export { fill } from './fill.js';
 export { inItem } from './inItem.js';
 export { inset } from './inset.js';
+export { isSeqSpec } from './seq.js';
 export {
   isNotShow,
   isNotShowOutline,
@@ -196,7 +197,7 @@ export { load, loadNonblocking } from './tagged/load.js';
 export { loft } from './loft.js';
 export { log } from './log.js';
 export { makeAbsolute } from './makeAbsolute.js';
-export { masked } from './masked.js';
+export { maskedBy } from './maskedBy.js';
 export { masking } from './masking.js';
 export { measureArea } from './tagged/measureArea.js';
 export { measureBoundingBox } from './measureBoundingBox.js';

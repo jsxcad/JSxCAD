@@ -9,8 +9,8 @@ const filter = () => (geometry) =>
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
-export const reconstruct = (geometry) => {
+export const reconstruct = (geometry, { offset } = {}) => {
   const inputs = linearize(geometry, filter());
-  const outputs = reconstructWithCgal(inputs);
+  const outputs = reconstructWithCgal(inputs, offset);
   return replacer(inputs, outputs)(geometry);
 };

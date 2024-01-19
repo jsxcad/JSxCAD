@@ -98,3 +98,15 @@ Box(10)
   .fill()
   .view();
 ```
+
+![Image](shape_2.md.$13.png)
+
+```JavaScript
+Box(10).x({ to: 100, by: 11 }).view();
+```
+
+![Image](shape_2.md.$14.png)
+
+```JavaScript
+Box(10).rz({ by: 1/3 }).view();
+```

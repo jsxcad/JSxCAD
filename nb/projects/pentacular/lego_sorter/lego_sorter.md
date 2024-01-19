@@ -3,8 +3,8 @@
 ```JavaScript
 const grid = Hexagon(16)
   .seq(
-    { from: -4, to: 4 },
-    { from: -4, to: 4 },
+    { from: -4, upto: 4 },
+    { from: -4, upto: 4 },
     (i, j) =>
       move((i + (j % 2) * 0.5) * 18 * Math.sqrt(3) * 0.5, j * 18 * 0.75),
     Group

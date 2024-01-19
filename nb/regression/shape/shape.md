@@ -151,7 +151,7 @@ Line([10])
 ![Image](shape.md.$25.png)
 
 ```JavaScript
-Group(seq(Arc, { from: 1, to: 20 }))
+Group(seq(Arc, { from: 1, upto: 20 }))
   .pack()
   .gridView();
 ```
@@ -307,7 +307,7 @@ Segments(
     (y) => (s) => [[-10, y, 0], [10, y, 0]],
     {
       from: -6,
-      to: 6,
+      upto: 6,
       by: 1 / 4,
     },
     List

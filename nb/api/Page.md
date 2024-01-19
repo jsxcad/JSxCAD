@@ -17,7 +17,7 @@ _Note: The implementation of Page needs cleaning up._
 
 ![Image](Page.md.$2.png)
 
-Page('pack', Seq({ upto: 20 }, () => Box(), Group)) packs 20 boxes onto a page.
+Page('pack', Seq({ to: 20 }, () => Box(), Group)) packs 20 boxes onto a page.
 
 ```JavaScript
 Page(
@@ -26,6 +26,6 @@ Page(
 )
   .view()
   .note(
-    "Page('pack', Seq({ upto: 20 }, () => Box(), Group)) packs 20 boxes onto a page."
+    "Page('pack', Seq({ to: 20 }, () => Box(), Group)) packs 20 boxes onto a page."
   );
 ```

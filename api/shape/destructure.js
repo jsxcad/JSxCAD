@@ -1,3 +1,5 @@
+import { isSeqSpec, seq } from '@jsxcad/geometry';
+
 import Shape from './Shape.js';
 
 const resolve = async (input, value, specOptions = {}) => {
@@ -165,15 +167,21 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       }
       case 'numbers': {
         const out = [];
+        const specs = [];
         for (const arg of args) {
           let value = await resolve(input, arg, specOptions);
           if (Shape.isNumber(value)) {
             out.push(value);
+          } else if (isSeqSpec(value)) {
+            specs.push(value);
           } else {
             rest.push(arg);
           }
         }
         output.push(out);
+        if (specs.length > 0) {
+          out.push(...seq(...specs));
+        }
         break;
       }
       case 'string': {

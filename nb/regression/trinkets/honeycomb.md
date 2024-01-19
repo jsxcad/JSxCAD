@@ -3,8 +3,8 @@
 ```JavaScript
 await Hexagon(4)
   .seq(
-    { to: 10 },
-    { to: 10 },
+    { upto: 10 },
+    { upto: 10 },
     (x, y) => (s) => s.move(x * 5 + (y % 2) * 2.5, y * 4),
     Group
   )
