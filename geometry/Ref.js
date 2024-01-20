@@ -5,21 +5,17 @@ import {
 
 import { rotateX, rotateY, rotateZ } from './rotate.js';
 
+import { Group } from './Group.js';
 import { Point } from './Point.js';
 import { as } from './tag.js';
 import { hasTypeReference } from './tagged/type.js';
 import { transform } from './transform.js';
+import { translate } from './translate.js';
 
-export const Ref = (
-  name,
-  x = 0,
-  y = 0,
-  z = 0,
-  nx = 0,
-  ny = 0,
-  nz = 1,
-  coordinate
-) => {
+export const Ref = (name, nx = 0, ny = 0, nz = 1, coordinate) => {
+  let x = 0;
+  let y = 0;
+  let z = 0;
   if (coordinate) {
     [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
   }
@@ -39,16 +35,71 @@ export const Ref = (
 
 export const ref = (geometry, name) => transform(Ref(name), geometry.matrix);
 
-export const X = (x = 0) => Ref(undefined, x, 0, 0, 0, 0, 1);
-export const Y = (y = 0) => Ref(undefined, 0, y, 0, 0, 0, 1);
-export const Z = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, 1);
-export const XY = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, 1);
-export const YX = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, -1);
-export const XZ = (y = 0) => Ref(undefined, 0, y, 0, 0, 1, 0);
-export const ZX = (y = 0) => Ref(undefined, 0, y, 0, 0, -1, 0);
-export const YZ = (x = 0) => Ref(undefined, x, 0, 0, 1, 0, 0);
-export const ZY = (x = 0) => Ref(undefined, x, 0, 0, -1, 0, 0);
+const orZero = (v) => (v.length === 0 ? [0] : v);
 
-export const RX = (t = 0) => rotateX(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
-export const RY = (t = 0) => rotateY(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
-export const RZ = (t = 0) => rotateZ(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
+export const X = (xs) =>
+  Group(
+    orZero(xs).map((x) =>
+      ref(translate(rotateY(Point(0, 0, 0), -1 / 4), [x, 0, 0]))
+    )
+  );
+export const Y = (ys) =>
+  Group(
+    orZero(ys).map((y) =>
+      ref(translate(rotateX(Point(0, 0, 0), -1 / 4), [0, y, 0]))
+    )
+  );
+export const Z = (zs) =>
+  Group(orZero(zs).map((z) => ref(translate(Point(0, 0, 0), [0, 0, z]))));
+
+export const YZ = (xs) =>
+  Group(
+    orZero(xs).map((x) =>
+      ref(translate(rotateY(Point(0, 0, 0), -1 / 4), [x, 0, 0]))
+    )
+  );
+export const XZ = (ys) =>
+  Group(
+    orZero(ys).map((y) =>
+      ref(translate(rotateX(Point(0, 0, 0), -1 / 4), [0, y, 0]))
+    )
+  );
+export const XY = (zs) =>
+  Group(orZero(zs).map((z) => ref(translate(Point(0, 0, 0), [0, 0, z]))));
+
+export const ZY = (xs) =>
+  Group(
+    orZero(xs).map((x) =>
+      ref(translate(rotateY(Point(0, 0, 0), 1 / 4), [-x, 0, 0]))
+    )
+  );
+export const ZX = (ys) =>
+  Group(
+    orZero(ys).map((y) =>
+      ref(translate(rotateX(Point(0, 0, 0), 1 / 4), [0, -y, 0]))
+    )
+  );
+export const YX = (zs) =>
+  Group(
+    orZero(zs).map((z) =>
+      ref(translate(rotateX(Point(0, 0, 0), 1 / 2), [0, 0, -z]))
+    )
+  );
+
+// export const X = (x) => translateXs(Ref(undefined, 1, 0, 0), orZero(x));
+// export const Y = (y) => translateYs(Ref(undefined, 0, 1, 0), orZero(y));
+// export const Z = (z) => translateZs(Ref(undefined, 0, 0, 1), orZero(z));
+
+// export const XY = (z) => translateZs(Ref(undefined, 0, 0, 1), orZero(z));
+// export const YX = (z) => translateZs(Ref(undefined, 0, 0, -1), orZero(z));
+// export const XZ = (y) => translateYs(Ref(undefined, 0, 1, 0), orZero(y));
+// export const ZX = (y) => translateYs(Ref(undefined, 0, -1, 0), orZero(y));
+// export const YZ = (x) => translateXs(Ref(undefined, 1, 0, 0), orZero(x));
+// export const ZY = (x) => translateXs(Ref(undefined, -1, 0, 0), orZero(x));
+
+export const RX = (ts) =>
+  Group(orZero(ts).map((t) => ref(rotateX(Point(0, 0, 0), t))));
+export const RY = (ts) =>
+  Group(orZero(ts).map((t) => ref(rotateY(Point(0, 0, 0), t))));
+export const RZ = (ts) =>
+  Group(orZero(ts).map((t) => ref(rotateZ(Point(0, 0, 0), t))));

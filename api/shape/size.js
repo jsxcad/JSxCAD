@@ -7,13 +7,6 @@ const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
   az + bz,
 ];
 
-const distance = ([ax, ay, az], [bx, by, bz]) => {
-  const x = bx - ax;
-  const y = by - ay;
-  const z = bz - az;
-  return Math.sqrt(x * x + y * y + z * z);
-};
-
 const scale = (amount, [x = 0, y = 0, z = 0]) => [
   x * amount,
   y * amount,
@@ -29,52 +22,63 @@ export const size = Shape.registerMethod3(
   [
     'inputGeometry',
     'function',
-    'modes:max,min,right,left,front,back,top,bottom,length,width,height,center,radius',
+    'strings:empty,max,min,right,left,front,back,top,bottom,length,width,height,center',
   ],
   async (geometry, _op, modes) => {
     const bounds = measureBoundingBox(geometry);
     const args = [];
-    if (bounds !== undefined) {
+    if (bounds === undefined) {
+      for (const mode of modes) {
+        switch (mode) {
+          case 'empty':
+            args.push(true);
+            break;
+        }
+      }
+    } else {
       const [min, max] = bounds;
-      if (modes.max) {
-        args.push(max);
-      }
-      if (modes.min) {
-        args.push(min);
-      }
-      if (modes.right) {
-        args.push(max[X]);
-      }
-      if (modes.left) {
-        args.push(min[X]);
-      }
-      if (modes.front) {
-        args.push(min[Y]);
-      }
-      if (modes.back) {
-        args.push(max[Y]);
-      }
-      if (modes.top) {
-        args.push(max[Z]);
-      }
-      if (modes.bottom) {
-        args.push(min[Z]);
-      }
-      if (modes.length) {
-        args.push(max[X] - min[X]);
-      }
-      if (modes.width) {
-        args.push(max[Y] - min[Y]);
-      }
-      if (modes.height) {
-        args.push(max[Z] - min[Z]);
-      }
-      if (modes.center) {
-        args.push(scale(0.5, add(min, max)));
-      }
-      if (modes.radius) {
-        const center = scale(0.5, add(min, max));
-        args.push(distance(center, max));
+      for (const mode of modes) {
+        switch (mode) {
+          case 'empty':
+            args.push(false);
+            break;
+          case 'max':
+            args.push(max);
+            break;
+          case 'min':
+            args.push(min);
+            break;
+          case 'right':
+            args.push(max[X]);
+            break;
+          case 'left':
+            args.push(min[X]);
+            break;
+          case 'front':
+            args.push(min[Y]);
+            break;
+          case 'back':
+            args.push(max[Y]);
+            break;
+          case 'top':
+            args.push(max[Z]);
+            break;
+          case 'bottom':
+            args.push(min[Z]);
+            break;
+          case 'length':
+            args.push(max[X] - min[X]);
+            break;
+          case 'width':
+            args.push(max[Y] - min[Y]);
+            break;
+          case 'height':
+            args.push(max[Z] - min[Z]);
+            break;
+          case 'center':
+            args.push(scale(0.5, add(min, max)));
+            break;
+        }
       }
     }
     return args;

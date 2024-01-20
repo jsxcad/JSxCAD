@@ -242,6 +242,10 @@ Shape.isFunction = isFunction;
 export const isArray = (value) => value instanceof Array;
 Shape.isArray = isArray;
 
+export const isGroupShape = (value) =>
+  isShape(value) && value.geometry.type === 'group';
+Shape.isGroupShape = isGroupShape;
+
 export const isObject = (value) =>
   value instanceof Object &&
   !isArray(value) &&

@@ -2,7 +2,12 @@ import { isSeqSpec, seq } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-const resolve = async (input, value, specOptions = {}) => {
+const resolve = async (
+  input,
+  value,
+  specOptions = {},
+  { flattenGroups = false } = {}
+) => {
   while (value instanceof Promise) {
     value = await value;
   }
@@ -21,6 +26,20 @@ const resolve = async (input, value, specOptions = {}) => {
       resolvedElements.push(result);
     }
     return resolvedElements;
+  } else if (flattenGroups && Shape.isGroupShape(value)) {
+    const flattenedElements = [];
+    const walk = (elements) => {
+      for (const element of elements) {
+        if (element.type === 'group') {
+          walk(element.content);
+        } else {
+          flattenedElements.push(Shape.fromGeometry(element));
+        }
+      }
+    };
+    const geometry = await value.toGeometry();
+    walk(geometry.content);
+    return flattenedElements;
   } else if (Shape.isObject(value)) {
     const resolvedObject = {};
     for (const key of Object.keys(value)) {
@@ -87,7 +106,8 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
   for (const baseSpec of specs) {
     const [spec, specOptionText] = baseSpec.split(':');
     const specOptions = {};
-    if (specOptionText !== undefined) {
+    const hasSpecOptions = specOptionText !== undefined;
+    if (hasSpecOptions) {
       for (const chunk of specOptionText.split(',')) {
         const [key, value] = chunk.split('=');
         if (value === undefined) {
@@ -296,7 +316,10 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'strings': {
         const out = [];
         for (const arg of args) {
-          if (typeof arg === 'string') {
+          if (
+            typeof arg === 'string' &&
+            (!hasSpecOptions || specOptions[arg] === true)
+          ) {
             out.push(arg);
           } else {
             rest.push(arg);
@@ -381,7 +404,9 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'geometries': {
         const out = [];
         for (const arg of args) {
-          let value = await resolve(input, arg, specOptions);
+          let value = await resolve(input, arg, specOptions, {
+            flattenGroups: true,
+          });
           if (Shape.isShape(value)) {
             const result = await value.toGeometry();
             out.push(result);

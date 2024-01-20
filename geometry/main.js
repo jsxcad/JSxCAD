@@ -34,6 +34,7 @@ export { ComputeSkeleton } from './computeSkeleton.js';
 export { Curve, curve } from './Curve.js';
 export { Edge } from './Edge.js';
 export { Empty } from './Empty.js';
+export { Gauge } from './gauge.js';
 export { Group } from './Group.js';
 export { Hershey } from './Hershey.js';
 export { Icosahedron } from './Icosahedron.js';
@@ -110,6 +111,7 @@ export {
 } from '@jsxcad/algorithm-cgal';
 export { Fuse, fuse } from './fuse.js';
 export { gap } from './gap.js';
+export { gauge } from './gauge.js';
 export { generateLowerEnvelope } from './generateLowerEnvelope.js';
 export { generateUpperEnvelope } from './generateUpperEnvelope.js';
 export { get, getAll, getAllList, getList, getNot, getNotList } from './get.js';

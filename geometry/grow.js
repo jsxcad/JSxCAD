@@ -13,7 +13,7 @@ const filter = (geometry, parent) =>
 export const grow = (geometry, offset, axes = 'xyz', selections) => {
   const inputs = linearize(geometry, filter);
   const count = inputs.length;
-  inputs.push(Z(offset));
+  inputs.push(Z([offset]));
   for (const selection of selections) {
     linearize(selection, filter, inputs);
   }

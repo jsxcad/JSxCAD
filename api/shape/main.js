@@ -89,6 +89,7 @@ export { o, origin } from './origin.js';
 export { fuse } from './fuse.js';
 export { g, get } from './get.js';
 export { gap } from './gap.js';
+export { gauge } from './gauge.js';
 export { getAll } from './getAll.js';
 export { getTag } from './getTag.js';
 export { ghost } from './ghost.js';
