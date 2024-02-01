@@ -100,9 +100,6 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
     }
     args.push(arg instanceof Promise ? await arg : arg);
   }
-  if (names.includes('on')) {
-    console.log(`QQ/on`);
-  }
   for (const baseSpec of specs) {
     const [spec, specOptionText] = baseSpec.split(':');
     const specOptions = {};

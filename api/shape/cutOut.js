@@ -3,7 +3,7 @@ import Shape from './Shape.js';
 import { cutOut as cutOutOp } from '@jsxcad/geometry';
 
 export const cutOut = Shape.registerMethod3(
-  'cutOut',
+  ['cutOut', 'split'],
   [
     'inputGeometry',
     'geometry',
@@ -22,3 +22,5 @@ export const cutOut = Shape.registerMethod3(
       clipOp(Shape.fromGeometry(clippedShape))
     )
 );
+
+export const split = cutOut;

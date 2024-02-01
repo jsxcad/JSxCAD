@@ -10,7 +10,7 @@ const toolFilter = (geometry) =>
   isNotTypeVoid(geometry);
 
 const segmentsFilter = (geometry) =>
-  ['segments'].includes(geometry.type) &&
+  ['segments', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 

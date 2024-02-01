@@ -3263,17 +3263,6 @@ const YX = (zs) =>
     )
   );
 
-// export const X = (x) => translateXs(Ref(undefined, 1, 0, 0), orZero(x));
-// export const Y = (y) => translateYs(Ref(undefined, 0, 1, 0), orZero(y));
-// export const Z = (z) => translateZs(Ref(undefined, 0, 0, 1), orZero(z));
-
-// export const XY = (z) => translateZs(Ref(undefined, 0, 0, 1), orZero(z));
-// export const YX = (z) => translateZs(Ref(undefined, 0, 0, -1), orZero(z));
-// export const XZ = (y) => translateYs(Ref(undefined, 0, 1, 0), orZero(y));
-// export const ZX = (y) => translateYs(Ref(undefined, 0, -1, 0), orZero(y));
-// export const YZ = (x) => translateXs(Ref(undefined, 1, 0, 0), orZero(x));
-// export const ZY = (x) => translateXs(Ref(undefined, -1, 0, 0), orZero(x));
-
 const RX = (ts) =>
   Group(orZero(ts).map((t) => ref(rotateX(Point(0, 0, 0), t))));
 const RY = (ts) =>
@@ -4208,7 +4197,7 @@ const toolFilter = (geometry) =>
   isNotTypeVoid(geometry);
 
 const segmentsFilter = (geometry) =>
-  ['segments'].includes(geometry.type) &&
+  ['segments', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
