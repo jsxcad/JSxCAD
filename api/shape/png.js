@@ -16,8 +16,8 @@ const readPngAsRasta = async (path) => {
 
 export const LoadPng = Shape.registerMethod3(
   'LoadPng',
-  ['string', 'numbers'],
-  async (path, bands) => {
+  ['functions', 'string', 'numbers'],
+  async (ops, path, bands) => {
     if (bands.length === 0) {
       bands = [128, 256];
     }
@@ -36,8 +36,17 @@ export const LoadPng = Shape.registerMethod3(
         data[y][x] = getPixel(x, y);
       }
     }
-    const contours = fromRaster(data, bands);
-    return Group(contours);
+    const rawBands = fromRaster(data, bands);
+    const processedBands = [];
+    for (let nth = 0; nth < rawBands.length; nth++) {
+      const contours = rawBands[nth];
+      if (ops[nth] === undefined) {
+        processedBands.push(contours);
+      } else {
+        processedBands.push(await Shape.applyGeometryToGeometry(contours, ops[nth]));
+      }
+    }
+    return Group(processedBands);
   }
 );
 
@@ -66,7 +75,7 @@ export const LoadPngAsRelief = Shape.registerMethod3(
     let maxZ = -Infinity;
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const z = Math.min(getPixel(x, y) + minimumValue, 255);
+        const z = Math.min(Math.max(getPixel(x, y) - minimumValue, 0), 255);
         if (z > maxZ) {
           maxZ = z;
         }

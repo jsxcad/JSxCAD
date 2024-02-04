@@ -15,7 +15,7 @@ export const section = (inputs, count) =>
           inputs,
           cgalGeometry.getSize(),
           inputs.length,
-          /* copyOriginal= */ true
+          /* regroup= */ true
         );
       default:
         throw new Error(`Unexpected status ${status}`);

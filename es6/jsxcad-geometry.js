@@ -5135,22 +5135,22 @@ const gap = (geometry) => hasTypeGhost(hasTypeVoid(geometry));
 const filter$k = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-const generateLowerEnvelope = (geometry) => {
+const generateLowerEnvelope = (geometry, modes) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$k, inputs);
-  const outputs = generateEnvelope(inputs, /* envelopeType= */ 1);
+  const outputs = generateEnvelope(inputs, /* envelopeType= */ 1, modes);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
 const filter$j = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-const generateUpperEnvelope = (geometry) => {
+const generateUpperEnvelope = (geometry, modes) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$j, inputs);
-  const outputs = generateEnvelope(inputs, /* envelopeType= */ 0);
+  const outputs = generateEnvelope(inputs, /* envelopeType= */ 0, modes);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 

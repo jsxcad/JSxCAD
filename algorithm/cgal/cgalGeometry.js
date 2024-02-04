@@ -1,5 +1,6 @@
 /* globals WeakRef */
 
+import { Group } from '@jsxcad/geometry';
 import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
 
 import { computeHash } from '@jsxcad/sys';
@@ -184,10 +185,10 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
   return cgalGeometry;
 };
 
-export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
+export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, regroup = false) => {
   const results = [];
   for (let nth = start; nth < length; nth++) {
-    const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
+    let origin = geometry.getOrigin(nth);
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
@@ -345,6 +346,23 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       case GEOMETRY_EMPTY: {
         results[nth] = { type: 'group', content: [], tags: [] };
       }
+    }
+  }
+  if (regroup) {
+    const grouped = new Map();
+    for (let nth = 0; nth < results.length; nth++) {
+      const origin = geometry.getOrigin(nth);
+      if (origin === nth) {
+        continue;
+      }
+      if (!grouped.has(origin)) {
+        grouped.set(origin, []);
+      }
+      grouped.get(origin).push(results[nth]);
+      results[nth] = undefined;
+    }
+    for (const [value, key] of grouped) {
+      results[key] = Group(value);
     }
   }
   let output;

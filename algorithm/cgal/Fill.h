@@ -28,23 +28,6 @@ int Fill(Geometry* geometry) {
   if (points.size() >= 3) {
     // Establish an initial support plane.
     Plane base(Point(0, 0, 0), Vector(0, 0, 1));
-#if 0
-    // TODO: Check what problem this solves.
-    for (auto a = points.begin(); a != points.end(); ++a) {
-      for (auto b = std::next(a); b != points.end(); ++b) {
-        for (auto c = std::next(b); c != points.end(); ++c) {
-          if (CGAL::collinear(*a, *b, *c)) {
-            continue;
-          }
-          base = Plane(*a, *b, *c);
-          if (base.orthogonal_vector() * Vector(0, 0, 1) < 0) {
-            base = base.opposite();
-          }
-          break;
-        }
-      }
-    }
-#endif
     bool has_common_plane = true;
     for (auto p = points.begin(); p != points.end(); ++p) {
       if (!base.has_on(*p)) {

@@ -1,4 +1,5 @@
 import { onBoot, emit, log, isNode, computeHash } from './jsxcad-sys.js';
+import { Group } from './jsxcad-geometry.js';
 
 var _require_crypto_ = {};
 
@@ -865,10 +866,10 @@ const toCgalGeometry = (inputs, g = getCgal()) => {
   return cgalGeometry;
 };
 
-const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
+const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, regroup = false) => {
   const results = [];
   for (let nth = start; nth < length; nth++) {
-    const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
+    let origin = geometry.getOrigin(nth);
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
@@ -1026,6 +1027,23 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, c
       case GEOMETRY_EMPTY: {
         results[nth] = { type: 'group', content: [], tags: [] };
       }
+    }
+  }
+  if (regroup) {
+    const grouped = new Map();
+    for (let nth = 0; nth < results.length; nth++) {
+      const origin = geometry.getOrigin(nth);
+      if (origin === nth) {
+        continue;
+      }
+      if (!grouped.has(origin)) {
+        grouped.set(origin, []);
+      }
+      grouped.get(origin).push(results[nth]);
+      results[nth] = undefined;
+    }
+    for (const [value, key] of grouped) {
+      results[key] = Group(value);
     }
   }
   let output;
@@ -1592,7 +1610,7 @@ const extrude = (inputs, count) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by extrude');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, count);
+        return fromCgalGeometry(cgalGeometry, inputs, count, /* start= */0, /* regroup= */true);
       default:
         throw new Error(`Unexpected status ${status}`);
     }
@@ -1842,16 +1860,16 @@ const fuse = (inputs, exact = false) =>
     }
   });
 
-const generateEnvelope = (inputs, envelopeType) =>
+const generateEnvelope = (inputs, envelopeType, { plan, face, edge } = {}) =>
   withCgalGeometry('generateEnvelope', inputs, (cgalGeometry, g) => {
-    const status = g.GenerateEnvelope(cgalGeometry, envelopeType);
+    const status = g.GenerateEnvelope(cgalGeometry, envelopeType, plan, face, edge);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness(
           'Zero thickness produced by generateEnvelope'
         );
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs);
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize(), inputs.length);
       default:
         throw new Error(`Unexpected status ${status}`);
     }
@@ -2196,7 +2214,7 @@ const section = (inputs, count) =>
           inputs,
           cgalGeometry.getSize(),
           inputs.length,
-          /* copyOriginal= */ true
+          /* regroup= */ true
         );
       default:
         throw new Error(`Unexpected status ${status}`);

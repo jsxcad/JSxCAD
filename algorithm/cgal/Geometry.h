@@ -96,7 +96,7 @@ class Geometry {
     points_.resize(size);
     bbox2_.resize(size);
     bbox3_.resize(size);
-    origin_.resize(size);
+    origin_.resize(size, -1);
 #ifdef ENABLE_OCCT
     occt_shape_.resize(size);
 #endif
@@ -328,7 +328,13 @@ class Geometry {
 
   int& origin(int nth) { return origin_[nth]; }
 
-  int getOrigin(int nth) { return origin_[nth]; }
+  int getOrigin(int nth) {
+    if (origin_[nth] == -1) {
+      return nth;
+    } else {
+      return origin_[nth];
+    }
+  }
 
   void setTransform(int nth, std::shared_ptr<const Transformation>& transform) {
     transforms_[nth] = transform;
@@ -448,6 +454,8 @@ class Geometry {
         // Convert to planar mesh.
         Vertex_map vertex_map;
         setMesh(nth, new Surface_mesh);
+        // Note: a set of polygons might not be convertible to a single mesh
+        // due to zero width junctions.
         if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh(nth),
                                             vertex_map)) {
           std::cout << "QQ/convertPolygonsToPlanarMeshes failed";

@@ -3,6 +3,6 @@ import { generateUpperEnvelope } from '@jsxcad/geometry';
 
 export const upperEnvelope = Shape.registerMethod3(
   'upperEnvelope',
-  ['inputGeometry'],
+  ['inputGeometry', 'modes:face,edge,plan'],
   generateUpperEnvelope
 );
