@@ -16,8 +16,8 @@ const readPngAsRasta = async (path) => {
 
 export const LoadPng = Shape.registerMethod3(
   'LoadPng',
-  ['functions', 'string', 'numbers'],
-  async (ops, path, bands) => {
+  ['functions', 'string', 'numbers', 'options'],
+  async (ops, path, bands, { offset = 0.01 } = {}) => {
     if (bands.length === 0) {
       bands = [128, 256];
     }
@@ -36,7 +36,7 @@ export const LoadPng = Shape.registerMethod3(
         data[y][x] = getPixel(x, y);
       }
     }
-    const rawBands = fromRaster(data, bands);
+    const rawBands = fromRaster(data, bands, offset);
     const processedBands = [];
     for (let nth = 0; nth < rawBands.length; nth++) {
       const contours = rawBands[nth];

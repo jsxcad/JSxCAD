@@ -1,4 +1,4 @@
-import { link, Points, fill, Group } from './jsxcad-geometry.js';
+import { link, Points, Group, offset, fill } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3436,7 +3436,7 @@ var marchingsquares = createCommonjsModule(function (module, exports) {
 
 var MarchingSquares = unwrapExports(marchingsquares);
 
-const fromRaster = (raster, bands) => {
+const fromRaster = (raster, bands, offsetAmount) => {
   const preprocessedData = new MarchingSquares.QuadTree(raster);
 
   const perBand = [];
@@ -3447,7 +3447,11 @@ const fromRaster = (raster, bands) => {
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
       contours.push(link(Points(band), [], /* close= */ true));
     }
-    perBand.push(fill(Group(contours)));
+    let band = Group(contours);
+    if (offsetAmount !== undefined) {
+      band = offset(band, offsetAmount);
+    }
+    perBand.push(fill(band));
   }
   return perBand;
 };

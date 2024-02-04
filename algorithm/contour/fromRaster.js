@@ -1,8 +1,8 @@
-import { Group, Points, fill, link } from '@jsxcad/geometry';
+import { Group, Points, fill, link, offset } from '@jsxcad/geometry';
 
 import MarchingSquares from 'marchingsquares/dist/marchingsquares.js';
 
-export const fromRaster = (raster, bands) => {
+export const fromRaster = (raster, bands, offsetAmount) => {
   const preprocessedData = new MarchingSquares.QuadTree(raster);
 
   const perBand = [];
@@ -13,7 +13,11 @@ export const fromRaster = (raster, bands) => {
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
       contours.push(link(Points(band), [], /* close= */ true));
     }
-    perBand.push(fill(Group(contours)));
+    let band = Group(contours);
+    if (offsetAmount !== undefined) {
+      band = offset(band, offsetAmount);
+    }
+    perBand.push(fill(band));
   }
   return perBand;
 };
