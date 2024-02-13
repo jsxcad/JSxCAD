@@ -10,7 +10,7 @@ export const extrude = (inputs, count) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by extrude');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, count, /* start= */0, /* regroup= */true);
+        return fromCgalGeometry(cgalGeometry, inputs, count);
       default:
         throw new Error(`Unexpected status ${status}`);
     }

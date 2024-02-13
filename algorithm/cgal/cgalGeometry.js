@@ -2,7 +2,6 @@
 
 import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from './transform.js';
 
-import { Group } from '@jsxcad/geometry';
 import { computeHash } from '@jsxcad/sys';
 import { getCgal } from './getCgal.js';
 
@@ -185,170 +184,10 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
   return cgalGeometry;
 };
 
-export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, regroup = false) => {
+export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const results = [];
-
-  const loadResult = (geometry, nth) => {
-    switch (geometry.getType(nth)) {
-      case GEOMETRY_MESH: {
-        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        let { tags = [], graph } = inputs[nth] || {};
-        let update = false;
-        let newMesh;
-        let serializedSurfaceMesh;
-        let newOcctShape;
-        let serializedOcctShape;
-        if (geometry.has_mesh(nth)) {
-          const oldMesh = getCachedMesh(graph);
-          newMesh = geometry.getMesh(nth);
-          if (newMesh === oldMesh) {
-            serializedSurfaceMesh = graph.serializedSurfaceMesh;
-          } else {
-            serializedSurfaceMesh = geometry.getSerializedMesh(nth);
-          update = true;
-        }
-      }
-      if (geometry.has_occt_shape(nth)) {
-        const oldOcctShape = occtShapeCache.get(graph);
-        newOcctShape = geometry.getOcctShape(nth);
-        if (newOcctShape === oldOcctShape) {
-          serializedOcctShape = graph.serializedOcctShape;
-        } else {
-          serializedOcctShape = geometry.getSerializedOcctShape(nth);
-          update = true;
-        }
-      }
-      if (update) {
-        graph = {
-          serializedSurfaceMesh,
-          serializedOcctShape,
-        };
-        graph.hash = computeHash(graph);
-        // Not part of the hash.
-        if (newMesh) {
-          setCachedMesh(graph, newMesh);
-        }
-        if (newOcctShape) {
-          occtShapeCache.set(graph, newOcctShape);
-        }
-      }
-      return {
-        type: 'graph',
-        matrix,
-        tags,
-        graph
-      };
-    }
-    case GEOMETRY_POLYGONS_WITH_HOLES: {
-      const polygonsWithHoles = [];
-      let exactPlane, plane, exactPoints, points, output;
-      const outputPlane = (x, y, z, w, exactX, exactY, exactZ, exactW) => {
-        plane = [x, y, z, w];
-        exactPlane = [exactX, exactY, exactZ, exactW];
-      };
-      const outputPolygon = (isHole) => {
-        points = [];
-        exactPoints = [];
-        if (isHole) {
-          output.holes.push({
-            points,
-            exactPoints,
-            holes: [],
-          });
-        } else {
-          output = {
-            points,
-            exactPoints,
-            holes: [],
-          };
-          polygonsWithHoles.push(output);
-        }
-      };
-      const outputPolygonPoint = (x, y, exactX, exactY) => {
-        points.push([x, y]);
-        exactPoints.push([exactX, exactY]);
-      };
-      geometry.emitPolygonsWithHoles(
-        nth,
-        outputPlane,
-        outputPolygon,
-        outputPolygonPoint
-      );
-      const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-      const { tags = [] } = inputs[nth] || {};
-      return {
-        type: 'polygonsWithHoles',
-        polygonsWithHoles,
-        plane,
-        exactPlane,
-        matrix,
-        tags,
-      };
-    }
-    case GEOMETRY_SEGMENTS: {
-      const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-      const { tags = [] } = inputs[nth] || {};
-      const segments = [];
-        geometry.emitSegments(nth, (sX, sY, sZ, tX, tY, tZ, exact) => {
-          segments.push([[sX, sY, sZ], [tX, tY, tZ], exact]);
-        });
-      return {
-        type: 'segments',
-          segments,
-          matrix,
-          tags,
-        };
-      }
-      case GEOMETRY_POINTS: {
-        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
-        const points = [];
-        const exactPoints = [];
-        geometry.emitPoints(nth, (x, y, z, exact) => {
-          points.push([x, y, z]);
-          exactPoints.push(exact);
-        });
-        return {
-          type: 'points',
-          points,
-          exactPoints,
-          matrix,
-          tags,
-        };
-      }
-      case GEOMETRY_EDGES: {
-        // TODO: Figure out segments vs edges.
-        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        const { tags = [] } = inputs[nth] || {};
-        const segments = [];
-        const normals = [];
-        const faces = [];
-        geometry.emitEdges(nth, (sX, sY, sZ, tX, tY, tZ, nX, nY, nZ, face, exact) => {
-          segments.push([[sX, sY, sZ], [tX, tY, tZ], exact]);
-          normals.push([nX, nY, nZ]);
-          faces.push(face);
-        });
-        return {
-          type: 'segments',
-          segments,
-          matrix,
-          tags,
-          normals,
-          faces,
-        };
-      }
-      default:
-      case GEOMETRY_EMPTY: {
-        return { type: 'group', content: [], tags: [] };
-      }
-    }
-  };
-  for (let nth = start; nth < inputs.length; nth++) {
-    const r = loadResult(geometry, nth);
-    if (r !== undefined) {
-      results[nth] = r;
-    }
-    /*
+  for (let nth = start; nth < length; nth++) {
+    const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
@@ -506,29 +345,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       case GEOMETRY_EMPTY: {
         results[nth] = { type: 'group', content: [], tags: [] };
       }
-    }
-    */
-  }
-  const size = geometry.getSize();
-  for (let nth = inputs.length; nth < size; nth++) {
-    const grouped = new Map();
-    for (let nth = 0; nth < size; nth++) {
-      const origin = geometry.getOrigin(nth);
-      const r = loadResult(geometry, nth);
-      if (r === undefined) {
-        continue;
-      }
-      if (origin === nth) {
-        results[nth] = r;
-      } else {
-        if (!grouped.has(origin)) {
-          grouped.set(origin, []);
-        }
-        grouped.get(origin).push(r);
-      }
-    }
-    for (const [key, value] of grouped) {
-      results[key] = Group(value);
     }
   }
   let output;

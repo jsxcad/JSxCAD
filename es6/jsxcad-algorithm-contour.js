@@ -1,4 +1,4 @@
-import { link, Points, Group, offset, fill } from './jsxcad-geometry.js';
+import { link, Points, fill, Group, offset } from './jsxcad-geometry.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3447,11 +3447,11 @@ const fromRaster = (raster, bands, offsetAmount) => {
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
       contours.push(link(Points(band), [], /* close= */ true));
     }
-    let band = Group(contours);
+    let band = fill(Group(contours));
     if (offsetAmount !== undefined) {
       band = offset(band, offsetAmount);
     }
-    perBand.push(fill(band));
+    perBand.push(band);
   }
   return perBand;
 };

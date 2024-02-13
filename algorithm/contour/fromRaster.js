@@ -13,11 +13,11 @@ export const fromRaster = (raster, bands, offsetAmount) => {
     for (const band of MarchingSquares.isoBands(preprocessedData, low, high)) {
       contours.push(link(Points(band), [], /* close= */ true));
     }
-    let band = Group(contours);
+    let band = fill(Group(contours));
     if (offsetAmount !== undefined) {
       band = offset(band, offsetAmount);
     }
-    perBand.push(fill(band));
+    perBand.push(band);
   }
   return perBand;
 };

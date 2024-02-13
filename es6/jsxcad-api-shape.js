@@ -3586,7 +3586,9 @@ const LoadPng = Shape.registerMethod3(
       if (ops[nth] === undefined) {
         processedBands.push(contours);
       } else {
-        processedBands.push(await Shape.applyGeometryToGeometry(contours, ops[nth]));
+        processedBands.push(
+          await Shape.applyGeometryToGeometry(contours, ops[nth])
+        );
       }
     }
     return Group$1(processedBands);
