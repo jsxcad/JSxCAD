@@ -3559,10 +3559,10 @@ const readPngAsRasta = async (path) => {
 
 const LoadPng = Shape.registerMethod3(
   'LoadPng',
-  ['functions', 'string', 'numbers', 'options'],
-  async (ops, path, bands, { offset = 0.01 } = {}) => {
+  ['function', 'string', 'numbers', 'options'],
+  async (op, path, bands, { offset = 0.01 } = {}) => {
     if (bands.length === 0) {
-      bands = [128, 256];
+      bands = [0.5, 1.0];
     }
     const { width, height, pixels } = await readPngAsRasta(path);
     const getPixel = (x, y) => {
@@ -3579,17 +3579,22 @@ const LoadPng = Shape.registerMethod3(
         data[y][x] = getPixel(x, y);
       }
     }
-    const rawBands = fromRaster(data, bands, offset);
+    const rawBands = fromRaster(
+      data,
+      bands.map((band) => band * 256),
+      offset
+    );
     const processedBands = [];
     for (let nth = 0; nth < rawBands.length; nth++) {
       const contours = rawBands[nth];
-      if (ops[nth] === undefined) {
-        processedBands.push(contours);
-      } else {
-        processedBands.push(
-          await Shape.applyGeometryToGeometry(contours, ops[nth])
-        );
-      }
+      processedBands.push(
+        await Shape.applyGeometryToGeometry(
+          contours,
+          op,
+          bands[nth],
+          bands[nth + 1]
+        )
+      );
     }
     return Group$1(processedBands);
   }

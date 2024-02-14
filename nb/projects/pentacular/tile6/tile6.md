@@ -60,66 +60,22 @@ const grid2x2 = Grid(2, 2).view();
 const grid3x3 = Grid(3, 3).stl('grid3x3');
 ```
 
-![Image](tile6.md.contourFlagstone1.png)
-
 ```JavaScript
-const contourFlagstone1 = LoadPng(
-  'https://jsxcad.js.org/png/flagstone1.png',
-  100,
-  ez([0, 1]),
-  150,
-  ez([1, 2]),
-  200,
-  ez([2, 3]),
-  250
+const contourFlagstone1 = LoadPng('t/flagstone1.png', { by: 1 / 4 }, (l, h) =>
+  ez([h])
 )
   .align('xyz>')
   .view()
   .v(11);
 ```
 
-![Image](tile6.md.contourRiverbed1.png)
-
 ```JavaScript
-const contourRiverbed1 = LoadPng(
-  'https://jsxcad.js.org/png/riverbed1.png',
-  0,
-  ez([0, 0.25]),
-  25,
-  ez([0, 0.5]),
-  50,
-  ez([0, 0.75]),
-  75,
-  ez([0, 1.0]),
-  100,
-  ez([0, 1.25]),
-  125,
-  ez([0, 1.5]),
-  150,
-  ez([0, 1.75]),
-  175
+const contourRiverbed1 = LoadPng('t/riverbed1.png', { by: 1 / 8 }, (l, h) =>
+  ez([h])
 )
   .align('xy')
   .v(7)
   .view();
-```
-
-![Image](tile6.md.tileRiverbed1a_riverbed1a.png)
-
-[riverbed1a.stl](tile6.riverbed1a.stl)
-
-```JavaScript
-const tileRiverbed1a = tile
-  .align('z<')
-  .and(contourRiverbed1.scaleToFit(23, 23).clip(py.sz(-1)))
-  .stl('riverbed1a')
-  .v(2);
-```
-
-![Image](tile6.md.$1.png)
-
-```JavaScript
-contourRiverbed1.clip(Box(23.8, 23.8, [3])).view();
 ```
 
 ![Image](tile6.md.$2.png)
@@ -128,45 +84,52 @@ contourRiverbed1.clip(Box(23.8, 23.8, [3])).view();
 Box(10).ez(1).view().v(9);
 ```
 
-![Image](tile6.md.contourTile1.png)
-
 ```JavaScript
-const contourTile1 = LoadPng(
-  'https://jsxcad.js.org/png/tile1.png',
-  0,
-  ez([0, 0.25]),
-  25,
-  ez([0, 0.5]),
-  50,
-  ez([0, 0.75]),
-  75,
-  ez([0, 1.0]),
-  100,
-  ez([0, 1.25]),
-  125,
-  ez([0, 1.5]),
-  150,
-  ez([0, 1.75]),
-  175,
-  ez([0, 2]),
-  200
-)
+const contourTile1 = LoadPng('t/tile1.png', { by: 1 / 10 }, (l, h) => ez([h]))
   .align('xyz>')
   .scaleToFit(23, 23, 2)
   .v(7)
   .view();
 ```
 
-![Image](tile6.md.tileTile1a_tile1a.png)
-
-[tile1a.stl](tile6.tile1a.stl)
+```JavaScript
+const contourWood1 = LoadPng('t/wood1.png', { by: 1 / 10 }, (l, h) => ez([h]))
+  .align('xyz>')
+  .scaleToFit(23, 23, 2)
+  .v(7)
+  .view();
+```
 
 ```JavaScript
-const tileTile1a = tile
-  .align('z<')
-  .and(contourTile1.scaleToFit(23, 23).clip(py.sz(-1)))
-  .stl('tile1a')
-  .v(2);
+const contourSoil1 = LoadPng('t/soil1.png', { by: 1 / 10 }, (l, h) => ez([h]))
+  .align('xy')
+  .v(7)
+  .view();
+```
+
+```JavaScript
+const contourStone1 = LoadPng('t/stone1.png', { by: 1 / 10 }, (l, h) => ez([h]))
+  .align('xy')
+  .v(7)
+  .view();
+```
+
+```JavaScript
+const contourRocks1 = LoadPng('t/rocks1.png', { by: 1 / 10 }, (l, h) => e([h]))
+  .align('xy')
+  .v(7)
+  .view();
+```
+
+```JavaScript
+const contourBrick1 = LoadPng('t/brick2.png', { by: 1 / 10 }, (l, h) =>
+  ez([0, h])
+)
+  .align('xyz>')
+  .scaleToFit(36, 36, 2)
+  .clip(Box(23, 23, [2]))
+  .v(7)
+  .view();
 ```
 
 ```JavaScript
@@ -199,18 +162,16 @@ const Wall = (tile) =>
     .clean();
 ```
 
-```JavaScript
-const wallBrick1a = Wall(contourBrick1).stl('wall_brick', ry(1 / 4));
-```
-
-![Image](tile6.md.wallTile1a_wall_tile.png)
-
-[wall_tile.stl](tile6.wall_tile.stl)
+![Image](tile6.md.contourWreath1.png)
 
 ```JavaScript
-const wallTile1a = Wall(contourTile1).stl('wall_tile', ry(1 / 4));
-```
-
-```JavaScript
-const wallWood1a = Wall(contourWood1).stl('wall_wood', ry(1 / 4));
+const contourWreath1 = LoadPng(
+  'https://jsxcad.js.org/png/wreath.png',
+  { by: 1 / 20 },
+  (l, h) => ez([0, h])
+)
+  .align('xyz>')
+  .scaleToFit(23, 23, 2)
+  .v(8)
+  .view();
 ```
