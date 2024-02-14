@@ -56,7 +56,7 @@ const knob = await Loft(
 
 ```JavaScript
 const top = await saucer
-  .upperEnvelope()
+  .upperEnvelope('face')
   .involute()
   .loft(Box(150).z(5))
   .fitTo(knob)
@@ -64,6 +64,41 @@ const top = await saucer
   .stl('knob', get('knob').align('>z'));
 ```
 
+![Image](saucer.md.topWithPegHoles_top2.png)
+
+[top2.stl](saucer.top2.stl)
+
 ```JavaScript
-const base = await saucer.lowerEnvelope().loft(Box(150).z(-12.01)).as('base');
+const topWithPegHoles = await top
+  .cut(Arc(8.2).ez([-12, 5]).x(50, -50).y(35, -35))
+  .clip(
+    Hexagon(155)
+      .rz(1 / 12)
+      .ez([-12, 5])
+  )
+  .stl(
+    'top2',
+    getNot('knob')
+      .rx(1 / 2)
+      .align('>z')
+  );
+```
+
+```JavaScript
+const base = await saucer.lowerEnvelope('face').loft(Box(150).z(-12.01)).as('base');
+```
+
+![Image](saucer.md.baseWithPegHoles_base.png)
+
+[base.stl](saucer.base.stl)
+
+```JavaScript
+const baseWithPegHoles = await base
+  .cut(Arc(8.2).ez([-12, 5]).x(50, -50).y(35, -35))
+  .clip(
+    Hexagon(155)
+      .rz(1 / 12)
+      .ez([-12])
+  )
+  .stl('base');
 ```

@@ -1,14 +1,6 @@
 ```JavaScript
-const reliefFlagstone1 = LoadPngAsRelief('t/flagstone1.png')
-  .align('xyz>')
-  .scaleToFit(23.8, 23.8, 2)
-  .view()
-  .v(3);
-```
-
-```JavaScript
 const Tile = (play) =>
-  Box(23 - play, 23 - play, [3])
+  Box(24 - play, 24 - play, [3])
     .cut(
       Box(2 + play, [4, 12], [2 + play * 2])
         .x(4, -4)
@@ -68,25 +60,11 @@ const grid2x2 = Grid(2, 2).view();
 const grid3x3 = Grid(3, 3).stl('grid3x3');
 ```
 
-```JavaScript
-const reliefRiverbed1 = LoadPngAsRelief('t/riverbed1.png')
-  .align('xyz>')
-  .scaleToFit(23.8, 23.8, 2)
-  .view()
-  .v(3);
-```
-
-```JavaScript
-const reliefLeaf3 = LoadPngAsRelief('t/leaf3.png', { minimumValue: 25 })
-  .align('xyz>')
-  .scaleToFit(8, 8, 1)
-  .view()
-  .v(3);
-```
+![Image](tile6.md.contourFlagstone1.png)
 
 ```JavaScript
 const contourFlagstone1 = LoadPng(
-  't/flagstone1.png',
+  'https://jsxcad.js.org/png/flagstone1.png',
   100,
   ez([0, 1]),
   150,
@@ -100,9 +78,11 @@ const contourFlagstone1 = LoadPng(
   .v(11);
 ```
 
+![Image](tile6.md.contourRiverbed1.png)
+
 ```JavaScript
 const contourRiverbed1 = LoadPng(
-  't/riverbed1.png',
+  'https://jsxcad.js.org/png/riverbed1.png',
   0,
   ez([0, 0.25]),
   25,
@@ -124,15 +104,35 @@ const contourRiverbed1 = LoadPng(
   .view();
 ```
 
+![Image](tile6.md.tileRiverbed1a_riverbed1a.png)
+
+[riverbed1a.stl](tile6.riverbed1a.stl)
+
+```JavaScript
+const tileRiverbed1a = tile
+  .align('z<')
+  .and(contourRiverbed1.scaleToFit(23, 23).clip(py.sz(-1)))
+  .stl('riverbed1a')
+  .v(2);
+```
+
+![Image](tile6.md.$1.png)
+
+```JavaScript
+contourRiverbed1.clip(Box(23.8, 23.8, [3])).view();
+```
+
 ![Image](tile6.md.$2.png)
 
 ```JavaScript
 Box(10).ez(1).view().v(9);
 ```
 
+![Image](tile6.md.contourTile1.png)
+
 ```JavaScript
 const contourTile1 = LoadPng(
-  't/tile1.png',
+  'https://jsxcad.js.org/png/tile1.png',
   0,
   ez([0, 0.25]),
   25,
@@ -150,189 +150,67 @@ const contourTile1 = LoadPng(
   175,
   ez([0, 2]),
   200
-)
-  .align('xy')
-  .v(7)
-  .view();
-```
-
-```JavaScript
-const contourWood1 = LoadPng(
-  't/wood1.png',
-  0,
-  ez([0, 0.25]),
-  25,
-  ez([0, 0.5]),
-  50,
-  ez([0, 0.75]),
-  75,
-  ez([0, 1.0]),
-  100,
-  ez([0, 1.25]),
-  125,
-  ez([0, 1.5]),
-  150,
-  ez([0, 1.75]),
-  175,
-  ez([0, 2]),
-  200
-)
-  .align('xy')
-  .v(7)
-  .view();
-```
-
-```JavaScript
-const contourSoil1 = LoadPng(
-  't/soil1.png',
-  0,
-  ez([0, 0.1]),
-  0.1 * 256,
-  ez([0, 0.2]),
-  0.2 * 256,
-  ez([0, 0.3]),
-  0.3 * 256,
-  ez([0, 0.4]),
-  0.4 * 256,
-  ez([0, 0.5]),
-  0.5 * 256,
-  ez([0, 0.6]),
-  0.6 * 256,
-  ez([0, 0.7]),
-  0.7 * 256,
-  ez([0, 0.8]),
-  0.8 * 256,
-  ez([0, 0.9]),
-  0.9 * 256,
-  ez([0, 1]),
-  1 * 256
-)
-  .align('xy')
-  .v(7)
-  .view();
-```
-
-```JavaScript
-const contourStone1 = LoadPng(
-  't/stone1.png',
-  0,
-  ez([0, 0.1]),
-  0.1 * 256,
-  ez([0, 0.2]),
-  0.2 * 256,
-  ez([0, 0.3]),
-  0.3 * 256,
-  ez([0, 0.4]),
-  0.4 * 256,
-  ez([0, 0.5]),
-  0.5 * 256,
-  ez([0, 0.6]),
-  0.6 * 256,
-  ez([0, 0.7]),
-  0.7 * 256,
-  ez([0, 0.8]),
-  0.8 * 256,
-  ez([0, 0.9]),
-  0.9 * 256,
-  ez([0, 1]),
-  1 * 256
-)
-  .align('xy')
-  .v(7)
-  .view();
-```
-
-```JavaScript
-const contourRocks1 = LoadPng(
-  't/rocks1.png',
-  0,
-  ez([0, 0.1]),
-  0.1 * 256,
-  ez([0, 0.2]),
-  0.2 * 256,
-  ez([0, 0.3]),
-  0.3 * 256,
-  ez([0, 0.4]),
-  0.4 * 256,
-  ez([0, 0.5]),
-  0.5 * 256,
-  ez([0, 0.6]),
-  0.6 * 256,
-  ez([0, 0.7]),
-  0.7 * 256,
-  ez([0, 0.8]),
-  0.8 * 256,
-  ez([0, 0.9]),
-  0.9 * 256,
-  ez([0, 1]),
-  1 * 256
-)
-  .align('xy')
-  .v(7)
-  .view();
-```
-
-```JavaScript
-const contourBrick1 = LoadPng(
-  't/brick2.png',
-  0,
-  ez([0, 0.1]),
-  0.1 * 256,
-  ez([0, 0.2]),
-  0.2 * 256,
-  ez([0, 0.3]),
-  0.3 * 256,
-  ez([0, 0.4]),
-  0.4 * 256,
-  ez([0, 0.5]),
-  0.5 * 256,
-  ez([0, 0.6]),
-  0.6 * 256,
-  ez([0, 0.7]),
-  0.7 * 256,
-  ez([0, 0.8]),
-  0.8 * 256,
-  ez([0, 0.9]),
-  0.9 * 256,
-  ez([0, 1.0]),
-  1 * 256
 )
   .align('xyz>')
+  .scaleToFit(23, 23, 2)
   .v(7)
   .view();
+```
+
+![Image](tile6.md.tileTile1a_tile1a.png)
+
+[tile1a.stl](tile6.tile1a.stl)
+
+```JavaScript
+const tileTile1a = tile
+  .align('z<')
+  .and(contourTile1.scaleToFit(23, 23).clip(py.sz(-1)))
+  .stl('tile1a')
+  .v(2);
 ```
 
 ```JavaScript
 const py = Box(23).hull(Point(0, 0, -11.5));
 ```
 
-![Image](tile6.md.wall2_wall.png)
-
-[wall.stl](tile6.wall.stl)
-
 ```JavaScript
-const wall2 = grid1x1
-  .And(
-    ry(-1 / 4)
-      .join(
-        Box([0, 4], [5, 11], [-3, 1])
-          .clip(RY(-1 / 32).x(3))
-          .sy(1, -1)
-      )
-      .fuse()
-      .cut(Box([-1, 5], [7 - 0.1, 9 - 0.1], [-4, -1]).sy(1, -1))
-      .x(-12 - 3)
-      .y(12)
-      .z(3)
-      .as('upright')
-    //x(-12).y(12)
-  )
-  .cut(Z(0))
-  .stl('wall', ry(1 / 4));
+const Wall = (tile) =>
+  grid1x1
+    .noGap()
+    .y(12, -12)
+    .cutFrom(
+      tile
+        .align('z>')
+        .and(rz(1 / 4).sz(-1))
+        .ry(-1 / 4)
+        .align('z>')
+        .z(3, 3 + 24)
+        .and(Box(7, 23, [3]))
+        .clip(
+          py
+            .sz(1, -1)
+            .ry(-1 / 4)
+            .align('z>')
+            .z(3, 4 - 24, 3 + 24)
+            .fuse()
+        )
+        .and(Box(0.8, 22, [2, 24 * 2]))
+    )
+    .clean();
 ```
 
-![Image](tile6.md.wall.png)
+```JavaScript
+const wallBrick1a = Wall(contourBrick1).stl('wall_brick', ry(1 / 4));
+```
+
+![Image](tile6.md.wallTile1a_wall_tile.png)
+
+[wall_tile.stl](tile6.wall_tile.stl)
 
 ```JavaScript
-const wall = tile.align('z<').sz(1, -1).view();
+const wallTile1a = Wall(contourTile1).stl('wall_tile', ry(1 / 4));
+```
+
+```JavaScript
+const wallWood1a = Wall(contourWood1).stl('wall_wood', ry(1 / 4));
 ```

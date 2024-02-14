@@ -3914,11 +3914,6 @@ const taggedLayout = (
   };
 };
 
-// import { getList, getNot } from './get.js';
-// import { tags } from './tag.js';
-// import { toDisplayGeometry } from './tagged/toDisplayGeometry.js';
-// import { translate } from './translate.js';
-
 const MIN = 0;
 const MAX = 1;
 const X$3 = 0;
@@ -3931,60 +3926,8 @@ const buildLayout = ({
   margin,
   center = false,
 }) => {
-  /*
-  const itemNames = tags(getNot(layer, ['type:ghost']), ['item'])
-    .filter((name) => name !== '')
-    .flatMap((name) => name)
-    .sort();
-  */
-  // const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
-  // const r = (v) => Math.floor(v * 100) / 100;
-  // const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
-  // const title = [];
-  /*
-  if (isFinite(pageWidth) && isFinite(pageLength)) {
-    // CHECK: Even when this is only called once we're getting a duplication of the
-    // 'x' at the start. If we replace it with 'abc', we get the 'b' at the start.
-    const text = `${r(pageWidth)} x ${r(pageLength)}`;
-    title.push(Hershey(text, fontHeight));
-  }
-  */
-  /*
-  for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(
-      translate(Hershey(itemNames[nth], fontHeight), [
-        0,
-        (nth + 1) * fontHeight,
-        0,
-      ])
-    );
-  }
-  */
-  /*
-  const visualization = ghost(
-    hasColor(
-      Group(
-        [
-          outline(
-            Box([Math.max(pageWidth, margin), Math.max(pageLength, margin)])
-          ),
-          translate(Group(title), [
-            pageWidth / -2,
-            (pageLength * (1 + labelScale)) / 2,
-          ]),
-        ],
-        'red'
-      )
-    )
-  );
-  */
-  let layout = taggedLayout(
-    { size, margin },
-    layer,
-    // visualization
-    Empty()
-  );
+  let layout = taggedLayout({ size, margin }, layer, Empty());
   if (center) {
     layout = by(layout, alignment(layout));
   }
