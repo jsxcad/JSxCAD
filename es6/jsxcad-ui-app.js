@@ -9861,7 +9861,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.32.3";
+exports.version = "1.32.6";
 
 });
 
@@ -10446,9 +10446,9 @@ exports.addMultiMouseDownListener = function (elements, timeouts, eventHandler, 
         addListener(el, "mousedown", onMousedown, destroyer);
     });
 };
-var getModifierHash = function (e) {
+function getModifierHash(e) {
     return 0 | (e.ctrlKey ? 1 : 0) | (e.altKey ? 2 : 0) | (e.shiftKey ? 4 : 0) | (e.metaKey ? 8 : 0);
-};
+}
 exports.getModifierString = function (e) {
     return keys.KEY_MODS[getModifierHash(e)];
 };
@@ -10464,7 +10464,7 @@ function normalizeCommandKeys(callback, e, keyCode) {
                 return;
         }
         if (keyCode === 18 || keyCode === 17) {
-            var location = "location" in e ? e.location : e.keyLocation;
+            var location = e.location;
             if (keyCode === 17 && location === 1) {
                 if (pressedKeys[keyCode] == 1)
                     ts = e.timeStamp;
@@ -10480,8 +10480,7 @@ function normalizeCommandKeys(callback, e, keyCode) {
         keyCode = -1;
     }
     if (!hashId && keyCode === 13) {
-        var location = "location" in e ? e.location : e.keyLocation;
-        if (location === 3) {
+        if (e.location === 3) {
             callback(e, hashId, -keyCode);
             if (e.defaultPrevented)
                 return;
@@ -11031,7 +11030,11 @@ TextInput = function (parentNode, host) {
             pasted = true;
         }
     };
-    event.addCommandKeyListener(text, host.onCommandKey.bind(host), host);
+    event.addCommandKeyListener(text, function (e, hashId, keyCode) {
+        if (inComposition)
+            return;
+        return host.onCommandKey(e, hashId, keyCode);
+    }, host);
     event.addListener(text, "select", onSelect, host);
     event.addListener(text, "input", onInput, host);
     event.addListener(text, "cut", onCut, host);
@@ -21260,7 +21263,6 @@ exports.commands = [{
         description: "Auto Indent",
         bindKey: bindKey(null, null),
         exec: function (editor) { editor.autoIndent(); },
-        multiSelectAction: "forEachLine",
         scrollIntoView: "animate"
     }, {
         name: "expandtoline",
@@ -22760,39 +22762,35 @@ var Editor = /** @class */ (function () {
     Editor.prototype.autoIndent = function () {
         var session = this.session;
         var mode = session.getMode();
-        var startRow, endRow;
-        if (this.selection.isEmpty()) {
-            startRow = 0;
-            endRow = session.doc.getLength() - 1;
-        }
-        else {
-            var selectedRange = this.getSelectionRange();
-            startRow = selectedRange.start.row;
-            endRow = selectedRange.end.row;
-        }
+        var ranges = this.selection.isEmpty()
+            ? [new Range(0, 0, session.doc.getLength() - 1, 0)]
+            : this.selection.getAllRanges();
         var prevLineState = "";
         var prevLine = "";
         var lineIndent = "";
-        var line, currIndent, range;
         var tab = session.getTabString();
-        for (var row = startRow; row <= endRow; row++) {
-            if (row > 0) {
-                prevLineState = session.getState(row - 1);
-                prevLine = session.getLine(row - 1);
-                lineIndent = mode.getNextLineIndent(prevLineState, prevLine, tab);
-            }
-            line = session.getLine(row);
-            currIndent = mode.$getIndent(line);
-            if (lineIndent !== currIndent) {
-                if (currIndent.length > 0) {
-                    range = new Range(row, 0, row, currIndent.length);
-                    session.remove(range);
+        for (var i = 0; i < ranges.length; i++) {
+            var startRow = ranges[i].start.row;
+            var endRow = ranges[i].end.row;
+            for (var row = startRow; row <= endRow; row++) {
+                if (row > 0) {
+                    prevLineState = session.getState(row - 1);
+                    prevLine = session.getLine(row - 1);
+                    lineIndent = mode.getNextLineIndent(prevLineState, prevLine, tab);
                 }
-                if (lineIndent.length > 0) {
-                    session.insert({ row: row, column: 0 }, lineIndent);
+                var line = session.getLine(row);
+                var currIndent = mode.$getIndent(line);
+                if (lineIndent !== currIndent) {
+                    if (currIndent.length > 0) {
+                        var range = new Range(row, 0, row, currIndent.length);
+                        session.remove(range);
+                    }
+                    if (lineIndent.length > 0) {
+                        session.insert({ row: row, column: 0 }, lineIndent);
+                    }
                 }
+                mode.autoOutdent(prevLineState, session, row);
             }
-            mode.autoOutdent(prevLineState, session, row);
         }
     };
     Editor.prototype.onTextInput = function (text, composition) {
@@ -39314,8 +39312,10 @@ var TabstopManager = /** @class */ (function () {
         if (index == max)
             index = 0;
         this.selectTabstop(index);
-        if (index === 0)
+        this.updateTabstopMarkers();
+        if (index === 0) {
             this.detach();
+        }
     };
     TabstopManager.prototype.selectTabstop = function (index) {
         this.$openTabstops = null;
@@ -39360,8 +39360,10 @@ var TabstopManager = /** @class */ (function () {
         var i = this.index;
         var arg = [i + 1, 0];
         var ranges = this.ranges;
+        var snippetId = this.snippetId = (this.snippetId || 0) + 1;
         tabstops.forEach(function (ts, index) {
             var dest = this.$openTabstops[index] || ts;
+            dest.snippetId = snippetId;
             for (var i = 0; i < ts.length; i++) {
                 var p = ts[i];
                 var range = Range.fromPoints(p.start, p.end || p.start);
@@ -39411,6 +39413,20 @@ var TabstopManager = /** @class */ (function () {
             session.removeMarker(range.markerId);
             range.markerId = null;
         });
+    };
+    TabstopManager.prototype.updateTabstopMarkers = function () {
+        if (!this.selectedTabstop)
+            return;
+        var currentSnippetId = this.selectedTabstop.snippetId;
+        if (this.selectedTabstop.index === 0) {
+            currentSnippetId--;
+        }
+        this.tabstops.forEach(function (ts) {
+            if (ts.snippetId === currentSnippetId)
+                this.addTabstopMarkers(ts);
+            else
+                this.removeTabstopMarkers(ts);
+        }, this);
     };
     TabstopManager.prototype.removeRange = function (range) {
         var i = range.tabstop.indexOf(range);
@@ -39592,7 +39608,7 @@ var AcePopup = /** @class */ (function () {
                 el.setAttribute("aria-activedescendant", ariaId);
                 selected.setAttribute("role", optionAriaRole);
                 selected.setAttribute("aria-roledescription", nls("item"));
-                selected.setAttribute("aria-label", popup.getData(row).value);
+                selected.setAttribute("aria-label", popup.getData(row).caption || popup.getData(row).value);
                 selected.setAttribute("aria-setsize", popup.data.length);
                 selected.setAttribute("aria-posinset", row + 1);
                 selected.setAttribute("aria-describedby", "doc-tooltip");
@@ -40363,6 +40379,7 @@ var Autocomplete = /** @class */ (function () {
             this.base = this.editor.session.doc.createAnchor(pos.row, pos.column);
             this.base.$insertRight = true;
             this.completions = new FilteredList(options.matches);
+            this.getCompletionProvider().completions = this.completions;
             return this.openPopup(this.editor, "", keepPopupPosition);
         }
         var session = this.editor.getSession();
