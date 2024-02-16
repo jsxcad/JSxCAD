@@ -1,5 +1,5 @@
 const EPSILON = 1e-5;
-const SEQ_KEYS = ['from', 'to', 'by', 'end'];
+const SEQ_KEYS = ['downto', 'from', 'to', 'by', 'end', 'upto'];
 
 export const seq = (...specs) => {
   const indexes = [];

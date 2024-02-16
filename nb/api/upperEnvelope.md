@@ -14,5 +14,5 @@ See: [lowerEnvelope](../../nb/api/lowerEnvelope.md)
 The upper envelope of a rough sphere.
 
 ```JavaScript
-Orb(5).upperEnvelope().view().note('The upper envelope of a rough sphere.');
+Orb(5).upperEnvelope('face').view().note('The upper envelope of a rough sphere.');
 ```

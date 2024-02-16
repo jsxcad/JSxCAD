@@ -3,12 +3,16 @@
 Parameter|Default|Type
 ---|---|---
 path||The path or url to load
-bands|[128, 256]|The threshold bands to draw contours at.
+bands|[0.5, 1.0]|The threshold bands to draw contours at.
 
 ![Image](LoadPng.md.$2.png)
 
-await LoadPng('https://jsxcad.js.org/png/bathymetry.png')
+LoadPng('https://jsxcad.js.org/png/bathymetry.png', { by: 1 / 2 }, (l, h) => e([h]))
 
 ```JavaScript
-await LoadPng('https://jsxcad.js.org/png/bathymetry.png').view().note(`await LoadPng('https://jsxcad.js.org/png/bathymetry.png')`);
+LoadPng('https://jsxcad.js.org/png/bathymetry.png',
+        { by: 1 / 2 },
+        (l, h) => e([h]))
+  .view('top')
+  .note(`LoadPng('https://jsxcad.js.org/png/bathymetry.png', { by: 1 / 2 }, (l, h) => e([h]))`);
 ```

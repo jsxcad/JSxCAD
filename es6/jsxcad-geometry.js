@@ -1,8 +1,8 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, invertTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, iron as iron$1, makeUnitSphere, outline as outline$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, serialize as serialize$1, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, cast as cast$1, clip as clip$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, cut as cut$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withAabbTreeQuery, seam as seam$1, section as section$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, invertTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, outline as outline$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withAabbTreeQuery, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
-import { toTagsFromName } from './jsxcad-algorithm-color.js';
+import { toTagsFromName } from './jsxcad-algorithm-material.js';
+import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-color.js';
 import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending, log as log$1 } from './jsxcad-sys.js';
-import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-material.js';
 
 const taggedGroup = ({ tags = [], matrix, provenance }, ...content) => {
   if (content.some((value) => !value)) {
@@ -360,8 +360,8 @@ const filter$N = (geometry) =>
 const measureBoundingBox = (geometry) =>
   computeBoundingBox(linearize(geometry, filter$N));
 
-const X$a = 0;
-const Y$a = 1;
+const X$b = 0;
+const Y$b = 1;
 const Z$9 = 2;
 
 const scale$1 = (geometry, [x = 1, y = 1, z = 1]) => {
@@ -413,8 +413,8 @@ const scaleToFit = (geometry, [x, y, z]) => {
     return geometry;
   }
   const [min, max] = bounds;
-  const length = max[X$a] - min[X$a];
-  const width = max[Y$a] - min[Y$a];
+  const length = max[X$b] - min[X$b];
+  const width = max[Y$b] - min[Y$b];
   const height = max[Z$9] - min[Z$9];
   if (x === undefined) {
     x = length;
@@ -637,8 +637,8 @@ const loop = (geometry, geometries, mode = {}) =>
 const Loop = (geometries, mode = {}) =>
   Link(geometries, { ...mode, close: true });
 
-const X$9 = 0;
-const Y$9 = 1;
+const X$a = 0;
+const Y$a = 1;
 const Z$8 = 2;
 
 const buildCorners = (x = 1, y = x, z = 0) => {
@@ -649,30 +649,30 @@ const buildCorners = (x = 1, y = x, z = 0) => {
       x.push(0);
     }
     if (x[0] < x[1]) {
-      c1[X$9] = x[1];
-      c2[X$9] = x[0];
+      c1[X$a] = x[1];
+      c2[X$a] = x[0];
     } else {
-      c1[X$9] = x[0];
-      c2[X$9] = x[1];
+      c1[X$a] = x[0];
+      c2[X$a] = x[1];
     }
   } else {
-    c1[X$9] = x / 2;
-    c2[X$9] = x / -2;
+    c1[X$a] = x / 2;
+    c2[X$a] = x / -2;
   }
   if (y instanceof Array) {
     while (y.length < 2) {
       y.push(0);
     }
     if (y[0] < y[1]) {
-      c1[Y$9] = y[1];
-      c2[Y$9] = y[0];
+      c1[Y$a] = y[1];
+      c2[Y$a] = y[0];
     } else {
-      c1[Y$9] = y[0];
-      c2[Y$9] = y[1];
+      c1[Y$a] = y[0];
+      c2[Y$a] = y[1];
     }
   } else {
-    c1[Y$9] = y / 2;
-    c2[Y$9] = y / -2;
+    c1[Y$a] = y / 2;
+    c2[Y$a] = y / -2;
   }
   if (z instanceof Array) {
     while (z.length < 2) {
@@ -698,8 +698,8 @@ const computeScale = (
 ) => [ax - bx, ay - by, az - bz];
 
 const computeMiddle = (c1, c2) => [
-  (c1[X$9] + c2[X$9]) * 0.5,
-  (c1[Y$9] + c2[Y$9]) * 0.5,
+  (c1[X$a] + c2[X$a]) * 0.5,
+  (c1[Y$a] + c2[Y$a]) * 0.5,
   (c1[Z$8] + c2[Z$8]) * 0.5,
 ];
 
@@ -922,7 +922,7 @@ const fill$1 = (geometry, tags = []) => {
 };
 
 const EPSILON = 1e-5;
-const SEQ_KEYS = ['from', 'to', 'by', 'end'];
+const SEQ_KEYS = ['downto', 'from', 'to', 'by', 'end', 'upto'];
 
 const seq = (...specs) => {
   const indexes = [];
@@ -995,8 +995,8 @@ const isSeqSpec = (value) => {
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
 
-const X$8 = 0;
-const Y$8 = 1;
+const X$9 = 0;
+const Y$9 = 1;
 const Z$7 = 2;
 
 const makeArc =
@@ -1009,11 +1009,11 @@ const makeArc =
     const scale = computeScale(c1, c2);
     const middle = computeMiddle(c1, c2);
 
-    const left = c1[X$8];
-    const right = c2[X$8];
+    const left = c1[X$9];
+    const right = c2[X$9];
 
-    const front = c1[Y$8];
-    const back = c2[Y$8];
+    const front = c1[Y$9];
+    const back = c2[Y$9];
 
     const bottom = c1[Z$7];
     const top = c2[Z$7];
@@ -1032,30 +1032,30 @@ const makeArc =
 
     if (
       end - start === 1 ||
-      (axis === X$8 && left !== right) ||
-      (axis === Y$8 && front !== back) ||
+      (axis === X$9 && left !== right) ||
+      (axis === Y$9 && front !== back) ||
       (axis === Z$7 && top !== bottom)
     ) {
       spiral = fill$1(Loop([spiral]));
     }
 
     switch (axis) {
-      case X$8: {
-        scale[X$8] = 1;
+      case X$9: {
+        scale[X$9] = 1;
         spiral = translate(scale$1(rotateY(spiral, -1 / 4), scale), middle);
         if (left !== right) {
           spiral = extrudeAlongX(spiral, [
-            [left - middle[X$8], right - middle[X$8]],
+            [left - middle[X$9], right - middle[X$9]],
           ]);
         }
         break;
       }
-      case Y$8: {
-        scale[Y$8] = 1;
+      case Y$9: {
+        scale[Y$9] = 1;
         spiral = translate(scale$1(rotateX(spiral, -1 / 4), scale), middle);
         if (front !== back) {
           spiral = extrudeAlongY(spiral, [
-            [front - middle[Y$8], back - middle[Y$8]],
+            [front - middle[Y$9], back - middle[Y$9]],
           ]);
         }
         break;
@@ -1078,8 +1078,8 @@ const makeArc =
     return makeAbsolute(spiral);
   };
 
-const makeArcX = makeArc(X$8);
-const makeArcY = makeArc(Y$8);
+const makeArcX = makeArc(X$9);
+const makeArcY = makeArc(Y$9);
 const makeArcZ = makeArc(Z$7);
 
 const ArcOp =
@@ -1170,8 +1170,8 @@ const Edge = (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
   return taggedSegments({ matrix }, [baseSegment]);
 };
 
-const X$7 = 0;
-const Y$7 = 1;
+const X$8 = 0;
+const Y$8 = 1;
 const Z$6 = 2;
 
 let fundamentalShapes;
@@ -1198,11 +1198,11 @@ const buildFs = () => {
 const makeBox = (corner1, corner2) => {
   const build = () => {
     const fs = buildFs();
-    const left = corner2[X$7];
-    const right = corner1[X$7];
+    const left = corner2[X$8];
+    const right = corner1[X$8];
 
-    const front = corner2[Y$7];
-    const back = corner1[Y$7];
+    const front = corner2[Y$8];
+    const back = corner1[Y$8];
 
     const bottom = corner2[Z$6];
     const top = corner1[Z$6];
@@ -2885,6 +2885,466 @@ const toSegments$1 = (letters) => {
 
 const Hershey = (text, size) => scaleUniformly(toSegments$1(text), size);
 
+const Segment = (segment) => taggedSegments({}, [segment]);
+
+const Segments = (segments) => taggedSegments({}, segments);
+
+const X$7 = 0;
+const Y$7 = 1;
+const Z$5 = 2;
+
+const MIN$1 = 0;
+const MAX$1 = 1;
+
+// Round to the nearest 0.001 mm
+
+const round = (v) => Math.round(v * 1000) / 1000;
+
+const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
+
+const computeOffset = (geometry, spec, origin) => {
+  const boundingBox = measureBoundingBox(geometry);
+  if (boundingBox === undefined) {
+    return [0, 0, 0];
+  }
+  const max = roundCoordinate(boundingBox[MAX$1]);
+  const min = roundCoordinate(boundingBox[MIN$1]);
+  const center = roundCoordinate(scale(0.5, add(min, max)));
+  const offset = [0, 0, 0];
+  let index = 0;
+  while (index < spec.length) {
+    switch (spec[index++]) {
+      case 'x': {
+        switch (spec[index]) {
+          case '>':
+            offset[X$7] = -min[X$7];
+            index += 1;
+            break;
+          case '<':
+            offset[X$7] = -max[X$7];
+            index += 1;
+            break;
+          default:
+            offset[X$7] = -center[X$7];
+        }
+        break;
+      }
+      case 'y': {
+        switch (spec[index]) {
+          case '>':
+            offset[Y$7] = -min[Y$7];
+            index += 1;
+            break;
+          case '<':
+            offset[Y$7] = -max[Y$7];
+            index += 1;
+            break;
+          default:
+            offset[Y$7] = -center[Y$7];
+        }
+        break;
+      }
+      case 'z': {
+        switch (spec[index]) {
+          case '>':
+            offset[Z$5] = -min[Z$5];
+            index += 1;
+            break;
+          case '<':
+            offset[Z$5] = -max[Z$5];
+            index += 1;
+            break;
+          default:
+            offset[Z$5] = -center[Z$5];
+        }
+        break;
+      }
+    }
+  }
+  if (!offset.every(isFinite)) {
+    throw Error(`Non-finite/offset: ${offset}`);
+  }
+  return offset;
+};
+
+const alignment = (geometry, spec = 'xyz', origin = [0, 0, 0]) => {
+  const offset = computeOffset(geometry, spec);
+  const reference = translate(
+    taggedPoints({}, [[0, 0, 0]]),
+    subtract(offset, origin)
+  );
+  return reference;
+};
+
+const getInverseMatrices = (geometry) => {
+  geometry = toConcreteGeometry(geometry);
+  switch (geometry.type) {
+    case 'plan': {
+      if (geometry.content.length === 1) {
+        return getInverseMatrices(geometry.content[0]);
+      }
+    }
+    // fallthrough
+    default: {
+      return {
+        global: geometry.matrix,
+        local: invertTransform(geometry.matrix),
+      };
+    }
+  }
+};
+
+const by = (geometry, selections) => {
+  const placed = [];
+  for (const selection of selections) {
+    for (const leaf of getLeafs(selection)) {
+      const { global } = getInverseMatrices(leaf);
+      // Perform the operation then place the
+      // result in the global frame of the reference.
+      placed.push(transform(geometry, global));
+    }
+  }
+  return Group(placed);
+};
+
+const align = (geometry, spec, origin) =>
+  by(geometry, [alignment(geometry, spec, origin)]);
+
+const bb = (
+  geometry,
+  xOffset = 1,
+  yOffset = xOffset,
+  zOffset = yOffset
+) => {
+  const bounds = measureBoundingBox(geometry);
+  if (bounds === undefined) {
+    return Empty();
+  } else {
+    const [min, max] = bounds;
+    return Box([], {
+      c2: add(min, [-xOffset, -yOffset, -zOffset]),
+      c1: add(max, [xOffset, yOffset, zOffset]),
+    });
+  }
+};
+
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTags = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter((tag) => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'group':
+        return descend();
+      default:
+        const composedTags = composeTags(geometry.tags);
+        if (composedTags === undefined) {
+          const copy = { ...geometry };
+          delete copy.tags;
+          return copy;
+        }
+        if (composedTags === geometry.tags) {
+          return geometry;
+        } else {
+          return descend({ tags: composedTags });
+        }
+    }
+  };
+  return rewrite(geometry, op);
+};
+
+const hasMaterial = (geometry, name) =>
+  rewriteTags(toTagsFromName(name), [], geometry);
+
+const filter$D = (noVoid, onlyGraph) => (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) &&
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry))) &&
+  (!onlyGraph || geometry.type === 'graph');
+
+const clip = (
+  geometry,
+  geometries,
+  { open, exact, noVoid, noGhost, onlyGraph }
+) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter$D(noVoid, onlyGraph), inputs);
+  const count = inputs.length;
+  for (const geometry of geometries) {
+    linearize(geometry, filter$D(noVoid), inputs);
+  }
+  const outputs = clip$1(inputs, count, open, exact);
+  const ghosts = [];
+  if (!noGhost) {
+    for (let nth = 0; nth < inputs.length; nth++) {
+      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+    }
+  }
+  return taggedGroup(
+    {},
+    replacer(inputs, outputs, count)(concreteGeometry),
+    ...ghosts
+  );
+};
+
+const clipFrom = (clipBy, clipFrom, modes) =>
+  clip(clipFrom, [clipBy], modes);
+
+const commonVolume = (geometry, modes) => {
+  const inputs = linearize(
+    geometry,
+    filter$D(modes.noVoid, { ...modes, onlyGraph: true })
+  );
+  switch (inputs.length) {
+    case 0: {
+      return taggedGroup({});
+    }
+    case 1: {
+      return inputs[0];
+    }
+    default: {
+      const [first, ...rest] = inputs;
+      return clip(first, rest, modes);
+    }
+  }
+};
+
+const filterTargets$1 = (noVoid) => (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) &&
+  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
+
+const filterRemoves = (noVoid) => (geometry) =>
+  filterTargets$1(noVoid)(geometry) && isNotTypeMasked(geometry);
+
+const cut = (
+  toCut,
+  toClips,
+  { open = false, exact, noVoid, noGhost }
+) => {
+  const inputs = linearize(toCut, filterTargets$1(noVoid));
+  const count = inputs.length;
+  for (const toClip of toClips) {
+    linearize(toClip, filterRemoves(noVoid), inputs);
+  }
+  const outputs = cut$1(inputs, count, open, exact);
+  const ghosts = [];
+  if (!noGhost) {
+    for (let nth = count; nth < inputs.length; nth++) {
+      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+    }
+  }
+  return Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
+};
+
+const cutFrom = (toClip, toCut, options) =>
+  cut(toCut, [toClip], options);
+
+const cutOut = (cutGeometry, clipGeometry, modes) => [
+  cut(cutGeometry, [clipGeometry], { ...modes, noGhost: true }),
+  clip(cutGeometry, [clipGeometry], { ...modes, noGhost: true }),
+];
+
+const ghost = (geometry) => hasTypeGhost(geometry);
+
+const hasColor = (geometry, name) =>
+  rewriteTags(toTagsFromName$1(name), [], geometry);
+
+const Ref = (name, nx = 0, ny = 0, nz = 1, coordinate) => {
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  if (coordinate) {
+    [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
+  }
+  // Disorient the point as though the source of a segment.
+  const inverse = fromSegmentToInverseTransform(
+    [
+      [x, y, z],
+      [x + nx, y + ny, z + nz],
+    ],
+    [0, 0, 1]
+  );
+  const matrix = invertTransform(inverse);
+  const point = Point(0, 0, 0);
+  const content = name ? as(point, [name]) : point;
+  return hasTypeReference(transform(content, matrix));
+};
+
+const ref = (geometry, name) => transform(Ref(name), geometry.matrix);
+
+const orZero = (v) => (v.length === 0 ? [0] : v);
+
+const X$6 = (xs) =>
+  Group(
+    orZero(xs).map((x) =>
+      ref(translate(rotateY(Point(0, 0, 0), -1 / 4), [x, 0, 0]))
+    )
+  );
+const Y$6 = (ys) =>
+  Group(
+    orZero(ys).map((y) =>
+      ref(translate(rotateX(Point(0, 0, 0), -1 / 4), [0, y, 0]))
+    )
+  );
+const Z$4 = (zs) =>
+  Group(orZero(zs).map((z) => ref(translate(Point(0, 0, 0), [0, 0, z]))));
+
+const YZ = (xs) =>
+  Group(
+    orZero(xs).map((x) =>
+      ref(translate(rotateY(Point(0, 0, 0), -1 / 4), [x, 0, 0]))
+    )
+  );
+const XZ = (ys) =>
+  Group(
+    orZero(ys).map((y) =>
+      ref(translate(rotateX(Point(0, 0, 0), -1 / 4), [0, y, 0]))
+    )
+  );
+const XY = (zs) =>
+  Group(orZero(zs).map((z) => ref(translate(Point(0, 0, 0), [0, 0, z]))));
+
+const ZY = (xs) =>
+  Group(
+    orZero(xs).map((x) =>
+      ref(translate(rotateY(Point(0, 0, 0), 1 / 4), [-x, 0, 0]))
+    )
+  );
+const ZX = (ys) =>
+  Group(
+    orZero(ys).map((y) =>
+      ref(translate(rotateX(Point(0, 0, 0), 1 / 4), [0, -y, 0]))
+    )
+  );
+const YX = (zs) =>
+  Group(
+    orZero(zs).map((z) =>
+      ref(translate(rotateX(Point(0, 0, 0), 1 / 2), [0, 0, -z]))
+    )
+  );
+
+const RX = (ts) =>
+  Group(orZero(ts).map((t) => ref(rotateX(Point(0, 0, 0), t))));
+const RY = (ts) =>
+  Group(orZero(ts).map((t) => ref(rotateY(Point(0, 0, 0), t))));
+const RZ = (ts) =>
+  Group(orZero(ts).map((t) => ref(rotateZ(Point(0, 0, 0), t))));
+
+const filterInputs$1 = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
+
+const filterReferences$1 = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
+    geometry.type
+  );
+
+const section = (inputGeometry, referenceGeometries = []) => {
+  const inputs = linearize(inputGeometry, filterInputs$1);
+  const count = inputs.length;
+  if (referenceGeometries.length === 0) {
+    // Default to the Z(0) plane.
+    inputs.push(Ref());
+  } else {
+    for (const referenceGeometry of referenceGeometries) {
+      linearize(referenceGeometry, filterReferences$1, inputs);
+    }
+  }
+  const outputs = section$1(inputs, count);
+  const ghosts = [];
+  for (let nth = 0; nth < count; nth++) {
+    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
+  }
+  return Group([...outputs, ...ghosts]);
+};
+
+const X$5 = 0;
+const Y$5 = 1;
+
+const Gauge = (geometry, refs, offset = 5, color = 'green') => {
+  const gauges = [];
+  for (const ref of refs) {
+    const { local, global } = getInverseMatrices(ref);
+    const bounds = measureBoundingBox(section(transform(geometry, local)));
+    if (bounds === undefined) {
+      continue;
+    }
+    const [min, max] = bounds;
+    const left = min[X$5];
+    const right = max[X$5];
+    const back = max[Y$5];
+    const width = right - left;
+    const lines = Segments([
+      [
+        [left, 0, 0],
+        [left, back + offset, 0],
+      ],
+      [
+        [right, 0, 0],
+        [right, back + offset, 0],
+      ],
+      [
+        [left, back + offset, 0],
+        [right, back + offset, 0],
+      ],
+    ]);
+    const text = translate(align(Hershey(`${width.toFixed(1)} mm`, 2), 'xy'), [
+      (left + right) / 2,
+      back + offset,
+      0,
+    ]);
+    const box = bb(text);
+    gauges.push(
+      transform(Group([text, cut(lines, [box], { noGhost: true })]), global)
+    );
+  }
+  return ghost(hasColor(Group(gauges), color));
+};
+
+const gauge = (geometry, refs, color) =>
+  Group([geometry, Gauge(geometry, refs, color)]);
+
 // Unit icosahedron vertices.
 const points = Points([
   [0.850651, 0.0, -0.525731],
@@ -2908,14 +3368,14 @@ const Icosahedron = ([x = 1, y = x, z = x]) => {
   return translate(scale$1(ConvexHull([points]), scale), middle);
 };
 
-const filter$D = (geometry) =>
+const filter$C = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
 const ironImpl = (geometry, turn = 1) => {
   const inputs = [];
-  linearize(geometry, filter$D, inputs);
+  linearize(geometry, filter$C, inputs);
   const outputs = iron$1(inputs, turn);
   return replacer(inputs, outputs)(geometry);
 };
@@ -2924,8 +3384,6 @@ const iron = (geometry, turn = 1, geometries) =>
   ironImpl(Group([geometry, ...geometries]), turn);
 
 const Iron = (geometries, turn = 1) => ironImpl(Group(geometries), turn);
-
-const ghost = (geometry) => hasTypeGhost(geometry);
 
 const Label = (text, distance) =>
   hasTypeLabel(
@@ -2952,6 +3410,32 @@ const Orb = ([x = 1, y = x, z = x], { zag = DEFAULT_ORB_ZAG } = {}) => {
     tolerance
   );
   return makeAbsolute(translate(scale$1(unitSphere, scale$2), middle));
+};
+
+const eachItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'sketch': {
+        // Sketches aren't real.
+        return;
+      }
+      default: {
+        op(geometry);
+        return descend();
+      }
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getLayouts = (geometry) => {
+  const layouts = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'layout') {
+      layouts.push(item);
+    }
+  });
+  return layouts;
 };
 
 const getSimpleList = (
@@ -3050,230 +3534,6 @@ const getNot = (geometry, tags) => get(geometry, tags, { not: true });
 
 const getNotList = (geometry, tags) =>
   getList(geometry, tags, { not: true });
-
-const X$6 = 0;
-const Y$6 = 1;
-const Z$5 = 2;
-
-const MIN$1 = 0;
-const MAX$1 = 1;
-
-// Round to the nearest 0.001 mm
-
-const round = (v) => Math.round(v * 1000) / 1000;
-
-const roundCoordinate = ([x, y, z]) => [round(x), round(y), round(z)];
-
-const computeOffset = (geometry, spec, origin) => {
-  const boundingBox = measureBoundingBox(geometry);
-  if (boundingBox === undefined) {
-    return [0, 0, 0];
-  }
-  const max = roundCoordinate(boundingBox[MAX$1]);
-  const min = roundCoordinate(boundingBox[MIN$1]);
-  const center = roundCoordinate(scale(0.5, add(min, max)));
-  const offset = [0, 0, 0];
-  let index = 0;
-  while (index < spec.length) {
-    switch (spec[index++]) {
-      case 'x': {
-        switch (spec[index]) {
-          case '>':
-            offset[X$6] = -min[X$6];
-            index += 1;
-            break;
-          case '<':
-            offset[X$6] = -max[X$6];
-            index += 1;
-            break;
-          default:
-            offset[X$6] = -center[X$6];
-        }
-        break;
-      }
-      case 'y': {
-        switch (spec[index]) {
-          case '>':
-            offset[Y$6] = -min[Y$6];
-            index += 1;
-            break;
-          case '<':
-            offset[Y$6] = -max[Y$6];
-            index += 1;
-            break;
-          default:
-            offset[Y$6] = -center[Y$6];
-        }
-        break;
-      }
-      case 'z': {
-        switch (spec[index]) {
-          case '>':
-            offset[Z$5] = -min[Z$5];
-            index += 1;
-            break;
-          case '<':
-            offset[Z$5] = -max[Z$5];
-            index += 1;
-            break;
-          default:
-            offset[Z$5] = -center[Z$5];
-        }
-        break;
-      }
-    }
-  }
-  if (!offset.every(isFinite)) {
-    throw Error(`Non-finite/offset: ${offset}`);
-  }
-  return offset;
-};
-
-const alignment = (geometry, spec = 'xyz', origin = [0, 0, 0]) => {
-  const offset = computeOffset(geometry, spec);
-  const reference = translate(
-    taggedPoints({}, [[0, 0, 0]]),
-    subtract(offset, origin)
-  );
-  return reference;
-};
-
-const getInverseMatrices = (geometry) => {
-  geometry = toConcreteGeometry(geometry);
-  switch (geometry.type) {
-    case 'plan': {
-      if (geometry.content.length === 1) {
-        return getInverseMatrices(geometry.content[0]);
-      }
-    }
-    // fallthrough
-    default: {
-      return {
-        global: geometry.matrix,
-        local: invertTransform(geometry.matrix),
-      };
-    }
-  }
-};
-
-const by = (geometry, selections) => {
-  const placed = [];
-  for (const selection of selections) {
-    for (const leaf of getLeafs(selection)) {
-      const { global } = getInverseMatrices(leaf);
-      // Perform the operation then place the
-      // result in the global frame of the reference.
-      placed.push(transform(geometry, global));
-    }
-  }
-  return Group(placed);
-};
-
-const eachItem = (geometry, op) => {
-  const walk = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'sketch': {
-        // Sketches aren't real.
-        return;
-      }
-      default: {
-        op(geometry);
-        return descend();
-      }
-    }
-  };
-  visit(geometry, walk);
-};
-
-const getLayouts = (geometry) => {
-  const layouts = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'layout') {
-      layouts.push(item);
-    }
-  });
-  return layouts;
-};
-
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const rewriteTags = (
-  add,
-  remove,
-  geometry,
-  conditionTags,
-  conditionSpec
-) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return add.filter((tag) => !remove.includes(tag));
-      } else {
-        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'group':
-        return descend();
-      default:
-        const composedTags = composeTags(geometry.tags);
-        if (composedTags === undefined) {
-          const copy = { ...geometry };
-          delete copy.tags;
-          return copy;
-        }
-        if (composedTags === geometry.tags) {
-          return geometry;
-        } else {
-          return descend({ tags: composedTags });
-        }
-    }
-  };
-  return rewrite(geometry, op);
-};
-
-const hasColor = (geometry, name) =>
-  rewriteTags(toTagsFromName(name), [], geometry);
-
-const filter$C = (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
-
-const outline = (geometry, selections = []) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$C, inputs);
-  const count = inputs.length;
-  for (const selection of selections) {
-    linearize(toConcreteGeometry(selection), filter$C, inputs);
-  }
-  const outputs = outline$1(inputs, count);
-  return replacer(inputs, outputs)(concreteGeometry);
-};
 
 var binPacking = createCommonjsModule(function (module, exports) {
 (function (global, factory) {
@@ -3497,14 +3757,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var BinPackingEs = unwrapExports(binPacking);
 
-const align = (geometry, spec, origin) =>
-  by(geometry, [alignment(geometry, spec, origin)]);
-
 const { GrowingPacker, Packer } = BinPackingEs;
 
-const X$5 = 0;
-const Y$5 = 1;
-const Z$4 = 2;
+const X$4 = 0;
+const Y$4 = 1;
+const Z$3 = 2;
 
 const measureSize = (geometry) => {
   const bounds = measureBoundingBox(geometry);
@@ -3512,9 +3769,9 @@ const measureSize = (geometry) => {
     return;
   }
   const [min, max] = bounds;
-  const width = max[X$5] - min[X$5];
-  const height = max[Y$5] - min[Y$5];
-  return [width, height, min[Z$4]];
+  const width = max[X$4] - min[X$4];
+  const height = max[Y$4] - min[Y$4];
+  return [width, height, min[Z$3]];
 };
 
 const measureOrigin = (geometry) => {
@@ -3657,102 +3914,10 @@ const taggedLayout = (
   };
 };
 
-const filter$B = () => (geometry) =>
-  ['polygonsWithHoles'].includes(geometry.type);
-
-const convertPolygonsToMeshes = (geometry) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$B(), inputs);
-  if (inputs.length === 0) {
-    return geometry;
-  }
-  try {
-    const outputs = convertPolygonsToMeshes$1(inputs);
-    return replacer(inputs, outputs)(concreteGeometry);
-  } catch (e) {
-    console.log(e.stack);
-    throw e;
-  }
-};
-
-const filter$A = (geometry) =>
-  geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
-
-const serialize = (geometry) => {
-  const inputs = [];
-  linearize(geometry, filter$A, inputs, /* includeSketches= */ true);
-  if (inputs.length === 0) {
-    return geometry;
-  }
-  serialize$1(inputs);
-  return geometry;
-};
-
-const soup = (geometry) => {
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph': {
-        const { graph } = geometry;
-        if (graph.isEmpty) {
-          return taggedGroup({});
-        } else {
-          return geometry;
-        }
-      }
-      // Unreachable.
-      case 'polygonsWithHoles':
-        return geometry;
-      case 'segments':
-      case 'triangles':
-      case 'points':
-      case 'paths':
-        // Already soupy enough.
-        return geometry;
-      case 'toolpath':
-        // Drop toolpaths for now.
-        return taggedGroup({});
-      case 'displayGeometry':
-        // soup can handle displayGeometry.
-        return descend();
-      case 'layout':
-      case 'plan':
-      case 'item':
-      case 'sketch':
-      case 'group': {
-        return descend();
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-
-  return rewrite(
-    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
-    op
-  );
-};
-
-const toDisplayGeometry = (
-  geometry,
-  { triangles, outline = true, skin, wireframe = false } = {}
-) => {
-  if (!geometry) {
-    throw Error('die');
-  }
-  if (skin === undefined) {
-    skin = triangles;
-  }
-  if (skin === undefined) {
-    skin = true;
-  }
-  return soup(toConcreteGeometry(geometry));
-};
-
 const MIN = 0;
 const MAX = 1;
-const X$4 = 0;
-const Y$4 = 1;
+const X$3 = 0;
+const Y$3 = 1;
 
 const buildLayout = ({
   layer,
@@ -3761,67 +3926,8 @@ const buildLayout = ({
   margin,
   center = false,
 }) => {
-  /*
-  const itemNames = (await getNot('type:ghost').tags('item', list)(layer))
-    .filter((name) => name !== '')
-    .flatMap((name) => name)
-    .sort();
-    */
-  const itemNames = tags(getNot(layer, ['type:ghost']), ['item'])
-    .filter((name) => name !== '')
-    .flatMap((name) => name)
-    .sort();
-  const labelScale = 0.0125 * 10;
   const size = [pageWidth, pageLength];
-  const r = (v) => Math.floor(v * 100) / 100;
-  const fontHeight = Math.max(pageWidth, pageLength) * labelScale;
-  const title = [];
-  if (isFinite(pageWidth) && isFinite(pageLength)) {
-    // CHECK: Even when this is only called once we're getting a duplication of the
-    // 'x' at the start. If we replace it with 'abc', we get the 'b' at the start.
-    const text = `${r(pageWidth)} x ${r(pageLength)}`;
-    title.push(Hershey(text, fontHeight));
-  }
-  for (let nth = 0; nth < itemNames.length; nth++) {
-    title.push(
-      translate(Hershey(itemNames[nth], fontHeight), [
-        0,
-        (nth + 1) * fontHeight,
-        0,
-      ])
-    );
-  }
-  const visualization = ghost(
-    hasColor(
-      Group(
-        [
-          outline(
-            Box([Math.max(pageWidth, margin), Math.max(pageLength, margin)])
-          ),
-          translate(Group(title), [
-            pageWidth / -2,
-            (pageLength * (1 + labelScale)) / 2,
-          ]),
-        ])
-    )
-  );
-  /*
-  const visualization = Box(
-    Math.max(pageWidth, margin),
-    Math.max(pageLength, margin)
-  )
-    .outline()
-    .and(
-      Group(...title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
-    )
-    .color('red')
-    .ghost();
-    */
-  let layout = taggedLayout(
-    { size, margin },
-    toDisplayGeometry(layer),
-    toDisplayGeometry(visualization)
-  );
+  let layout = taggedLayout({ size, margin }, layer, Empty());
   if (center) {
     layout = by(layout, alignment(layout));
   }
@@ -3859,15 +3965,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$4] * 2),
-        Math.abs(packSize[MIN][X$4] * 2)
+        Math.abs(packSize[MAX][X$3] * 2),
+        Math.abs(packSize[MIN][X$3] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$4] * 2),
-        Math.abs(packSize[MIN][Y$4] * 2)
+        Math.abs(packSize[MAX][Y$3] * 2),
+        Math.abs(packSize[MIN][Y$3] * 2)
       ) +
       pageMargin * 2;
     return buildLayout({
@@ -3886,15 +3992,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$4] * 2),
-        Math.abs(packSize[MIN][X$4] * 2)
+        Math.abs(packSize[MAX][X$3] * 2),
+        Math.abs(packSize[MIN][X$3] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$4] * 2),
-        Math.abs(packSize[MIN][Y$4] * 2)
+        Math.abs(packSize[MAX][Y$3] * 2),
+        Math.abs(packSize[MIN][Y$3] * 2)
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
@@ -3933,8 +4039,8 @@ const Page = (
     if (packSize.length === 0) {
       throw Error('Packing failed');
     }
-    const pageWidth = Math.max(1, packSize[MAX][X$4] - packSize[MIN][X$4]);
-    const pageLength = Math.max(1, packSize[MAX][Y$4] - packSize[MIN][Y$4]);
+    const pageWidth = Math.max(1, packSize[MAX][X$3] - packSize[MIN][X$3]);
+    const pageLength = Math.max(1, packSize[MAX][Y$3] - packSize[MIN][Y$3]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of getList(content, ['pack:layout'])) {
@@ -3979,8 +4085,8 @@ const Page = (
     }
     // FIX: Using content.size() loses the margin, which is a problem for repacking.
     // Probably page plans should be generated by pack and count toward the size.
-    const pageWidth = packSize[MAX][X$4] - packSize[MIN][X$4];
-    const pageLength = packSize[MAX][Y$4] - packSize[MIN][Y$4];
+    const pageWidth = packSize[MAX][X$3] - packSize[MIN][X$3];
+    const pageLength = packSize[MAX][Y$3] - packSize[MIN][Y$3];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of getList(contents, ['pack:layout'])) {
@@ -4020,7 +4126,7 @@ const page = (
   );
 
 const ensurePages = (geometry, depth = 0) => {
-  const pages = getLayouts(toDisplayGeometry(geometry));
+  const pages = getLayouts(geometry);
   if (pages.length === 0 && depth === 0) {
     return ensurePages(Page([geometry], { pack: false }), depth + 1);
   } else {
@@ -4034,7 +4140,7 @@ const toolFilter = (geometry) =>
   isNotTypeVoid(geometry);
 
 const segmentsFilter = (geometry) =>
-  ['segments'].includes(geometry.type) &&
+  ['segments', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
@@ -4049,11 +4155,23 @@ const Route = (tool, geometries) => {
   return Group(outputs);
 };
 
-const Segment = (segment) => taggedSegments({}, [segment]);
+const filter$B = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  isNotTypeGhost(geometry);
 
-const Segments = (segments) => taggedSegments({}, segments);
+const outline = (geometry, selections = []) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter$B, inputs);
+  const count = inputs.length;
+  for (const selection of selections) {
+    linearize(toConcreteGeometry(selection), filter$B, inputs);
+  }
+  const outputs = outline$1(inputs, count);
+  return replacer(inputs, outputs)(concreteGeometry);
+};
 
-const filter$z = ({ type }) => type === 'segments';
+const filter$A = ({ type }) => type === 'segments';
 
 const eachSegment = (geometry, emit, selections = []) => {
   if (!(selections instanceof Array)) {
@@ -4061,7 +4179,7 @@ const eachSegment = (geometry, emit, selections = []) => {
   }
   for (const { matrix, segments, normals, faces } of linearize(
     outline(geometry, selections),
-    filter$z
+    filter$A
   )) {
     for (let nth = 0; nth < segments.length; nth++) {
       const [source, target] = segments[nth];
@@ -4174,10 +4292,10 @@ const abstract = (geometry, types) => {
   return geometry;
 };
 
-const filter$y = (geometry) => ['graph'].includes(geometry.type);
+const filter$z = (geometry) => ['graph'].includes(geometry.type);
 
 const approximate = (geometry, faceCount, minErrorDrop) => {
-  const inputs = linearize(geometry, filter$y);
+  const inputs = linearize(geometry, filter$z);
   const outputs = approximate$1(inputs, faceCount, minErrorDrop);
   return replacer(inputs, outputs)(geometry);
 };
@@ -4196,7 +4314,7 @@ const allTags = (geometry) => {
   return collectedTags;
 };
 
-const filter$x = (geometry) =>
+const filter$y = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
@@ -4208,7 +4326,7 @@ const Disjoint = (geometries, { backward, exact }) => {
   );
   const inputs = [];
   for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter$x, inputs);
+    linearize(concreteGeometry, filter$y, inputs);
   }
   // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
   const outputs = disjoint$1(inputs, backward, exact);
@@ -4231,50 +4349,45 @@ const disjoint = (geometry, modes) => Disjoint([geometry], modes);
 const assemble = (geometries, exact) =>
   disjoint(geometries, undefined);
 
-const at = (geometry, selection, op) => {
+const at = (geometry, selection) => {
   const { local, global } = getInverseMatrices(geometry);
   const { local: selectionLocal, global: selectionGlobal } =
     getInverseMatrices(selection);
   const localGeometry = transform(geometry, local);
-  const selectionGlobalGeometry = transform(localGeometry, selectionGlobal);
+  const selectionLocalGeometry = transform(localGeometry, selectionLocal);
   // We split this operation to allow the caller to do arbitrary operations in the middle.
   return [
-    selectionGlobalGeometry,
-    (newSelectionGlobalGeometry) => {
-      const newSelectionLocalGeometry = transform(
-        newSelectionGlobalGeometry,
-        selectionLocal
+    selectionLocalGeometry,
+    (newSelectionLocalGeometry) => {
+      const newSelectionGlobalGeometry = transform(
+        newSelectionLocalGeometry,
+        selectionGlobal
       );
-      const newGlobalGeometry = transform(newSelectionLocalGeometry, global);
+      const newGlobalGeometry = transform(newSelectionGlobalGeometry, global);
       return newGlobalGeometry;
     },
   ];
 };
 
-const bb = (
-  geometry,
-  xOffset = 1,
-  yOffset = xOffset,
-  zOffset = yOffset
-) => {
-  const bounds = measureBoundingBox(geometry);
-  if (bounds === undefined) {
-    return Empty();
-  } else {
-    const [min, max] = bounds;
-    return Box([], {
-      c2: add(min, [-xOffset, -yOffset, -zOffset]),
-      c1: add(max, [xOffset, yOffset, zOffset]),
-    });
-  }
-};
-
-const filter$w = (geometry) => ['graph'].includes(geometry.type);
+const filter$x = (geometry) => ['graph'].includes(geometry.type);
 
 const bend = (geometry, radius = 100) => {
-  const inputs = linearize(geometry, filter$w);
+  const inputs = linearize(geometry, filter$x);
   const outputs = bend$1(inputs, radius);
   return replacer(inputs, outputs)(geometry);
+};
+
+const filter$w = (geometry) =>
+  geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
+
+const serialize = (geometry) => {
+  const inputs = [];
+  linearize(geometry, filter$w, inputs, /* includeSketches= */ true);
+  if (inputs.length === 0) {
+    return geometry;
+  }
+  serialize$1(inputs);
+  return geometry;
 };
 
 const hash = (geometry) => {
@@ -4480,7 +4593,7 @@ const filter$v = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-const filterReferences$1 = (geometry) =>
+const filterReferences = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
     geometry.type
   );
@@ -4488,79 +4601,21 @@ const filterReferences$1 = (geometry) =>
 const cast = (planeReference, sourceReference, geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(toConcreteGeometry(planeReference), filterReferences$1, inputs);
+  linearize(toConcreteGeometry(planeReference), filterReferences, inputs);
   inputs.length = 1;
-  linearize(toConcreteGeometry(sourceReference), filterReferences$1, inputs);
+  linearize(toConcreteGeometry(sourceReference), filterReferences, inputs);
   inputs.length = 2;
   linearize(concreteGeometry, filter$v, inputs);
   const outputs = cast$1(inputs);
   return taggedGroup({}, ...outputs);
 };
 
-const hasMaterial = (geometry, name) =>
-  rewriteTags(toTagsFromName$1(name), [], geometry);
-
-const filter$u = (noVoid, onlyGraph) => (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
-    geometry.type
-  ) &&
-  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry))) &&
-  (!onlyGraph || geometry.type === 'graph');
-
-const clip = (
-  geometry,
-  geometries,
-  { open, exact, noVoid, noGhost, onlyGraph }
-) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
-  const inputs = [];
-  linearize(concreteGeometry, filter$u(noVoid, onlyGraph), inputs);
-  const count = inputs.length;
-  for (const geometry of geometries) {
-    linearize(geometry, filter$u(noVoid), inputs);
-  }
-  const outputs = clip$1(inputs, count, open, exact);
-  const ghosts = [];
-  if (!noGhost) {
-    for (let nth = 0; nth < inputs.length; nth++) {
-      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
-    }
-  }
-  return taggedGroup(
-    {},
-    replacer(inputs, outputs, count)(concreteGeometry),
-    ...ghosts
-  );
-};
-
-const clipFrom = (clipBy, clipFrom, modes) =>
-  clip(clipFrom, [clipBy], modes);
-
-const commonVolume = (geometry, modes) => {
-  const inputs = linearize(
-    geometry,
-    filter$u(modes.noVoid, { ...modes, onlyGraph: true })
-  );
-  switch (inputs.length) {
-    case 0: {
-      return taggedGroup({});
-    }
-    case 1: {
-      return inputs[0];
-    }
-    default: {
-      const [first, ...rest] = inputs;
-      return clip(first, rest, modes);
-    }
-  }
-};
-
-const filter$t = (geometry) =>
+const filter$u = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
 const computeCentroid = (geometry, top, bottom) =>
-  Group(computeCentroid$1(linearize(geometry, filter$t)));
+  Group(computeCentroid$1(linearize(geometry, filter$u)));
 
 const computeGeneralizedDiameter = (geometry) => {
   const coordinates = toCoordinates(geometry);
@@ -4595,7 +4650,7 @@ const computeImplicitVolume = (
   return taggedGroup({}, ...outputs);
 };
 
-const filter$s = (geometry) =>
+const filter$t = (geometry) =>
   isNotTypeGhost(geometry) &&
   ((geometry.type === 'graph' && !geometry.graph.isEmpty) ||
     ['polygonsWithHoles', 'segments', 'points'].includes(geometry.type));
@@ -4603,7 +4658,7 @@ const filter$s = (geometry) =>
 const computeOrientedBoundingBox = (geometry) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
-  linearize(concreteGeometry, filter$s, inputs);
+  linearize(concreteGeometry, filter$t, inputs);
   const outputs = computeOrientedBoundingBox$1(inputs);
   return outputs[0];
 };
@@ -4635,7 +4690,7 @@ const computeReliefFromImage = (
   return taggedGroup({}, ...outputs);
 };
 
-const filter$r = (geometry) =>
+const filter$s = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const computeToolpath = (
@@ -4649,9 +4704,9 @@ const computeToolpath = (
   annealingDecay
 ) => {
   const inputs = [];
-  linearize(geometry, filter$r, inputs);
+  linearize(geometry, filter$s, inputs);
   const materialStart = inputs.length;
-  linearize(material, filter$r, inputs);
+  linearize(material, filter$s, inputs);
   const outputs = computeToolpath$1(
     inputs,
     materialStart,
@@ -4673,42 +4728,24 @@ const copy = (geometry, count) => {
   return Group(copies);
 };
 
-const filterTargets$1 = (noVoid) => (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
-    geometry.type
-  ) &&
-  (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid(geometry)));
+const filter$r = () => (geometry) =>
+  ['polygonsWithHoles'].includes(geometry.type);
 
-const filterRemoves = (noVoid) => (geometry) =>
-  filterTargets$1(noVoid)(geometry) && isNotTypeMasked(geometry);
-
-const cut = (
-  toCut,
-  toClips,
-  { open = false, exact, noVoid, noGhost }
-) => {
-  const inputs = linearize(toCut, filterTargets$1(noVoid));
-  const count = inputs.length;
-  for (const toClip of toClips) {
-    linearize(toClip, filterRemoves(noVoid), inputs);
+const convertPolygonsToMeshes = (geometry) => {
+  const concreteGeometry = toConcreteGeometry(geometry);
+  const inputs = [];
+  linearize(concreteGeometry, filter$r(), inputs);
+  if (inputs.length === 0) {
+    return geometry;
   }
-  const outputs = cut$1(inputs, count, open, exact);
-  const ghosts = [];
-  if (!noGhost) {
-    for (let nth = count; nth < inputs.length; nth++) {
-      ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
-    }
+  try {
+    const outputs = convertPolygonsToMeshes$1(inputs);
+    return replacer(inputs, outputs)(concreteGeometry);
+  } catch (e) {
+    console.log(e.stack);
+    throw e;
   }
-  return Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
 };
-
-const cutFrom = (toClip, toCut, options) =>
-  cut(toCut, [toClip], options);
-
-const cutOut = (cutGeometry, clipGeometry, modes) => [
-  cut(cutGeometry, [clipGeometry], { ...modes, noGhost: true }),
-  clip(cutGeometry, [clipGeometry], { ...modes, noGhost: true }),
-];
 
 const filterShape = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
@@ -5041,22 +5078,22 @@ const gap = (geometry) => hasTypeGhost(hasTypeVoid(geometry));
 const filter$k = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-const generateLowerEnvelope = (geometry) => {
+const generateLowerEnvelope = (geometry, modes) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$k, inputs);
-  const outputs = generateEnvelope(inputs, /* envelopeType= */ 1);
+  const outputs = generateEnvelope(inputs, /* envelopeType= */ 1, modes);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
 const filter$j = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-const generateUpperEnvelope = (geometry) => {
+const generateUpperEnvelope = (geometry, modes) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter$j, inputs);
-  const outputs = generateEnvelope(inputs, /* envelopeType= */ 0);
+  const outputs = generateEnvelope(inputs, /* envelopeType= */ 0, modes);
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
@@ -5145,56 +5182,13 @@ const getTags = (geometry) => {
   }
 };
 
-const Ref = (
-  name,
-  x = 0,
-  y = 0,
-  z = 0,
-  nx = 0,
-  ny = 0,
-  nz = 1,
-  coordinate
-) => {
-  if (coordinate) {
-    [x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1] = coordinate;
-  }
-  // Disorient the point as though the source of a segment.
-  const inverse = fromSegmentToInverseTransform(
-    [
-      [x, y, z],
-      [x + nx, y + ny, z + nz],
-    ],
-    [0, 0, 1]
-  );
-  const matrix = invertTransform(inverse);
-  const point = Point(0, 0, 0);
-  const content = name ? as(point, [name]) : point;
-  return hasTypeReference(transform(content, matrix));
-};
-
-const ref = (geometry, name) => transform(Ref(name), geometry.matrix);
-
-const X$3 = (x = 0) => Ref(undefined, x, 0, 0, 0, 0, 1);
-const Y$3 = (y = 0) => Ref(undefined, 0, y, 0, 0, 0, 1);
-const Z$3 = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, 1);
-const XY = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, 1);
-const YX = (z = 0) => Ref(undefined, 0, 0, z, 0, 0, -1);
-const XZ = (y = 0) => Ref(undefined, 0, y, 0, 0, 1, 0);
-const ZX = (y = 0) => Ref(undefined, 0, y, 0, 0, -1, 0);
-const YZ = (x = 0) => Ref(undefined, x, 0, 0, 1, 0, 0);
-const ZY = (x = 0) => Ref(undefined, x, 0, 0, -1, 0, 0);
-
-const RX = (t = 0) => rotateX(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
-const RY = (t = 0) => rotateY(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
-const RZ = (t = 0) => rotateZ(Ref(undefined, 0, 0, 0, 0, 0, 1), t);
-
 const filter$i = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
 const grow = (geometry, offset, axes = 'xyz', selections) => {
   const inputs = linearize(geometry, filter$i);
   const count = inputs.length;
-  inputs.push(Z$3(offset));
+  inputs.push(Z$4([offset]));
   for (const selection of selections) {
     linearize(selection, filter$i, inputs);
   }
@@ -5787,35 +5781,6 @@ const seam = (geometry, selections) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
-const filterInputs$1 = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
-    geometry.type
-  ) && isNotTypeGhost(geometry);
-
-const filterReferences = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
-    geometry.type
-  );
-
-const section = (inputGeometry, referenceGeometries = []) => {
-  const inputs = linearize(inputGeometry, filterInputs$1);
-  const count = inputs.length;
-  if (referenceGeometries.length === 0) {
-    // Default to the Z(0) plane.
-    inputs.push(Ref());
-  } else {
-    for (const referenceGeometry of referenceGeometries) {
-      linearize(referenceGeometry, filterReferences, inputs);
-    }
-  }
-  const outputs = section$1(inputs, count);
-  const ghosts = [];
-  for (let nth = 0; nth < count; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
-  }
-  return Group([...outputs, ...ghosts]);
-};
-
 const filter$5 = (geometry, parent) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
@@ -5901,6 +5866,50 @@ const smooth = (
   return taggedGroup({}, replacer(inputs, outputs, count)(geometry), ...ghosts);
 };
 
+const soup = (geometry) => {
+  const op = (geometry, descend) => {
+    switch (geometry.type) {
+      case 'graph': {
+        const { graph } = geometry;
+        if (graph.isEmpty) {
+          return taggedGroup({});
+        } else {
+          return geometry;
+        }
+      }
+      // Unreachable.
+      case 'polygonsWithHoles':
+        return geometry;
+      case 'segments':
+      case 'triangles':
+      case 'points':
+      case 'paths':
+        // Already soupy enough.
+        return geometry;
+      case 'toolpath':
+        // Drop toolpaths for now.
+        return taggedGroup({});
+      case 'displayGeometry':
+        // soup can handle displayGeometry.
+        return descend();
+      case 'layout':
+      case 'plan':
+      case 'item':
+      case 'sketch':
+      case 'group': {
+        return descend();
+      }
+      default:
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+    }
+  };
+
+  return rewrite(
+    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
+    op
+  );
+};
+
 const taggedDisplayGeometry = (
   { tags = [], matrix, provenance },
   ...content
@@ -5977,6 +5986,22 @@ const taggedTriangles = (
 const to = (geometry, target, connector = geometry) => {
   const oriented = by(geometry, [origin(connector)]);
   return by(oriented, [target]);
+};
+
+const toDisplayGeometry = (
+  geometry,
+  { triangles, outline = true, skin, wireframe = false } = {}
+) => {
+  if (!geometry) {
+    throw Error('die');
+  }
+  if (skin === undefined) {
+    skin = triangles;
+  }
+  if (skin === undefined) {
+    skin = true;
+  }
+  return soup(toConcreteGeometry(geometry));
 };
 
 const toTransformedGeometry = (geometry) => geometry;
@@ -6094,4 +6119,4 @@ const Wrap = (geometries, offset = 1, alpha = 0.1) => {
 const wrap = (geometry, geometries, offset, alpha) =>
   tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Stroke, Triangle, Wrap, X$3 as X, XY, XZ, Y$3 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Stroke, Triangle, Wrap, X$6 as X, XY, XZ, Y$6 as Y, YX, YZ, Z$4 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fromPolygons, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

@@ -43,8 +43,6 @@ Arc(10).ez([1, 2], [-1, -2]).view();
 
 A plane (default XY(0)) to cast upon and a direction (default XY(1)) can be provided.
 
-![Image](interactions_with_geometry.md.$9.png)
-
 ```JavaScript
 Arc(4)
   .ez([10])

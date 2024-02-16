@@ -56,7 +56,7 @@ const knob = await Loft(
 
 ```JavaScript
 const top = await saucer
-  .upperEnvelope()
+  .upperEnvelope('face')
   .involute()
   .loft(Box(150).z(5))
   .fitTo(knob)
@@ -85,7 +85,7 @@ const topWithPegHoles = await top
 ```
 
 ```JavaScript
-const base = await saucer.lowerEnvelope().loft(Box(150).z(-12.01)).as('base');
+const base = await saucer.lowerEnvelope('face').loft(Box(150).z(-12.01)).as('base');
 ```
 
 ![Image](saucer.md.baseWithPegHoles_base.png)

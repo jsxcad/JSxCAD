@@ -3,16 +3,31 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const generateEnvelope = (inputs, envelopeType) =>
+export const generateEnvelope = (
+  inputs,
+  envelopeType,
+  { plan, face, edge } = {}
+) =>
   withCgalGeometry('generateEnvelope', inputs, (cgalGeometry, g) => {
-    const status = g.GenerateEnvelope(cgalGeometry, envelopeType);
+    const status = g.GenerateEnvelope(
+      cgalGeometry,
+      envelopeType,
+      plan,
+      face,
+      edge
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness(
           'Zero thickness produced by generateEnvelope'
         );
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs);
+        return fromCgalGeometry(
+          cgalGeometry,
+          inputs,
+          cgalGeometry.getSize(),
+          inputs.length
+        );
       default:
         throw new Error(`Unexpected status ${status}`);
     }

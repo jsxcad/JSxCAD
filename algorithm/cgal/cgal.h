@@ -137,6 +137,7 @@ typedef Kernel::Segment_3 Segment;
 typedef Kernel::Segment_2 Segment_2;
 typedef Epick_kernel::Segment_3 Epick_segment;
 typedef std::vector<Segment> Segments;
+typedef std::vector<Epick_segment> Epick_segments;
 typedef Kernel::Triangle_2 Triangle_2;
 typedef Kernel::Triangle_3 Triangle;
 typedef Kernel::Vector_2 Vector_2;
@@ -580,9 +581,8 @@ bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
   return plane.has_on(p[m.target(m.next(m.opposite(e)))]);
 }
 
-template <typename Vertex_point_map>
-bool is_sufficiently_coplanar_edge(const Surface_mesh& m,
-                                   const Vertex_point_map& p,
+template <typename Mesh, typename Vertex_point_map, typename Halfedge_index>
+bool is_sufficiently_coplanar_edge(const Mesh& m, const Vertex_point_map& p,
                                    const Halfedge_index e, FT threshold) {
   FT angle = CGAL::approximate_dihedral_angle(
       p[CGAL::target(opposite(e, m), m)], p[CGAL::target(e, m)],
@@ -1774,31 +1774,6 @@ void check() {
   for (int a = 3; a < limit; a++) {
     assert(a < limit);
   }
-}
-
-template <typename Kernel, typename Edge, typename Face, typename Point>
-bool projectPointToEnvelope(const Edge& edge, const Face& face,
-                            Point& projected) {
-  typedef typename Kernel::Line_3 Line;
-  typedef typename Kernel::Vector_3 Vector;
-  typedef typename Kernel::Plane_3 Plane;
-  // Project the corner up to the surface.
-  auto p2 = edge->source()->point();
-  Line line(Point(p2.x(), p2.y(), 0), Vector(0, 0, 1).direction());
-  for (auto surface = face->surfaces_begin(); surface != face->surfaces_end();
-       ++surface) {
-    const auto& triangle = *surface;
-    const Plane plane(triangle.vertex(0), triangle.vertex(1),
-                      triangle.vertex(2));
-    const auto result = CGAL::intersection(line, plane);
-    if (result) {
-      if (const Point* p3 = std::get_if<Point>(&*result)) {
-        projected = *p3;
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 std::shared_ptr<Surface_mesh> DeserializeMesh(

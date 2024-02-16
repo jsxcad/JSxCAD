@@ -14,7 +14,7 @@ int Route(Geometry* geometry, int tool_count) {
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
-  geometry->convertPolygonsToPlanarMeshes();
+  geometry->convertPlanarMeshesToPolygons();
 
   if (size < 1 || geometry->getType(0) != GEOMETRY_MESH) {
     return STATUS_INVALID_INPUT;
@@ -46,36 +46,64 @@ int Route(Geometry* geometry, int tool_count) {
     }
   }
 
+  std::set<std::pair<Point, Point>> known;
+  std::vector<std::pair<Point, Point>> segments;
+
+  auto add_edge = [&](const Point& a, const Point& b) {
+    if (!known.insert(std::make_pair(a, b)).second) {
+      // Already handled.
+      return;
+    }
+    // We handle edges symmetrically.
+    auto pair = std::make_pair(b, a);
+    known.insert(pair);
+    segments.push_back(pair);
+  };
+
   for (int nth = tool_count; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        std::set<std::pair<Point, Point>> segments;
         for (const auto& segment : geometry->segments(nth)) {
-          if (!segments
-                   .insert(std::make_pair(segment.source(), segment.target()))
-                   .second) {
-            // Already handled.
-            continue;
+          add_edge(segment.source(), segment.target());
+        }
+        break;
+      }
+      case GEOMETRY_POLYGONS_WITH_HOLES: {
+        geometry->setType(nth, GEOMETRY_SEGMENTS);
+        const Plane& plane = geometry->plane(nth);
+        for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
+          for (auto s2 = polygon.outer_boundary().edges_begin();
+               s2 != polygon.outer_boundary().edges_end(); ++s2) {
+            geometry->addSegment(nth, Segment(plane.to_3d(s2->source()),
+                                              plane.to_3d(s2->target())));
+            add_edge(plane.to_3d(s2->source()), plane.to_3d(s2->target()));
           }
-          // We handle edges symmetrically.
-          segments.insert(std::make_pair(segment.target(), segment.source()));
-
-          Transformation xs = translate_to(segment.source());
-          Transformation xt = translate_to(segment.target());
-
-          for (const auto& tool : tools) {
-            int result = geometry->add(GEOMETRY_MESH);
-            Surface_mesh& output = geometry->mesh(result);
-            std::list<Point> points;
-            for (const auto vertex : tool.vertices()) {
-              const Point& point = tool.point(vertex);
-              points.push_back(point.transform(xs));
-              points.push_back(point.transform(xt));
+          for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
+               ++hole) {
+            for (auto s2 = hole->edges_begin(); s2 != hole->edges_end(); ++s2) {
+              add_edge(plane.to_3d(s2->source()), plane.to_3d(s2->target()));
             }
-            CGAL::convex_hull_3(points.begin(), points.end(), output);
           }
         }
+        break;
       }
+    }
+  }
+
+  for (const auto& [source, target] : segments) {
+    Transformation xs = translate_to(source);
+    Transformation xt = translate_to(target);
+
+    for (const auto& tool : tools) {
+      int result = geometry->add(GEOMETRY_MESH);
+      Surface_mesh& output = geometry->mesh(result);
+      std::list<Point> points;
+      for (const auto vertex : tool.vertices()) {
+        const Point& point = tool.point(vertex);
+        points.push_back(point.transform(xs));
+        points.push_back(point.transform(xt));
+      }
+      CGAL::convex_hull_3(points.begin(), points.end(), output);
     }
   }
 

@@ -7,10 +7,10 @@ import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 const filter = (geometry) =>
   ['graph'].includes(geometry.type) && isNotTypeGhost(geometry);
 
-export const generateUpperEnvelope = (geometry) => {
+export const generateUpperEnvelope = (geometry, modes) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = generateEnvelope(inputs, /* envelopeType= */ 0);
+  const outputs = generateEnvelope(inputs, /* envelopeType= */ 0, modes);
   return replacer(inputs, outputs)(concreteGeometry);
 };

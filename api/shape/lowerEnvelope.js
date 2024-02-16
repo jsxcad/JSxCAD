@@ -3,6 +3,6 @@ import { generateLowerEnvelope } from '@jsxcad/geometry';
 
 export const lowerEnvelope = Shape.registerMethod3(
   'lowerEnvelope',
-  ['inputGeometry'],
+  ['inputGeometry', 'modes:face,edge,plan'],
   generateLowerEnvelope
 );
