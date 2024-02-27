@@ -465,11 +465,13 @@ registerDynamicModule(
   './jsxcad-api-v1-dst.js',
   '../v1-dst/main.js'
 );
+/*
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-dxf',
   './jsxcad-api-v1-dxf.js',
   '../v1-dxf.main.js'
 );
+*/
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-font',
   './jsxcad-api-v1-font.js',

@@ -27,6 +27,7 @@
     "@jsxcad/algorithm-contour": "^0.0.79",
     "@jsxcad/algorithm-tool": "^0.0.79",
     "@jsxcad/api-v1-math": "^0.0.79",
+    "@jsxcad/convert-dxf": "^0.0.79",
     "@jsxcad/convert-gcode": "^0.0.79",
     "@jsxcad/convert-ldraw": "^0.0.79",
     "@jsxcad/convert-off": "^0.0.79",

@@ -2529,7 +2529,8 @@ const buildRegularPolygon = (sides = 32) => {
 
 const fromDxf = async (data) => {
   const parser = new DxfParser();
-  const dxf = parser.parseSync(data);
+  const text = new TextDecoder('utf8').decode(data);
+  const dxf = parser.parseSync(text);
   const assembly = [];
   for (const entity of dxf.entities) {
     const { handle, layer } = entity;
