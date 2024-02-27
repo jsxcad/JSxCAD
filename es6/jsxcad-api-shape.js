@@ -2109,13 +2109,13 @@ const voidFn = gap;
 
 Shape.registerMethod3(
   'Gauge',
-  ['inputGeometry', 'geometries', 'number', 'string'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'string'],
   Gauge
 );
 
 const gauge = Shape.registerMethod3(
   'gauge',
-  ['inputGeometry', 'geometries', 'number', 'string'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'string'],
   gauge$1
 );
 
