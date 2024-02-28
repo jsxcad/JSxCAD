@@ -43,7 +43,8 @@ void write_segment(Segment s, std::ostringstream& o) {
   write_point(s.target(), o);
 }
 
-void emitPoint(Point p, emscripten::val emit_point) {
+template <typename emit>
+void emitPoint(Point p, const emit& emit_point) {
   std::ostringstream exact;
   write_point(p, exact);
   emit_point(CGAL::to_double(p.x().exact()), CGAL::to_double(p.y().exact()),

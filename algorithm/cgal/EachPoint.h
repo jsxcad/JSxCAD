@@ -1,4 +1,4 @@
-int EachPoint(Geometry* geometry, emscripten::val emit_point) {
+int EachPoint(Geometry* geometry, const std::function<void(double, double, double, const std::string&)>& emit_point) {
   try {
     size_t size = geometry->size();
 

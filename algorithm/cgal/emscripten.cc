@@ -1,4 +1,16 @@
+#include <emscripten/bind.h>
+
 #include "cgal.h"
+
+namespace wrapper {
+  int EachPoint(Geometry* geometry, emscripten::val emit_point) {
+    return ::EachPoint(geometry, [&](double x, double y, double z, const std::string& e) { return emit_point(x, y, z, e); });
+  }
+
+  int Repair(Geometry* geometry, emscripten::val nextStrategy) {
+    return ::Repair(geometry, [&]() { return nextStrategy.as<int>(); });
+  }
+}
 
 EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Transformation>("Transformation")
@@ -229,7 +241,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
-  emscripten::function("Repair", &Repair, emscripten::allow_raw_pointers());
+  emscripten::function("Repair", &wrapper::Repair, emscripten::allow_raw_pointers());
   emscripten::function("Route", &Route, emscripten::allow_raw_pointers());
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
