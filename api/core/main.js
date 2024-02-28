@@ -46,25 +46,11 @@ registerDynamicModule(
   '@jsxcad/api-v1-dst',
   '../v1-dst/main.js'
 );
-/*
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-dxf',
-  '@jsxcad/api-v1-dxf',
-  '../v1-dxf.main.js'
-);
-*/
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-font',
   '@jsxcad/api-v1-font',
   '../v1-font/main.js'
 );
-/*
-registerDynamicModule(
-  '@' + 'jsxcad/api-v1-ldraw',
-  '@jsxcad/api-v1-ldraw',
-  '../v1-ldraw/main.js'
-);
-*/
 registerDynamicModule(
   '@' + 'jsxcad/api-v1-math',
   '@jsxcad/api-v1-math',

@@ -3,7 +3,8 @@
 Parameter|Default|Type
 ---|---|---
 ...refs||Reference geometry for the gauge positions.
-{offset}|5|Additional length for the gauge needles
+{offset}|5|Offset of the label away from the model.
+{length}|0|Length of the gauge needles toward the model.
 {color}|'green'|The color to use for the gauge needles.
 
 Generates a set of gauges for measuring width at a particular reference position.
@@ -24,14 +25,14 @@ Box(20)
 
 ![Image](gauge.md.$3.png)
 
-Box(20).z(-5).hull(Point().z(5)).rz(1 / 8).gauge(15, RX({ by: 1 / 8, to: 1 / 2 }))
+Box(20).z(-5).hull(Point().z(5)).rz(1 / 8).gauge(15, 20, RX({ by: 1 / 8, to: 1 / 2 }), 'red')
 
 ```JavaScript
 Box(20)
   .z(-5)
   .hull(Point().z(5))
   .rz(1 / 8)
-  .gauge(15, RX({ by: 1 / 8, to: 1 / 2 }))
+  .gauge(15, 20, RX({ by: 1 / 8, to: 1 / 2 }), 'red')
   .view()
-  .note('Box(20).z(-5).hull(Point().z(5)).rz(1 / 8).gauge(15, RX({ by: 1 / 8, to: 1 / 2 }))');
+  .note(`Box(20).z(-5).hull(Point().z(5)).rz(1 / 8).gauge(15, 20, RX({ by: 1 / 8, to: 1 / 2 }), 'red')`);
 ```

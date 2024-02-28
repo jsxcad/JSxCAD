@@ -15,7 +15,13 @@ import { translate } from './translate.js';
 const X = 0;
 const Y = 1;
 
-export const Gauge = (geometry, refs, offset = 5, color = 'green') => {
+export const Gauge = (
+  geometry,
+  refs,
+  offset = 5,
+  length = 0,
+  color = 'green'
+) => {
   const gauges = [];
   for (const ref of refs) {
     const { local, global } = getInverseMatrices(ref);
@@ -28,26 +34,30 @@ export const Gauge = (geometry, refs, offset = 5, color = 'green') => {
     const right = max[X];
     const back = max[Y];
     const width = right - left;
+    const base = back - length;
+    const offsetBase = back + offset;
     const lines = Segments([
       [
-        [left, 0, 0],
-        [left, back + offset, 0],
+        [left, base, 0],
+        [left, offsetBase, 0],
       ],
       [
-        [right, 0, 0],
-        [right, back + offset, 0],
+        [right, base, 0],
+        [right, offsetBase, 0],
       ],
       [
-        [left, back + offset, 0],
-        [right, back + offset, 0],
+        [left, offsetBase, 0],
+        [right, offsetBase, 0],
       ],
     ]);
-    const text = translate(align(Hershey(`${width.toFixed(1)} mm`, 2), 'xy'), [
-      (left + right) / 2,
-      back + offset,
-      0,
-    ]);
-    const box = bb(text);
+    const text = translate(
+      align(
+        Hershey(`${width.toFixed(1).replace(/\.0+$/, '')}`, width * 0.05),
+        'xy'
+      ),
+      [(left + right) / 2, back + offset, 0]
+    );
+    const box = bb(text, offset);
     gauges.push(
       transform(Group([text, cut(lines, [box], { noGhost: true })]), global)
     );
@@ -55,5 +65,5 @@ export const Gauge = (geometry, refs, offset = 5, color = 'green') => {
   return ghost(hasColor(Group(gauges), color));
 };
 
-export const gauge = (geometry, refs, color) =>
-  Group([geometry, Gauge(geometry, refs, color)]);
+export const gauge = (geometry, refs, offset, length, color) =>
+  Group([geometry, Gauge(geometry, refs, offset, length, color)]);

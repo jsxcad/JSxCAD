@@ -4,12 +4,12 @@ import { Shape } from './Shape.js';
 
 export const Gauge = Shape.registerMethod3(
   'Gauge',
-  ['inputGeometry', 'geometries', 'number', 'string'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'string'],
   Op
 );
 
 export const gauge = Shape.registerMethod3(
   'gauge',
-  ['inputGeometry', 'geometries', 'number', 'string'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'string'],
   op
 );
