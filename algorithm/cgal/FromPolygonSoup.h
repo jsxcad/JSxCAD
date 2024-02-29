@@ -3,12 +3,14 @@
 #include "./approximate_util.h"
 #include "./repair_util.h"
 
-int FromPolygonSoup(Geometry* geometry, emscripten::val fill, size_t face_count,
-                    double min_error_drop, emscripten::val nextStrategy) {
+int FromPolygonSoup(Geometry* geometry,
+                    const std::function<void(Triples*, Polygons*)>& fill,
+                    size_t face_count, double min_error_drop,
+                    const std::function<int()>& get_next_strategy) {
   std::vector<int> strategies;
 
-  for (int strategy = nextStrategy().as<int>(); strategy != -1;
-       strategy = nextStrategy().as<int>()) {
+  for (int strategy = get_next_strategy(); strategy != -1;
+       strategy = get_next_strategy()) {
     std::cout << "QQ/FromPolygonSoup: strategy=" << strategy << std::endl;
     strategies.push_back(strategy);
   }
@@ -24,10 +26,7 @@ int FromPolygonSoup(Geometry* geometry, emscripten::val fill, size_t face_count,
       Polygons polygons;
       {
         Triples triples;
-        // Workaround for emscripten::val() bindings.
-        Triples* triples_ptr = &triples;
-        Polygons* polygons_ptr = &polygons;
-        fill(triples_ptr, polygons_ptr);
+        fill(&triples, &polygons);
         for (const Triple& triple : triples) {
           points.push_back(Point(triple[0], triple[1], triple[2]));
         }

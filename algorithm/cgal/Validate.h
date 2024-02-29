@@ -2,13 +2,14 @@
 
 #include "validate_util.h"
 
-int Validate(Geometry* geometry, emscripten::val nextStrategy) {
+int Validate(Geometry* geometry,
+             const std::function<int()>& get_next_strategy) {
   size_t size = geometry->getSize();
 
   std::vector<int> strategies;
 
-  for (int strategy = nextStrategy().as<int>(); strategy != -1;
-       strategy = nextStrategy().as<int>()) {
+  for (int strategy = get_next_strategy(); strategy != -1;
+       strategy = get_next_strategy()) {
     std::cout << "Validate: strategy=" << strategy << std::endl;
     strategies.push_back(strategy);
   }

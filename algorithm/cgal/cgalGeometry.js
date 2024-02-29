@@ -207,16 +207,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
             update = true;
           }
         }
-        if (geometry.has_occt_shape(nth)) {
-          const oldOcctShape = occtShapeCache.get(graph);
-          newOcctShape = geometry.getOcctShape(nth);
-          if (newOcctShape === oldOcctShape) {
-            serializedOcctShape = graph.serializedOcctShape;
-          } else {
-            serializedOcctShape = geometry.getSerializedOcctShape(nth);
-            update = true;
-          }
-        }
         if (update) {
           graph = {
             serializedSurfaceMesh,

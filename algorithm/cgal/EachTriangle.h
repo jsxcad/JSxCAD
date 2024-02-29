@@ -1,4 +1,6 @@
-int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
+int EachTriangle(Geometry* geometry,
+                 const std::function<void(double, double, double,
+                                          const std::string&)>& emit_point) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();

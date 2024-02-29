@@ -85,6 +85,7 @@ void remesh(Surface_mesh& mesh, std::vector<const Surface_mesh*>& selections,
           .number_of_relaxation_steps(relaxation_steps));
 }
 
+#if 0
 class Surface_mesh_explorer {
  public:
   Surface_mesh_explorer(emscripten::val& emit_point, emscripten::val& emit_edge,
@@ -233,14 +234,6 @@ void Surface_mesh__explore(const Surface_mesh* input,
 bool Surface_mesh__triangulate_faces(Surface_mesh* mesh) {
   return CGAL::Polygon_mesh_processing::triangulate_faces(mesh->faces(), *mesh);
 }
-bool Surface_mesh__is_closed(const Surface_mesh* mesh) {
-  return CGAL::is_closed(*mesh);
-}
-
-bool Surface_mesh__is_empty(const Surface_mesh* mesh) {
-  return CGAL::is_empty(*mesh);
-}
-
 bool Surface_mesh__is_valid_halfedge_graph(const Surface_mesh* mesh) {
   return CGAL::is_valid_halfedge_graph(*mesh);
 }
@@ -260,4 +253,13 @@ void Surface_mesh__bbox(const Surface_mesh* input,
                                            CGAL::parameters::all_default());
   CGAL::Bbox_3 box = CGAL::Polygon_mesh_processing::bbox(mesh);
   emit(box.xmin(), box.ymin(), box.zmin(), box.xmax(), box.ymax(), box.zmax());
+}
+#endif
+
+bool Surface_mesh__is_closed(const Surface_mesh* mesh) {
+  return CGAL::is_closed(*mesh);
+}
+
+bool Surface_mesh__is_empty(const Surface_mesh* mesh) {
+  return CGAL::is_empty(*mesh);
 }
