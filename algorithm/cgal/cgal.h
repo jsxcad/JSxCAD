@@ -256,13 +256,6 @@ static FT compute_approximate_point_value(FT ft) {
   return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
-#if 0
-static Point_2 compute_approximate_point_2(Point_2 p2) {
-  return Point_2(compute_approximate_point_value(p2.x()),
-                 compute_approximate_point_value(p2.y()));
-}
-#endif
-
 template <typename RT>
 static void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
   // Convert angle to radians.
@@ -363,92 +356,6 @@ static Transformation rotate_z_to_y0(const Vector& direction) {
                         0, 0, w, 0, w);
 }
 
-#if 0
-static void disorient_along_x(Vector source, Vector normal,
-                              Transformation& align) {
-  if (source.x() != 0 || source.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(source.x(), source.y(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // Z rotation to bring y to the x axis.
-    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
-    source = source.transform(rotation);
-    normal = normal.transform(rotation);
-    align = rotation * align;
-  }
-
-  if (source.x() != 0 || source.z() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(source.x(), -source.z(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // Y rotation to bring z to the x axis.
-    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
-    source = source.transform(rotation);
-    normal = normal.transform(rotation);
-    align = rotation * align;
-  }
-
-  if (normal.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(normal.y(), -normal.z(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // X rotation to bring the normal to the x axis.
-    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                            sin_alpha, cos_alpha, 0, w);
-    align = rotation * align;
-  }
-}
-#endif
-
-#if 0
-static void reorient_along_x(Vector target, Vector normal,
-                             Transformation& align) {
-  if (normal.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(-normal.y(), normal.z(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // X rotation to bring the normal to the x axis.
-    Transformation rotation(w, 0, 0, 0, 0, cos_alpha, -sin_alpha, 0, 0,
-                            sin_alpha, cos_alpha, 0, w);
-    align = rotation * align;
-  }
-
-  if (target.x() != 0 || target.z() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(-target.x(), target.z(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // Y rotation to bring z to the x axis.
-    Transformation rotation(cos_alpha, 0, -sin_alpha, 0, 0, w, 0, 0, sin_alpha,
-                            0, cos_alpha, 0, w);
-    target = target.transform(rotation);
-    align = rotation * align;
-  }
-
-  if (target.x() != 0 || target.y() != 0) {
-    RT sin_alpha, cos_alpha, w;
-    CGAL::rational_rotation_approximation(-target.x(), -target.y(), sin_alpha,
-                                          cos_alpha, w, RT(1), RT(1000));
-    // Z rotation to bring y to the x axis.
-    Transformation rotation(cos_alpha, sin_alpha, 0, 0, -sin_alpha, cos_alpha,
-                            0, 0, 0, 0, w, 0, w);
-    target = target.transform(rotation);
-    align = rotation * align;
-  }
-}
-#endif
-
-#if 0
-static Transformation orient_along_x(Vector source, Vector source_normal,
-                                     Vector target, Vector target_normal) {
-  Transformation transform(CGAL::IDENTITY);
-  disorient_along_x(source, source_normal, transform);
-  reorient_along_x(target, target_normal, transform);
-  return transform;
-}
-#endif
-
 static void disorient_along_z(Vector source, Vector normal,
                               Transformation& align) {
   if (source.y() != 0 || source.z() != 0) {
@@ -471,19 +378,6 @@ static void disorient_along_z(Vector source, Vector normal,
   }
 }
 
-#if 0
-static void reorient_along_z(Vector target, Vector normal,
-                             Transformation& align) {}
-
-static Transformation orient_along_z(Vector source, Vector source_normal,
-                                     Vector target, Vector target_normal) {
-  Transformation transform(CGAL::IDENTITY);
-  disorient_along_x(source, source_normal, transform);
-  reorient_along_x(target, target_normal, transform);
-  return transform;
-}
-#endif
-
 static template <typename Vector>
 CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Vector>::Kernel>
 translate(const Vector& vector) {
@@ -498,33 +392,6 @@ translate_to(const Point& point) {
       typename CGAL::Kernel_traits<Point>::Kernel>(CGAL::TRANSLATION,
                                                    point - Point(0, 0, 0));
 }
-
-#if 0
-static Transformation orient_plane(Plane source, Plane target) {
-  Point_2 zero(0, 0);
-  // Build a transform to get to this plane.
-  Transformation rotation = orient_along_x(
-      unitVector(source.orthogonal_vector()), unitVector(source.base1()),
-      unitVector(target.orthogonal_vector()), unitVector(target.base1()));
-  Point s = source.to_3d(zero).transform(rotation);
-  Point t = target.to_3d(zero).transform(rotation);
-  Transformation translation = translate(t - s);
-  return translation * rotation;
-}
-#endif
-
-#if 0
-static Transformation disorient_plane_along_x(Plane source) {
-  Transformation transform(CGAL::IDENTITY);
-  disorient_along_x(unitVector(source.orthogonal_vector()),
-                    unitVector(source.base1()), transform);
-  Point s = source.to_3d(Point_2(0, 0));
-  // return translate(s.transform(rotation) - Point(0, 0, 0)) * rotation *
-  // translate(Point(0, 0, 0) - s);
-  transform = transform * translate(Point(0, 0, 0) - s);
-  return transform;
-}
-#endif
 
 static Transformation disorient_plane_along_z(Plane source) {
   Transformation transform(CGAL::IDENTITY);
@@ -571,26 +438,12 @@ static Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh,
                       mesh.point(mesh.source(mesh.next(mesh.next(h)))));
 }
 
-#if 0
-static Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
-  for (const auto& facet : mesh.faces()) {
-    return NormalOfSurfaceMeshFacet<Surface_mesh, Vector>(mesh, facet);
-  }
-  return CGAL::NULL_VECTOR;
-}
-#endif
-
 #include "convert.h"
 #include "polygon_util.h"
 #include "printing.h"
 
 template <typename Vector>
 static Vector unitVector(const Vector& vector);
-
-#if 0
-static Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh,
-                                       Face_index facet);
-#endif
 
 template <typename Surface_mesh, typename Vertex_point_map,
           typename Halfedge_index>
@@ -724,21 +577,6 @@ static void admitPlane(Plane& plane,
   plane = Plane(q[0], q[1], q[2], q[3]);
 }
 
-#if 0
-static bool didAdmitPlane(Plane& plane,
-                          const std::function<bool(Quadruple*)>& fill_plane) {
-  Quadruple q;
-  Quadruple* qp = &q;
-  bool result = fill_plane(qp);
-  if (result) {
-    plane = Plane(q[0], q[1], q[2], q[3]);
-    return true;
-  } else {
-    return false;
-  }
-}
-#endif
-
 template <typename MAP>
 struct Project {
   Project(MAP map, Vector vector) : map(map), vector(vector) {}
@@ -751,56 +589,6 @@ struct Project {
   MAP map;
   Vector vector;
 };
-
-#if 0
-static bool findClosestPointOnSegment(const Point& point,
-                                      const Segment& segment, Point& result) {
-  Vector heading = segment.target() - segment.source();
-  FT length2 = heading.squared_length();
-  // This is imprecise, but will be precisely on the segment.
-  // Vector unit_heading = heading / length;
-  // Do projection from the point but clamp it
-  Vector lhs = point - segment.source();
-  FT t = (lhs * heading) / length2;
-  if (t < 0) {
-    result = segment.source();
-    return false;
-  }
-  if (t > 1) {
-    result = segment.target();
-    return false;
-  }
-  result = segment.source() + (heading * t);
-  return true;
-};
-#endif
-
-#if 0
-static Segment& findLargestSegment(std::vector<Segment>& segments) {
-  Segment* largest_segment = nullptr;
-  FT largest_length2 = 0;
-  for (Segment& segment : segments) {
-    FT length2 = (segment.source() - segment.target()).squared_length();
-    if (largest_segment == nullptr || length2 > largest_length2) {
-      largest_segment = &segment;
-      largest_length2 = length2;
-    }
-  }
-  return *largest_segment;
-}
-#endif
-
-#if 0
-static bool admitVector(Vector& vector,
-                        const std::function<bool(Quadruple*)>& fill_vector) {
-  Quadruple q;
-  if (fill_vector(&q)) {
-    vector = Vector(q[0], q[1], q[2]);
-    return true;
-  }
-  return false;
-}
-#endif
 
 static Vector estimateTriangleNormals(const std::vector<Triangle>& triangles) {
   Vector estimate(0, 0, 0);
@@ -827,23 +615,6 @@ static void computeCentroidOfSurfaceMesh(Point& centroid,
   centroid = CGAL::centroid(triangles.begin(), triangles.end(),
                             CGAL::Dimension_tag<2>());
 }
-
-#if 0
-static void computeCentroidOfPolygonsWithHoles(
-    const Polygons_with_holes_2& polygons, Point_2& centroid) {
-  std::vector<Triangle_2> triangles;
-  std::vector<Polygon_2> facets;
-  CGAL::Polygon_triangulation_decomposition_2<Kernel> convexifier;
-  for (const auto& polygon : polygons) {
-    convexifier(polygon, std::back_inserter(facets));
-  }
-  for (const auto& facet : facets) {
-    triangles.emplace_back(facet[0], facet[1], facet[2]);
-  }
-  centroid = CGAL::centroid(triangles.begin(), triangles.end(),
-                            CGAL::Dimension_tag<2>());
-}
-#endif
 
 static void computeNormalOfSurfaceMesh(Vector& normal,
                                        const Surface_mesh& mesh) {
@@ -876,20 +647,6 @@ static const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
   }
   return it->second;
 }
-
-#if 0
-static void removeCollinearPointsFromPolyline(Polyline& polyline) {
-  size_t limit = polyline.size();
-  for (size_t nth = 2; nth < limit;) {
-    if (CGAL::collinear(polyline[nth - 2], polyline[nth - 1], polyline[nth])) {
-      polyline.erase(polyline.begin() + nth - 1);
-      limit--;
-    } else {
-      nth++;
-    }
-  }
-}
-#endif
 
 template <typename Arrangement_2>
 static void analyzeCcb(typename Arrangement_2::Ccb_halfedge_circulator start,
@@ -1180,18 +937,6 @@ static void PlanarSurfaceMeshToPolygonsWithHoles(
   convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
 }
 
-#if 0
-static void PlanarSurfaceMeshToPolygonSet(const Plane& plane,
-                                          const Surface_mesh& mesh,
-                                          General_polygon_set_2& set) {
-  std::vector<Polygon_with_holes_2> polygons;
-  PlanarSurfaceMeshToPolygonsWithHoles(plane, mesh, polygons);
-  for (const auto& polygon : polygons) {
-    set.join(polygon);
-  }
-}
-#endif
-
 // This handles potentially overlapping facets.
 static void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
                                                 const Surface_mesh& mesh,
@@ -1235,23 +980,6 @@ static bool IsPlanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
   return true;
 }
 
-#if 0
-static bool IsCoplanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
-  if (CGAL::is_closed(a)) return false;
-  if (a.number_of_vertices() < 3) return false;
-  for (const auto& vertex : a.vertices()) {
-    if (!plane.has_on(a.point(vertex))) return false;
-  }
-  return true;
-}
-#endif
-
-#if 0
-static Point to_3d(const Point_2& p2, const Transformation& transform) {
-  return Point(p2.x(), p2.y(), 0).transform(transform);
-}
-#endif
-
 static bool PolygonsWithHolesToSurfaceMesh(
     const Plane& plane, std::vector<Polygon_with_holes_2>& polygons,
     Surface_mesh& result, Vertex_map& vertex_map, bool flip = false) {
@@ -1279,33 +1007,6 @@ static bool PolygonsWithHolesToSurfaceMesh(
   return true;
 }
 
-#if 0
-static FT max2(FT a, FT b) { return a > b ? a : b; }
-#endif
-
-#if 0
-static FT max3(FT a, FT b, FT c) { return max2(a, max2(b, c)); }
-#endif
-
-#if 0
-static FT computeDihedralDeviation(const Surface_mesh& mesh) {
-  FT sum = 0;
-  for (const Edge_index edge : edges(mesh)) {
-    const Halfedge_index halfedge = mesh.halfedge(edge);
-    Point p = mesh.point(mesh.target(mesh.next(halfedge)));
-    Point q = mesh.point(mesh.target(mesh.next(mesh.opposite(halfedge))));
-    Point r = mesh.point(mesh.source(halfedge));
-    Point s = mesh.point(mesh.target(halfedge));
-    FT deviation = CGAL::abs(
-        (CGAL::abs(CGAL::approximate_dihedral_angle(p, q, r, s)) / 180) - 1);
-    FT length = CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(r, s)));
-    FT delta = deviation * length;
-    sum += delta;
-  }
-  return sum;
-}
-#endif
-
 static void PolygonToPolyline(const Plane& plane, const Polygon_2& polygon,
                               Polyline& polyline) {
   for (const Point_2& p2 : polygon) {
@@ -1331,46 +1032,6 @@ static double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
   return distance;
 }
 
-#if 0
-static double computeBestDistanceBetweenPolygons3(const Plane& plane_a,
-                                                  const Polygon_2& polygon_a,
-                                                  const Plane& plane_b,
-                                                  const Polygon_2& polygon_b,
-                                                  size_t& offset_b) {
-  size_t size = polygon_a.size();
-  double distance = std::numeric_limits<double>::infinity();
-  offset_b = 0;
-  for (size_t trial_offset_b = 0; trial_offset_b < size; trial_offset_b++) {
-    double trial_distance = 0;
-    for (size_t nth = 0; nth < size; nth++) {
-      trial_distance += CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(
-          plane_a.to_3d(polygon_a[nth]),
-          plane_b.to_3d(polygon_b[(nth + trial_offset_b) % size]))));
-    }
-    if (trial_distance < distance) {
-      distance = trial_distance;
-      offset_b = trial_offset_b;
-    }
-  }
-  return distance;
-}
-#endif
-
-#if 0
-// Write a function to determine the closest alignment between two polygons in
-// two planes.
-static void alignPolygons3(const Plane& plane_a, Polygon_2& polygon_a,
-                           const Plane& plane_b, Polygon_2& polygon_b) {
-  size_t offset_b;
-  computeBestDistanceBetweenPolygons3(plane_a, polygon_a, plane_b, polygon_b,
-                                      offset_b);
-  if (offset_b != 0) {
-    std::rotate(polygon_b.begin(), polygon_b.begin() + offset_b,
-                polygon_b.end());
-  }
-}
-#endif
-
 // Write a function to determine the closest alignment between two polyline.
 static void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
   size_t offset_b;
@@ -1380,87 +1041,6 @@ static void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
                 polyline_b.end());
   }
 }
-
-#if 0
-static void splitLongPolylineEdges(Polyline& polyline, FT threshold) {
-  FT threshold2 = threshold * threshold;
-  Polyline split;
-  split.push_back(polyline.back());
-  polyline.pop_back();
-  while (!polyline.empty()) {
-    if (CGAL::squared_distance(split.back(), polyline.back()) > threshold2) {
-      polyline.push_back(CGAL::midpoint(split.back(), polyline.back()));
-    } else {
-      split.push_back(polyline.back());
-      polyline.pop_back();
-    }
-  }
-  std::reverse(split.begin(), split.end());
-  polyline = split;
-}
-#endif
-
-#if 0
-static bool GeneralPolygonSetToSurfaceMesh(const Plane& plane,
-                                           General_polygon_set_2& set,
-                                           Surface_mesh& result,
-                                           Vertex_map& vertex_map,
-                                           bool flip = false) {
-  std::vector<Polygon_with_holes_2> polygons;
-  set.polygons_with_holes(std::back_inserter(polygons));
-  return PolygonsWithHolesToSurfaceMesh(plane, polygons, result, vertex_map,
-                                        flip);
-}
-#endif
-
-#if 0
-static double measurePerimeterOfPolygon2(
-    const Polygon_2& polygon,
-    std::map<double, Point_2>& position_on_perimeter) {
-  double traveled = 0;
-  for (auto position = polygon.begin(); position != polygon.end(); ++position) {
-    position_on_perimeter[traveled] = *position;
-    auto next = position + 1;
-    if (next == polygon.end()) {
-      next = polygon.begin();
-    }
-    FT length2 = (*next - *position).squared_length();
-    double length = CGAL::sqrt(CGAL::to_double(length2));
-    traveled += length;
-  }
-  return traveled;
-}
-#endif
-
-#if 0
-static bool pointOnPerimeterPosition(const Polygon_2& polygon,
-                                     double perimeter_length, double fraction,
-                                     Point_2& point) {
-  const double eps = 0.001;
-  double traveled = 0;
-  double target = fraction * perimeter_length;
-  for (;;) {
-    for (auto position = polygon.begin(); position != polygon.end();
-         ++position) {
-      auto next = position + 1;
-      if (next == polygon.end()) {
-        next = polygon.begin();
-      }
-      Vector_2 heading = (*next - *position);
-      FT length2 = heading.squared_length();
-      double length = CGAL::sqrt(CGAL::to_double(length2));
-      if (target < traveled + length + eps) {
-        Vector_2 unit_heading = heading / length;
-        // Interpolate the point into this segment.
-        point = *position + unit_heading * (target - traveled);
-        return true;
-      }
-      traveled += length;
-    }
-  }
-  return false;
-}
-#endif
 
 template <typename P>
 static bool emitPolygonsWithHoles(
@@ -1792,71 +1372,6 @@ static Plane ensureFacetPlane(
   }
 }
 
-#if 0
-static void convertSurfaceMeshFacesToArrangements(
-    Surface_mesh& mesh, std::unordered_map<Plane, Arrangement_2>& arrangements,
-    bool use_unit_planes = false) {
-  std::unordered_set<Plane> planes;
-  std::unordered_map<Face_index, Plane> facet_to_plane;
-
-  // FIX: Make this more efficient.
-  for (const auto& facet : mesh.faces()) {
-    const auto& start = mesh.halfedge(facet);
-    if (mesh.is_removed(start)) {
-      continue;
-    }
-    Plane facet_plane = ensureFacetPlane(mesh, facet_to_plane, planes, facet);
-    if (facet_plane == Plane(0, 0, 0, 0)) {
-      std::cout << "CSMTA/FIXME: degenerate plane" << std::endl;
-      continue;
-    }
-    if (use_unit_planes) {
-      facet_plane = unitPlane<Kernel>(facet_plane);
-    }
-    Arrangement_2& arrangement = arrangements[facet_plane];
-    Halfedge_index edge = start;
-    do {
-      bool corner = false;
-      const auto& opposite_facet = mesh.face(mesh.opposite(edge));
-      if (opposite_facet == mesh.null_face()) {
-        corner = true;
-      } else {
-        const Plane opposite_facet_plane =
-            ensureFacetPlane(mesh, facet_to_plane, planes, opposite_facet);
-        if (facet_plane != opposite_facet_plane) {
-          corner = true;
-        }
-      }
-      if (corner) {
-        Point s3 = mesh.point(mesh.source(edge));
-        Point t3 = mesh.point(mesh.target(edge));
-        Point_2 s2 = compute_approximate_point_2(facet_plane.to_2d(s3));
-        Point_2 t2 = compute_approximate_point_2(facet_plane.to_2d(t3));
-        if (s2 != t2) {
-          Segment_2 segment(s2, t2);
-          insert(arrangement, segment);
-        }
-      }
-      const auto& next = mesh.next(edge);
-      edge = next;
-    } while (edge != start);
-  }
-}
-#endif
-
-#if 0
-static bool lt(int a, int b) { return a < b; }
-#endif
-
-#if 0
-static void check() {
-  int limit = 8;
-  for (int a = 3; a < limit; a++) {
-    assert(a < limit);
-  }
-}
-#endif
-
 static std::shared_ptr<Surface_mesh> DeserializeMesh(
     const std::string& serialization) {
   Surface_mesh* mesh = new Surface_mesh();
@@ -2100,100 +1615,6 @@ static bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 static double FT__to_double(const FT& ft) { return CGAL::to_double(ft); }
 
 #include "surface_mesh_util.h"
-
-#if 0
-static bool computeFitPolygon(const Polygon_with_holes_2& space,
-                              const Polygon_with_holes_2& shape,
-                              Point_2& picked) {
-  Polygon_with_holes_2 insetting_boundary;
-
-  {
-    // Stick a box around the boundary (which will now form a hole).
-    CGAL::Bbox_2 bb = space.outer_boundary().bbox();
-    // 10 is wrong -- it should be a dilated boundary box of shape.
-    bb.dilate(10);
-
-    Polygon_2 frame;
-    frame.push_back(Point_2(bb.xmin(), bb.ymin()));
-    frame.push_back(Point_2(bb.xmax(), bb.ymin()));
-    frame.push_back(Point_2(bb.xmax(), bb.ymax()));
-    frame.push_back(Point_2(bb.xmin(), bb.ymax()));
-    if (frame.orientation() == CGAL::Sign::NEGATIVE) {
-      frame.reverse_orientation();
-    }
-
-    std::vector<Polygon_2> boundaries{space.outer_boundary()};
-
-    insetting_boundary =
-        Polygon_with_holes_2(frame, boundaries.begin(), boundaries.end());
-  }
-
-  std::vector<Polygon_2> holes;
-  for (auto it = space.holes_begin(); it != space.holes_end(); ++it) {
-    Polygon_2 hole = *it;
-    if (!hole.is_simple()) {
-      std::cout << "Hole is not simple" << std::endl;
-      print_polygon_nl(hole);
-      continue;
-    }
-    if (hole.orientation() == CGAL::Sign::NEGATIVE) {
-      hole.reverse_orientation();
-    }
-    holes.push_back(hole);
-  }
-
-  General_polygon_set_2 boundaries;
-
-  Polygon_with_holes_2 inset_boundary =
-      CGAL::minkowski_sum_2(insetting_boundary, shape);
-
-  // We just extract the holes, which are the inset boundary.
-  for (auto hole = inset_boundary.holes_begin();
-       hole != inset_boundary.holes_end(); ++hole) {
-    if (!hole->is_simple()) {
-      std::cout << "fitPolygon: hole is not simple" << std::endl;
-      print_polygon_nl(*hole);
-      continue;
-    }
-    if (hole->orientation() == CGAL::Sign::NEGATIVE) {
-      Polygon_2 boundary = *hole;
-      boundary.reverse_orientation();
-      boundaries.join(General_polygon_set_2(boundary));
-    } else {
-      boundaries.join(General_polygon_set_2(*hole));
-    }
-  }
-
-  for (const auto& hole : holes) {
-    Polygon_with_holes_2 offset_hole = CGAL::minkowski_sum_2(hole, shape);
-    boundaries.difference(General_polygon_set_2(offset_hole));
-  }
-
-  std::vector<Polygon_with_holes_2> polygons;
-  boundaries.polygons_with_holes(std::back_inserter(polygons));
-
-  std::vector<Point_2> points;
-  for (const auto& polygon : polygons) {
-    points.insert(std::end(points), polygon.outer_boundary().vertices_begin(),
-                  polygon.outer_boundary().vertices_end());
-    for (const auto& point : polygon.outer_boundary()) {
-      points.push_back(point);
-    }
-    for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
-         ++hole) {
-      points.insert(std::end(points), hole->vertices_begin(),
-                    hole->vertices_end());
-    }
-  }
-
-  // Just pick the first point for now.
-
-  picked = points[0];
-
-  return true;
-}
-#endif
-
 #include "transform_util.h"
 
 static void Polygon_2__add(Polygon_2* polygon, double x, double y) {

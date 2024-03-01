@@ -190,12 +190,6 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
                             /*is_visited=*/false,
                             /*weight=*/0};
           }
-#if 0
-          std::cout << "Cell " << std::get<0>(coord) << ","
-                    << std::get<1>(coord) << "," << std::get<2>(coord)
-                    << " hf=" << has_fill << " ip=" << is_protected
-                    << " mc=" << may_cut << std::endl;
-#endif
         }
       }
     }
@@ -236,13 +230,7 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
         }
       }
     }
-// std::cout << "TC: size=" << tool_coords.size() << std::endl;
-#if 0
-    for (const Coord& coord : tool_coords) {
-      std::cout << "TC/coord: " << std::get<0>(coord) << ","
-                << std::get<1>(coord) << "," << std::get<2>(coord) << std::endl;
-    }
-#endif
+    // std::cout << "TC: size=" << tool_coords.size() << std::endl;
   }
 
   auto ComputeCellCost = [&](const Cell& cell, double& cost) -> bool {
@@ -290,10 +278,6 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
     auto PickCutCell = [&](Cell* last_cell, Coord coord, double& next_cost,
                            Cell*& next_cell) {
       Cell* cell;
-#if 0
-      std::cout << "PCC coord=" << std::get<0>(coord) << ","
-                << std::get<1>(coord) << "," << std::get<2>(coord) << std::endl;
-#endif
       if (!GetCell(coord, cell) || cell->is_visited) {
         std::cout << "PCC/v" << std::endl;
         // There's no new cell to visit here.
@@ -329,20 +313,10 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
     auto PickJumpCell = [&](Cell* current_cell, double& next_cost,
                             Cell*& next_cell) {
       for (auto& [coord, cell] : rough) {
-#if 0
-        std::cout << "PJC coord=" << std::get<0>(cell.coord) << ","
-                  << std::get<1>(cell.coord) << "," << std::get<2>(cell.coord)
-                  << std::endl;
-#endif
         if (cell.is_visited) {
           // std::cout << "PJC/v" << std::endl;
           continue;
         }
-#if 0
-        if (!IsCellEligible(cell)) {
-          continue;
-        }
-#endif
         double cost = kJumpBaseCost;
         if (!ComputeCellCost(cell, cost)) {
           // std::cout << "PJC/c" << std::endl;

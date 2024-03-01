@@ -64,23 +64,6 @@ static int Reconstruct(Geometry* geometry, double offset) {
             // A centroid and corners are sufficient for reconstruction.
             // Presumably the three midpoints of the centroid and each corner
             // would also work.
-#if 0
-            points.emplace_back(center, plane.orthogonal_vector(),
-                                plane_index);
-            point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(a)).transform(tx),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(b)).transform(tx),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(c)).transform(tx),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
-#else
             // Let's try a tight cluster at the center of the face.
             points.emplace_back(center, plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
@@ -92,7 +75,6 @@ static int Reconstruct(Geometry* geometry, double offset) {
             points.emplace_back(center + (unitVector(plane.base2()) * 0.01),
                                 plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
-#endif
           }
 
           std::cout << "QQ/Reconstruct/3" << std::endl;

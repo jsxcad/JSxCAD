@@ -36,31 +36,6 @@ static int ComputeSkeleton(Geometry* geometry) {
                         to_epeck(skeleton[target(e, skeleton)].point)));
           }
         }
-#if 0
-      // FIX: Seems to be an issue with FPU rounding mode.
-      case GEOMETRY_POLYGONS_WITH_HOLES: {
-        int segments = geometry->add(GEOMETRY_SEGMENTS);
-        geometry->copyTransform(segments, geometry->transform(nth));
-        for (const Polygon_with_holes_2& epeck_polygon : geometry->pwh(nth)) {
-          std::vector<CGAL::Polygon_with_holes_2<Cartesian_kernel>>
-              cartesian_polygons;
-          convert(epeck_polygon, cartesian_polygons);
-          for (const auto& cartesian_polygon : cartesian_polygons) {
-            auto skeleton = CGAL::create_interior_straight_skeleton_2(
-                cartesian_polygon, Cartesian_kernel());
-            for (auto edge = skeleton->halfedges_begin();
-                 edge != skeleton->halfedges_end(); ++edge) {
-              // Note: We will get both directions.
-              const auto& s = edge->vertex()->point();
-              const auto& t = edge->opposite()->vertex()->point();
-              geometry->addSegment(segments, Segment(Point(s.x(), s.y(), 0),
-                                                     Point(t.x(), t.y(), 0)));
-            }
-          }
-        }
-        break;
-      }
-#endif
       }
     }
     geometry->transformToLocalFrame();
