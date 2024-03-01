@@ -2,7 +2,109 @@
 
 #include "cgal.h"
 
+using emscripten::base;
+using emscripten::select_overload;
+
+namespace emscripten {
+namespace internal {
+template <>
+void raw_destructor<Surface_mesh>(Surface_mesh* ptr) {
+  std::cout << "QQ/Destroying Surface_mesh" << std::endl;
+  delete ptr;
+}
+
+template <>
+void raw_destructor<Transformation>(Transformation* ptr) {
+  std::cout << "QQ/Destroying Transformation" << std::endl;
+  delete ptr;
+}
+}  //  namespace internal
+}  //  namespace emscripten
+
 namespace wrapped {
+class EmGeometry : public Geometry {
+ public:
+  EmGeometry() : Geometry() {}
+
+  // using ::Geometry::addInputPoint;
+  // using ::Geometry::addInputPointExact;
+  // using ::Geometry::addInputSegment;
+  // using ::Geometry::addInputSegmentExact;
+  // using ::Geometry::convertPlanarMeshesToPolygons;
+  // using ::Geometry::convertPolygonsToPlanarMeshes;
+  // using ::Geometry::copyInputMeshesToOutputMeshes;
+  // using ::Geometry::deserializeInputMesh;
+  // // using ::Geometry::emitEdges;
+  // // using ::Geometry::emitPoints;
+  // // using ::Geometry::emitPolygonsWithHoles;
+  // // using ::Geometry::emitSegments;
+  // // using ::Geometry::fillPolygonsWithHoles;
+  // using ::Geometry::getInputMesh;
+  // using ::Geometry::getMesh;
+  // using ::Geometry::getOrigin;
+  // using ::Geometry::getSerializedInputMesh;
+  // using ::Geometry::getSize;
+  // using ::Geometry::getTransform;
+  // using ::Geometry::getType;
+  // using ::Geometry::has_mesh;
+  // using ::Geometry::setInputMesh;
+  // using ::Geometry::setSize;
+  // using ::Geometry::setTestMode;
+  // using ::Geometry::setTransform;
+  // using ::Geometry::setType;
+  // using ::Geometry::transformToAbsoluteFrame;
+
+  void emFillPolygonsWithHoles(int nth, emscripten::val fillPlane,
+                               emscripten::val fillBoundary,
+                               emscripten::val fillHole) {
+    fillPolygonsWithHoles(
+        nth, [&](Quadruple* q) -> bool { return fillPlane(q).as<bool>(); },
+        [&](Polygon_2* boundary) { return fillBoundary(boundary); },
+        [&](Polygon_2* hole, int nth) { return fillHole(hole, nth); });
+  }  // namespace wrapped
+
+  void emEmitPolygonsWithHoles(int nth, emscripten::val emit_plane,
+                               emscripten::val emit_polygon,
+                               emscripten::val emit_point) {
+    emitPolygonsWithHoles(
+        nth,
+        [&](double a, double b, double c, double d, const std::string& e,
+            const std::string& f, const std::string& g,
+            const std::string& h) { emit_plane(a, b, c, d, e, f, g, h); },
+        [&](bool b) { emit_polygon(b); },
+        [&](double x, double y, const std::string& ex, const std::string& ey) {
+          emit_point(x, y, ex, ey);
+        });
+  }
+
+  void emEmitSegments(int nth, emscripten::val emit) {
+    emitSegments(nth, [&](double sx, double sy, double sz, double tx, double ty,
+                          double tz, const std::string& exact) {
+      emit(sx, sy, sz, tx, ty, tz, exact);
+    });
+  }
+
+  void emEmitEdges(int nth, emscripten::val emit) {
+    emitEdges(nth, [&](double sx, double sy, double sz, double tx, double ty,
+                       double tz, double nx, double ny, double nz, int face_id,
+                       const std::string& exact) {
+      emit(sx, sy, sz, tx, ty, tz, nx, ny, nz, exact);
+    });
+  }
+
+  void emEmitPoints(int nth, emscripten::val emit_point) {
+    emitPoints(nth,
+               [&](double x, double y, double z, const std::string& exact) {
+                 emit_point(x, y, z, exact);
+               });
+  }
+};
+
+void Transformation__to_exact(std::shared_ptr<const Transformation> t,
+                              emscripten::val put) {
+  ::Transformation__to_exact(t, [&](const std::string& str) { put(str); });
+}
+
 int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
   return ::ComputeBoundingBox(
       geometry,
@@ -89,7 +191,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        &Transformation__from_exact);
   emscripten::function("Transformation__to_approximate",
                        &Transformation__to_approximate);
-  emscripten::function("Transformation__to_exact", &Transformation__to_exact);
+  emscripten::function("Transformation__to_exact",
+                       &wrapped::Transformation__to_exact);
   emscripten::function("Transformation__translate", &Transformation__translate);
   emscripten::function("Transformation__scale", &Transformation__scale);
   emscripten::function(
@@ -188,11 +291,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("copyInputMeshesToOutputMeshes",
                 &Geometry::copyInputMeshesToOutputMeshes)
       .function("deserializeInputMesh", &Geometry::deserializeInputMesh)
-      .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
-      .function("emitPoints", &Geometry::emitPoints)
-      .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
-      .function("emitEdges", &Geometry::emitEdges)
-      .function("emitSegments", &Geometry::emitSegments)
       .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
       .function("getOrigin", &Geometry::getOrigin)
@@ -210,16 +308,27 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("transformToAbsoluteFrame",
                 &Geometry::transformToAbsoluteFrame);
 
+  emscripten::class_<wrapped::EmGeometry, base<Geometry>>("EmGeometry")
+      .constructor<>()
+      .function("fillPolygonsWithHoles",
+                &wrapped::EmGeometry::emFillPolygonsWithHoles)
+      .function("emitPoints", &wrapped::EmGeometry::emEmitPoints)
+      .function("emitPolygonsWithHoles",
+                &wrapped::EmGeometry::emEmitPolygonsWithHoles)
+      .function("emitEdges", &wrapped::EmGeometry::emEmitEdges)
+      .function("emitSegments", &wrapped::EmGeometry::emEmitSegments);
+
+#if 0
   emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
       .constructor<>()
       .function("addGeometry", &AabbTreeQuery::addGeometry,
                 emscripten::allow_raw_pointers())
-      .function("intersectSegmentApproximate",
-                &AabbTreeQuery::intersectSegmentApproximate)
+      .function("intersectSegmentApproximate", &AabbTreeQuery::intersectSegmentApproximate)
       .function("isIntersectingPointApproximate",
                 &AabbTreeQuery::isIntersectingPointApproximate)
       .function("isIntersectingSegmentApproximate",
                 &AabbTreeQuery::isIntersectingSegmentApproximate);
+#endif
 
   // New primitives
   emscripten::function("Approximate", &Approximate,

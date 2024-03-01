@@ -179,7 +179,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
 };
 
 export const toCgalGeometry = (inputs, g = getCgal()) => {
-  const cgalGeometry = new (g.Geometry)();
+  const cgalGeometry = new (g.EmGeometry)();
   fillCgalGeometry(cgalGeometry, inputs);
   return cgalGeometry;
 };

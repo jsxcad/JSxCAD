@@ -27,7 +27,6 @@ int Reconstruct(Geometry* geometry, double offset) {
 
           using Traits = CGAL::Shape_detection::Efficient_RANSAC_traits<
               Epick_kernel, Point_vector, Point_map, Normal_map>;
-          using Plane_map = CGAL::Shape_detection::Plane_map<Traits>;
 
           const Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
           Point_vector points;
@@ -101,10 +100,7 @@ int Reconstruct(Geometry* geometry, double offset) {
 
           std::cout << "QQ/Reconstruct/3" << std::endl;
 
-          Plane_map plane_map;
           Point_map point_map;
-          Normal_map normal_map;
-          // Face_index_map face_index_map;
 
           struct Plane_range
               : public CGAL::Iterator_range<
@@ -139,7 +135,6 @@ int Reconstruct(Geometry* geometry, double offset) {
           // regularize_planes does not move the points, so we need to do this
           // ourselves.
           std::unordered_map<Epick_plane, int> regulated_plane_index;
-          int next_regulated_plane_id = 0;
           for (auto& [point, normal, plane_id] : points) {
             const auto& plane = planes[plane_id];
             const auto& regulated_plane = regulated_planes[plane_id];

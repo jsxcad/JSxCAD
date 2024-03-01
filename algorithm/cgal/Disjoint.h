@@ -134,14 +134,14 @@ int disjointBackward(Geometry* geometry,
         // TODO: Support disjunction by volumes, segments, polygons.
         break;
       }
-      case GEOMETRY_REFERENCE:
-      case GEOMETRY_EMPTY: {
-        break;
-      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Disjoint at " << start << std::endl;
         return STATUS_INVALID_INPUT;
       }
+      case GEOMETRY_REFERENCE:
+      case GEOMETRY_EDGES:
+      case GEOMETRY_EMPTY:
+        break;
     }
   }
 

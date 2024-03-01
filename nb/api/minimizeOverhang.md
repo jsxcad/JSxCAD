@@ -13,12 +13,20 @@ Otherwise arranges a shape to minimize overhangs one in direction, without cross
 
 Note: This is experimental and may change.
 
-```JavaScript
-ArcX(5, 5, [-5], 'split').join(Box(5, 5, 5)).minimizeOverhang().view()
-  .note('ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang()');
-```
+![Image](minimizeOverhang.md.$2.png)
+
+ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang('split')
 
 ```JavaScript
-ArcX(5, 5, [-5], 'split').join(Box(5, 5, 5)).minimizeOverhang().cutOut(XY(), rx(0), rx(1 / 2)).pack().view()
+ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang('split').view()
+  .note(`ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang('split')`);
+```
+
+![Image](minimizeOverhang.md.$3.png)
+
+ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang().cutOut(XY(), rx(0), rx(1 / 2)).pack()
+
+```JavaScript
+ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang().cutOut(XY(), rx(0), rx(1 / 2)).pack().view()
   .note('ArcX(5, 5, [-5]).join(Box(5, 5, 5)).minimizeOverhang().cutOut(XY(), rx(0), rx(1 / 2)).pack()');
 ```

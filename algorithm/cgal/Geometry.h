@@ -30,18 +30,6 @@ class DN {
   int key_;
 };
 
-#ifdef ENABLE_OCCT
-class TopoDS_Shape;
-std::shared_ptr<const TopoDS_Shape> DeserializeOcctShape(
-    std::string serialization);
-std::string SerializeOcctShape(std::shared_ptr<const TopoDS_Shape>& shape);
-void buildSurfaceMeshFromOcctShape(const TopoDS_Shape& shape,
-                                   double deflection_tolerance,
-                                   Surface_mesh& mesh);
-std::shared_ptr<const TopoDS_Shape> transformOcctShape(
-    const Transformation& t, const TopoDS_Shape& shape);
-#endif
-
 class Geometry {
  public:
   Geometry() : test_mode_(false), size_(0), is_absolute_frame_(false) {}
@@ -65,9 +53,6 @@ class Geometry {
     bbox2_.clear();
     bbox3_.clear();
     origin_.clear();
-#ifdef ENABLE_OCCT
-    occt_shape_.clear();
-#endif
     resize(size);
   }
 
@@ -97,9 +82,6 @@ class Geometry {
     bbox2_.resize(size);
     bbox3_.resize(size);
     origin_.resize(size, -1);
-#ifdef ENABLE_OCCT
-    occt_shape_.resize(size);
-#endif
   }
 
   GeometryType& type(int nth) { return types_[nth]; }
@@ -141,47 +123,18 @@ class Geometry {
 
   bool has_input_mesh(int nth) { return input_meshes_[nth] != nullptr; }
 
-  const Surface_mesh& input_mesh(int nth) {
-#ifdef ENABLE_OCCT
-    if (!has_input_mesh(nth) && has_occt_shape(nth)) {
-      Surface_mesh mesh;
-      buildSurfaceMeshFromOcctShape(occt_shape(nth), /*tolerance=*/0.01, mesh);
-      input_meshes_[nth] =
-          std::shared_ptr<const Surface_mesh>(new Surface_mesh(mesh));
-    }
-#endif
-    return *input_meshes_[nth];
-  }
+  const Surface_mesh& input_mesh(int nth) { return *input_meshes_[nth]; }
 
   bool has_mesh(int nth) { return meshes_[nth] != nullptr; }
 
   Surface_mesh& mesh(int nth) {
     if (!has_mesh(nth)) {
       meshes_[nth].reset(new Surface_mesh);
-#ifdef ENABLE_OCCT
-      if (has_occt_shape(nth)) {
-        // TODO: Pick a better default tolerance.
-        buildSurfaceMeshFromOcctShape(occt_shape(nth), /*tolerance=*/0.01,
-                                      *meshes_[nth]);
-      }
-#endif
     }
     return *meshes_[nth];
   }
 
   void discard_mesh(int nth) { meshes_[nth].reset(); }
-
-#ifdef ENABLE_OCCT
-  bool has_occt_shape(int nth) { return occt_shape_[nth] != nullptr; }
-#else
-  bool has_occt_shape(int nth) { return false; }
-#endif
-
-#ifdef ENABLE_OCCT
-  const TopoDS_Shape& occt_shape(int nth) { return *occt_shape_[nth]; }
-
-  void discard_occt_shape(int nth) { occt_shape_[nth].reset(); }
-#endif
 
   bool has_epick_mesh(int nth) { return epick_meshes_[nth] != nullptr; }
 
@@ -365,20 +318,6 @@ class Geometry {
     }
   }
 
-#ifdef ENABLE_OCCT
-  void setOcctShape(int nth, const std::shared_ptr<const TopoDS_Shape>& shape) {
-    occt_shape_[nth] = shape;
-  }
-
-  const std::shared_ptr<const TopoDS_Shape> getOcctShape(int nth) {
-    return occt_shape_[nth];
-  }
-
-  void deserializeOcctShape(int nth, const std::string& serialization) {
-    occt_shape_[nth] = DeserializeOcctShape(serialization);
-  }
-#endif
-
   void setTestMode(bool mode) { test_mode_ = mode; }
 
   const std::shared_ptr<const Surface_mesh> getInputMesh(int nth) {
@@ -388,12 +327,6 @@ class Geometry {
   void deserializeInputMesh(int nth, const std::string& serialization) {
     input_meshes_[nth] = DeserializeMesh(serialization);
   }
-
-#ifdef ENABLE_OCCT
-  std::string getSerializedOcctShape(int nth) {
-    return SerializeOcctShape(occt_shape_[nth]);
-  }
-#endif
 
   void deserializeMesh(int nth, const std::string& serialization) {
     meshes_[nth] = DeserializeMesh(serialization);
@@ -419,14 +352,15 @@ class Geometry {
     return meshes_[nth];
   }
 
-  void fillPolygonsWithHoles(int nth, emscripten::val fillPlane,
-                             emscripten::val fillBoundary,
-                             emscripten::val fillHole) {
+  void fillPolygonsWithHoles(
+      int nth, const std::function<bool(Quadruple*)>& fillPlane,
+      const std::function<void(Polygon_2* boundary)>& fill_boundary,
+      const std::function<void(Polygon_2* hole, int nth)>& fill_hole) {
     assert(is_local_frame());
     Plane local_plane;
     admitPlane(local_plane, fillPlane);
     Polygons_with_holes_2 polygons;
-    admitPolygonsWithHoles(polygons, fillBoundary, fillHole);
+    admitPolygonsWithHoles(polygons, fill_boundary, fill_hole);
     plane(nth) = unitPlane<Kernel>(local_plane);
     pwh(nth) = std::move(polygons);
   }
@@ -467,12 +401,17 @@ class Geometry {
     }
   }
 
-  void emitPolygonsWithHoles(int nth, emscripten::val emit_plane,
-                             emscripten::val emit_polygon,
-                             emscripten::val emit_point) {
+  void emitPolygonsWithHoles(
+      int nth,
+      const std::function<void(double a, double b, double c, double d,
+                               const std::string& e, const std::string& f,
+                               const std::string& g, const std::string& h)>&
+          emit_plane,
+      const std::function<void(bool)>& emit_polygon,
+      const std::function<void(double x, double y, const std::string& ex,
+                               const std::string& ey)>& emit_point) {
     assert(is_local_frame());
     emitPlane(plane(nth), emit_plane);
-    // emitPlane(Plane(0, 0, 1, 0), emit_plane);
     ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
   }
 
@@ -503,7 +442,10 @@ class Geometry {
     segments(nth).push_back(segment);
   }
 
-  void emitSegments(int nth, emscripten::val emit) {
+  void emitSegments(int nth,
+                    const std::function<void(double sx, double sy, double sz,
+                                             double tx, double ty, double tz,
+                                             const std::string& exact)>& emit) {
     if (!has_segments(nth)) {
       return;
     }
@@ -520,7 +462,11 @@ class Geometry {
 
   void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
 
-  void emitEdges(int nth, emscripten::val emit) {
+  void emitEdges(int nth,
+                 const std::function<void(double sx, double sy, double sz,
+                                          double tx, double ty, double tz,
+                                          double nx, double ny, double nz, int,
+                                          const std::string& exact)>& emit) {
     if (!has_edges(nth)) {
       return;
     }
@@ -543,7 +489,10 @@ class Geometry {
 
   void addPoint(int nth, Point point) { points(nth).push_back(point); }
 
-  void emitPoints(int nth, emscripten::val emit_point) {
+  void emitPoints(
+      int nth,
+      const std::function<void(double x, double y, double z,
+                               const std::string& exact)>& emit_point) {
     for (const Point& point : points(nth)) {
       emitPoint(point, emit_point);
     }
@@ -609,12 +558,6 @@ class Geometry {
             CGAL::Polygon_mesh_processing::transform(
                 transform(nth), mesh(nth), CGAL::parameters::all_default());
           }
-#ifdef ENABLE_OCCT
-          if (has_occt_shape(nth)) {
-            setOcctShape(nth,
-                         transformOcctShape(transform(nth), occt_shape(nth)));
-          }
-#endif
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -657,12 +600,6 @@ class Geometry {
                 transform(nth).inverse(), mesh(nth),
                 CGAL::parameters::all_default());
           }
-#ifdef ENABLE_OCCT
-          if (has_occt_shape(nth)) {
-            setOcctShape(nth, transformOcctShape(transform(nth).inverse(),
-                                                 occt_shape(nth)));
-          }
-#endif
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -697,7 +634,7 @@ class Geometry {
 
   void removeEmptyMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {
-      if (is_mesh(nth) && is_empty_mesh(nth) && !has_occt_shape(nth)) {
+      if (is_mesh(nth) && is_empty_mesh(nth)) {
         setType(nth, GEOMETRY_EMPTY);
       }
     }
@@ -785,7 +722,4 @@ class Geometry {
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
-#ifdef ENABLE_OCCT
-  std::vector<std::shared_ptr<const TopoDS_Shape>> occt_shape_;
-#endif
 };

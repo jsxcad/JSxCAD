@@ -1,7 +1,3 @@
-#ifdef ENABLE_OCCT
-#include "BRepAlgoAPI_Common.hxx"
-#endif
-
 int Clip(Geometry* geometry, int targets, bool open, bool exact) {
   try {
     size_t size = geometry->size();
@@ -17,25 +13,10 @@ int Clip(Geometry* geometry, int targets, bool open, bool exact) {
     for (int target = 0; target < targets; target++) {
       switch (geometry->type(target)) {
         case GEOMETRY_MESH: {
-          if (geometry->is_empty_mesh(target) &&
-              !geometry->has_occt_shape(target)) {
+          if (geometry->is_empty_mesh(target)) {
             continue;
           }
           for (int nth = targets; nth < size; nth++) {
-#ifdef ENABLE_OCCT
-            if (geometry->has_occt_shape(target) &&
-                geometry->has_occt_shape(nth)) {
-              // Occt vs Occt cut.
-              BRepAlgoAPI_Common common(geometry->occt_shape(target),
-                                        geometry->occt_shape(nth));
-              common.Build();
-              geometry->setOcctShape(target,
-                                     std::shared_ptr<const TopoDS_Shape>(
-                                         new TopoDS_Shape(common.Shape())));
-              geometry->discard_mesh(target);
-              continue;
-            }
-#endif
             if (geometry->is_reference(nth)) {
               Plane plane(0, 0, 1, 0);
               plane = plane.transform(geometry->transform(nth));
@@ -162,16 +143,14 @@ int Clip(Geometry* geometry, int targets, bool open, bool exact) {
           geometry->points(target).swap(in);
           break;
         }
-        case GEOMETRY_REFERENCE: {
-          break;
-        }
-        case GEOMETRY_EMPTY: {
-          break;
-        }
         case GEOMETRY_UNKNOWN: {
           std::cout << "Unknown type for Clip at " << target << std::endl;
           return STATUS_INVALID_INPUT;
         }
+        case GEOMETRY_EDGES:
+        case GEOMETRY_REFERENCE:
+        case GEOMETRY_EMPTY:
+          break;
       }
     }
 

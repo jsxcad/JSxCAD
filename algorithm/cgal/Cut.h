@@ -1,8 +1,3 @@
-#ifdef ENABLE_OCCT
-#include "BRepAlgoAPI_Cut.hxx"
-#include "BRepCheck_Analyzer.hxx"
-#endif
-
 int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -16,39 +11,11 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
-        if (geometry->is_empty_mesh(target) &&
-            !geometry->has_occt_shape(target)) {
+        if (geometry->is_empty_mesh(target)) {
           // Nothing to cut.
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
-#ifdef ENABLE_OCCT
-          if (geometry->has_occt_shape(target) &&
-              geometry->has_occt_shape(nth)) {
-            // Occt vs Occt cut.
-            BRepCheck_Analyzer target_checker(geometry->occt_shape(target));
-            if (!target_checker.IsValid()) {
-              std::cout << "QQ/shape/target: invalid" << std::endl;
-            }
-            BRepCheck_Analyzer nth_checker(geometry->occt_shape(nth));
-            if (!nth_checker.IsValid()) {
-              std::cout << "QQ/shape/nth: invalid" << std::endl;
-            }
-            BRepAlgoAPI_Cut cut(geometry->occt_shape(target),
-                                geometry->occt_shape(nth));
-            cut.Build();
-            if (!cut.IsDone()) {
-              cut.DumpErrors(std::cout);
-              continue;
-            }
-            const TopoDS_Shape shape = cut.Shape();
-            const TopoDS_Shape* indirect = new TopoDS_Shape(shape);
-            std::shared_ptr<const TopoDS_Shape> shared(indirect);
-            geometry->setOcctShape(target, shared);
-            geometry->discard_mesh(target);
-            continue;
-          }
-#endif
           if (geometry->is_reference(nth)) {
             Plane plane(0, 0, 1, 0);
             plane = plane.transform(geometry->transform(nth));
@@ -166,14 +133,14 @@ int Cut(Geometry* geometry, int targets, bool open, bool exact) {
         geometry->points(target).swap(in);
         break;
       }
-      case GEOMETRY_REFERENCE:
-      case GEOMETRY_EMPTY: {
-        break;
-      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Cut at " << target << std::endl;
         return STATUS_INVALID_INPUT;
       }
+      case GEOMETRY_REFERENCE:
+      case GEOMETRY_EDGES:
+      case GEOMETRY_EMPTY:
+        break;
     }
   }
 

@@ -82,6 +82,7 @@ class SurfaceMeshQuery {
     return (*inside_tester_)(point) == CGAL::ON_UNBOUNDED_SIDE;
   }
 
+#if 0
   void intersectSegmentApproximate(bool do_clip, double source_x,
                                    double source_y, double source_z,
                                    double target_x, double target_y,
@@ -101,6 +102,7 @@ class SurfaceMeshQuery {
     };
     intersectSegment(do_clip, segment, emit);
   }
+#endif
 
   bool isIntersectingSegmentApproximate(double sx, double sy, double sz,
                                         double tx, double ty, double tz) {
@@ -208,6 +210,7 @@ class SurfaceMeshQuery {
   bool is_volume_;
 };
 
+#if 0
 class AabbTreeQuery {
  public:
   AabbTreeQuery() {}
@@ -258,6 +261,7 @@ class AabbTreeQuery {
     return false;
   }
 
+#if 0
   void intersectSegmentApproximate(bool do_clip, double source_x,
                                    double source_y, double source_z,
                                    double target_x, double target_y,
@@ -277,6 +281,7 @@ class AabbTreeQuery {
     };
     intersectSegment(do_clip, segment, emit);
   }
+#endif
 
   void intersectSegment(bool do_clip, const Segment& segment,
                         std::function<void(const Segment&)> emit) {
@@ -291,3 +296,4 @@ class AabbTreeQuery {
  private:
   std::vector<std::unique_ptr<SurfaceMeshQuery>> surface_mesh_query_;
 };
+#endif

@@ -152,7 +152,6 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
           Location location{x, y, z};
 
           bool has_fill = false;
-          const bool is_cut = false;
           bool is_protected = false;
           bool may_cut = true;
           CGAL::Bbox_3 bit(x - resolution / 2 + 0.1, y - resolution / 2 + 0.1,
@@ -287,7 +286,6 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
   // TODO: Apply a more sensible annealing strategy.
   while (annealing > annealing_min) {
     annealing_iteration += 1;
-    Cell* last_cell = nullptr;
     Cell* current_cell = nullptr;
     auto PickCutCell = [&](Cell* last_cell, Coord coord, double& next_cost,
                            Cell*& next_cell) {
@@ -439,7 +437,6 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
       if (IsCellEligible(*cell)) {
         std::cout << "QQ/Cut cell remains eligible!" << std::endl;
       }
-      last_cell = current_cell;
       current_cell = cell;
     }
     std::cout << "total_cost: " << total_cost

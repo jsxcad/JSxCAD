@@ -19,8 +19,9 @@ std::shared_ptr<const Transformation> Transformation__inverse(
       new Transformation(a->inverse()));
 }
 
-void Transformation__to_exact(std::shared_ptr<const Transformation> t,
-                              emscripten::val put) {
+void Transformation__to_exact(
+    std::shared_ptr<const Transformation> t,
+    const std::function<void(const std::string& str)>& put) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) {
       auto value = t->cartesian(i, j).exact();

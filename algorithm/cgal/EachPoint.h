@@ -22,7 +22,6 @@ int EachPoint(Geometry* geometry,
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           const Plane& plane = geometry->plane(nth);
-          const Transformation& transform = geometry->transform(nth);
           for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
             for (const Point_2 point : polygon.outer_boundary()) {
               emitPoint(plane.to_3d(point), emit_point);

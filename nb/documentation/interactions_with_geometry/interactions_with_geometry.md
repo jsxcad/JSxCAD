@@ -401,10 +401,6 @@ Box(4).as('box').and(Arc(5).ez([10]).as('bar')).abstract();
 ### Voxels
 We can convert a volume into voxels at a given resolution.
 
-![Image](interactions_with_geometry.md.$52.png)
-
-Produce a voxel representation with a 1mm resolution
-
 ```JavaScript
 Box(11)
   .ez([10])

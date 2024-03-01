@@ -51,7 +51,8 @@ void emitPoint(Point p, const emit& emit_point) {
              CGAL::to_double(p.z().exact()), exact.str());
 }
 
-void emitPoint2(Point_2 p, emscripten::val emit_point) {
+template <typename Emitter>
+void emitPoint2(Point_2 p, Emitter emit_point) {
   std::ostringstream x;
   x << p.x().exact();
   std::string xs = x.str();
@@ -62,7 +63,8 @@ void emitPoint2(Point_2 p, emscripten::val emit_point) {
              ys);
 }
 
-void emitNthPoint(int nth, Point p, emscripten::val emit_point) {
+template <typename Emitter>
+void emitNthPoint(int nth, Point p, Emitter emit_point) {
   std::ostringstream x;
   x << p.x().exact();
   std::string xs = x.str();

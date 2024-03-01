@@ -2,9 +2,6 @@
 
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
-// Still cannot work around the memory access errors with occt.
-// #define ENABLE_OCCT
-
 #define CGAL_EIGEN3_ENABLED
 
 // These are added to make Deform work.
@@ -105,7 +102,6 @@
 #include <CGAL/offset_polygon_2.h>
 #include <CGAL/perturb_mesh_3.h>
 #include <CGAL/simplest_rational_in_interval.h>
-#include <emscripten/bind.h>
 
 #include <array>
 #include <boost/algorithm/string.hpp>
@@ -690,17 +686,19 @@ void fillExactQuadruple(Quadruple* q, const std::string& a,
   (*q)[3] = to_FT(d);
 }
 
-void admitPlane(Plane& plane, emscripten::val fill_plane) {
+void admitPlane(Plane& plane,
+                const std::function<bool(Quadruple*)>& fill_plane) {
   Quadruple q;
   Quadruple* qp = &q;
   fill_plane(qp);
   plane = Plane(q[0], q[1], q[2], q[3]);
 }
 
-bool didAdmitPlane(Plane& plane, emscripten::val fill_plane) {
+bool didAdmitPlane(Plane& plane,
+                   const std::function<bool(Quadruple*)>& fill_plane) {
   Quadruple q;
   Quadruple* qp = &q;
-  bool result = fill_plane(qp).as<bool>();
+  bool result = fill_plane(qp);
   if (result) {
     plane = Plane(q[0], q[1], q[2], q[3]);
     return true;
@@ -756,10 +754,10 @@ Segment& findLargestSegment(std::vector<Segment>& segments) {
   return *largest_segment;
 }
 
-bool admitVector(Vector& vector, emscripten::val fill_vector) {
+bool admitVector(Vector& vector,
+                 const std::function<bool(Quadruple*)>& fill_vector) {
   Quadruple q;
-  Quadruple* qp = &q;
-  if (fill_vector(qp).as<bool>()) {
+  if (fill_vector(&q)) {
     vector = Vector(q[0], q[1], q[2]);
     return true;
   }
@@ -1120,7 +1118,6 @@ void PlanarSurfaceMeshToPolygonsWithHoles(
     std::vector<Polygon_with_holes_2>& polygons) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
-  typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
 
   Arrangement_with_regions_2 arrangement;
 
@@ -1154,7 +1151,6 @@ void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
                                          General_polygon_set_2& set) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
-  typedef CGAL::Arrangement_2<Traits_2> Arrangement_2;
 
   std::set<std::vector<Kernel::FT>> segments;
 
@@ -1397,9 +1393,11 @@ bool pointOnPerimeterPosition(const Polygon_2& polygon, double perimeter_length,
 }
 
 template <typename P>
-bool emitPolygonsWithHoles(const std::vector<P>& polygons,
-                           emscripten::val& emit_polygon,
-                           emscripten::val& emit_point) {
+bool emitPolygonsWithHoles(
+    const std::vector<P>& polygons,
+    const std::function<void(bool)>& emit_polygon,
+    const std::function<void(double, double, const std::string&,
+                             const std::string&)>& emit_point) {
   bool emitted = false;
   for (const P& polygon : polygons) {
     const auto& outer = polygon.outer_boundary();
@@ -1431,8 +1429,9 @@ bool emitPolygonsWithHoles(const std::vector<P>& polygons,
 }
 
 template <typename P>
-bool admitPolygonWithHoles(P& pwhs, emscripten::val fill_boundary,
-                           emscripten::val fill_hole) {
+bool admitPolygonWithHoles(P& pwhs,
+                           std::function<void(Polygon_2*)>& fill_boundary,
+                           std::function<void(Polygon_2*, int)>& fill_hole) {
   Polygon_2 boundary;
   Polygon_2* boundary_ptr = &boundary;
   fill_boundary(boundary_ptr);
@@ -1455,9 +1454,9 @@ bool admitPolygonWithHoles(P& pwhs, emscripten::val fill_boundary,
   return true;
 }
 
-template <typename P>
-void admitPolygonsWithHoles(P& pwhs, emscripten::val fill_boundary,
-                            emscripten::val fill_hole) {
+template <typename P, typename FillBoundary, typename FillHole>
+void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
+                            FillHole fill_hole) {
   for (;;) {
     if (!admitPolygonWithHoles(pwhs, fill_boundary, fill_hole)) {
       return;
@@ -1465,7 +1464,12 @@ void admitPolygonsWithHoles(P& pwhs, emscripten::val fill_boundary,
   }
 }
 
-void emitPlane(const Plane& plane, emscripten::val& emit_plane) {
+void emitPlane(
+    const Plane& plane,
+    const std::function<void(double a, double b, double c, double d,
+                             const std::string& e, const std::string& f,
+                             const std::string& g, const std::string& h)>&
+        emit_plane) {
   const auto a = plane.a().exact();
   const auto b = plane.b().exact();
   const auto c = plane.c().exact();
@@ -1859,9 +1863,6 @@ std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
 }
 
 #include "Geometry.h"
-#ifdef ENABLE_OCCT
-#include "occt_util.h"
-#endif
 #include "queries.h"
 
 void intersect_segment_with_volume(const Segment& segment, AABB_tree& tree,
@@ -2111,11 +2112,6 @@ bool computeFitPolygon(const Polygon_with_holes_2& space,
   return true;
 }
 
-// void DeleteSurfaceMesh(const Surface_mesh* input) { delete input; }
-
-// FT get_double(emscripten::val get) { return to_FT(get().as<double>()); }
-// FT get_string(emscripten::val get) { return to_FT(get().as<std::string>()); }
-
 #include "transform_util.h"
 
 void Polygon_2__add(Polygon_2* polygon, double x, double y) {
@@ -2126,22 +2122,3 @@ void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
                          const std::string& y) {
   polygon->push_back(Point_2(to_FT(x), to_FT(y)));
 }
-
-using emscripten::select_const;
-using emscripten::select_overload;
-
-namespace emscripten {
-namespace internal {
-template <>
-void raw_destructor<Surface_mesh>(Surface_mesh* ptr) {
-  std::cout << "QQ/Destroying Surface_mesh" << std::endl;
-  delete ptr;
-}
-
-template <>
-void raw_destructor<Transformation>(Transformation* ptr) {
-  std::cout << "QQ/Destroying Transformation" << std::endl;
-  delete ptr;
-}
-}  // namespace internal
-}  // namespace emscripten
