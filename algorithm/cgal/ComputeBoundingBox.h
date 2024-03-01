@@ -1,6 +1,7 @@
-int ComputeBoundingBox(Geometry* geometry,
-                       const std::function<void(double, double, double, double,
-                                                double, double)>& emit) {
+static int ComputeBoundingBox(
+    Geometry* geometry,
+    const std::function<void(double, double, double, double, double, double)>&
+        emit) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();

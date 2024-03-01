@@ -9,7 +9,7 @@
 
 // Simulates running a vertically oriented router along each segment.
 
-int Route(Geometry* geometry, int tool_count) {
+static int Route(Geometry* geometry, int tool_count) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();

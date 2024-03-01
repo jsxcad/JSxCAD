@@ -1,4 +1,4 @@
-int Cut(Geometry* geometry, int targets, bool open, bool exact) {
+static int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();

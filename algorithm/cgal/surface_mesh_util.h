@@ -1,11 +1,11 @@
 #pragma once
 
 template <typename Kernel, typename Surface_mesh>
-void prepare_selection(Surface_mesh& mesh,
-                       std::vector<const Surface_mesh*>& selections,
-                       std::set<Face_index>& unconstrained_faces,
-                       std::set<Vertex_index>& constrained_vertices,
-                       std::set<Edge_index>& constrained_edges) {
+static void prepare_selection(Surface_mesh& mesh,
+                              std::vector<const Surface_mesh*>& selections,
+                              std::set<Face_index>& unconstrained_faces,
+                              std::set<Vertex_index>& constrained_vertices,
+                              std::set<Edge_index>& constrained_edges) {
   // Could these be unordered_set?
   std::set<Vertex_index> unconstrained_vertices;
   if (selections.size() > 0) {
@@ -63,8 +63,9 @@ void prepare_selection(Surface_mesh& mesh,
 }
 
 template <typename Kernel, typename Surface_mesh>
-void remesh(Surface_mesh& mesh, std::vector<const Surface_mesh*>& selections,
-            int iterations, int relaxation_steps, double target_edge_length) {
+static void remesh(Surface_mesh& mesh,
+                   std::vector<const Surface_mesh*>& selections, int iterations,
+                   int relaxation_steps, double target_edge_length) {
   std::set<Face_index> unconstrained_faces;
   std::set<Vertex_index> constrained_vertices;
   std::set<Edge_index> constrained_edges;
@@ -85,10 +86,10 @@ void remesh(Surface_mesh& mesh, std::vector<const Surface_mesh*>& selections,
           .number_of_relaxation_steps(relaxation_steps));
 }
 
-bool Surface_mesh__is_closed(const Surface_mesh* mesh) {
+static bool Surface_mesh__is_closed(const Surface_mesh* mesh) {
   return CGAL::is_closed(*mesh);
 }
 
-bool Surface_mesh__is_empty(const Surface_mesh* mesh) {
+static bool Surface_mesh__is_empty(const Surface_mesh* mesh) {
   return CGAL::is_empty(*mesh);
 }

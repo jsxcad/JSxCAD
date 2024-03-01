@@ -222,46 +222,49 @@ using CGAL::Kernel_traits;
 #include "hash_util.h"
 #include "manifold_util.h"
 
-void MakeDeterministic() {
+static void MakeDeterministic() {
   CGAL::get_default_random() = CGAL::Random(0);
   std::srand(0);
 }
 
-FT to_FT(const std::string& v) {
+static FT to_FT(const std::string& v) {
   std::istringstream i(v);
   FT ft;
   i >> ft;
   return ft;
 }
 
-FT to_FT(const double v) { return FT(v); }
+static FT to_FT(const double v) { return FT(v); }
 
 // These may need adjustment.
-FT compute_scaling_factor(double value) {
+static FT compute_scaling_factor(double value) {
   return CGAL::simplest_rational_in_interval<FT>(value * 0.999, value * 1.001);
 }
 
-FT compute_translation_offset(double value) {
+static FT compute_translation_offset(double value) {
   return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
-FT compute_approximate_point_value(double value, double tolerance = 0.001) {
+static FT compute_approximate_point_value(double value,
+                                          double tolerance = 0.001) {
   return CGAL::simplest_rational_in_interval<FT>(value - tolerance,
                                                  value + tolerance);
 }
 
-FT compute_approximate_point_value(FT ft) {
+static FT compute_approximate_point_value(FT ft) {
   const double value = CGAL::to_double(ft.exact());
   return CGAL::simplest_rational_in_interval<FT>(value - 0.001, value + 0.001);
 }
 
-Point_2 compute_approximate_point_2(Point_2 p2) {
+#if 0
+static Point_2 compute_approximate_point_2(Point_2 p2) {
   return Point_2(compute_approximate_point_value(p2.x()),
                  compute_approximate_point_value(p2.y()));
 }
+#endif
 
 template <typename RT>
-void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
+static void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
   // Convert angle to radians.
   double radians = turn * 2 * CGAL_PI;
   CGAL::rational_rotation_approximation(radians, sin_alpha, cos_alpha, w, RT(1),
@@ -269,7 +272,7 @@ void compute_turn(double turn, RT& sin_alpha, RT& cos_alpha, RT& w) {
 }
 
 template <typename Kernel>
-typename Kernel::Plane_3 unitPlane(const typename Kernel::Plane_3& p) {
+static typename Kernel::Plane_3 unitPlane(const typename Kernel::Plane_3& p) {
   typedef typename Kernel::Plane_3 Plane_3;
   typedef typename Kernel::Vector_3 Vector_3;
   Vector_3 normal = p.orthogonal_vector();
@@ -295,7 +298,7 @@ typename Kernel::Plane_3 unitPlane(const typename Kernel::Plane_3& p) {
 }
 
 template <typename Vector>
-Vector unitVector(const Vector& vector) {
+static Vector unitVector(const Vector& vector) {
   // We can handle the axis aligned planes exactly.
   if (vector.direction() == Vector(0, 0, 1).direction()) {
     return Vector(0, 0, 1);
@@ -318,7 +321,7 @@ Vector unitVector(const Vector& vector) {
 }
 
 template <typename Vector_2>
-Vector_2 unitVector2(const Vector_2& vector) {
+static Vector_2 unitVector2(const Vector_2& vector) {
   // We can handle the axis aligned planes exactly.
   if (vector.direction() == Vector_2(0, 1).direction()) {
     return Vector_2(0, 1);
@@ -336,7 +339,7 @@ Vector_2 unitVector2(const Vector_2& vector) {
   }
 }
 
-Transformation rotate_x_to_y0(const Vector& direction) {
+static Transformation rotate_x_to_y0(const Vector& direction) {
   FT sin_alpha, cos_alpha, w;
   CGAL::rational_rotation_approximation(direction.z(), direction.y(), sin_alpha,
                                         cos_alpha, w, RT(1), RT(1000));
@@ -344,7 +347,7 @@ Transformation rotate_x_to_y0(const Vector& direction) {
                         cos_alpha, 0, w);
 }
 
-Transformation rotate_y_to_x0(const Vector& direction) {
+static Transformation rotate_y_to_x0(const Vector& direction) {
   FT sin_alpha, cos_alpha, w;
   CGAL::rational_rotation_approximation(direction.z(), direction.x(), sin_alpha,
                                         cos_alpha, w, RT(1), RT(1000));
@@ -352,7 +355,7 @@ Transformation rotate_y_to_x0(const Vector& direction) {
                         cos_alpha, 0, w);
 }
 
-Transformation rotate_z_to_y0(const Vector& direction) {
+static Transformation rotate_z_to_y0(const Vector& direction) {
   FT sin_alpha, cos_alpha, w;
   CGAL::rational_rotation_approximation(direction.x(), direction.y(), sin_alpha,
                                         cos_alpha, w, RT(1), RT(1000));
@@ -360,7 +363,9 @@ Transformation rotate_z_to_y0(const Vector& direction) {
                         0, 0, w, 0, w);
 }
 
-void disorient_along_x(Vector source, Vector normal, Transformation& align) {
+#if 0
+static void disorient_along_x(Vector source, Vector normal,
+                              Transformation& align) {
   if (source.x() != 0 || source.y() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(source.x(), source.y(), sin_alpha,
@@ -395,8 +400,11 @@ void disorient_along_x(Vector source, Vector normal, Transformation& align) {
     align = rotation * align;
   }
 }
+#endif
 
-void reorient_along_x(Vector target, Vector normal, Transformation& align) {
+#if 0
+static void reorient_along_x(Vector target, Vector normal,
+                             Transformation& align) {
   if (normal.y() != 0) {
     RT sin_alpha, cos_alpha, w;
     CGAL::rational_rotation_approximation(-normal.y(), normal.z(), sin_alpha,
@@ -429,16 +437,20 @@ void reorient_along_x(Vector target, Vector normal, Transformation& align) {
     align = rotation * align;
   }
 }
+#endif
 
-Transformation orient_along_x(Vector source, Vector source_normal,
-                              Vector target, Vector target_normal) {
+#if 0
+static Transformation orient_along_x(Vector source, Vector source_normal,
+                                     Vector target, Vector target_normal) {
   Transformation transform(CGAL::IDENTITY);
   disorient_along_x(source, source_normal, transform);
   reorient_along_x(target, target_normal, transform);
   return transform;
 }
+#endif
 
-void disorient_along_z(Vector source, Vector normal, Transformation& align) {
+static void disorient_along_z(Vector source, Vector normal,
+                              Transformation& align) {
   if (source.y() != 0 || source.z() != 0) {
     Transformation rotation = rotate_x_to_y0(source);
     source = source.transform(rotation);
@@ -459,24 +471,27 @@ void disorient_along_z(Vector source, Vector normal, Transformation& align) {
   }
 }
 
-void reorient_along_z(Vector target, Vector normal, Transformation& align) {}
+#if 0
+static void reorient_along_z(Vector target, Vector normal,
+                             Transformation& align) {}
 
-Transformation orient_along_z(Vector source, Vector source_normal,
-                              Vector target, Vector target_normal) {
+static Transformation orient_along_z(Vector source, Vector source_normal,
+                                     Vector target, Vector target_normal) {
   Transformation transform(CGAL::IDENTITY);
   disorient_along_x(source, source_normal, transform);
   reorient_along_x(target, target_normal, transform);
   return transform;
 }
+#endif
 
-template <typename Vector>
+static template <typename Vector>
 CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Vector>::Kernel>
 translate(const Vector& vector) {
   return CGAL::Aff_transformation_3<
       typename CGAL::Kernel_traits<Vector>::Kernel>(CGAL::TRANSLATION, vector);
 }
 
-template <typename Point>
+static template <typename Point>
 CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Point>::Kernel>
 translate_to(const Point& point) {
   return CGAL::Aff_transformation_3<
@@ -484,7 +499,8 @@ translate_to(const Point& point) {
                                                    point - Point(0, 0, 0));
 }
 
-Transformation orient_plane(Plane source, Plane target) {
+#if 0
+static Transformation orient_plane(Plane source, Plane target) {
   Point_2 zero(0, 0);
   // Build a transform to get to this plane.
   Transformation rotation = orient_along_x(
@@ -495,8 +511,10 @@ Transformation orient_plane(Plane source, Plane target) {
   Transformation translation = translate(t - s);
   return translation * rotation;
 }
+#endif
 
-Transformation disorient_plane_along_x(Plane source) {
+#if 0
+static Transformation disorient_plane_along_x(Plane source) {
   Transformation transform(CGAL::IDENTITY);
   disorient_along_x(unitVector(source.orthogonal_vector()),
                     unitVector(source.base1()), transform);
@@ -506,8 +524,9 @@ Transformation disorient_plane_along_x(Plane source) {
   transform = transform * translate(Point(0, 0, 0) - s);
   return transform;
 }
+#endif
 
-Transformation disorient_plane_along_z(Plane source) {
+static Transformation disorient_plane_along_z(Plane source) {
   Transformation transform(CGAL::IDENTITY);
   disorient_along_z(unitVector(source.orthogonal_vector()),
                     unitVector(source.base1()), transform);
@@ -516,9 +535,9 @@ Transformation disorient_plane_along_z(Plane source) {
   return transform;
 }
 
-Transformation computeInverseSegmentTransform(const Point& start,
-                                              const Point& end,
-                                              const Vector& normal) {
+static Transformation computeInverseSegmentTransform(const Point& start,
+                                                     const Point& end,
+                                                     const Vector& normal) {
   Point zero(0, 0, 0);
   Transformation align(CGAL::IDENTITY);
   disorient_along_z(end - start, normal, align);
@@ -526,8 +545,8 @@ Transformation computeInverseSegmentTransform(const Point& start,
 }
 
 template <typename Surface_mesh, typename Face_index, typename Plane>
-void PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet,
-                             Plane& plane) {
+static void PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet,
+                                    Plane& plane) {
   const auto h = mesh.halfedge(facet);
   plane =
       Plane{mesh.point(mesh.source(h)), mesh.point(mesh.source(mesh.next(h))),
@@ -535,7 +554,7 @@ void PlaneOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet,
 }
 
 template <typename Plane, typename Surface_mesh>
-bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
+static bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
   for (const auto& facet : mesh.faces()) {
     PlaneOfSurfaceMeshFacet(mesh, facet, plane);
     return true;
@@ -544,32 +563,39 @@ bool SomePlaneOfSurfaceMesh(Plane& plane, const Surface_mesh& mesh) {
 }
 
 template <typename Surface_mesh, typename Vector>
-Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet) {
+static Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh,
+                                       Face_index facet) {
   const auto h = mesh.halfedge(facet);
   return CGAL::normal(mesh.point(mesh.source(h)),
                       mesh.point(mesh.source(mesh.next(h))),
                       mesh.point(mesh.source(mesh.next(mesh.next(h)))));
 }
 
-Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
+#if 0
+static Vector SomeNormalOfSurfaceMesh(const Surface_mesh& mesh) {
   for (const auto& facet : mesh.faces()) {
     return NormalOfSurfaceMeshFacet<Surface_mesh, Vector>(mesh, facet);
   }
   return CGAL::NULL_VECTOR;
 }
+#endif
 
 #include "convert.h"
 #include "polygon_util.h"
 #include "printing.h"
 
 template <typename Vector>
-Vector unitVector(const Vector& vector);
-Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh, Face_index facet);
+static Vector unitVector(const Vector& vector);
+
+#if 0
+static Vector NormalOfSurfaceMeshFacet(const Surface_mesh& mesh,
+                                       Face_index facet);
+#endif
 
 template <typename Surface_mesh, typename Vertex_point_map,
           typename Halfedge_index>
-bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
-                      const Halfedge_index e) {
+static bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
+                             const Halfedge_index e) {
   auto a = p[m.source(e)];
   auto b = p[m.target(e)];
   auto c = p[m.target(m.next(e))];
@@ -578,8 +604,10 @@ bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
 }
 
 template <typename Mesh, typename Vertex_point_map, typename Halfedge_index>
-bool is_sufficiently_coplanar_edge(const Mesh& m, const Vertex_point_map& p,
-                                   const Halfedge_index e, FT threshold) {
+static bool is_sufficiently_coplanar_edge(const Mesh& m,
+                                          const Vertex_point_map& p,
+                                          const Halfedge_index e,
+                                          FT threshold) {
   FT angle = CGAL::approximate_dihedral_angle(
       p[CGAL::target(opposite(e, m), m)], p[CGAL::target(e, m)],
       p[CGAL::target(CGAL::next(e, m), m)],
@@ -589,8 +617,9 @@ bool is_sufficiently_coplanar_edge(const Mesh& m, const Vertex_point_map& p,
 
 template <typename Surface_mesh, typename Vertex_point_map,
           typename Halfedge_index>
-bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
-                       const Halfedge_index e0, const Halfedge_index e1) {
+static bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
+                              const Halfedge_index e0,
+                              const Halfedge_index e1) {
   // Assume that e0 and e1 share the same source vertex.
   const auto& a = p[m.source(e0)];
   const auto& b = p[m.target(e0)];
@@ -600,8 +629,8 @@ bool is_collinear_edge(const Surface_mesh& m, const Vertex_point_map& p,
 
 template <typename Surface_mesh, typename Vertex_point_map,
           typename Halfedge_index>
-bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
-                     const Halfedge_index start) {
+static bool is_safe_to_move(const Surface_mesh& m, const Vertex_point_map& p,
+                            const Halfedge_index start) {
   for (Halfedge_index e = m.next_around_source(start); e != start;
        e = m.next_around_source(e)) {
     if (m.is_border(e) || m.is_border(m.opposite(e))) {
@@ -648,7 +677,7 @@ class Demesh_safe_placement {
 };
 
 template <typename Surface_mesh>
-void demesh(Surface_mesh& mesh) {
+static void demesh(Surface_mesh& mesh) {
   CGAL::Surface_mesh_simplification::Edge_count_stop_predicate<Surface_mesh>
       stop(0);
   Demesh_cost cost;
@@ -658,8 +687,8 @@ void demesh(Surface_mesh& mesh) {
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
 
-void addTriple(Triples* triples, double x, double y, double z,
-               double tolerance = 0) {
+static void addTriple(Triples* triples, double x, double y, double z,
+                      double tolerance = 0) {
   if (tolerance > 0) {
     FT exact_x = compute_approximate_point_value(x, tolerance);
     FT exact_y = compute_approximate_point_value(y, tolerance);
@@ -670,32 +699,34 @@ void addTriple(Triples* triples, double x, double y, double z,
   }
 }
 
-void fillQuadruple(Quadruple* q, double x, double y, double z, double w) {
+static void fillQuadruple(Quadruple* q, double x, double y, double z,
+                          double w) {
   (*q)[0] = to_FT(x);
   (*q)[1] = to_FT(y);
   (*q)[2] = to_FT(z);
   (*q)[3] = to_FT(w);
 }
 
-void fillExactQuadruple(Quadruple* q, const std::string& a,
-                        const std::string& b, const std::string& c,
-                        const std::string& d) {
+static void fillExactQuadruple(Quadruple* q, const std::string& a,
+                               const std::string& b, const std::string& c,
+                               const std::string& d) {
   (*q)[0] = to_FT(a);
   (*q)[1] = to_FT(b);
   (*q)[2] = to_FT(c);
   (*q)[3] = to_FT(d);
 }
 
-void admitPlane(Plane& plane,
-                const std::function<bool(Quadruple*)>& fill_plane) {
+static void admitPlane(Plane& plane,
+                       const std::function<bool(Quadruple*)>& fill_plane) {
   Quadruple q;
   Quadruple* qp = &q;
   fill_plane(qp);
   plane = Plane(q[0], q[1], q[2], q[3]);
 }
 
-bool didAdmitPlane(Plane& plane,
-                   const std::function<bool(Quadruple*)>& fill_plane) {
+#if 0
+static bool didAdmitPlane(Plane& plane,
+                          const std::function<bool(Quadruple*)>& fill_plane) {
   Quadruple q;
   Quadruple* qp = &q;
   bool result = fill_plane(qp);
@@ -706,6 +737,7 @@ bool didAdmitPlane(Plane& plane,
     return false;
   }
 }
+#endif
 
 template <typename MAP>
 struct Project {
@@ -720,8 +752,9 @@ struct Project {
   Vector vector;
 };
 
-bool findClosestPointOnSegment(const Point& point, const Segment& segment,
-                               Point& result) {
+#if 0
+static bool findClosestPointOnSegment(const Point& point,
+                                      const Segment& segment, Point& result) {
   Vector heading = segment.target() - segment.source();
   FT length2 = heading.squared_length();
   // This is imprecise, but will be precisely on the segment.
@@ -740,8 +773,10 @@ bool findClosestPointOnSegment(const Point& point, const Segment& segment,
   result = segment.source() + (heading * t);
   return true;
 };
+#endif
 
-Segment& findLargestSegment(std::vector<Segment>& segments) {
+#if 0
+static Segment& findLargestSegment(std::vector<Segment>& segments) {
   Segment* largest_segment = nullptr;
   FT largest_length2 = 0;
   for (Segment& segment : segments) {
@@ -753,9 +788,11 @@ Segment& findLargestSegment(std::vector<Segment>& segments) {
   }
   return *largest_segment;
 }
+#endif
 
-bool admitVector(Vector& vector,
-                 const std::function<bool(Quadruple*)>& fill_vector) {
+#if 0
+static bool admitVector(Vector& vector,
+                        const std::function<bool(Quadruple*)>& fill_vector) {
   Quadruple q;
   if (fill_vector(&q)) {
     vector = Vector(q[0], q[1], q[2]);
@@ -763,8 +800,9 @@ bool admitVector(Vector& vector,
   }
   return false;
 }
+#endif
 
-Vector estimateTriangleNormals(const std::vector<Triangle>& triangles) {
+static Vector estimateTriangleNormals(const std::vector<Triangle>& triangles) {
   Vector estimate(0, 0, 0);
   for (const Triangle& triangle : triangles) {
     estimate +=
@@ -774,7 +812,8 @@ Vector estimateTriangleNormals(const std::vector<Triangle>& triangles) {
   return estimate;
 }
 
-void computeCentroidOfSurfaceMesh(Point& centroid, const Surface_mesh& mesh) {
+static void computeCentroidOfSurfaceMesh(Point& centroid,
+                                         const Surface_mesh& mesh) {
   std::vector<Triangle> triangles;
   for (const auto& facet : mesh.faces()) {
     if (mesh.is_removed(facet)) {
@@ -789,8 +828,9 @@ void computeCentroidOfSurfaceMesh(Point& centroid, const Surface_mesh& mesh) {
                             CGAL::Dimension_tag<2>());
 }
 
-void computeCentroidOfPolygonsWithHoles(const Polygons_with_holes_2& polygons,
-                                        Point_2& centroid) {
+#if 0
+static void computeCentroidOfPolygonsWithHoles(
+    const Polygons_with_holes_2& polygons, Point_2& centroid) {
   std::vector<Triangle_2> triangles;
   std::vector<Polygon_2> facets;
   CGAL::Polygon_triangulation_decomposition_2<Kernel> convexifier;
@@ -803,8 +843,10 @@ void computeCentroidOfPolygonsWithHoles(const Polygons_with_holes_2& polygons,
   centroid = CGAL::centroid(triangles.begin(), triangles.end(),
                             CGAL::Dimension_tag<2>());
 }
+#endif
 
-void computeNormalOfSurfaceMesh(Vector& normal, const Surface_mesh& mesh) {
+static void computeNormalOfSurfaceMesh(Vector& normal,
+                                       const Surface_mesh& mesh) {
   std::vector<Triangle> triangles;
   for (const auto& facet : mesh.faces()) {
     if (mesh.is_removed(facet)) {
@@ -824,8 +866,8 @@ void computeNormalOfSurfaceMesh(Vector& normal, const Surface_mesh& mesh) {
   }
 }
 
-const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
-                                const Point& point) {
+static const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
+                                       const Point& point) {
   auto it = vertices.find(point);
   if (it == vertices.end()) {
     Vertex_index new_vertex = mesh.add_vertex(point);
@@ -835,7 +877,8 @@ const Vertex_index ensureVertex(Surface_mesh& mesh, Vertex_map& vertices,
   return it->second;
 }
 
-void removeCollinearPointsFromPolyline(Polyline& polyline) {
+#if 0
+static void removeCollinearPointsFromPolyline(Polyline& polyline) {
   size_t limit = polyline.size();
   for (size_t nth = 2; nth < limit;) {
     if (CGAL::collinear(polyline[nth - 2], polyline[nth - 1], polyline[nth])) {
@@ -846,10 +889,11 @@ void removeCollinearPointsFromPolyline(Polyline& polyline) {
     }
   }
 }
+#endif
 
 template <typename Arrangement_2>
-void analyzeCcb(typename Arrangement_2::Ccb_halfedge_circulator start,
-                size_t& region) {
+static void analyzeCcb(typename Arrangement_2::Ccb_halfedge_circulator start,
+                       size_t& region) {
   size_t base_region = region;
   typename Arrangement_2::Ccb_halfedge_circulator edge = start;
   std::map<typename Arrangement_2::Point_2,
@@ -876,7 +920,7 @@ void analyzeCcb(typename Arrangement_2::Ccb_halfedge_circulator start,
 }
 
 template <typename Arrangement_2>
-void printCcb(typename Arrangement_2::Ccb_halfedge_circulator start) {
+static void printCcb(typename Arrangement_2::Ccb_halfedge_circulator start) {
   typename Arrangement_2::Ccb_halfedge_circulator edge = start;
   do {
     std::cout << "p=" << edge->source()->point() << " r=" << edge->data()
@@ -885,7 +929,7 @@ void printCcb(typename Arrangement_2::Ccb_halfedge_circulator start) {
 }
 
 template <typename Arrangement_2>
-void analyzeArrangementRegions(Arrangement_2& arrangement) {
+static void analyzeArrangementRegions(Arrangement_2& arrangement) {
   // Region zero should cover the unbounded face.
   for (auto edge = arrangement.halfedges_begin();
        edge != arrangement.halfedges_end(); ++edge) {
@@ -906,7 +950,7 @@ void analyzeArrangementRegions(Arrangement_2& arrangement) {
 }
 
 template <typename Arrangement_2>
-bool convertArrangementToPolygonsWithHolesEvenOdd(
+static bool convertArrangementToPolygonsWithHolesEvenOdd(
     Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out,
     Segments& non_simple) {
   analyzeArrangementRegions(arrangement);
@@ -1031,7 +1075,7 @@ bool convertArrangementToPolygonsWithHolesEvenOdd(
 }
 
 template <typename Arrangement_2>
-bool convertArrangementToPolygonsWithHolesEvenOdd(
+static bool convertArrangementToPolygonsWithHolesEvenOdd(
     Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   Segments non_simple;
   return convertArrangementToPolygonsWithHolesEvenOdd(arrangement, out,
@@ -1040,7 +1084,7 @@ bool convertArrangementToPolygonsWithHolesEvenOdd(
 
 // FIX: handle holes properly.
 template <typename Arrangement_2>
-bool convertArrangementToPolygonsWithHolesNonZero(
+static bool convertArrangementToPolygonsWithHolesNonZero(
     Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out,
     Segments& non_simple) {
   analyzeArrangementRegions(arrangement);
@@ -1106,14 +1150,14 @@ bool convertArrangementToPolygonsWithHolesNonZero(
 }
 
 template <typename Arrangement_2>
-bool convertArrangementToPolygonsWithHolesNonZero(
+static bool convertArrangementToPolygonsWithHolesNonZero(
     Arrangement_2& arrangement, std::vector<Polygon_with_holes_2>& out) {
   Segments non_simple;
   return convertArrangementToPolygonsWithHolesNonZero(arrangement, out,
                                                       non_simple);
 }
 
-void PlanarSurfaceMeshToPolygonsWithHoles(
+static void PlanarSurfaceMeshToPolygonsWithHoles(
     const Plane& plane, const Surface_mesh& mesh,
     std::vector<Polygon_with_holes_2>& polygons) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
@@ -1136,19 +1180,22 @@ void PlanarSurfaceMeshToPolygonsWithHoles(
   convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
 }
 
-void PlanarSurfaceMeshToPolygonSet(const Plane& plane, const Surface_mesh& mesh,
-                                   General_polygon_set_2& set) {
+#if 0
+static void PlanarSurfaceMeshToPolygonSet(const Plane& plane,
+                                          const Surface_mesh& mesh,
+                                          General_polygon_set_2& set) {
   std::vector<Polygon_with_holes_2> polygons;
   PlanarSurfaceMeshToPolygonsWithHoles(plane, mesh, polygons);
   for (const auto& polygon : polygons) {
     set.join(polygon);
   }
 }
+#endif
 
 // This handles potentially overlapping facets.
-void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
-                                         const Surface_mesh& mesh,
-                                         General_polygon_set_2& set) {
+static void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
+                                                const Surface_mesh& mesh,
+                                                General_polygon_set_2& set) {
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
   typedef Traits_2::X_monotone_curve_2 Segment_2;
 
@@ -1178,7 +1225,7 @@ void PlanarSurfaceMeshFacetsToPolygonSet(const Plane& plane,
   }
 }
 
-bool IsPlanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
+static bool IsPlanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
   if (CGAL::is_closed(a)) return false;
   if (a.number_of_vertices() < 3) return false;
   if (!SomePlaneOfSurfaceMesh(plane, a)) return false;
@@ -1188,7 +1235,8 @@ bool IsPlanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
   return true;
 }
 
-bool IsCoplanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
+#if 0
+static bool IsCoplanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
   if (CGAL::is_closed(a)) return false;
   if (a.number_of_vertices() < 3) return false;
   for (const auto& vertex : a.vertices()) {
@@ -1196,15 +1244,17 @@ bool IsCoplanarSurfaceMesh(Plane& plane, const Surface_mesh& a) {
   }
   return true;
 }
+#endif
 
-Point to_3d(const Point_2& p2, const Transformation& transform) {
+#if 0
+static Point to_3d(const Point_2& p2, const Transformation& transform) {
   return Point(p2.x(), p2.y(), 0).transform(transform);
 }
+#endif
 
-bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
-                                    std::vector<Polygon_with_holes_2>& polygons,
-                                    Surface_mesh& result,
-                                    Vertex_map& vertex_map, bool flip = false) {
+static bool PolygonsWithHolesToSurfaceMesh(
+    const Plane& plane, std::vector<Polygon_with_holes_2>& polygons,
+    Surface_mesh& result, Vertex_map& vertex_map, bool flip = false) {
   CGAL::Polygon_triangulation_decomposition_2<Kernel> triangulator;
   for (const Polygon_with_holes_2& polygon : polygons) {
     std::vector<Polygon_2> facets;
@@ -1229,11 +1279,16 @@ bool PolygonsWithHolesToSurfaceMesh(const Plane& plane,
   return true;
 }
 
-FT max2(FT a, FT b) { return a > b ? a : b; }
+#if 0
+static FT max2(FT a, FT b) { return a > b ? a : b; }
+#endif
 
-FT max3(FT a, FT b, FT c) { return max2(a, max2(b, c)); }
+#if 0
+static FT max3(FT a, FT b, FT c) { return max2(a, max2(b, c)); }
+#endif
 
-FT computeDihedralDeviation(const Surface_mesh& mesh) {
+#if 0
+static FT computeDihedralDeviation(const Surface_mesh& mesh) {
   FT sum = 0;
   for (const Edge_index edge : edges(mesh)) {
     const Halfedge_index halfedge = mesh.halfedge(edge);
@@ -1249,17 +1304,18 @@ FT computeDihedralDeviation(const Surface_mesh& mesh) {
   }
   return sum;
 }
+#endif
 
-void PolygonToPolyline(const Plane& plane, const Polygon_2& polygon,
-                       Polyline& polyline) {
+static void PolygonToPolyline(const Plane& plane, const Polygon_2& polygon,
+                              Polyline& polyline) {
   for (const Point_2& p2 : polygon) {
     polyline.push_back(plane.to_3d(p2));
   }
 }
 
-double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
-                                           const Polyline& polyline_b,
-                                           size_t& offset_b) {
+static double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
+                                                  const Polyline& polyline_b,
+                                                  size_t& offset_b) {
   size_t size_b = polyline_b.size();
   double distance = std::numeric_limits<double>::infinity();
   offset_b = 0;
@@ -1275,11 +1331,12 @@ double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
   return distance;
 }
 
-double computeBestDistanceBetweenPolygons3(const Plane& plane_a,
-                                           const Polygon_2& polygon_a,
-                                           const Plane& plane_b,
-                                           const Polygon_2& polygon_b,
-                                           size_t& offset_b) {
+#if 0
+static double computeBestDistanceBetweenPolygons3(const Plane& plane_a,
+                                                  const Polygon_2& polygon_a,
+                                                  const Plane& plane_b,
+                                                  const Polygon_2& polygon_b,
+                                                  size_t& offset_b) {
   size_t size = polygon_a.size();
   double distance = std::numeric_limits<double>::infinity();
   offset_b = 0;
@@ -1297,11 +1354,13 @@ double computeBestDistanceBetweenPolygons3(const Plane& plane_a,
   }
   return distance;
 }
+#endif
 
+#if 0
 // Write a function to determine the closest alignment between two polygons in
 // two planes.
-void alignPolygons3(const Plane& plane_a, Polygon_2& polygon_a,
-                    const Plane& plane_b, Polygon_2& polygon_b) {
+static void alignPolygons3(const Plane& plane_a, Polygon_2& polygon_a,
+                           const Plane& plane_b, Polygon_2& polygon_b) {
   size_t offset_b;
   computeBestDistanceBetweenPolygons3(plane_a, polygon_a, plane_b, polygon_b,
                                       offset_b);
@@ -1310,9 +1369,10 @@ void alignPolygons3(const Plane& plane_a, Polygon_2& polygon_a,
                 polygon_b.end());
   }
 }
+#endif
 
 // Write a function to determine the closest alignment between two polyline.
-void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
+static void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
   size_t offset_b;
   computeBestDistanceBetweenPolylines(polyline_a, polyline_b, offset_b);
   if (offset_b != 0) {
@@ -1321,7 +1381,8 @@ void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
   }
 }
 
-void splitLongPolylineEdges(Polyline& polyline, FT threshold) {
+#if 0
+static void splitLongPolylineEdges(Polyline& polyline, FT threshold) {
   FT threshold2 = threshold * threshold;
   Polyline split;
   split.push_back(polyline.back());
@@ -1337,18 +1398,23 @@ void splitLongPolylineEdges(Polyline& polyline, FT threshold) {
   std::reverse(split.begin(), split.end());
   polyline = split;
 }
+#endif
 
-bool GeneralPolygonSetToSurfaceMesh(const Plane& plane,
-                                    General_polygon_set_2& set,
-                                    Surface_mesh& result,
-                                    Vertex_map& vertex_map, bool flip = false) {
+#if 0
+static bool GeneralPolygonSetToSurfaceMesh(const Plane& plane,
+                                           General_polygon_set_2& set,
+                                           Surface_mesh& result,
+                                           Vertex_map& vertex_map,
+                                           bool flip = false) {
   std::vector<Polygon_with_holes_2> polygons;
   set.polygons_with_holes(std::back_inserter(polygons));
   return PolygonsWithHolesToSurfaceMesh(plane, polygons, result, vertex_map,
                                         flip);
 }
+#endif
 
-double measurePerimeterOfPolygon2(
+#if 0
+static double measurePerimeterOfPolygon2(
     const Polygon_2& polygon,
     std::map<double, Point_2>& position_on_perimeter) {
   double traveled = 0;
@@ -1364,9 +1430,12 @@ double measurePerimeterOfPolygon2(
   }
   return traveled;
 }
+#endif
 
-bool pointOnPerimeterPosition(const Polygon_2& polygon, double perimeter_length,
-                              double fraction, Point_2& point) {
+#if 0
+static bool pointOnPerimeterPosition(const Polygon_2& polygon,
+                                     double perimeter_length, double fraction,
+                                     Point_2& point) {
   const double eps = 0.001;
   double traveled = 0;
   double target = fraction * perimeter_length;
@@ -1391,9 +1460,10 @@ bool pointOnPerimeterPosition(const Polygon_2& polygon, double perimeter_length,
   }
   return false;
 }
+#endif
 
 template <typename P>
-bool emitPolygonsWithHoles(
+static bool emitPolygonsWithHoles(
     const std::vector<P>& polygons,
     const std::function<void(bool)>& emit_polygon,
     const std::function<void(double, double, const std::string&,
@@ -1429,9 +1499,9 @@ bool emitPolygonsWithHoles(
 }
 
 template <typename P>
-bool admitPolygonWithHoles(P& pwhs,
-                           std::function<void(Polygon_2*)>& fill_boundary,
-                           std::function<void(Polygon_2*, int)>& fill_hole) {
+static bool admitPolygonWithHoles(
+    P& pwhs, std::function<void(Polygon_2*)>& fill_boundary,
+    std::function<void(Polygon_2*, int)>& fill_hole) {
   Polygon_2 boundary;
   Polygon_2* boundary_ptr = &boundary;
   fill_boundary(boundary_ptr);
@@ -1455,8 +1525,8 @@ bool admitPolygonWithHoles(P& pwhs,
 }
 
 template <typename P, typename FillBoundary, typename FillHole>
-void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
-                            FillHole fill_hole) {
+static void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
+                                   FillHole fill_hole) {
   for (;;) {
     if (!admitPolygonWithHoles(pwhs, fill_boundary, fill_hole)) {
       return;
@@ -1464,7 +1534,7 @@ void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
   }
 }
 
-void emitPlane(
+static static void emitPlane(
     const Plane& plane,
     const std::function<void(double a, double b, double c, double d,
                              const std::string& e, const std::string& f,
@@ -1495,7 +1565,7 @@ void emitPlane(
   emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
 }
 
-CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
+static CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
   CGAL::Bbox_2 bound;
   for (auto it = gps.arrangement().vertices_begin();
        it != gps.arrangement().vertices_end(); ++it) {
@@ -1508,7 +1578,7 @@ CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
   return bound;
 }
 
-void offsetOfPolygonWithHoles(
+static void offsetOfPolygonWithHoles(
     double initial, double step, double limit, int segments,
     const Polygon_with_holes_2& polygon,
     std::vector<Polygon_with_holes_2>& offset_polygons) {
@@ -1597,7 +1667,7 @@ void offsetOfPolygonWithHoles(
   }
 }
 
-void insetOfPolygonWithHoles(
+static void insetOfPolygonWithHoles(
     double initial, double step, double limit, int segments,
     const Polygon_with_holes_2& polygon,
     std::vector<Polygon_with_holes_2>& inset_polygons) {
@@ -1696,9 +1766,10 @@ void insetOfPolygonWithHoles(
 }
 
 template <typename Surface_mesh, typename Face_index, typename Plane>
-Plane ensureFacetPlane(const Surface_mesh& mesh,
-                       std::unordered_map<Face_index, Plane>& facet_to_plane,
-                       std::unordered_set<Plane>& planes, Face_index facet) {
+static Plane ensureFacetPlane(
+    const Surface_mesh& mesh,
+    std::unordered_map<Face_index, Plane>& facet_to_plane,
+    std::unordered_set<Plane>& planes, Face_index facet) {
   auto it = facet_to_plane.find(facet);
   if (it == facet_to_plane.end()) {
     Plane facet_plane;
@@ -1721,7 +1792,8 @@ Plane ensureFacetPlane(const Surface_mesh& mesh,
   }
 }
 
-void convertSurfaceMeshFacesToArrangements(
+#if 0
+static void convertSurfaceMeshFacesToArrangements(
     Surface_mesh& mesh, std::unordered_map<Plane, Arrangement_2>& arrangements,
     bool use_unit_planes = false) {
   std::unordered_set<Plane> planes;
@@ -1770,17 +1842,22 @@ void convertSurfaceMeshFacesToArrangements(
     } while (edge != start);
   }
 }
+#endif
 
-bool lt(int a, int b) { return a < b; }
+#if 0
+static bool lt(int a, int b) { return a < b; }
+#endif
 
-void check() {
+#if 0
+static void check() {
   int limit = 8;
   for (int a = 3; a < limit; a++) {
     assert(a < limit);
   }
 }
+#endif
 
-std::shared_ptr<Surface_mesh> DeserializeMesh(
+static std::shared_ptr<Surface_mesh> DeserializeMesh(
     const std::string& serialization) {
   Surface_mesh* mesh = new Surface_mesh();
   std::istringstream s(serialization);
@@ -1813,7 +1890,7 @@ std::shared_ptr<Surface_mesh> DeserializeMesh(
   return std::shared_ptr<Surface_mesh>(mesh);
 }
 
-std::string serializeMesh(const Surface_mesh& mesh) {
+static std::string serializeMesh(const Surface_mesh& mesh) {
   std::ostringstream s;
   size_t number_of_vertices = mesh.number_of_vertices();
   s << number_of_vertices << "\n";
@@ -1858,16 +1935,18 @@ std::string serializeMesh(const Surface_mesh& mesh) {
   return s.str();
 }
 
-std::string SerializeMesh(std::shared_ptr<const Surface_mesh> input_mesh) {
+static std::string SerializeMesh(
+    std::shared_ptr<const Surface_mesh> input_mesh) {
   return serializeMesh(*input_mesh);
 }
 
 #include "Geometry.h"
 #include "queries.h"
 
-void intersect_segment_with_volume(const Segment& segment, AABB_tree& tree,
-                                   Side_of_triangle_mesh& on_side, bool clip,
-                                   Segments& segments) {
+static void intersect_segment_with_volume(const Segment& segment,
+                                          AABB_tree& tree,
+                                          Side_of_triangle_mesh& on_side,
+                                          bool clip, Segments& segments) {
   const Point& source = segment.source();
   const Point& target = segment.target();
   std::list<Segment_intersection> intersections;
@@ -1909,27 +1988,27 @@ void intersect_segment_with_volume(const Segment& segment, AABB_tree& tree,
   }
 }
 
-void clip_segment_with_volume(const Segment& segment, AABB_tree& tree,
-                              Side_of_triangle_mesh& on_side,
-                              Segments& segments) {
+static void clip_segment_with_volume(const Segment& segment, AABB_tree& tree,
+                                     Side_of_triangle_mesh& on_side,
+                                     Segments& segments) {
   return intersect_segment_with_volume(segment, tree, on_side, true, segments);
 }
 
-void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
-                             Side_of_triangle_mesh& on_side,
-                             Segments& segments) {
+static void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
+                                    Side_of_triangle_mesh& on_side,
+                                    Segments& segments) {
   return intersect_segment_with_volume(segment, tree, on_side, false, segments);
 }
 
 template <typename Point>
-void unique_points(std::vector<Point>& points) {
+static void unique_points(std::vector<Point>& points) {
   // This won't make points unique, but should remove repeated points.
   points.erase(std::unique(points.begin(), points.end()), points.end());
 }
 
-bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
-                                           const Plane& plane,
-                                           Polygons_with_holes_2& pwhs) {
+static bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
+                                                  const Plane& plane,
+                                                  Polygons_with_holes_2& pwhs) {
   CGAL::Polygon_mesh_slicer<Surface_mesh, Kernel> slicer(mesh);
   Arrangement_with_regions_2 arrangement;
   Polylines polylines;
@@ -2018,12 +2097,14 @@ bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Validate.h"
 #include "Wrap.h"
 
-double FT__to_double(const FT& ft) { return CGAL::to_double(ft); }
+static double FT__to_double(const FT& ft) { return CGAL::to_double(ft); }
 
 #include "surface_mesh_util.h"
 
-bool computeFitPolygon(const Polygon_with_holes_2& space,
-                       const Polygon_with_holes_2& shape, Point_2& picked) {
+#if 0
+static bool computeFitPolygon(const Polygon_with_holes_2& space,
+                              const Polygon_with_holes_2& shape,
+                              Point_2& picked) {
   Polygon_with_holes_2 insetting_boundary;
 
   {
@@ -2111,14 +2192,15 @@ bool computeFitPolygon(const Polygon_with_holes_2& space,
 
   return true;
 }
+#endif
 
 #include "transform_util.h"
 
-void Polygon_2__add(Polygon_2* polygon, double x, double y) {
+static void Polygon_2__add(Polygon_2* polygon, double x, double y) {
   polygon->push_back(Point_2(x, y));
 }
 
-void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
-                         const std::string& y) {
+static void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
+                                const std::string& y) {
   polygon->push_back(Point_2(to_FT(x), to_FT(y)));
 }

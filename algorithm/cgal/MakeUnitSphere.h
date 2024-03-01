@@ -1,5 +1,5 @@
-int MakeUnitSphere(Geometry* geometry, double angularBound, double radiusBound,
-                   double distanceBound) {
+static int MakeUnitSphere(Geometry* geometry, double angularBound,
+                          double radiusBound, double distanceBound) {
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
   typedef Tr::Geom_traits GT;

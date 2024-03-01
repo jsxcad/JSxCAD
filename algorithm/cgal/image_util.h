@@ -12,7 +12,7 @@
 #include "CGAL/Polygon_mesh_processing/merge_border_vertices.h"
 
 template <typename Surface_mesh>
-bool build_surface_mesh_as_relief_from_graymap(
+static bool build_surface_mesh_as_relief_from_graymap(
     int x_max, int y_max, int z_max, unsigned char* data, double angular_bound,
     double radius_bound, double distance_bound, double error_bound,
     double max_height, Surface_mesh& mesh) {

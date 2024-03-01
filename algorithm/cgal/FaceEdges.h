@@ -1,7 +1,8 @@
 template <typename Triangle_mesh, typename Kernel>
-bool inside_any(const Segment& segment,
-                std::vector<CGAL::Side_of_triangle_mesh<Triangle_mesh, Kernel>>&
-                    selections) {
+static bool inside_any(
+    const Segment& segment,
+    std::vector<CGAL::Side_of_triangle_mesh<Triangle_mesh, Kernel>>&
+        selections) {
   for (const auto& selection : selections) {
     if (selection(segment.source()) != CGAL::ON_UNBOUNDED_SIDE &&
         selection(segment.target()) != CGAL::ON_UNBOUNDED_SIDE) {
@@ -11,7 +12,7 @@ bool inside_any(const Segment& segment,
   return false;
 }
 
-int FaceEdges(Geometry* geometry, int count) {
+static int FaceEdges(Geometry* geometry, int count) {
   int size = geometry->size();
 
   geometry->copyInputSegmentsToOutputSegments();

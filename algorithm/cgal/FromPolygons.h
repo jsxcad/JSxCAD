@@ -1,5 +1,5 @@
-int FromPolygons(Geometry* geometry, bool close,
-                 const std::function<void(Triples*, Polygons*)>& fill) {
+static int FromPolygons(Geometry* geometry, bool close,
+                        const std::function<void(Triples*, Polygons*)>& fill) {
   Triples triples;
   Polygons polygons;
   fill(&triples, &polygons);

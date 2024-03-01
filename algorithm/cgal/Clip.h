@@ -1,4 +1,4 @@
-int Clip(Geometry* geometry, int targets, bool open, bool exact) {
+static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
   try {
     size_t size = geometry->size();
 

@@ -1,4 +1,4 @@
-int ConvertPolygonsToMeshes(Geometry* geometry) {
+static int ConvertPolygonsToMeshes(Geometry* geometry) {
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
   geometry->transformToLocalFrame();

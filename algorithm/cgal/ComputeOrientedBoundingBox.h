@@ -2,7 +2,7 @@
 
 #include <CGAL/optimal_bounding_box.h>
 
-int ComputeOrientedBoundingBox(Geometry* geometry) {
+static int ComputeOrientedBoundingBox(Geometry* geometry) {
   size_t size = geometry->size();
 
   CGAL::Cartesian_converter<Kernel, Epick_kernel> to_epick;

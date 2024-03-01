@@ -1,4 +1,4 @@
-int Fix(Geometry* geometry, bool remove_self_intersections) {
+static int Fix(Geometry* geometry, bool remove_self_intersections) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   for (int nth = 0; nth < size; nth++) {

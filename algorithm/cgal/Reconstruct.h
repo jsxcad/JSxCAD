@@ -9,7 +9,7 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/property_map.h>
 
-int Reconstruct(Geometry* geometry, double offset) {
+static int Reconstruct(Geometry* geometry, double offset) {
   try {
     size_t size = geometry->size();
 
@@ -24,9 +24,6 @@ int Reconstruct(Geometry* geometry, double offset) {
           typedef CGAL::Nth_of_tuple_property_map<1, PNI> Normal_map;
           typedef CGAL::Nth_of_tuple_property_map<2, PNI> Plane_id_map;
           typedef std::vector<PNI> Point_vector;
-
-          using Traits = CGAL::Shape_detection::Efficient_RANSAC_traits<
-              Epick_kernel, Point_vector, Point_map, Normal_map>;
 
           const Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
           Point_vector points;

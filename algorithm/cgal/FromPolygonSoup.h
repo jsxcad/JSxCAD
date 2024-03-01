@@ -3,10 +3,10 @@
 #include "./approximate_util.h"
 #include "./repair_util.h"
 
-int FromPolygonSoup(Geometry* geometry,
-                    const std::function<void(Triples*, Polygons*)>& fill,
-                    size_t face_count, double min_error_drop,
-                    const std::function<int()>& get_next_strategy) {
+static int FromPolygonSoup(Geometry* geometry,
+                           const std::function<void(Triples*, Polygons*)>& fill,
+                           size_t face_count, double min_error_drop,
+                           const std::function<int()>& get_next_strategy) {
   std::vector<int> strategies;
 
   for (int strategy = get_next_strategy(); strategy != -1;

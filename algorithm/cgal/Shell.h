@@ -90,9 +90,9 @@ class Offset_function {
 
 }  // namespace
 
-int Shell(Geometry* geometry, double inner_offset, double outer_offset,
-          bool protect, double angle, double sizing, double approx,
-          double edge_size) {
+static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
+                 bool protect, double angle, double sizing, double approx,
+                 double edge_size) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();

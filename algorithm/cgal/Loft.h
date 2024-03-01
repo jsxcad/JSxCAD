@@ -137,8 +137,8 @@ struct Loft_weight_calculator {
   int bottom_end;
 };
 
-void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
-                          Polygons& polygons) {
+static void loftBetweenPolylines(Polyline& lower, Polyline& upper,
+                                 Points& points, Polygons& polygons) {
   alignPolylines3(lower, upper);
   Polyline joined;
   int bottom_start = joined.size();
@@ -180,8 +180,8 @@ void loftBetweenPolylines(Polyline& lower, Polyline& upper, Points& points,
   }
 }
 
-void buildMeshFromPolygons(Points& points, Polygons& polygons, bool close,
-                           Surface_mesh& mesh) {
+static void buildMeshFromPolygons(Points& points, Polygons& polygons,
+                                  bool close, Surface_mesh& mesh) {
   std::cout << "bMFP/1" << std::endl;
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       points, polygons, CGAL::parameters::all_default());
@@ -233,7 +233,7 @@ void buildMeshFromPolygons(Points& points, Polygons& polygons, bool close,
   }
 }
 
-int Loft(Geometry* geometry, bool close) {
+static int Loft(Geometry* geometry, bool close) {
   std::cout << "Loft/0" << std::endl;
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();

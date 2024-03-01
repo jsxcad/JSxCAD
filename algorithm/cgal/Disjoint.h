@@ -1,7 +1,7 @@
 // This tries to make the largest disjoints first.
-int disjointBackward(Geometry* geometry,
-                     const std::function<bool(int)>& get_is_masked,
-                     bool exact) {
+static int disjointBackward(Geometry* geometry,
+                            const std::function<bool(int)>& get_is_masked,
+                            bool exact) {
   int size = geometry->size();
 
   std::vector<bool> is_masked;
@@ -153,8 +153,9 @@ int disjointBackward(Geometry* geometry,
 }
 
 // This tries to make the smallest disjoints.
-int disjointForward(Geometry* geometry,
-                    const std::function<bool(int)>& get_is_masked, bool exact) {
+static int disjointForward(Geometry* geometry,
+                           const std::function<bool(int)>& get_is_masked,
+                           bool exact) {
   int size = geometry->size();
   if (size < 2) {
     // Already disjoint.
@@ -306,8 +307,9 @@ int disjointForward(Geometry* geometry,
   return STATUS_OK;
 }
 
-int Disjoint(Geometry* geometry, const std::function<bool(int)>& get_is_masked,
-             int mode, bool exact) {
+static int Disjoint(Geometry* geometry,
+                    const std::function<bool(int)>& get_is_masked, int mode,
+                    bool exact) {
   switch (mode == 0) {
     case 0:  // 50.58
       return disjointBackward(geometry, get_is_masked, exact);

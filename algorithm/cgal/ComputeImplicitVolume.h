@@ -1,4 +1,4 @@
-int ComputeImplicitVolume(
+static int ComputeImplicitVolume(
     Geometry* geometry, const std::function<double(double, double, double)>& op,
     double radius, double angular_bound, double radius_bound,
     double distance_bound, double error_bound) {

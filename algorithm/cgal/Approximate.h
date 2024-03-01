@@ -4,7 +4,8 @@
 
 #include "approximate_util.h"
 
-int Approximate(Geometry* geometry, size_t face_count, double min_error_drop) {
+static int Approximate(Geometry* geometry, size_t face_count,
+                       double min_error_drop) {
   try {
     int size = geometry->size();
     geometry->copyInputMeshesToOutputMeshes();

@@ -1,4 +1,4 @@
-double ComputeVolume(Geometry* geometry) {
+static double ComputeVolume(Geometry* geometry) {
   FT volume = 0;
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();

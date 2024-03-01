@@ -4,12 +4,12 @@
 
 #include "printing.h"
 
-void Polygon__push_back(Polygon* polygon, std::size_t index) {
+static void Polygon__push_back(Polygon* polygon, std::size_t index) {
   polygon->push_back(index);
 }
 
 template <typename Polygon_2, typename Segments>
-void polygonToSegments(Polygon_2& polygon, Segments& segments) {
+static void polygonToSegments(Polygon_2& polygon, Segments& segments) {
   Plane base(0, 0, 1, 0);
   for (size_t nth = 0, limit = polygon.size(); nth < limit; nth++) {
     const Point_2& a = polygon[nth];
@@ -18,7 +18,7 @@ void polygonToSegments(Polygon_2& polygon, Segments& segments) {
   }
 }
 
-void removeRepeatedPointsInPolygon(Polygon_2& polygon) {
+static void removeRepeatedPointsInPolygon(Polygon_2& polygon) {
   for (size_t nth = 0, limit = polygon.size(); nth < limit;) {
     const Point_2& a = polygon[nth];
     const Point_2& b = polygon[(nth + 1) % limit];
@@ -32,9 +32,9 @@ void removeRepeatedPointsInPolygon(Polygon_2& polygon) {
 }
 
 template <typename Polygon_2, typename Segments>
-void simplifyPolygon(Polygon_2& polygon,
-                     std::vector<Polygon_2>& simple_polygons,
-                     Segments& non_simple) {
+static void simplifyPolygon(Polygon_2& polygon,
+                            std::vector<Polygon_2>& simple_polygons,
+                            Segments& non_simple) {
   if (polygon.size() < 3) {
     polygonToSegments(polygon, non_simple);
     polygon.clear();
@@ -116,8 +116,8 @@ void simplifyPolygon(Polygon_2& polygon,
 }
 
 template <typename Polygon_2>
-void simplifyPolygon(Polygon_2& polygon,
-                     std::vector<Polygon_2>& simple_polygons) {
+static void simplifyPolygon(Polygon_2& polygon,
+                            std::vector<Polygon_2>& simple_polygons) {
   if (polygon.size() < 3) {
     polygon.clear();
     return;
@@ -196,7 +196,7 @@ void simplifyPolygon(Polygon_2& polygon,
 }
 
 template <typename Polygon_2, typename Polygons_with_holes_2>
-bool toPolygonsWithHolesFromBoundariesAndHoles(
+static bool toPolygonsWithHolesFromBoundariesAndHoles(
     std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
     Polygons_with_holes_2& pwhs) {
   for (auto& boundary : boundaries) {
@@ -236,7 +236,7 @@ bool toPolygonsWithHolesFromBoundariesAndHoles(
 }
 
 template <typename Polygon_2, typename Polygons_with_holes_2>
-bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
+static bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
     std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
     Polygons_with_holes_2& pwhs) {
   std::vector<Polygon_2> simple_boundaries;
@@ -252,7 +252,7 @@ bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
 }
 
 template <typename Polygon_2, typename Polygons_with_holes_2>
-bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
+static bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
     const std::vector<Polygon_2>& boundaries,
     const std::vector<Polygon_2>& holes, Polygons_with_holes_2& pwhs) {
   std::vector<Polygon_2> simple_boundaries;
@@ -270,8 +270,8 @@ bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
 }
 
 template <typename SK, typename DK>
-bool convert(const CGAL::Polygon_with_holes_2<SK>& src,
-             std::vector<CGAL::Polygon_with_holes_2<DK>>& dst) {
+static bool convert(const CGAL::Polygon_with_holes_2<SK>& src,
+                    std::vector<CGAL::Polygon_with_holes_2<DK>>& dst) {
   CGAL::Cartesian_converter<SK, DK> to;
   CGAL::Polygon_2<DK> dst_boundary;
   for (const auto& point : src.outer_boundary()) {

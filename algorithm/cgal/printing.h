@@ -1,7 +1,7 @@
 #pragma once
 
 template <class Kernel, class Container>
-void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
+static void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
   typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator vit;
   std::cout << std::setprecision(20) << "Polygon(";
   for (vit = P.vertices_begin(); vit != P.vertices_end(); ++vit) {
@@ -16,26 +16,28 @@ void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
 }
 
 template <class Kernel, class Container>
-void print_polygon_nl(const CGAL::Polygon_2<Kernel, Container>& P) {
+static void print_polygon_nl(const CGAL::Polygon_2<Kernel, Container>& P) {
   print_polygon(P);
   std::cout << std::endl;
 }
 
 template <class Kernel, class Container>
-void print_polygons(const std::vector<CGAL::Polygon_2<Kernel, Container>>& Ps) {
+static void print_polygons(
+    const std::vector<CGAL::Polygon_2<Kernel, Container>>& Ps) {
   for (const auto& P : Ps) {
     print_polygon(P);
   }
 }
 
 template <class Kernel, class Container>
-void print_polygons_nl(std::vector<CGAL::Polygon_2<Kernel, Container>>& P) {
+static void print_polygons_nl(
+    std::vector<CGAL::Polygon_2<Kernel, Container>>& P) {
   print_polygons(P);
   std::cout << std::endl;
 }
 
 template <class Kernel, class Container>
-void print_polygon_with_holes(
+static void print_polygon_with_holes(
     const CGAL::Polygon_with_holes_2<Kernel, Container>& pwh) {
   if (!pwh.is_unbounded()) {
     std::cout << "Polygon: ";
@@ -55,7 +57,7 @@ void print_polygon_with_holes(
 }
 
 template <class Kernel, class Container>
-void print_polygons_with_holes(
+static void print_polygons_with_holes(
     const std::vector<CGAL::Polygon_with_holes_2<Kernel, Container>>& pwhs) {
   for (const auto& pwh : pwhs) {
     print_polygon_with_holes(pwh);

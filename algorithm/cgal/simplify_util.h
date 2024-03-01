@@ -31,8 +31,8 @@ struct Constrained_edge_map {
   const CGAL::Unique_hash_map<key_type, bool>& mConstraints;
 };
 
-void simplify(double face_count, double sharp_edge_threshold,
-              Surface_mesh& epeck_mesh, Segments& sharp_edges) {
+static void simplify(double face_count, double sharp_edge_threshold,
+                     Surface_mesh& epeck_mesh, Segments& sharp_edges) {
   double sharp_edge_threshold_degrees = sharp_edge_threshold * 360;
   typedef Epick_kernel::Point_3 Point_3;
   typedef boost::graph_traits<Epick_surface_mesh>::edge_descriptor

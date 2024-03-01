@@ -1,4 +1,4 @@
-int ComputeCentroid(Geometry* geometry) {
+static int ComputeCentroid(Geometry* geometry) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();

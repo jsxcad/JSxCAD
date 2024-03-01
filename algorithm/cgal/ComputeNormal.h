@@ -1,4 +1,4 @@
-int ComputeNormal(Geometry* geometry) {
+static int ComputeNormal(Geometry* geometry) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();

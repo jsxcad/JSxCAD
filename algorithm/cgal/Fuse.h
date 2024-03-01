@@ -1,4 +1,4 @@
-int Fuse(Geometry* geometry, bool exact) {
+static int Fuse(Geometry* geometry, bool exact) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();

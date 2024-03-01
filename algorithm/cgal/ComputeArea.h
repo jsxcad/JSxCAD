@@ -1,4 +1,4 @@
-double ComputeArea(Geometry* geometry) {
+static double ComputeArea(Geometry* geometry) {
   FT area = 0;
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();

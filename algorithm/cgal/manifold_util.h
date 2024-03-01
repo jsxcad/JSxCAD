@@ -2,8 +2,8 @@
 
 #include "manifold.h"
 
-void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
-                                  manifold::Manifold& manifold) {
+static void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
+                                         manifold::Manifold& manifold) {
   if (surface_mesh.has_garbage()) {
     surface_mesh.collect_garbage();
   }

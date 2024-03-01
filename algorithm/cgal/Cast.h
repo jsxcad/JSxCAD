@@ -1,4 +1,4 @@
-int Cast(Geometry* geometry) {
+static int Cast(Geometry* geometry) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();

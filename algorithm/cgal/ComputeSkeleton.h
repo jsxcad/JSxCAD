@@ -9,7 +9,7 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/extract_mean_curvature_flow_skeleton.h>
 
-int ComputeSkeleton(Geometry* geometry) {
+static int ComputeSkeleton(Geometry* geometry) {
   try {
     size_t size = geometry->size();
     geometry->copyInputMeshesToOutputMeshes();

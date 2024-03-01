@@ -1,4 +1,4 @@
-int Link(Geometry* geometry, bool close, bool reverse) {
+static int Link(Geometry* geometry, bool close, bool reverse) {
   size_t size = geometry->size();
 
   geometry->copyInputSegmentsToOutputSegments();

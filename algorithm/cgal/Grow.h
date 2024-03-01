@@ -3,7 +3,7 @@
 #include "cgal.h"
 
 #if 0
-int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
+static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -87,7 +87,7 @@ int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   return STATUS_OK;
 }
 #else
-int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
+static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();

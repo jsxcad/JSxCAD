@@ -26,34 +26,6 @@ class EmGeometry : public Geometry {
  public:
   EmGeometry() : Geometry() {}
 
-  // using ::Geometry::addInputPoint;
-  // using ::Geometry::addInputPointExact;
-  // using ::Geometry::addInputSegment;
-  // using ::Geometry::addInputSegmentExact;
-  // using ::Geometry::convertPlanarMeshesToPolygons;
-  // using ::Geometry::convertPolygonsToPlanarMeshes;
-  // using ::Geometry::copyInputMeshesToOutputMeshes;
-  // using ::Geometry::deserializeInputMesh;
-  // // using ::Geometry::emitEdges;
-  // // using ::Geometry::emitPoints;
-  // // using ::Geometry::emitPolygonsWithHoles;
-  // // using ::Geometry::emitSegments;
-  // // using ::Geometry::fillPolygonsWithHoles;
-  // using ::Geometry::getInputMesh;
-  // using ::Geometry::getMesh;
-  // using ::Geometry::getOrigin;
-  // using ::Geometry::getSerializedInputMesh;
-  // using ::Geometry::getSize;
-  // using ::Geometry::getTransform;
-  // using ::Geometry::getType;
-  // using ::Geometry::has_mesh;
-  // using ::Geometry::setInputMesh;
-  // using ::Geometry::setSize;
-  // using ::Geometry::setTestMode;
-  // using ::Geometry::setTransform;
-  // using ::Geometry::setType;
-  // using ::Geometry::transformToAbsoluteFrame;
-
   void emFillPolygonsWithHoles(int nth, emscripten::val fillPlane,
                                emscripten::val fillBoundary,
                                emscripten::val fillHole) {
@@ -61,7 +33,7 @@ class EmGeometry : public Geometry {
         nth, [&](Quadruple* q) -> bool { return fillPlane(q).as<bool>(); },
         [&](Polygon_2* boundary) { return fillBoundary(boundary); },
         [&](Polygon_2* hole, int nth) { return fillHole(hole, nth); });
-  }  // namespace wrapped
+  }
 
   void emEmitPolygonsWithHoles(int nth, emscripten::val emit_plane,
                                emscripten::val emit_polygon,

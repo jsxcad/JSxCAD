@@ -1,4 +1,4 @@
-int EagerTransform(Geometry* geometry, int count) {
+static int EagerTransform(Geometry* geometry, int count) {
   try {
     geometry->copyInputMeshesToOutputMeshes();
     geometry->copyInputSegmentsToOutputSegments();

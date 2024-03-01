@@ -1,4 +1,4 @@
-int Fill(Geometry* geometry) {
+static int Fill(Geometry* geometry) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();

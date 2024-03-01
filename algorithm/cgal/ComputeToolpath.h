@@ -7,10 +7,10 @@
 
 // Note: this does not yet handle overlapping paths.
 
-int ComputeToolpath(Geometry* geometry, size_t material_start,
-                    double resolution, double tool_size, double tool_cut_depth,
-                    double annealing_max, double annealing_min,
-                    double annealing_decay) {
+static int ComputeToolpath(Geometry* geometry, size_t material_start,
+                           double resolution, double tool_size,
+                           double tool_cut_depth, double annealing_max,
+                           double annealing_min, double annealing_decay) {
   size_t size = geometry->size();
 
   double diameter = tool_size;

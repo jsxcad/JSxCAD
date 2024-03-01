@@ -1,4 +1,4 @@
-int Section(Geometry* geometry, int count) {
+static int Section(Geometry* geometry, int count) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();

@@ -2,8 +2,8 @@
 
 #include "validate_util.h"
 
-int Validate(Geometry* geometry,
-             const std::function<int()>& get_next_strategy) {
+static int Validate(Geometry* geometry,
+                    const std::function<int()>& get_next_strategy) {
   size_t size = geometry->getSize();
 
   std::vector<int> strategies;
