@@ -1,4 +1,4 @@
-int ConvexHull(Geometry* geometry) {
+static int ConvexHull(Geometry* geometry) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();

@@ -7,10 +7,10 @@
 
 // Note: this does not yet handle overlapping paths.
 
-int ComputeToolpath(Geometry* geometry, size_t material_start,
-                    double resolution, double tool_size, double tool_cut_depth,
-                    double annealing_max, double annealing_min,
-                    double annealing_decay) {
+static int ComputeToolpath(Geometry* geometry, size_t material_start,
+                           double resolution, double tool_size,
+                           double tool_cut_depth, double annealing_max,
+                           double annealing_min, double annealing_decay) {
   size_t size = geometry->size();
 
   double diameter = tool_size;
@@ -152,7 +152,6 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
           Location location{x, y, z};
 
           bool has_fill = false;
-          const bool is_cut = false;
           bool is_protected = false;
           bool may_cut = true;
           CGAL::Bbox_3 bit(x - resolution / 2 + 0.1, y - resolution / 2 + 0.1,
@@ -191,12 +190,6 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
                             /*is_visited=*/false,
                             /*weight=*/0};
           }
-#if 0
-          std::cout << "Cell " << std::get<0>(coord) << ","
-                    << std::get<1>(coord) << "," << std::get<2>(coord)
-                    << " hf=" << has_fill << " ip=" << is_protected
-                    << " mc=" << may_cut << std::endl;
-#endif
         }
       }
     }
@@ -237,13 +230,7 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
         }
       }
     }
-// std::cout << "TC: size=" << tool_coords.size() << std::endl;
-#if 0
-    for (const Coord& coord : tool_coords) {
-      std::cout << "TC/coord: " << std::get<0>(coord) << ","
-                << std::get<1>(coord) << "," << std::get<2>(coord) << std::endl;
-    }
-#endif
+    // std::cout << "TC: size=" << tool_coords.size() << std::endl;
   }
 
   auto ComputeCellCost = [&](const Cell& cell, double& cost) -> bool {
@@ -287,15 +274,10 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
   // TODO: Apply a more sensible annealing strategy.
   while (annealing > annealing_min) {
     annealing_iteration += 1;
-    Cell* last_cell = nullptr;
     Cell* current_cell = nullptr;
     auto PickCutCell = [&](Cell* last_cell, Coord coord, double& next_cost,
                            Cell*& next_cell) {
       Cell* cell;
-#if 0
-      std::cout << "PCC coord=" << std::get<0>(coord) << ","
-                << std::get<1>(coord) << "," << std::get<2>(coord) << std::endl;
-#endif
       if (!GetCell(coord, cell) || cell->is_visited) {
         std::cout << "PCC/v" << std::endl;
         // There's no new cell to visit here.
@@ -331,20 +313,10 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
     auto PickJumpCell = [&](Cell* current_cell, double& next_cost,
                             Cell*& next_cell) {
       for (auto& [coord, cell] : rough) {
-#if 0
-        std::cout << "PJC coord=" << std::get<0>(cell.coord) << ","
-                  << std::get<1>(cell.coord) << "," << std::get<2>(cell.coord)
-                  << std::endl;
-#endif
         if (cell.is_visited) {
           // std::cout << "PJC/v" << std::endl;
           continue;
         }
-#if 0
-        if (!IsCellEligible(cell)) {
-          continue;
-        }
-#endif
         double cost = kJumpBaseCost;
         if (!ComputeCellCost(cell, cost)) {
           // std::cout << "PJC/c" << std::endl;
@@ -439,7 +411,6 @@ int ComputeToolpath(Geometry* geometry, size_t material_start,
       if (IsCellEligible(*cell)) {
         std::cout << "QQ/Cut cell remains eligible!" << std::endl;
       }
-      last_cell = current_cell;
       current_cell = cell;
     }
     std::cout << "total_cost: " << total_cost

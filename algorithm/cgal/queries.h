@@ -82,26 +82,6 @@ class SurfaceMeshQuery {
     return (*inside_tester_)(point) == CGAL::ON_UNBOUNDED_SIDE;
   }
 
-  void intersectSegmentApproximate(bool do_clip, double source_x,
-                                   double source_y, double source_z,
-                                   double target_x, double target_y,
-                                   double target_z,
-                                   emscripten::val emit_segment) {
-    Segment segment(Point(source_x, source_y, source_z),
-                    Point(target_x, target_y, target_z));
-    auto emit = [&](Segment out) {
-      const Point& source = out.source();
-      const Point& target = out.target();
-      emit_segment(CGAL::to_double(source.x().exact()),
-                   CGAL::to_double(source.y().exact()),
-                   CGAL::to_double(source.z().exact()),
-                   CGAL::to_double(target.x().exact()),
-                   CGAL::to_double(target.y().exact()),
-                   CGAL::to_double(target.z().exact()));
-    };
-    intersectSegment(do_clip, segment, emit);
-  }
-
   bool isIntersectingSegmentApproximate(double sx, double sy, double sz,
                                         double tx, double ty, double tz) {
     return isIntersectingSegment(Segment(Point(sx, sy, sz), Point(tx, ty, tz)));
@@ -206,88 +186,4 @@ class SurfaceMeshQuery {
   std::unique_ptr<Tree> tree_;
   std::unique_ptr<Inside_tester> inside_tester_;
   bool is_volume_;
-};
-
-class AabbTreeQuery {
- public:
-  AabbTreeQuery() {}
-
-  void addGeometry(Geometry* geometry) {
-    int size = geometry->getSize();
-    surface_mesh_query_.resize(size);
-    for (int nth = 0; nth < size; nth++) {
-      switch (geometry->getType(nth)) {
-        case GEOMETRY_MESH: {
-          surface_mesh_query_[nth].reset(
-              new SurfaceMeshQuery(&geometry->mesh(nth)));
-        }
-      }
-    }
-  }
-
-  bool isIntersectingPointApproximate(double x, double y, double z) {
-    return isIntersectingPoint(Point(x, y, z));
-  }
-
-  bool isIntersectingPoint(const Point& point) {
-    for (const auto& query : surface_mesh_query_) {
-      if (query == nullptr) {
-        continue;
-      }
-      if (query->isIntersectingPoint(point)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool isIntersectingSegmentApproximate(double sx, double sy, double sz,
-                                        double tx, double ty, double tz) {
-    return isIntersectingSegment(Segment(Point(sx, sy, sz), Point(tx, ty, tz)));
-  }
-
-  bool isIntersectingSegment(const Segment& segment) {
-    for (const auto& query : surface_mesh_query_) {
-      if (query == nullptr) {
-        continue;
-      }
-      if (query->isIntersectingSegment(segment)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  void intersectSegmentApproximate(bool do_clip, double source_x,
-                                   double source_y, double source_z,
-                                   double target_x, double target_y,
-                                   double target_z,
-                                   emscripten::val emit_segment) {
-    Segment segment(Point(source_x, source_y, source_z),
-                    Point(target_x, target_y, target_z));
-    auto emit = [&](Segment out) {
-      const Point& source = out.source();
-      const Point& target = out.target();
-      emit_segment(CGAL::to_double(source.x().exact()),
-                   CGAL::to_double(source.y().exact()),
-                   CGAL::to_double(source.z().exact()),
-                   CGAL::to_double(target.x().exact()),
-                   CGAL::to_double(target.y().exact()),
-                   CGAL::to_double(target.z().exact()));
-    };
-    intersectSegment(do_clip, segment, emit);
-  }
-
-  void intersectSegment(bool do_clip, const Segment& segment,
-                        std::function<void(const Segment&)> emit) {
-    for (const auto& query : surface_mesh_query_) {
-      if (query == nullptr) {
-        continue;
-      }
-      query->intersectSegment(do_clip, segment, emit);
-    }
-  }
-
- private:
-  std::vector<std::unique_ptr<SurfaceMeshQuery>> surface_mesh_query_;
 };

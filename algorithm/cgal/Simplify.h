@@ -1,8 +1,8 @@
 #include "simplify_util.h"
 
-int Simplify(Geometry* geometry, double face_count, bool simplify_points,
-             double sharp_edge_threshold,
-             bool use_bounded_normal_change_filter = false) {
+static int Simplify(Geometry* geometry, double face_count, bool simplify_points,
+                    double sharp_edge_threshold,
+                    bool use_bounded_normal_change_filter = false) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();

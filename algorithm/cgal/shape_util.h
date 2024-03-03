@@ -3,7 +3,7 @@
 #include <CGAL/boost/graph/generators.h>
 
 template <typename Surface_mesh>
-int make_box_from_bbox_3(CGAL::bbox_3 b, Surface_mesh& mesh) {
+static int make_box_from_bbox_3(CGAL::bbox_3 b, Surface_mesh& mesh) {
   typedef Surface_mesh::Point P;
   make_hexahedron(P(b.xmin(), b.ymin(), b.zmin()),  // 0
                   P(b.xmax(), b.ymin(), b.zmin()),  // 1

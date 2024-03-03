@@ -1,7 +1,7 @@
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/minkowski_sum_3.h>
 
-int DilateXY(Geometry* geometry, double amount) {
+static int DilateXY(Geometry* geometry, double amount) {
   typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
 
   size_t size = geometry->getSize();

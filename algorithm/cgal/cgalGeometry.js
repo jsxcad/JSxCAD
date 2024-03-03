@@ -179,7 +179,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
 };
 
 export const toCgalGeometry = (inputs, g = getCgal()) => {
-  const cgalGeometry = new (g.Geometry)();
+  const cgalGeometry = new (g.EmGeometry)();
   fillCgalGeometry(cgalGeometry, inputs);
   return cgalGeometry;
 };
@@ -204,16 +204,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
             serializedSurfaceMesh = graph.serializedSurfaceMesh;
           } else {
             serializedSurfaceMesh = geometry.getSerializedMesh(nth);
-            update = true;
-          }
-        }
-        if (geometry.has_occt_shape(nth)) {
-          const oldOcctShape = occtShapeCache.get(graph);
-          newOcctShape = geometry.getOcctShape(nth);
-          if (newOcctShape === oldOcctShape) {
-            serializedOcctShape = graph.serializedOcctShape;
-          } else {
-            serializedOcctShape = geometry.getSerializedOcctShape(nth);
             update = true;
           }
         }

@@ -1,4 +1,4 @@
-int Bend(Geometry* geometry, double referenceRadius) {
+static int Bend(Geometry* geometry, double referenceRadius) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();

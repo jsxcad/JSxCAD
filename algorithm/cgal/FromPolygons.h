@@ -1,10 +1,8 @@
-int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
+static int FromPolygons(Geometry* geometry, bool close,
+                        const std::function<void(Triples*, Polygons*)>& fill) {
   Triples triples;
   Polygons polygons;
-  // Workaround for emscripten::val() bindings.
-  Triples* triples_ptr = &triples;
-  Polygons* polygons_ptr = &polygons;
-  fill(triples_ptr, polygons_ptr);
+  fill(&triples, &polygons);
   int target = geometry->add(GEOMETRY_MESH);
   Surface_mesh& mesh = geometry->mesh(target);
   geometry->setIdentityTransform(target);

@@ -7,7 +7,7 @@
 #include "wrap_util.h"
 
 template <typename Surface_mesh>
-int number_of_self_intersections(const Surface_mesh& mesh) {
+static int number_of_self_intersections(const Surface_mesh& mesh) {
   std::vector<std::pair<typename Surface_mesh::face_index,
                         typename Surface_mesh::face_index>>
       intersections;
@@ -17,7 +17,7 @@ int number_of_self_intersections(const Surface_mesh& mesh) {
 }
 
 template <typename Surface_mesh>
-int number_of_non_manifold_vertices(const Surface_mesh& mesh) {
+static int number_of_non_manifold_vertices(const Surface_mesh& mesh) {
   std::vector<typename Surface_mesh::Halfedge_index> vertices;
   CGAL::Polygon_mesh_processing::non_manifold_vertices(
       mesh, std::back_inserter(vertices));
@@ -33,8 +33,8 @@ enum RepairStrategy {
 };
 
 template <typename Kernel, typename Surface_mesh>
-bool repair_self_intersections(Surface_mesh& mesh,
-                               const std::vector<int>& strategies) {
+static bool repair_self_intersections(Surface_mesh& mesh,
+                                      const std::vector<int>& strategies) {
   std::cout << "QQ/repair_self_intersections: strategies=" << strategies.size()
             << std::endl;
 
@@ -144,7 +144,7 @@ bool repair_self_intersections(Surface_mesh& mesh,
 }
 
 template <typename Kernel, typename Surface_mesh>
-bool repair_self_intersections(Surface_mesh& mesh) {
+static bool repair_self_intersections(Surface_mesh& mesh) {
   return repair_self_intersections<Kernel>(
       mesh, {REPAIR_AUTOREFINE_AND_REMOVE_SELF_INTERSECTIONS,
              REPAIR_TRY_REMOVE_SELF_INTERSECTIONS});

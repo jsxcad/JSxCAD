@@ -1,6 +1,6 @@
 // FIX
-int Deform(Geometry* geometry, size_t length, size_t iterations,
-           double tolerance, double alpha) {
+static int Deform(Geometry* geometry, size_t length, size_t iterations,
+                  double tolerance, double alpha) {
   typedef CGAL::Cartesian_converter<Cartesian_kernel, Kernel> converter;
   typedef CGAL::Surface_mesh_deformation<Cartesian_surface_mesh, CGAL::Default,
                                          CGAL::Default, CGAL::SRE_ARAP>

@@ -1,8 +1,8 @@
 #include "outline_util.h"
 
 template <typename Kernel, typename Edge, typename Face, typename Point>
-bool projectPointToEnvelope(const Edge& edge, const Face& face,
-                            Point& projected) {
+static bool projectPointToEnvelope(const Edge& edge, const Face& face,
+                                   Point& projected) {
   typedef typename Kernel::Line_3 Line;
   typedef typename Kernel::Vector_3 Vector;
   typedef typename Kernel::Plane_3 Plane;
@@ -25,8 +25,8 @@ bool projectPointToEnvelope(const Edge& edge, const Face& face,
   return false;
 }
 
-int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
-                     bool do_project_faces, bool do_project_edges) {
+static int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
+                            bool do_project_faces, bool do_project_edges) {
   // Unfortunately we seem to need Epeck here, which is quite slow.
   typedef Epeck_kernel Envelope_kernel;
   typedef std::vector<Envelope_kernel::Segment_3> Envelope_segments;
@@ -38,7 +38,6 @@ int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
   }
 
   typedef CGAL::Env_triangle_traits_3<Envelope_kernel> Traits_3;
-  typedef Envelope_kernel::Line_3 Line_3;
   typedef Envelope_kernel::Point_3 Point_3;
   typedef Traits_3::Surface_3 Env_triangle_3;
   typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;

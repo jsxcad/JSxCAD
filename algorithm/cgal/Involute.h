@@ -1,4 +1,4 @@
-int Involute(Geometry* geometry) {
+static int Involute(Geometry* geometry) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   for (int nth = 0; nth < size; nth++) {

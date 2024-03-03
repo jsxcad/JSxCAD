@@ -1,4 +1,4 @@
-int Extrude(Geometry* geometry, size_t count) {
+static int Extrude(Geometry* geometry, size_t count) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();

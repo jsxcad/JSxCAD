@@ -1,6 +1,6 @@
 #include "wrap_util.h"
 
-int Wrap(Geometry* geometry, double alpha, double offset) {
+static int Wrap(Geometry* geometry, double alpha, double offset) {
   try {
     CGAL::Cartesian_converter<Kernel, Epick_kernel> to_cartesian;
 

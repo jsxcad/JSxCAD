@@ -2,7 +2,9 @@
 
 #include "mu3d.h"
 
-int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
+static int Unfold(
+    Geometry* geometry, bool enable_tabs,
+    const std::function<void(int face, const std::string& tag)>& emit_tag) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();

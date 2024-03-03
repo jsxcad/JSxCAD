@@ -9,9 +9,9 @@
 #include "cgal.h"
 #include "surface_mesh_util.h"
 
-int Fair(Geometry* geometry, size_t count, double resolution,
-         int number_of_iterations, int remesh_iterations,
-         int remesh_relaxation_steps) {
+static int Fair(Geometry* geometry, size_t count, double resolution,
+                int number_of_iterations, int remesh_iterations,
+                int remesh_relaxation_steps) {
   std::cout << "Fair: resolution=" << resolution
             << " number_of_iterations=" << number_of_iterations
             << " remesh_iterations=" << remesh_iterations

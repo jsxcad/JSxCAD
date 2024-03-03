@@ -9,7 +9,7 @@
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/property_map.h>
 
-int Reconstruct(Geometry* geometry, double offset) {
+static int Reconstruct(Geometry* geometry, double offset) {
   try {
     size_t size = geometry->size();
 
@@ -24,10 +24,6 @@ int Reconstruct(Geometry* geometry, double offset) {
           typedef CGAL::Nth_of_tuple_property_map<1, PNI> Normal_map;
           typedef CGAL::Nth_of_tuple_property_map<2, PNI> Plane_id_map;
           typedef std::vector<PNI> Point_vector;
-
-          using Traits = CGAL::Shape_detection::Efficient_RANSAC_traits<
-              Epick_kernel, Point_vector, Point_map, Normal_map>;
-          using Plane_map = CGAL::Shape_detection::Plane_map<Traits>;
 
           const Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
           Point_vector points;
@@ -68,23 +64,6 @@ int Reconstruct(Geometry* geometry, double offset) {
             // A centroid and corners are sufficient for reconstruction.
             // Presumably the three midpoints of the centroid and each corner
             // would also work.
-#if 0
-            points.emplace_back(center, plane.orthogonal_vector(),
-                                plane_index);
-            point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(a)).transform(tx),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(b)).transform(tx),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
-
-            points.emplace_back(mesh.point(mesh.source(c)).transform(tx),
-                                plane.orthogonal_vector(), plane_index);
-            point_plane_index.push_back(plane_index);
-#else
             // Let's try a tight cluster at the center of the face.
             points.emplace_back(center, plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
@@ -96,15 +75,11 @@ int Reconstruct(Geometry* geometry, double offset) {
             points.emplace_back(center + (unitVector(plane.base2()) * 0.01),
                                 plane.orthogonal_vector(), plane_index);
             point_plane_index.push_back(plane_index);
-#endif
           }
 
           std::cout << "QQ/Reconstruct/3" << std::endl;
 
-          Plane_map plane_map;
           Point_map point_map;
-          Normal_map normal_map;
-          // Face_index_map face_index_map;
 
           struct Plane_range
               : public CGAL::Iterator_range<
@@ -139,7 +114,6 @@ int Reconstruct(Geometry* geometry, double offset) {
           // regularize_planes does not move the points, so we need to do this
           // ourselves.
           std::unordered_map<Epick_plane, int> regulated_plane_index;
-          int next_regulated_plane_id = 0;
           for (auto& [point, normal, plane_id] : points) {
             const auto& plane = planes[plane_id];
             const auto& regulated_plane = regulated_planes[plane_id];

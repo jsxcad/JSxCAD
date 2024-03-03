@@ -8,7 +8,7 @@ enum ValidateStrategy {
 };
 
 template <typename Surface_mesh>
-bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
+static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
   bool valid = true;
   for (int strategy : strategies) {
     switch (strategy) {

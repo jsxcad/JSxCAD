@@ -31,24 +31,15 @@ struct Constrained_edge_map {
   const CGAL::Unique_hash_map<key_type, bool>& mConstraints;
 };
 
-void simplify(double face_count, double sharp_edge_threshold,
-              Surface_mesh& epeck_mesh, Segments& sharp_edges) {
+static void simplify(double face_count, double sharp_edge_threshold,
+                     Surface_mesh& epeck_mesh, Segments& sharp_edges) {
   double sharp_edge_threshold_degrees = sharp_edge_threshold * 360;
-  typedef Epick_kernel::FT FT;
   typedef Epick_kernel::Point_3 Point_3;
   typedef boost::graph_traits<Epick_surface_mesh>::edge_descriptor
       edge_descriptor;
   typedef boost::graph_traits<Epick_surface_mesh>::halfedge_descriptor
       halfedge_descriptor;
   namespace SMS = CGAL::Surface_mesh_simplification;
-  typedef SMS::GarlandHeckbert_plane_policies<Epick_surface_mesh, Epick_kernel>
-      Classic_plane;
-  typedef SMS::GarlandHeckbert_probabilistic_plane_policies<Epick_surface_mesh,
-                                                            Epick_kernel>
-      Prob_plane;
-  typedef SMS::GarlandHeckbert_triangle_policies<Epick_surface_mesh,
-                                                 Epick_kernel>
-      Classic_tri;
   typedef SMS::GarlandHeckbert_probabilistic_triangle_policies<
       Epick_surface_mesh, Epick_kernel>
       Prob_tri;

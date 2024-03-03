@@ -1,6 +1,7 @@
-int ComputeImplicitVolume(Geometry* geometry, emscripten::val op, double radius,
-                          double angular_bound, double radius_bound,
-                          double distance_bound, double error_bound) {
+static int ComputeImplicitVolume(
+    Geometry* geometry, const std::function<double(double, double, double)>& op,
+    double radius, double angular_bound, double radius_bound,
+    double distance_bound, double error_bound) {
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   // c2t3
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
@@ -17,8 +18,7 @@ int ComputeImplicitVolume(Geometry* geometry, emscripten::val op, double radius,
   // defining the surface
   auto thunk = [&](const Point_3& p) {
     return FT(op(CGAL::to_double(p.x()), CGAL::to_double(p.y()),
-                 CGAL::to_double(p.z()))
-                  .as<double>());
+                 CGAL::to_double(p.z())));
   };
 
   MakeDeterministic();

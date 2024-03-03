@@ -1,5 +1,5 @@
-int Offset(Geometry* geometry, double initial, double step, double limit,
-           int segments) {
+static int Offset(Geometry* geometry, double initial, double step, double limit,
+                  int segments) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();

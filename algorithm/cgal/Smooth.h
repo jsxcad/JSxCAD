@@ -14,8 +14,9 @@ struct Constrained_vertex_map {
   const CGAL::Unique_hash_map<Vertex_index, bool>& map_;
 };
 
-int Smooth(Geometry* geometry, size_t count, double resolution, int iterations,
-           double time, int remesh_iterations, int remesh_relaxation_steps) {
+static int Smooth(Geometry* geometry, size_t count, double resolution,
+                  int iterations, double time, int remesh_iterations,
+                  int remesh_relaxation_steps) {
   std::cout << "Smooth: resolution=" << resolution
             << " iterations=" << iterations << " time=" << time
             << " remesh_iterations=" << remesh_iterations

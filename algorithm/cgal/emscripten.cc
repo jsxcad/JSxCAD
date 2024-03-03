@@ -1,4 +1,155 @@
+#include <emscripten/bind.h>
+
 #include "cgal.h"
+
+using emscripten::base;
+using emscripten::select_overload;
+
+namespace emscripten {
+namespace internal {
+template <>
+void raw_destructor<Surface_mesh>(Surface_mesh* ptr) {
+  std::cout << "QQ/Destroying Surface_mesh" << std::endl;
+  delete ptr;
+}
+
+template <>
+void raw_destructor<Transformation>(Transformation* ptr) {
+  std::cout << "QQ/Destroying Transformation" << std::endl;
+  delete ptr;
+}
+}  //  namespace internal
+}  //  namespace emscripten
+
+namespace wrapped {
+class EmGeometry : public Geometry {
+ public:
+  EmGeometry() : Geometry() {}
+
+  void emFillPolygonsWithHoles(int nth, emscripten::val fillPlane,
+                               emscripten::val fillBoundary,
+                               emscripten::val fillHole) {
+    fillPolygonsWithHoles(
+        nth, [&](Quadruple* q) -> bool { return fillPlane(q).as<bool>(); },
+        [&](Polygon_2* boundary) { return fillBoundary(boundary); },
+        [&](Polygon_2* hole, int nth) { return fillHole(hole, nth); });
+  }
+
+  void emEmitPolygonsWithHoles(int nth, emscripten::val emit_plane,
+                               emscripten::val emit_polygon,
+                               emscripten::val emit_point) {
+    emitPolygonsWithHoles(
+        nth,
+        [&](double a, double b, double c, double d, const std::string& e,
+            const std::string& f, const std::string& g,
+            const std::string& h) { emit_plane(a, b, c, d, e, f, g, h); },
+        [&](bool b) { emit_polygon(b); },
+        [&](double x, double y, const std::string& ex, const std::string& ey) {
+          emit_point(x, y, ex, ey);
+        });
+  }
+
+  void emEmitSegments(int nth, emscripten::val emit) {
+    emitSegments(nth, [&](double sx, double sy, double sz, double tx, double ty,
+                          double tz, const std::string& exact) {
+      emit(sx, sy, sz, tx, ty, tz, exact);
+    });
+  }
+
+  void emEmitEdges(int nth, emscripten::val emit) {
+    emitEdges(nth, [&](double sx, double sy, double sz, double tx, double ty,
+                       double tz, double nx, double ny, double nz, int face_id,
+                       const std::string& exact) {
+      emit(sx, sy, sz, tx, ty, tz, nx, ny, nz, exact);
+    });
+  }
+
+  void emEmitPoints(int nth, emscripten::val emit_point) {
+    emitPoints(nth,
+               [&](double x, double y, double z, const std::string& exact) {
+                 emit_point(x, y, z, exact);
+               });
+  }
+};
+
+void Transformation__to_exact(std::shared_ptr<const Transformation> t,
+                              emscripten::val put) {
+  ::Transformation__to_exact(t, [&](const std::string& str) { put(str); });
+}
+
+int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
+  return ::ComputeBoundingBox(
+      geometry,
+      [&](double xmin, double ymin, double zmin, double xmax, double ymax,
+          double zmax) { emit(xmin, ymin, zmin, xmax, ymax, zmax); });
+}
+
+int ComputeImplicitVolume(Geometry* geometry, emscripten::val op, double radius,
+                          double angular_bound, double radius_bound,
+                          double distance_bound, double error_bound) {
+  return ::ComputeImplicitVolume(
+      geometry,
+      [&](double x, double y, double z) -> double {
+        return op(x, y, z).as<double>();
+      },
+      radius, angular_bound, radius_bound, distance_bound, error_bound);
+}
+
+int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode,
+             bool exact) {
+  return ::Disjoint(
+      geometry,
+      [&](int index) -> bool { return getIsMasked(index).as<bool>(); }, mode,
+      exact);
+}
+
+int EachPoint(Geometry* geometry, emscripten::val emit_point) {
+  return ::EachPoint(
+      geometry, [&](double x, double y, double z, const std::string& exact) {
+        return emit_point(x, y, z, exact);
+      });
+}
+
+int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
+  return ::EachTriangle(
+      geometry, [&](double x, double y, double z, const std::string& exact) {
+        emit_point(x, y, z, exact);
+      });
+}
+
+int FromPolygonSoup(Geometry* geometry, emscripten::val fill, size_t face_count,
+                    double min_error_drop, emscripten::val nextStrategy) {
+  return ::FromPolygonSoup(
+      geometry,
+      [&](Triples* triples, Polygons* polygons) {
+        return fill(triples, polygons);
+      },
+      face_count, min_error_drop,
+      [&]() -> int { return nextStrategy().as<int>(); });
+}
+
+int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
+  return ::FromPolygons(geometry, close,
+                        [&](Triples* triples, Polygons* polygons) {
+                          return fill(triples, polygons);
+                        });
+}
+
+int Repair(Geometry* geometry, emscripten::val nextStrategy) {
+  return ::Repair(geometry, [&]() { return nextStrategy().as<int>(); });
+}
+
+int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
+  return ::Unfold(
+      geometry, enable_tabs,
+      [&](int index, const std::string& tag) { emit_tag(index, tag); });
+}
+
+int Validate(Geometry* geometry, emscripten::val get_next_strategy) {
+  return ::Validate(geometry,
+                    [&]() -> int { return get_next_strategy().as<int>(); });
+}
+}  // namespace wrapped
 
 EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Transformation>("Transformation")
@@ -12,7 +163,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        &Transformation__from_exact);
   emscripten::function("Transformation__to_approximate",
                        &Transformation__to_approximate);
-  emscripten::function("Transformation__to_exact", &Transformation__to_exact);
+  emscripten::function("Transformation__to_exact",
+                       &wrapped::Transformation__to_exact);
   emscripten::function("Transformation__translate", &Transformation__translate);
   emscripten::function("Transformation__scale", &Transformation__scale);
   emscripten::function(
@@ -88,11 +240,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("number_of_faces", &Surface_mesh::number_of_faces)
       .function("has_garbage", &Surface_mesh::has_garbage);
 
-#ifdef ENABLE_OCCT
-  emscripten::class_<TopoDS_Shape>("TopoDS_Shape")
-      .smart_ptr<std::shared_ptr<const TopoDS_Shape>>("TopoDS_Shape");
-#endif
-
   emscripten::class_<Quadruple>("Quadruple").constructor<>();
   emscripten::function("fillQuadruple", &fillQuadruple,
                        emscripten::allow_raw_pointers());
@@ -116,11 +263,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("copyInputMeshesToOutputMeshes",
                 &Geometry::copyInputMeshesToOutputMeshes)
       .function("deserializeInputMesh", &Geometry::deserializeInputMesh)
-      .function("fillPolygonsWithHoles", &Geometry::fillPolygonsWithHoles)
-      .function("emitPoints", &Geometry::emitPoints)
-      .function("emitPolygonsWithHoles", &Geometry::emitPolygonsWithHoles)
-      .function("emitEdges", &Geometry::emitEdges)
-      .function("emitSegments", &Geometry::emitSegments)
       .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
       .function("getOrigin", &Geometry::getOrigin)
@@ -135,25 +277,30 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform)
       .function("setType", &Geometry::setType)
-      .function("transformToAbsoluteFrame", &Geometry::transformToAbsoluteFrame)
-#ifdef ENABLE_OCCT
-      .function("deserializeOcctShape", &Geometry::deserializeOcctShape)
-      .function("getOcctShape", &Geometry::getOcctShape)
-      .function("getSerializedOcctShape", &Geometry::getSerializedOcctShape)
-      .function("setOcctShape", &Geometry::setOcctShape)
-#endif ENABLE_OCCT
-      .function("has_occt_shape", &Geometry::has_occt_shape);
+      .function("transformToAbsoluteFrame",
+                &Geometry::transformToAbsoluteFrame);
 
+  emscripten::class_<wrapped::EmGeometry, base<Geometry>>("EmGeometry")
+      .constructor<>()
+      .function("fillPolygonsWithHoles",
+                &wrapped::EmGeometry::emFillPolygonsWithHoles)
+      .function("emitPoints", &wrapped::EmGeometry::emEmitPoints)
+      .function("emitPolygonsWithHoles",
+                &wrapped::EmGeometry::emEmitPolygonsWithHoles)
+      .function("emitEdges", &wrapped::EmGeometry::emEmitEdges)
+      .function("emitSegments", &wrapped::EmGeometry::emEmitSegments);
+
+#if 0
   emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
       .constructor<>()
       .function("addGeometry", &AabbTreeQuery::addGeometry,
                 emscripten::allow_raw_pointers())
-      .function("intersectSegmentApproximate",
-                &AabbTreeQuery::intersectSegmentApproximate)
+      .function("intersectSegmentApproximate", &AabbTreeQuery::intersectSegmentApproximate)
       .function("isIntersectingPointApproximate",
                 &AabbTreeQuery::isIntersectingPointApproximate)
       .function("isIntersectingSegmentApproximate",
                 &AabbTreeQuery::isIntersectingSegmentApproximate);
+#endif
 
   // New primitives
   emscripten::function("Approximate", &Approximate,
@@ -163,14 +310,14 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
   emscripten::function("ComputeArea", &ComputeArea,
                        emscripten::allow_raw_pointers());
-  emscripten::function("ComputeBoundingBox", &ComputeBoundingBox,
+  emscripten::function("ComputeBoundingBox", &wrapped::ComputeBoundingBox,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeOrientedBoundingBox",
                        &ComputeOrientedBoundingBox,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeCentroid", &ComputeCentroid,
                        emscripten::allow_raw_pointers());
-  emscripten::function("ComputeImplicitVolume", &ComputeImplicitVolume,
+  emscripten::function("ComputeImplicitVolume", &wrapped::ComputeImplicitVolume,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeNormal", &ComputeNormal,
                        emscripten::allow_raw_pointers());
@@ -190,10 +337,11 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
   emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());
   emscripten::function("DilateXY", &DilateXY, emscripten::allow_raw_pointers());
-  emscripten::function("Disjoint", &Disjoint, emscripten::allow_raw_pointers());
-  emscripten::function("EachPoint", &EachPoint,
+  emscripten::function("Disjoint", &wrapped::Disjoint,
                        emscripten::allow_raw_pointers());
-  emscripten::function("EachTriangle", &EachTriangle,
+  emscripten::function("EachPoint", &wrapped::EachPoint,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("EachTriangle", &wrapped::EachTriangle,
                        emscripten::allow_raw_pointers());
   emscripten::function("EagerTransform", &EagerTransform,
                        emscripten::allow_raw_pointers());
@@ -203,9 +351,9 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygons", &FromPolygons,
+  emscripten::function("FromPolygons", &wrapped::FromPolygons,
                        emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygonSoup", &FromPolygonSoup,
+  emscripten::function("FromPolygonSoup", &wrapped::FromPolygonSoup,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
   emscripten::function("GenerateEnvelope", &GenerateEnvelope,
@@ -229,7 +377,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());
   emscripten::function("Remesh", &Remesh, emscripten::allow_raw_pointers());
-  emscripten::function("Repair", &Repair, emscripten::allow_raw_pointers());
+  emscripten::function("Repair", &wrapped::Repair,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Route", &Route, emscripten::allow_raw_pointers());
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
@@ -238,44 +387,30 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
-  emscripten::function("Unfold", &Unfold, emscripten::allow_raw_pointers());
-  emscripten::function("Validate", &Validate, emscripten::allow_raw_pointers());
+  emscripten::function("Unfold", &wrapped::Unfold,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("Validate", &wrapped::Validate,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
 
   emscripten::function("FT__to_double", &FT__to_double,
                        emscripten::allow_raw_pointers());
 
-  emscripten::function("Surface_mesh__explore", &Surface_mesh__explore,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Surface_mesh__triangulate_faces",
-                       &Surface_mesh__triangulate_faces,
-                       emscripten::allow_raw_pointers());
+  // emscripten::function("Surface_mesh__explore", &Surface_mesh__explore,
+  // emscripten::allow_raw_pointers());
+  // emscripten::function("Surface_mesh__triangulate_faces",
+  // &Surface_mesh__triangulate_faces, emscripten::allow_raw_pointers());
 
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed,
                        emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_empty", &Surface_mesh__is_empty,
                        emscripten::allow_raw_pointers());
-  emscripten::function("Surface_mesh__is_valid_halfedge_graph",
-                       &Surface_mesh__is_valid_halfedge_graph,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Surface_mesh__is_valid_face_graph",
-                       &Surface_mesh__is_valid_face_graph,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Surface_mesh__is_valid_polygon_mesh",
-                       &Surface_mesh__is_valid_polygon_mesh,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox,
-                       emscripten::allow_raw_pointers());
-
-  // OpenCascade
-#ifdef ENABLE_OCCT
-  emscripten::function("DeserializeOcctShape", &DeserializeOcctShape,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("MakeOcctBox", &MakeOcctBox,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("MakeOcctSphere", &MakeOcctSphere,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("SerializeOcctShape", &SerializeOcctShape,
-                       emscripten::allow_raw_pointers());
-#endif
+  // emscripten::function("Surface_mesh__is_valid_halfedge_graph",
+  // &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());
+  // emscripten::function("Surface_mesh__is_valid_face_graph",
+  // &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());
+  // emscripten::function("Surface_mesh__is_valid_polygon_mesh",
+  // &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
+  // emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox,
+  // emscripten::allow_raw_pointers());
 }

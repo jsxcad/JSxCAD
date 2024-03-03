@@ -1,5 +1,5 @@
-int Separate(Geometry* geometry, bool keep_shapes, bool keep_holes_in_shapes,
-             bool keep_holes_as_shapes) {
+static int Separate(Geometry* geometry, bool keep_shapes,
+                    bool keep_holes_in_shapes, bool keep_holes_as_shapes) {
   int size = geometry->size();
 
   for (int nth = 0; nth < size; nth++) {

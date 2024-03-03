@@ -1,8 +1,4 @@
-#ifdef ENABLE_OCCT
-#include "BRepAlgoAPI_Fuse.hxx"
-#endif
-
-int Join(Geometry* geometry, int targets, bool exact) {
+static int Join(Geometry* geometry, int targets, bool exact) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -20,25 +16,12 @@ int Join(Geometry* geometry, int targets, bool exact) {
           continue;
         }
         for (int nth = targets; nth < size; nth++) {
-          if (!geometry->is_mesh(nth) && !geometry->has_occt_shape(target)) {
+          if (!geometry->is_mesh(nth)) {
             continue;
           }
-          if (!geometry->is_mesh(target) && !geometry->has_occt_shape(target)) {
+          if (!geometry->is_mesh(target)) {
             continue;
           }
-#ifdef ENABLE_OCCT
-          if (geometry->has_occt_shape(target) &&
-              geometry->has_occt_shape(nth)) {
-            // Occt vs Occt cut.
-            BRepAlgoAPI_Fuse fuse(geometry->occt_shape(target),
-                                  geometry->occt_shape(nth));
-            fuse.Build();
-            geometry->setOcctShape(target, std::shared_ptr<const TopoDS_Shape>(
-                                               new TopoDS_Shape(fuse.Shape())));
-            geometry->discard_mesh(target);
-            continue;
-          }
-#endif
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
           } else if (exact) {
@@ -112,14 +95,14 @@ int Join(Geometry* geometry, int targets, bool exact) {
         }
         break;
       }
-      case GEOMETRY_REFERENCE:
-      case GEOMETRY_EMPTY: {
-        break;
-      }
       case GEOMETRY_UNKNOWN: {
         std::cout << "Unknown type for Join at " << target << std::endl;
         return STATUS_INVALID_INPUT;
       }
+      case GEOMETRY_REFERENCE:
+      case GEOMETRY_EDGES:
+      case GEOMETRY_EMPTY:
+        break;
     }
   }
 

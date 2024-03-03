@@ -32,8 +32,8 @@ static bool inside(glm::dvec2& p, glm::dvec2& p1, glm::dvec2& p2) {
          0;
 }
 
-static glm::dvec2 intersection(glm::dvec2& cp1, glm::dvec2& cp2, glm::dvec2& s,
-                               glm::dvec2& e) {
+static static glm::dvec2 intersection(glm::dvec2& cp1, glm::dvec2& cp2,
+                                      glm::dvec2& s, glm::dvec2& e) {
   glm::dvec2 dc = {cp1.x - cp2.x, cp1.y - cp2.y};
   glm::dvec2 dp = {s.x - e.x, s.y - e.y};
 
@@ -44,13 +44,13 @@ static glm::dvec2 intersection(glm::dvec2& cp1, glm::dvec2& cp2, glm::dvec2& s,
   return {(n1 * dp.x - n2 * dc.x) * n3, (n1 * dp.y - n2 * dc.y) * n3};
 }
 
-static glm::dvec3 point_to_vector(const Kernel::Point_3& point) {
+static static glm::dvec3 point_to_vector(const Kernel::Point_3& point) {
   return glm::dvec3(point.x(), point.y(), point.z());
 }
 
-static void planar(const glm::dvec3& A, const glm::dvec3& B,
-                   const glm::dvec3& C, glm::dvec2& a, glm::dvec2& b,
-                   glm::dvec2& c) {
+static static void planar(const glm::dvec3& A, const glm::dvec3& B,
+                          const glm::dvec3& C, glm::dvec2& a, glm::dvec2& b,
+                          glm::dvec2& c) {
   double lengthAB = glm::length(A - B);
 
   a = glm::dvec2(0, 0);
@@ -63,10 +63,10 @@ static void planar(const glm::dvec3& A, const glm::dvec3& B,
                  a.y + cl * (b.y - a.y) + s * (b.x - a.x));
 }
 
-static void planar(const glm::dvec3& P1, const glm::dvec3& P2,
-                   const glm::dvec3& Pu, const glm::dvec2& p1,
-                   const glm::dvec2& p2, const glm::dvec2& p3prev,
-                   glm::dvec2& pu, bool flip = false) {
+static static void planar(const glm::dvec3& P1, const glm::dvec3& P2,
+                          const glm::dvec3& Pu, const glm::dvec2& p1,
+                          const glm::dvec2& p2, const glm::dvec2& p3prev,
+                          glm::dvec2& pu, bool flip = false) {
   double length = glm::length(p1 - p2);
 
   double s =

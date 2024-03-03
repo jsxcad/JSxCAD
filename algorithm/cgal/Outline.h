@@ -1,6 +1,6 @@
 #include "outline_util.h"
 
-int Outline(Geometry* geometry) {
+static int Outline(Geometry* geometry) {
   int size = geometry->size();
 
   geometry->copyInputSegmentsToOutputSegments();

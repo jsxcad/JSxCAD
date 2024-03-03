@@ -1,4 +1,7 @@
-int EachPoint(Geometry* geometry, emscripten::val emit_point) {
+static int EachPoint(
+    Geometry* geometry,
+    const std::function<void(double, double, double, const std::string&)>&
+        emit_point) {
   try {
     size_t size = geometry->size();
 
@@ -20,7 +23,6 @@ int EachPoint(Geometry* geometry, emscripten::val emit_point) {
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           const Plane& plane = geometry->plane(nth);
-          const Transformation& transform = geometry->transform(nth);
           for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
             for (const Point_2 point : polygon.outer_boundary()) {
               emitPoint(plane.to_3d(point), emit_point);

@@ -1,9 +1,9 @@
 #include "image_util.h"
 
-int ComputeReliefFromImage(Geometry* geometry, int x, int y, int z,
-                           uintptr_t data_offset, double angular_bound,
-                           double radius_bound, double distance_bound,
-                           double error_bound, double extrusion) {
+static int ComputeReliefFromImage(Geometry* geometry, int x, int y, int z,
+                                  uintptr_t data_offset, double angular_bound,
+                                  double radius_bound, double distance_bound,
+                                  double error_bound, double extrusion) {
   unsigned char* image = reinterpret_cast<unsigned char*>(data_offset);
   int target = geometry->add(GEOMETRY_MESH);
   build_surface_mesh_as_relief_from_graymap(

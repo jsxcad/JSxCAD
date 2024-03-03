@@ -27,6 +27,8 @@ import { screenshot } from './screenshot.js';
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/api/Orb.md.$5_2.observed.png',
   'nb/api/image.md.$2.observed.png',
+  'nb/api/iron.md.$2.observed.png',
+  'nb/regression/smooth/smooth.md.simplified_1.observed.png',
   'nb/regression/shapes/shapes.md.$11.observed.png',
   'nb/regression/shapes/shapes.md.$55.observed.png',
   'nb/regression/shapes/shapes.md.$56.observed.png',

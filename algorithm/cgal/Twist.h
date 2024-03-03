@@ -1,4 +1,4 @@
-int Twist(Geometry* geometry, double turnsPerMm) {
+static int Twist(Geometry* geometry, double turnsPerMm) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
