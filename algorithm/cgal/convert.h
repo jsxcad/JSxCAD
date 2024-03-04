@@ -21,6 +21,11 @@ static void read_point(Point& point, std::istringstream& input) {
   point = Point(x, y, z);
 }
 
+static void read_point(Point& point, const std::string& input) {
+  std::istringstream stream(input);
+  read_point(point, stream);
+}
+
 static void read_point_approximate(Point& point, std::istringstream& input) {
   double x, y, z;
   input >> x;

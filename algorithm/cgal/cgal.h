@@ -236,6 +236,12 @@ static FT to_FT(const std::string& v) {
 
 static FT to_FT(const double v) { return FT(v); }
 
+std::string to_string_from_FT(FT ft) {
+  std::ostringstream s;
+  s << ft.exact();
+  return s.str();
+}
+
 // These may need adjustment.
 static FT compute_scaling_factor(double value) {
   return CGAL::simplest_rational_in_interval<FT>(value * 0.999, value * 1.001);
@@ -378,15 +384,15 @@ static void disorient_along_z(Vector source, Vector normal,
   }
 }
 
-static template <typename Vector>
-CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Vector>::Kernel>
+template <typename Vector>
+static CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Vector>::Kernel>
 translate(const Vector& vector) {
   return CGAL::Aff_transformation_3<
       typename CGAL::Kernel_traits<Vector>::Kernel>(CGAL::TRANSLATION, vector);
 }
 
-static template <typename Point>
-CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Point>::Kernel>
+template <typename Point>
+static CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Point>::Kernel>
 translate_to(const Point& point) {
   return CGAL::Aff_transformation_3<
       typename CGAL::Kernel_traits<Point>::Kernel>(CGAL::TRANSLATION,
@@ -1114,7 +1120,7 @@ static void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
   }
 }
 
-static static void emitPlane(
+static void emitPlane(
     const Plane& plane,
     const std::function<void(double a, double b, double c, double d,
                              const std::string& e, const std::string& f,

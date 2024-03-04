@@ -19,14 +19,6 @@ const peg = Box(7.5, 12)
 
 ![Image](makerspace.md.bug.png)
 
-![Image](makerspace.md.bug_ladybird_body.png)
-
-[ladybird_body.svg](makerspace.ladybird_body.svg)
-
-![Image](makerspace.md.bug_ladybird_wings.png)
-
-[ladybird_wings.svg](makerspace.ladybird_wings.svg)
-
 ```JavaScript
 const bug = And(
   Arc(20, { end: 1 / 2 })

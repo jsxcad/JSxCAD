@@ -53,6 +53,7 @@ class Geometry {
     bbox2_.clear();
     bbox3_.clear();
     origin_.clear();
+    integers_.clear();
     resize(size);
   }
 
@@ -82,6 +83,7 @@ class Geometry {
     bbox2_.resize(size);
     bbox3_.resize(size);
     origin_.resize(size, -1);
+    integers_.resize(size);
   }
 
   GeometryType& type(int nth) { return types_[nth]; }
@@ -289,6 +291,8 @@ class Geometry {
     }
   }
 
+  std::vector<int>& integers(int nth) { return integers_[nth]; }
+
   void setTransform(int nth, std::shared_ptr<const Transformation>& transform) {
     transforms_[nth] = transform;
   }
@@ -365,6 +369,41 @@ class Geometry {
     pwh(nth) = std::move(polygons);
   }
 
+  void addPolygon(int nth) { pwh(nth).emplace_back(); }
+
+  void setPolygonsPlane(int nth, double x, double y, double z, double w) {
+    plane(nth) = unitPlane<Kernel>(Plane(x, y, z, w));
+  }
+
+  void setPolygonsPlaneExact(int nth, const std::string& a,
+                             const std::string& b, const std::string& c,
+                             const std::string& d) {
+    plane(nth) =
+        unitPlane<Kernel>(Plane(to_FT(a), to_FT(b), to_FT(c), to_FT(d)));
+  }
+
+  void addPolygonPoint(int nth, double x, double y) {
+    pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
+  }
+
+  void addPolygonPointExact(int nth, const std::string& x,
+                            const std::string& y) {
+    pwh(nth).back().outer_boundary().push_back(Point_2(to_FT(x), to_FT(y)));
+  }
+
+  void addPolygonHole(int nth) {
+    pwh(nth).back().holes().push_back(std::move(Polygon_2()));
+  }
+
+  void addPolygonHolePoint(int nth, double x, double y) {
+    pwh(nth).back().holes().back().push_back(Point_2(x, y));
+  }
+
+  void addPolygonHolePointExact(int nth, const std::string& x,
+                                const std::string& y) {
+    pwh(nth).back().holes().back().push_back(Point_2(to_FT(x), to_FT(y)));
+  }
+
   void convertPlanarMeshesToPolygons() {
     assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {
@@ -415,15 +454,16 @@ class Geometry {
     ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
   }
 
+  void addInteger(int nth, int integer) { integers(nth).push_back(integer); }
+
   void addInputPoint(int nth, double x, double y, double z) {
     input_points(nth).emplace_back(Point{x, y, z});
   }
 
   void addInputPointExact(int nth, const std::string& exact) {
-    std::istringstream i(exact);
-    Point p;
-    read_point(p, i);
-    input_points(nth).push_back(std::move(p));
+    Point point;
+    read_point(point, exact);
+    input_points(nth).push_back(std::move(point));
   }
 
   void addInputSegment(int nth, double sx, double sy, double sz, double tx,
@@ -722,4 +762,5 @@ class Geometry {
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
+  std::vector<std::vector<int>> integers_;
 };

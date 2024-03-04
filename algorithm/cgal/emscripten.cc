@@ -26,15 +26,6 @@ class EmGeometry : public Geometry {
  public:
   EmGeometry() : Geometry() {}
 
-  void emFillPolygonsWithHoles(int nth, emscripten::val fillPlane,
-                               emscripten::val fillBoundary,
-                               emscripten::val fillHole) {
-    fillPolygonsWithHoles(
-        nth, [&](Quadruple* q) -> bool { return fillPlane(q).as<bool>(); },
-        [&](Polygon_2* boundary) { return fillBoundary(boundary); },
-        [&](Polygon_2* hole, int nth) { return fillHole(hole, nth); });
-  }
-
   void emEmitPolygonsWithHoles(int nth, emscripten::val emit_plane,
                                emscripten::val emit_polygon,
                                emscripten::val emit_point) {
@@ -117,22 +108,97 @@ int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
       });
 }
 
-int FromPolygonSoup(Geometry* geometry, emscripten::val fill, size_t face_count,
-                    double min_error_drop, emscripten::val nextStrategy) {
-  return ::FromPolygonSoup(
-      geometry,
-      [&](Triples* triples, Polygons* polygons) {
-        return fill(triples, polygons);
-      },
-      face_count, min_error_drop,
-      [&]() -> int { return nextStrategy().as<int>(); });
+static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
+                          emscripten::val& js_exact_plane) {
+  const auto a = plane.a().exact();
+  const auto b = plane.b().exact();
+  const auto c = plane.c().exact();
+  const auto d = plane.d().exact();
+  std::ostringstream x;
+  x << a;
+  std::string xs = x.str();
+  std::ostringstream y;
+  y << b;
+  std::string ys = y.str();
+  std::ostringstream z;
+  z << c;
+  std::string zs = z.str();
+  std::ostringstream w;
+  w << d;
+  std::string ws = w.str();
+  const double xd = CGAL::to_double(a);
+  const double yd = CGAL::to_double(b);
+  const double zd = CGAL::to_double(c);
+  const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
+  const double wd = CGAL::to_double(d);
+  // Normalize the approximate plane normal.
+  js_plane.set(0, emscripten::val(xd / ld));
+  js_plane.set(1, emscripten::val(yd / ld));
+  js_plane.set(2, emscripten::val(zd / ld));
+  js_plane.set(3, emscripten::val(wd));
+  js_exact_plane.set(0, emscripten::val(xs));
+  js_exact_plane.set(1, emscripten::val(ys));
+  js_exact_plane.set(2, emscripten::val(zs));
+  js_exact_plane.set(3, emscripten::val(ws));
 }
 
-int FromPolygons(Geometry* geometry, bool close, emscripten::val fill) {
-  return ::FromPolygons(geometry, close,
-                        [&](Triples* triples, Polygons* polygons) {
-                          return fill(triples, polygons);
-                        });
+int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
+  emscripten::val js_pwhs = js.array();
+  emscripten::val js_plane = js.array();
+  emscripten::val js_exact_plane = js.array();
+  fill_js_plane(geometry->plane(nth), js_plane, js_exact_plane);
+  const Polygons_with_holes_2& pwhs = geometry->pwh(nth);
+  for (size_t nth = 0; nth < pwhs.size(); nth++) {
+    const Polygon_with_holes_2& pwh = pwhs[nth];
+    emscripten::val js_pwh = js.object();
+    emscripten::val js_points = js.array();
+    for (size_t nth = 0; nth < pwh.outer_boundary().size(); nth++) {
+      const Point_2& point = pwh.outer_boundary()[nth];
+      emscripten::val js_point = js.array();
+      js_point.set(0, emscripten::val(to_double(point.x())));
+      js_point.set(1, emscripten::val(to_double(point.y())));
+      js_points.set(nth, js_point);
+    }
+    js_pwh.set("points", js_points);
+    emscripten::val js_exact_points = js.array();
+    for (size_t nth = 0; nth < pwh.outer_boundary().size(); nth++) {
+      const Point_2& point = pwh.outer_boundary()[nth];
+      emscripten::val js_point = js.array();
+      js_point.set(0, emscripten::val(to_string_from_FT(point.x())));
+      js_point.set(1, emscripten::val(to_string_from_FT(point.y())));
+      js_exact_points.set(nth, js_point);
+    }
+    js_pwh.set("exactPoints", js_exact_points);
+    emscripten::val js_holes = js.array();
+    for (size_t nth_hole = 0; nth_hole < pwh.holes().size(); nth_hole++) {
+      const Polygon_2& hole = pwh.holes()[nth];
+      emscripten::val js_hole = js.object();
+      emscripten::val js_points = js.array();
+      for (size_t nth = 0; nth < hole.size(); nth++) {
+        emscripten::val js_point = js.array();
+        js_point.set(0, emscripten::val(to_double(hole[nth].x())));
+        js_point.set(1, emscripten::val(to_double(hole[nth].y())));
+        js_points.set(nth, js_point);
+      }
+      js_hole.set("points", js_points);
+      emscripten::val js_exact_points = js.array();
+      for (size_t nth = 0; nth < hole.size(); nth++) {
+        emscripten::val js_exact_point = js.array();
+        js_exact_point.set(0, emscripten::val(to_string_from_FT(hole[nth][0])));
+        js_exact_point.set(1, emscripten::val(to_string_from_FT(hole[nth][1])));
+        js_exact_points.set(nth, js_exact_point);
+      }
+      js_hole.set("exactPoints", js_exact_points);
+      js_holes.set(nth_hole, js_hole);
+    }
+    js_pwh.set("holes", js_holes);
+    js_pwhs.set(nth, js_pwh);
+  }
+  js.set("type", emscripten::val("polygonsWithHoles"));
+  js.set("plane", js_plane);
+  js.set("exactPlane", js_exact_plane);
+  js.set("polygonsWithHoles", js_pwhs);
+  return STATUS_OK;
 }
 
 int Repair(Geometry* geometry, emscripten::val nextStrategy) {
@@ -256,6 +322,13 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("addInputPointExact", &Geometry::addInputPointExact)
       .function("addInputSegment", &Geometry::addInputSegment)
       .function("addInputSegmentExact", &Geometry::addInputSegmentExact)
+      .function("addInteger", &Geometry::addInteger)
+      .function("addPolygon", &Geometry::addPolygon)
+      .function("addPolygonPoint", &Geometry::addPolygonPoint)
+      .function("addPolygonPointExact", &Geometry::addPolygonPointExact)
+      .function("addPolygonHole", &Geometry::addPolygonHole)
+      .function("addPolygonHolePoint", &Geometry::addPolygonHolePoint)
+      .function("addPolygonHolePointExact", &Geometry::addPolygonHolePointExact)
       .function("convertPlanarMeshesToPolygons",
                 &Geometry::convertPlanarMeshesToPolygons)
       .function("convertPolygonsToPlanarMeshes",
@@ -274,6 +347,8 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("has_mesh", &Geometry::has_mesh)
       .function("setTestMode", &Geometry::setTestMode)
       .function("setInputMesh", &Geometry::setInputMesh)
+      .function("setPolygonsPlane", &Geometry::setPolygonsPlane)
+      .function("setPolygonsPlaneExact", &Geometry::setPolygonsPlaneExact)
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform)
       .function("setType", &Geometry::setType)
@@ -282,25 +357,11 @@ EMSCRIPTEN_BINDINGS(module) {
 
   emscripten::class_<wrapped::EmGeometry, base<Geometry>>("EmGeometry")
       .constructor<>()
-      .function("fillPolygonsWithHoles",
-                &wrapped::EmGeometry::emFillPolygonsWithHoles)
       .function("emitPoints", &wrapped::EmGeometry::emEmitPoints)
       .function("emitPolygonsWithHoles",
                 &wrapped::EmGeometry::emEmitPolygonsWithHoles)
       .function("emitEdges", &wrapped::EmGeometry::emEmitEdges)
       .function("emitSegments", &wrapped::EmGeometry::emEmitSegments);
-
-#if 0
-  emscripten::class_<AabbTreeQuery>("AabbTreeQuery")
-      .constructor<>()
-      .function("addGeometry", &AabbTreeQuery::addGeometry,
-                emscripten::allow_raw_pointers())
-      .function("intersectSegmentApproximate", &AabbTreeQuery::intersectSegmentApproximate)
-      .function("isIntersectingPointApproximate",
-                &AabbTreeQuery::isIntersectingPointApproximate)
-      .function("isIntersectingSegmentApproximate",
-                &AabbTreeQuery::isIntersectingSegmentApproximate);
-#endif
 
   // New primitives
   emscripten::function("Approximate", &Approximate,
@@ -351,12 +412,14 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygons", &wrapped::FromPolygons,
+  emscripten::function("FromPolygons", &FromPolygons,
                        emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygonSoup", &wrapped::FromPolygonSoup,
+  emscripten::function("FromPolygonSoup", &FromPolygonSoup,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
   emscripten::function("GenerateEnvelope", &GenerateEnvelope,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("GetPolygonsWithHoles", &wrapped::GetPolygonsWithHoles,
                        emscripten::allow_raw_pointers());
   emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
   emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());
@@ -396,21 +459,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("FT__to_double", &FT__to_double,
                        emscripten::allow_raw_pointers());
 
-  // emscripten::function("Surface_mesh__explore", &Surface_mesh__explore,
-  // emscripten::allow_raw_pointers());
-  // emscripten::function("Surface_mesh__triangulate_faces",
-  // &Surface_mesh__triangulate_faces, emscripten::allow_raw_pointers());
-
   emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed,
                        emscripten::allow_raw_pointers());
   emscripten::function("Surface_mesh__is_empty", &Surface_mesh__is_empty,
                        emscripten::allow_raw_pointers());
-  // emscripten::function("Surface_mesh__is_valid_halfedge_graph",
-  // &Surface_mesh__is_valid_halfedge_graph, emscripten::allow_raw_pointers());
-  // emscripten::function("Surface_mesh__is_valid_face_graph",
-  // &Surface_mesh__is_valid_face_graph, emscripten::allow_raw_pointers());
-  // emscripten::function("Surface_mesh__is_valid_polygon_mesh",
-  // &Surface_mesh__is_valid_polygon_mesh, emscripten::allow_raw_pointers());
-  // emscripten::function("Surface_mesh__bbox", &Surface_mesh__bbox,
-  // emscripten::allow_raw_pointers());
 }

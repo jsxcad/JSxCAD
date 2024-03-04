@@ -5,14 +5,14 @@ import { toCgalTransformFromJsTransform, toJsTransformFromCgalTransform } from '
 import { computeHash } from '@jsxcad/sys';
 import { getCgal } from './getCgal.js';
 
-const GEOMETRY_UNKNOWN = 0;
-const GEOMETRY_MESH = 1;
-const GEOMETRY_POLYGONS_WITH_HOLES = 2;
-const GEOMETRY_SEGMENTS = 3;
-const GEOMETRY_POINTS = 4;
-const GEOMETRY_EMPTY = 5;
-const GEOMETRY_REFERENCE = 6;
-const GEOMETRY_EDGES = 7;
+export const GEOMETRY_UNKNOWN = 0;
+export const GEOMETRY_MESH = 1;
+export const GEOMETRY_POLYGONS_WITH_HOLES = 2;
+export const GEOMETRY_SEGMENTS = 3;
+export const GEOMETRY_POINTS = 4;
+export const GEOMETRY_EMPTY = 5;
+export const GEOMETRY_REFERENCE = 6;
+export const GEOMETRY_EDGES = 7;
 
 const meshCache = new WeakMap();
 const occtShapeCache = new Map();
@@ -39,7 +39,6 @@ let testMode = false;
 export const setTestMode = (mode) => { testMode = mode; };
 
 export const fillCgalGeometry = (geometry, inputs) => {
-  const g = getCgal();
   geometry.setSize(inputs.length);
   if (testMode) {
     geometry.setTestMode(testMode);
@@ -77,61 +76,38 @@ export const fillCgalGeometry = (geometry, inputs) => {
         break;
       case 'polygonsWithHoles': {
         const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
-        let cursor = -1;
         geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
-        geometry.fillPolygonsWithHoles(
-          nth,
-          (planeToFill) => {
-            if (exactPlane) {
-              const [a, b, c, d] = exactPlane;
-              g.fillExactQuadruple(planeToFill, a, b, c, d);
-            } else {
-              const [x, y, z, w] = plane;
-              g.fillQuadruple(planeToFill, x, y, z, -w);
+        if (exactPlane) {
+          const [a, b, c, d] = exactPlane;
+          geometry.setPolygonsPlaneExact(nth, a, b, c, d);
+        } else {
+          const [x, y, z, w] = plane;
+          geometry.setPolygonsPlane(nth, x, y, z, w);
+        }
+        for (const polygon of polygonsWithHoles) {
+          geometry.addPolygon(nth);
+          if (polygon.exactPoints) {
+            for (const [x, y] of polygon.exactPoints) {
+              geometry.addPolygonPointExact(nth, x, y);
             }
-          },
-          (boundaryToFill) => {
-            cursor += 1;
-            const polygon = polygonsWithHoles[cursor];
-            if (polygon === undefined) {
-              return false;
+          } else {
+            for (const [x, y] of polygon.points) {
+              geometry.addPolygonPoint(nth, x, y);
             }
-            if (polygon.exactPoints) {
-              for (const [x, y] of polygon.exactPoints) {
-                try {
-                boundaryToFill.addExact(x, y);
-                } catch (error) { console.log(`QQ/polygon/addExact: ${JSON.stringify([x, y])}`); throw error; }
-              }
-            } else {
-              for (const [x, y] of polygon.points) {
-                boundaryToFill.add(x, y);
-              }
-            }
-            return true;
-          },
-          (holeToFill, nthHole) => {
-            const polygon = polygonsWithHoles[cursor];
-            if (polygon === undefined) {
-              return false;
-            }
-            const hole = polygon.holes[nthHole];
-            if (hole === undefined) {
-              return false;
-            }
+          }
+          for (const hole of polygon.holes) {
+            geometry.addPolygonHole(nth);
             if (hole.exactPoints) {
               for (const [x, y] of hole.exactPoints) {
-                try {
-                holeToFill.addExact(x, y);
-                } catch (error) { console.log(`QQ/hole/addExact: ${JSON.stringify([x, y])}`); throw error; }
+                geometry.addPolygonHolePointExact(nth, x, y);
               }
             } else {
               for (const [x, y] of hole.points) {
-                holeToFill.add(x, y);
+                geometry.addPolygonHolePoint(nth, x, y);
               }
             }
-            return true;
           }
-        );
+        }
         break;
       }
       case 'segments': {
@@ -185,6 +161,7 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 };
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
+  const g = getCgal();
   const results = [];
   for (let nth = start; nth < length; nth++) {
     const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
@@ -230,50 +207,12 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        const polygonsWithHoles = [];
-        let exactPlane, plane, exactPoints, points, output;
-        const outputPlane = (x, y, z, w, exactX, exactY, exactZ, exactW) => {
-          plane = [x, y, z, w];
-          exactPlane = [exactX, exactY, exactZ, exactW];
-        };
-        const outputPolygon = (isHole) => {
-          points = [];
-          exactPoints = [];
-          if (isHole) {
-            output.holes.push({
-              points,
-              exactPoints,
-              holes: [],
-            });
-          } else {
-            output = {
-              points,
-              exactPoints,
-              holes: [],
-            };
-            polygonsWithHoles.push(output);
-          }
-        };
-        const outputPolygonPoint = (x, y, exactX, exactY) => {
-          points.push([x, y]);
-          exactPoints.push([exactX, exactY]);
-        };
-        geometry.emitPolygonsWithHoles(
-          nth,
-          outputPlane,
-          outputPolygon,
-          outputPolygonPoint
-        );
-        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        let polygonsWithHoles = {};
+        g.GetPolygonsWithHoles(geometry, nth, polygonsWithHoles);
         const { tags = [] } = inputs[origin] || {};
-        results[nth] = {
-          type: 'polygonsWithHoles',
-          polygonsWithHoles,
-          plane,
-          exactPlane,
-          matrix,
-          tags,
-        };
+        polygonsWithHoles.matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        polygonsWithHoles.tags = tags;
+        results[nth] = polygonsWithHoles;
         break;
       }
       case GEOMETRY_SEGMENTS: {
