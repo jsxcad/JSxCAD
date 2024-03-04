@@ -152,42 +152,38 @@ int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
     const Polygon_with_holes_2& pwh = pwhs[nth];
     emscripten::val js_pwh = js.object();
     emscripten::val js_points = js.array();
+    emscripten::val js_exact_points = js.array();
     for (size_t nth = 0; nth < pwh.outer_boundary().size(); nth++) {
       const Point_2& point = pwh.outer_boundary()[nth];
       emscripten::val js_point = js.array();
       js_point.set(0, emscripten::val(to_double(point.x())));
       js_point.set(1, emscripten::val(to_double(point.y())));
       js_points.set(nth, js_point);
+      emscripten::val js_exact_point = js.array();
+      js_exact_point.set(0, emscripten::val(to_string_from_FT(point.x())));
+      js_exact_point.set(1, emscripten::val(to_string_from_FT(point.y())));
+      js_exact_points.set(nth, js_exact_point);
     }
     js_pwh.set("points", js_points);
-    emscripten::val js_exact_points = js.array();
-    for (size_t nth = 0; nth < pwh.outer_boundary().size(); nth++) {
-      const Point_2& point = pwh.outer_boundary()[nth];
-      emscripten::val js_point = js.array();
-      js_point.set(0, emscripten::val(to_string_from_FT(point.x())));
-      js_point.set(1, emscripten::val(to_string_from_FT(point.y())));
-      js_exact_points.set(nth, js_point);
-    }
     js_pwh.set("exactPoints", js_exact_points);
     emscripten::val js_holes = js.array();
     for (size_t nth_hole = 0; nth_hole < pwh.holes().size(); nth_hole++) {
       const Polygon_2& hole = pwh.holes()[nth];
       emscripten::val js_hole = js.object();
       emscripten::val js_points = js.array();
-      for (size_t nth = 0; nth < hole.size(); nth++) {
-        emscripten::val js_point = js.array();
-        js_point.set(0, emscripten::val(to_double(hole[nth].x())));
-        js_point.set(1, emscripten::val(to_double(hole[nth].y())));
-        js_points.set(nth, js_point);
-      }
-      js_hole.set("points", js_points);
       emscripten::val js_exact_points = js.array();
       for (size_t nth = 0; nth < hole.size(); nth++) {
+        const Point_2& point = hole[nth];
+        emscripten::val js_point = js.array();
+        js_point.set(0, emscripten::val(to_double(point.x())));
+        js_point.set(1, emscripten::val(to_double(point.y())));
+        js_points.set(nth, js_point);
         emscripten::val js_exact_point = js.array();
-        js_exact_point.set(0, emscripten::val(to_string_from_FT(hole[nth][0])));
-        js_exact_point.set(1, emscripten::val(to_string_from_FT(hole[nth][1])));
+        js_exact_point.set(0, emscripten::val(to_string_from_FT(point.x())));
+        js_exact_point.set(1, emscripten::val(to_string_from_FT(point.y())));
         js_exact_points.set(nth, js_exact_point);
       }
+      js_hole.set("points", js_points);
       js_hole.set("exactPoints", js_exact_points);
       js_holes.set(nth_hole, js_hole);
     }
