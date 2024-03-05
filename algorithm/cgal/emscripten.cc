@@ -333,6 +333,8 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("copyInputMeshesToOutputMeshes",
                 &Geometry::copyInputMeshesToOutputMeshes)
       .function("deserializeInputMesh", &Geometry::deserializeInputMesh)
+      .function("finishPolygon", &Geometry::finishPolygon)
+      .function("finishPolygonHole", &Geometry::finishPolygonHole)
       .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
       .function("getOrigin", &Geometry::getOrigin)

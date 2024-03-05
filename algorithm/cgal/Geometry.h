@@ -404,6 +404,20 @@ class Geometry {
     pwh(nth).back().holes().back().push_back(Point_2(to_FT(x), to_FT(y)));
   }
 
+  void finishPolygonHole(int nth) {
+    Polygon_2& hole = pwh(nth).back().holes().back();
+    if (hole.orientation() != CGAL::Sign::NEGATIVE) {
+      hole.reverse_orientation();
+    }
+  }
+
+  void finishPolygon(int nth) {
+    Polygon_2& polygon = pwh(nth).back().outer_boundary();
+    if (polygon.orientation() != CGAL::Sign::POSITIVE) {
+      polygon.reverse_orientation();
+    }
+  }
+
   int print(int nth) {
     switch (type(nth)) {
       case GEOMETRY_POLYGONS_WITH_HOLES:

@@ -106,7 +106,9 @@ export const fillCgalGeometry = (geometry, inputs) => {
                 geometry.addPolygonHolePoint(nth, x, y);
               }
             }
+            geometry.finishPolygonHole(nth);
           }
+          geometry.finishPolygon(nth);
         }
         break;
       }

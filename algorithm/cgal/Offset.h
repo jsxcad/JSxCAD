@@ -1,3 +1,8 @@
+#pragma once
+
+#include "cgal.h"
+#include "offset_util.h"
+
 static int Offset(Geometry* geometry, double initial, double step, double limit,
                   int segments) {
   int size = geometry->size();
@@ -9,8 +14,8 @@ static int Offset(Geometry* geometry, double initial, double step, double limit,
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         std::vector<Polygon_with_holes_2> offset_polygons;
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
-          offsetOfPolygonWithHoles(initial, step, limit, segments, polygon,
-                                   offset_polygons);
+          offsetPolygonWithHoles(initial, step, limit, segments, polygon,
+                                 offset_polygons);
         }
         for (Polygon_with_holes_2& offset_polygon : offset_polygons) {
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
