@@ -464,6 +464,7 @@ class Geometry {
     }
   }
 
+#if 0
   void emitPolygonsWithHoles(
       int nth,
       const std::function<void(double a, double b, double c, double d,
@@ -477,6 +478,7 @@ class Geometry {
     emitPlane(plane(nth), emit_plane);
     ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
   }
+#endif
 
   void addInteger(int nth, int integer) { integers(nth).push_back(integer); }
 
@@ -506,6 +508,7 @@ class Geometry {
     segments(nth).push_back(segment);
   }
 
+#if 0
   void emitSegments(int nth,
                     const std::function<void(double sx, double sy, double sz,
                                              double tx, double ty, double tz,
@@ -523,9 +526,11 @@ class Geometry {
            CGAL::to_double(t.y()), CGAL::to_double(t.z()), exact.str());
     }
   }
+#endif
 
   void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
 
+#if 0
   void emitEdges(int nth,
                  const std::function<void(double sx, double sy, double sz,
                                           double tx, double ty, double tz,
@@ -550,6 +555,7 @@ class Geometry {
            CGAL::to_double(n.z()), edge.face_id, exact.str());
     }
   }
+#endif
 
   void addPoint(int nth, Point point) { points(nth).push_back(point); }
 

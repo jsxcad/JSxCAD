@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 
 #include "cgal.h"
+#include "convert.h"
 
 using emscripten::base;
 using emscripten::select_overload;
@@ -22,6 +23,7 @@ void raw_destructor<Transformation>(Transformation* ptr) {
 }  //  namespace emscripten
 
 namespace wrapped {
+#if 0
 class EmGeometry : public Geometry {
  public:
   EmGeometry() : Geometry() {}
@@ -62,6 +64,7 @@ class EmGeometry : public Geometry {
                });
   }
 };
+#endif
 
 void Transformation__to_exact(std::shared_ptr<const Transformation> t,
                               emscripten::val put) {
@@ -195,6 +198,95 @@ int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
   js.set("plane", js_plane);
   js.set("exactPlane", js_exact_plane);
   js.set("polygonsWithHoles", js_pwhs);
+  return STATUS_OK;
+}
+
+int GetPoints(Geometry* geometry, int nth, emscripten::val js) {
+  emscripten::val js_points = js.array();
+  emscripten::val js_exact_points = js.array();
+  size_t nth_point = 0;
+  for (const Point& point : geometry->points(nth)) {
+    emscripten::val js_point = js.array();
+    js_point.set(0, to_double(point.x()));
+    js_point.set(1, to_double(point.y()));
+    js_point.set(2, to_double(point.z()));
+    js_points.set(nth_point, js_point);
+    std::string exact;
+    write_point(point, exact);
+    js_exact_points.set(nth_point, exact);
+    nth_point += 1;
+  }
+  js.set("type", emscripten::val("points"));
+  js.set("points", js_points);
+  js.set("exactPoints", js_exact_points);
+  return STATUS_OK;
+}
+
+int GetSegments(Geometry* geometry, int nth, emscripten::val js) {
+  emscripten::val js_segments = js.array();
+  size_t nth_segment = 0;
+  for (const Segment& segment : geometry->segments(nth)) {
+    emscripten::val js_source = js.array();
+    js_source.set(0, to_double(segment.source().x()));
+    js_source.set(1, to_double(segment.source().y()));
+    js_source.set(2, to_double(segment.source().z()));
+    emscripten::val js_target = js.array();
+    js_target.set(0, to_double(segment.target().x()));
+    js_target.set(1, to_double(segment.target().y()));
+    js_target.set(2, to_double(segment.target().z()));
+    std::string exact;
+    write_segment(segment, exact);
+    emscripten::val js_segment = js.array();
+    js_segment.set(0, js_source);
+    js_segment.set(1, js_target);
+    js_segment.set(2, emscripten::val(exact));
+    js_segments.set(nth_segment, js_segment);
+    nth_segment += 1;
+  }
+  js.set("type", "segments");
+  js.set("segments", js_segments);
+  return STATUS_OK;
+}
+
+int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
+  emscripten::val js_segments = js.array();
+  emscripten::val js_normals = js.array();
+  emscripten::val js_faces = js.array();
+  size_t nth_segment = 0;
+  for (const Edge& edge : geometry->edges(nth)) {
+    const Segment& segment = edge.segment;
+    const Point& s = segment.source();
+    const Point& t = segment.target();
+    const Point& n = edge.normal;
+    std::ostringstream exact;
+    write_segment(segment, exact);
+    exact << " ";
+    write_point(edge.normal, exact);
+    emscripten::val js_source = js.array();
+    js_source.set(0, to_double(s.x()));
+    js_source.set(1, to_double(s.y()));
+    js_source.set(2, to_double(s.z()));
+    emscripten::val js_target = js.array();
+    js_target.set(0, to_double(t.x()));
+    js_target.set(1, to_double(t.y()));
+    js_target.set(2, to_double(t.z()));
+    emscripten::val js_segment = js.array();
+    js_segment.set(0, js_source);
+    js_segment.set(0, js_target);
+    js_segment.set(0, exact.str());
+    emscripten::val js_normal = js.array();
+    js_normal.set(0, to_double(n.x()));
+    js_normal.set(1, to_double(n.y()));
+    js_normal.set(2, to_double(n.z()));
+    js_segments.set(nth_segment, js_segment);
+    js_normals.set(nth_segment, js_normal);
+    js_faces.set(nth_segment, edge.face_id);
+    nth_segment += 1;
+  }
+  js.set("type", "segments");
+  js.set("segments", js_segments);
+  js.set("normals", js_normals);
+  js.set("faces", js_faces);
   return STATUS_OK;
 }
 
@@ -355,6 +447,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("transformToAbsoluteFrame",
                 &Geometry::transformToAbsoluteFrame);
 
+#if 0
   emscripten::class_<wrapped::EmGeometry, base<Geometry>>("EmGeometry")
       .constructor<>()
       .function("emitPoints", &wrapped::EmGeometry::emEmitPoints)
@@ -362,6 +455,7 @@ EMSCRIPTEN_BINDINGS(module) {
                 &wrapped::EmGeometry::emEmitPolygonsWithHoles)
       .function("emitEdges", &wrapped::EmGeometry::emEmitEdges)
       .function("emitSegments", &wrapped::EmGeometry::emEmitSegments);
+#endif
 
   // New primitives
   emscripten::function("Approximate", &Approximate,
@@ -419,7 +513,13 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
   emscripten::function("GenerateEnvelope", &GenerateEnvelope,
                        emscripten::allow_raw_pointers());
+  emscripten::function("GetEdges", &wrapped::GetEdges,
+                       emscripten::allow_raw_pointers());
   emscripten::function("GetPolygonsWithHoles", &wrapped::GetPolygonsWithHoles,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("GetSegments", &wrapped::GetSegments,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("GetPoints", &wrapped::GetPoints,
                        emscripten::allow_raw_pointers());
   emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
   emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());

@@ -1,9 +1,17 @@
 #pragma once
 
+static double to_double(FT ft) { return CGAL::to_double(ft.exact()); }
+
 static void write_point(const Point& p, std::ostringstream& o) {
   o << p.x().exact() << " ";
   o << p.y().exact() << " ";
   o << p.z().exact();
+}
+
+static void write_point(const Point& p, std::string& s) {
+  std::ostringstream o;
+  write_point(p, o);
+  s = std::move(o.str());
 }
 
 // Approximations are in 100ths of a mm.
@@ -42,10 +50,16 @@ static void read_segment(Segment& segment, std::istringstream& input) {
   segment = Segment(source, target);
 }
 
-static void write_segment(Segment s, std::ostringstream& o) {
+static void write_segment(const Segment& s, std::ostringstream& o) {
   write_point(s.source(), o);
   o << " ";
   write_point(s.target(), o);
+}
+
+static void write_segment(const Segment& s, std::string& str) {
+  std::ostringstream o;
+  write_segment(s, o);
+  str = std::move(o.str());
 }
 
 template <typename emit>

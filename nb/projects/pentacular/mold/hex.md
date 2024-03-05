@@ -1,5 +1,3 @@
-![Image](hex.md.assembled.png)
-
 ```JavaScript
 const assembled = await Hexagon(50, 50, 50)
   .eachEdge(
@@ -10,10 +8,4 @@ const assembled = await Hexagon(50, 50, 50)
     (e, f) => (s) => f.e([1]).join(e)
   )
   .view();
-```
-
-![Image](hex.md.disassembled.png)
-
-```JavaScript
-const disassembled = await assembled.each(to(XY())).pack().view();
 ```

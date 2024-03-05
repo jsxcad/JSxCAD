@@ -1,5 +1,3 @@
-![Image](test2.md.$1.png)
-
 ```JavaScript
 Box(4, 4, 4)
   .cut(

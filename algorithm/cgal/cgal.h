@@ -1120,37 +1120,6 @@ static void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
   }
 }
 
-static void emitPlane(
-    const Plane& plane,
-    const std::function<void(double a, double b, double c, double d,
-                             const std::string& e, const std::string& f,
-                             const std::string& g, const std::string& h)>&
-        emit_plane) {
-  const auto a = plane.a().exact();
-  const auto b = plane.b().exact();
-  const auto c = plane.c().exact();
-  const auto d = plane.d().exact();
-  std::ostringstream x;
-  x << a;
-  std::string xs = x.str();
-  std::ostringstream y;
-  y << b;
-  std::string ys = y.str();
-  std::ostringstream z;
-  z << c;
-  std::string zs = z.str();
-  std::ostringstream w;
-  w << d;
-  std::string ws = w.str();
-  const double xd = CGAL::to_double(a);
-  const double yd = CGAL::to_double(b);
-  const double zd = CGAL::to_double(c);
-  const double ld = std::sqrt(xd * xd + yd * yd + zd * zd);
-  const double wd = CGAL::to_double(d);
-  // Normalize the approximate plane normal.
-  emit_plane(xd / ld, yd / ld, zd / ld, wd, xs, ys, zs, ws);
-}
-
 static CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
   CGAL::Bbox_2 bound;
   for (auto it = gps.arrangement().vertices_begin();

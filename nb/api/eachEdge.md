@@ -12,10 +12,6 @@ Each edge is independently oriented.
 ## See also
 [Edge](../../nb/api/Edge.md)
 
-![Image](eachEdge.md.$2.png)
-
-Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge))
-
 ```JavaScript
 Box(5, 5, 5)
   .eachEdge((edge, length) => s =>
@@ -27,10 +23,6 @@ Box(5, 5, 5)
     'Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge))'
   );
 ```
-
-![Image](eachEdge.md.$3.png)
-
-Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge), (edges, face) => s => edges.and(face.cut(inset(1)).e([0.2])))
 
 ```JavaScript
 Box(5, 5, 5)
@@ -45,8 +37,6 @@ Box(5, 5, 5)
     'Box(5, 5, 5).eachEdge((edge, length) => s => Arc(0.5, [0.2, 0.7], [length], { end: 2 / 4 }).to(edge), (edges, face) => s => edges.and(face.cut(inset(1)).e([0.2])))'
   );
 ```
-
-![Image](eachEdge.md.$4.png)
 
 ```JavaScript
 Box(50, 50, 50)

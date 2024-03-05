@@ -330,13 +330,9 @@ const b = Box(5)
   .y(10);
 ```
 
-![Image](shape.md.$47.png)
-
 ```JavaScript
 b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
 ```
-
-![Image](shape.md.$48.png)
 
 ```JavaScript
 b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
@@ -653,8 +649,6 @@ Loft(Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 Loft('open', Box(3).cut(Arc(2)), Hexagon(3).cut(Arc(2)).z(10)).view();
 ```
 
-![Image](shape.md.$76.png)
-
 ```JavaScript
 Orb(5, 5, 5, { zag: 5 })
   .eachEdge((e, l) => Box([0, 0.1], [0, 0.1], [0, l * 0.75]).to)
@@ -709,8 +703,6 @@ Box(4).fitTo(Arc(3).void()).clip(Box(1, 5)).clean().view();
 Box(4).fitTo(Arc(3).void()).clip(Box(1, 5), 'noVoid').clean().view();
 ```
 
-![Image](shape.md.$85.png)
-
 ```JavaScript
 Box(10, 10, 10)
   .and(
@@ -725,8 +717,6 @@ Box(10, 10, 10)
   )
   .view();
 ```
-
-![Image](shape.md.$86.png)
 
 ```JavaScript
 Arc(10, 10, 10, { sides: 7 })

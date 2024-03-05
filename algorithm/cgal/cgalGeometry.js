@@ -157,7 +157,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
 };
 
 export const toCgalGeometry = (inputs, g = getCgal()) => {
-  const cgalGeometry = new (g.EmGeometry)();
+  const cgalGeometry = new (g.Geometry)();
   fillCgalGeometry(cgalGeometry, inputs);
   return cgalGeometry;
 };
@@ -209,67 +209,44 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        let polygonsWithHoles = {};
-        g.GetPolygonsWithHoles(geometry, nth, polygonsWithHoles);
         const { tags = [] } = inputs[origin] || {};
-        polygonsWithHoles.matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
-        polygonsWithHoles.tags = tags;
-        results[nth] = polygonsWithHoles;
+        const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
+        results[nth] = {
+          tags,
+          matrix
+        };
+        g.GetPolygonsWithHoles(geometry, nth, results[nth]);
         break;
       }
       case GEOMETRY_SEGMENTS: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
         const { tags = [] } = inputs[origin] || {};
-        const segments = [];
         results[nth] = {
-          type: 'segments',
-          segments,
           matrix,
-          tags,
+          tags
         };
-        geometry.emitSegments(nth, (sX, sY, sZ, tX, tY, tZ, exact) => {
-          segments.push([[sX, sY, sZ], [tX, tY, tZ], exact]);
-        });
+        g.GetSegments(geometry, nth, results[nth]);
         break;
       }
       case GEOMETRY_POINTS: {
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
         const { tags = [] } = inputs[origin] || {};
-        const points = [];
-        const exactPoints = [];
         results[nth] = {
-          type: 'points',
-          points,
-          exactPoints,
           matrix,
-          tags,
+          tags
         };
-        geometry.emitPoints(nth, (x, y, z, exact) => {
-          points.push([x, y, z]);
-          exactPoints.push(exact);
-        });
+        g.GetPoints(geometry, nth, results[nth]);
         break;
       }
       case GEOMETRY_EDGES: {
         // TODO: Figure out segments vs edges.
         const matrix = toJsTransformFromCgalTransform(geometry.getTransform(nth));
         const { tags = [] } = inputs[origin] || {};
-        const segments = [];
-        const normals = [];
-        const faces = [];
         results[nth] = {
-          type: 'segments',
-          segments,
           matrix,
           tags,
-          normals,
-          faces,
         };
-        geometry.emitEdges(nth, (sX, sY, sZ, tX, tY, tZ, nX, nY, nZ, face, exact) => {
-          segments.push([[sX, sY, sZ], [tX, tY, tZ], exact]);
-          normals.push([nX, nY, nZ]);
-          faces.push(face);
-        });
+        g.GetEdges(geometry, nth, results[nth]);
         break;
       }
       default:
