@@ -167,13 +167,14 @@ int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
     js_pwh.set("points", js_points);
     js_pwh.set("exactPoints", js_exact_points);
     emscripten::val js_holes = js.array();
-    for (size_t nth_hole = 0; nth_hole < pwh.holes().size(); nth_hole++) {
-      const Polygon_2& hole = pwh.holes()[nth];
+    size_t nth_hole = 0;
+    for (auto hole = pwh.holes_begin(); hole != pwh.holes_end();
+         ++hole, ++nth_hole) {
       emscripten::val js_hole = js.object();
       emscripten::val js_points = js.array();
       emscripten::val js_exact_points = js.array();
-      for (size_t nth = 0; nth < hole.size(); nth++) {
-        const Point_2& point = hole[nth];
+      for (size_t nth = 0; nth < hole->size(); nth++) {
+        const Point_2& point = (*hole)[nth];
         emscripten::val js_point = js.array();
         js_point.set(0, emscripten::val(to_double(point.x())));
         js_point.set(1, emscripten::val(to_double(point.y())));
@@ -341,6 +342,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("getTransform", &Geometry::getTransform)
       .function("getType", &Geometry::getType)
       .function("has_mesh", &Geometry::has_mesh)
+      .function("print", &Geometry::print)
       .function("setTestMode", &Geometry::setTestMode)
       .function("setInputMesh", &Geometry::setInputMesh)
       .function("setPolygonsPlane", &Geometry::setPolygonsPlane)

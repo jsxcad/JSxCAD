@@ -404,6 +404,16 @@ class Geometry {
     pwh(nth).back().holes().back().push_back(Point_2(to_FT(x), to_FT(y)));
   }
 
+  int print(int nth) {
+    switch (type(nth)) {
+      case GEOMETRY_POLYGONS_WITH_HOLES:
+        print_polygons_with_holes(pwh(nth));
+        return STATUS_OK;
+      default:
+        return STATUS_INVALID_INPUT;
+    }
+  }
+
   void convertPlanarMeshesToPolygons() {
     assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {

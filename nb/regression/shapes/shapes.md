@@ -340,6 +340,8 @@ Line([-15, 15])
   .view();
 ```
 
+![Image](shapes.md.$30.png)
+
 ```JavaScript
 Box(12)
   .cut(
@@ -351,6 +353,8 @@ Box(12)
   .fit(separate().offset(1).fuse().color('yellow'))
   .view();
 ```
+
+![Image](shapes.md.$31.png)
 
 ```JavaScript
 Box(12)
@@ -508,6 +512,8 @@ Orb(6, { zag: 2 })
   .view();
 ```
 
+![Image](shapes.md.$50.png)
+
 ```JavaScript
 Box(10, 10, 10)
   .cut(faces(Box(4, 4, 4).to))
@@ -551,6 +557,8 @@ Box(5, 5, 20)
   .smooth(50, 1, ArcX(6, 16, 16))
   .view();
 ```
+
+![Image](shapes.md.$56.png)
 
 ```JavaScript
 Box(10)
