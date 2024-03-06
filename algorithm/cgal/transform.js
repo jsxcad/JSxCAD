@@ -20,20 +20,6 @@ export const identityMatrix = [
   '1 0 0 0 0 1 0 0 0 0 1 0 1',
 ];
 
-const M00 = 0;
-const M01 = 1;
-const M02 = 2;
-const M03 = 3;
-const M10 = 4;
-const M11 = 5;
-const M12 = 6;
-const M13 = 7;
-const M20 = 8;
-const M21 = 9;
-const M22 = 10;
-const M23 = 11;
-const HW = 12;
-
 export const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
   try {
     const transform = [];
@@ -153,6 +139,7 @@ export const matrix6 = (a, b, c, d, tx, ty) => [
   1,
 ];
 
+/*
 export const rotateXToY0 = ([x, y, z]) =>
   toJsTransformFromCgalTransform(
     getCgal().Transformation__rotate_x_to_y0(x, y, z)
@@ -167,3 +154,4 @@ export const rotateZToY0 = ([x, y, z]) =>
   toJsTransformFromCgalTransform(
     getCgal().Transformation__rotate_z_to_y0(x, y, z)
   );
+*/

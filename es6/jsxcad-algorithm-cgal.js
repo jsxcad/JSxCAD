@@ -451,7 +451,7 @@ const identityMatrix = [
   '1 0 0 0 0 1 0 0 0 0 1 0 1',
 ];
 
-const composeTransforms = (a, b) => {
+const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
   try {
     const transform = [];
     getCgal().ComposeTransforms(a, b, transform);
@@ -461,13 +461,12 @@ const composeTransforms = (a, b) => {
   }
 };
 
-const invertTransform = (a) => {
+const invertTransform = (a = identityMatrix) => {
   try {
     const inverted = [];
     getCgal().InvertTransform(a, inverted);
     return inverted;
   } catch (error) {
-    console.log(`QQ/invertTransform: ${JSON.stringify(a)}`);
     throw Error(error);
   }
 };
@@ -570,6 +569,23 @@ const matrix6 = (a, b, c, d, tx, ty) => [
   0,
   1,
 ];
+
+/*
+export const rotateXToY0 = ([x, y, z]) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_x_to_y0(x, y, z)
+  );
+
+export const rotateYToX0 = ([x, y, z]) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_y_to_x0(x, y, z)
+  );
+
+export const rotateZToY0 = ([x, y, z]) =>
+  toJsTransformFromCgalTransform(
+    getCgal().Transformation__rotate_z_to_y0(x, y, z)
+  );
+*/
 
 const STATUS_OK = 0;
 const STATUS_EMPTY = 1;
