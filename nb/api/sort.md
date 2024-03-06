@@ -28,6 +28,10 @@ Box(4, 4, 4)
   );
 ```
 
+![Image](sort.md.$3.png)
+
+_Check this one_.
+
 ```JavaScript
 Box(4, 4, 4)
   .cut(

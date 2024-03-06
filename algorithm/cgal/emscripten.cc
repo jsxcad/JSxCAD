@@ -272,8 +272,8 @@ int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
     js_target.set(2, to_double(t.z()));
     emscripten::val js_segment = js.array();
     js_segment.set(0, js_source);
-    js_segment.set(0, js_target);
-    js_segment.set(0, exact.str());
+    js_segment.set(1, js_target);
+    js_segment.set(2, exact.str());
     emscripten::val js_normal = js.array();
     js_normal.set(0, to_double(n.x()));
     js_normal.set(1, to_double(n.y()));
