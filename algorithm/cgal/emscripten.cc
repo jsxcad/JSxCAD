@@ -23,52 +23,84 @@ void raw_destructor<Transformation>(Transformation* ptr) {
 }  //  namespace emscripten
 
 namespace wrapped {
-#if 0
-class EmGeometry : public Geometry {
- public:
-  EmGeometry() : Geometry() {}
+Transformation to_transform(emscripten::val& js) {
+  if (js[16] != js.undefined()) {
+    return ::to_transform(js[16].as<std::string>());
+  } else {
+    return ::to_transform(js[0].as<double>(),   // M00
+                          js[4].as<double>(),   // M01
+                          js[8].as<double>(),   // M02
+                          js[12].as<double>(),  // M03
 
-  void emEmitPolygonsWithHoles(int nth, emscripten::val emit_plane,
-                               emscripten::val emit_polygon,
-                               emscripten::val emit_point) {
-    emitPolygonsWithHoles(
-        nth,
-        [&](double a, double b, double c, double d, const std::string& e,
-            const std::string& f, const std::string& g,
-            const std::string& h) { emit_plane(a, b, c, d, e, f, g, h); },
-        [&](bool b) { emit_polygon(b); },
-        [&](double x, double y, const std::string& ex, const std::string& ey) {
-          emit_point(x, y, ex, ey);
-        });
+                          js[1].as<double>(),   // M10
+                          js[5].as<double>(),   // M11
+                          js[9].as<double>(),   // M12
+                          js[13].as<double>(),  // M13
+
+                          js[2].as<double>(),    // M20
+                          js[6].as<double>(),    // M21
+                          js[10].as<double>(),   // M21
+                          js[14].as<double>(),   // M21
+                          js[15].as<double>());  // HW
   }
+}
 
-  void emEmitSegments(int nth, emscripten::val emit) {
-    emitSegments(nth, [&](double sx, double sy, double sz, double tx, double ty,
-                          double tz, const std::string& exact) {
-      emit(sx, sy, sz, tx, ty, tz, exact);
-    });
+void to_js(const Transformation& transform, emscripten::val& js) {
+  double doubles[16];
+  to_doubles(transform, doubles);
+  for (size_t nth = 0; nth < 16; nth++) {
+    js.set(nth, doubles[nth]);
   }
+  js.set(16, to_exact(transform));
+}
 
-  void emEmitEdges(int nth, emscripten::val emit) {
-    emitEdges(nth, [&](double sx, double sy, double sz, double tx, double ty,
-                       double tz, double nx, double ny, double nz, int face_id,
-                       const std::string& exact) {
-      emit(sx, sy, sz, tx, ty, tz, nx, ny, nz, exact);
-    });
-  }
+int ComposeTransforms(emscripten::val js_a, emscripten::val js_b,
+                      emscripten::val js_out) {
+  to_js(to_transform(js_a) * to_transform(js_b), js_out);
+  return STATUS_OK;
+}
 
-  void emEmitPoints(int nth, emscripten::val emit_point) {
-    emitPoints(nth,
-               [&](double x, double y, double z, const std::string& exact) {
-                 emit_point(x, y, z, exact);
-               });
-  }
-};
-#endif
+int InvertTransform(emscripten::val js_in, emscripten::val js_out) {
+  Transformation t = to_transform(js_in);
+  Transformation inverse = t.inverse();
+  to_js(inverse, js_out);
+  return STATUS_OK;
+}
 
-void Transformation__to_exact(std::shared_ptr<const Transformation> t,
-                              emscripten::val put) {
-  ::Transformation__to_exact(t, [&](const std::string& str) { put(str); });
+int TranslateTransform(double x, double y, double z, emscripten::val js_out) {
+  to_js(::TranslateTransform(x, y, z), js_out);
+  return STATUS_OK;
+}
+
+int ScaleTransform(double x, double y, double z, emscripten::val js_out) {
+  to_js(::ScaleTransform(x, y, z), js_out);
+  return STATUS_OK;
+}
+
+int XTurnTransform(double turn, emscripten::val js_out) {
+  to_js(TransformationFromXTurn<Transformation, RT>(turn), js_out);
+  return STATUS_OK;
+}
+
+int YTurnTransform(double turn, emscripten::val js_out) {
+  to_js(TransformationFromYTurn<Transformation, RT>(turn), js_out);
+  return STATUS_OK;
+}
+
+int ZTurnTransform(double turn, emscripten::val js_out) {
+  to_js(TransformationFromZTurn<Transformation, RT>(turn), js_out);
+  return STATUS_OK;
+}
+
+int InverseSegmentTransform(double startx, double starty, double startz,
+                            double endx, double endy, double endz,
+                            double normalx, double normaly, double normalz,
+                            emscripten::val js_out) {
+  to_js(::InverseSegmentTransform(Point(startx, starty, startz),
+                                  Point(endx, endy, endz),
+                                  Vector(normalx, normaly, normalz)),
+        js_out);
+  return STATUS_OK;
 }
 
 int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
@@ -290,8 +322,18 @@ int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
+int GetTransform(Geometry* geometry, int nth, emscripten::val js) {
+  to_js(geometry->transform(nth), js);
+  return STATUS_OK;
+}
+
 int Repair(Geometry* geometry, emscripten::val nextStrategy) {
   return ::Repair(geometry, [&]() { return nextStrategy().as<int>(); });
+}
+
+int SetTransform(Geometry* geometry, int nth, emscripten::val js_transform) {
+  geometry->copyTransform(nth, to_transform(js_transform));
+  return STATUS_OK;
 }
 
 int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
@@ -309,35 +351,23 @@ int Validate(Geometry* geometry, emscripten::val get_next_strategy) {
 EMSCRIPTEN_BINDINGS(module) {
   emscripten::class_<Transformation>("Transformation")
       .smart_ptr<std::shared_ptr<const Transformation>>("Transformation");
-  emscripten::function("Transformation__compose", &Transformation__compose);
-  emscripten::function("Transformation__identity", &Transformation__identity);
-  emscripten::function("Transformation__inverse", &Transformation__inverse);
-  emscripten::function("Transformation__from_approximate",
-                       &Transformation__from_approximate);
-  emscripten::function("Transformation__from_exact",
-                       &Transformation__from_exact);
-  emscripten::function("Transformation__to_approximate",
-                       &Transformation__to_approximate);
-  emscripten::function("Transformation__to_exact",
-                       &wrapped::Transformation__to_exact);
-  emscripten::function("Transformation__translate", &Transformation__translate);
-  emscripten::function("Transformation__scale", &Transformation__scale);
-  emscripten::function(
-      "Transformation__rotate_x",
-      &Transformation__rotate_x<Epeck_transformation, Epeck_kernel::RT>);
-  emscripten::function(
-      "Transformation__rotate_y",
-      &Transformation__rotate_y<Epeck_transformation, Epeck_kernel::RT>);
-  emscripten::function(
-      "Transformation__rotate_z",
-      &Transformation__rotate_z<Epeck_transformation, Epeck_kernel::RT>);
-  emscripten::function("Transformation__rotate_x_to_y0",
+  emscripten::function("ComposeTransforms", &wrapped::ComposeTransforms);
+  emscripten::function("InvertTransform", &wrapped::InvertTransform);
+  emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
+  emscripten::function("ScaleTransform", &wrapped::ScaleTransform);
+  emscripten::function("XTurnTransform", &wrapped::XTurnTransform);
+  emscripten::function("YTurnTransform", &wrapped::YTurnTransform);
+  emscripten::function("ZTurnTransform", &wrapped::ZTurnTransform);
+#if 0
+  emscripten::function("rotate_x_to_y0",
                        &Transformation__rotate_x_to_y0);
-  emscripten::function("Transformation__rotate_y_to_x0",
+  emscripten::function("rotate_y_to_x0",
                        &Transformation__rotate_y_to_x0);
-  emscripten::function("Transformation__rotate_z_to_y0",
+  emscripten::function("rotate_z_to_y0",
                        &Transformation__rotate_z_to_y0);
-  emscripten::function("InverseSegmentTransform", &InverseSegmentTransform);
+#endif
+  emscripten::function("InverseSegmentTransform",
+                       &wrapped::InverseSegmentTransform);
 
   emscripten::class_<Triples>("Triples")
       .constructor<>()
@@ -447,16 +477,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("transformToAbsoluteFrame",
                 &Geometry::transformToAbsoluteFrame);
 
-#if 0
-  emscripten::class_<wrapped::EmGeometry, base<Geometry>>("EmGeometry")
-      .constructor<>()
-      .function("emitPoints", &wrapped::EmGeometry::emEmitPoints)
-      .function("emitPolygonsWithHoles",
-                &wrapped::EmGeometry::emEmitPolygonsWithHoles)
-      .function("emitEdges", &wrapped::EmGeometry::emEmitEdges)
-      .function("emitSegments", &wrapped::EmGeometry::emEmitSegments);
-#endif
-
   // New primitives
   emscripten::function("Approximate", &Approximate,
                        emscripten::allow_raw_pointers());
@@ -521,6 +541,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("GetPoints", &wrapped::GetPoints,
                        emscripten::allow_raw_pointers());
+  emscripten::function("GetTransform", &wrapped::GetTransform,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
   emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());
   emscripten::function("Involute", &Involute, emscripten::allow_raw_pointers());
@@ -546,6 +568,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
+  emscripten::function("SetTransform", &wrapped::SetTransform,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Shell", &Shell, emscripten::allow_raw_pointers());
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());

@@ -1,7 +1,5 @@
 export {
   composeTransforms,
-  fromExactToCgalTransform,
-  fromIdentityToCgalTransform,
   fromRotateXToTransform,
   fromRotateYToTransform,
   fromRotateZToTransform,
@@ -11,7 +9,6 @@ export {
   identity,
   invertTransform,
   matrix6,
-  toCgalTransformFromJsTransform,
 } from './transform.js';
 
 export { approximate } from './approximate.js';

@@ -1,5 +1,4 @@
 import { getCgal } from './getCgal.js';
-import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const minkowskiSumOfSurfaceMeshes = (
   mesh,
@@ -10,9 +9,9 @@ export const minkowskiSumOfSurfaceMeshes = (
   try {
     getCgal().MinkowskiSumOfSurfaceMeshes(
       mesh,
-      toCgalTransformFromJsTransform(meshTransform),
+      meshTransform,
       offset,
-      toCgalTransformFromJsTransform(offsetTransform)
+      offsetTransform
     );
   } catch (error) {
     throw Error(error);

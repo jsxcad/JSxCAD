@@ -464,22 +464,6 @@ class Geometry {
     }
   }
 
-#if 0
-  void emitPolygonsWithHoles(
-      int nth,
-      const std::function<void(double a, double b, double c, double d,
-                               const std::string& e, const std::string& f,
-                               const std::string& g, const std::string& h)>&
-          emit_plane,
-      const std::function<void(bool)>& emit_polygon,
-      const std::function<void(double x, double y, const std::string& ex,
-                               const std::string& ey)>& emit_point) {
-    assert(is_local_frame());
-    emitPlane(plane(nth), emit_plane);
-    ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
-  }
-#endif
-
   void addInteger(int nth, int integer) { integers(nth).push_back(integer); }
 
   void addInputPoint(int nth, double x, double y, double z) {
@@ -508,54 +492,7 @@ class Geometry {
     segments(nth).push_back(segment);
   }
 
-#if 0
-  void emitSegments(int nth,
-                    const std::function<void(double sx, double sy, double sz,
-                                             double tx, double ty, double tz,
-                                             const std::string& exact)>& emit) {
-    if (!has_segments(nth)) {
-      return;
-    }
-    for (const Segment& segment : segments(nth)) {
-      const Point& s = segment.source();
-      const Point& t = segment.target();
-      std::ostringstream exact;
-      write_segment(segment, exact);
-      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
-           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
-           CGAL::to_double(t.y()), CGAL::to_double(t.z()), exact.str());
-    }
-  }
-#endif
-
   void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
-
-#if 0
-  void emitEdges(int nth,
-                 const std::function<void(double sx, double sy, double sz,
-                                          double tx, double ty, double tz,
-                                          double nx, double ny, double nz, int,
-                                          const std::string& exact)>& emit) {
-    if (!has_edges(nth)) {
-      return;
-    }
-    for (const Edge& edge : edges(nth)) {
-      const Segment& segment = edge.segment;
-      const Point& s = segment.source();
-      const Point& t = segment.target();
-      const Point& n = edge.normal;
-      std::ostringstream exact;
-      write_segment(segment, exact);
-      exact << " ";
-      write_point(edge.normal, exact);
-      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
-           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
-           CGAL::to_double(t.y()), CGAL::to_double(t.z()),
-           CGAL::to_double(n.x()), CGAL::to_double(n.y()),
-           CGAL::to_double(n.z()), edge.face_id, exact.str());
-    }
-  }
-#endif
 
   void addPoint(int nth, Point point) { points(nth).push_back(point); }
 

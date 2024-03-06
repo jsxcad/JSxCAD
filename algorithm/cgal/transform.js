@@ -1,6 +1,24 @@
 import { getCgal } from './getCgal.js';
 
-export const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+export const identityMatrix = [
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  '1 0 0 0 0 1 0 0 0 0 1 0 1',
+];
 
 const M00 = 0;
 const M01 = 1;
@@ -16,138 +34,21 @@ const M22 = 10;
 const M23 = 11;
 const HW = 12;
 
-const cgalTransforms = new WeakMap();
-
-export const toJsTransformFromCgalTransform = (cgalTransform) => {
+export const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
   try {
-    const a = [];
-    getCgal().Transformation__to_approximate(cgalTransform, (value) =>
-      a.push(value)
-    );
-    const jsTransform = [
-      a[M00],
-      a[M10],
-      a[M20],
-      0,
-      a[M01],
-      a[M11],
-      a[M21],
-      0,
-      a[M02],
-      a[M12],
-      a[M22],
-      0,
-      a[M03],
-      a[M13],
-      a[M23],
-      a[HW],
-    ];
-    getCgal().Transformation__to_exact(cgalTransform, (value) =>
-      jsTransform.push(value)
-    );
-    cgalTransforms.set(jsTransform, cgalTransform);
-    return jsTransform;
+    const transform = [];
+    getCgal().ComposeTransforms(a, b, transform);
+    return transform;
   } catch (error) {
     throw Error(error);
   }
 };
 
-export const toCgalTransformFromJsTransform = (
-  jsTransform = identityMatrix
-) => {
+export const invertTransform = (a = identityMatrix) => {
   try {
-    let cgalTransform = cgalTransforms.get(jsTransform);
-    if (cgalTransform === undefined) {
-      if (jsTransform.length > 16) {
-        cgalTransform = fromExactToCgalTransform(jsTransform.slice(16));
-      } else {
-        const [
-          m00,
-          m10,
-          m20,
-          ,
-          m01,
-          m11,
-          m21,
-          ,
-          m02,
-          m12,
-          m22,
-          ,
-          m03,
-          m13,
-          m23,
-          hw,
-        ] = jsTransform;
-        cgalTransform = fromApproximateToCgalTransform([
-          m00,
-          m01,
-          m02,
-          m03,
-          m10,
-          m11,
-          m12,
-          m13,
-          m20,
-          m21,
-          m22,
-          m23,
-          hw,
-        ]);
-      }
-      cgalTransforms.set(jsTransform, cgalTransform);
-    }
-    return cgalTransform;
-  } catch (e) {
-    console.log(
-      `Malformed transform: ${JSON.stringify(jsTransform)}: ${e.stack}`
-    );
-    throw e;
-  }
-};
-
-export const composeTransforms = (a, b) => {
-  try {
-    return toJsTransformFromCgalTransform(
-      getCgal().Transformation__compose(
-        toCgalTransformFromJsTransform(a),
-        toCgalTransformFromJsTransform(b)
-      )
-    );
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-export const invertTransform = (a) => {
-  try {
-    return toJsTransformFromCgalTransform(
-      getCgal().Transformation__inverse(toCgalTransformFromJsTransform(a))
-    );
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-export const fromExactToCgalTransform = (exact) => {
-  try {
-    return getCgal().Transformation__from_exact(...exact);
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-export const fromApproximateToCgalTransform = (approximate) => {
-  try {
-    return getCgal().Transformation__from_approximate(...approximate);
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-export const fromIdentityToCgalTransform = () => {
-  try {
-    return toJsTransformFromCgalTransform(getCgal().Transformation__identity());
+    const inverted = [];
+    getCgal().InvertTransform(a, inverted);
+    return inverted;
   } catch (error) {
     throw Error(error);
   }
@@ -155,10 +56,9 @@ export const fromIdentityToCgalTransform = () => {
 
 export const fromRotateXToTransform = (turn) => {
   try {
-    const t = toJsTransformFromCgalTransform(
-      getCgal().Transformation__rotate_x(turn)
-    );
-    return t;
+    const transform = [];
+    getCgal().XTurnTransform(turn, transform);
+    return transform;
   } catch (error) {
     throw Error(error);
   }
@@ -166,9 +66,9 @@ export const fromRotateXToTransform = (turn) => {
 
 export const fromRotateYToTransform = (turn) => {
   try {
-    return toJsTransformFromCgalTransform(
-      getCgal().Transformation__rotate_y(turn)
-    );
+    const transform = [];
+    getCgal().YTurnTransform(turn, transform);
+    return transform;
   } catch (error) {
     throw Error(error);
   }
@@ -176,9 +76,9 @@ export const fromRotateYToTransform = (turn) => {
 
 export const fromRotateZToTransform = (turn) => {
   try {
-    return toJsTransformFromCgalTransform(
-      getCgal().Transformation__rotate_z(turn)
-    );
+    const transform = [];
+    getCgal().ZTurnTransform(turn, transform);
+    return transform;
   } catch (error) {
     throw Error(error);
   }
@@ -189,9 +89,9 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
     if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
       throw Error(`Non-finite ${[x, y, z]}`);
     }
-    return toJsTransformFromCgalTransform(
-      getCgal().Transformation__translate(x, y, z)
-    );
+    const transform = [];
+    getCgal().TranslateTransform(x, y, z, transform);
+    return transform;
   } catch (error) {
     throw Error(error);
   }
@@ -199,9 +99,9 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
 
 export const fromScaleToTransform = (x = 1, y = 1, z = 1) => {
   try {
-    return toJsTransformFromCgalTransform(
-      getCgal().Transformation__scale(x, y, z)
-    );
+    const transform = [];
+    getCgal().ScaleTransform(x, y, z, transform);
+    return transform;
   } catch (error) {
     throw Error(error);
   }
@@ -212,24 +112,26 @@ export const fromSegmentToInverseTransform = (
   [normalX = 0, normalY = 0, normalZ = 1]
 ) => {
   try {
-    return toJsTransformFromCgalTransform(
-      getCgal().InverseSegmentTransform(
-        startX,
-        startY,
-        startZ,
-        endX,
-        endY,
-        endZ,
-        normalX,
-        normalY,
-        normalZ
-      )
+    const jsTransform = [];
+    getCgal().InverseSegmentTransform(
+      startX,
+      startY,
+      startZ,
+      endX,
+      endY,
+      endZ,
+      normalX,
+      normalY,
+      normalZ,
+      jsTransform
     );
+    return jsTransform;
   } catch (error) {
     throw Error(error);
   }
 };
 
+// FIX: Why do we need to copy this?
 export const identity = () => [...identityMatrix];
 
 export const matrix6 = (a, b, c, d, tx, ty) => [

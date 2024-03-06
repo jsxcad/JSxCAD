@@ -1,5 +1,4 @@
 import { getCgal } from './getCgal.js';
-import { toCgalTransformFromJsTransform } from './transform.js';
 
 export const smoothSurfaceMesh = (
   mesh,
@@ -10,12 +9,12 @@ export const smoothSurfaceMesh = (
   try {
     const smoothedMesh = getCgal().SmoothSurfaceMesh(
       mesh,
-      toCgalTransformFromJsTransform(matrix),
+      matrix,
       iterations,
       safe,
       selections.length,
       (nth) => selections[nth].mesh,
-      (nth) => toCgalTransformFromJsTransform(selections[nth].matrix)
+      (nth) => selections[nth].matrix
     );
     smoothedMesh.provenance = 'smooth';
     return smoothedMesh;
