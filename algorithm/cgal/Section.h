@@ -19,7 +19,7 @@ static int Section(Geometry* geometry, int count) {
               disorient_plane_along_z(unitPlane<Kernel>(plane));
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->origin(target) = nth;
-          geometry->copyTransform(target, disorientation.inverse());
+          geometry->setTransform(target, disorientation.inverse());
           geometry->plane(target) = plane;
           geometry->pwh(target) = std::move(pwhs);
           break;
@@ -31,7 +31,7 @@ static int Section(Geometry* geometry, int count) {
           }
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->origin(target) = nth;
-          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->setTransform(target, geometry->transform(nthTransform));
           geometry->plane(target) = geometry->plane(nth);
           geometry->pwh(target) = geometry->pwh(nth);
           break;
@@ -39,7 +39,7 @@ static int Section(Geometry* geometry, int count) {
         case GEOMETRY_SEGMENTS: {
           int target = geometry->add(GEOMETRY_SEGMENTS);
           geometry->origin(target) = nth;
-          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->setTransform(target, geometry->transform(nthTransform));
           for (const Segment& segment : geometry->segments(nth)) {
             if (plane.has_on(segment.source()) &&
                 plane.has_on(segment.target())) {
@@ -52,7 +52,7 @@ static int Section(Geometry* geometry, int count) {
         case GEOMETRY_POINTS: {
           int target = geometry->add(GEOMETRY_POINTS);
           geometry->origin(target) = nth;
-          geometry->copyTransform(target, geometry->transform(nthTransform));
+          geometry->setTransform(target, geometry->transform(nthTransform));
           for (const Point& point : geometry->points(nth)) {
             if (plane.has_on(point)) {
               geometry->addPoint(target, point);

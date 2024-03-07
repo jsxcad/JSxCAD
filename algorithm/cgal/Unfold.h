@@ -72,7 +72,7 @@ static int Unfold(
               Transformation t =
                   computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
               geometry->segments(edge).emplace_back(s1, s2);
-              geometry->copyTransform(edge, t.inverse());
+              geometry->setTransform(edge, t.inverse());
               emit_tag(edge, std::string("unfold:edge"));
             }
             {
@@ -80,7 +80,7 @@ static int Unfold(
               Transformation t =
                   computeInverseSegmentTransform(t2, t1, Vector(0, 0, 1));
               geometry->segments(edge).emplace_back(t2, t1);
-              geometry->copyTransform(edge, t.inverse());
+              geometry->setTransform(edge, t.inverse());
               emit_tag(edge, std::string("unfold:edge"));
             }
           } else {
@@ -89,7 +89,7 @@ static int Unfold(
             Transformation t =
                 computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
             geometry->segments(edge).emplace_back(s1, s2);
-            geometry->copyTransform(edge, t.inverse());
+            geometry->setTransform(edge, t.inverse());
             emit_tag(edge, std::string("unfold:edge"));
           }
         }

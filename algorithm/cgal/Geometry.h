@@ -1,5 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #include "transform_util.h"
 
 enum Status {
@@ -64,7 +68,7 @@ class Geometry {
   void resize(int size) {
     size_ = size;
     types_.resize(size);
-    transforms_.resize(size);
+    transforms_.resize(size, Transformation(CGAL::IDENTITY));
     planes_.resize(size);
     gps_.resize(size);
     pwh_.resize(size);
@@ -107,18 +111,9 @@ class Geometry {
   bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
   bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
 
-  bool has_transform(int nth) { return transforms_[nth] != nullptr; }
+  bool has_transform(int nth) { return true; }
 
-  void ensureTransform(int nth) {
-    if (!has_transform(nth)) {
-      transforms_[nth].reset(new Transformation(CGAL::IDENTITY));
-    }
-  }
-
-  const Transformation& transform(int nth) {
-    ensureTransform(nth);
-    return *transforms_[nth];
-  }
+  const Transformation& transform(int nth) { return transforms_[nth]; }
 
   bool has_plane(int nth) { return is_polygons(nth); }
   Plane& plane(int nth) { return planes_[nth]; }
@@ -293,25 +288,16 @@ class Geometry {
 
   std::vector<int>& integers(int nth) { return integers_[nth]; }
 
-  void setTransform(int nth, std::shared_ptr<const Transformation>& transform) {
+  void setTransform(int nth, const Transformation& transform) {
     transforms_[nth] = transform;
   }
 
   void applyTransform(int nth, const Transformation& xform) {
-    copyTransform(nth, xform * transform(nth));
-  }
-
-  void copyTransform(int nth, const Transformation& transform) {
-    transforms_[nth].reset(new Transformation(transform));
-  }
-
-  const std::shared_ptr<const Transformation>& getTransform(int nth) {
-    ensureTransform(nth);
-    return transforms_[nth];
+    setTransform(nth, xform * transform(nth));
   }
 
   void setIdentityTransform(int nth) {
-    copyTransform(nth, Transformation(CGAL::IDENTITY));
+    setTransform(nth, Transformation(CGAL::IDENTITY));
   }
 
   void setInputMesh(int nth, const std::shared_ptr<const Surface_mesh>& mesh) {
@@ -356,6 +342,7 @@ class Geometry {
     return meshes_[nth];
   }
 
+#if 0
   void fillPolygonsWithHoles(
       int nth, const std::function<bool(Quadruple*)>& fillPlane,
       const std::function<void(Polygon_2* boundary)>& fill_boundary,
@@ -368,6 +355,7 @@ class Geometry {
     plane(nth) = unitPlane<Kernel>(local_plane);
     pwh(nth) = std::move(polygons);
   }
+#endif
 
   void addPolygon(int nth) { pwh(nth).emplace_back(); }
 
@@ -375,20 +363,26 @@ class Geometry {
     plane(nth) = unitPlane<Kernel>(Plane(x, y, z, w));
   }
 
-  void setPolygonsPlaneExact(int nth, const std::string& a,
-                             const std::string& b, const std::string& c,
-                             const std::string& d) {
-    plane(nth) =
-        unitPlane<Kernel>(Plane(to_FT(a), to_FT(b), to_FT(c), to_FT(d)));
+  void setPolygonsPlaneExact(int nth, const std::string& exact) {
+    std::istringstream s(exact);
+    FT a, b, c, d;
+    s >> a;
+    s >> b;
+    s >> c;
+    s >> d;
+    plane(nth) = unitPlane<Kernel>(Plane(a, b, c, d));
   }
 
   void addPolygonPoint(int nth, double x, double y) {
     pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
   }
 
-  void addPolygonPointExact(int nth, const std::string& x,
-                            const std::string& y) {
-    pwh(nth).back().outer_boundary().push_back(Point_2(to_FT(x), to_FT(y)));
+  void addPolygonPointExact(int nth, const std::string& exact) {
+    std::istringstream s(exact);
+    FT x, y;
+    s >> x;
+    s >> y;
+    pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
   }
 
   void addPolygonHole(int nth) {
@@ -399,9 +393,12 @@ class Geometry {
     pwh(nth).back().holes().back().push_back(Point_2(x, y));
   }
 
-  void addPolygonHolePointExact(int nth, const std::string& x,
-                                const std::string& y) {
-    pwh(nth).back().holes().back().push_back(Point_2(to_FT(x), to_FT(y)));
+  void addPolygonHolePointExact(int nth, const std::string& exact) {
+    std::istringstream s(exact);
+    FT x, y;
+    s >> x;
+    s >> y;
+    pwh(nth).back().holes().back().push_back(Point_2(x, y));
   }
 
   void finishPolygonHole(int nth) {
@@ -496,6 +493,7 @@ class Geometry {
 
   void addPoint(int nth, Point point) { points(nth).push_back(point); }
 
+#if 0
   void emitPoints(
       int nth,
       const std::function<void(double x, double y, double z,
@@ -504,6 +502,7 @@ class Geometry {
       emitPoint(point, emit_point);
     }
   }
+#endif
 
   void copyInputMeshesToOutputMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {
@@ -528,7 +527,11 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       if (has_gps(nth)) {
         pwh(nth).clear();
-        gps(nth).polygons_with_holes(std::back_inserter(pwh(nth)));
+        Polygons_with_holes_2 complex_pwhs;
+        gps(nth).polygons_with_holes(std::back_inserter(complex_pwhs));
+        Polygons_with_holes_2 simple_pwhs;
+        simplifyPolygonsWithHoles(complex_pwhs, simple_pwhs);
+        pwh(nth) = std::move(simple_pwhs);
       }
     }
   }
@@ -710,7 +713,7 @@ class Geometry {
   int size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
-  std::vector<std::shared_ptr<const Transformation>> transforms_;
+  std::vector<Transformation> transforms_;
   std::vector<Plane> planes_;
   std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;

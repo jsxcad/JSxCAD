@@ -8,6 +8,8 @@ static int Cut(Geometry* geometry, int targets, bool open, bool exact) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
+  std::cout << "Cut/1" << std::endl;
+
   for (int target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
@@ -71,12 +73,14 @@ static int Cut(Geometry* geometry, int targets, bool open, bool exact) {
         for (int nth = targets; nth < size; nth++) {
           switch (geometry->getType(nth)) {
             case GEOMETRY_POLYGONS_WITH_HOLES: {
+              std::cout << "Cut/2" << std::endl;
               if (geometry->plane(target) != geometry->plane(nth) ||
                   geometry->noOverlap2(target, nth)) {
                 continue;
               }
               geometry->gps(target).difference(geometry->gps(nth));
               geometry->updateBounds2(target);
+              std::cout << "Cut/3" << std::endl;
               break;
             }
             case GEOMETRY_MESH: {
@@ -144,10 +148,14 @@ static int Cut(Geometry* geometry, int targets, bool open, bool exact) {
     }
   }
 
+  std::cout << "Cut/4" << std::endl;
   geometry->resize(targets);
   geometry->removeEmptyMeshes();
+  std::cout << "Cut/5" << std::endl;
   geometry->copyGeneralPolygonSetsToPolygonsWithHoles();
+  std::cout << "Cut/6" << std::endl;
   geometry->convertPlanarMeshesToPolygons();
+  std::cout << "Cut/7" << std::endl;
   geometry->transformToLocalFrame();
 
   return STATUS_OK;

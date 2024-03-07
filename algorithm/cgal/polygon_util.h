@@ -1,6 +1,8 @@
 #pragma once
 
 #include <CGAL/Cartesian_converter.h>
+#include <CGAL/Polygon_2.h>
+#include <CGAL/Polygon_with_holes_2.h>
 
 #include "printing.h"
 
@@ -196,6 +198,26 @@ static void simplifyPolygon(Polygon_2& polygon,
 }
 
 template <typename Polygon_2, typename Polygons_with_holes_2>
+static void toBoundariesAndHolesFromPolygonWithHoles(
+    const Polygon_with_holes_2& pwh, std::vector<Polygon_2>& boundaries,
+    std::vector<Polygon_2>& holes) {
+  boundaries.push_back(pwh.outer_boundary());
+  for (const auto& hole : pwh.holes()) {
+    holes.push_back(hole);
+  }
+}
+
+template <typename Polygon_2, typename Polygons_with_holes_2>
+static void toBoundariesAndHolesFromPolygonsWithHoles(
+    const std::vector<Polygon_with_holes_2>& pwhs,
+    std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes) {
+  for (const auto& pwh : pwhs) {
+    toBoundariesAndHolesFromPolygonWithHoles<Polygon_2, Polygons_with_holes_2>(
+        pwh, boundaries, holes);
+  }
+}
+
+template <typename Polygon_2, typename Polygons_with_holes_2>
 static bool toPolygonsWithHolesFromBoundariesAndHoles(
     std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
     Polygons_with_holes_2& pwhs) {
@@ -236,7 +258,7 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
 }
 
 template <typename Polygon_2, typename Polygons_with_holes_2>
-static bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
+static void toSimplePolygonsWithHolesFromBoundariesAndHoles(
     std::vector<Polygon_2>& boundaries, std::vector<Polygon_2>& holes,
     Polygons_with_holes_2& pwhs) {
   std::vector<Polygon_2> simple_boundaries;
@@ -252,7 +274,7 @@ static bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
 }
 
 template <typename Polygon_2, typename Polygons_with_holes_2>
-static bool toSimplePolygonsWithHolesFromBoundariesAndHoles(
+static void toSimplePolygonsWithHolesFromBoundariesAndHoles(
     const std::vector<Polygon_2>& boundaries,
     const std::vector<Polygon_2>& holes, Polygons_with_holes_2& pwhs) {
   std::vector<Polygon_2> simple_boundaries;
@@ -290,4 +312,13 @@ static bool convert(const CGAL::Polygon_with_holes_2<SK>& src,
   toSimplePolygonsWithHolesFromBoundariesAndHoles(dst_boundaries, dst_holes,
                                                   dst);
   return true;
+};
+
+static void simplifyPolygonsWithHoles(const Polygons_with_holes_2& complex,
+                                      Polygons_with_holes_2& simple) {
+  std::vector<Polygon_2> boundaries;
+  std::vector<Polygon_2> holes;
+  toBoundariesAndHolesFromPolygonsWithHoles<Polygon_2, Polygons_with_holes_2>(
+      complex, boundaries, holes);
+  toSimplePolygonsWithHolesFromBoundariesAndHoles(boundaries, holes, simple);
 };

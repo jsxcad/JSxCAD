@@ -60,8 +60,8 @@ static int FaceEdges(Geometry* geometry, int count) {
             }
           }
         }
-        geometry->copyTransform(face_target, geometry->transform(nth));
-        geometry->copyTransform(edge_target, geometry->transform(nth));
+        geometry->setTransform(face_target, geometry->transform(nth));
+        geometry->setTransform(edge_target, geometry->transform(nth));
         break;
       }
       case GEOMETRY_MESH: {
@@ -162,8 +162,8 @@ static int FaceEdges(Geometry* geometry, int count) {
           Polygons_with_holes_2 pwhs;
           convertArrangementToPolygonsWithHolesEvenOdd(arrangement, pwhs);
           geometry->pwh(face_target) = std::move(pwhs);
-          geometry->copyTransform(edge_target, disorientation.inverse());
-          geometry->copyTransform(face_target, disorientation.inverse());
+          geometry->setTransform(edge_target, disorientation.inverse());
+          geometry->setTransform(face_target, disorientation.inverse());
           geometry->plane(face_target) = plane;
         }
 

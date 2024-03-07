@@ -21,7 +21,7 @@ static int Inset(Geometry* geometry, double initial, double step, double limit,
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->pwh(target).push_back(inset_polygon);
           geometry->plane(target) = geometry->plane(nth);
-          geometry->copyTransform(target, geometry->transform(nth));
+          geometry->setTransform(target, geometry->transform(nth));
         }
         break;
       }

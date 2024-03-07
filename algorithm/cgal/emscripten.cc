@@ -145,22 +145,13 @@ int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
 
 static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
                           emscripten::val& js_exact_plane) {
+  js_plane = js_plane.array();
   const auto a = plane.a().exact();
   const auto b = plane.b().exact();
   const auto c = plane.c().exact();
   const auto d = plane.d().exact();
-  std::ostringstream x;
-  x << a;
-  std::string xs = x.str();
-  std::ostringstream y;
-  y << b;
-  std::string ys = y.str();
-  std::ostringstream z;
-  z << c;
-  std::string zs = z.str();
-  std::ostringstream w;
-  w << d;
-  std::string ws = w.str();
+  std::ostringstream exact;
+  exact << a << " " << b << " " << c << " " << d;
   const double xd = CGAL::to_double(a);
   const double yd = CGAL::to_double(b);
   const double zd = CGAL::to_double(c);
@@ -171,16 +162,13 @@ static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
   js_plane.set(1, emscripten::val(yd / ld));
   js_plane.set(2, emscripten::val(zd / ld));
   js_plane.set(3, emscripten::val(wd));
-  js_exact_plane.set(0, emscripten::val(xs));
-  js_exact_plane.set(1, emscripten::val(ys));
-  js_exact_plane.set(2, emscripten::val(zs));
-  js_exact_plane.set(3, emscripten::val(ws));
+  js_exact_plane = emscripten::val(exact.str());
 }
 
 int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
   emscripten::val js_pwhs = js.array();
-  emscripten::val js_plane = js.array();
-  emscripten::val js_exact_plane = js.array();
+  emscripten::val js_plane;
+  emscripten::val js_exact_plane;
   fill_js_plane(geometry->plane(nth), js_plane, js_exact_plane);
   const Polygons_with_holes_2& pwhs = geometry->pwh(nth);
   for (size_t nth = 0; nth < pwhs.size(); nth++) {
@@ -194,10 +182,9 @@ int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
       js_point.set(0, emscripten::val(to_double(point.x())));
       js_point.set(1, emscripten::val(to_double(point.y())));
       js_points.set(nth, js_point);
-      emscripten::val js_exact_point = js.array();
-      js_exact_point.set(0, emscripten::val(to_string_from_FT(point.x())));
-      js_exact_point.set(1, emscripten::val(to_string_from_FT(point.y())));
-      js_exact_points.set(nth, js_exact_point);
+      std::ostringstream o;
+      o << point.x().exact() << " " << point.y().exact();
+      js_exact_points.set(nth, o.str());
     }
     js_pwh.set("points", js_points);
     js_pwh.set("exactPoints", js_exact_points);
@@ -214,10 +201,9 @@ int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
         js_point.set(0, emscripten::val(to_double(point.x())));
         js_point.set(1, emscripten::val(to_double(point.y())));
         js_points.set(nth, js_point);
-        emscripten::val js_exact_point = js.array();
-        js_exact_point.set(0, emscripten::val(to_string_from_FT(point.x())));
-        js_exact_point.set(1, emscripten::val(to_string_from_FT(point.y())));
-        js_exact_points.set(nth, js_exact_point);
+        std::ostringstream o;
+        o << point.x().exact() << " " << point.y().exact();
+        js_exact_points.set(nth, o.str());
       }
       js_hole.set("points", js_points);
       js_hole.set("exactPoints", js_exact_points);
@@ -332,7 +318,7 @@ int Repair(Geometry* geometry, emscripten::val nextStrategy) {
 }
 
 int SetTransform(Geometry* geometry, int nth, emscripten::val js_transform) {
-  geometry->copyTransform(nth, to_transform(js_transform));
+  geometry->setTransform(nth, to_transform(js_transform));
   return STATUS_OK;
 }
 
@@ -463,7 +449,6 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("getSerializedInputMesh", &Geometry::getSerializedInputMesh)
       .function("getSerializedMesh", &Geometry::getSerializedMesh)
       .function("getSize", &Geometry::getSize)
-      .function("getTransform", &Geometry::getTransform)
       .function("getType", &Geometry::getType)
       .function("has_mesh", &Geometry::has_mesh)
       .function("print", &Geometry::print)

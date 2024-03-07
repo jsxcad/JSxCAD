@@ -75,8 +75,7 @@ export const fillCgalGeometry = (geometry, inputs) => {
         const { exactPlane, plane, polygonsWithHoles } = inputs[nth];
         geometry.setType(nth, GEOMETRY_POLYGONS_WITH_HOLES);
         if (exactPlane) {
-          const [a, b, c, d] = exactPlane;
-          geometry.setPolygonsPlaneExact(nth, a, b, c, d);
+          geometry.setPolygonsPlaneExact(nth, exactPlane);
         } else {
           const [x, y, z, w] = plane;
           geometry.setPolygonsPlane(nth, x, y, z, w);
@@ -84,8 +83,8 @@ export const fillCgalGeometry = (geometry, inputs) => {
         for (const polygon of polygonsWithHoles) {
           geometry.addPolygon(nth);
           if (polygon.exactPoints) {
-            for (const [x, y] of polygon.exactPoints) {
-              geometry.addPolygonPointExact(nth, x, y);
+            for (const exact of polygon.exactPoints) {
+              geometry.addPolygonPointExact(nth, exact);
             }
           } else {
             for (const [x, y] of polygon.points) {
@@ -95,8 +94,8 @@ export const fillCgalGeometry = (geometry, inputs) => {
           for (const hole of polygon.holes) {
             geometry.addPolygonHole(nth);
             if (hole.exactPoints) {
-              for (const [x, y] of hole.exactPoints) {
-                geometry.addPolygonHolePointExact(nth, x, y);
+              for (const exact of hole.exactPoints) {
+                geometry.addPolygonHolePointExact(nth, exact);
               }
             } else {
               for (const [x, y] of hole.points) {

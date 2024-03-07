@@ -227,21 +227,6 @@ static void MakeDeterministic() {
   std::srand(0);
 }
 
-static FT to_FT(const std::string& v) {
-  std::istringstream i(v);
-  FT ft;
-  i >> ft;
-  return ft;
-}
-
-static FT to_FT(const double v) { return FT(v); }
-
-std::string to_string_from_FT(FT ft) {
-  std::ostringstream s;
-  s << ft.exact();
-  return s.str();
-}
-
 // These may need adjustment.
 static FT compute_scaling_factor(double value) {
   return CGAL::simplest_rational_in_interval<FT>(value * 0.999, value * 1.001);
@@ -573,14 +558,6 @@ static void fillExactQuadruple(Quadruple* q, const std::string& a,
   (*q)[1] = to_FT(b);
   (*q)[2] = to_FT(c);
   (*q)[3] = to_FT(d);
-}
-
-static void admitPlane(Plane& plane,
-                       const std::function<bool(Quadruple*)>& fill_plane) {
-  Quadruple q;
-  Quadruple* qp = &q;
-  fill_plane(qp);
-  plane = Plane(q[0], q[1], q[2], q[3]);
 }
 
 template <typename MAP>

@@ -9,6 +9,10 @@ See: [Arc](../../nb/api/Arc.md).
 
 _FIX: The whole Arc should be red._
 
+![Image](Octagon.md.$2.png)
+
+Box(10).color('black').fitTo(Arc(10).color('red'), Octagon(10).color('blue')) shows the hexagon inscribed within the arc inscribed within the box.
+
 ```JavaScript
 Box(10)
   .color('black')

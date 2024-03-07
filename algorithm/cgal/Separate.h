@@ -43,7 +43,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
             }
             int target = geometry->add(GEOMETRY_MESH);
             geometry->setMesh(target, new Surface_mesh(mesh));
-            geometry->copyTransform(target, geometry->transform(nth));
+            geometry->setTransform(target, geometry->transform(nth));
           }
         }
 
@@ -52,7 +52,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
             CGAL::Polygon_mesh_processing::reverse_face_orientations(mesh);
             int target = geometry->add(GEOMETRY_MESH);
             geometry->setMesh(target, new Surface_mesh(mesh));
-            geometry->copyTransform(target, geometry->transform(nth));
+            geometry->setTransform(target, geometry->transform(nth));
           }
         }
         break;
@@ -61,7 +61,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
           if (keep_shapes) {
             int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-            geometry->copyTransform(target, geometry->transform(nth));
+            geometry->setTransform(target, geometry->transform(nth));
             geometry->plane(target) = geometry->plane(nth);
             if (keep_holes_in_shapes) {
               geometry->pwh(target).push_back(polygon);
@@ -74,7 +74,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
             for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
                  ++hole) {
               int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-              geometry->copyTransform(target, geometry->transform(nth));
+              geometry->setTransform(target, geometry->transform(nth));
               geometry->plane(target) = geometry->plane(nth);
               Polygon_2 shape = *hole;
               shape.reverse_orientation();
