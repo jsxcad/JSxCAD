@@ -6,6 +6,7 @@
 using emscripten::base;
 using emscripten::select_overload;
 
+#if 0
 namespace emscripten {
 namespace internal {
 template <>
@@ -21,9 +22,10 @@ void raw_destructor<Transformation>(Transformation* ptr) {
 }
 }  //  namespace internal
 }  //  namespace emscripten
+#endif
 
 namespace wrapped {
-Transformation to_transform(emscripten::val& js) {
+static Transformation to_transform(emscripten::val& js) {
   if (js[16] != js.undefined()) {
     return ::to_transform(js[16].as<std::string>());
   } else {
@@ -45,7 +47,7 @@ Transformation to_transform(emscripten::val& js) {
   }
 }
 
-void to_js(const Transformation& transform, emscripten::val& js) {
+static void to_js(const Transformation& transform, emscripten::val& js) {
   double doubles[16];
   to_doubles(transform, doubles);
   for (size_t nth = 0; nth < 16; nth++) {
@@ -54,48 +56,50 @@ void to_js(const Transformation& transform, emscripten::val& js) {
   js.set(16, to_exact(transform));
 }
 
-int ComposeTransforms(emscripten::val js_a, emscripten::val js_b,
-                      emscripten::val js_out) {
+static int ComposeTransforms(emscripten::val js_a, emscripten::val js_b,
+                             emscripten::val js_out) {
   to_js(to_transform(js_a) * to_transform(js_b), js_out);
   return STATUS_OK;
 }
 
-int InvertTransform(emscripten::val js_in, emscripten::val js_out) {
+static int InvertTransform(emscripten::val js_in, emscripten::val js_out) {
   Transformation t = to_transform(js_in);
   Transformation inverse = t.inverse();
   to_js(inverse, js_out);
   return STATUS_OK;
 }
 
-int TranslateTransform(double x, double y, double z, emscripten::val js_out) {
+static int TranslateTransform(double x, double y, double z,
+                              emscripten::val js_out) {
   to_js(::TranslateTransform(x, y, z), js_out);
   return STATUS_OK;
 }
 
-int ScaleTransform(double x, double y, double z, emscripten::val js_out) {
+static int ScaleTransform(double x, double y, double z,
+                          emscripten::val js_out) {
   to_js(::ScaleTransform(x, y, z), js_out);
   return STATUS_OK;
 }
 
-int XTurnTransform(double turn, emscripten::val js_out) {
+static int XTurnTransform(double turn, emscripten::val js_out) {
   to_js(TransformationFromXTurn<Transformation, RT>(turn), js_out);
   return STATUS_OK;
 }
 
-int YTurnTransform(double turn, emscripten::val js_out) {
+static int YTurnTransform(double turn, emscripten::val js_out) {
   to_js(TransformationFromYTurn<Transformation, RT>(turn), js_out);
   return STATUS_OK;
 }
 
-int ZTurnTransform(double turn, emscripten::val js_out) {
+static int ZTurnTransform(double turn, emscripten::val js_out) {
   to_js(TransformationFromZTurn<Transformation, RT>(turn), js_out);
   return STATUS_OK;
 }
 
-int InverseSegmentTransform(double startx, double starty, double startz,
-                            double endx, double endy, double endz,
-                            double normalx, double normaly, double normalz,
-                            emscripten::val js_out) {
+static int InverseSegmentTransform(double startx, double starty, double startz,
+                                   double endx, double endy, double endz,
+                                   double normalx, double normaly,
+                                   double normalz, emscripten::val js_out) {
   to_js(::InverseSegmentTransform(Point(startx, starty, startz),
                                   Point(endx, endy, endz),
                                   Vector(normalx, normaly, normalz)),
@@ -103,16 +107,17 @@ int InverseSegmentTransform(double startx, double starty, double startz,
   return STATUS_OK;
 }
 
-int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
+static int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
   return ::ComputeBoundingBox(
       geometry,
       [&](double xmin, double ymin, double zmin, double xmax, double ymax,
           double zmax) { emit(xmin, ymin, zmin, xmax, ymax, zmax); });
 }
 
-int ComputeImplicitVolume(Geometry* geometry, emscripten::val op, double radius,
-                          double angular_bound, double radius_bound,
-                          double distance_bound, double error_bound) {
+static int ComputeImplicitVolume(Geometry* geometry, emscripten::val op,
+                                 double radius, double angular_bound,
+                                 double radius_bound, double distance_bound,
+                                 double error_bound) {
   return ::ComputeImplicitVolume(
       geometry,
       [&](double x, double y, double z) -> double {
@@ -121,22 +126,22 @@ int ComputeImplicitVolume(Geometry* geometry, emscripten::val op, double radius,
       radius, angular_bound, radius_bound, distance_bound, error_bound);
 }
 
-int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode,
-             bool exact) {
+static int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode,
+                    bool exact) {
   return ::Disjoint(
       geometry,
       [&](int index) -> bool { return getIsMasked(index).as<bool>(); }, mode,
       exact);
 }
 
-int EachPoint(Geometry* geometry, emscripten::val emit_point) {
+static static int EachPoint(Geometry* geometry, emscripten::val emit_point) {
   return ::EachPoint(
       geometry, [&](double x, double y, double z, const std::string& exact) {
         return emit_point(x, y, z, exact);
       });
 }
 
-int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
+static int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
   return ::EachTriangle(
       geometry, [&](double x, double y, double z, const std::string& exact) {
         emit_point(x, y, z, exact);
@@ -165,7 +170,8 @@ static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
   js_exact_plane = emscripten::val(exact.str());
 }
 
-int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
+static int GetPolygonsWithHoles(Geometry* geometry, int nth,
+                                emscripten::val js) {
   emscripten::val js_pwhs = js.array();
   emscripten::val js_plane;
   emscripten::val js_exact_plane;
@@ -219,7 +225,7 @@ int GetPolygonsWithHoles(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
-int GetPoints(Geometry* geometry, int nth, emscripten::val js) {
+static int GetPoints(Geometry* geometry, int nth, emscripten::val js) {
   emscripten::val js_points = js.array();
   emscripten::val js_exact_points = js.array();
   size_t nth_point = 0;
@@ -240,7 +246,7 @@ int GetPoints(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
-int GetSegments(Geometry* geometry, int nth, emscripten::val js) {
+static int GetSegments(Geometry* geometry, int nth, emscripten::val js) {
   emscripten::val js_segments = js.array();
   size_t nth_segment = 0;
   for (const Segment& segment : geometry->segments(nth)) {
@@ -266,7 +272,7 @@ int GetSegments(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
-int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
+static int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
   emscripten::val js_segments = js.array();
   emscripten::val js_normals = js.array();
   emscripten::val js_faces = js.array();
@@ -308,35 +314,39 @@ int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
-int GetTransform(Geometry* geometry, int nth, emscripten::val js) {
+static int GetTransform(Geometry* geometry, int nth, emscripten::val js) {
   to_js(geometry->transform(nth), js);
   return STATUS_OK;
 }
 
-int Repair(Geometry* geometry, emscripten::val nextStrategy) {
+static int Repair(Geometry* geometry, emscripten::val nextStrategy) {
   return ::Repair(geometry, [&]() { return nextStrategy().as<int>(); });
 }
 
-int SetTransform(Geometry* geometry, int nth, emscripten::val js_transform) {
+static int SetTransform(Geometry* geometry, int nth,
+                        emscripten::val js_transform) {
   geometry->setTransform(nth, to_transform(js_transform));
   return STATUS_OK;
 }
 
-int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit_tag) {
+static int Unfold(Geometry* geometry, bool enable_tabs,
+                  emscripten::val emit_tag) {
   return ::Unfold(
       geometry, enable_tabs,
       [&](int index, const std::string& tag) { emit_tag(index, tag); });
 }
 
-int Validate(Geometry* geometry, emscripten::val get_next_strategy) {
+static int Validate(Geometry* geometry, emscripten::val get_next_strategy) {
   return ::Validate(geometry,
                     [&]() -> int { return get_next_strategy().as<int>(); });
 }
 }  // namespace wrapped
 
 EMSCRIPTEN_BINDINGS(module) {
+#if 0
   emscripten::class_<Transformation>("Transformation")
       .smart_ptr<std::shared_ptr<const Transformation>>("Transformation");
+#endif
   emscripten::function("ComposeTransforms", &wrapped::ComposeTransforms);
   emscripten::function("InvertTransform", &wrapped::InvertTransform);
   emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
@@ -344,17 +354,10 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("XTurnTransform", &wrapped::XTurnTransform);
   emscripten::function("YTurnTransform", &wrapped::YTurnTransform);
   emscripten::function("ZTurnTransform", &wrapped::ZTurnTransform);
-#if 0
-  emscripten::function("rotate_x_to_y0",
-                       &Transformation__rotate_x_to_y0);
-  emscripten::function("rotate_y_to_x0",
-                       &Transformation__rotate_y_to_x0);
-  emscripten::function("rotate_z_to_y0",
-                       &Transformation__rotate_z_to_y0);
-#endif
   emscripten::function("InverseSegmentTransform",
                        &wrapped::InverseSegmentTransform);
 
+#if 0
   emscripten::class_<Triples>("Triples")
       .constructor<>()
       .function("push_back",
@@ -400,27 +403,25 @@ EMSCRIPTEN_BINDINGS(module) {
       .constructor<std::size_t>();
   emscripten::class_<Vertex_index>("Vertex_index").constructor<std::size_t>();
 
-  emscripten::class_<Surface_mesh>("Surface_mesh")
-      .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh")
-      .function("is_valid",
-                select_overload<bool(bool) const>(&Surface_mesh::is_valid))
-      .function("is_empty", &Surface_mesh::is_empty)
-      .function("number_of_vertices", &Surface_mesh::number_of_vertices)
-      .function("number_of_halfedges", &Surface_mesh::number_of_halfedges)
-      .function("number_of_edges", &Surface_mesh::number_of_edges)
-      .function("number_of_faces", &Surface_mesh::number_of_faces)
-      .function("has_garbage", &Surface_mesh::has_garbage);
-
   emscripten::class_<Quadruple>("Quadruple").constructor<>();
   emscripten::function("fillQuadruple", &fillQuadruple,
                        emscripten::allow_raw_pointers());
   emscripten::function("fillExactQuadruple", &fillExactQuadruple,
                        emscripten::allow_raw_pointers());
+#endif
 
-  emscripten::function("DeserializeMesh", &DeserializeMesh);
-  emscripten::function("SerializeMesh", &SerializeMesh);
+  emscripten::class_<Surface_mesh>("Surface_mesh")
+      .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh")
+      // .function("is_valid", select_overload<bool(bool)
+      // const>(&Surface_mesh::is_valid)) .function("is_empty",
+      // &Surface_mesh::is_empty) .function("number_of_vertices",
+      // &Surface_mesh::number_of_vertices) .function("number_of_halfedges",
+      // &Surface_mesh::number_of_halfedges) .function("number_of_edges",
+      // &Surface_mesh::number_of_edges) .function("number_of_faces",
+      // &Surface_mesh::number_of_faces) .function("has_garbage",
+      // &Surface_mesh::has_garbage);
+      ;
 
-  // New classes
   emscripten::class_<Geometry>("Geometry")
       .constructor<>()
       .function("addInputPoint", &Geometry::addInputPoint)
@@ -496,6 +497,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
   emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());
+  emscripten::function("DeserializeMesh", &DeserializeMesh);
   emscripten::function("DilateXY", &DilateXY, emscripten::allow_raw_pointers());
   emscripten::function("Disjoint", &wrapped::Disjoint,
                        emscripten::allow_raw_pointers());
@@ -553,6 +555,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
+  emscripten::function("SerializeMesh", &SerializeMesh);
   emscripten::function("SetTransform", &wrapped::SetTransform,
                        emscripten::allow_raw_pointers());
   emscripten::function("Shell", &Shell, emscripten::allow_raw_pointers());

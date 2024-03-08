@@ -1,3 +1,4 @@
+/*
 import { getCgal } from './getCgal.js';
 
 export const fromSurfaceMeshToLazyGraph = (mesh) => {
@@ -14,3 +15,4 @@ export const fromSurfaceMeshToLazyGraph = (mesh) => {
     throw Error(error);
   }
 };
+*/

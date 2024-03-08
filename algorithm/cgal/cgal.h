@@ -531,6 +531,7 @@ static void demesh(Surface_mesh& mesh) {
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
 
+#if 0
 static void addTriple(Triples* triples, double x, double y, double z,
                       double tolerance = 0) {
   if (tolerance > 0) {
@@ -542,7 +543,9 @@ static void addTriple(Triples* triples, double x, double y, double z,
     triples->emplace_back(Triple{x, y, z});
   }
 }
+#endif
 
+#if 0
 static void fillQuadruple(Quadruple* q, double x, double y, double z,
                           double w) {
   (*q)[0] = to_FT(x);
@@ -559,6 +562,7 @@ static void fillExactQuadruple(Quadruple* q, const std::string& a,
   (*q)[2] = to_FT(c);
   (*q)[3] = to_FT(d);
 }
+#endif
 
 template <typename MAP>
 struct Project {
@@ -1382,6 +1386,7 @@ static double FT__to_double(const FT& ft) { return CGAL::to_double(ft); }
 #include "surface_mesh_util.h"
 #include "transform_util.h"
 
+#if 0
 static void Polygon_2__add(Polygon_2* polygon, double x, double y) {
   polygon->push_back(Point_2(x, y));
 }
@@ -1390,3 +1395,4 @@ static void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
                                 const std::string& y) {
   polygon->push_back(Point_2(to_FT(x), to_FT(y)));
 }
+#endif

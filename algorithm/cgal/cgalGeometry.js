@@ -14,7 +14,6 @@ export const GEOMETRY_REFERENCE = 6;
 export const GEOMETRY_EDGES = 7;
 
 const meshCache = new WeakMap();
-const occtShapeCache = new Map();
 
 export const clearMeshCache = () => {
   console.log(`QQ/clearMeshCache/noop`);
@@ -61,14 +60,6 @@ export const fillCgalGeometry = (geometry, inputs) => {
           geometry.deserializeInputMesh(nth, graph.serializedSurfaceMesh);
         } else {
           // throw Error(`Cannot deserialize surface mesh: ${JSON.stringify(inputs[nth])}`);
-        }
-        let occt = occtShapeCache.get(graph);
-        if (occt) {
-          geometry.setOcctShape(nth, occt);
-        } else if (graph.serializedOcctShape) {
-          geometry.deserializeOcctShape(nth, graph.serializedOcctShape);
-        } else {
-          // throw Error(`Cannot deserialize occt shape: ${JSON.stringify(inputs[nth])}`);
         }
         break;
       case 'polygonsWithHoles': {
@@ -172,8 +163,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         let update = false;
         let newMesh;
         let serializedSurfaceMesh;
-        let newOcctShape;
-        let serializedOcctShape;
         if (geometry.has_mesh(nth)) {
           const oldMesh = getCachedMesh(graph);
           newMesh = geometry.getMesh(nth);
@@ -187,15 +176,11 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         if (update) {
           graph = {
             serializedSurfaceMesh,
-            serializedOcctShape,
           };
           graph.hash = computeHash(graph);
           // Not part of the hash.
           if (newMesh) {
             setCachedMesh(graph, newMesh);
-          }
-          if (newOcctShape) {
-            occtShapeCache.set(graph, newOcctShape);
           }
         }
         results[nth] = {

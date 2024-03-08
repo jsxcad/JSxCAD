@@ -99,17 +99,16 @@ class Geometry {
     return target;
   }
 
-  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
-
-  bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
-  bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
   bool is_empty_epick_mesh(int nth) { return CGAL::is_empty(epick_mesh(nth)); }
+  bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
+  bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
   bool is_polygons(int nth) {
     return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
   }
+  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
   bool is_segments(int nth) { return type(nth) == GEOMETRY_SEGMENTS; }
-  bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
-  bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
 
   bool has_transform(int nth) { return true; }
 
@@ -342,21 +341,6 @@ class Geometry {
     return meshes_[nth];
   }
 
-#if 0
-  void fillPolygonsWithHoles(
-      int nth, const std::function<bool(Quadruple*)>& fillPlane,
-      const std::function<void(Polygon_2* boundary)>& fill_boundary,
-      const std::function<void(Polygon_2* hole, int nth)>& fill_hole) {
-    assert(is_local_frame());
-    Plane local_plane;
-    admitPlane(local_plane, fillPlane);
-    Polygons_with_holes_2 polygons;
-    admitPolygonsWithHoles(polygons, fill_boundary, fill_hole);
-    plane(nth) = unitPlane<Kernel>(local_plane);
-    pwh(nth) = std::move(polygons);
-  }
-#endif
-
   void addPolygon(int nth) { pwh(nth).emplace_back(); }
 
   void setPolygonsPlane(int nth, double x, double y, double z, double w) {
@@ -492,17 +476,6 @@ class Geometry {
   void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
 
   void addPoint(int nth, Point point) { points(nth).push_back(point); }
-
-#if 0
-  void emitPoints(
-      int nth,
-      const std::function<void(double x, double y, double z,
-                               const std::string& exact)>& emit_point) {
-    for (const Point& point : points(nth)) {
-      emitPoint(point, emit_point);
-    }
-  }
-#endif
 
   void copyInputMeshesToOutputMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {
