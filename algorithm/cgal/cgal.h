@@ -531,39 +531,6 @@ static void demesh(Surface_mesh& mesh) {
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
 
-#if 0
-static void addTriple(Triples* triples, double x, double y, double z,
-                      double tolerance = 0) {
-  if (tolerance > 0) {
-    FT exact_x = compute_approximate_point_value(x, tolerance);
-    FT exact_y = compute_approximate_point_value(y, tolerance);
-    FT exact_z = compute_approximate_point_value(z, tolerance);
-    triples->emplace_back(Triple{exact_x, exact_y, exact_z});
-  } else {
-    triples->emplace_back(Triple{x, y, z});
-  }
-}
-#endif
-
-#if 0
-static void fillQuadruple(Quadruple* q, double x, double y, double z,
-                          double w) {
-  (*q)[0] = to_FT(x);
-  (*q)[1] = to_FT(y);
-  (*q)[2] = to_FT(z);
-  (*q)[3] = to_FT(w);
-}
-
-static void fillExactQuadruple(Quadruple* q, const std::string& a,
-                               const std::string& b, const std::string& c,
-                               const std::string& d) {
-  (*q)[0] = to_FT(a);
-  (*q)[1] = to_FT(b);
-  (*q)[2] = to_FT(c);
-  (*q)[3] = to_FT(d);
-}
-#endif
-
 template <typename MAP>
 struct Project {
   Project(MAP map, Vector vector) : map(map), vector(vector) {}
@@ -1029,6 +996,7 @@ static void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
   }
 }
 
+#if 0
 template <typename P>
 static bool emitPolygonsWithHoles(
     const std::vector<P>& polygons,
@@ -1100,6 +1068,7 @@ static void admitPolygonsWithHoles(P& pwhs, FillBoundary fill_boundary,
     }
   }
 }
+#endif
 
 static CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
   CGAL::Bbox_2 bound;
@@ -1380,19 +1349,5 @@ static bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Unfold.h"
 #include "Validate.h"
 #include "Wrap.h"
-
-static double FT__to_double(const FT& ft) { return CGAL::to_double(ft); }
-
 #include "surface_mesh_util.h"
 #include "transform_util.h"
-
-#if 0
-static void Polygon_2__add(Polygon_2* polygon, double x, double y) {
-  polygon->push_back(Point_2(x, y));
-}
-
-static void Polygon_2__addExact(Polygon_2* polygon, const std::string& x,
-                                const std::string& y) {
-  polygon->push_back(Point_2(to_FT(x), to_FT(y)));
-}
-#endif

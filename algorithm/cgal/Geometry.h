@@ -57,7 +57,6 @@ class Geometry {
     bbox2_.clear();
     bbox3_.clear();
     origin_.clear();
-    integers_.clear();
     resize(size);
   }
 
@@ -87,7 +86,6 @@ class Geometry {
     bbox2_.resize(size);
     bbox3_.resize(size);
     origin_.resize(size, -1);
-    integers_.resize(size);
   }
 
   GeometryType& type(int nth) { return types_[nth]; }
@@ -285,8 +283,6 @@ class Geometry {
     }
   }
 
-  std::vector<int>& integers(int nth) { return integers_[nth]; }
-
   void setTransform(int nth, const Transformation& transform) {
     transforms_[nth] = transform;
   }
@@ -444,8 +440,6 @@ class Geometry {
       }
     }
   }
-
-  void addInteger(int nth, int integer) { integers(nth).push_back(integer); }
 
   void addInputPoint(int nth, double x, double y, double z) {
     input_points(nth).emplace_back(Point{x, y, z});
@@ -705,5 +699,4 @@ class Geometry {
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
-  std::vector<std::vector<int>> integers_;
 };

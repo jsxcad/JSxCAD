@@ -24,13 +24,11 @@ export const fromPolygonSoup = (
         cgalGeometry.addInputPoint(nth, x, y, z);
       }
     }
-    for (const code of generateRepairStrategyCodes(strategies)) {
-      cgalGeometry.addInteger(0, code);
-    }
     const status = g.FromPolygonSoup(
       cgalGeometry,
       faceCountLimit,
-      minErrorDrop
+      minErrorDrop,
+      generateRepairStrategyCodes(strategies)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

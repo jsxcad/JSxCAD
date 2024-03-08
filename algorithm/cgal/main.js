@@ -54,7 +54,6 @@ export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
-// export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fuse } from './fuse.js';
 export { generateEnvelope } from './generateEnvelope.js';
 export { grow } from './grow.js';

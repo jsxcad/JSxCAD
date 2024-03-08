@@ -6,24 +6,6 @@
 using emscripten::base;
 using emscripten::select_overload;
 
-#if 0
-namespace emscripten {
-namespace internal {
-template <>
-void raw_destructor<Surface_mesh>(Surface_mesh* ptr) {
-  std::cout << "QQ/Destroying Surface_mesh" << std::endl;
-  delete ptr;
-}
-
-template <>
-void raw_destructor<Transformation>(Transformation* ptr) {
-  std::cout << "QQ/Destroying Transformation" << std::endl;
-  delete ptr;
-}
-}  //  namespace internal
-}  //  namespace emscripten
-#endif
-
 namespace wrapped {
 static Transformation to_transform(emscripten::val& js) {
   if (js[16] != js.undefined()) {
@@ -107,11 +89,23 @@ static int InverseSegmentTransform(double startx, double starty, double startz,
   return STATUS_OK;
 }
 
-static int ComputeBoundingBox(Geometry* geometry, emscripten::val emit) {
-  return ::ComputeBoundingBox(
-      geometry,
-      [&](double xmin, double ymin, double zmin, double xmax, double ymax,
-          double zmax) { emit(xmin, ymin, zmin, xmax, ymax, zmax); });
+static int ComputeBoundingBox(Geometry* geometry, emscripten::val js) {
+  std::vector<double> bbox;
+  int status = ::ComputeBoundingBox(geometry, bbox);
+  if (status != STATUS_OK) {
+    return status;
+  }
+  emscripten::val min = js.array();
+  min.set(0, bbox[0]);
+  min.set(1, bbox[1]);
+  min.set(2, bbox[2]);
+  emscripten::val max = js.array();
+  max.set(0, bbox[3]);
+  max.set(1, bbox[4]);
+  max.set(2, bbox[5]);
+  js.set(0, min);
+  js.set(1, max);
+  return STATUS_OK;
 }
 
 static int ComputeImplicitVolume(Geometry* geometry, emscripten::val op,
@@ -126,26 +120,46 @@ static int ComputeImplicitVolume(Geometry* geometry, emscripten::val op,
       radius, angular_bound, radius_bound, distance_bound, error_bound);
 }
 
-static int Disjoint(Geometry* geometry, emscripten::val getIsMasked, int mode,
+static int Disjoint(Geometry* geometry, emscripten::val js_is_masked, int mode,
                     bool exact) {
-  return ::Disjoint(
-      geometry,
-      [&](int index) -> bool { return getIsMasked(index).as<bool>(); }, mode,
-      exact);
+  size_t size = geometry->size();
+  std::vector<bool> is_masked;
+  for (size_t nth = 0; nth < size; nth++) {
+    is_masked.push_back(js_is_masked[nth].as<bool>());
+  }
+  return ::Disjoint(geometry, is_masked, mode, exact);
 }
 
 static static int EachPoint(Geometry* geometry, emscripten::val emit_point) {
-  return ::EachPoint(
-      geometry, [&](double x, double y, double z, const std::string& exact) {
-        return emit_point(x, y, z, exact);
-      });
+  std::vector<Point> points;
+  int status = ::EachPoint(geometry, points);
+  if (status != STATUS_OK) {
+    return status;
+  }
+  for (const Point& point : points) {
+    std::ostringstream o;
+    o << point.x().exact() << " " << point.y().exact() << " "
+      << point.z().exact();
+    emit_point(to_double(point.x()), to_double(point.y()), to_double(point.z()),
+               o.str());
+  }
+  return STATUS_OK;
 }
 
 static int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
-  return ::EachTriangle(
-      geometry, [&](double x, double y, double z, const std::string& exact) {
-        emit_point(x, y, z, exact);
-      });
+  std::vector<Point> points;
+  int status = ::EachTriangle(geometry, points);
+  if (status != STATUS_OK) {
+    return status;
+  }
+  for (const Point& point : points) {
+    std::ostringstream o;
+    o << point.x().exact() << " " << point.y().exact() << " "
+      << point.z().exact();
+    emit_point(to_double(point.x()), to_double(point.y()), to_double(point.z()),
+               o.str());
+  }
+  return STATUS_OK;
 }
 
 static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
@@ -168,6 +182,17 @@ static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
   js_plane.set(2, emscripten::val(zd / ld));
   js_plane.set(3, emscripten::val(wd));
   js_exact_plane = emscripten::val(exact.str());
+}
+
+static int FromPolygonSoup(Geometry* geometry, int face_count,
+                           double min_error_drop,
+                           emscripten::val js_strategies) {
+  std::vector<int> strategies;
+  size_t length = js_strategies["length"].as<int>();
+  for (size_t nth = 0; nth < length; nth++) {
+    strategies.push_back(js_strategies[nth].as<int>());
+  }
+  return ::FromPolygonSoup(geometry, face_count, min_error_drop, strategies);
 }
 
 static int GetPolygonsWithHoles(Geometry* geometry, int nth,
@@ -319,8 +344,13 @@ static int GetTransform(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
-static int Repair(Geometry* geometry, emscripten::val nextStrategy) {
-  return ::Repair(geometry, [&]() { return nextStrategy().as<int>(); });
+static int Repair(Geometry* geometry, emscripten::val js_strategies) {
+  std::vector<int> strategies;
+  size_t length = js_strategies["length"].as<int>();
+  for (size_t nth = 0; nth < length; nth++) {
+    strategies.push_back(js_strategies[nth].as<int>());
+  }
+  return ::Repair(geometry, strategies);
 }
 
 static int SetTransform(Geometry* geometry, int nth,
@@ -329,106 +359,35 @@ static int SetTransform(Geometry* geometry, int nth,
   return STATUS_OK;
 }
 
-static int Unfold(Geometry* geometry, bool enable_tabs,
-                  emscripten::val emit_tag) {
-  return ::Unfold(
-      geometry, enable_tabs,
-      [&](int index, const std::string& tag) { emit_tag(index, tag); });
+static int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit) {
+  std::vector<UnfoldTag> unfold_tags;
+  int status = ::Unfold(geometry, enable_tabs, unfold_tags);
+  if (status != STATUS_OK) {
+    return status;
+  }
+  for (const UnfoldTag& unfold_tag : unfold_tags) {
+    emit(unfold_tag.face, unfold_tag.name);
+  }
+  return STATUS_OK;
 }
 
-static int Validate(Geometry* geometry, emscripten::val get_next_strategy) {
-  return ::Validate(geometry,
-                    [&]() -> int { return get_next_strategy().as<int>(); });
+static int Validate(Geometry* geometry, emscripten::val js_strategies) {
+  std::vector<int> strategies;
+  size_t length = js_strategies["length"].as<int>();
+  for (size_t nth = 0; nth < length; nth++) {
+    strategies.push_back(js_strategies[nth].as<int>());
+  }
+  return ::Validate(geometry, strategies);
 }
 }  // namespace wrapped
 
 EMSCRIPTEN_BINDINGS(module) {
-#if 0
-  emscripten::class_<Transformation>("Transformation")
-      .smart_ptr<std::shared_ptr<const Transformation>>("Transformation");
-#endif
-  emscripten::function("ComposeTransforms", &wrapped::ComposeTransforms);
-  emscripten::function("InvertTransform", &wrapped::InvertTransform);
-  emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
-  emscripten::function("ScaleTransform", &wrapped::ScaleTransform);
-  emscripten::function("XTurnTransform", &wrapped::XTurnTransform);
-  emscripten::function("YTurnTransform", &wrapped::YTurnTransform);
-  emscripten::function("ZTurnTransform", &wrapped::ZTurnTransform);
-  emscripten::function("InverseSegmentTransform",
-                       &wrapped::InverseSegmentTransform);
-
-#if 0
-  emscripten::class_<Triples>("Triples")
-      .constructor<>()
-      .function("push_back",
-                select_overload<void(const Triple&)>(&Triples::push_back))
-      .function("size", select_overload<size_t() const>(&Triples::size));
-
-  emscripten::function("addTriple", &addTriple,
-                       emscripten::allow_raw_pointers());
-
-  emscripten::class_<Polygon>("Polygon").constructor<>().function(
-      "size", select_overload<size_t() const>(&Polygon::size));
-
-  emscripten::function("Polygon__push_back", &Polygon__push_back,
-                       emscripten::allow_raw_pointers());
-
-  emscripten::class_<Polygons>("Polygons")
-      .constructor<>()
-      .function("push_back",
-                select_overload<void(const Polygon&)>(&Polygons::push_back))
-      .function("size", select_overload<size_t() const>(&Polygons::size));
-
-  emscripten::class_<Point>("Point")
-      .constructor<float, float, float>()
-      .function("hx", &Point::hx)
-      .function("hy", &Point::hy)
-      .function("hz", &Point::hz)
-      .function("hw", &Point::hw)
-      .function("x", &Point::x)
-      .function("y", &Point::y)
-      .function("z", &Point::z);
-
-  emscripten::class_<Polygon_2>("Polygon_2")
-      .constructor<>()
-      .function("add", &Polygon_2__add, emscripten::allow_raw_pointers())
-      .function("addExact", &Polygon_2__addExact,
-                emscripten::allow_raw_pointers());
-
-  emscripten::class_<Polygon_with_holes_2>("Polygon_with_holes_2")
-      .constructor<>();
-
-  emscripten::class_<Face_index>("Face_index").constructor<std::size_t>();
-  emscripten::class_<Halfedge_index>("Halfedge_index")
-      .constructor<std::size_t>();
-  emscripten::class_<Vertex_index>("Vertex_index").constructor<std::size_t>();
-
-  emscripten::class_<Quadruple>("Quadruple").constructor<>();
-  emscripten::function("fillQuadruple", &fillQuadruple,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("fillExactQuadruple", &fillExactQuadruple,
-                       emscripten::allow_raw_pointers());
-#endif
-
-  emscripten::class_<Surface_mesh>("Surface_mesh")
-      .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh")
-      // .function("is_valid", select_overload<bool(bool)
-      // const>(&Surface_mesh::is_valid)) .function("is_empty",
-      // &Surface_mesh::is_empty) .function("number_of_vertices",
-      // &Surface_mesh::number_of_vertices) .function("number_of_halfedges",
-      // &Surface_mesh::number_of_halfedges) .function("number_of_edges",
-      // &Surface_mesh::number_of_edges) .function("number_of_faces",
-      // &Surface_mesh::number_of_faces) .function("has_garbage",
-      // &Surface_mesh::has_garbage);
-      ;
-
   emscripten::class_<Geometry>("Geometry")
       .constructor<>()
       .function("addInputPoint", &Geometry::addInputPoint)
       .function("addInputPointExact", &Geometry::addInputPointExact)
       .function("addInputSegment", &Geometry::addInputSegment)
       .function("addInputSegmentExact", &Geometry::addInputSegmentExact)
-      .function("addInteger", &Geometry::addInteger)
       .function("addPolygon", &Geometry::addPolygon)
       .function("addPolygonPoint", &Geometry::addPolygonPoint)
       .function("addPolygonPointExact", &Geometry::addPolygonPointExact)
@@ -463,12 +422,15 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("transformToAbsoluteFrame",
                 &Geometry::transformToAbsoluteFrame);
 
-  // New primitives
+  emscripten::class_<Surface_mesh>("Surface_mesh")
+      .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh");
+
   emscripten::function("Approximate", &Approximate,
                        emscripten::allow_raw_pointers());
   emscripten::function("Bend", &Bend, emscripten::allow_raw_pointers());
   emscripten::function("Cast", &Cast, emscripten::allow_raw_pointers());
   emscripten::function("Clip", &Clip, emscripten::allow_raw_pointers());
+  emscripten::function("ComposeTransforms", &wrapped::ComposeTransforms);
   emscripten::function("ComputeArea", &ComputeArea,
                        emscripten::allow_raw_pointers());
   emscripten::function("ComputeBoundingBox", &wrapped::ComputeBoundingBox,
@@ -515,7 +477,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
   emscripten::function("FromPolygons", &FromPolygons,
                        emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygonSoup", &FromPolygonSoup,
+  emscripten::function("FromPolygonSoup", &wrapped::FromPolygonSoup,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
   emscripten::function("GenerateEnvelope", &GenerateEnvelope,
@@ -532,6 +494,9 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
   emscripten::function("Inset", &Inset, emscripten::allow_raw_pointers());
+  emscripten::function("InvertTransform", &wrapped::InvertTransform);
+  emscripten::function("InverseSegmentTransform",
+                       &wrapped::InverseSegmentTransform);
   emscripten::function("Involute", &Involute, emscripten::allow_raw_pointers());
   emscripten::function("Iron", &Iron, emscripten::allow_raw_pointers());
   emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
@@ -552,6 +517,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Repair", &wrapped::Repair,
                        emscripten::allow_raw_pointers());
   emscripten::function("Route", &Route, emscripten::allow_raw_pointers());
+  emscripten::function("ScaleTransform", &wrapped::ScaleTransform);
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
@@ -561,18 +527,14 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Shell", &Shell, emscripten::allow_raw_pointers());
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
+  emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
   emscripten::function("Unfold", &wrapped::Unfold,
                        emscripten::allow_raw_pointers());
   emscripten::function("Validate", &wrapped::Validate,
                        emscripten::allow_raw_pointers());
   emscripten::function("Wrap", &Wrap, emscripten::allow_raw_pointers());
-
-  emscripten::function("FT__to_double", &FT__to_double,
-                       emscripten::allow_raw_pointers());
-
-  emscripten::function("Surface_mesh__is_closed", &Surface_mesh__is_closed,
-                       emscripten::allow_raw_pointers());
-  emscripten::function("Surface_mesh__is_empty", &Surface_mesh__is_empty,
-                       emscripten::allow_raw_pointers());
+  emscripten::function("XTurnTransform", &wrapped::XTurnTransform);
+  emscripten::function("YTurnTransform", &wrapped::YTurnTransform);
+  emscripten::function("ZTurnTransform", &wrapped::ZTurnTransform);
 }

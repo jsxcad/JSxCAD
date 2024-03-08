@@ -2,24 +2,7 @@
 
 static double to_double(FT ft) { return CGAL::to_double(ft.exact()); }
 
-#if 0
-static FT to_FT(const std::string& v) {
-  std::istringstream i(v);
-  FT ft;
-  i >> ft;
-  return ft;
-}
-#endif
-
 static FT to_FT(const double v) { return FT(v); }
-
-#if 0
-static std::string to_string_from_FT(FT ft) {
-  std::ostringstream s;
-  s << ft.exact();
-  return s.str();
-}
-#endif
 
 static void write_point(const Point& p, std::ostringstream& o) {
   o << p.x().exact() << " ";

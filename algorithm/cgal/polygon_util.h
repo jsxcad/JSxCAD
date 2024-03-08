@@ -6,12 +6,6 @@
 
 #include "printing.h"
 
-#if 0
-static void Polygon__push_back(Polygon* polygon, std::size_t index) {
-  polygon->push_back(index);
-}
-#endif
-
 template <typename Polygon_2, typename Segments>
 static void polygonToSegments(Polygon_2& polygon, Segments& segments) {
   Plane base(0, 0, 1, 0);

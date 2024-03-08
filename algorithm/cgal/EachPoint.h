@@ -1,7 +1,4 @@
-static int EachPoint(
-    Geometry* geometry,
-    const std::function<void(double, double, double, const std::string&)>&
-        emit_point) {
+static int EachPoint(Geometry* geometry, std::vector<Point>& points) {
   try {
     size_t size = geometry->size();
 
@@ -9,8 +6,6 @@ static int EachPoint(
     geometry->copyInputSegmentsToOutputSegments();
     geometry->copyInputPointsToOutputPoints();
     geometry->transformToAbsoluteFrame();
-
-    Points points;
 
     for (int nth = 0; nth < size; nth++) {
       switch (geometry->getType(nth)) {
@@ -25,7 +20,7 @@ static int EachPoint(
           const Plane& plane = geometry->plane(nth);
           for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
             for (const Point_2 point : polygon.outer_boundary()) {
-              emitPoint(plane.to_3d(point), emit_point);
+              points.push_back(plane.to_3d(point));
             }
             for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
                  ++hole) {
@@ -53,10 +48,6 @@ static int EachPoint(
     }
 
     unique_points(points);
-
-    for (const Point& point : points) {
-      emitPoint(point, emit_point);
-    }
 
     return STATUS_OK;
   } catch (const std::exception& e) {

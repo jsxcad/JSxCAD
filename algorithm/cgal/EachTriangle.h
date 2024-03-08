@@ -1,7 +1,4 @@
-static int EachTriangle(
-    Geometry* geometry,
-    const std::function<void(double, double, double, const std::string&)>&
-        emit_point) {
+static int EachTriangle(Geometry* geometry, std::vector<Point>& points) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -16,9 +13,9 @@ static int EachTriangle(
       const auto& a = mesh.halfedge(facet);
       const auto& b = mesh.next(a);
       const auto& c = mesh.next(b);
-      emitPoint(mesh.point(mesh.source(a)), emit_point);
-      emitPoint(mesh.point(mesh.source(b)), emit_point);
-      emitPoint(mesh.point(mesh.source(c)), emit_point);
+      points.push_back(mesh.point(mesh.source(a)));
+      points.push_back(mesh.point(mesh.source(b)));
+      points.push_back(mesh.point(mesh.source(c)));
     }
   }
 

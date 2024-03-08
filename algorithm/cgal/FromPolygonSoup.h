@@ -4,9 +4,9 @@
 #include "./repair_util.h"
 
 static int FromPolygonSoup(Geometry* geometry, size_t face_count,
-                           double min_error_drop) {
+                           double min_error_drop,
+                           const std::vector<int>& strategies) {
   size_t size = geometry->size();
-  const std::vector<int>& strategies = geometry->integers(0);
 
   try {
     int target = geometry->add(GEOMETRY_MESH);

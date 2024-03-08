@@ -85,11 +85,3 @@ static void remesh(Surface_mesh& mesh,
           .edge_is_constrained_map(constrained_edge_map)
           .number_of_relaxation_steps(relaxation_steps));
 }
-
-static bool Surface_mesh__is_closed(const Surface_mesh* mesh) {
-  return CGAL::is_closed(*mesh);
-}
-
-static bool Surface_mesh__is_empty(const Surface_mesh* mesh) {
-  return CGAL::is_empty(*mesh);
-}
