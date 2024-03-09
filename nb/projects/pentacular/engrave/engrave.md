@@ -10,22 +10,10 @@ const unYetGul = 'https://jsxcad.js.org/ttf/UnYetgul.ttf';
 const text = control('Engraving', '輝');
 ```
 
-![Image](engrave.md.model.png)
-
-Model
-
 ```JavaScript
 const model = Text(unYetGul, text, 25)
   .align('xy')
   .cutFrom(Box(30, 26))
   .view()
   .note('Model');
-```
-
-![Image](engrave.md.inset.png)
-
-Section Inset
-
-```JavaScript
-const inset = model.inset(0.5).gridView().note('Section Inset');
 ```

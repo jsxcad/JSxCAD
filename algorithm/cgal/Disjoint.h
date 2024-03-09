@@ -294,9 +294,9 @@ static int disjointForward(Geometry* geometry,
 static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
                     int mode, bool exact) {
   switch (mode == 0) {
-    case 0:  // 50.58
+    case 0:
       return disjointBackward(geometry, is_masked, exact);
-    case 1:  // 30.65
+    case 1:
       return disjointForward(geometry, is_masked, exact);
     default:
       return STATUS_INVALID_INPUT;

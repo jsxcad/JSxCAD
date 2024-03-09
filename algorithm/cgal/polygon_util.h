@@ -78,7 +78,6 @@ static void simplifyPolygon(Polygon_2& polygon,
         std::cout << "QQ/Could not find seen point" << std::endl;
       }
       Polygon_2 cut(from, to);
-      std::cout << "QQ/Cut loop size=" << cut.size() << std::endl;
       simplifyPolygon(cut, simple_polygons, non_simple);
       if (cut.size() != 0) {
         std::cout << "QQ/cut was not cleared" << std::endl;
@@ -159,7 +158,6 @@ static void simplifyPolygon(Polygon_2& polygon,
         std::cout << "QQ/Could not find seen point" << std::endl;
       }
       Polygon_2 cut(from, to);
-      std::cout << "QQ/Cut loop size=" << cut.size() << std::endl;
       simplifyPolygon(cut, simple_polygons);
       if (cut.size() != 0) {
         std::cout << "QQ/cut was not cleared" << std::endl;
@@ -248,7 +246,30 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
         local_holes.push_back(hole);
       }
     }
-    pwhs.emplace_back(boundary, local_holes.begin(), local_holes.end());
+    // Remove nested holes.
+    if (local_holes.size() > 1) {
+      std::vector<Polygon_2> distinct_holes;
+      for (size_t a = 0; a < local_holes.size(); a++) {
+        const typename Polygon_2::Point_2& representative_point =
+            local_holes[a][0];
+        bool is_distinct = true;
+        for (size_t b = 0; b < local_holes.size(); b++) {
+          if (a == b) {
+            continue;
+          }
+          if (local_holes[b].has_on_negative_side(representative_point)) {
+            is_distinct = false;
+            break;
+          }
+          if (is_distinct) {
+            distinct_holes.push_back(local_holes[a]);
+          }
+        }
+      }
+      pwhs.emplace_back(boundary, distinct_holes.begin(), distinct_holes.end());
+    } else {
+      pwhs.emplace_back(boundary, local_holes.begin(), local_holes.end());
+    }
   }
   return true;
 }

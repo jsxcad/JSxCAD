@@ -3,6 +3,7 @@
 Parameter|Default|Type
 ---|---|---
 spec|'z<y<x<'|String defining the sort predicate.
+resolution|0.01|Coordinates are rounded to this resolution for sorting.
 
 This orders a group of shapes by their extremal bounding box corner.
 

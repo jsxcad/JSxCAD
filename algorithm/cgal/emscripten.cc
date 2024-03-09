@@ -243,7 +243,6 @@ static int GetPolygonsWithHoles(Geometry* geometry, int nth,
     js_pwh.set("holes", js_holes);
     js_pwhs.set(nth, js_pwh);
   }
-  js.set("type", emscripten::val("polygonsWithHoles"));
   js.set("plane", js_plane);
   js.set("exactPlane", js_exact_plane);
   js.set("polygonsWithHoles", js_pwhs);
@@ -265,7 +264,6 @@ static int GetPoints(Geometry* geometry, int nth, emscripten::val js) {
     js_exact_points.set(nth_point, exact);
     nth_point += 1;
   }
-  js.set("type", emscripten::val("points"));
   js.set("points", js_points);
   js.set("exactPoints", js_exact_points);
   return STATUS_OK;
@@ -292,7 +290,6 @@ static int GetSegments(Geometry* geometry, int nth, emscripten::val js) {
     js_segments.set(nth_segment, js_segment);
     nth_segment += 1;
   }
-  js.set("type", "segments");
   js.set("segments", js_segments);
   return STATUS_OK;
 }
@@ -332,7 +329,6 @@ static int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
     js_faces.set(nth_segment, edge.face_id);
     nth_segment += 1;
   }
-  js.set("type", "segments");
   js.set("segments", js_segments);
   js.set("normals", js_normals);
   js.set("faces", js_faces);
