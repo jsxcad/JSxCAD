@@ -1,3 +1,8 @@
+#pragma once
+
+#include "cgal.h"
+#include "offset_util.h"
+
 static int Inset(Geometry* geometry, double initial, double step, double limit,
                  int segments) {
   int size = geometry->size();
@@ -9,14 +14,14 @@ static int Inset(Geometry* geometry, double initial, double step, double limit,
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         Polygons_with_holes_2 inset_polygons;
         for (const Polygon_with_holes_2 polygon : geometry->pwh(nth)) {
-          insetOfPolygonWithHoles(initial, step, limit, segments, polygon,
-                                  inset_polygons);
+          insetPolygonWithHoles(initial, step, limit, segments, polygon,
+                                inset_polygons);
         }
         for (const Polygon_with_holes_2& inset_polygon : inset_polygons) {
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->pwh(target).push_back(inset_polygon);
           geometry->plane(target) = geometry->plane(nth);
-          geometry->copyTransform(target, geometry->transform(nth));
+          geometry->setTransform(target, geometry->transform(nth));
         }
         break;
       }

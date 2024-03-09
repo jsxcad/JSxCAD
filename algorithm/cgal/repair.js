@@ -3,7 +3,7 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const provideRepairStrategies = (strategies) => {
+export const generateRepairStrategyCodes = (strategies) => {
   const strategyCodes = [];
   for (const strategy of strategies) {
     switch (strategy) {
@@ -25,6 +25,11 @@ export const provideRepairStrategies = (strategies) => {
         );
     }
   }
+  return strategyCodes;
+};
+
+export const provideRepairStrategies = (strategies) => {
+  const strategyCodes = generateRepairStrategyCodes(strategies);
   return () => (strategyCodes.length >= 1 ? strategyCodes.shift() : -1);
 };
 

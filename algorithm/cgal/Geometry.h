@@ -1,5 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #include "transform_util.h"
 
 enum Status {
@@ -63,7 +67,7 @@ class Geometry {
   void resize(int size) {
     size_ = size;
     types_.resize(size);
-    transforms_.resize(size);
+    transforms_.resize(size, Transformation(CGAL::IDENTITY));
     planes_.resize(size);
     gps_.resize(size);
     pwh_.resize(size);
@@ -93,30 +97,20 @@ class Geometry {
     return target;
   }
 
-  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
-
-  bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
-  bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
   bool is_empty_epick_mesh(int nth) { return CGAL::is_empty(epick_mesh(nth)); }
+  bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
+  bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
   bool is_polygons(int nth) {
     return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
   }
+  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
   bool is_segments(int nth) { return type(nth) == GEOMETRY_SEGMENTS; }
-  bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
-  bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
 
-  bool has_transform(int nth) { return transforms_[nth] != nullptr; }
+  bool has_transform(int nth) { return true; }
 
-  void ensureTransform(int nth) {
-    if (!has_transform(nth)) {
-      transforms_[nth].reset(new Transformation(CGAL::IDENTITY));
-    }
-  }
-
-  const Transformation& transform(int nth) {
-    ensureTransform(nth);
-    return *transforms_[nth];
-  }
+  const Transformation& transform(int nth) { return transforms_[nth]; }
 
   bool has_plane(int nth) { return is_polygons(nth); }
   Plane& plane(int nth) { return planes_[nth]; }
@@ -289,25 +283,16 @@ class Geometry {
     }
   }
 
-  void setTransform(int nth, std::shared_ptr<const Transformation>& transform) {
+  void setTransform(int nth, const Transformation& transform) {
     transforms_[nth] = transform;
   }
 
   void applyTransform(int nth, const Transformation& xform) {
-    copyTransform(nth, xform * transform(nth));
-  }
-
-  void copyTransform(int nth, const Transformation& transform) {
-    transforms_[nth].reset(new Transformation(transform));
-  }
-
-  const std::shared_ptr<const Transformation>& getTransform(int nth) {
-    ensureTransform(nth);
-    return transforms_[nth];
+    setTransform(nth, xform * transform(nth));
   }
 
   void setIdentityTransform(int nth) {
-    copyTransform(nth, Transformation(CGAL::IDENTITY));
+    setTransform(nth, Transformation(CGAL::IDENTITY));
   }
 
   void setInputMesh(int nth, const std::shared_ptr<const Surface_mesh>& mesh) {
@@ -352,17 +337,72 @@ class Geometry {
     return meshes_[nth];
   }
 
-  void fillPolygonsWithHoles(
-      int nth, const std::function<bool(Quadruple*)>& fillPlane,
-      const std::function<void(Polygon_2* boundary)>& fill_boundary,
-      const std::function<void(Polygon_2* hole, int nth)>& fill_hole) {
-    assert(is_local_frame());
-    Plane local_plane;
-    admitPlane(local_plane, fillPlane);
-    Polygons_with_holes_2 polygons;
-    admitPolygonsWithHoles(polygons, fill_boundary, fill_hole);
-    plane(nth) = unitPlane<Kernel>(local_plane);
-    pwh(nth) = std::move(polygons);
+  void addPolygon(int nth) { pwh(nth).emplace_back(); }
+
+  void setPolygonsPlane(int nth, double x, double y, double z, double w) {
+    plane(nth) = unitPlane<Kernel>(Plane(x, y, z, w));
+  }
+
+  void setPolygonsPlaneExact(int nth, const std::string& exact) {
+    std::istringstream s(exact);
+    FT a, b, c, d;
+    s >> a;
+    s >> b;
+    s >> c;
+    s >> d;
+    plane(nth) = unitPlane<Kernel>(Plane(a, b, c, d));
+  }
+
+  void addPolygonPoint(int nth, double x, double y) {
+    pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
+  }
+
+  void addPolygonPointExact(int nth, const std::string& exact) {
+    std::istringstream s(exact);
+    FT x, y;
+    s >> x;
+    s >> y;
+    pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
+  }
+
+  void addPolygonHole(int nth) {
+    pwh(nth).back().holes().push_back(std::move(Polygon_2()));
+  }
+
+  void addPolygonHolePoint(int nth, double x, double y) {
+    pwh(nth).back().holes().back().push_back(Point_2(x, y));
+  }
+
+  void addPolygonHolePointExact(int nth, const std::string& exact) {
+    std::istringstream s(exact);
+    FT x, y;
+    s >> x;
+    s >> y;
+    pwh(nth).back().holes().back().push_back(Point_2(x, y));
+  }
+
+  void finishPolygonHole(int nth) {
+    Polygon_2& hole = pwh(nth).back().holes().back();
+    if (hole.orientation() != CGAL::Sign::NEGATIVE) {
+      hole.reverse_orientation();
+    }
+  }
+
+  void finishPolygon(int nth) {
+    Polygon_2& polygon = pwh(nth).back().outer_boundary();
+    if (polygon.orientation() != CGAL::Sign::POSITIVE) {
+      polygon.reverse_orientation();
+    }
+  }
+
+  int print(int nth) {
+    switch (type(nth)) {
+      case GEOMETRY_POLYGONS_WITH_HOLES:
+        print_polygons_with_holes(pwh(nth));
+        return STATUS_OK;
+      default:
+        return STATUS_INVALID_INPUT;
+    }
   }
 
   void convertPlanarMeshesToPolygons() {
@@ -401,29 +441,14 @@ class Geometry {
     }
   }
 
-  void emitPolygonsWithHoles(
-      int nth,
-      const std::function<void(double a, double b, double c, double d,
-                               const std::string& e, const std::string& f,
-                               const std::string& g, const std::string& h)>&
-          emit_plane,
-      const std::function<void(bool)>& emit_polygon,
-      const std::function<void(double x, double y, const std::string& ex,
-                               const std::string& ey)>& emit_point) {
-    assert(is_local_frame());
-    emitPlane(plane(nth), emit_plane);
-    ::emitPolygonsWithHoles(pwh(nth), emit_polygon, emit_point);
-  }
-
   void addInputPoint(int nth, double x, double y, double z) {
     input_points(nth).emplace_back(Point{x, y, z});
   }
 
   void addInputPointExact(int nth, const std::string& exact) {
-    std::istringstream i(exact);
-    Point p;
-    read_point(p, i);
-    input_points(nth).push_back(std::move(p));
+    Point point;
+    read_point(point, exact);
+    input_points(nth).push_back(std::move(point));
   }
 
   void addInputSegment(int nth, double sx, double sy, double sz, double tx,
@@ -442,61 +467,9 @@ class Geometry {
     segments(nth).push_back(segment);
   }
 
-  void emitSegments(int nth,
-                    const std::function<void(double sx, double sy, double sz,
-                                             double tx, double ty, double tz,
-                                             const std::string& exact)>& emit) {
-    if (!has_segments(nth)) {
-      return;
-    }
-    for (const Segment& segment : segments(nth)) {
-      const Point& s = segment.source();
-      const Point& t = segment.target();
-      std::ostringstream exact;
-      write_segment(segment, exact);
-      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
-           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
-           CGAL::to_double(t.y()), CGAL::to_double(t.z()), exact.str());
-    }
-  }
-
   void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
 
-  void emitEdges(int nth,
-                 const std::function<void(double sx, double sy, double sz,
-                                          double tx, double ty, double tz,
-                                          double nx, double ny, double nz, int,
-                                          const std::string& exact)>& emit) {
-    if (!has_edges(nth)) {
-      return;
-    }
-    for (const Edge& edge : edges(nth)) {
-      const Segment& segment = edge.segment;
-      const Point& s = segment.source();
-      const Point& t = segment.target();
-      const Point& n = edge.normal;
-      std::ostringstream exact;
-      write_segment(segment, exact);
-      exact << " ";
-      write_point(edge.normal, exact);
-      emit(CGAL::to_double(s.x()), CGAL::to_double(s.y()),
-           CGAL::to_double(s.z()), CGAL::to_double(t.x()),
-           CGAL::to_double(t.y()), CGAL::to_double(t.z()),
-           CGAL::to_double(n.x()), CGAL::to_double(n.y()),
-           CGAL::to_double(n.z()), edge.face_id, exact.str());
-    }
-  }
-
   void addPoint(int nth, Point point) { points(nth).push_back(point); }
-
-  void emitPoints(
-      int nth,
-      const std::function<void(double x, double y, double z,
-                               const std::string& exact)>& emit_point) {
-    for (const Point& point : points(nth)) {
-      emitPoint(point, emit_point);
-    }
-  }
 
   void copyInputMeshesToOutputMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {
@@ -521,7 +494,11 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       if (has_gps(nth)) {
         pwh(nth).clear();
-        gps(nth).polygons_with_holes(std::back_inserter(pwh(nth)));
+        Polygons_with_holes_2 complex_pwhs;
+        gps(nth).polygons_with_holes(std::back_inserter(complex_pwhs));
+        Polygons_with_holes_2 simple_pwhs;
+        simplifyPolygonsWithHoles(complex_pwhs, simple_pwhs);
+        pwh(nth) = std::move(simple_pwhs);
       }
     }
   }
@@ -703,7 +680,7 @@ class Geometry {
   int size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
-  std::vector<std::shared_ptr<const Transformation>> transforms_;
+  std::vector<Transformation> transforms_;
   std::vector<Plane> planes_;
   std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;

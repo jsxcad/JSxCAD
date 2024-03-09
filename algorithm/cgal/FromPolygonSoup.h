@@ -3,17 +3,10 @@
 #include "./approximate_util.h"
 #include "./repair_util.h"
 
-static int FromPolygonSoup(Geometry* geometry,
-                           const std::function<void(Triples*, Polygons*)>& fill,
-                           size_t face_count, double min_error_drop,
-                           const std::function<int()>& get_next_strategy) {
-  std::vector<int> strategies;
-
-  for (int strategy = get_next_strategy(); strategy != -1;
-       strategy = get_next_strategy()) {
-    std::cout << "QQ/FromPolygonSoup: strategy=" << strategy << std::endl;
-    strategies.push_back(strategy);
-  }
+static int FromPolygonSoup(Geometry* geometry, size_t face_count,
+                           double min_error_drop,
+                           const std::vector<int>& strategies) {
+  size_t size = geometry->size();
 
   try {
     int target = geometry->add(GEOMETRY_MESH);
@@ -24,12 +17,13 @@ static int FromPolygonSoup(Geometry* geometry,
       std::cout << "QQ/FromPolygonSoup/Load" << std::endl;
       Points points;
       Polygons polygons;
-      {
-        Triples triples;
-        fill(&triples, &polygons);
-        for (const Triple& triple : triples) {
-          points.push_back(Point(triple[0], triple[1], triple[2]));
+      for (size_t nth = 0; nth < size; nth++) {
+        Polygon polygon;
+        for (const Point& point : geometry->input_points(nth)) {
+          polygon.push_back(points.size());
+          points.push_back(point);
         }
+        polygons.push_back(std::move(polygon));
       }
 
       std::cout << "QQ/FromPolygonSoup/Repair" << std::endl;

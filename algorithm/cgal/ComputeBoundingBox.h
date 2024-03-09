@@ -1,7 +1,4 @@
-static int ComputeBoundingBox(
-    Geometry* geometry,
-    const std::function<void(double, double, double, double, double, double)>&
-        emit) {
+static int ComputeBoundingBox(Geometry* geometry, std::vector<double>& out) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -57,8 +54,12 @@ static int ComputeBoundingBox(
     return STATUS_EMPTY;
   }
 
-  emit(bbox.xmin(), bbox.ymin(), bbox.zmin(), bbox.xmax(), bbox.ymax(),
-       bbox.zmax());
+  out.push_back(bbox.xmin());
+  out.push_back(bbox.ymin());
+  out.push_back(bbox.zmin());
+  out.push_back(bbox.xmax());
+  out.push_back(bbox.ymax());
+  out.push_back(bbox.zmax());
 
   return STATUS_OK;
 }

@@ -38,7 +38,7 @@ static int EagerTransform(Geometry* geometry, int count) {
           break;
         }
         case GEOMETRY_REFERENCE: {
-          geometry->copyTransform(nth, transform * geometry->transform(nth));
+          geometry->setTransform(nth, transform * geometry->transform(nth));
           break;
         }
       }

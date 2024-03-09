@@ -1,11 +1,7 @@
 // This tries to make the largest disjoints first.
 static int disjointBackward(Geometry* geometry,
-                            const std::function<bool(int)>& get_is_masked,
-                            bool exact) {
+                            const std::vector<bool>& is_masked, bool exact) {
   int size = geometry->size();
-
-  std::vector<bool> is_masked;
-  is_masked.resize(size);
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->removeEmptyMeshes();
@@ -14,10 +10,6 @@ static int disjointBackward(Geometry* geometry,
   geometry->convertPlanarMeshesToPolygons();
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
-
-  for (int nth = 1; nth < size; nth++) {
-    is_masked[nth] = get_is_masked(nth);
-  }
 
   for (int start = 0; start < size - 1; start++) {
     switch (geometry->type(start)) {
@@ -154,19 +146,11 @@ static int disjointBackward(Geometry* geometry,
 
 // This tries to make the smallest disjoints.
 static int disjointForward(Geometry* geometry,
-                           const std::function<bool(int)>& get_is_masked,
-                           bool exact) {
+                           const std::vector<bool>& is_masked, bool exact) {
   int size = geometry->size();
   if (size < 2) {
     // Already disjoint.
     return STATUS_UNCHANGED;
-  }
-
-  std::vector<bool> is_masked;
-  is_masked.resize(size);
-
-  for (int nth = 1; nth < size; nth++) {
-    is_masked[nth] = get_is_masked(nth);
   }
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -307,14 +291,13 @@ static int disjointForward(Geometry* geometry,
   return STATUS_OK;
 }
 
-static int Disjoint(Geometry* geometry,
-                    const std::function<bool(int)>& get_is_masked, int mode,
-                    bool exact) {
+static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
+                    int mode, bool exact) {
   switch (mode == 0) {
-    case 0:  // 50.58
-      return disjointBackward(geometry, get_is_masked, exact);
-    case 1:  // 30.65
-      return disjointForward(geometry, get_is_masked, exact);
+    case 0:
+      return disjointBackward(geometry, is_masked, exact);
+    case 1:
+      return disjointForward(geometry, is_masked, exact);
     default:
       return STATUS_INVALID_INPUT;
   }

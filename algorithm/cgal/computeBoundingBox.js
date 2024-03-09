@@ -7,16 +7,8 @@ export const computeBoundingBox = (inputs) => {
     return;
   }
   return withCgalGeometry('computeBoundingBox', inputs, (cgalGeometry, g) => {
-    let bbox;
-    const status = g.ComputeBoundingBox(
-      cgalGeometry,
-      (minX, minY, minZ, maxX, maxY, maxZ) => {
-        bbox = [
-          [minX, minY, minZ],
-          [maxX, maxY, maxZ],
-        ];
-      }
-    );
+    const bbox = [];
+    const status = g.ComputeBoundingBox(cgalGeometry, bbox);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness(

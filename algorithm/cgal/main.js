@@ -1,7 +1,5 @@
 export {
   composeTransforms,
-  fromExactToCgalTransform,
-  fromIdentityToCgalTransform,
   fromRotateXToTransform,
   fromRotateYToTransform,
   fromRotateZToTransform,
@@ -11,7 +9,6 @@ export {
   identity,
   invertTransform,
   matrix6,
-  toCgalTransformFromJsTransform,
 } from './transform.js';
 
 export { approximate } from './approximate.js';
@@ -57,7 +54,6 @@ export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
 export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
-export { fromSurfaceMeshToLazyGraph } from './fromSurfaceMeshToLazyGraph.js';
 export { fuse } from './fuse.js';
 export { generateEnvelope } from './generateEnvelope.js';
 export { grow } from './grow.js';
@@ -89,7 +85,6 @@ export { repair } from './repair.js';
 export { shell } from './shell.js';
 export { simplify } from './simplify.js';
 export { smooth } from './smooth.js';
-export { smoothSurfaceMesh } from './smoothSurfaceMesh.js';
 export { twist } from './twist.js';
 export { unfold } from './unfold.js';
 export { validate } from './validate.js';

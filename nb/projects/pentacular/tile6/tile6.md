@@ -162,8 +162,6 @@ const Wall = (tile) =>
     .clean();
 ```
 
-![Image](tile6.md.contourWreath1.png)
-
 ```JavaScript
 const contourWreath1 = LoadPng(
   'https://jsxcad.js.org/png/wreath.png',

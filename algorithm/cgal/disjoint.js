@@ -10,9 +10,10 @@ import { ErrorZeroThickness } from './error.js';
 export const disjoint = (inputs, mode, exact = false) =>
   withCgalGeometry('disjoint', inputs, (geometry, g) => {
     // These are custom inputs.
-    const getIsMasked = (nth) =>
-      inputs[nth].tags && inputs[nth].tags.includes('type:masked');
-    const status = g.Disjoint(geometry, getIsMasked, mode, exact);
+    const isMasked = inputs.map(
+      ({ tags }) => tags && tags.includes('type:masked')
+    );
+    const status = g.Disjoint(geometry, isMasked, mode, exact);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by disjoint');

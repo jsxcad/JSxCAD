@@ -1,17 +1,12 @@
-static int FromPolygons(Geometry* geometry, bool close,
-                        const std::function<void(Triples*, Polygons*)>& fill) {
-  Triples triples;
-  Polygons polygons;
-  fill(&triples, &polygons);
+static int FromPolygons(Geometry* geometry, bool close) {
+  size_t size = geometry->size();
   int target = geometry->add(GEOMETRY_MESH);
   Surface_mesh& mesh = geometry->mesh(target);
   geometry->setIdentityTransform(target);
   Vertex_map vertex_map;
-  for (auto& polygon : polygons) {
+  for (size_t nth = 0; nth < size; nth++) {
     std::vector<Vertex_index> vertices;
-    for (auto& index : polygon) {
-      const Triple& triple = triples[index];
-      const Point point(triple[0], triple[1], triple[2]);
+    for (auto& point : geometry->input_points(nth)) {
       Vertex_index vertex = ensureVertex(mesh, vertex_map, point);
       vertices.push_back(vertex);
     }

@@ -6,14 +6,21 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+const round = (values, resolution) =>
+  values.map((value) => Math.round(value / resolution) * resolution);
+
 export const sort = Shape.registerMethod3(
   'sort',
-  ['inputGeometry', 'string'],
-  (geometry, spec = 'z<y<x<') => {
+  ['inputGeometry', 'string', 'number'],
+  (geometry, spec = 'z<y<x<', resolution = 0.01) => {
     let leafs = [];
     for (const leaf of getLeafs(geometry)) {
       const [min, max] = measureBoundingBox(leaf);
-      leafs.push({ min, max, leaf });
+      leafs.push({
+        min: round(min, resolution),
+        max: round(max, resolution),
+        leaf,
+      });
     }
     const ops = [];
     while (spec) {

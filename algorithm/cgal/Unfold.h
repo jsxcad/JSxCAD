@@ -2,9 +2,15 @@
 
 #include "mu3d.h"
 
-static int Unfold(
-    Geometry* geometry, bool enable_tabs,
-    const std::function<void(int face, const std::string& tag)>& emit_tag) {
+struct UnfoldTag {
+  UnfoldTag(int face, const std::string& name) : face(face), name(name) {}
+
+  int face;
+  const std::string name;
+};
+
+static int Unfold(Geometry* geometry, bool enable_tabs,
+                  std::vector<UnfoldTag>& tags) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -24,7 +30,7 @@ static int Unfold(
         std::vector<Point_2> points;
         g.fillPoints(points);
         int faces = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-        emit_tag(faces, std::string("unfold:faces"));
+        tags.emplace_back(faces, "unfold:faces");
         geometry->plane(faces) = Plane(0, 0, 1, 0);
         geometry->setIdentityTransform(faces);
         for (size_t nth = 0; nth < points.size(); nth += 3) {
@@ -39,7 +45,7 @@ static int Unfold(
           std::vector<Point_2> points;
           g.fillTabs(points);
           int faces = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
-          emit_tag(faces, std::string("unfold:tabs"));
+          tags.emplace_back(faces, "unfold:tabs");
           // We want each of these to be a separate shape.
           for (size_t nth = 0; nth < points.size(); nth += 4) {
             Polygon_2 polygon;
@@ -72,16 +78,16 @@ static int Unfold(
               Transformation t =
                   computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
               geometry->segments(edge).emplace_back(s1, s2);
-              geometry->copyTransform(edge, t.inverse());
-              emit_tag(edge, std::string("unfold:edge"));
+              geometry->setTransform(edge, t.inverse());
+              tags.emplace_back(edge, "unfold:edge");
             }
             {
               int edge = geometry->add(GEOMETRY_SEGMENTS);
               Transformation t =
                   computeInverseSegmentTransform(t2, t1, Vector(0, 0, 1));
               geometry->segments(edge).emplace_back(t2, t1);
-              geometry->copyTransform(edge, t.inverse());
-              emit_tag(edge, std::string("unfold:edge"));
+              geometry->setTransform(edge, t.inverse());
+              tags.emplace_back(edge, "unfold:edge");
             }
           } else {
             // This edge was not split, but with a fold -- include one side.
@@ -89,8 +95,8 @@ static int Unfold(
             Transformation t =
                 computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
             geometry->segments(edge).emplace_back(s1, s2);
-            geometry->copyTransform(edge, t.inverse());
-            emit_tag(edge, std::string("unfold:edge"));
+            geometry->setTransform(edge, t.inverse());
+            tags.emplace_back(edge, "unfold:edge");
           }
         }
       }

@@ -1,8 +1,12 @@
+import {
+  GEOMETRY_POINTS,
+  fromCgalGeometry,
+  withCgalGeometry,
+} from './cgalGeometry.js';
 import { STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
-import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
-import { provideRepairStrategies } from './repair.js';
+import { generateRepairStrategyCodes } from './repair.js';
 
 export const fromPolygonSoup = (
   jsPolygons,
@@ -12,30 +16,30 @@ export const fromPolygonSoup = (
   strategies = []
 ) =>
   withCgalGeometry('fromPolygonSoup', [], (cgalGeometry, g) => {
+    cgalGeometry.setSize(jsPolygons.length);
+    for (let nth = 0; nth < jsPolygons.length; nth++) {
+      const { points } = jsPolygons[nth];
+      cgalGeometry.setType(nth, GEOMETRY_POINTS);
+      for (const [x, y, z] of points) {
+        cgalGeometry.addInputPoint(nth, x, y, z);
+      }
+    }
     const status = g.FromPolygonSoup(
       cgalGeometry,
-      (triples, polygons) => {
-        let index = 0;
-        // FIX: Prefer exactPoints
-        for (const { points } of jsPolygons) {
-          // FIX: Clean this up and use exactPoints.
-          const polygon = new g.Polygon();
-          for (const [x, y, z] of points) {
-            g.addTriple(triples, x, y, z, tolerance);
-            g.Polygon__push_back(polygon, index++);
-          }
-          polygons.push_back(polygon);
-        }
-      },
       faceCountLimit,
       minErrorDrop,
-      provideRepairStrategies(strategies)
+      generateRepairStrategyCodes(strategies)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fromPolygons');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, [], cgalGeometry.getSize(), 0);
+        return fromCgalGeometry(
+          cgalGeometry,
+          [],
+          cgalGeometry.getSize(),
+          jsPolygons.length
+        );
       default:
         throw new Error(`Unexpected status ${status}`);
     }

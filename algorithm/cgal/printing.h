@@ -8,9 +8,9 @@ static void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {
     if (vit != P.vertices_begin()) {
       std::cout << ", ";
     }
-    // std::cout << "{\"" << vit->x().exact() << "\", \"" << vit->y().exact() <<
-    // "\"}";
-    std::cout << "Point(" << vit->x() << ", " << vit->y() << ")";
+    std::cout << "{ to_FT(\"" << vit->x().exact() << "\"), to_FT(\""
+              << vit->y().exact() << "\")}";
+    // std::cout << "Point(" << vit->x() << ", " << vit->y() << ")";
   }
   std::cout << ")";
 }
@@ -51,7 +51,7 @@ static void print_polygon_with_holes(
   std::cout << " " << pwh.number_of_holes() << " holes:" << std::endl;
   for (hit = pwh.holes_begin(); hit != pwh.holes_end(); ++hit, ++k) {
     std::cout << "Hole: ";
-    print_polygon(*hit);
+    print_polygon_nl(*hit);
   }
   std::cout << std::endl;
 }

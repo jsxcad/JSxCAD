@@ -10,14 +10,14 @@ static int ComputeNormal(Geometry* geometry) {
         computeNormalOfSurfaceMesh(normal, geometry->mesh(nth));
         geometry->setType(nth, GEOMETRY_POINTS);
         geometry->addPoint(nth, Point(0, 0, 0));
-        geometry->copyTransform(nth, translate(normal).inverse());
+        geometry->setTransform(nth, translate(normal).inverse());
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         Vector normal = geometry->plane(nth).orthogonal_vector();
         geometry->setType(nth, GEOMETRY_POINTS);
         geometry->addPoint(nth, Point(0, 0, 0));
-        geometry->copyTransform(nth, translate(normal));
+        geometry->setTransform(nth, translate(normal));
         break;
       }
     }
