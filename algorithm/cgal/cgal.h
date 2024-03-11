@@ -9,8 +9,12 @@
 #define EIGEN_DONT_VECTORIZE
 // #define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
 
+#include <CGAL/FPU.h>
+
 // Used in Deform, but it's unclear if this definition is correct.
+#ifndef FE_UNDERFLOW
 #define FE_UNDERFLOW 0
+#endif
 
 #include <CGAL/Aff_transformation_3.h>
 #include <CGAL/Arr_conic_traits_2.h>

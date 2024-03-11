@@ -14,11 +14,11 @@ static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
 
   bool hasSelections = count + 1 < size;
 
-  for (int nth = 0; nth < count; nth++) {
+  for (size_t nth = 0; nth < count; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         Surface_mesh& mesh = geometry->mesh(nth);
-        for (int selection = count + 1; selection < size; selection++) {
+        for (size_t selection = count + 1; selection < size; selection++) {
           if (!geometry->is_mesh(selection)) {
             continue;
           }
@@ -57,7 +57,7 @@ static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
           bool inside = true;
           if (hasSelections) {
             inside = false;
-            for (int selection = count + 1; selection < size; selection++) {
+            for (size_t selection = count + 1; selection < size; selection++) {
               if (geometry->on_side(selection)(point) !=
                   CGAL::ON_UNBOUNDED_SIDE) {
                 inside = true;

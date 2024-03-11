@@ -27,18 +27,8 @@ static int disjointBackward(Geometry* geometry,
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-              if (exact) {
-                Surface_mesh cutMeshCopy(geometry->mesh(nth));
-                if (!CGAL::Polygon_mesh_processing::
-                        corefine_and_compute_difference(
-                            geometry->mesh(start), cutMeshCopy,
-                            geometry->mesh(start),
-                            CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default())) {
-                  return STATUS_ZERO_THICKNESS;
-                }
-              } else {
+#if JOT_MANIFOLD_ENABLED
+              if (!exact) {
                 // TODO: Optimize out unnecessary conversions.
                 manifold::Manifold target_manifold;
                 buildManifoldFromSurfaceMesh(geometry->mesh(start),
@@ -49,6 +39,20 @@ static int disjointBackward(Geometry* geometry,
                 geometry->mesh(start).clear();
                 buildSurfaceMeshFromManifold(target_manifold,
                                              geometry->mesh(start));
+              } else {
+#else
+              {
+#endif
+                Surface_mesh cutMeshCopy(geometry->mesh(nth));
+                if (!CGAL::Polygon_mesh_processing::
+                        corefine_and_compute_difference(
+                            geometry->mesh(start), cutMeshCopy,
+                            geometry->mesh(start),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default())) {
+                  return STATUS_ZERO_THICKNESS;
+                }
               }
               geometry->updateBounds3(start);
               break;
@@ -174,18 +178,8 @@ static int disjointForward(Geometry* geometry,
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-              if (exact) {
-                Surface_mesh cutMeshCopy(geometry->mesh(nth));
-                if (!CGAL::Polygon_mesh_processing::
-                        corefine_and_compute_difference(
-                            geometry->mesh(start), cutMeshCopy,
-                            geometry->mesh(start),
-                            CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default())) {
-                  return STATUS_ZERO_THICKNESS;
-                }
-              } else {
+#ifdef JOT_MANIFOLD_ENABLED
+              if (!exact) {
                 // TODO: Optimize out unnecessary conversions.
                 manifold::Manifold target_manifold;
                 buildManifoldFromSurfaceMesh(geometry->mesh(start),
@@ -196,6 +190,20 @@ static int disjointForward(Geometry* geometry,
                 geometry->mesh(start).clear();
                 buildSurfaceMeshFromManifold(target_manifold,
                                              geometry->mesh(start));
+              } else {
+#else
+              {
+#endif
+                Surface_mesh cutMeshCopy(geometry->mesh(nth));
+                if (!CGAL::Polygon_mesh_processing::
+                        corefine_and_compute_difference(
+                            geometry->mesh(start), cutMeshCopy,
+                            geometry->mesh(start),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default(),
+                            CGAL::parameters::all_default())) {
+                  return STATUS_ZERO_THICKNESS;
+                }
               }
               geometry->updateBounds3(start);
               break;
@@ -273,6 +281,7 @@ static int disjointForward(Geometry* geometry,
         // TODO: Support disjunction by volumes, segments, polygons.
         break;
       }
+      case GEOMETRY_EDGES:
       case GEOMETRY_REFERENCE:
       case GEOMETRY_EMPTY: {
         break;
@@ -293,11 +302,11 @@ static int disjointForward(Geometry* geometry,
 
 static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
                     int mode, bool exact) {
-  switch (mode == 0) {
+  switch (mode) {
     case 0:
-      return disjointBackward(geometry, is_masked, exact);
-    case 1:
       return disjointForward(geometry, is_masked, exact);
+    case 1:
+      return disjointBackward(geometry, is_masked, exact);
     default:
       return STATUS_INVALID_INPUT;
   }

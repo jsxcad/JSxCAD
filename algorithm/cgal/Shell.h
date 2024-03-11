@@ -45,12 +45,12 @@ class Offset_function {
  public:
   Offset_function(TriangleMesh& tm, double inner_min, double inner_max,
                   double outer_min, double outer_max)
-      : inner_min_(inner_min),
+      : tree_ptr_(new Tree(boost::begin(faces(tm)), boost::end(faces(tm)), tm)),
+        side_of_ptr_(new Side_of(*tree_ptr_)),
+        inner_min_(inner_min),
         inner_max_(inner_max),
         outer_min_(outer_min),
         outer_max_(outer_max),
-        tree_ptr_(new Tree(boost::begin(faces(tm)), boost::end(faces(tm)), tm)),
-        side_of_ptr_(new Side_of(*tree_ptr_)),
         is_closed_(is_closed(tm)) {
     CGAL_assertion(!tree_ptr_->empty());
   }

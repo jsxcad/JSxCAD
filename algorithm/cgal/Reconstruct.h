@@ -16,7 +16,7 @@ static int Reconstruct(Geometry* geometry, double offset) {
     geometry->copyInputMeshesToOutputMeshes();
     geometry->transformToAbsoluteFrame();
 
-    for (int nth = 0; nth < size; nth++) {
+    for (size_t nth = 0; nth < size; nth++) {
       switch (geometry->type(nth)) {
         case GEOMETRY_MESH: {
           typedef boost::tuple<Epick_point, Epick_vector, int> PNI;
@@ -159,6 +159,14 @@ static int Reconstruct(Geometry* geometry, double offset) {
 
           std::cout << "QQ/Reconstruct/8" << std::endl;
         }
+        case GEOMETRY_UNKNOWN:
+        case GEOMETRY_POLYGONS_WITH_HOLES:
+        case GEOMETRY_SEGMENTS:
+        case GEOMETRY_POINTS:
+        case GEOMETRY_EMPTY:
+        case GEOMETRY_REFERENCE:
+        case GEOMETRY_EDGES:
+          break;
       }
     }
 

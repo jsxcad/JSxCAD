@@ -181,7 +181,7 @@ static void simplifyPolygon(Polygon_2& polygon,
     std::cout << "QQ/polygon was not cleared" << std::endl;
   }
 
-  for (const auto simple_polygon : simple_polygons) {
+  for (const auto& simple_polygon : simple_polygons) {
     if (!simple_polygon.is_simple()) {
       std::cout
           << "QQ/simplifyPolygon produced non-simple polygon in simple_polygons"

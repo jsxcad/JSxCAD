@@ -11,7 +11,7 @@ static int MakeAbsolute(Geometry* geometry) {
   geometry->copyInputPointsToOutputPoints();
   geometry->transformToAbsoluteFrame();
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     geometry->setIdentityTransform(nth);
   }
 

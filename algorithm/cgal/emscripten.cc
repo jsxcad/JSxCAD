@@ -162,6 +162,17 @@ static int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
   return STATUS_OK;
 }
 
+static int FromPolygonSoup(Geometry* geometry, int face_count,
+                           double min_error_drop,
+                           emscripten::val js_strategies) {
+  std::vector<int> strategies;
+  size_t length = js_strategies["length"].as<int>();
+  for (size_t nth = 0; nth < length; nth++) {
+    strategies.push_back(js_strategies[nth].as<int>());
+  }
+  return ::FromPolygonSoup(geometry, face_count, min_error_drop, strategies);
+}
+
 static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
                           emscripten::val& js_exact_plane) {
   js_plane = js_plane.array();
@@ -182,17 +193,6 @@ static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
   js_plane.set(2, emscripten::val(zd / ld));
   js_plane.set(3, emscripten::val(wd));
   js_exact_plane = emscripten::val(exact.str());
-}
-
-static int FromPolygonSoup(Geometry* geometry, int face_count,
-                           double min_error_drop,
-                           emscripten::val js_strategies) {
-  std::vector<int> strategies;
-  size_t length = js_strategies["length"].as<int>();
-  for (size_t nth = 0; nth < length; nth++) {
-    strategies.push_back(js_strategies[nth].as<int>());
-  }
-  return ::FromPolygonSoup(geometry, face_count, min_error_drop, strategies);
 }
 
 static int GetPolygonsWithHoles(Geometry* geometry, int nth,
@@ -390,24 +390,21 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("addPolygonHole", &Geometry::addPolygonHole)
       .function("addPolygonHolePoint", &Geometry::addPolygonHolePoint)
       .function("addPolygonHolePointExact", &Geometry::addPolygonHolePointExact)
-      .function("convertPlanarMeshesToPolygons",
-                &Geometry::convertPlanarMeshesToPolygons)
-      .function("convertPolygonsToPlanarMeshes",
-                &Geometry::convertPolygonsToPlanarMeshes)
-      .function("copyInputMeshesToOutputMeshes",
-                &Geometry::copyInputMeshesToOutputMeshes)
+      // .function("convertPlanarMeshesToPolygons", &Geometry::convertPlanarMeshesToPolygons)
+      // .function("convertPolygonsToPlanarMeshes", &Geometry::convertPolygonsToPlanarMeshes)
+      // .function("copyInputMeshesToOutputMeshes", &Geometry::copyInputMeshesToOutputMeshes)
       .function("deserializeInputMesh", &Geometry::deserializeInputMesh)
       .function("finishPolygon", &Geometry::finishPolygon)
       .function("finishPolygonHole", &Geometry::finishPolygonHole)
-      .function("getInputMesh", &Geometry::getMesh)
+      // .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
       .function("getOrigin", &Geometry::getOrigin)
-      .function("getSerializedInputMesh", &Geometry::getSerializedInputMesh)
+      // .function("getSerializedInputMesh", &Geometry::getSerializedInputMesh)
       .function("getSerializedMesh", &Geometry::getSerializedMesh)
       .function("getSize", &Geometry::getSize)
       .function("getType", &Geometry::getType)
       .function("has_mesh", &Geometry::has_mesh)
-      .function("print", &Geometry::print)
+      // .function("print", &Geometry::print)
       .function("setTestMode", &Geometry::setTestMode)
       .function("setInputMesh", &Geometry::setInputMesh)
       .function("setPolygonsPlane", &Geometry::setPolygonsPlane)
@@ -415,8 +412,8 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform)
       .function("setType", &Geometry::setType)
-      .function("transformToAbsoluteFrame",
-                &Geometry::transformToAbsoluteFrame);
+      // .function("transformToAbsoluteFrame", &Geometry::transformToAbsoluteFrame)
+      ;
 
   emscripten::class_<Surface_mesh>("Surface_mesh")
       .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh");

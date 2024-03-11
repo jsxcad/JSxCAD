@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef JOT_MANIFOLD_ENABLED
+
 #include "manifold.h"
 
 static void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
@@ -57,3 +59,5 @@ void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
     }
   }
 }
+
+#endif

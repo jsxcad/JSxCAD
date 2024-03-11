@@ -23,7 +23,7 @@ static int Fair(Geometry* geometry, size_t count, double resolution,
   geometry->transformToAbsoluteFrame();
 
   std::vector<const Surface_mesh*> selections;
-  for (int selection = count; selection < size; selection++) {
+  for (size_t selection = count; selection < size; selection++) {
     selections.push_back(&geometry->mesh(selection));
   }
 

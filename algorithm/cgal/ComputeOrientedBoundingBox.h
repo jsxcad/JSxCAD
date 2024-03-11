@@ -15,7 +15,7 @@ static int ComputeOrientedBoundingBox(Geometry* geometry) {
 
   std::vector<Epick_kernel::Point_3> points;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         const Surface_mesh& mesh = geometry->mesh(nth);
@@ -27,7 +27,7 @@ static int ComputeOrientedBoundingBox(Geometry* geometry) {
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         const Plane& plane = geometry->plane(nth);
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
-          for (const Point_2 point : polygon.outer_boundary()) {
+          for (const Point_2& point : polygon.outer_boundary()) {
             points.push_back(to_epick(plane.to_3d(point)));
           }
           for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();

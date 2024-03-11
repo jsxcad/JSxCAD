@@ -1,4 +1,4 @@
-static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
+static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
   try {
     size_t size = geometry->size();
 
@@ -10,13 +10,13 @@ static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
     geometry->copyPolygonsWithHolesToGeneralPolygonSets();
     geometry->computeBounds();
 
-    for (int target = 0; target < targets; target++) {
+    for (size_t target = 0; target < targets; target++) {
       switch (geometry->type(target)) {
         case GEOMETRY_MESH: {
           if (geometry->is_empty_mesh(target)) {
             continue;
           }
-          for (int nth = targets; nth < size; nth++) {
+          for (size_t nth = targets; nth < size; nth++) {
             if (geometry->is_reference(nth)) {
               Plane plane(0, 0, 1, 0);
               plane = plane.transform(geometry->transform(nth));
@@ -44,17 +44,8 @@ static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
                       CGAL::parameters::use_compact_clipper(true))) {
                 return STATUS_ZERO_THICKNESS;
               }
-            } else if (exact) {
-              if (!CGAL::Polygon_mesh_processing::
-                      corefine_and_compute_intersection(
-                          geometry->mesh(target), clipMeshCopy,
-                          geometry->mesh(target),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default())) {
-                return STATUS_ZERO_THICKNESS;
-              }
-            } else {
+#ifdef JOT_MANIFOLD_ENABLED
+            } else if (!exact) {
               // TODO: Optimize out unnecessary conversions.
               manifold::Manifold target_manifold;
               buildManifoldFromSurfaceMesh(geometry->mesh(target),
@@ -65,6 +56,17 @@ static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
               geometry->mesh(target).clear();
               buildSurfaceMeshFromManifold(target_manifold,
                                            geometry->mesh(target));
+#endif
+            } else {
+              if (!CGAL::Polygon_mesh_processing::
+                      corefine_and_compute_intersection(
+                          geometry->mesh(target), clipMeshCopy,
+                          geometry->mesh(target),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default(),
+                          CGAL::parameters::all_default())) {
+                return STATUS_ZERO_THICKNESS;
+              }
             }
             geometry->updateBounds3(target);
           }
@@ -72,7 +74,7 @@ static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
-          for (int nth = targets; nth < size; nth++) {
+          for (size_t nth = targets; nth < size; nth++) {
             switch (geometry->getType(nth)) {
               case GEOMETRY_POLYGONS_WITH_HOLES: {
                 if (geometry->plane(target) != geometry->plane(nth)) {
@@ -105,7 +107,7 @@ static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
           std::vector<Segment> in;
           geometry->segments(target).swap(in);
           std::vector<Segment> out;
-          for (int nth = targets; nth < size; nth++) {
+          for (size_t nth = targets; nth < size; nth++) {
             if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
               continue;
             }
@@ -127,7 +129,7 @@ static int Clip(Geometry* geometry, int targets, bool open, bool exact) {
           std::vector<Point> in;
           geometry->points(target).swap(in);
           std::vector<Point> out;
-          for (int nth = targets; nth < size; nth++) {
+          for (size_t nth = targets; nth < size; nth++) {
             if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
               continue;
             }

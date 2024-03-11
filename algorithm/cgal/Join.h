@@ -1,4 +1,4 @@
-static int Join(Geometry* geometry, int targets, bool exact) {
+static int Join(Geometry* geometry, size_t targets, bool exact) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -9,13 +9,13 @@ static int Join(Geometry* geometry, int targets, bool exact) {
   geometry->copyPolygonsWithHolesToGeneralPolygonSets();
   geometry->computeBounds();
 
-  for (int target = 0; target < targets; target++) {
+  for (size_t target = 0; target < targets; target++) {
     switch (geometry->type(target)) {
       case GEOMETRY_MESH: {
         if (geometry->is_empty_mesh(target)) {
           continue;
         }
-        for (int nth = targets; nth < size; nth++) {
+        for (size_t nth = targets; nth < size; nth++) {
           if (!geometry->is_mesh(nth)) {
             continue;
           }
@@ -24,14 +24,8 @@ static int Join(Geometry* geometry, int targets, bool exact) {
           }
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
-          } else if (exact) {
-            Surface_mesh cutMeshCopy(geometry->mesh(nth));
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                    geometry->mesh(target), cutMeshCopy,
-                    geometry->mesh(target))) {
-              return STATUS_ZERO_THICKNESS;
-            }
-          } else {
+#ifdef JOT_MANIFOLD_ENABLED
+          } else if (!exact) {
             // TODO: Optimize out unnecessary conversions.
             manifold::Manifold target_manifold;
             buildManifoldFromSurfaceMesh(geometry->mesh(target),
@@ -42,6 +36,14 @@ static int Join(Geometry* geometry, int targets, bool exact) {
             geometry->mesh(target).clear();
             buildSurfaceMeshFromManifold(target_manifold,
                                          geometry->mesh(target));
+#endif
+          } else {
+            Surface_mesh cutMeshCopy(geometry->mesh(nth));
+            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                    geometry->mesh(target), cutMeshCopy,
+                    geometry->mesh(target))) {
+              return STATUS_ZERO_THICKNESS;
+            }
           }
           geometry->updateBounds3(target);
         }
@@ -49,7 +51,7 @@ static int Join(Geometry* geometry, int targets, bool exact) {
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        for (int nth = targets; nth < size; nth++) {
+        for (size_t nth = targets; nth < size; nth++) {
           switch (geometry->getType(nth)) {
             case GEOMETRY_POLYGONS_WITH_HOLES: {
               if (geometry->plane(target) != geometry->plane(nth)) {
@@ -74,7 +76,7 @@ static int Join(Geometry* geometry, int targets, bool exact) {
         break;
       }
       case GEOMETRY_SEGMENTS: {
-        for (int nth = targets; nth < size; nth++) {
+        for (size_t nth = targets; nth < size; nth++) {
           if (!geometry->has_segments(nth)) {
             continue;
           }
@@ -85,7 +87,7 @@ static int Join(Geometry* geometry, int targets, bool exact) {
         break;
       }
       case GEOMETRY_POINTS: {
-        for (int nth = targets; nth < size; nth++) {
+        for (size_t nth = targets; nth < size; nth++) {
           if (!geometry->has_points(nth)) {
             continue;
           }

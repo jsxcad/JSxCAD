@@ -129,7 +129,7 @@ static double sh_overlapping_area(glm::dvec2& a, glm::dvec2& b, glm::dvec2& c,
     glm::dvec2 cp1 = clipper[j];
     glm::dvec2 cp2 = clipper[(j + 1) % 3];
 
-    for (int i = 0; i < input_polygon.size(); i++) {
+    for (size_t i = 0; i < input_polygon.size(); i++) {
       glm::dvec2 s = input_polygon[i];
       glm::dvec2 e = input_polygon[(i + 1) % input_polygon.size()];
 
@@ -158,7 +158,7 @@ static double sh_overlapping_area(glm::dvec2& a, glm::dvec2& b, glm::dvec2& c,
   double leftSum = 0.0;
   double rightSum = 0.0;
 
-  for (int i = 0; i < new_polygon.size(); i++) {
+  for (size_t i = 0; i < new_polygon.size(); i++) {
     int j = (i + 1) % new_polygon.size();
     leftSum += new_polygon[i].x * new_polygon[j].y;
     rightSum += new_polygon[j].x * new_polygon[i].y;
@@ -543,11 +543,11 @@ class Graph {
   std::vector<GluetabToPlane> _planarGluetabs;
 
   double _Cenergy;
-  double _optEnergy;
-  int _temperature;
   float _maxtemp;
-  float _opttemperature;
+  double _optEnergy;
   bool _optimise;
+  float _opttemperature;
+  int _temperature;
   std::default_random_engine _generator;
   std::uniform_real_distribution<double> _distribution;
 

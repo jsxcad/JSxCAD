@@ -6,6 +6,9 @@
 
 #include "transform_util.h"
 
+// Denotes which methods are exposed to javascript.
+#define JS_BINDING
+
 enum Status {
   STATUS_OK = 0,
   STATUS_EMPTY = 1,
@@ -38,7 +41,7 @@ class Geometry {
  public:
   Geometry() : test_mode_(false), size_(0), is_absolute_frame_(false) {}
 
-  void setSize(int size) {
+  JS_BINDING void setSize(size_t size) {
     types_.clear();
     transforms_.clear();
     planes_.clear();
@@ -60,11 +63,11 @@ class Geometry {
     resize(size);
   }
 
-  int size() const { return size_; }
+  size_t size() const { return size_; }
 
   void clear() { setSize(0); }
 
-  void resize(int size) {
+  void resize(size_t size) {
     size_ = size;
     types_.resize(size);
     transforms_.resize(size, Transformation(CGAL::IDENTITY));
@@ -88,51 +91,51 @@ class Geometry {
     origin_.resize(size, -1);
   }
 
-  GeometryType& type(int nth) { return types_[nth]; }
+  GeometryType& type(size_t nth) { return types_[nth]; }
 
-  int add(GeometryType type) {
+  size_t add(GeometryType type) {
     int target = size();
     resize(target + 1);
     setType(target, type);
     return target;
   }
 
-  bool is_edges(int nth) { return type(nth) == GEOMETRY_EDGES; }
-  bool is_empty_epick_mesh(int nth) { return CGAL::is_empty(epick_mesh(nth)); }
-  bool is_empty_mesh(int nth) { return CGAL::is_empty(mesh(nth)); }
-  bool is_mesh(int nth) { return type(nth) == GEOMETRY_MESH; }
-  bool is_points(int nth) { return type(nth) == GEOMETRY_POINTS; }
-  bool is_polygons(int nth) {
+  bool is_edges(size_t nth) { return type(nth) == GEOMETRY_EDGES; }
+  bool is_empty_epick_mesh(size_t nth) { return CGAL::is_empty(epick_mesh(nth)); }
+  bool is_empty_mesh(size_t nth) { return CGAL::is_empty(mesh(nth)); }
+  bool is_mesh(size_t nth) { return type(nth) == GEOMETRY_MESH; }
+  bool is_points(size_t nth) { return type(nth) == GEOMETRY_POINTS; }
+  bool is_polygons(size_t nth) {
     return type(nth) == GEOMETRY_POLYGONS_WITH_HOLES;
   }
-  bool is_reference(int nth) { return type(nth) == GEOMETRY_REFERENCE; }
-  bool is_segments(int nth) { return type(nth) == GEOMETRY_SEGMENTS; }
+  bool is_reference(size_t nth) { return type(nth) == GEOMETRY_REFERENCE; }
+  bool is_segments(size_t nth) { return type(nth) == GEOMETRY_SEGMENTS; }
 
-  bool has_transform(int nth) { return true; }
+  bool has_transform(size_t nth) { return true; }
 
-  const Transformation& transform(int nth) { return transforms_[nth]; }
+  const Transformation& transform(size_t nth) { return transforms_[nth]; }
 
-  bool has_plane(int nth) { return is_polygons(nth); }
-  Plane& plane(int nth) { return planes_[nth]; }
+  bool has_plane(size_t nth) { return is_polygons(nth); }
+  Plane& plane(size_t nth) { return planes_[nth]; }
 
-  bool has_input_mesh(int nth) { return input_meshes_[nth] != nullptr; }
+  bool has_input_mesh(size_t nth) { return input_meshes_[nth] != nullptr; }
 
-  const Surface_mesh& input_mesh(int nth) { return *input_meshes_[nth]; }
+  const Surface_mesh& input_mesh(size_t nth) { return *input_meshes_[nth]; }
 
-  bool has_mesh(int nth) { return meshes_[nth] != nullptr; }
+  JS_BINDING bool has_mesh(size_t nth) { return meshes_[nth] != nullptr; }
 
-  Surface_mesh& mesh(int nth) {
+  Surface_mesh& mesh(size_t nth) {
     if (!has_mesh(nth)) {
       meshes_[nth].reset(new Surface_mesh);
     }
     return *meshes_[nth];
   }
 
-  void discard_mesh(int nth) { meshes_[nth].reset(); }
+  void discard_mesh(size_t nth) { meshes_[nth].reset(); }
 
-  bool has_epick_mesh(int nth) { return epick_meshes_[nth] != nullptr; }
+  bool has_epick_mesh(size_t nth) { return epick_meshes_[nth] != nullptr; }
 
-  Epick_surface_mesh& epick_mesh(int nth) {
+  Epick_surface_mesh& epick_mesh(size_t nth) {
     if (!has_epick_mesh(nth)) {
       epick_meshes_[nth].reset(new Epick_surface_mesh);
       copy_face_graph(mesh(nth), *epick_meshes_[nth]);
@@ -140,78 +143,78 @@ class Geometry {
     return *epick_meshes_[nth];
   }
 
-  void copyEpickMeshToEpeckMesh(int nth) {
+  void copyEpickMeshToEpeckMesh(size_t nth) {
     copy_face_graph(*epick_meshes_[nth], mesh(nth));
   }
 
-  bool has_aabb_tree(int nth) { return aabb_trees_[nth] != nullptr; }
+  bool has_aabb_tree(size_t nth) { return aabb_trees_[nth] != nullptr; }
 
-  bool has_epick_aabb_tree(int nth) {
+  bool has_epick_aabb_tree(size_t nth) {
     return epick_aabb_trees_[nth] != nullptr;
   }
 
-  void update_aabb_tree(int nth) {
+  void update_aabb_tree(size_t nth) {
     Surface_mesh& m = mesh(nth);
     aabb_trees_[nth].reset(new AABB_tree(faces(m).first, faces(m).second, m));
   }
 
-  void update_epick_aabb_tree(int nth) {
+  void update_epick_aabb_tree(size_t nth) {
     Epick_surface_mesh& m = epick_mesh(nth);
     epick_aabb_trees_[nth].reset(
         new Epick_AABB_tree(faces(m).first, faces(m).second, m));
   }
 
-  AABB_tree& aabb_tree(int nth) {
+  AABB_tree& aabb_tree(size_t nth) {
     if (!has_aabb_tree(nth)) {
       update_aabb_tree(nth);
     }
     return *aabb_trees_[nth];
   }
 
-  Epick_AABB_tree& epick_aabb_tree(int nth) {
+  Epick_AABB_tree& epick_aabb_tree(size_t nth) {
     if (!has_epick_aabb_tree(nth)) {
       update_epick_aabb_tree(nth);
     }
     return *epick_aabb_trees_[nth];
   }
 
-  bool has_on_side(int nth) { return on_sides_[nth] != nullptr; }
+  bool has_on_side(size_t nth) { return on_sides_[nth] != nullptr; }
 
-  bool has_on_epick_side(int nth) { return on_epick_sides_[nth] != nullptr; }
+  bool has_on_epick_side(size_t nth) { return on_epick_sides_[nth] != nullptr; }
 
-  void update_on_side(int nth) {
+  void update_on_side(size_t nth) {
     on_sides_[nth].reset(new Side_of_triangle_mesh(aabb_tree(nth)));
   }
 
-  void update_on_epick_side(int nth) {
+  void update_on_epick_side(size_t nth) {
     on_epick_sides_[nth].reset(
         new Epick_side_of_triangle_mesh(epick_aabb_tree(nth)));
   }
 
-  Side_of_triangle_mesh& on_side(int nth) {
+  Side_of_triangle_mesh& on_side(size_t nth) {
     if (!has_on_side(nth)) {
       update_on_side(nth);
     }
     return *on_sides_[nth];
   }
 
-  Epick_side_of_triangle_mesh& on_epick_side(int nth) {
+  Epick_side_of_triangle_mesh& on_epick_side(size_t nth) {
     if (!has_on_epick_side(nth)) {
       update_on_epick_side(nth);
     }
     return *on_epick_sides_[nth];
   }
 
-  bool has_gps(int nth) { return gps_[nth] != nullptr; }
+  bool has_gps(size_t nth) { return gps_[nth] != nullptr; }
 
-  General_polygon_set_2& gps(int nth) {
+  General_polygon_set_2& gps(size_t nth) {
     if (!has_gps(nth)) {
       gps_[nth].reset(new General_polygon_set_2);
     }
     return *gps_[nth];
   }
 
-  bool has_pwh(int nth) { return pwh_[nth] != nullptr; }
+  bool has_pwh(size_t nth) { return pwh_[nth] != nullptr; }
   Polygons_with_holes_2& pwh(int nth) {
     if (!has_pwh(nth)) {
       pwh_[nth].reset(new Polygons_with_holes_2);
@@ -219,45 +222,45 @@ class Geometry {
     return *pwh_[nth];
   }
 
-  bool has_input_segments(int nth) { return input_segments_[nth] != nullptr; }
+  bool has_input_segments(size_t nth) { return input_segments_[nth] != nullptr; }
 
-  Segments& input_segments(int nth) {
+  Segments& input_segments(size_t nth) {
     if (!has_input_segments(nth)) {
       input_segments_[nth].reset(new Segments);
     }
     return *input_segments_[nth];
   }
 
-  bool has_segments(int nth) { return segments_[nth] != nullptr; }
+  bool has_segments(size_t nth) { return segments_[nth] != nullptr; }
 
-  Segments& segments(int nth) {
+  Segments& segments(size_t nth) {
     if (!has_segments(nth)) {
       segments_[nth].reset(new Segments);
     }
     return *segments_[nth];
   }
 
-  bool has_edges(int nth) { return edges_[nth] != nullptr; }
+  bool has_edges(size_t nth) { return edges_[nth] != nullptr; }
 
-  Edges& edges(int nth) {
+  Edges& edges(size_t nth) {
     if (!has_edges(nth)) {
       edges_[nth].reset(new Edges);
     }
     return *edges_[nth];
   }
 
-  bool has_input_points(int nth) { return input_points_[nth] != nullptr; }
+  bool has_input_points(size_t nth) { return input_points_[nth] != nullptr; }
 
-  Points& input_points(int nth) {
+  Points& input_points(size_t nth) {
     if (!has_input_points(nth)) {
       input_points_[nth].reset(new Points);
     }
     return *input_points_[nth];
   }
 
-  bool has_points(int nth) { return points_[nth] != nullptr; }
+  bool has_points(size_t nth) { return points_[nth] != nullptr; }
 
-  std::vector<Point>& points(int nth) {
+  std::vector<Point>& points(size_t nth) {
     if (!has_points(nth)) {
       points_[nth].reset(new Points);
     }
@@ -267,15 +270,15 @@ class Geometry {
   CGAL::Bbox_2& bbox2(int nth) { return bbox2_[nth]; }
   CGAL::Bbox_3& bbox3(int nth) { return bbox3_[nth]; }
 
-  int getSize() { return size_; }
+  JS_BINDING size_t getSize() { return size_; }
 
-  int getType(int nth) { return types_[nth]; }
+  JS_BINDING size_t getType(size_t nth) { return types_[nth]; }
 
-  void setType(int nth, int type) { types_[nth] = GeometryType(type); }
+  JS_BINDING void setType(size_t nth, size_t type) { types_[nth] = GeometryType(type); }
 
-  int& origin(int nth) { return origin_[nth]; }
+  int& origin(size_t nth) { return origin_[nth]; }
 
-  int getOrigin(int nth) {
+  JS_BINDING int getOrigin(int nth) {
     if (origin_[nth] == -1) {
       return nth;
     } else {
@@ -283,19 +286,19 @@ class Geometry {
     }
   }
 
-  void setTransform(int nth, const Transformation& transform) {
+  JS_BINDING void setTransform(size_t nth, const Transformation& transform) {
     transforms_[nth] = transform;
   }
 
-  void applyTransform(int nth, const Transformation& xform) {
+  void applyTransform(size_t nth, const Transformation& xform) {
     setTransform(nth, xform * transform(nth));
   }
 
-  void setIdentityTransform(int nth) {
+  void setIdentityTransform(size_t nth) {
     setTransform(nth, Transformation(CGAL::IDENTITY));
   }
 
-  void setInputMesh(int nth, const std::shared_ptr<const Surface_mesh>& mesh) {
+  JS_BINDING void setInputMesh(size_t nth, const std::shared_ptr<const Surface_mesh>& mesh) {
     input_meshes_[nth] = mesh;
     if (test_mode_) {
       assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
@@ -305,31 +308,31 @@ class Geometry {
 
   void setTestMode(bool mode) { test_mode_ = mode; }
 
-  const std::shared_ptr<const Surface_mesh> getInputMesh(int nth) {
+  const std::shared_ptr<const Surface_mesh> getInputMesh(size_t nth) {
     return input_meshes_[nth];
   }
 
-  void deserializeInputMesh(int nth, const std::string& serialization) {
+  void deserializeInputMesh(size_t nth, const std::string& serialization) {
     input_meshes_[nth] = DeserializeMesh(serialization);
   }
 
-  void deserializeMesh(int nth, const std::string& serialization) {
+  void deserializeMesh(size_t nth, const std::string& serialization) {
     meshes_[nth] = DeserializeMesh(serialization);
   }
 
-  std::string getSerializedInputMesh(int nth) {
+  std::string getSerializedInputMesh(size_t nth) {
     return serializeMesh(input_mesh(nth));
   }
 
-  std::string getSerializedMesh(int nth) { return serializeMesh(mesh(nth)); }
+  JS_BINDING std::string getSerializedMesh(size_t nth) { return serializeMesh(mesh(nth)); }
 
-  void setMesh(int nth, std::unique_ptr<Surface_mesh>& mesh) {
+  void setMesh(size_t nth, std::unique_ptr<Surface_mesh>& mesh) {
     meshes_[nth] = std::move(mesh);
   }
 
-  void setMesh(int nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
+  void setMesh(size_t nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
 
-  const std::shared_ptr<const Surface_mesh> getMesh(int nth) {
+  JS_BINDING std::shared_ptr<const Surface_mesh> getMesh(size_t nth) {
     if (test_mode_) {
       assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
           *meshes_[nth], CGAL::parameters::all_default()));
@@ -337,13 +340,13 @@ class Geometry {
     return meshes_[nth];
   }
 
-  void addPolygon(int nth) { pwh(nth).emplace_back(); }
+  JS_BINDING void addPolygon(size_t nth) { pwh(nth).emplace_back(); }
 
-  void setPolygonsPlane(int nth, double x, double y, double z, double w) {
+  JS_BINDING void setPolygonsPlane(size_t nth, double x, double y, double z, double w) {
     plane(nth) = unitPlane<Kernel>(Plane(x, y, z, w));
   }
 
-  void setPolygonsPlaneExact(int nth, const std::string& exact) {
+  JS_BINDING void setPolygonsPlaneExact(size_t nth, const std::string& exact) {
     std::istringstream s(exact);
     FT a, b, c, d;
     s >> a;
@@ -353,11 +356,11 @@ class Geometry {
     plane(nth) = unitPlane<Kernel>(Plane(a, b, c, d));
   }
 
-  void addPolygonPoint(int nth, double x, double y) {
+  JS_BINDING void addPolygonPoint(size_t nth, double x, double y) {
     pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
   }
 
-  void addPolygonPointExact(int nth, const std::string& exact) {
+  JS_BINDING void addPolygonPointExact(size_t nth, const std::string& exact) {
     std::istringstream s(exact);
     FT x, y;
     s >> x;
@@ -365,15 +368,15 @@ class Geometry {
     pwh(nth).back().outer_boundary().push_back(Point_2(x, y));
   }
 
-  void addPolygonHole(int nth) {
+  JS_BINDING void addPolygonHole(size_t nth) {
     pwh(nth).back().holes().push_back(std::move(Polygon_2()));
   }
 
-  void addPolygonHolePoint(int nth, double x, double y) {
+  JS_BINDING void addPolygonHolePoint(size_t nth, double x, double y) {
     pwh(nth).back().holes().back().push_back(Point_2(x, y));
   }
 
-  void addPolygonHolePointExact(int nth, const std::string& exact) {
+  JS_BINDING void addPolygonHolePointExact(size_t nth, const std::string& exact) {
     std::istringstream s(exact);
     FT x, y;
     s >> x;
@@ -381,21 +384,21 @@ class Geometry {
     pwh(nth).back().holes().back().push_back(Point_2(x, y));
   }
 
-  void finishPolygonHole(int nth) {
+  JS_BINDING void finishPolygonHole(size_t nth) {
     Polygon_2& hole = pwh(nth).back().holes().back();
     if (hole.orientation() != CGAL::Sign::NEGATIVE) {
       hole.reverse_orientation();
     }
   }
 
-  void finishPolygon(int nth) {
+  JS_BINDING void finishPolygon(size_t nth) {
     Polygon_2& polygon = pwh(nth).back().outer_boundary();
     if (polygon.orientation() != CGAL::Sign::POSITIVE) {
       polygon.reverse_orientation();
     }
   }
 
-  int print(int nth) {
+  int print(size_t nth) {
     switch (type(nth)) {
       case GEOMETRY_POLYGONS_WITH_HOLES:
         print_polygons_with_holes(pwh(nth));
@@ -441,35 +444,35 @@ class Geometry {
     }
   }
 
-  void addInputPoint(int nth, double x, double y, double z) {
+  JS_BINDING void addInputPoint(size_t nth, double x, double y, double z) {
     input_points(nth).emplace_back(Point{x, y, z});
   }
 
-  void addInputPointExact(int nth, const std::string& exact) {
+  JS_BINDING void addInputPointExact(size_t nth, const std::string& exact) {
     Point point;
     read_point(point, exact);
     input_points(nth).push_back(std::move(point));
   }
 
-  void addInputSegment(int nth, double sx, double sy, double sz, double tx,
+  JS_BINDING void addInputSegment(size_t nth, double sx, double sy, double sz, double tx,
                        double ty, double tz) {
     input_segments(nth).emplace_back(Point{sx, sy, sz}, Point{tx, ty, tz});
   }
 
-  void addInputSegmentExact(int nth, const std::string& serialization) {
+  JS_BINDING void addInputSegmentExact(size_t nth, const std::string& serialization) {
     std::istringstream i(serialization);
     Segment s;
     read_segment(s, i);
     input_segments(nth).push_back(std::move(s));
   }
 
-  void addSegment(int nth, const Segment& segment) {
+  JS_BINDING void addSegment(size_t nth, const Segment& segment) {
     segments(nth).push_back(segment);
   }
 
-  void addEdge(int nth, const Edge& edge) { edges(nth).push_back(edge); }
+  JS_BINDING void addEdge(size_t nth, const Edge& edge) { edges(nth).push_back(edge); }
 
-  void addPoint(int nth, Point point) { points(nth).push_back(point); }
+  JS_BINDING void addPoint(size_t nth, Point point) { points(nth).push_back(point); }
 
   void copyInputMeshesToOutputMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {
@@ -527,7 +530,7 @@ class Geometry {
 
   void transformToAbsoluteFrame() {
     assert(is_local_frame());
-    for (int nth = 0; nth < size(); nth++) {
+    for (size_t nth = 0; nth < size(); nth++) {
       assert(nth < size());
       switch (type(nth)) {
         case GEOMETRY_MESH: {
@@ -621,7 +624,7 @@ class Geometry {
     return CGAL::do_overlap(bbox2_[a], bbox2_[b]) == false;
   }
 
-  void updateBounds2(int nth) {
+  void updateBounds2(size_t nth) {
     if (has_gps(nth)) {
       bbox2(nth) = computePolygonSetBounds(gps(nth));
     } else if (has_pwh(nth)) {
@@ -637,14 +640,14 @@ class Geometry {
     return CGAL::do_overlap(bbox3_[a], bbox3_[b]) == false;
   }
 
-  void updateBounds3(int nth) {
+  void updateBounds3(size_t nth) {
     if (mesh(nth).is_empty()) {
       return;
     }
     bbox3(nth) = CGAL::Polygon_mesh_processing::bbox(mesh(nth));
   }
 
-  void updateEpickBounds3(int nth) {
+  void updateEpickBounds3(size_t nth) {
     if (epick_mesh(nth).is_empty()) {
       return;
     }
@@ -677,7 +680,7 @@ class Geometry {
   void set_local_frame() { is_absolute_frame_ = false; }
 
   bool test_mode_;
-  int size_;
+  size_t size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
   std::vector<Transformation> transforms_;

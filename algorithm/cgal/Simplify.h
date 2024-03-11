@@ -10,7 +10,7 @@ static int Simplify(Geometry* geometry, double face_count, bool simplify_points,
 
   int sharp_edges = geometry->add(GEOMETRY_SEGMENTS);
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }

@@ -12,7 +12,7 @@ static int Link(Geometry* geometry, bool close, bool reverse) {
   bool has_last = false;
   Point last;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
         std::vector<Segment>& segments = geometry->segments(nth);

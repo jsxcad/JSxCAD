@@ -9,7 +9,7 @@ static int Fill(Geometry* geometry) {
   std::unordered_set<Plane> planes;
   std::set<Point> points;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
         // The challenge here is that segments participate in many planes.
@@ -63,7 +63,7 @@ static int Fill(Geometry* geometry) {
 
   std::unordered_map<Plane, Arrangement_with_regions_2> arrangements;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
         std::vector<Segment_2> s2s;

@@ -15,7 +15,7 @@ static int Wrap(Geometry* geometry, double alpha, double offset) {
     Epick_points points;
     std::vector<std::vector<size_t>> faces;
 
-    for (int nth = 0; nth < size; nth++) {
+    for (size_t nth = 0; nth < size; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
           wrap_add_mesh_epick(to_cartesian, geometry->mesh(nth), points, faces);

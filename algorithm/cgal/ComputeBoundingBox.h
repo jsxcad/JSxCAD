@@ -8,7 +8,7 @@ static int ComputeBoundingBox(Geometry* geometry, std::vector<double>& out) {
 
   CGAL::Bbox_3 bbox;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         const Surface_mesh& mesh = geometry->mesh(nth);
@@ -20,7 +20,7 @@ static int ComputeBoundingBox(Geometry* geometry, std::vector<double>& out) {
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         const Plane& plane = geometry->plane(nth);
         for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
-          for (const Point_2 point : polygon.outer_boundary()) {
+          for (const Point_2& point : polygon.outer_boundary()) {
             bbox += plane.to_3d(point).bbox();
           }
           for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
