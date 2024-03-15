@@ -101,7 +101,9 @@ class Geometry {
   }
 
   bool is_edges(size_t nth) { return type(nth) == GEOMETRY_EDGES; }
-  bool is_empty_epick_mesh(size_t nth) { return CGAL::is_empty(epick_mesh(nth)); }
+  bool is_empty_epick_mesh(size_t nth) {
+    return CGAL::is_empty(epick_mesh(nth));
+  }
   bool is_empty_mesh(size_t nth) { return CGAL::is_empty(mesh(nth)); }
   bool is_mesh(size_t nth) { return type(nth) == GEOMETRY_MESH; }
   bool is_points(size_t nth) { return type(nth) == GEOMETRY_POINTS; }
@@ -222,7 +224,9 @@ class Geometry {
     return *pwh_[nth];
   }
 
-  bool has_input_segments(size_t nth) { return input_segments_[nth] != nullptr; }
+  bool has_input_segments(size_t nth) {
+    return input_segments_[nth] != nullptr;
+  }
 
   Segments& input_segments(size_t nth) {
     if (!has_input_segments(nth)) {
@@ -274,7 +278,9 @@ class Geometry {
 
   JS_BINDING size_t getType(size_t nth) { return types_[nth]; }
 
-  JS_BINDING void setType(size_t nth, size_t type) { types_[nth] = GeometryType(type); }
+  JS_BINDING void setType(size_t nth, size_t type) {
+    types_[nth] = GeometryType(type);
+  }
 
   int& origin(size_t nth) { return origin_[nth]; }
 
@@ -298,7 +304,8 @@ class Geometry {
     setTransform(nth, Transformation(CGAL::IDENTITY));
   }
 
-  JS_BINDING void setInputMesh(size_t nth, const std::shared_ptr<const Surface_mesh>& mesh) {
+  JS_BINDING void setInputMesh(
+      size_t nth, const std::shared_ptr<const Surface_mesh>& mesh) {
     input_meshes_[nth] = mesh;
     if (test_mode_) {
       assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
@@ -324,7 +331,9 @@ class Geometry {
     return serializeMesh(input_mesh(nth));
   }
 
-  JS_BINDING std::string getSerializedMesh(size_t nth) { return serializeMesh(mesh(nth)); }
+  JS_BINDING std::string getSerializedMesh(size_t nth) {
+    return serializeMesh(mesh(nth));
+  }
 
   void setMesh(size_t nth, std::unique_ptr<Surface_mesh>& mesh) {
     meshes_[nth] = std::move(mesh);
@@ -342,7 +351,8 @@ class Geometry {
 
   JS_BINDING void addPolygon(size_t nth) { pwh(nth).emplace_back(); }
 
-  JS_BINDING void setPolygonsPlane(size_t nth, double x, double y, double z, double w) {
+  JS_BINDING void setPolygonsPlane(size_t nth, double x, double y, double z,
+                                   double w) {
     plane(nth) = unitPlane<Kernel>(Plane(x, y, z, w));
   }
 
@@ -376,7 +386,8 @@ class Geometry {
     pwh(nth).back().holes().back().push_back(Point_2(x, y));
   }
 
-  JS_BINDING void addPolygonHolePointExact(size_t nth, const std::string& exact) {
+  JS_BINDING void addPolygonHolePointExact(size_t nth,
+                                           const std::string& exact) {
     std::istringstream s(exact);
     FT x, y;
     s >> x;
@@ -454,12 +465,13 @@ class Geometry {
     input_points(nth).push_back(std::move(point));
   }
 
-  JS_BINDING void addInputSegment(size_t nth, double sx, double sy, double sz, double tx,
-                       double ty, double tz) {
+  JS_BINDING void addInputSegment(size_t nth, double sx, double sy, double sz,
+                                  double tx, double ty, double tz) {
     input_segments(nth).emplace_back(Point{sx, sy, sz}, Point{tx, ty, tz});
   }
 
-  JS_BINDING void addInputSegmentExact(size_t nth, const std::string& serialization) {
+  JS_BINDING void addInputSegmentExact(size_t nth,
+                                       const std::string& serialization) {
     std::istringstream i(serialization);
     Segment s;
     read_segment(s, i);
@@ -470,9 +482,13 @@ class Geometry {
     segments(nth).push_back(segment);
   }
 
-  JS_BINDING void addEdge(size_t nth, const Edge& edge) { edges(nth).push_back(edge); }
+  JS_BINDING void addEdge(size_t nth, const Edge& edge) {
+    edges(nth).push_back(edge);
+  }
 
-  JS_BINDING void addPoint(size_t nth, Point point) { points(nth).push_back(point); }
+  JS_BINDING void addPoint(size_t nth, Point point) {
+    points(nth).push_back(point);
+  }
 
   void copyInputMeshesToOutputMeshes() {
     for (size_t nth = 0; nth < size_; nth++) {

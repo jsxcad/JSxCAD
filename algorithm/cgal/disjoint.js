@@ -13,7 +13,7 @@ export const disjoint = (inputs, mode, exact = false) =>
     const isMasked = inputs.map(
       ({ tags }) => tags && tags.includes('type:masked')
     );
-    const status = g.Disjoint(geometry, isMasked, mode, exact);
+    const status = g.Disjoint(geometry, isMasked, mode ? 1 : 0, exact);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by disjoint');

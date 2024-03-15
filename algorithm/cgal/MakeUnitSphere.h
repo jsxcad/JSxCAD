@@ -1,5 +1,5 @@
-static int MakeUnitSphere(Geometry* geometry, double angularBound,
-                          double radiusBound, double distanceBound) {
+static int MakeUnitSphere(Geometry* geometry, double angular_bound,
+                          double radius_bound, double distance_bound) {
   typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
   typedef CGAL::Complex_2_in_triangulation_3<Tr> C2t3;
   typedef Tr::Geom_traits GT;
@@ -16,8 +16,8 @@ static int MakeUnitSphere(Geometry* geometry, double angularBound,
   std::srand(0);
 
   Surface_3 surface(unitSphereFunction<FT, Point_3>, Sphere_3(CGAL::ORIGIN, 2));
-  CGAL::Surface_mesh_default_criteria_3<Tr> criteria(angularBound, radiusBound,
-                                                     distanceBound);
+  CGAL::Surface_mesh_default_criteria_3<Tr> criteria(
+      angular_bound, radius_bound, distance_bound);
   // meshing surface
   CGAL::make_surface_mesh(c2t3, surface, criteria, CGAL::Manifold_tag());
   Epick_Surface_mesh epick_mesh;

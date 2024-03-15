@@ -781,12 +781,9 @@ static bool convertArrangementToPolygonsWithHolesEvenOdd(
       polygon_holes.push_back(std::move(polygon));
     }
 
-    if (!toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
-                                                   polygon_holes, out)) {
-      ok = false;
-    }
+    toSimplePolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes, out);
   }
-  return ok;
+  return true;
 }
 
 template <typename Arrangement_2>
@@ -855,13 +852,10 @@ static bool convertArrangementToPolygonsWithHolesNonZero(
       polygon_holes.push_back(std::move(polygon));
     }
 
-    if (!toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
-                                                   polygon_holes, out)) {
-      ok = false;
-    }
+    toSimplePolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries, polygon_holes, out);
   }
 
-  return ok;
+  return true;
 }
 
 template <typename Arrangement_2>

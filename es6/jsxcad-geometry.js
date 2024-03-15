@@ -4338,8 +4338,7 @@ const Disjoint = (geometries, { backward, exact }) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$y, inputs);
   }
-  // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
-  const outputs = disjoint$1(inputs, backward, exact);
+  const outputs = disjoint$1(inputs, backward === true, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
   for (const concreteGeometry of concreteGeometries) {

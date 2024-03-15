@@ -1,3 +1,5 @@
+/*
+FIX
 import {
   NutThread,
   NutThreadSegment,
@@ -19,6 +21,7 @@ await NutThreadSegment(20, { play: 0.1 })
   .clip(Box([0, 10], [0, 10], [0, 10]))
   .view()
   .note(`NutThread(20, 10).and(ScrewThread(20, 10))`);
+*/
 
 /*
 ScrewThreadSegment(20, { turn: 'right' })

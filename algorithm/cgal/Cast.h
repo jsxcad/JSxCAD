@@ -1,3 +1,4 @@
+// REVIEW: Should we keep this?
 static int Cast(Geometry* geometry) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
