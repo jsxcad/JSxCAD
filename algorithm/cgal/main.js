@@ -12,10 +12,7 @@ export {
 } from './transform.js';
 
 export { approximate } from './approximate.js';
-export {
-  arrangeSegments,
-  arrangeSegmentsIntoTriangles,
-} from './arrangeSegments.js';
+// export { arrangeSegments, arrangeSegmentsIntoTriangles, } from './arrangeSegments.js';
 export { bend } from './bend.js';
 export {
   STATUS_OK,
@@ -67,8 +64,8 @@ export { loft } from './loft.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { makeAbsolute } from './makeAbsolute.js';
-export { makeOcctBox } from './occt.js';
-export { makeOcctSphere } from './occt.js';
+// export { makeOcctBox } from './occt.js';
+// export { makeOcctSphere } from './occt.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
 export { minimizeOverhang } from './minimizeOverhang.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';

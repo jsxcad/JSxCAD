@@ -13,10 +13,10 @@ export const remesh = (
   withCgalGeometry('remesh', inputs, (cgalGeometry, g) => {
     const status = g.Remesh(
       cgalGeometry,
-      count,
-      iterations,
-      relaxationSteps,
-      targetEdgeLength
+      Number(count),
+      Number(iterations),
+      Number(relaxationSteps),
+      Number(targetEdgeLength)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

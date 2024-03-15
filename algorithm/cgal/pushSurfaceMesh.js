@@ -8,7 +8,13 @@ export const pushSurfaceMesh = (
   scale = 1
 ) => {
   try {
-    getCgal().PushSurfaceMesh(mesh, transform, force, minimumDistance, scale);
+    getCgal().PushSurfaceMesh(
+      mesh,
+      transform,
+      Number(force),
+      Number(minimumDistance),
+      Number(scale)
+    );
   } catch (error) {
     throw Error(error);
   }

@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const dilateXY = (inputs, amount) => {
   return withCgalGeometry('dilateXY', inputs, (cgalGeometry, g) => {
-    const status = g.DilateXY(cgalGeometry, amount);
+    const status = g.DilateXY(cgalGeometry, Number(amount));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by dilateXY');

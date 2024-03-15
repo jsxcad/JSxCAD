@@ -19,8 +19,6 @@ const saucer = await profile
   .view(2);
 ```
 
-![Image](saucer.md.knob.png)
-
 ```JavaScript
 const knob = await Loft(
   Hexagon(60)
@@ -52,16 +50,6 @@ const knob = await Loft(
   )
   .as('knob')
   .view();
-```
-
-```JavaScript
-const top = await saucer
-  .upperEnvelope('face')
-  .involute()
-  .loft(Box(150).z(5))
-  .fitTo(knob)
-  .as('top')
-  .stl('knob', get('knob').align('>z'));
 ```
 
 ```JavaScript

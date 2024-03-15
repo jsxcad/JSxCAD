@@ -1,3 +1,4 @@
+/*
 import { getCgal } from './getCgal.js';
 
 const X = 0;
@@ -71,4 +72,5 @@ export const arrangeSegments = (
 };
 
 export const arrangeSegmentsIntoTriangles = (plane, exactPlane, polygons) =>
-  arrangeSegments(plane, exactPlane, polygons, /* triangulate= */ true);
+  arrangeSegments(plane, exactPlane, polygons, * triangulate= * true);
+*/

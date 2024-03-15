@@ -14,48 +14,6 @@ static void assertArgCount(const Napi::CallbackInfo& info, uint32_t count) {
   }
 }
 
-static void assertIsArray(const Napi::CallbackInfo& info, uint32_t nth) {
-  if (!info[nth].IsArray()) {
-    Napi::TypeError::New(info.Env(), "Requires array")
-        .ThrowAsJavaScriptException();
-  }
-}
-
-static void assertIsBoolean(const Napi::CallbackInfo& info, uint32_t nth) {
-  if (!info[nth].IsBoolean()) {
-    Napi::TypeError::New(info.Env(), "Requires boolean")
-        .ThrowAsJavaScriptException();
-  }
-}
-
-static void assertIsFunction(const Napi::CallbackInfo& info, uint32_t nth) {
-  if (!info[nth].IsFunction()) {
-    Napi::TypeError::New(info.Env(), "Requires function")
-        .ThrowAsJavaScriptException();
-  }
-}
-
-static void assertIsNumber(const Napi::CallbackInfo& info, uint32_t nth) {
-  if (!info[nth].IsNumber()) {
-    Napi::TypeError::New(info.Env(), "Requires number")
-        .ThrowAsJavaScriptException();
-  }
-}
-
-static void assertIsObject(const Napi::CallbackInfo& info, uint32_t nth) {
-  if (!info[nth].IsObject()) {
-    Napi::TypeError::New(info.Env(), "Requires object")
-        .ThrowAsJavaScriptException();
-  }
-}
-
-static void assertIsString(const Napi::CallbackInfo& info, uint32_t nth) {
-  if (!info[nth].IsString()) {
-    Napi::TypeError::New(info.Env(), "Requires string")
-        .ThrowAsJavaScriptException();
-  }
-}
-
 static void fill_js_plane(const Plane& plane, Napi::Array& js_plane, std::string& exact) {
   const auto a = plane.a().exact();
   const auto b = plane.b().exact();
@@ -162,10 +120,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addInputPoint(const Napi::CallbackInfo& info) {
     assertArgCount(info, 4);
-    assertIsNumber(info, 0);
-    assertIsNumber(info, 1);
-    assertIsNumber(info, 2);
-    assertIsNumber(info, 3);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     double x = info[1].As<Napi::Number>().DoubleValue();
     double y = info[2].As<Napi::Number>().DoubleValue();
@@ -176,8 +130,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addInputPointExact(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsString(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     const std::string& exact = info[1].As<Napi::String>().Utf8Value();
     geometry_.addInputPointExact(nth, exact);
@@ -186,13 +138,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addInputSegment(const Napi::CallbackInfo& info) {
     assertArgCount(info, 7);
-    assertIsNumber(info, 0);
-    assertIsNumber(info, 1);
-    assertIsNumber(info, 2);
-    assertIsNumber(info, 3);
-    assertIsNumber(info, 4);
-    assertIsNumber(info, 5);
-    assertIsNumber(info, 6);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     double sx = info[1].As<Napi::Number>().DoubleValue();
     double sy = info[2].As<Napi::Number>().DoubleValue();
@@ -206,8 +151,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addInputSegmentExact(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsString(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     const std::string& exact = info[1].As<Napi::String>().Utf8Value();
     geometry_.addInputSegmentExact(nth, exact);
@@ -216,7 +159,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addPolygon(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     geometry_.addPolygon(nth);
     return info.Env().Undefined();
@@ -224,9 +166,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addPolygonPoint(const Napi::CallbackInfo& info) {
     assertArgCount(info, 3);
-    assertIsNumber(info, 0);
-    assertIsNumber(info, 1);
-    assertIsNumber(info, 2);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     double x = info[1].As<Napi::Number>().DoubleValue();
     double y = info[2].As<Napi::Number>().DoubleValue();
@@ -236,8 +175,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addPolygonPointExact(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsString(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     const std::string& exact = info[1].As<Napi::String>().Utf8Value();
     geometry_.addPolygonPointExact(nth, exact);
@@ -246,7 +183,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addPolygonHole(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     geometry_.addPolygonHole(nth);
     return info.Env().Undefined();
@@ -254,9 +190,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addPolygonHolePoint(const Napi::CallbackInfo& info) {
     assertArgCount(info, 3);
-    assertIsNumber(info, 0);
-    assertIsNumber(info, 1);
-    assertIsNumber(info, 2);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     double x = info[1].As<Napi::Number>().DoubleValue();
     double y = info[2].As<Napi::Number>().DoubleValue();
@@ -266,8 +199,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value addPolygonHolePointExact(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsString(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     const std::string& exact = info[1].As<Napi::String>().Utf8Value();
     geometry_.addPolygonHolePointExact(nth, exact);
@@ -276,8 +207,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value deserializeInputMesh(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsString(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     const std::string& exact = info[1].As<Napi::String>().Utf8Value();
     geometry_.deserializeInputMesh(nth, exact);
@@ -286,7 +215,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value finishPolygon(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     geometry_.finishPolygon(nth);
     return info.Env().Undefined();
@@ -294,7 +222,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value finishPolygonHole(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     geometry_.finishPolygonHole(nth);
     return info.Env().Undefined();
@@ -302,7 +229,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value getMesh(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     // CHECK: Does this actually work?
     Napi::Object instance = Surface_mesh_constructor->New({});
@@ -313,14 +239,12 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value getOrigin(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     return Napi::Number::New(info.Env(), geometry_.getOrigin(nth));
   }
 
   Napi::Value getSerializedMesh(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     return Napi::String::New(info.Env(), geometry_.getSerializedMesh(nth));
   }
@@ -332,22 +256,18 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value getType(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     return Napi::Number::New(info.Env(), geometry_.getType(nth));
   }
 
   Napi::Value has_mesh(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     return Napi::Boolean::New(info.Env(), geometry_.has_mesh(nth));
   }
 
   Napi::Value setInputMesh(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsObject(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     Napi::Object jsMesh = info[1].As<Napi::Object>();
     Surface_mesh* mesh = Surface_mesh::Unwrap(jsMesh);
@@ -357,11 +277,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value setPolygonsPlane(const Napi::CallbackInfo& info) {
     assertArgCount(info, 5);
-    assertIsNumber(info, 0);
-    assertIsNumber(info, 1);
-    assertIsNumber(info, 2);
-    assertIsNumber(info, 3);
-    assertIsNumber(info, 4);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     double x = info[1].As<Napi::Number>().DoubleValue();
     double y = info[2].As<Napi::Number>().DoubleValue();
@@ -373,8 +288,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value setPolygonsPlaneExact(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsString(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     const std::string& exact = info[1].As<Napi::String>().Utf8Value();
     geometry_.setPolygonsPlaneExact(nth, exact);
@@ -383,7 +296,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value setSize(const Napi::CallbackInfo& info) {
     assertArgCount(info, 1);
-    assertIsNumber(info, 0);
     uint32_t size = info[0].As<Napi::Number>().Uint32Value();
     geometry_.setSize(size);
     return info.Env().Undefined();
@@ -391,8 +303,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value setTransform(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsArray(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     geometry_.setTransform(nth, to_transform(info[1]));
     return info.Env().Undefined();
@@ -400,8 +310,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
   Napi::Value setType(const Napi::CallbackInfo& info) {
     assertArgCount(info, 2);
-    assertIsNumber(info, 0);
-    assertIsNumber(info, 1);
     uint32_t nth = info[0].As<Napi::Number>().Uint32Value();
     uint32_t type = info[1].As<Napi::Number>().Uint32Value();
     geometry_.setType(nth, type);
@@ -453,9 +361,6 @@ class Geometry : public Napi::ObjectWrap<Geometry> {
 
 static Napi::Value Approximate(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t face_count = info[1].As<Napi::Number>().Uint32Value();
@@ -466,8 +371,6 @@ static Napi::Value Approximate(const Napi::CallbackInfo& info) {
 
 static Napi::Value Bend(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double reference_radius = info[2].As<Napi::Number>().DoubleValue();
@@ -477,7 +380,6 @@ static Napi::Value Bend(const Napi::CallbackInfo& info) {
 
 static Napi::Value Cast(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::Cast(geometry);
@@ -486,10 +388,6 @@ static Napi::Value Cast(const Napi::CallbackInfo& info) {
 
 static Napi::Value Clip(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
-  assertIsBoolean(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t targets = info[1].As<Napi::Number>().Uint32Value();
@@ -501,7 +399,6 @@ static Napi::Value Clip(const Napi::CallbackInfo& info) {
 
 static Napi::Value ConvertPolygonsToMeshes(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::ConvertPolygonsToMeshes(geometry);
@@ -510,9 +407,6 @@ static Napi::Value ConvertPolygonsToMeshes(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComposeTransforms(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsObject(info, 1);
-  assertIsObject(info, 2);
   Napi::Array out = info[2].As<Napi::Array>();
   to_js(to_transform(info[0]) * to_transform(info[1]), out);
   return info.Env().Undefined();
@@ -520,8 +414,6 @@ static Napi::Value ComposeTransforms(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeBoundingBox(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsObject(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   Napi::Array out = info[1].As<Napi::Array>();
@@ -544,7 +436,6 @@ static Napi::Value ComputeBoundingBox(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeCentroid(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::ComputeCentroid(geometry);
@@ -553,7 +444,6 @@ static Napi::Value ComputeCentroid(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeNormal(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::ComputeNormal(geometry);
@@ -562,7 +452,6 @@ static Napi::Value ComputeNormal(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeOrientedBoundingBox(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::ComputeOrientedBoundingBox(geometry);
@@ -571,16 +460,6 @@ static Napi::Value ComputeOrientedBoundingBox(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeReliefFromImage(const Napi::CallbackInfo& info) {
   assertArgCount(info, 10);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
-  assertIsNumber(info, 6);
-  assertIsNumber(info, 7);
-  assertIsNumber(info, 8);
-  assertIsNumber(info, 9);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int32_t x = info[1].As<Napi::Number>().Int32Value();
@@ -606,14 +485,6 @@ static Napi::Value ComputeSkeleton(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeToolpath(const Napi::CallbackInfo& info) {
   assertArgCount(info, 8);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
-  assertIsNumber(info, 6);
-  assertIsNumber(info, 7);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t material_start = info[1].As<Napi::Number>().Uint32Value();
@@ -645,10 +516,6 @@ static Napi::Value ConvexHull(const Napi::CallbackInfo& info) {
 
 static Napi::Value Cut(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
-  assertIsBoolean(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t targets = info[1].As<Napi::Number>().Uint32Value();
@@ -660,11 +527,6 @@ static Napi::Value Cut(const Napi::CallbackInfo& info) {
 
 static Napi::Value Deform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t length = info[1].As<Napi::Number>().Uint32Value();
@@ -677,7 +539,6 @@ static Napi::Value Deform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Demesh(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::Demesh(geometry);
@@ -686,8 +547,6 @@ static Napi::Value Demesh(const Napi::CallbackInfo& info) {
 
 static Napi::Value DilateXY(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double amount = info[1].As<Napi::Number>().DoubleValue();
@@ -697,7 +556,6 @@ static Napi::Value DilateXY(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeArea(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double area = ::ComputeArea(geometry);
@@ -706,13 +564,6 @@ static Napi::Value ComputeArea(const Napi::CallbackInfo& info) {
 
 static Napi::Value ComputeImplicitVolume(const Napi::CallbackInfo& info) {
   assertArgCount(info, 7);
-  assertIsObject(info, 0);
-  assertIsFunction(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
-  assertIsNumber(info, 6);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   Napi::Function jsOp = info[1].As<Napi::Function>();
@@ -731,10 +582,6 @@ static Napi::Value ComputeImplicitVolume(const Napi::CallbackInfo& info) {
 
 static Napi::Value Disjoint(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsObject(info, 0);
-  assertIsArray(info, 1);
-  assertIsNumber(info, 2);
-  assertIsBoolean(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   Napi::Array js_is_masked = info[1].As<Napi::Array>();
@@ -749,8 +596,6 @@ static Napi::Value Disjoint(const Napi::CallbackInfo& info) {
 
 static Napi::Value EachPoint(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsFunction(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   Napi::Function jsOp = info[1].As<Napi::Function>();
@@ -774,8 +619,6 @@ static Napi::Value EachPoint(const Napi::CallbackInfo& info) {
 
 static Napi::Value EachTriangle(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsFunction(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   Napi::Function jsOp = info[1].As<Napi::Function>();
@@ -799,8 +642,6 @@ static Napi::Value EachTriangle(const Napi::CallbackInfo& info) {
 
 static Napi::Value EagerTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -810,8 +651,6 @@ static Napi::Value EagerTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Extrude(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -821,12 +660,6 @@ static Napi::Value Extrude(const Napi::CallbackInfo& info) {
 
 static Napi::Value Fair(const Napi::CallbackInfo& info) {
   assertArgCount(info, 6);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -840,8 +673,6 @@ static Napi::Value Fair(const Napi::CallbackInfo& info) {
 
 static Napi::Value FaceEdges(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -851,7 +682,6 @@ static Napi::Value FaceEdges(const Napi::CallbackInfo& info) {
 
 static Napi::Value Fill(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   size_t status = ::Fill(geometry);
@@ -860,10 +690,6 @@ static Napi::Value Fill(const Napi::CallbackInfo& info) {
 
 static Napi::Value FromPolygonSoup(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsObject(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t face_count = info[1].As<Napi::Number>().Uint32Value();
@@ -876,8 +702,6 @@ static Napi::Value FromPolygonSoup(const Napi::CallbackInfo& info) {
 
 static Napi::Value FromPolygons(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsBoolean(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   bool close = info[1].As<Napi::Boolean>().Value();
@@ -887,8 +711,6 @@ static Napi::Value FromPolygons(const Napi::CallbackInfo& info) {
 
 static Napi::Value Fuse(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsBoolean(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   bool close = info[1].As<Napi::Boolean>().Value();
@@ -898,11 +720,6 @@ static Napi::Value Fuse(const Napi::CallbackInfo& info) {
 
 static Napi::Value GenerateEnvelope(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
-  assertIsBoolean(info, 3);
-  assertIsBoolean(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t envelope_type = info[1].As<Napi::Number>().Uint32Value();
@@ -917,9 +734,6 @@ static Napi::Value GenerateEnvelope(const Napi::CallbackInfo& info) {
 
 static Napi::Value GetPolygonsWithHoles(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsObject(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
@@ -978,9 +792,6 @@ static Napi::Value GetPolygonsWithHoles(const Napi::CallbackInfo& info) {
 
 static Napi::Value GetPoints(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsObject(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
@@ -1006,9 +817,6 @@ static Napi::Value GetPoints(const Napi::CallbackInfo& info) {
 
 static Napi::Value GetSegments(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsObject(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
@@ -1039,9 +847,6 @@ static Napi::Value GetSegments(const Napi::CallbackInfo& info) {
 
 static Napi::Value GetEdges(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsObject(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
@@ -1084,9 +889,6 @@ static Napi::Value GetEdges(const Napi::CallbackInfo& info) {
 
 static Napi::Value GetTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsObject(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
@@ -1097,11 +899,6 @@ static Napi::Value GetTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Grow(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
-  assertIsBoolean(info, 3);
-  assertIsBoolean(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -1114,11 +911,6 @@ static Napi::Value Grow(const Napi::CallbackInfo& info) {
 
 static Napi::Value Inset(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double initial = info[1].As<Napi::Number>().DoubleValue();
@@ -1131,16 +923,6 @@ static Napi::Value Inset(const Napi::CallbackInfo& info) {
 
 static Napi::Value InverseSegmentTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 10);
-  assertIsNumber(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
-  assertIsNumber(info, 6);
-  assertIsNumber(info, 7);
-  assertIsNumber(info, 8);
-  assertIsObject(info, 9);
   double startx = info[0].As<Napi::Number>().DoubleValue();
   double starty = info[1].As<Napi::Number>().DoubleValue();
   double startz = info[2].As<Napi::Number>().DoubleValue();
@@ -1157,8 +939,6 @@ static Napi::Value InverseSegmentTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value InvertTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsArray(info, 0);
-  assertIsArray(info, 1);
   Napi::Array out = info[1].As<Napi::Array>();
   Transformation t = to_transform(info[0]);
   Transformation inverse_t = t.inverse();
@@ -1168,7 +948,6 @@ static Napi::Value InvertTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Involute(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   size_t status = ::Involute(geometry);
@@ -1177,8 +956,6 @@ static Napi::Value Involute(const Napi::CallbackInfo& info) {
 
 static Napi::Value Iron(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double turn = info[1].As<Napi::Number>().DoubleValue();
@@ -1188,9 +965,6 @@ static Napi::Value Iron(const Napi::CallbackInfo& info) {
 
 static Napi::Value Join(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t targets = info[1].As<Napi::Number>().Uint32Value();
@@ -1201,9 +975,6 @@ static Napi::Value Join(const Napi::CallbackInfo& info) {
 
 static Napi::Value Link(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsBoolean(info, 1);
-  assertIsBoolean(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   bool close = info[1].As<Napi::Boolean>().Value();
@@ -1214,8 +985,6 @@ static Napi::Value Link(const Napi::CallbackInfo& info) {
 
 static Napi::Value Loft(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsBoolean(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   bool close = info[1].As<Napi::Boolean>().Value();
@@ -1225,7 +994,6 @@ static Napi::Value Loft(const Napi::CallbackInfo& info) {
 
 static Napi::Value MakeAbsolute(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   int status = ::MakeAbsolute(geometry);
@@ -1234,9 +1002,6 @@ static Napi::Value MakeAbsolute(const Napi::CallbackInfo& info) {
 
 static Napi::Value MinimizeOverhang(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double threshold = info[1].As<Napi::Number>().DoubleValue();
@@ -1247,10 +1012,6 @@ static Napi::Value MinimizeOverhang(const Napi::CallbackInfo& info) {
 
 static Napi::Value MakeUnitSphere(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double angular_bound = info[1].As<Napi::Number>().DoubleValue();
@@ -1262,11 +1023,6 @@ static Napi::Value MakeUnitSphere(const Napi::CallbackInfo& info) {
 
 static Napi::Value Offset(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double initial = info[1].As<Napi::Number>().DoubleValue();
@@ -1279,7 +1035,6 @@ static Napi::Value Offset(const Napi::CallbackInfo& info) {
 
 static Napi::Value Outline(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
-  assertIsObject(info, 0);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   size_t status = ::Outline(geometry);
@@ -1288,8 +1043,6 @@ static Napi::Value Outline(const Napi::CallbackInfo& info) {
 
 static Napi::Value Repair(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsObject(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   std::vector<int> strategies;
@@ -1300,8 +1053,6 @@ static Napi::Value Repair(const Napi::CallbackInfo& info) {
 
 static Napi::Value Reconstruct(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double offset = info[1].As<Napi::Number>().DoubleValue();
@@ -1311,9 +1062,6 @@ static Napi::Value Reconstruct(const Napi::CallbackInfo& info) {
 
 static Napi::Value Refine(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -1324,11 +1072,6 @@ static Napi::Value Refine(const Napi::CallbackInfo& info) {
 
 static Napi::Value Remesh(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -1341,8 +1084,6 @@ static Napi::Value Remesh(const Napi::CallbackInfo& info) {
 
 static Napi::Value Route(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t tool_count = info[1].As<Napi::Number>().Uint32Value();
@@ -1352,10 +1093,6 @@ static Napi::Value Route(const Napi::CallbackInfo& info) {
 
 static Napi::Value ScaleTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsNumber(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsObject(info, 3);
   double x = info[0].As<Napi::Number>().DoubleValue();
   double y = info[1].As<Napi::Number>().DoubleValue();
   double z = info[2].As<Napi::Number>().DoubleValue();
@@ -1366,8 +1103,6 @@ static Napi::Value ScaleTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Seam(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -1377,8 +1112,6 @@ static Napi::Value Seam(const Napi::CallbackInfo& info) {
 
 static Napi::Value Section(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -1388,10 +1121,6 @@ static Napi::Value Section(const Napi::CallbackInfo& info) {
 
 static Napi::Value Separate(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsObject(info, 0);
-  assertIsBoolean(info, 1);
-  assertIsBoolean(info, 2);
-  assertIsBoolean(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   bool keep_shapes = info[1].As<Napi::Boolean>().Value();
@@ -1403,9 +1132,6 @@ static Napi::Value Separate(const Napi::CallbackInfo& info) {
 
 static Napi::Value SetTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsObject(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
@@ -1416,14 +1142,6 @@ static Napi::Value SetTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Shell(const Napi::CallbackInfo& info) {
   assertArgCount(info, 8);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsBoolean(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
-  assertIsNumber(info, 6);
-  assertIsNumber(info, 7);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double inner_offset = info[1].As<Napi::Number>().DoubleValue();
@@ -1439,11 +1157,6 @@ static Napi::Value Shell(const Napi::CallbackInfo& info) {
 
 static Napi::Value Simplify(const Napi::CallbackInfo& info) {
   assertArgCount(info, 5);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsBoolean(info, 2);
-  assertIsNumber(info, 3);
-  assertIsBoolean(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double face_count = info[1].As<Napi::Number>().DoubleValue();
@@ -1456,13 +1169,6 @@ static Napi::Value Simplify(const Napi::CallbackInfo& info) {
 
 static Napi::Value Smooth(const Napi::CallbackInfo& info) {
   assertArgCount(info, 7);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsNumber(info, 3);
-  assertIsNumber(info, 4);
-  assertIsNumber(info, 5);
-  assertIsNumber(info, 6);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
@@ -1477,10 +1183,6 @@ static Napi::Value Smooth(const Napi::CallbackInfo& info) {
 
 static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
-  assertIsNumber(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
-  assertIsObject(info, 3);
   double x = info[0].As<Napi::Number>().DoubleValue();
   double y = info[1].As<Napi::Number>().DoubleValue();
   double z = info[2].As<Napi::Number>().DoubleValue();
@@ -1491,8 +1193,6 @@ static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value Twist(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double turns_per_mm = info[1].As<Napi::Number>().DoubleValue();
@@ -1502,9 +1202,6 @@ static Napi::Value Twist(const Napi::CallbackInfo& info) {
 
 static Napi::Value Unfold(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsBoolean(info, 1);
-  assertIsFunction(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   bool enable_tabs = info[1].As<Napi::Boolean>().Value();
@@ -1522,8 +1219,6 @@ static Napi::Value Unfold(const Napi::CallbackInfo& info) {
 
 static Napi::Value Validate(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsArray(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   std::vector<int> strategies;
@@ -1534,9 +1229,6 @@ static Napi::Value Validate(const Napi::CallbackInfo& info) {
 
 static Napi::Value Wrap(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
-  assertIsObject(info, 0);
-  assertIsNumber(info, 1);
-  assertIsNumber(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double alpha = info[1].As<Napi::Number>().DoubleValue();
@@ -1547,8 +1239,6 @@ static Napi::Value Wrap(const Napi::CallbackInfo& info) {
 
 static Napi::Value XTurnTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsNumber(info, 0);
-  assertIsArray(info, 1);
   double turn = info[0].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[1].As<Napi::Array>();
   to_js(TransformationFromXTurn<Transformation, RT>(turn), out);
@@ -1557,8 +1247,6 @@ static Napi::Value XTurnTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value YTurnTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsNumber(info, 0);
-  assertIsArray(info, 1);
   double turn = info[0].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[1].As<Napi::Array>();
   to_js(TransformationFromYTurn<Transformation, RT>(turn), out);
@@ -1567,8 +1255,6 @@ static Napi::Value YTurnTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value ZTurnTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsNumber(info, 0);
-  assertIsArray(info, 1);
   double turn = info[0].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[1].As<Napi::Array>();
   to_js(TransformationFromZTurn<Transformation, RT>(turn), out);

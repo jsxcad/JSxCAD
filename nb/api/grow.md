@@ -12,10 +12,6 @@ Amount may be negative.
 
 _Note: May produce self-intersection._
 
-![Image](grow.md.$2.png)
-
-The ghost is grown by 5 mm in all directions.
-
 ```JavaScript
 Box(5, 5, 5)
   .and(grow(1).ghost())
@@ -23,20 +19,12 @@ Box(5, 5, 5)
   .note('The ghost is grown by 5 mm in all directions.');
 ```
 
-![Image](grow.md.$3.png)
-
-The ghost is grown by 5 mm in only x and z directions.
-
 ```JavaScript
 Box(5, 5, 5)
   .and(grow(1, 'xz').ghost())
   .view()
   .note('The ghost is grown by 5 mm in only x and z directions.');
 ```
-
-![Image](grow.md.$4.png)
-
-Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.
 
 ```JavaScript
 Box(5, 5, 5)
@@ -46,10 +34,6 @@ Box(5, 5, 5)
     'Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.'
   );
 ```
-
-![Image](grow.md.$5.png)
-
-Box(5, 5, 20).grow(4, 'xy', Box(5, 5, 5)) grows the middle of the pillar outward by 5 mm.
 
 ```JavaScript
 Box(5, 5, 20)

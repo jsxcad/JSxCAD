@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const refine = (inputs, count, density = 0) =>
   withCgalGeometry('fair', inputs, (cgalGeometry, g) => {
-    const status = g.Refine(cgalGeometry, count, density);
+    const status = g.Refine(cgalGeometry, Number(count), Number(density));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by refine');

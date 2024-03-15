@@ -14,11 +14,11 @@ export const fair = (
   withCgalGeometry('fair', inputs, (cgalGeometry, g) => {
     const status = g.Fair(
       cgalGeometry,
-      count,
-      resolution,
-      numberOfIterations,
-      remeshIterations,
-      remeshRelaxationSteps
+      Number(count),
+      Number(resolution),
+      Number(numberOfIterations),
+      Number(remeshIterations),
+      Number(remeshRelaxationSteps)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

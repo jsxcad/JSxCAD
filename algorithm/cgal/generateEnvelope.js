@@ -11,10 +11,10 @@ export const generateEnvelope = (
   withCgalGeometry('generateEnvelope', inputs, (cgalGeometry, g) => {
     const status = g.GenerateEnvelope(
       cgalGeometry,
-      envelopeType,
-      plan,
-      face,
-      edge
+      Number(envelopeType),
+      Boolean(plan),
+      Boolean(face),
+      Boolean(edge)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

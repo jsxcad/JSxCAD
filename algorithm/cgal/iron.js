@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const iron = (inputs, turn = 1 / 360) =>
   withCgalGeometry('iron', inputs, (cgalGeometry, g) => {
-    const status = g.Iron(cgalGeometry, turn);
+    const status = g.Iron(cgalGeometry, Number(turn));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by iron');

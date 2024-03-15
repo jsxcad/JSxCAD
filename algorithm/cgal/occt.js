@@ -1,3 +1,4 @@
+/*
 import { STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
 import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
@@ -30,3 +31,4 @@ export const makeOcctSphere = (diameter) =>
         throw new Error(`Unexpected status ${status}`);
     }
   });
+*/

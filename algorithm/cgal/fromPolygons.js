@@ -17,7 +17,7 @@ export const fromPolygons = (jsPolygons, close = false, tolerance = 0.001) => {
         cgalGeometry.addInputPoint(nth, x, y, z);
       }
     }
-    const status = g.FromPolygons(cgalGeometry, close);
+    const status = g.FromPolygons(cgalGeometry, Boolean(close));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fromPolygons');

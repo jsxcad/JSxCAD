@@ -389,23 +389,17 @@ Orb(10)
 Box(10).cut(Box(5)).ez([1, -1]).section().view();
 ```
 
-![Image](shapes.md.$35.png)
-
 ```JavaScript
 Box(10, 10, 20)
   .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
   .view();
 ```
 
-![Image](shapes.md.$36_3.png)
-
 ```JavaScript
 Box(10, 10, 20)
   .grow(2, Box(10, 10, [7, 10]))
   .view(3);
 ```
-
-![Image](shapes.md.$37_3.png)
 
 ```JavaScript
 Box(10, 10, 20)

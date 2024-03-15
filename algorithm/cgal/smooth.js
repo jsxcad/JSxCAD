@@ -15,12 +15,12 @@ export const smooth = (
   withCgalGeometry('smooth', inputs, (cgalGeometry, g) => {
     const status = g.Smooth(
       cgalGeometry,
-      count,
-      resolution,
-      steps,
-      time,
-      remeshIterations,
-      remeshRelaxationSteps
+      Number(count),
+      Number(resolution),
+      Number(steps),
+      Number(time),
+      Number(remeshIterations),
+      Number(remeshRelaxationSteps)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

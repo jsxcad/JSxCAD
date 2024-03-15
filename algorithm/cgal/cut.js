@@ -5,7 +5,12 @@ import { ErrorZeroThickness } from './error.js';
 
 export const cut = (inputs, targetsLength, open = false, exact = false) =>
   withCgalGeometry('cut', inputs, (cgalGeometry, g) => {
-    const status = g.Cut(cgalGeometry, targetsLength, open, exact);
+    const status = g.Cut(
+      cgalGeometry,
+      Number(targetsLength),
+      Boolean(open),
+      Boolean(exact)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cut');

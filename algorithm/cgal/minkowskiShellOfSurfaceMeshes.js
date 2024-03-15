@@ -10,7 +10,7 @@ export const minkowskiShellOfSurfaceMeshes = (
     getCgal().MinkowskiShellOfSurfaceMeshes(
       mesh,
       meshTransform,
-      offset,
+      Number(offset),
       offsetTransform
     );
   } catch (error) {

@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const fix = (inputs, selfIntersection = true) =>
   withCgalGeometry('fix', inputs, (cgalGeometry, g) => {
-    const status = g.Fix(cgalGeometry, selfIntersection);
+    const status = g.Fix(cgalGeometry, Boolean(selfIntersection));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fix');

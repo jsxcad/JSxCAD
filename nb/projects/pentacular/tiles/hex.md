@@ -122,41 +122,6 @@ const Peaks = (seed = 0, turns = [0], nth = 0) => {
 ```
 
 ```JavaScript
-const Mountainous =
-  (maxHeight = 13, minHeight = 1, peaks = 10) =>
-  (seed = 0) => {
-    const turn = random(seed + 1).in(0, 1);
-    const distance = random(seed + 2).in(0, 13);
-    const height = random(seed + 3).in(minHeight, maxHeight);
-    return Seq({ upto: peaks }, (t) =>
-      Hull(hex, Point(distance(t), 0, height(t)).rz(turn(t)))
-    )
-      .fuse()
-      .remesh(1)
-      .smooth(hex.ez([0.2, 21]))
-      .clean()
-      .z(2)
-      .and(hexTile);
-  };
-```
-
-```JavaScript
-const Mountain = Cached('Mountain', Mountainous(20, 1));
-```
-
-```JavaScript
-const Hill = Cached('Hill', Mountainous(6));
-```
-
-```JavaScript
-const Meadow = Cached('Meadow', Mountainous(2, 0));
-```
-
-```JavaScript
-const Flat = Cached('Flat', Mountainous(0, 0));
-```
-
-```JavaScript
 const Forest = Cached('Forest', (seed = 0, turn = 0, nth, count = 40) => {
   console.log(`Forest: seed=${seed}, turn=${turn}, count=${count}`);
   const getAngle = random(seed + 1).in(0, 1);
@@ -225,18 +190,6 @@ const wave = (low = 1.5, high = 4.5, turn = 0) =>
   cut(
     ArcX(32, 2, [low, high]).seq({ from: -20, to: 20, by: 1.75 }, y).rz(turn)
   );
-```
-
-```JavaScript
-const Waves = (seed = 0, nth = 0) => hex.ez([1.5, 3]).join(hexTile).op(wave);
-```
-
-```JavaScript
-const Dunes = (seed = 0, nth = 0) =>
-  hex
-    .ez([1.5, 3.5])
-    .join(hexTile)
-    .cut(ArcX(32, 3, [2, 5.5]).seq({ from: -20, to: 20, by: 3 }, y));
 ```
 
 ```JavaScript
@@ -521,145 +474,6 @@ const turnPairs = (config) => {
 };
 ```
 
-```JavaScript
-const Tile = (...args) => {
-  const [
-    seed = 0,
-    {
-      terrain,
-      trees,
-      islands,
-      peaks,
-      river,
-      path,
-      road,
-      tunnel,
-      wall,
-      buildings,
-      buildings2,
-      field,
-      swamp,
-      caves,
-    },
-  ] = args;
-
-  console.log(`Tile: ${JSON.stringify(args)}`);
-
-  let caveCut = Empty();
-  if (caves) {
-    const dt = random(seed).pick(0 / 6, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6);
-    for (let h = 2; h < 20; h += 5) {
-      for (let t = 0; t < 6; t++) {
-        caveCut = caveCut.and(Tunnel(seed, t / 6, dt(h + t), h).z(h));
-      }
-    }
-  }
-
-  const tileTerrain = {
-    meadow: Meadow,
-    hill: Hill,
-    mountain: Mountain,
-    dunes: Dunes,
-    waves: Waves,
-    flat: Flat,
-  }[terrain](seed);
-  let tile = tileTerrain;
-
-  for (const [turn, nth] of turnSingles(trees)) {
-    tile = tile.and(Forest(seed, turn, nth));
-  }
-
-  const peakTurns = turnList(peaks);
-  if (peakTurns.length > 0) {
-    tile = tile.and(
-      Peaks(
-        seed,
-        peakTurns.map((turn) => turn / 6)
-      )
-    );
-  }
-
-  const islandTurns = turnList(islands);
-  if (islandTurns.length > 0) {
-    tile = tile.and(
-      Peaks(
-        seed,
-        islandTurns.map((turn) => turn / 6)
-      )
-        .z(-8)
-        .clip(hex.ez([20]))
-    );
-  }
-
-  const swampTurns = turnList(swamp);
-  const swamps = [];
-  for (const turn of swampTurns) {
-    swamps.push(Swamp(seed, turn / 6, swamps.length));
-  }
-  if (swamps.length > 0) {
-    tile = tile.cut(...swamps);
-  }
-
-  const wallTurns = turnList(wall);
-  const walls = [];
-  for (const turn of wallTurns) {
-    walls.push(Wall(seed, turn / 6, walls.length));
-  }
-  if (walls.length > 0) {
-    tile = tile.and(...walls);
-  }
-
-  for (const [to, from, nth] of turnPairs(river)) {
-    tile = tile.cut(River(seed, to, from, nth));
-  }
-
-  for (const [turn, nth] of turnSingles(buildings)) {
-    tile = tile.and(Building(seed, turn, nth));
-  }
-
-  for (const [turn, nth] of turnSingles(buildings2)) {
-    tile = tile.and(Building2(seed, turn, nth));
-  }
-
-  const paths = [];
-  for (const [from, to, nth] of turnPairs(path)) {
-    paths.push(Path(seed, from, to, nth));
-  }
-  if (paths.length > 0) {
-    tile = tile.cut(
-      Join(...paths)
-        .cut(tileTerrain)
-        .z(-0.5)
-    );
-  }
-
-  const roads = [];
-  for (const [from, to, nth] of turnPairs(road)) {
-    roads.push(Road(seed, from, to, nth));
-  }
-  if (roads.length > 0) {
-    tile = tile.cut(...roads);
-  }
-
-  for (const [turn, nth] of turnSingles(field)) {
-    tile = tile.and(Field(seed, turn, nth));
-  }
-
-  const tunnels = [];
-  for (const [from, to, nth] of turnPairs(tunnel)) {
-    tunnels.push(Tunnel(seed, from, to, nth));
-  }
-
-  if (tunnels.length > 0) {
-    tile = tile.cut(...tunnels);
-  }
-
-  tile = tile.cut(caveCut);
-
-  return tile.clean().fuse();
-};
-```
-
 ### Tile Generator
 
 ```JavaScript
@@ -727,33 +541,4 @@ const caves = control('caves', '', 'input');
 
 ```JavaScript
 const wall = control('wall', '', 'input');
-```
-
-![Image](hex.md.$3_tile.png)
-
-[tile.stl](hex.tile.stl)
-
-```JavaScript
-await Tile(seed4, {
-  terrain: terrain2,
-  trees: trees2,
-  islands: islands3,
-  peaks: peaks,
-  river: river3,
-  swamp: swamp2,
-  path: path2,
-  road: road,
-  tunnel: tunnel2,
-  buildings: buildings,
-  buildings2: buildings2,
-  caves: caves,
-  wall: wall,
-  field: field2,
-}).stl('tile');
-```
-
-![Image](hex.md.$4_hexTile.png)
-
-```JavaScript
-hexTile.view('hexTile');
 ```

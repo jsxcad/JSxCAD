@@ -34,13 +34,27 @@ const Grid = (l, w) =>
     .view();
 ```
 
+![Image](tile6.md.grid1x1.png)
+
+![Image](tile6.md.grid1x1.png)
+
 ```JavaScript
 const grid1x1 = Grid(1, 1).view();
 ```
 
+![Image](tile6.md.grid2x2.png)
+
+![Image](tile6.md.grid2x2.png)
+
 ```JavaScript
 const grid2x2 = Grid(2, 2).view();
 ```
+
+![Image](tile6.md.grid3x3.png)
+
+![Image](tile6.md.grid3x3_grid3x3.png)
+
+[grid3x3.stl](tile6.grid3x3.stl)
 
 ```JavaScript
 const grid3x3 = Grid(3, 3).stl('grid3x3');
@@ -120,6 +134,32 @@ const contourBrick1 = LoadPng('t/brick2.png', { by: 1 / 10 }, (l, h) =>
 
 ```JavaScript
 const py = Box(23).hull(Point(0, 0, -11.5));
+```
+
+```JavaScript
+const Wall = (tile) =>
+  grid1x1
+    .noGap()
+    .y(12, -12)
+    .cutFrom(
+      tile
+        .align('z>')
+        .and(rz(1 / 4).sz(-1))
+        .ry(-1 / 4)
+        .align('z>')
+        .z(3, 3 + 24)
+        .and(Box(7, 23, [3]))
+        .clip(
+          py
+            .sz(1, -1)
+            .ry(-1 / 4)
+            .align('z>')
+            .z(3, 4 - 24, 3 + 24)
+            .fuse()
+        )
+        .and(Box(0.8, 22, [2, 24 * 2]))
+    )
+    .clean();
 ```
 
 ![Image](tile6.md.contourWreath1.png)

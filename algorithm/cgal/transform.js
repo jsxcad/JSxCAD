@@ -76,7 +76,7 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
       throw Error(`Non-finite ${[x, y, z]}`);
     }
     const transform = [];
-    getCgal().TranslateTransform(x, y, z, transform);
+    getCgal().TranslateTransform(Number(x), Number(y), Number(z), transform);
     return transform;
   } catch (error) {
     throw Error(error);

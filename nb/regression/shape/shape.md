@@ -724,8 +724,6 @@ Box(10, 10, 10)
   .view();
 ```
 
-![Image](shape.md.$86.png)
-
 ```JavaScript
 Arc(10, 10, 10, { sides: 7 })
   .cut(

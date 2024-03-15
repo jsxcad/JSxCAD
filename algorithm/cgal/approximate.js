@@ -5,7 +5,11 @@ import { ErrorZeroThickness } from './error.js';
 
 export const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
   withCgalGeometry('approximate', inputs, (cgalGeometry, g) => {
-    const status = g.Approximate(cgalGeometry, faceCount, minErrorDrop);
+    const status = g.Approximate(
+      cgalGeometry,
+      Number(faceCount),
+      Number(minErrorDrop)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by approximate');

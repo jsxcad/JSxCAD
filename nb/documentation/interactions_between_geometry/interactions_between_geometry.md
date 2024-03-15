@@ -182,8 +182,6 @@ Mask is used to create a mask around something. This allows the shape to cut a l
 const shaft = Arc(10, 10, 40).color('grey');
 ```
 
-![Image](interactions_between_geometry.md.$26.png)
-
 ```JavaScript
 shaft.masked(grow(1)).view();
 ```

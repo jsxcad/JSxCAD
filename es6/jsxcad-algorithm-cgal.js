@@ -507,7 +507,7 @@ const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
       throw Error(`Non-finite ${[x, y, z]}`);
     }
     const transform = [];
-    getCgal().TranslateTransform(x, y, z, transform);
+    getCgal().TranslateTransform(Number(x), Number(y), Number(z), transform);
     return transform;
   } catch (error) {
     throw Error(error);
@@ -866,7 +866,11 @@ class ErrorZeroThickness extends Error {}
 
 const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
   withCgalGeometry('approximate', inputs, (cgalGeometry, g) => {
-    const status = g.Approximate(cgalGeometry, faceCount, minErrorDrop);
+    const status = g.Approximate(
+      cgalGeometry,
+      Number(faceCount),
+      Number(minErrorDrop)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by approximate');
@@ -877,82 +881,9 @@ const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
     }
   });
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
-
-const arrangeSegments = (
-  plane,
-  exactPlane,
-  segments,
-  triangulate = false
-) => {
-  try {
-    const c = getCgal();
-    let target;
-    let polygon;
-    let polygons = [];
-    let filled = false;
-    const fill = (out) => {
-      // This interface is a bit silly.
-      if (!filled) {
-        for (const [start, end] of segments) {
-          c.addPoint(out, start[X$1], start[Y$1], start[Z$1]);
-          c.addPoint(out, end[X$1], end[Y$1], end[Z$1]);
-        }
-        filled = true;
-      }
-    };
-    const emitPolygon = (isHole) => {
-      target = { points: [], exactPoints: [], holes: [], plane, exactPlane };
-      if (isHole) {
-        polygon.holes.push(target);
-      } else {
-        polygons.push(target);
-        polygon = target;
-      }
-    };
-    const emitPoint = (x, y, z, exactX, exactY, exactZ) => {
-      target.points.push([x, y, z]);
-      target.exactPoints.push([exactX, exactY, exactZ]);
-    };
-    if (exactPlane) {
-      const [x, y, z, w] = exactPlane;
-      c.ArrangePathsExact(
-        x,
-        y,
-        z,
-        w,
-        triangulate,
-        fill,
-        emitPolygon,
-        emitPoint
-      );
-    } else {
-      const [x, y, z, w] = plane || [0, 0, 1, 0];
-      c.ArrangePathsApproximate(
-        x,
-        y,
-        z,
-        w,
-        triangulate,
-        fill,
-        emitPolygon,
-        emitPoint
-      );
-    }
-    return polygons;
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-const arrangeSegmentsIntoTriangles = (plane, exactPlane, polygons) =>
-  arrangeSegments(plane, exactPlane, polygons, /* triangulate= */ true);
-
 const bend = (inputs, targetsLength) =>
   withCgalGeometry('bend', inputs, (cgalGeometry, g) => {
-    const status = g.Bend(cgalGeometry, targetsLength);
+    const status = g.Bend(cgalGeometry, Number(targetsLength));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by bend');
@@ -986,7 +917,12 @@ const cast = (inputs) =>
 
 const clip = (inputs, targetsLength, open = false, exact = false) =>
   withCgalGeometry('clip', inputs, (cgalGeometry, g) => {
-    const status = g.Clip(cgalGeometry, targetsLength, open, exact);
+    const status = g.Clip(
+      cgalGeometry,
+      Number(targetsLength),
+      Boolean(open),
+      Boolean(exact)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by clip');
@@ -1051,11 +987,11 @@ const computeImplicitVolume = (
     const status = g.ComputeImplicitVolume(
       cgalGeometry,
       op,
-      radius,
-      angularBound,
-      radiusBound,
-      distanceBound,
-      errorBound
+      Number(radius),
+      Number(angularBound),
+      Number(radiusBound),
+      Number(distanceBound),
+      Number(errorBound)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -1133,15 +1069,15 @@ const computeReliefFromImage = (
       cArray.set(data);
       const status = g.ComputeReliefFromImage(
         cgalGeometry,
-        x,
-        y,
-        z,
+        Number(x),
+        Number(y),
+        Number(z),
         cStorage,
-        angularBound,
-        radiusBound,
-        distanceBound,
-        errorBound,
-        extrusion
+        Number(angularBound),
+        Number(radiusBound),
+        Number(distanceBound),
+        Number(errorBound),
+        Number(extrusion)
       );
       switch (status) {
         case STATUS_ZERO_THICKNESS:
@@ -1191,13 +1127,13 @@ const computeToolpath = (
   withCgalGeometry('computeToolpath', inputs, (cgalGeometry, g) => {
     const status = g.ComputeToolpath(
       cgalGeometry,
-      materialStart,
-      resolution,
-      toolSize,
-      toolCutDepth,
-      annealingMax,
-      annealingMin,
-      annealingDecay
+      Number(materialStart),
+      Number(resolution),
+      Number(toolSize),
+      Number(toolCutDepth),
+      Number(annealingMax),
+      Number(annealingMin),
+      Number(annealingDecay)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -1256,7 +1192,12 @@ const convexHull = (inputs) =>
 
 const cut = (inputs, targetsLength, open = false, exact = false) =>
   withCgalGeometry('cut', inputs, (cgalGeometry, g) => {
-    const status = g.Cut(cgalGeometry, targetsLength, open, exact);
+    const status = g.Cut(
+      cgalGeometry,
+      Number(targetsLength),
+      Boolean(open),
+      Boolean(exact)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cut');
@@ -1276,7 +1217,13 @@ const deform = (
   alpha = 0.02
 ) => {
   return withCgalGeometry('deform', inputs, (cgalGeometry, g) => {
-    const status = g.Deform(cgalGeometry, length, iterations, tolerance, alpha);
+    const status = g.Deform(
+      cgalGeometry,
+      Number(length),
+      Number(iterations),
+      Number(tolerance),
+      Number(alpha)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by deform');
@@ -1303,7 +1250,7 @@ const demesh = (inputs) =>
 
 const dilateXY = (inputs, amount) => {
   return withCgalGeometry('dilateXY', inputs, (cgalGeometry, g) => {
-    const status = g.DilateXY(cgalGeometry, amount);
+    const status = g.DilateXY(cgalGeometry, Number(amount));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by dilateXY');
@@ -1321,7 +1268,7 @@ const disjoint = (inputs, mode, exact = false) =>
     const isMasked = inputs.map(
       ({ tags }) => tags && tags.includes('type:masked')
     );
-    const status = g.Disjoint(geometry, isMasked, mode ? 1 : 0, exact);
+    const status = g.Disjoint(geometry, isMasked, mode ? 1 : 0, Boolean(exact));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by disjoint');
@@ -1388,7 +1335,7 @@ const eagerTransform = (inputs) =>
 
 const extrude = (inputs, count) =>
   withCgalGeometry('extrude', inputs, (cgalGeometry, g) => {
-    const status = g.Extrude(cgalGeometry, count);
+    const status = g.Extrude(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by extrude');
@@ -1401,7 +1348,7 @@ const extrude = (inputs, count) =>
 
 const faceEdges = (inputs, count) => {
   return withCgalGeometry('faceEdges', inputs, (cgalGeometry, g) => {
-    const status = g.FaceEdges(cgalGeometry, count);
+    const status = g.FaceEdges(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by faceEdges');
@@ -1429,11 +1376,11 @@ const fair = (
   withCgalGeometry('fair', inputs, (cgalGeometry, g) => {
     const status = g.Fair(
       cgalGeometry,
-      count,
-      resolution,
-      numberOfIterations,
-      remeshIterations,
-      remeshRelaxationSteps
+      Number(count),
+      Number(resolution),
+      Number(numberOfIterations),
+      Number(remeshIterations),
+      Number(remeshRelaxationSteps)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -1498,7 +1445,7 @@ const fitPlaneToPoints = (points) => {
 
 const fix = (inputs, selfIntersection = true) =>
   withCgalGeometry('fix', inputs, (cgalGeometry, g) => {
-    const status = g.Fix(cgalGeometry, selfIntersection);
+    const status = g.Fix(cgalGeometry, Boolean(selfIntersection));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fix');
@@ -1519,7 +1466,7 @@ const fromPolygons = (jsPolygons, close = false, tolerance = 0.001) => {
         cgalGeometry.addInputPoint(nth, x, y, z);
       }
     }
-    const status = g.FromPolygons(cgalGeometry, close);
+    const status = g.FromPolygons(cgalGeometry, Boolean(close));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fromPolygons');
@@ -1597,8 +1544,8 @@ const fromPolygonSoup = (
     }
     const status = g.FromPolygonSoup(
       cgalGeometry,
-      faceCountLimit,
-      minErrorDrop,
+      Number(faceCountLimit),
+      Number(minErrorDrop),
       generateRepairStrategyCodes(strategies)
     );
     switch (status) {
@@ -1618,7 +1565,7 @@ const fromPolygonSoup = (
 
 const fuse = (inputs, exact = false) =>
   withCgalGeometry('fuse', inputs, (cgalGeometry, g) => {
-    const status = g.Fuse(cgalGeometry, exact);
+    const status = g.Fuse(cgalGeometry, Boolean(exact));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fuse');
@@ -1642,10 +1589,10 @@ const generateEnvelope = (
   withCgalGeometry('generateEnvelope', inputs, (cgalGeometry, g) => {
     const status = g.GenerateEnvelope(
       cgalGeometry,
-      envelopeType,
-      plan,
-      face,
-      edge
+      Number(envelopeType),
+      Boolean(plan),
+      Boolean(face),
+      Boolean(edge)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -1666,7 +1613,13 @@ const generateEnvelope = (
 
 const grow = (inputs, count, { x = true, y = true, z = true } = {}) =>
   withCgalGeometry('grow', inputs, (cgalGeometry, g) => {
-    const status = g.Grow(cgalGeometry, count, x, y, z);
+    const status = g.Grow(
+      cgalGeometry,
+      Number(count),
+      Number(x),
+      Number(y),
+      Number(z)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by grow');
@@ -1685,7 +1638,13 @@ const inset = (
   segments = 16
 ) =>
   withCgalGeometry('inset', inputs, (cgalGeometry, g) => {
-    const status = g.Inset(cgalGeometry, initial, step, limit, segments);
+    const status = g.Inset(
+      cgalGeometry,
+      Number(initial),
+      Number(step),
+      Number(limit),
+      Number(segments)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by inset');
@@ -1716,7 +1675,7 @@ const involute = (inputs) =>
 
 const iron = (inputs, turn = 1 / 360) =>
   withCgalGeometry('iron', inputs, (cgalGeometry, g) => {
-    const status = g.Iron(cgalGeometry, turn);
+    const status = g.Iron(cgalGeometry, Number(turn));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by iron');
@@ -1729,7 +1688,7 @@ const iron = (inputs, turn = 1 / 360) =>
 
 const join = (inputs, targetsLength, exact = false) =>
   withCgalGeometry('join', inputs, (cgalGeometry, g) => {
-    const status = g.Join(cgalGeometry, targetsLength, exact);
+    const status = g.Join(cgalGeometry, Number(targetsLength), Boolean(exact));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by join');
@@ -1742,7 +1701,7 @@ const join = (inputs, targetsLength, exact = false) =>
 
 const link = (inputs, close, reverse) =>
   withCgalGeometry('link', inputs, (cgalGeometry, g) => {
-    const status = g.Link(cgalGeometry, close, reverse);
+    const status = g.Link(cgalGeometry, Boolean(close), Boolean(reverse));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by link');
@@ -1760,7 +1719,7 @@ const link = (inputs, close, reverse) =>
 
 const loft = (inputs, close = true) =>
   withCgalGeometry('loft', inputs, (cgalGeometry, g) => {
-    const status = g.Loft(cgalGeometry, close);
+    const status = g.Loft(cgalGeometry, Boolean(close));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by loft');
@@ -1784,7 +1743,13 @@ const offset = (
   segments = 16
 ) =>
   withCgalGeometry('offset', inputs, (cgalGeometry, g) => {
-    const status = g.Offset(cgalGeometry, initial, step, limit, segments);
+    const status = g.Offset(
+      cgalGeometry,
+      Number(initial),
+      Number(step),
+      Number(limit),
+      Number(segments)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by offset');
@@ -1828,41 +1793,13 @@ const makeAbsolute = (inputs) => {
   });
 };
 
-const makeOcctBox = (xLength = 1, yLength = 1, zLength = 1) =>
-  withCgalGeometry('makeOcctBox', [], (geometry, g) => {
-    const status = g.MakeOcctBox(geometry, xLength, yLength, zLength);
-    switch (status) {
-      case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by makeOcctBox');
-      case STATUS_OK:
-        return fromCgalGeometry(geometry, [], 1)[0];
-      default:
-        throw new Error(`Unexpected status ${status}`);
-    }
-  });
-
-const makeOcctSphere = (diameter) =>
-  withCgalGeometry('makeOcctSphere', [], (geometry, g) => {
-    const status = g.MakeOcctSphere(geometry, diameter);
-    switch (status) {
-      case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness(
-          'Zero thickness produced by makeOcctSphere'
-        );
-      case STATUS_OK:
-        return fromCgalGeometry(geometry, [], 1)[0];
-      default:
-        throw new Error(`Unexpected status ${status}`);
-    }
-  });
-
 const makeUnitSphere = (angularBound, radiusBound, distanceBound) =>
   withCgalGeometry('makeUnitSphere', [], (cgalGeometry, g) => {
     const status = g.MakeUnitSphere(
       cgalGeometry,
-      angularBound,
-      radiusBound,
-      distanceBound
+      Number(angularBound),
+      Number(radiusBound),
+      Number(distanceBound)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -1876,7 +1813,11 @@ const makeUnitSphere = (angularBound, radiusBound, distanceBound) =>
 
 const minimizeOverhang = (inputs, threshold, split = false) =>
   withCgalGeometry('minimizeOverhang', inputs, (cgalGeometry, g) => {
-    const status = g.MinimizeOverhang(cgalGeometry, threshold, split);
+    const status = g.MinimizeOverhang(
+      cgalGeometry,
+      Number(threshold),
+      Boolean(split)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by overhang');
@@ -1895,7 +1836,13 @@ const pushSurfaceMesh = (
   scale = 1
 ) => {
   try {
-    getCgal().PushSurfaceMesh(mesh, transform, force, minimumDistance, scale);
+    getCgal().PushSurfaceMesh(
+      mesh,
+      transform,
+      Number(force),
+      Number(minimumDistance),
+      Number(scale)
+    );
   } catch (error) {
     throw Error(error);
   }
@@ -1903,7 +1850,7 @@ const pushSurfaceMesh = (
 
 const reconstruct = (inputs, offset = 0) =>
   withCgalGeometry('reconstruct', inputs, (cgalGeometry, g) => {
-    const status = g.Reconstruct(cgalGeometry, offset);
+    const status = g.Reconstruct(cgalGeometry, Number(offset));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by reconstruct');
@@ -1918,7 +1865,7 @@ const reconstruct = (inputs, offset = 0) =>
 
 const refine = (inputs, count, density = 0) =>
   withCgalGeometry('fair', inputs, (cgalGeometry, g) => {
-    const status = g.Refine(cgalGeometry, count, density);
+    const status = g.Refine(cgalGeometry, Number(count), Number(density));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by refine');
@@ -1939,10 +1886,10 @@ const remesh = (
   withCgalGeometry('remesh', inputs, (cgalGeometry, g) => {
     const status = g.Remesh(
       cgalGeometry,
-      count,
-      iterations,
-      relaxationSteps,
-      targetEdgeLength
+      Number(count),
+      Number(iterations),
+      Number(relaxationSteps),
+      Number(targetEdgeLength)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -1956,7 +1903,7 @@ const remesh = (
 
 const route = (inputs, toolCount) =>
   withCgalGeometry('route', inputs, (cgalGeometry, g) => {
-    const status = g.Route(cgalGeometry, toolCount);
+    const status = g.Route(cgalGeometry, Number(toolCount));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by route');
@@ -1974,7 +1921,7 @@ const route = (inputs, toolCount) =>
 
 const seam = (inputs, count) =>
   withCgalGeometry('seam', inputs, (cgalGeometry, g) => {
-    const status = g.Seam(cgalGeometry, count);
+    const status = g.Seam(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by seam');
@@ -1987,7 +1934,7 @@ const seam = (inputs, count) =>
 
 const section = (inputs, count) =>
   withCgalGeometry('section', inputs, (cgalGeometry, g) => {
-    const status = g.Section(cgalGeometry, count);
+    const status = g.Section(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');
@@ -2013,9 +1960,9 @@ const separate = (
   withCgalGeometry('separate', inputs, (cgalGeometry, g) => {
     const status = g.Separate(
       cgalGeometry,
-      keepShapes,
-      keepHolesInShapes,
-      keepHolesAsShapes
+      Boolean(keepShapes),
+      Boolean(keepHolesInShapes),
+      Boolean(keepHolesAsShapes)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -2063,13 +2010,13 @@ const shell = (
   return withCgalGeometry('shell', inputs, (cgalGeometry, g) => {
     const status = g.Shell(
       cgalGeometry,
-      innerOffset,
-      outerOffset,
-      protect,
-      angle,
-      sizing,
-      approx,
-      edgeSize
+      Number(innerOffset),
+      Number(outerOffset),
+      Boolean(protect),
+      Number(angle),
+      Number(sizing),
+      Number(approx),
+      Number(edgeSize)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -2086,9 +2033,9 @@ const simplify = (inputs, cornerThreshold, eps) =>
   withCgalGeometry('simplify', inputs, (cgalGeometry, g) => {
     const status = g.Simplify(
       cgalGeometry,
-      cornerThreshold,
+      Number(cornerThreshold),
       eps !== undefined,
-      eps || 0,
+      Number(eps) || 0,
       false
     );
     switch (status) {
@@ -2113,12 +2060,12 @@ const smooth = (
   withCgalGeometry('smooth', inputs, (cgalGeometry, g) => {
     const status = g.Smooth(
       cgalGeometry,
-      count,
-      resolution,
-      steps,
-      time,
-      remeshIterations,
-      remeshRelaxationSteps
+      Number(count),
+      Number(resolution),
+      Number(steps),
+      Number(time),
+      Number(remeshIterations),
+      Number(remeshRelaxationSteps)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -2132,7 +2079,7 @@ const smooth = (
 
 const twist = (inputs, targetsLength) =>
   withCgalGeometry('twist', inputs, (cgalGeometry, g) => {
-    const status = g.Twist(cgalGeometry, targetsLength);
+    const status = g.Twist(cgalGeometry, Number(targetsLength));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by twist');
@@ -2149,7 +2096,7 @@ const unfold = (inputs, enableTabs = false) =>
     // Not sure that passing tags around like this is a sensible idea.
     const status = g.Unfold(
       cgalGeometry,
-      enableTabs,
+      Boolean(enableTabs),
       (nth, tag) => (tags[nth] = tag)
     );
     switch (status) {
@@ -2236,7 +2183,7 @@ const withAabbTreeQuery = (inputs, op) =>
 
 const wrap = (inputs, alpha, offset) =>
   withCgalGeometry('wrap', inputs, (cgalGeometry, g) => {
-    const status = g.Wrap(cgalGeometry, alpha, offset);
+    const status = g.Wrap(cgalGeometry, Number(alpha), Number(offset));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by wrap');
@@ -2252,4 +2199,4 @@ const wrap = (inputs, alpha, offset) =>
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, arrangeSegments, arrangeSegmentsIntoTriangles, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeOcctBox, makeOcctSphere, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pushSurfaceMesh, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, twist, unfold, validate, withAabbTreeQuery, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pushSurfaceMesh, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, twist, unfold, validate, withAabbTreeQuery, wrap };
