@@ -18,7 +18,7 @@ Box(1, 1, 1)
 
 Orb(1).volume((value) => note('' + value))
 
-0.43463137275279373
+0
 
 ```JavaScript
 Orb(1)

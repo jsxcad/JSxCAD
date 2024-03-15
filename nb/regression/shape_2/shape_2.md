@@ -99,8 +99,6 @@ Box(10)
   .view();
 ```
 
-![Image](shape_2.md.$13.png)
-
 ```JavaScript
 Box(10).x({ to: 100, by: 11 }).view();
 ```

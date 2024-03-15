@@ -34,13 +34,3 @@ Box(5)
   .view()
   .note('Box(5).loft(Arc(4).z(5)) lofts a box by 5 mm to a circle.');
 ```
-
-```JavaScript
-Box(5)
-  .cut(inset(1))
-  .loft(Arc(4).cut(inset(1)).z(5))
-  .view()
-  .note(
-    'Box(5).cut(inset(1)).loft(Arc(4).cut(inset(1)).z(5)) lofts a box with a hole to a circle with a hole'
-  );
-```

@@ -214,10 +214,6 @@ At each step the shape is retriangulated to preserve manifold structure.
 
 Once a shape is remeshed it can be twisted or bent about the origin.
 
-![Image](interactions_with_geometry.md.$30.png)
-
-A rectangle bent into a ring with a central radius of 25
-
 ```JavaScript
 Box(157, 20)
   .ez([1])

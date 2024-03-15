@@ -204,7 +204,7 @@ Box(5)
   .gridView();
 ```
 
-length 1.0000000000000009x2.0000000000000018x3.0000000000000013
+length 1x2x3
 
 ```JavaScript
 Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => note(`length ${length}x${width}x${height}`));
@@ -436,8 +436,6 @@ Box(10).cut(Arc(6).x(6, -6), Box(1, 10))
   // .and(toolpath())
   .view(54);
 ```
-
-![Image](shape.md.$56_60.png)
 
 ```JavaScript
 Box(20, 20, 20)

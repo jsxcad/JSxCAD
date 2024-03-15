@@ -10,10 +10,6 @@ The shape needs to have an appropriate meshing density.
 
 See: [remesh](../../nb/api/remesh.md)
 
-![Image](bend.md.$2.png)
-
-Box(40, 1, 5).y(20).and(remesh().bend(20))
-
 ```JavaScript
 Box(40, 1, 5)
   .y(20)

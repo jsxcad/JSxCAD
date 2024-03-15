@@ -313,8 +313,6 @@ Line([15, -15])
   .view();
 ```
 
-![Image](shapes.md.$27.png)
-
 ```JavaScript
 Line([15, -15])
   .seq({ from: -10, upto: 11 }, y, Group)
@@ -375,8 +373,6 @@ Group(Box(1), Box(1).rx(1 / 4))
   .each(e([2]))
   .view();
 ```
-
-![Image](shapes.md.$33_1.png)
 
 ```JavaScript
 Orb(10)

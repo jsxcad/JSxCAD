@@ -9,10 +9,6 @@ Parameter|Default|Type
 
 Generates a set of gauges for measuring width at a particular reference position.
 
-![Image](gauge.md.$2.png)
-
-Box(20).z(-5).hull(Point().z(5)).rz(1 / 8).gauge(0, Z({ from: -5, to: 5, by: 5 }))
-
 ```JavaScript
 Box(20)
   .z(-5)
