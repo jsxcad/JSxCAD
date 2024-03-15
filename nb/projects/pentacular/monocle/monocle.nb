@@ -1,3 +1,5 @@
+/*
+FIX
 const mono40e = And(
   Loft(Arc(40), Arc(34).z(14.5))
     .cut(Loft(Arc(40).inset(2), Arc(31.75).z(12.5), Arc(31.75).z(14.5)))
@@ -48,3 +50,4 @@ const circlet = Arc(30)
       .ez([-10.5])
   )
   .stl('circlet', getNot('beam'));
+*/

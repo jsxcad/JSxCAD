@@ -227,10 +227,6 @@ await Group(roadTile, curvedRoadTile)
 
 [2d road tile.pdf](road.2d%20road%20tile.pdf)
 
-![Image](road.md.$3_2d_road_tile.png)
-
-[2d road tile_2.pdf](road.2d%20road%20tile_2.pdf)
-
 ![Image](road.md.$3_3d_road_tile.png)
 
 [3d road tile.stl](road.3d%20road%20tile.stl)

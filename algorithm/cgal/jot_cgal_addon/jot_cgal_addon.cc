@@ -1157,12 +1157,12 @@ static Napi::Value InverseSegmentTransform(const Napi::CallbackInfo& info) {
 
 static Napi::Value InvertTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
-  assertIsObject(info, 0);
-  assertIsObject(info, 1);
+  assertIsArray(info, 0);
+  assertIsArray(info, 1);
   Napi::Array out = info[1].As<Napi::Array>();
   Transformation t = to_transform(info[0]);
-  Transformation inverse = t.inverse();
-  to_js(t, out);
+  Transformation inverse_t = t.inverse();
+  to_js(inverse_t, out);
   return info.Env().Undefined();
 }
 

@@ -37,6 +37,52 @@ test('Inverse transform cancels', (t) => {
   t.deepEqual(composed[16], '1 0 0 0 0 1 0 0 0 0 1 0 1');
 });
 
+test('Inverse translate', (t) => {
+  const c = getCgal();
+  const translate = [];
+  c.TranslateTransform(1, 2, 3, translate);
+  const untranslate = [];
+  c.InvertTransform(translate, untranslate);
+  t.deepEqual(translate, [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    2,
+    3,
+    1,
+    '1 0 0 1 0 1 0 2 0 0 1 3 1',
+  ]);
+  t.deepEqual(untranslate, [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    -1,
+    -2,
+    -3,
+    1,
+    '1 0 0 -1 0 1 0 -2 0 0 1 -3 1',
+  ]);
+});
+
 test('[[2.55,7.45,5],[2.55,12.55,5]] normal [0, 0, 1]', (t) => {
   const segment = [
     [2.55, 7.45, 5],

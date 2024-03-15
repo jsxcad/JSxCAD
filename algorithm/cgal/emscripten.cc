@@ -451,7 +451,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("ConvexHull", &ConvexHull,
                        emscripten::allow_raw_pointers());
-  emscripten::function("ConvertPolygonsToMeshes", &ConvertPolygonsToMeshes, emscripten::allow_raw_pointers());
+  emscripten::function("ConvertPolygonsToMeshes", &ConvertPolygonsToMeshes,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
   emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());

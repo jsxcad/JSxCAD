@@ -474,7 +474,7 @@ const invertTransform = (a = identityMatrix) => {
 const fromRotateXToTransform = (turn) => {
   try {
     const transform = [];
-    getCgal().XTurnTransform(turn, transform);
+    getCgal().XTurnTransform(Number(turn), transform);
     return transform;
   } catch (error) {
     throw Error(error);
@@ -484,7 +484,7 @@ const fromRotateXToTransform = (turn) => {
 const fromRotateYToTransform = (turn) => {
   try {
     const transform = [];
-    getCgal().YTurnTransform(turn, transform);
+    getCgal().YTurnTransform(Number(turn), transform);
     return transform;
   } catch (error) {
     throw Error(error);
@@ -494,7 +494,7 @@ const fromRotateYToTransform = (turn) => {
 const fromRotateZToTransform = (turn) => {
   try {
     const transform = [];
-    getCgal().ZTurnTransform(turn, transform);
+    getCgal().ZTurnTransform(Number(turn), transform);
     return transform;
   } catch (error) {
     throw Error(error);

@@ -15,6 +15,10 @@ Press Control-E to cycle between editing and viewing a notebook.
 
 Jot allows CAD design as notebooks.
 
+![Image](index.md.$2_1.png)
+
+![Image](index.md.$2_2.png)
+
 ```JavaScript
 Assembly(
   Box(15, 10).offset(4).material('wood').ez([2]).as('base'),

@@ -3166,14 +3166,18 @@ const cut = (
   for (const toClip of toClips) {
     linearize(toClip, filterRemoves(noVoid), inputs);
   }
+  console.log(`QQ/cut/before: ${JSON.stringify(inputs)}`);
   const outputs = cut$1(inputs, count, open, exact);
+  console.log(`QQ/cut/after: ${JSON.stringify(inputs)}`);
   const ghosts = [];
   if (!noGhost) {
     for (let nth = count; nth < inputs.length; nth++) {
       ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
     }
   }
-  return Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
+  const results = Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
+  console.log(`QQ/cut/results: ${JSON.stringify(results)}`);
+  return results;
 };
 
 const cutFrom = (toClip, toCut, options) =>

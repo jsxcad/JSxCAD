@@ -1,17 +1,14 @@
-```JavaScript
-import { Text, readFont } from '@jsxcad/api-v1-font';
-```
+![Image](test.md.$1_1.png)
+
+![Image](test.md.$1_2.png)
+
+![Image](test.md.$1_3.png)
 
 ```JavaScript
-const unYetGul = 'https://jsxcad.js.org/ttf/UnYetgul.ttf';
-```
-
-```JavaScript
-const text = control('Engraving', '輝');
-```
-
-```JavaScript
-const model = Text(unYetGul, text, 25)
-  // .align('xy')
-  .cutFrom(Box(30, 26));
+Box(10)
+  .ez([1])
+  .view(1)
+  .rx(1 / 16)
+  .view(2)
+  .view(3, flat());
 ```

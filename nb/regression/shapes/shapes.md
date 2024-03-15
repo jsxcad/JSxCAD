@@ -313,6 +313,8 @@ Line([15, -15])
   .view();
 ```
 
+![Image](shapes.md.$27.png)
+
 ```JavaScript
 Line([15, -15])
   .seq({ from: -10, upto: 11 }, y, Group)
