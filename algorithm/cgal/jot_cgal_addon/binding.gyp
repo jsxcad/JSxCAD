@@ -3,7 +3,7 @@
     {
       'target_name': 'jot_cgal_addon-native',
       'sources': [ './jot_cgal_addon.cc' ],
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm", "/home/runner/boost/boost/boost"],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm", "/home/runner/boost/boost"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
 
       # 'cflags_cc': [ '-O3', '-DCGAL_USE_GLPK'],
