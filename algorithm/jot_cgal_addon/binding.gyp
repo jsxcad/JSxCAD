@@ -3,17 +3,16 @@
     {
       'target_name': 'jot_cgal_addon-native',
       'sources': [ './jot_cgal_addon.cc' ],
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm"],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "../cgal", "../glm"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
 
-      'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
       # 'cflags_cc': [ '-O3', '-DCGAL_USE_GLPK'],
       # 'cflags_cc': ['-fsanitize=address', '-g', '-DCGAL_USE_GLPK', '-fno-omit-frame-pointer'],
       # 'ldflags': ['-fsanitize=address'],
-
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
-      'cflags_cc': ['-DCGAL_USE_GLPK'],
 
+      'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
+      'cflags_cc': ['-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
       'xcode_settings': {
