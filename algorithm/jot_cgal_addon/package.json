@@ -7,7 +7,7 @@
     "test": "node --napi-modules ./test/test_binding.js"
   },
   "gypfile": true,
-  "name": "jot_cgal_addon",
+  "name": "@jsxcad/jot_cgal_addon",
   "version": "1.0.0",
   "description": "Node bindings for cgal in jot",
   "author": "",
