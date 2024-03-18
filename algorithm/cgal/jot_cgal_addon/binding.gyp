@@ -3,7 +3,7 @@
     {
       'target_name': 'jot_cgal_addon-native',
       'sources': [ './jot_cgal_addon.cc' ],
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm"],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm", "/home/runner/boost/boost"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
 
       # 'cflags_cc': [ '-O3', '-DCGAL_USE_GLPK'],
@@ -12,7 +12,7 @@
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
 
       'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
-      'cflags_cc': ['-DCGAL_USE_GLPK', '-I ~/boost/boost'],
+      'cflags_cc': ['-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
       'xcode_settings': {
