@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
+      - run: (cd algorithm/cgal; ./install_cgal.sh; ./install_eigen.sh; ./install_glpk.sh; ./install_gmp.sh; ./install_mpfr.sh)
       - run: npm run bootstrap
       - run: npm run depcheck
       - run: npm run lint
