@@ -26,7 +26,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       # - run: (set -x; export SHELLOPTS; cd algorithm/cgal; ./install_cgal.sh; ./install_eigen.sh; ./install_glpk.sh; ./install_gmp.sh; ./install_mpfr.sh)
-      - run: (set -x; export SHELLOPTS; cd algorithm/cgal; ./install_eigen.sh; ./install_glpk.sh; ./install_gmp.sh; ./install_mpfr.sh)
+      # - run: (set -x; export SHELLOPTS; cd algorithm/cgal; ./install_eigen.sh)
+      - run: (set -x; export SHELLOPTS; cd algorithm/cgal; ./install_glpk.sh)
+      - run: (set -x; export SHELLOPTS; cd algorithm/cgal; ./install_gmp.sh)
+      - run: (set -x; export SHELLOPTS; cd algorithm/cgal; ./install_mpfr.sh)
       - run: npm run bootstrap
       - run: npm run depcheck
       - run: npm run lint
