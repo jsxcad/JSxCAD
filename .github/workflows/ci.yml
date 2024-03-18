@@ -28,7 +28,7 @@ jobs:
         uses: MarkusJx/install-boost@v2.4.5
         with:
             boost_version: 1.84.0
-            boost_install_dir: /home/runner/boost
+            boost_install_dir: /home/runner
       - run: npm ci
       - run: (cd algorithm/cgal; ./install_cgal.sh)
       - run: (cd algorithm/cgal; ./install_eigen.sh)
