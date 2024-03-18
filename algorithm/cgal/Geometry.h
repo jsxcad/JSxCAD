@@ -208,7 +208,7 @@ class Geometry {
   }
 
   bool isExteriorPoint(size_t nth, const Point& point) {
-    return on_side(nth)(point) != CGAL::ON_UNBOUNDED_SIDE;
+    return on_side(nth)(point) == CGAL::ON_UNBOUNDED_SIDE;
   }
 
   bool has_gps(size_t nth) { return gps_[nth] != nullptr; }

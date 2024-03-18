@@ -502,8 +502,8 @@ static Napi::Value ComputeVolume(const Napi::CallbackInfo& info) {
   assertArgCount(info, 1);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  int status = ::ComputeVolume(geometry);
-  return Napi::Number::New(info.Env(), status);
+  double volume = ::ComputeVolume(geometry);
+  return Napi::Number::New(info.Env(), volume);
 }
 
 static Napi::Value ConvexHull(const Napi::CallbackInfo& info) {
@@ -724,8 +724,8 @@ static Napi::Value GenerateEnvelope(const Napi::CallbackInfo& info) {
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t envelope_type = info[1].As<Napi::Number>().Uint32Value();
   bool do_plan = info[2].As<Napi::Boolean>().Value();
-  bool do_project_faces = info[2].As<Napi::Boolean>().Value();
-  bool do_project_edges = info[3].As<Napi::Boolean>().Value();
+  bool do_project_faces = info[3].As<Napi::Boolean>().Value();
+  bool do_project_edges = info[4].As<Napi::Boolean>().Value();
   size_t status = ::GenerateEnvelope(geometry, envelope_type, do_plan, do_project_faces, do_project_edges);
   return Napi::Number::New(info.Env(), status);
 }
