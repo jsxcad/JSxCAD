@@ -376,6 +376,8 @@ Group(Box(1), Box(1).rx(1 / 4))
   .view();
 ```
 
+![Image](shapes.md.$33_1.png)
+
 ```JavaScript
 Orb(10)
   .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
@@ -389,17 +391,23 @@ Orb(10)
 Box(10).cut(Box(5)).ez([1, -1]).section().view();
 ```
 
+![Image](shapes.md.$35.png)
+
 ```JavaScript
 Box(10, 10, 20)
   .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
   .view();
 ```
 
+![Image](shapes.md.$36_3.png)
+
 ```JavaScript
 Box(10, 10, 20)
   .grow(2, Box(10, 10, [7, 10]))
   .view(3);
 ```
+
+![Image](shapes.md.$37_3.png)
 
 ```JavaScript
 Box(10, 10, 20)

@@ -1114,10 +1114,12 @@ static std::string serializeMesh(const Surface_mesh& mesh) {
   return s.str();
 }
 
+#if 0
 static std::string SerializeMesh(
     std::shared_ptr<const Surface_mesh> input_mesh) {
   return serializeMesh(*input_mesh);
 }
+#endif
 
 #include "Geometry.h"
 #include "queries.h"
@@ -1252,6 +1254,7 @@ static bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Inset.h"
 #include "Involute.h"
 #include "Iron.h"
+#include "IsExteriorPoint.h"
 #include "Join.h"
 #include "Link.h"
 #include "Loft.h"

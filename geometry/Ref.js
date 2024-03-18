@@ -35,7 +35,15 @@ export const Ref = (name, nx = 0, ny = 0, nz = 1, coordinate) => {
 
 export const ref = (geometry, name) => transform(Ref(name), geometry.matrix);
 
-const orZero = (v) => (v.length === 0 ? [0] : v);
+const orZero = (v) => {
+  const r = v.length === 0 ? [0] : v;
+  try {
+    r.map((x) => x);
+  } catch (e) {
+    console.log(e.stack);
+  }
+  return r;
+};
 
 export const X = (xs) =>
   Group(

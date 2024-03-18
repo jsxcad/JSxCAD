@@ -85,5 +85,6 @@ export { smooth } from './smooth.js';
 export { twist } from './twist.js';
 export { unfold } from './unfold.js';
 export { validate } from './validate.js';
-export { withAabbTreeQuery } from './aabbTreeQuery.js';
+// export { withAabbTreeQuery } from './aabbTreeQuery.js';
+export { withIsExteriorPoint } from './withIsExteriorPoint.js';
 export { wrap } from './wrap.js';

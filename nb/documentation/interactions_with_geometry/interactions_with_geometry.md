@@ -43,6 +43,8 @@ Arc(10).ez([1, 2], [-1, -2]).view();
 
 A plane (default XY(0)) to cast upon and a direction (default XY(1)) can be provided.
 
+![Image](interactions_with_geometry.md.$9.png)
+
 ```JavaScript
 Arc(4)
   .ez([10])
@@ -126,6 +128,8 @@ aDesign
 ---
 ### Grow
 Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
+
+![Image](interactions_with_geometry.md.$17.png)
 
 ```JavaScript
 Arc(10, 10, 5).grow(1).view();
@@ -211,6 +215,10 @@ shape.remesh(4, 2) first breaks segments longer than 4 and then breaks segments 
 At each step the shape is retriangulated to preserve manifold structure.
 
 Once a shape is remeshed it can be twisted or bent about the origin.
+
+![Image](interactions_with_geometry.md.$30.png)
+
+A rectangle bent into a ring with a central radius of 25
 
 ```JavaScript
 Box(157, 20)
@@ -394,6 +402,10 @@ Box(4).as('box').and(Arc(5).ez([10]).as('bar')).abstract();
 ---
 ### Voxels
 We can convert a volume into voxels at a given resolution.
+
+![Image](interactions_with_geometry.md.$52.png)
+
+Produce a voxel representation with a 1mm resolution
 
 ```JavaScript
 Box(11)

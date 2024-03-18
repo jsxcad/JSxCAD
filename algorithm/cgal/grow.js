@@ -8,9 +8,9 @@ export const grow = (inputs, count, { x = true, y = true, z = true } = {}) =>
     const status = g.Grow(
       cgalGeometry,
       Number(count),
-      Number(x),
-      Number(y),
-      Number(z)
+      Boolean(x),
+      Boolean(y),
+      Boolean(z)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

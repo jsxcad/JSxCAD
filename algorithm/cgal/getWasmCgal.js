@@ -1,7 +1,8 @@
-import { emit, isNode, log, onBoot } from '@jsxcad/sys';
+// import { emit, isNode, log, onBoot } from '@jsxcad/sys';
+import { emit, log, onBoot } from '@jsxcad/sys';
 
 import CgalBrowser from './cgal_browser.cjs';
-import CgalNode from './cgal_node.cjs';
+/// import CgalNode from './cgal_node.cjs';
 import hashSum from 'hash-sum';
 import { toPathnameFromUrl } from './toPathnameFromUrl.js';
 
@@ -9,7 +10,8 @@ let cgal;
 
 export const initCgal = async () => {
   if (cgal === undefined) {
-    const Cgal = isNode ? CgalNode : CgalBrowser;
+    // const Cgal = isNode ? CgalNode : CgalBrowser;
+    const Cgal = CgalBrowser;
     cgal = await Cgal({
       destroy(obj) {
         console.log(`QQ/cgal/destroy`);

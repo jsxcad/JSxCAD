@@ -38,9 +38,7 @@ export const cut = (
       ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
     }
   }
-  const results = Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
-  console.log(`QQ/cut/results: ${JSON.stringify(results)}`);
-  return results;
+  return Group([replacer(inputs, outputs, count)(toCut), ...ghosts]);
 };
 
 export const cutFrom = (toClip, toCut, options) =>

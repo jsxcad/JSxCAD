@@ -72,6 +72,12 @@ await Flat({ diameter, length: flatLength, thickness: flatThickness })
   .abstract();
 ```
 
+![Image](shaft.md.$3.png)
+
+import { Shaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
+
+Shaft({ diameter: 5, length: 10, play: 0.2 })
+
 ```JavaScript
 await Shaft({ diameter, length, play })
   .view()
@@ -79,6 +85,12 @@ await Shaft({ diameter, length, play })
   .note(`Shaft({ diameter: ${diameter}, length: ${length}, play: ${play} })`)
   .abstract();
 ```
+
+![Image](shaft.md.$4.png)
+
+import { FlatShaft } from 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/components/shaft.nb';
+
+FlatShaft({ diameter: 5, length: 10, flatLength: 5, flatThickness: 3, play: 0.2 })
 
 ```JavaScript
 await FlatShaft({

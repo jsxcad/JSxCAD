@@ -1,5 +1,5 @@
-![Image](test.md.$1_1.png)
+![Image](test.md.$1.png)
 
 ```JavaScript
-Group(Arc(4), Arc(4, [3, 4])).view(1)
+Orb(10).voxels().view();
 ```

@@ -3,6 +3,10 @@
 
 Projects shape onto the given plane at the given direction.
 
+![Image](shadow.md.$2_8.png)
+
+shadow() casts vertically onto XY(0).
+
 ```JavaScript
 Box([0, 10], 3, [0, 2])
   .cut(Box(1, 2, [0, 2]).x(0, 2, 4, 6, 8, 10))

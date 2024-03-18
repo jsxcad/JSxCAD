@@ -207,6 +207,10 @@ class Geometry {
     return *on_epick_sides_[nth];
   }
 
+  bool isExteriorPoint(size_t nth, const Point& point) {
+    return on_side(nth)(point) != CGAL::ON_UNBOUNDED_SIDE;
+  }
+
   bool has_gps(size_t nth) { return gps_[nth] != nullptr; }
 
   General_polygon_set_2& gps(size_t nth) {
@@ -544,7 +548,7 @@ class Geometry {
     }
   }
 
-  void transformToAbsoluteFrame() {
+  void transformToAbsoluteFrame(int tag = 0) {
     assert(is_local_frame());
     for (size_t nth = 0; nth < size(); nth++) {
       assert(nth < size());

@@ -373,7 +373,7 @@ static Napi::Value Bend(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  double reference_radius = info[2].As<Napi::Number>().DoubleValue();
+  double reference_radius = info[1].As<Napi::Number>().DoubleValue();
   int status = ::Bend(geometry, reference_radius);
   return Napi::Number::New(info.Env(), status);
 }
@@ -726,8 +726,6 @@ static Napi::Value GenerateEnvelope(const Napi::CallbackInfo& info) {
   bool do_plan = info[2].As<Napi::Boolean>().Value();
   bool do_project_faces = info[2].As<Napi::Boolean>().Value();
   bool do_project_edges = info[3].As<Napi::Boolean>().Value();
-  std::vector<int> strategies;
-  fill_strategies(info[3].As<Napi::Array>(), strategies);
   size_t status = ::GenerateEnvelope(geometry, envelope_type, do_plan, do_project_faces, do_project_edges);
   return Napi::Number::New(info.Env(), status);
 }
@@ -963,6 +961,25 @@ static Napi::Value Iron(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
+static Napi::Value IsExteriorPoint(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 4);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  double x = info[1].As<Napi::Number>().DoubleValue();
+  double y = info[2].As<Napi::Number>().DoubleValue();
+  double z = info[3].As<Napi::Number>().DoubleValue();
+  bool value = ::IsExteriorPoint(geometry, x, y, z);
+  return Napi::Boolean::New(info.Env(), value);
+}
+
+static Napi::Value IsExteriorPointPrepare(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 1);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  size_t status = ::IsExteriorPointPrepare2(geometry);
+  return Napi::Number::New(info.Env(), STATUS_OK);
+}
+
 static Napi::Value Join(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1005,7 +1022,7 @@ static Napi::Value MinimizeOverhang(const Napi::CallbackInfo& info) {
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double threshold = info[1].As<Napi::Number>().DoubleValue();
-  bool split = info[1].As<Napi::Boolean>().Value();
+  bool split = info[2].As<Napi::Boolean>().Value();
   int status = ::MinimizeOverhang(geometry, threshold, split);
   return Napi::Number::New(info.Env(), status);
 }
@@ -1312,6 +1329,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "InverseSegmentTransform"), Napi::Function::New(env, InverseSegmentTransform));
   exports.Set(Napi::String::New(env, "InvertTransform"), Napi::Function::New(env, InvertTransform));
   exports.Set(Napi::String::New(env, "Involute"), Napi::Function::New(env, Involute));
+  exports.Set(Napi::String::New(env, "IsExteriorPoint"), Napi::Function::New(env, IsExteriorPoint));
+  exports.Set(Napi::String::New(env, "IsExteriorPointPrepare"), Napi::Function::New(env, IsExteriorPointPrepare));
   exports.Set(Napi::String::New(env, "Join"), Napi::Function::New(env, Join));
   exports.Set(Napi::String::New(env, "Link"), Napi::Function::New(env, Link));
   exports.Set(Napi::String::New(env, "Loft"), Napi::Function::New(env, Loft));

@@ -437,6 +437,8 @@ Box(10).cut(Arc(6).x(6, -6), Box(1, 10))
   .view(54);
 ```
 
+![Image](shape.md.$56_60.png)
+
 ```JavaScript
 Box(20, 20, 20)
   .join(Box(10, 10, 40))
@@ -723,6 +725,8 @@ Box(10, 10, 10)
   )
   .view();
 ```
+
+![Image](shape.md.$86.png)
 
 ```JavaScript
 Arc(10, 10, 10, { sides: 7 })

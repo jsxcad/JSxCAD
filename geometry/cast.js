@@ -1,8 +1,8 @@
+import { XY } from './Ref.js';
 import { cast as castWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { taggedGroup } from './tagged/taggedGroup.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
@@ -13,14 +13,17 @@ const filterReferences = (geometry) =>
     geometry.type
   );
 
-export const cast = (planeReference, sourceReference, geometry) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
+export const cast = (
+  planeReference = XY([0]),
+  sourceReference = XY([1]),
+  geometry
+) => {
   const inputs = [];
-  linearize(toConcreteGeometry(planeReference), filterReferences, inputs);
+  linearize(planeReference, filterReferences, inputs);
   inputs.length = 1;
-  linearize(toConcreteGeometry(sourceReference), filterReferences, inputs);
+  linearize(sourceReference, filterReferences, inputs);
   inputs.length = 2;
-  linearize(concreteGeometry, filter, inputs);
+  linearize(geometry, filter, inputs);
   const outputs = castWithCgal(inputs);
   return taggedGroup({}, ...outputs);
 };

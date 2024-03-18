@@ -390,6 +390,7 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("addPolygonHole", &Geometry::addPolygonHole)
       .function("addPolygonHolePoint", &Geometry::addPolygonHolePoint)
       .function("addPolygonHolePointExact", &Geometry::addPolygonHolePointExact)
+      .function("isExteriorPoint", &Geometry::isExteriorPoint)
       // .function("convertPlanarMeshesToPolygons",
       // &Geometry::convertPlanarMeshesToPolygons)
       // .function("convertPolygonsToPlanarMeshes",
@@ -496,6 +497,10 @@ EMSCRIPTEN_BINDINGS(module) {
                        &wrapped::InverseSegmentTransform);
   emscripten::function("Involute", &Involute, emscripten::allow_raw_pointers());
   emscripten::function("Iron", &Iron, emscripten::allow_raw_pointers());
+  emscripten::function("IsExteriorPointPrepare", &IsExteriorPointPrepare,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("IsExteriorPoint", &IsExteriorPoint,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
   emscripten::function("Link", &Link, emscripten::allow_raw_pointers());
   emscripten::function("Loft", &Loft, emscripten::allow_raw_pointers());

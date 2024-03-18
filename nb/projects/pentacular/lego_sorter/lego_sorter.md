@@ -53,6 +53,8 @@ const wall = await wall1
   .view();
 ```
 
+![Image](lego_sorter.md.bentWall.png)
+
 ```JavaScript
 const bentWall = await wall
   .clip(Box(475, 50, 500))
