@@ -4,7 +4,7 @@
  tar xzvf glpk-5.0.tar.gz &&
  cd glpk-5.0 &&
  # emconfigure ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt &&
- ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt &&
+ ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt;
  make &&
  make install &&
  cd ..)
