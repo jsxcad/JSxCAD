@@ -12,7 +12,7 @@
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
 
       'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
-      'cflags_cc': ['-DCGAL_USE_GLPK'],
+      'cflags_cc': ['-DCGAL_USE_GLPK', '-I ~/boost/boost'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
       'xcode_settings': {
