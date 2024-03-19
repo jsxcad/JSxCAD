@@ -31,6 +31,7 @@ jobs:
       - run: (cd algorithm/cgal; ./install_glpk.sh)
       - run: (cd algorithm/cgal; ./install_gmp.sh)
       - run: (cd algorithm/cgal; ./install_mpfr.sh)
+      - run: (find /home/runner/opt -print)
       - run: (cd algorithm/cgal/jot_cgal_addon; npm install)
       - run: npm run bootstrap
       - run: npm run depcheck
