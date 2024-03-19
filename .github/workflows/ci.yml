@@ -27,6 +27,7 @@ jobs:
       - run: (sudo apt-get install libboost-all-dev)
       - run: npm ci
       - run: (cd algorithm/cgal; ./install_native.sh)
+      - run: (cd algorithm/cgal; find ./native -print)
       - run: (cd algorithm/cgal/jot_cgal_addon; npm install)
       - run: npm run bootstrap
       - run: npm run depcheck
