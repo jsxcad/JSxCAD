@@ -26,12 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: (sudo apt-get install libboost-all-dev)
       - run: npm ci
-      - run: (cd algorithm/cgal; ./install_cgal.sh)
-      - run: (cd algorithm/cgal; ./install_eigen.sh)
-      - run: (cd algorithm/cgal; ./install_glpk.sh)
-      - run: (cd algorithm/cgal; ./install_gmp.sh)
-      - run: (cd algorithm/cgal; ./install_mpfr.sh)
-      - run: (find /home/runner/opt -print)
+      - run: (cd algorithm/cgal; ./install_native.sh)
       - run: (cd algorithm/cgal/jot_cgal_addon; npm install)
       - run: npm run bootstrap
       - run: npm run depcheck
