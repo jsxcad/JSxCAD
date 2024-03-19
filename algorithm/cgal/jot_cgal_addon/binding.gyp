@@ -11,7 +11,7 @@
       # 'ldflags': ['-fsanitize=address'],
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
 
-      'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
+      'libraries': ['-L/home/runner/opt/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
       'cflags_cc': ['-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
