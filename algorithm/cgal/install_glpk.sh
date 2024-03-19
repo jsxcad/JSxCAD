@@ -6,6 +6,6 @@
  mkdir -p ${HOME}/opt &&
  # emconfigure ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt &&
  ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt;
- make &&
+ make CFLAGS="-fPIC -O2" &&
  make install &&
  cd ..)
