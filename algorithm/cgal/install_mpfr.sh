@@ -5,6 +5,6 @@
  # emconfigure ./configure --host none --prefix=${HOME}/opt --with-gmp=${HOME}/opt &&
  mkdir -p ${HOME}/opt &&
  ./configure --host none --prefix=${HOME}/opt --with-gmp=${HOME}/opt &&
- make &&
+ make CFLAGS="-Wall -Wmissing-prototypes -Wpointer-arith -g -O3 -ffloat-store -fPIC" &&
  make install &&
  cd ..)
