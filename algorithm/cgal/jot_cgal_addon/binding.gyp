@@ -11,7 +11,8 @@
       # 'ldflags': ['-fsanitize=address'],
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
 
-      'libraries': ['-L../native/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
+      # 'libraries': ['-L../native/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
+      'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a'],
       'cflags_cc': ['-fPIC', '-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
