@@ -1,7 +1,8 @@
 (rm -rf cgal &&
- git clone https://github.com/CGAL/cgal &&
+ git clone https://github.com/pentacular/cgal &&
  CGAL_HOME=${PWD}/cgal &&
  cd cgal &&
+ checkout isotropic_remesh_fix
  mkdir build &&
  cd build &&
  rm -f ../CMakeCache.txt &&
