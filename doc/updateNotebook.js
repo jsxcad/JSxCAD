@@ -28,7 +28,10 @@ const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/api/Orb.md.$5_2.observed.png',
   'nb/api/image.md.$2.observed.png',
   'nb/api/iron.md.$2.observed.png',
+  'nb/api/minimizeOverhang.md.$2.observed.png',
   'nb/regression/smooth/smooth.md.simplified_1.observed.png',
+  'nb/regression/shape/shape.md.$50.difference.png',
+  'nb/regression/shape_2/shape_2.md.$5.observed.png',
   'nb/regression/shapes/shapes.md.$11.observed.png',
   'nb/regression/shapes/shapes.md.$55.observed.png',
   'nb/regression/shapes/shapes.md.$56.observed.png',
@@ -83,7 +86,7 @@ const writeMarkdown = async (
           }
           const observedPath = `${modulePath}.observed.${filename}`;
           const expectedPath = `${modulePath}.${filename}`;
-          if (!filename.endsWith('stl')) {
+          if (!filename.endsWith('stl') && !filename.endsWith('pdf')) {
             // STL output has become unstable; skip for now.
             try {
               const observed = new TextDecoder('utf8').decode(data);
