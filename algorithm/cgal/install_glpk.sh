@@ -1,11 +1,12 @@
 (rm -rf glpk-5.0 &&
  # . emsdk/emsdk_env.sh &&
+ mkdir -p wasm &&
+ mkdir -p native &&
  wget http://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz &&
  tar xzvf glpk-5.0.tar.gz &&
  cd glpk-5.0 &&
- mkdir -p ${HOME}/opt &&
- # emconfigure ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt &&
- ./configure --disable-assembly --host none --enable-cxx --prefix=${HOME}/opt;
+ # emconfigure ./configure --disable-assembly --host none --enable-cxx --prefix=${PWD}/../wasm &&
+ ./configure --disable-assembly --host none --enable-cxx --prefix=${PWD}/../native;
  make CFLAGS="-fPIC -O2" &&
  make install &&
  cd ..)

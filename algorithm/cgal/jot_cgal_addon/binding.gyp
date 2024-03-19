@@ -3,7 +3,7 @@
     {
       'target_name': 'jot_cgal_addon-native',
       'sources': [ './jot_cgal_addon.cc' ],
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm", "/home/runner/opt/include"],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm", "../native/include"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
 
       # 'cflags_cc': [ '-O3', '-DCGAL_USE_GLPK'],
@@ -11,7 +11,7 @@
       # 'ldflags': ['-fsanitize=address'],
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
 
-      'libraries': ['-L/home/runner/opt/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
+      'libraries': ['-L../native/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
       'cflags_cc': ['-fPIC', '-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
