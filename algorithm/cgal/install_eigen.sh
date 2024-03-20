@@ -1,6 +1,5 @@
 (rm -rf eigen-3.3.9 &&
- rm -f Eigen &&
+ rm -rf Eigen &&
  wget -nc https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz &&
- gunzip eigen-3.3.9.tar.gz &&
- tar xvf eigen-3.3.9.tar;
+ tar xzvf eigen-3.3.9.tar.gz;
  mv eigen-3.3.9/Eigen .)

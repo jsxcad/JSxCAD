@@ -3,7 +3,7 @@
     {
       'target_name': 'jot_cgal_addon-native',
       'sources': [ './jot_cgal_addon.cc' ],
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm", "../native/include"],
+      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm/glm", "../native/include"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
 
       # 'cflags_cc': [ '-O3', '-DCGAL_USE_GLPK'],
@@ -12,7 +12,8 @@
       # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
 
       # 'libraries': ['-L../native/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
-      'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a'],
+      # 'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a'],
+      'libraries': ['-L../../native/lib'],
       'cflags_cc': ['-fPIC', '-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
