@@ -5,15 +5,10 @@
       'sources': [ './jot_cgal_addon.cc' ],
       'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "..", "../glm/glm", "../native/include"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
-
       # 'cflags_cc': [ '-O3', '-DCGAL_USE_GLPK'],
       # 'cflags_cc': ['-fsanitize=address', '-g', '-DCGAL_USE_GLPK', '-fno-omit-frame-pointer'],
       # 'ldflags': ['-fsanitize=address'],
-      # 'libraries': ['-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
-
-      # 'libraries': ['-L../native/lib', '-lglpk', '-lgmpxx', '-lmpfr', '-lgmp'],
-      # 'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a'],
-      'libraries': ['-L../../native/lib'],
+      'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a'],
       'cflags_cc': ['-fPIC', '-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,

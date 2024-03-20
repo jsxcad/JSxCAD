@@ -4,6 +4,7 @@ algorithm/cgal/CGAL-*
 algorithm/cgal/Eigen*
 algorithm/cgal/cgal*
 algorithm/cgal/emsdk*
+algorithm/cgal/glm*
 algorithm/cgal/gmp*
 algorithm/cgal/mpfr*
 algorithm/cgal/eigen*

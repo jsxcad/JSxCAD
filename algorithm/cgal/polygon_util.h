@@ -246,7 +246,7 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
         local_holes.push_back(hole);
       }
     }
-    // Remove nested holes.
+    // Remove holes within holes.
     if (local_holes.size() > 1) {
       std::vector<Polygon_2> distinct_holes;
       // FIX: Find a better way.
@@ -260,7 +260,9 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
           if (a == b) {
             continue;
           }
-          if (CGAL::do_intersect(local_holes[a], local_holes[b])) {
+          if (CGAL::do_intersect(local_holes[a], local_holes[b]) &&
+              local_holes[a].has_on_unbounded_side(local_holes[b][0])) {
+            // The polygons overlap, and a is inside b, so skip a.
             is_distinct = false;
             break;
           }
