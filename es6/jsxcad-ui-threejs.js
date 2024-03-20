@@ -1910,7 +1910,6 @@ const staticDisplay = async (
   page
 ) => {
   if (locked === true) await acquire();
-  console.log('QQ/static display: begin');
   locked = true;
 
   const datasets = [];
@@ -1967,7 +1966,6 @@ const staticDisplay = async (
 
   render();
 
-  console.log('QQ/static display: end');
   await release();
 
   return { canvas: displayCanvas, renderer };

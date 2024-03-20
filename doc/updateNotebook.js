@@ -235,20 +235,16 @@ export const updateNotebook = async (
       readCache: false,
       workspace,
     });
-    console.log(`QQ/updateNotebook/executed`);
     await resolvePending();
-    console.log(`QQ/updateNotebook/resolved`);
     sortNotebook(notebook);
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',
     });
-    console.log(`QQ/updateNotebook/screenshot`);
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
       { browser }
     );
-    console.log(`QQ/updateNotebook/standalone`);
     {
       // Build a version for jsxcad.js.org/nb/
       const { html } = await toStandaloneFromScript({
@@ -260,7 +256,6 @@ export const updateNotebook = async (
       });
       writeFileSync(`${target}.html`, html);
     }
-    console.log(`QQ/updateNotebook/markdown`);
     await writeMarkdown(
       target,
       encodedNotebook,
@@ -270,7 +265,6 @@ export const updateNotebook = async (
     );
     for (let nth = 0; nth < imageUrlList.length; nth++) {
       const { imageUrl, viewId = nth } = imageUrlList[nth];
-      console.log(`QQ/viewId: ${viewId}`);
       const pathViewId = viewId.replace(/[/]/g, '_');
       const observedPath = `${target}.md.${pathViewId}.observed.png`;
       const expectedPath = `${target}.md.${pathViewId}.png`;
@@ -332,7 +326,6 @@ export const updateNotebook = async (
     console.log(error.stack);
     throw error;
   } finally {
-    console.log(`QQ/updateNotebook/done`);
     removeOnEmitHandler(onEmitHandler);
     unwatchFileRead(fileReadWatcher);
   }
