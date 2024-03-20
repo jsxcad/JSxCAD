@@ -3,7 +3,7 @@ static int ComputeCentroid(Geometry* geometry) {
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         Point centroid;

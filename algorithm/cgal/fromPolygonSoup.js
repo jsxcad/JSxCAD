@@ -26,8 +26,8 @@ export const fromPolygonSoup = (
     }
     const status = g.FromPolygonSoup(
       cgalGeometry,
-      faceCountLimit,
-      minErrorDrop,
+      Number(faceCountLimit),
+      Number(minErrorDrop),
       generateRepairStrategyCodes(strategies)
     );
     switch (status) {

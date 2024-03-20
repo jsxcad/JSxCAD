@@ -1,11 +1,10 @@
-import { XY, cast as castGeometry } from '@jsxcad/geometry';
-
 import Shape from './Shape.js';
+import { cast as castGeometry } from '@jsxcad/geometry';
 
 export const shadow = Shape.registerMethod3(
   ['silhouette', 'shadow'],
   ['inputGeometry', 'geometry', 'geometry'],
-  (geometry, planeReference = XY(0), sourceReference = XY(1)) =>
+  (geometry, planeReference, sourceReference) =>
     castGeometry(planeReference, sourceReference, geometry)
 );
 

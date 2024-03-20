@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const seam = (inputs, count) =>
   withCgalGeometry('seam', inputs, (cgalGeometry, g) => {
-    const status = g.Seam(cgalGeometry, count);
+    const status = g.Seam(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by seam');

@@ -16,13 +16,13 @@ export const shell = (
   return withCgalGeometry('shell', inputs, (cgalGeometry, g) => {
     const status = g.Shell(
       cgalGeometry,
-      innerOffset,
-      outerOffset,
-      protect,
-      angle,
-      sizing,
-      approx,
-      edgeSize
+      Number(innerOffset),
+      Number(outerOffset),
+      Boolean(protect),
+      Number(angle),
+      Number(sizing),
+      Number(approx),
+      Number(edgeSize)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

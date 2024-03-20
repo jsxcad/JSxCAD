@@ -261,7 +261,8 @@ export const withCgalGeometry = (name, inputs, op) => {
   const g = getCgal();
   const cgalGeometry = toCgalGeometry(inputs, g);
   try {
-    return op(cgalGeometry, g);
+    const result = op(cgalGeometry, g);
+    return result;
   } catch (error) {
     console.log(`QQ/withCgalGeometry/error: ${name}`);
     console.log(error.stack);

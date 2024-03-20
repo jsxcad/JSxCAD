@@ -9,8 +9,12 @@
 #define EIGEN_DONT_VECTORIZE
 // #define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
 
+#include <CGAL/FPU.h>
+
 // Used in Deform, but it's unclear if this definition is correct.
+#ifndef FE_UNDERFLOW
 #define FE_UNDERFLOW 0
+#endif
 
 #include <CGAL/Aff_transformation_3.h>
 #include <CGAL/Arr_conic_traits_2.h>
@@ -777,12 +781,10 @@ static bool convertArrangementToPolygonsWithHolesEvenOdd(
       polygon_holes.push_back(std::move(polygon));
     }
 
-    if (!toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
-                                                   polygon_holes, out)) {
-      ok = false;
-    }
+    toSimplePolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
+                                                    polygon_holes, out);
   }
-  return ok;
+  return true;
 }
 
 template <typename Arrangement_2>
@@ -851,13 +853,11 @@ static bool convertArrangementToPolygonsWithHolesNonZero(
       polygon_holes.push_back(std::move(polygon));
     }
 
-    if (!toPolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
-                                                   polygon_holes, out)) {
-      ok = false;
-    }
+    toSimplePolygonsWithHolesFromBoundariesAndHoles(polygon_boundaries,
+                                                    polygon_holes, out);
   }
 
-  return ok;
+  return true;
 }
 
 template <typename Arrangement_2>
@@ -1114,10 +1114,12 @@ static std::string serializeMesh(const Surface_mesh& mesh) {
   return s.str();
 }
 
+#if 0
 static std::string SerializeMesh(
     std::shared_ptr<const Surface_mesh> input_mesh) {
   return serializeMesh(*input_mesh);
 }
+#endif
 
 #include "Geometry.h"
 #include "queries.h"
@@ -1252,6 +1254,7 @@ static bool SurfaceMeshSectionToPolygonsWithHoles(const Surface_mesh& mesh,
 #include "Inset.h"
 #include "Involute.h"
 #include "Iron.h"
+#include "IsExteriorPoint.h"
 #include "Join.h"
 #include "Link.h"
 #include "Loft.h"

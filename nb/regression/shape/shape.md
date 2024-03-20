@@ -204,7 +204,7 @@ Box(5)
   .gridView();
 ```
 
-length 1.0000000000000009x2.0000000000000018x3.0000000000000013
+length 1x2x3
 
 ```JavaScript
 Box(1, 2, 3).size('length', 'width', 'height', (length, width, height) => note(`length ${length}x${width}x${height}`));

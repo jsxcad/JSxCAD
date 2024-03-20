@@ -21,15 +21,15 @@ export const computeReliefFromImage = (
       cArray.set(data);
       const status = g.ComputeReliefFromImage(
         cgalGeometry,
-        x,
-        y,
-        z,
+        Number(x),
+        Number(y),
+        Number(z),
         cStorage,
-        angularBound,
-        radiusBound,
-        distanceBound,
-        errorBound,
-        extrusion
+        Number(angularBound),
+        Number(radiusBound),
+        Number(distanceBound),
+        Number(errorBound),
+        Number(extrusion)
       );
       switch (status) {
         case STATUS_ZERO_THICKNESS:

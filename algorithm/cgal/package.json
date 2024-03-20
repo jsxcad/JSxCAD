@@ -7,7 +7,7 @@
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,@babel/*' --ignore-patterns 'emsdk/**'",
+    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,@babel/*' --ignore-patterns 'emsdk/**,glm/**,cgal/**,emsdk/**,mpfr*/**,gmp*/**,[Ee]igen*/**,glpk*/**'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
@@ -41,6 +41,7 @@
     "rollup": "^2.51.2",
     "rollup-plugin-cjs-es": "^1.0.1",
     "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-hypothetical": "^2.1.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"

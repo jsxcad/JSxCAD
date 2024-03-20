@@ -1,4 +1,4 @@
-static int Twist(Geometry* geometry, double turnsPerMm) {
+static int Twist(Geometry* geometry, double turns_per_mm) {
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -18,7 +18,7 @@ static int Twist(Geometry* geometry, double turnsPerMm) {
         continue;
       }
       Point& point = mesh.point(vertex);
-      FT radians = CGAL::to_double(point.z()) * turnsPerMm * CGAL_PI;
+      FT radians = CGAL::to_double(point.z()) * turns_per_mm * CGAL_PI;
       RT sin_alpha, cos_alpha, w;
       CGAL::rational_rotation_approximation(CGAL::to_double(radians.exact()),
                                             sin_alpha, cos_alpha, w, RT(1),

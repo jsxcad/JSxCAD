@@ -9,7 +9,7 @@ export const unfold = (inputs, enableTabs = false) =>
     // Not sure that passing tags around like this is a sensible idea.
     const status = g.Unfold(
       cgalGeometry,
-      enableTabs,
+      Boolean(enableTabs),
       (nth, tag) => (tags[nth] = tag)
     );
     switch (status) {

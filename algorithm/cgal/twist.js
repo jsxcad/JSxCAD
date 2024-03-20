@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const twist = (inputs, targetsLength) =>
   withCgalGeometry('twist', inputs, (cgalGeometry, g) => {
-    const status = g.Twist(cgalGeometry, targetsLength);
+    const status = g.Twist(cgalGeometry, Number(targetsLength));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by twist');

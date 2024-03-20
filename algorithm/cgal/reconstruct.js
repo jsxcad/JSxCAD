@@ -9,7 +9,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const reconstruct = (inputs, offset = 0) =>
   withCgalGeometry('reconstruct', inputs, (cgalGeometry, g) => {
-    const status = g.Reconstruct(cgalGeometry, offset);
+    const status = g.Reconstruct(cgalGeometry, Number(offset));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by reconstruct');

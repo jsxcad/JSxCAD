@@ -15,11 +15,11 @@ export const computeImplicitVolume = (
     const status = g.ComputeImplicitVolume(
       cgalGeometry,
       op,
-      radius,
-      angularBound,
-      radiusBound,
-      distanceBound,
-      errorBound
+      Number(radius),
+      Number(angularBound),
+      Number(radiusBound),
+      Number(distanceBound),
+      Number(errorBound)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

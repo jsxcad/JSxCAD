@@ -1,3 +1,4 @@
+/*
 const profile = await Arc(1, { start: 0 / 4, end: 2 / 4 })
   .x(10)
   .and(Point(5, -2), Point(0.001, -2), Point(0.001, -1), Point(5, -1))
@@ -74,3 +75,4 @@ const baseWithPegHoles = await base
       .ez([-12])
   )
   .stl('base');
+*/

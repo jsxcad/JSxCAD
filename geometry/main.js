@@ -288,6 +288,6 @@ export { twist } from './twist.js';
 export { update } from './tagged/update.js';
 export { unfold } from './unfold.js';
 export { validate } from './validate.js';
-export { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
+// export { withAabbTreeQuery } from '@jsxcad/algorithm-cgal';
 export { Wrap, wrap } from './wrap.js';
 export { write, writeNonblocking } from './tagged/write.js';

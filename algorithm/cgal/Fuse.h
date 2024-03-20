@@ -10,7 +10,7 @@ static int Fuse(Geometry* geometry, bool exact) {
 
   {
     int target = -1;
-    for (int nth = 0; nth < size; nth++) {
+    for (size_t nth = 0; nth < size; nth++) {
       if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
         continue;
       }
@@ -21,16 +21,8 @@ static int Fuse(Geometry* geometry, bool exact) {
       }
       if (geometry->noOverlap3(target, nth)) {
         geometry->mesh(target).join(geometry->mesh(nth));
-      } else if (exact) {
-        Surface_mesh cutMeshCopy(geometry->mesh(nth));
-        if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                CGAL::parameters::all_default(),
-                CGAL::parameters::all_default(),
-                CGAL::parameters::all_default())) {
-          return STATUS_ZERO_THICKNESS;
-        }
-      } else {
+#ifdef JOT_MANIFOLD_ENABLED
+      } else if (!exact) {
         // TODO: Optimize out unnecessary conversions.
         manifold::Manifold target_manifold;
         buildManifoldFromSurfaceMesh(geometry->mesh(target), target_manifold);
@@ -40,6 +32,16 @@ static int Fuse(Geometry* geometry, bool exact) {
         geometry->mesh(target).clear();
         geometry->mesh(target).collect_garbage();
         buildSurfaceMeshFromManifold(target_manifold, geometry->mesh(target));
+#endif
+      } else {
+        Surface_mesh cutMeshCopy(geometry->mesh(nth));
+        if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default(),
+                CGAL::parameters::all_default())) {
+          return STATUS_ZERO_THICKNESS;
+        }
       }
       geometry->updateBounds3(target);
     }
@@ -49,19 +51,19 @@ static int Fuse(Geometry* geometry, bool exact) {
   }
 
   int first_gps = geometry->size();
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     if (!geometry->is_polygons(nth)) {
       continue;
     }
-    int target = -1;
-    int end = geometry->size();
-    for (int test = first_gps; test < end; test++) {
+    size_t target = -1U;
+    size_t end = geometry->size();
+    for (size_t test = first_gps; test < end; test++) {
       if (geometry->plane(nth) == geometry->plane(test)) {
         target = test;
         break;
       }
     }
-    if (target == -1) {
+    if (target == -1U) {
       target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
       geometry->plane(target) = geometry->plane(nth);
       geometry->setIdentityTransform(target);
@@ -70,11 +72,11 @@ static int Fuse(Geometry* geometry, bool exact) {
     geometry->updateBounds2(target);
   }
 
-  for (int target = -1, nth = 0; nth < size; nth++) {
+  for (size_t target = -1, nth = 0; nth < size; nth++) {
     if (!geometry->has_segments(nth)) {
       continue;
     }
-    if (target == -1) {
+    if (target == -1U) {
       target = geometry->add(GEOMETRY_SEGMENTS);
       geometry->setIdentityTransform(target);
     }
@@ -83,11 +85,11 @@ static int Fuse(Geometry* geometry, bool exact) {
     }
   }
 
-  for (int target = -1, nth = 0; nth < size; nth++) {
+  for (size_t target = -1U, nth = 0; nth < size; nth++) {
     if (!geometry->has_points(nth)) {
       continue;
     }
-    if (target == -1) {
+    if (target == -1U) {
       target = geometry->add(GEOMETRY_POINTS);
       geometry->setIdentityTransform(target);
     }

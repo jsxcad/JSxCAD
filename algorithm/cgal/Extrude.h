@@ -14,7 +14,7 @@ static int Extrude(Geometry* geometry, size_t count) {
   Vector up = Point(0, 0, 0).transform(top) - Point(0, 0, 0);
   Vector down = Point(0, 0, 0).transform(bottom) - Point(0, 0, 0);
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         const Surface_mesh& mesh = geometry->mesh(nth);

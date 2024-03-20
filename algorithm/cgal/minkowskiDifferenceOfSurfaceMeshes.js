@@ -10,7 +10,7 @@ export const minkowskiDifferenceOfSurfaceMeshes = (
     getCgal().MinkowskiDifferenceOfSurfaceMeshes(
       mesh,
       meshTransform,
-      offset,
+      Number(offset),
       offsetTransform
     );
   } catch (error) {

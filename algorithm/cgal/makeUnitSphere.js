@@ -7,9 +7,9 @@ export const makeUnitSphere = (angularBound, radiusBound, distanceBound) =>
   withCgalGeometry('makeUnitSphere', [], (cgalGeometry, g) => {
     const status = g.MakeUnitSphere(
       cgalGeometry,
-      angularBound,
-      radiusBound,
-      distanceBound
+      Number(angularBound),
+      Number(radiusBound),
+      Number(distanceBound)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

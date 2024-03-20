@@ -11,7 +11,13 @@ export const offset = (
   segments = 16
 ) =>
   withCgalGeometry('offset', inputs, (cgalGeometry, g) => {
-    const status = g.Offset(cgalGeometry, initial, step, limit, segments);
+    const status = g.Offset(
+      cgalGeometry,
+      Number(initial),
+      Number(step),
+      Number(limit),
+      Number(segments)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by offset');

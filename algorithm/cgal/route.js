@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const route = (inputs, toolCount) =>
   withCgalGeometry('route', inputs, (cgalGeometry, g) => {
-    const status = g.Route(cgalGeometry, toolCount);
+    const status = g.Route(cgalGeometry, Number(toolCount));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by route');

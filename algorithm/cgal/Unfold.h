@@ -17,7 +17,7 @@ static int Unfold(Geometry* geometry, bool enable_tabs,
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         CGAL::Polyhedron_3<CGAL::Simple_cartesian<double>> polyhedron;

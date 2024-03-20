@@ -1,5 +1,5 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, invertTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, outline as outline$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withAabbTreeQuery, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
-export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, withAabbTreeQuery } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, invertTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, outline as outline$1, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygons as fromPolygons$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-material.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-color.js';
 import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending, log as log$1 } from './jsxcad-sys.js';
@@ -3212,7 +3212,15 @@ const Ref = (name, nx = 0, ny = 0, nz = 1, coordinate) => {
 
 const ref = (geometry, name) => transform(Ref(name), geometry.matrix);
 
-const orZero = (v) => (v.length === 0 ? [0] : v);
+const orZero = (v) => {
+  const r = v.length === 0 ? [0] : v;
+  try {
+    r.map((x) => x);
+  } catch (e) {
+    console.log(e.stack);
+  }
+  return r;
+};
 
 const X$6 = (xs) =>
   Group(
@@ -4338,8 +4346,7 @@ const Disjoint = (geometries, { backward, exact }) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$y, inputs);
   }
-  // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
-  const outputs = disjoint$1(inputs, backward, exact);
+  const outputs = disjoint$1(inputs, backward === true, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
   for (const concreteGeometry of concreteGeometries) {
@@ -4608,14 +4615,17 @@ const filterReferences = (geometry) =>
     geometry.type
   );
 
-const cast = (planeReference, sourceReference, geometry) => {
-  const concreteGeometry = toConcreteGeometry(geometry);
+const cast = (
+  planeReference = XY([0]),
+  sourceReference = XY([1]),
+  geometry
+) => {
   const inputs = [];
-  linearize(toConcreteGeometry(planeReference), filterReferences, inputs);
+  linearize(planeReference, filterReferences, inputs);
   inputs.length = 1;
-  linearize(toConcreteGeometry(sourceReference), filterReferences, inputs);
+  linearize(sourceReference, filterReferences, inputs);
   inputs.length = 2;
-  linearize(concreteGeometry, filter$v, inputs);
+  linearize(geometry, filter$v, inputs);
   const outputs = cast$1(inputs);
   return taggedGroup({}, ...outputs);
 };
@@ -5640,13 +5650,12 @@ const toVoxelsFromGeometry = (geometry, resolution = 1) => {
   const min = floorPoint(boxMin, resolution);
   const max = ceilPoint(boxMax, resolution);
   const polygons = [];
-  withAabbTreeQuery(
+  withIsExteriorPoint(
     linearize(geometry, ({ type }) =>
       ['graph', 'polygonsWithHoles'].includes(type)
     ),
-    (query) => {
-      const isInteriorPoint = (x, y, z) =>
-        query.isIntersectingPointApproximate(x, y, z);
+    (isExteriorPoint) => {
+      const isInteriorPoint = (x, y, z) => !isExteriorPoint(x, y, z);
       for (let x = min[X$1] - offset; x <= max[X$1] + offset; x += resolution) {
         for (let y = min[Y$1] - offset; y <= max[Y$1] + offset; y += resolution) {
           for (let z = min[Z$1] - offset; z <= max[Z$1] + offset; z += resolution) {
@@ -5760,9 +5769,8 @@ const samplePointCloud = (geometries, resolution = 1) => {
   const min = floorPoint(boxMin, resolution);
   const max = ceilPoint(boxMax, resolution);
   const points = [];
-  withAabbTreeQuery(inputs, (query) => {
-    const isInteriorPoint = (x, y, z) =>
-      query.isIntersectingPointApproximate(x, y, z);
+  withIsExteriorPoint(inputs, (isExteriorPoint) => {
+    const isInteriorPoint = (x, y, z) => !isExteriorPoint(x, y, z);
     for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
       for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
         for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {

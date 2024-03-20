@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Geometry.h"
@@ -187,3 +188,4 @@ class SurfaceMeshQuery {
   std::unique_ptr<Inside_tester> inside_tester_;
   bool is_volume_;
 };
+*/

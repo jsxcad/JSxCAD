@@ -5,7 +5,11 @@ import { ErrorZeroThickness } from './error.js';
 
 export const minimizeOverhang = (inputs, threshold, split = false) =>
   withCgalGeometry('minimizeOverhang', inputs, (cgalGeometry, g) => {
-    const status = g.MinimizeOverhang(cgalGeometry, threshold, split);
+    const status = g.MinimizeOverhang(
+      cgalGeometry,
+      Number(threshold),
+      Boolean(split)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by overhang');

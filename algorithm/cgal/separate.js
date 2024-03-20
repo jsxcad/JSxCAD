@@ -12,9 +12,9 @@ export const separate = (
   withCgalGeometry('separate', inputs, (cgalGeometry, g) => {
     const status = g.Separate(
       cgalGeometry,
-      keepShapes,
-      keepHolesInShapes,
-      keepHolesAsShapes
+      Boolean(keepShapes),
+      Boolean(keepHolesInShapes),
+      Boolean(keepHolesAsShapes)
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

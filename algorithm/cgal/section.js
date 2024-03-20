@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const section = (inputs, count) =>
   withCgalGeometry('section', inputs, (cgalGeometry, g) => {
-    const status = g.Section(cgalGeometry, count);
+    const status = g.Section(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');

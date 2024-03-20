@@ -167,7 +167,7 @@ static int Loft(Geometry* geometry, bool close) {
 
   std::vector<Polylines_with_holes> layers;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     Polylines_with_holes layer;
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {

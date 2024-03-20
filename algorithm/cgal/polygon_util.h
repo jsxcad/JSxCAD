@@ -181,7 +181,7 @@ static void simplifyPolygon(Polygon_2& polygon,
     std::cout << "QQ/polygon was not cleared" << std::endl;
   }
 
-  for (const auto simple_polygon : simple_polygons) {
+  for (const auto& simple_polygon : simple_polygons) {
     if (!simple_polygon.is_simple()) {
       std::cout
           << "QQ/simplifyPolygon produced non-simple polygon in simple_polygons"
@@ -246,24 +246,33 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
         local_holes.push_back(hole);
       }
     }
-    // Remove nested holes.
+    // Remove holes within holes.
     if (local_holes.size() > 1) {
       std::vector<Polygon_2> distinct_holes;
+      // FIX: Find a better way.
+      // Turn all of the holes outside in.
       for (size_t a = 0; a < local_holes.size(); a++) {
-        const typename Polygon_2::Point_2& representative_point =
-            local_holes[a][0];
+        local_holes[a].reverse_orientation();
+      }
+      for (size_t a = 0; a < local_holes.size(); a++) {
         bool is_distinct = true;
         for (size_t b = 0; b < local_holes.size(); b++) {
           if (a == b) {
             continue;
           }
-          if (local_holes[b].has_on_negative_side(representative_point)) {
+          if (CGAL::do_intersect(local_holes[a], local_holes[b]) &&
+              local_holes[a].has_on_unbounded_side(local_holes[b][0])) {
+            // The polygons overlap, and a is inside b, so skip a.
             is_distinct = false;
             break;
           }
-          if (is_distinct) {
-            distinct_holes.push_back(local_holes[a]);
-          }
+        }
+        if (is_distinct) {
+          distinct_holes.push_back(local_holes[a]);
+        }
+        // Then turn them back inside out.
+        for (size_t a = 0; a < distinct_holes.size(); a++) {
+          distinct_holes[a].reverse_orientation();
         }
       }
       pwhs.emplace_back(boundary, distinct_holes.begin(), distinct_holes.end());

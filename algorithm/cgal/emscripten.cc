@@ -162,6 +162,17 @@ static int EachTriangle(Geometry* geometry, emscripten::val emit_point) {
   return STATUS_OK;
 }
 
+static int FromPolygonSoup(Geometry* geometry, int face_count,
+                           double min_error_drop,
+                           emscripten::val js_strategies) {
+  std::vector<int> strategies;
+  size_t length = js_strategies["length"].as<int>();
+  for (size_t nth = 0; nth < length; nth++) {
+    strategies.push_back(js_strategies[nth].as<int>());
+  }
+  return ::FromPolygonSoup(geometry, face_count, min_error_drop, strategies);
+}
+
 static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
                           emscripten::val& js_exact_plane) {
   js_plane = js_plane.array();
@@ -182,17 +193,6 @@ static void fill_js_plane(const Plane& plane, emscripten::val& js_plane,
   js_plane.set(2, emscripten::val(zd / ld));
   js_plane.set(3, emscripten::val(wd));
   js_exact_plane = emscripten::val(exact.str());
-}
-
-static int FromPolygonSoup(Geometry* geometry, int face_count,
-                           double min_error_drop,
-                           emscripten::val js_strategies) {
-  std::vector<int> strategies;
-  size_t length = js_strategies["length"].as<int>();
-  for (size_t nth = 0; nth < length; nth++) {
-    strategies.push_back(js_strategies[nth].as<int>());
-  }
-  return ::FromPolygonSoup(geometry, face_count, min_error_drop, strategies);
 }
 
 static int GetPolygonsWithHoles(Geometry* geometry, int nth,
@@ -390,33 +390,23 @@ EMSCRIPTEN_BINDINGS(module) {
       .function("addPolygonHole", &Geometry::addPolygonHole)
       .function("addPolygonHolePoint", &Geometry::addPolygonHolePoint)
       .function("addPolygonHolePointExact", &Geometry::addPolygonHolePointExact)
-      .function("convertPlanarMeshesToPolygons",
-                &Geometry::convertPlanarMeshesToPolygons)
-      .function("convertPolygonsToPlanarMeshes",
-                &Geometry::convertPolygonsToPlanarMeshes)
-      .function("copyInputMeshesToOutputMeshes",
-                &Geometry::copyInputMeshesToOutputMeshes)
+      .function("isExteriorPoint", &Geometry::isExteriorPoint)
       .function("deserializeInputMesh", &Geometry::deserializeInputMesh)
       .function("finishPolygon", &Geometry::finishPolygon)
       .function("finishPolygonHole", &Geometry::finishPolygonHole)
-      .function("getInputMesh", &Geometry::getMesh)
       .function("getMesh", &Geometry::getMesh)
       .function("getOrigin", &Geometry::getOrigin)
-      .function("getSerializedInputMesh", &Geometry::getSerializedInputMesh)
       .function("getSerializedMesh", &Geometry::getSerializedMesh)
       .function("getSize", &Geometry::getSize)
       .function("getType", &Geometry::getType)
       .function("has_mesh", &Geometry::has_mesh)
-      .function("print", &Geometry::print)
       .function("setTestMode", &Geometry::setTestMode)
       .function("setInputMesh", &Geometry::setInputMesh)
       .function("setPolygonsPlane", &Geometry::setPolygonsPlane)
       .function("setPolygonsPlaneExact", &Geometry::setPolygonsPlaneExact)
       .function("setSize", &Geometry::setSize)
       .function("setTransform", &Geometry::setTransform)
-      .function("setType", &Geometry::setType)
-      .function("transformToAbsoluteFrame",
-                &Geometry::transformToAbsoluteFrame);
+      .function("setType", &Geometry::setType);
 
   emscripten::class_<Surface_mesh>("Surface_mesh")
       .smart_ptr<std::shared_ptr<const Surface_mesh>>("Surface_mesh");
@@ -455,7 +445,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Cut", &Cut, emscripten::allow_raw_pointers());
   emscripten::function("Deform", &Deform, emscripten::allow_raw_pointers());
   emscripten::function("Demesh", &Demesh, emscripten::allow_raw_pointers());
-  emscripten::function("DeserializeMesh", &DeserializeMesh);
   emscripten::function("DilateXY", &DilateXY, emscripten::allow_raw_pointers());
   emscripten::function("Disjoint", &wrapped::Disjoint,
                        emscripten::allow_raw_pointers());
@@ -495,6 +484,10 @@ EMSCRIPTEN_BINDINGS(module) {
                        &wrapped::InverseSegmentTransform);
   emscripten::function("Involute", &Involute, emscripten::allow_raw_pointers());
   emscripten::function("Iron", &Iron, emscripten::allow_raw_pointers());
+  emscripten::function("IsExteriorPointPrepare", &IsExteriorPointPrepare,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("IsExteriorPoint", &IsExteriorPoint,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Join", &Join, emscripten::allow_raw_pointers());
   emscripten::function("Link", &Link, emscripten::allow_raw_pointers());
   emscripten::function("Loft", &Loft, emscripten::allow_raw_pointers());
@@ -517,7 +510,6 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Seam", &Seam, emscripten::allow_raw_pointers());
   emscripten::function("Section", &Section, emscripten::allow_raw_pointers());
   emscripten::function("Separate", &Separate, emscripten::allow_raw_pointers());
-  emscripten::function("SerializeMesh", &SerializeMesh);
   emscripten::function("SetTransform", &wrapped::SetTransform,
                        emscripten::allow_raw_pointers());
   emscripten::function("Shell", &Shell, emscripten::allow_raw_pointers());

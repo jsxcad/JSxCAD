@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const link = (inputs, close, reverse) =>
   withCgalGeometry('link', inputs, (cgalGeometry, g) => {
-    const status = g.Link(cgalGeometry, close, reverse);
+    const status = g.Link(cgalGeometry, Boolean(close), Boolean(reverse));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by link');

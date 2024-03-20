@@ -10,7 +10,7 @@ export const minkowskiSumOfSurfaceMeshes = (
     getCgal().MinkowskiSumOfSurfaceMeshes(
       mesh,
       meshTransform,
-      offset,
+      Number(offset),
       offsetTransform
     );
   } catch (error) {

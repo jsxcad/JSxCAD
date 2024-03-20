@@ -20,8 +20,7 @@ export const Disjoint = (geometries, { backward, exact }) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter, inputs);
   }
-  // console.log(`QQ/disjoint/inputs: ${JSON.stringify(inputs)}`);
-  const outputs = disjointWithCgal(inputs, backward, exact);
+  const outputs = disjointWithCgal(inputs, backward === true, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
   for (const concreteGeometry of concreteGeometries) {

@@ -5,7 +5,13 @@ import { ErrorZeroThickness } from './error.js';
 
 export const grow = (inputs, count, { x = true, y = true, z = true } = {}) =>
   withCgalGeometry('grow', inputs, (cgalGeometry, g) => {
-    const status = g.Grow(cgalGeometry, count, x, y, z);
+    const status = g.Grow(
+      cgalGeometry,
+      Number(count),
+      Boolean(x),
+      Boolean(y),
+      Boolean(z)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by grow');

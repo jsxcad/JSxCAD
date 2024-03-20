@@ -5,20 +5,22 @@ import {
   ScrewThreadSegment,
 } from './bolt.nb';
 
-await ScrewThreadSegment(20).material('steel').view().note(`ScrewThreadSegment(20)`);
+// await ScrewThreadSegment(20).material('steel').view().note(`ScrewThreadSegment(20)`);
 
-await ScrewThread(20, 10).material('steel').view().note(`ScrewThread(20, 10)`);
+// await ScrewThread(20, 10).material('steel').view().note(`ScrewThread(20, 10)`);
 
-await NutThreadSegment(20).material('steel').view().note(`NutThreadSegment(20)`);
+// await NutThreadSegment(20).material('steel').view().note(`NutThreadSegment(20)`);
 
-await NutThread(20, 10).material('steel').view().note(`NutThread(20, 10)`);
+// await NutThread(20, 10).material('steel').view().note(`NutThread(20, 10)`);
 
+/*
 await NutThreadSegment(20, { play: 0.1 })
   .color('orange')
   .and(ScrewThreadSegment(20, { play: 0.1 }).color('blue'))
   .clip(Box([0, 10], [0, 10], [0, 10]))
   .view()
   .note(`NutThread(20, 10).and(ScrewThread(20, 10))`);
+*/
 
 /*
 ScrewThreadSegment(20, { turn: 'right' })

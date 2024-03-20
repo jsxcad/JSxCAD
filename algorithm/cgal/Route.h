@@ -9,7 +9,7 @@
 
 // Simulates running a vertically oriented router along each segment.
 
-static int Route(Geometry* geometry, int tool_count) {
+static int Route(Geometry* geometry, size_t tool_count) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -22,7 +22,7 @@ static int Route(Geometry* geometry, int tool_count) {
 
   // Handle concave tools.
   std::vector<Surface_mesh> tools;
-  for (int nth = 0; nth < tool_count; nth++) {
+  for (size_t nth = 0; nth < tool_count; nth++) {
     const Surface_mesh& tool = geometry->mesh(nth);
     CGAL::Nef_polyhedron_3<Epeck_kernel> nef(tool);
     CGAL::convex_decomposition_3(nef);
@@ -60,7 +60,7 @@ static int Route(Geometry* geometry, int tool_count) {
     segments.push_back(pair);
   };
 
-  for (int nth = tool_count; nth < size; nth++) {
+  for (size_t nth = tool_count; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
         for (const auto& segment : geometry->segments(nth)) {
@@ -95,7 +95,7 @@ static int Route(Geometry* geometry, int tool_count) {
     Transformation xt = translate_to(target);
 
     for (const auto& tool : tools) {
-      int result = geometry->add(GEOMETRY_MESH);
+      size_t result = geometry->add(GEOMETRY_MESH);
       Surface_mesh& output = geometry->mesh(result);
       std::list<Point> points;
       for (const auto vertex : tool.vertices()) {

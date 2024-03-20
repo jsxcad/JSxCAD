@@ -43,7 +43,7 @@ export const invertTransform = (a = identityMatrix) => {
 export const fromRotateXToTransform = (turn) => {
   try {
     const transform = [];
-    getCgal().XTurnTransform(turn, transform);
+    getCgal().XTurnTransform(Number(turn), transform);
     return transform;
   } catch (error) {
     throw Error(error);
@@ -53,7 +53,7 @@ export const fromRotateXToTransform = (turn) => {
 export const fromRotateYToTransform = (turn) => {
   try {
     const transform = [];
-    getCgal().YTurnTransform(turn, transform);
+    getCgal().YTurnTransform(Number(turn), transform);
     return transform;
   } catch (error) {
     throw Error(error);
@@ -63,7 +63,7 @@ export const fromRotateYToTransform = (turn) => {
 export const fromRotateZToTransform = (turn) => {
   try {
     const transform = [];
-    getCgal().ZTurnTransform(turn, transform);
+    getCgal().ZTurnTransform(Number(turn), transform);
     return transform;
   } catch (error) {
     throw Error(error);
@@ -76,7 +76,7 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
       throw Error(`Non-finite ${[x, y, z]}`);
     }
     const transform = [];
-    getCgal().TranslateTransform(x, y, z, transform);
+    getCgal().TranslateTransform(Number(x), Number(y), Number(z), transform);
     return transform;
   } catch (error) {
     throw Error(error);

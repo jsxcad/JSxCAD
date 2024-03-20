@@ -3,7 +3,7 @@ static int ComputeNormal(Geometry* geometry) {
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         Vector normal;

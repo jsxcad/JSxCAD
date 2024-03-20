@@ -1,10 +1,10 @@
-static int Bend(Geometry* geometry, double referenceRadius) {
+static int Bend(Geometry* geometry, double reference_radius) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
 
-  const FT referencePerimeterMm = 2 * CGAL_PI * referenceRadius;
-  const FT referenceRadiansPerMm = 2 / referencePerimeterMm;
+  const FT reference_perimeter_mm = 2 * CGAL_PI * reference_radius;
+  const FT reference_radians_per_mm = 2 / reference_perimeter_mm;
 
   for (int nth = 0; nth < size; nth++) {
     if (!geometry->is_mesh(nth)) {
@@ -22,7 +22,7 @@ static int Bend(Geometry* geometry, double referenceRadius) {
       const FT ly = point.y();
       const FT radius = ly;
       const FT radians =
-          (0.50 * CGAL_PI) - (lx * referenceRadiansPerMm * CGAL_PI);
+          (0.50 * CGAL_PI) - (lx * reference_radians_per_mm * CGAL_PI);
       RT sin_alpha, cos_alpha, w;
       CGAL::rational_rotation_approximation(CGAL::to_double(radians), sin_alpha,
                                             cos_alpha, w, RT(1), RT(1000));

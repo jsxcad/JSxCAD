@@ -5,7 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const loft = (inputs, close = true) =>
   withCgalGeometry('loft', inputs, (cgalGeometry, g) => {
-    const status = g.Loft(cgalGeometry, close);
+    const status = g.Loft(cgalGeometry, Boolean(close));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by loft');

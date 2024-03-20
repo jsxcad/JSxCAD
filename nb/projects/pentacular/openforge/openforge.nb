@@ -1,3 +1,4 @@
+/*
 const Base = (l = SIZE, w = SIZE) =>
   Box(l, w)
     .op(Loft(inset(1), z(1)), cut(inset(1)).ez([1, 6 + 1]))
@@ -175,3 +176,4 @@ const top3x3 = Top(SIZE * 3 - 0.2, SIZE * 3 - 0.2)
   .join(Connector().x(SIZE, 0, -SIZE).y(SIZE, 0, -SIZE))
   .cut(base3x3.z(-7.1))
   .stl('top3x3');
+*/

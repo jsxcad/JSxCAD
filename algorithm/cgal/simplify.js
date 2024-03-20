@@ -7,9 +7,9 @@ export const simplify = (inputs, cornerThreshold, eps) =>
   withCgalGeometry('simplify', inputs, (cgalGeometry, g) => {
     const status = g.Simplify(
       cgalGeometry,
-      cornerThreshold,
+      Number(cornerThreshold),
       eps !== undefined,
-      eps || 0,
+      Number(eps) || 0,
       false
     );
     switch (status) {

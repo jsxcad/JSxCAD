@@ -7,14 +7,23 @@ static int Validate(Geometry* geometry, const std::vector<int>& strategies) {
 
   bool isValid = true;
 
-  for (int nth = 0; nth < size; nth++) {
+  for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->type(nth)) {
       case GEOMETRY_MESH: {
         const Surface_mesh& mesh = geometry->input_mesh(nth);
         if (!validate(mesh, strategies)) {
           isValid = false;
         }
+        break;
       }
+      case GEOMETRY_POLYGONS_WITH_HOLES:
+      case GEOMETRY_SEGMENTS:
+      case GEOMETRY_POINTS:
+      case GEOMETRY_EMPTY:
+      case GEOMETRY_REFERENCE:
+      case GEOMETRY_EDGES:
+      case GEOMETRY_UNKNOWN:
+        break;
     }
   }
 
