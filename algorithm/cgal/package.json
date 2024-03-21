@@ -7,7 +7,7 @@
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
-    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,@babel/*' --ignore-patterns 'emsdk/**,glm/**,cgal/**,emsdk/**,mpfr*/**,gmp*/**,[Ee]igen*/**,glpk*/**'",
+    "depcheck": "depcheck --ignores '@jsxcad/eslint*,eslint*,@babel/*' --ignore-patterns 'emsdk/**,glm/**,cgal/**,emsdk/**,mpfr*/**,gmp*/**,[Ee]igen*/**,glpk*/**,manifold*/**'",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",

@@ -7,6 +7,7 @@ algorithm/cgal/emsdk*
 algorithm/cgal/glm*
 algorithm/cgal/gmp*
 algorithm/cgal/mpfr*
+algorithm/cgal/manifold*
 algorithm/cgal/eigen*
 algorithm/threejs/*
 dist

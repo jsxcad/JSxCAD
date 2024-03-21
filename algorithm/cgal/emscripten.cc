@@ -1,5 +1,7 @@
 #include <emscripten/bind.h>
 
+#define JOT_MANIFOLD_ENABLE
+
 #include "cgal.h"
 #include "convert.h"
 
