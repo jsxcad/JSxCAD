@@ -1,5 +1,7 @@
 #include <napi.h>
 
+#define JOT_MANIFOLD_ENABLED
+
 #include "cgal.h"
 #include "Geometry.h"
 

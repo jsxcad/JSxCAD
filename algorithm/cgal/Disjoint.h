@@ -27,7 +27,7 @@ static int disjointBackward(Geometry* geometry,
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-#if JOT_MANIFOLD_ENABLED
+#ifdef JOT_MANIFOLD_ENABLED
               if (!exact) {
                 // TODO: Optimize out unnecessary conversions.
                 manifold::Manifold target_manifold;

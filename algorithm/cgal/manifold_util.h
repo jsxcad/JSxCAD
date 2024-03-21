@@ -34,9 +34,6 @@ static void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
     manifold_mesh.triVerts[facet] = std::move(t);
   }
   manifold = manifold::Manifold(manifold_mesh);
-  if (!manifold.IsManifold()) {
-    std::cout << "Not manifold" << std::endl;
-  }
 }
 
 void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
