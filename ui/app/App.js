@@ -41,6 +41,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Make from './Make.js';
 import Notebook from './Notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
@@ -1526,6 +1527,11 @@ class App extends React.Component {
               </Card>
             </div>
           );
+        }
+        case 'Make': {
+          const { workspace } = this.props;
+          const { View = {} } = this.state;
+          return <Make path={View.path} workspace={workspace}></Make>;
         }
         case 'Notebook': {
           const path = this.Notebook.getSelectedPath();

@@ -1,12 +1,20 @@
 const EPSILON = 1e-5;
-const SEQ_KEYS = ['downto', 'from', 'to', 'by', 'end', 'upto'];
+const SEQ_KEYS = ['downto', 'from', 'steps', 'to', 'by', 'end', 'upto'];
 
 export const seq = (...specs) => {
   const indexes = [];
   for (const spec of specs) {
-    const { from = 0, to = 1, by = 1, upto, downto } = spec;
+    let { from = 0, to = 1, by = 1, steps, upto, downto } = spec;
 
     let consider;
+
+    if (steps !== undefined) {
+      if (upto === undefined && downto === undefined) {
+        by = (to - from) / steps;
+      } else {
+        by = ((upto || downto) - from) / (steps - 1);
+      }
+    }
 
     if (by > 0) {
       if (upto === undefined) {

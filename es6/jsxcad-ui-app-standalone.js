@@ -3927,7 +3927,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.32.7";
+exports.version = "1.32.9";
 
 });
 
@@ -13798,6 +13798,14 @@ var EditSession = /** @class */ (function () {
             return [screenColumn, column];
         };
     };
+    EditSession.prototype.getPrecedingCharacter = function () {
+        var pos = this.selection.getCursor();
+        if (pos.column === 0) {
+            return pos.row === 0 ? "" : this.doc.getNewLineCharacter();
+        }
+        var currentLine = this.getLine(pos.row);
+        return currentLine[pos.column - 1];
+    };
     EditSession.prototype.destroy = function () {
         if (!this.destroyed) {
             this.bgTokenizer.setDocument(null);
@@ -21552,14 +21560,14 @@ var VirtualRenderer = /** @class */ (function () {
             var el = this.container;
             var height = el.getBoundingClientRect().height;
             var ghostTextHeight = textLines.length * this.lineHeight;
-            var fitsY = ghostTextHeight < height - pixelPosition.top;
+            var fitsY = ghostTextHeight < (height - pixelPosition.top);
             if (fitsY)
                 return;
             if (ghostTextHeight < height) {
                 this.scrollBy(0, (textLines.length - 1) * this.lineHeight);
             }
             else {
-                this.scrollBy(0, pixelPosition.top);
+                this.scrollToRow(insertPosition.row);
             }
         }
     };
@@ -33874,6 +33882,338 @@ const ButtonGroup = /*#__PURE__*/x(({
 });
 ButtonGroup.displayName = 'ButtonGroup';
 
+/* global WebSocket */
+
+class FluidNcMachine {
+  constructor(address) {
+    this.address = address;
+    this.queries = new Set();
+    this.decoder = new TextDecoder();
+    this.encoder = new TextEncoder();
+    this.grbl = {
+      stateName: '',
+      message: '',
+      wco: [0, 0, 0],
+      mpos: [0, 0, 0],
+      wpos: [0, 0, 0],
+      feedrate: 0,
+      spindle: undefined,
+      spindleSpeed: 0,
+      ovr: [0, 0, 0],
+      lineNumber: 0,
+      flood: undefined,
+      mist: undefined,
+      pins: undefined
+    };
+    this.grblStatusListeners = new Set();
+    this.runQueue = [];
+  }
+  wait(ms) {
+    return new Promise((resolve, reject) => setTimeout(resolve, ms));
+  }
+  async ensureWebSocket() {
+    if (this.webSocket) {
+      return this.webSocket;
+    }
+    const webSocket = new WebSocket(`ws://${this.address}:81/`);
+    webSocket.binaryType = 'arraybuffer';
+    webSocket.onmessage = ({
+      data
+    }) => {
+      let line;
+      if (data instanceof ArrayBuffer) {
+        line = this.decoder.decode(data);
+      } else {
+        line = data;
+      }
+      console.log(line);
+      for (const query of [...this.queries]) {
+        query(line);
+      }
+      if (line.startsWith('<')) {
+        console.log(JSON.stringify(this.parseGrblStatus(line, this.grbl)));
+        for (const listener of [...this.grblStatusListeners]) {
+          listener(this.grbl);
+        }
+      }
+    };
+    webSocket.onclose = () => {
+      this.webSocket = null;
+    };
+    await new Promise((resolve, reject) => {
+      webSocket.onopen = resolve;
+    });
+    this.webSocket = webSocket;
+  }
+  async start() {
+    if (this.did_start) {
+      return;
+    }
+    this.did_start = true;
+    await this.ensureWebSocket();
+  }
+  parseGrblStatus(response, grbl) {
+    let isMposDirty = false;
+    let isWposDirty = false;
+    response = response.replace('<', '').replace('>', '');
+    for (const field of response.split('|')) {
+      const [tag, value] = field.split(':');
+      switch (tag) {
+        case 'Door':
+          grbl.stateName = tag;
+          grbl.message = field;
+          break;
+        case 'Hold':
+          grbl.stateName = tag;
+          grbl.message = field;
+          break;
+        case 'Run':
+        case 'Jog':
+        case 'Idle':
+        case 'Home':
+        case 'Alarm':
+        case 'Check':
+        case 'Sleep':
+          grbl.stateName = tag;
+          break;
+        case 'Ln':
+          grbl.lineNumber = parseInt(value);
+          break;
+        case 'MPos':
+          grbl.mpos = value.split(',').map(function (v) {
+            return parseFloat(v);
+          });
+          isMposDirty = true;
+          break;
+        case 'WPos':
+          grbl.wpos = value.split(',').map(function (v) {
+            return parseFloat(v);
+          });
+          isWposDirty = true;
+          break;
+        case 'WCO':
+          grbl.wco = value.split(',').map(function (v) {
+            return parseFloat(v);
+          });
+          break;
+        case 'FS':
+          {
+            const rates = value.split(',');
+            grbl.feedrate = parseFloat(rates[0]);
+            grbl.spindleSpeed = parseInt(rates[1]);
+            break;
+          }
+        case 'Ov':
+          {
+            const rates = value.split(',');
+            grbl.ovr = {
+              feed: parseInt(rates[0]),
+              rapid: parseInt(rates[1]),
+              spindle: parseInt(rates[2])
+            };
+            break;
+          }
+        case 'A':
+          grbl.spindleDirection = 'M5';
+          for (const v of value) {
+            switch (v) {
+              case 'S':
+                grbl.spindleDirection = 'M3';
+                break;
+              case 'C':
+                grbl.spindleDirection = 'M4';
+                break;
+              case 'F':
+                grbl.flood = true;
+                break;
+              case 'M':
+                grbl.mist = true;
+                break;
+            }
+          }
+          break;
+        case 'SD':
+          {
+            const sdinfo = value.split(',');
+            grbl.sdPercent = parseFloat(sdinfo[0]);
+            grbl.sdName = sdinfo[1];
+            break;
+          }
+        case 'Pn':
+          // pin status
+          grbl.pins = value;
+          break;
+      }
+    }
+    if (isMposDirty) {
+      const [mx, my, mz] = grbl.mpos;
+      const [ox, oy, oz] = grbl.wco;
+      grbl.wpos = [mx - ox, my - oy, mz - oz];
+    }
+    if (isWposDirty) {
+      const [wx, wy, wz] = grbl.wpos;
+      const [ox, oy, oz] = grbl.wco;
+      grbl.mpos = [wx + ox, wy + oy, wz + oz];
+    }
+    return grbl;
+  }
+  pauseGrblStatusUpdates() {
+    this.setReportInterval(0);
+  }
+  resumeGrblStatusUpdates() {
+    this.setReportInterval(500);
+  }
+  addGrblStatusListener(listener) {
+    if (this.grblStatusListeners.size === 0) {
+      this.resumeGrblStatusUpdates();
+    }
+    this.grblStatusListeners.add(listener);
+  }
+  removeGrblStatusListener(listener) {
+    this.grblStatusListeners.delete(listener);
+    if (this.grblStatusListeners.size === 0) {
+      this.pauseGrblStatusUpdates();
+    }
+  }
+  async runAcquire() {
+    return new Promise((resolve, reject) => {
+      this.runQueue.push(resolve);
+      if (this.runQueue.length === 1) {
+        resolve();
+      }
+    });
+  }
+  runRelease() {
+    this.runQueue.shift();
+    if (this.runQueue.length > 0) {
+      // Resolve the next runAcquire promise to let the next one through.
+      const resolve = this.runQueue[0];
+      resolve();
+    }
+  }
+  async runStatus() {
+    await this.runAcquire();
+    return new Promise((resolve, reject) => {
+      const op = data => {
+        const lines = data.split('\r\n');
+        const line = lines[0];
+        console.log(`QQ/status: line=[${line}]`);
+        if (line === 'ok') {
+          resolve(line);
+          this.queries.delete(op);
+          this.runRelease();
+          return true;
+        } else if (line.startsWith('error:')) {
+          reject(line);
+          this.queries.delete(op);
+          this.runRelease();
+          return true;
+        } else {
+          return false;
+        }
+      };
+      this.queries.add(op);
+    });
+  }
+  async uploadStatus() {
+    return new Promise((resolve, reject) => {
+      const op = data => {
+        const lines = data.split('\r\n');
+        const line = lines[0];
+        console.log(`QQ/status: line=[${line}]`);
+        if (line === '[MSG:Files changed]') {
+          resolve(line);
+          this.queries.delete(op);
+          return true;
+        } else if (line.startsWith('[MSG:ERR')) {
+          reject(line);
+          this.queries.delete(op);
+          return true;
+        } else {
+          return false;
+        }
+      };
+      this.queries.add(op);
+    });
+  }
+  async upload(filename, data) {
+    try {
+      await this.start();
+      await this.pauseGrblStatusUpdates();
+      // Give time for the status update buffers to drain?
+      await this.wait(1000);
+      const formData = new FormData();
+      formData.append('path', `/${filename}`);
+      formData.append(`/${filename}S`, data.length);
+      formData.append('myfile[]', new Blob([data], {
+        type: 'text/plain'
+      }), `/${filename}`);
+      const status = this.uploadStatus();
+      await fetch(`http://${this.address}/upload`, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      });
+      await status;
+      // Give time for the upload buffers to drain?
+      await this.wait(1000);
+      await this.resumeGrblStatusUpdates();
+    } catch (error) {
+      throw error;
+    }
+  }
+  async run(commandText) {
+    try {
+      await this.start();
+      const status = this.runStatus();
+      console.log(`QQ/run: commandText=${commandText}`);
+      await fetch(`http://${this.address}/command?${new URLSearchParams({
+        commandText
+      })}`, {
+        method: 'POST',
+        body: '',
+        mode: 'no-cors'
+      });
+      return status;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async realtime(commandText) {
+    try {
+      await this.start();
+      await fetch(`http://${this.address}/command?${new URLSearchParams({
+        commandText
+      })}`, {
+        method: 'POST',
+        body: '',
+        mode: 'no-cors'
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+  async home() {
+    await this.run('$H');
+  }
+  async pause() {
+    await this.realtime('!');
+  }
+  async reboot() {
+    await this.realtime('$Bye');
+  }
+  async resume() {
+    await this.realtime('~');
+  }
+  async reset() {
+    await this.realtime('\x18');
+  }
+  async setReportInterval(ms) {
+    await this.run(`$Report/Interval=${ms}`);
+  }
+}
+const cnc = new FluidNcMachine('192.168.31.195');
+
 /*
  * base64-arraybuffer 1.0.2 <https://github.com/niklasvh/base64-arraybuffer>
  * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
@@ -33933,6 +34273,25 @@ const downloadFile = async ({
   });
   saveAs(blob, filename);
 };
+const runGcode = async ({
+  filename,
+  path,
+  data,
+  type,
+  workspace
+}) => {
+  if (path && !data) {
+    data = await readOrWatch(path, {
+      workspace
+    });
+  }
+  console.log(`QQ/runCode/upload`);
+  await cnc.upload('tmp.gcode', data);
+  console.log(`QQ/runCode/run`);
+  await cnc.run(`G54`); // Use the first coordinate system.
+  await cnc.run(`$SD/Run=tmp.gcode`);
+  console.log(`QQ/runCode/run/done`);
+};
 class DownloadNote extends ReactDOM$1.PureComponent {
   static get propTypes() {
     return {
@@ -33981,6 +34340,79 @@ class DownloadNote extends ReactDOM$1.PureComponent {
       }), v$1("path", {
         d: "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
       })), ' ', filename));
+      if (filename.endsWith('.gcode')) {
+        buttons.push(v$1(Button, {
+          onClick: event => runGcode({
+            event,
+            filename,
+            path,
+            data,
+            type,
+            workspace
+          })
+        }, v$1("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          class: "bi bi-upload",
+          viewBox: "0 0 16 16"
+        }, v$1("path", {
+          d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
+        }), v$1("path", {
+          d: "M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"
+        }))));
+        buttons.push(v$1(Button, {
+          onClick: event => cnc.home()
+        }, v$1("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          class: "bi bi-house",
+          viewBox: "0 0 16 16"
+        }, v$1("path", {
+          d: "M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
+        }))));
+        buttons.push(v$1(Button, {
+          onClick: event => cnc.pause()
+        }, v$1("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          class: "bi bi-pause",
+          viewBox: "0 0 16 16"
+        }, v$1("path", {
+          d: "M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"
+        }))));
+        buttons.push(v$1(Button, {
+          onClick: event => cnc.resume()
+        }, v$1("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          class: "bi bi-caret-right",
+          viewBox: "0 0 16 16"
+        }, v$1("path", {
+          d: "M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"
+        }))));
+        buttons.push(v$1(Button, {
+          onClick: event => cnc.reset()
+        }, v$1("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          class: "bi bi-bootstrap-reboot",
+          viewBox: "0 0 16 16"
+        }, v$1("path", {
+          d: "M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 1 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.8 6.8 0 0 0 1.16 8z"
+        }), v$1("path", {
+          d: "M6.641 11.671V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352zm0-3.75V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324z"
+        }))));
+      }
     }
     const ref = selected && /*#__PURE__*/p$1();
     return v$1(ButtonGroup, {

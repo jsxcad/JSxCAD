@@ -22,19 +22,18 @@ test('Simple', async (t) => {
   );
   t.is(
     new TextDecoder('utf8').decode(code),
-    `
-G21
-G90
-M3
-F100
-S50
-G1 X1 Y2 Z3
-G1 X4 Y5 Z6
-G0 Z1
-G1 Z6
-M5
-G0 Z1
-G0 X0 Y0
+    `\r
+G21\r
+G90\r
+M3\r
+F100\r
+S50\r
+G1 X1 Y2 Z3\r
+G1 X4 Y5 Z6\r
+G0 Z1\r
+G1 Z6\r
+M5\r
+G0 Z1\r
 `
   );
 });

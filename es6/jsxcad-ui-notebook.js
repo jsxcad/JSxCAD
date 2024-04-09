@@ -53,7 +53,7 @@ function _toPrimitive(t, r) {
 }
 function _toPropertyKey(t) {
   var i = _toPrimitive(t, "string");
-  return "symbol" == typeof i ? i : String(i);
+  return "symbol" == typeof i ? i : i + "";
 }
 function _defineProperty(obj, key, value) {
   key = _toPropertyKey(key);
