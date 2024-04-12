@@ -42064,7 +42064,7 @@ var ListGroup$1 = Object.assign(ListGroup, {
 
 /* global WebSocket */
 
-class FluidNcMachine {
+class EspWebUiBridge {
   constructor(address) {
     this.address = address;
     this.queries = new Set();
@@ -42359,6 +42359,12 @@ class FluidNcMachine {
       throw error;
     }
   }
+  async uploadAndRun(data) {
+    await this.upload('tmp.gcode', data);
+    await this.run(`G54`); // Use the first coordinate system.
+    await this.run(`$SD/Run=tmp.gcode`);
+    console.log(`QQ/runCode/run/done`);
+  }
   async realtime(commandText) {
     try {
       await this.start();
@@ -42392,16 +42398,31 @@ class FluidNcMachine {
     await this.run(`$Report/Interval=${ms}`);
   }
 }
-const cnc = new FluidNcMachine('192.168.31.195');
+const espWebUiBridges = new Map();
+const getCnc = config => {
+  switch (config.type) {
+    case 'EspWebUi':
+      {
+        const {
+          ip
+        } = config;
+        if (!espWebUiBridges.has(ip)) {
+          espWebUiBridges.set(ip, new EspWebUiBridge(ip));
+        }
+        return espWebUiBridges.get(ip);
+      }
+  }
+};
 
-class Make extends ReactDOM$3.PureComponent {
+class MakeEspWebUi extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
+      ip: propTypes$2.exports.string,
       path: propTypes$2.exports.string,
       workspace: propTypes$2.exports.string
     };
   }
-  constructor() {
+  constructor(props) {
     super();
     this.cpos = [0, 0, undefined];
     this.cposRef = /*#__PURE__*/p$1();
@@ -42410,36 +42431,40 @@ class Make extends ReactDOM$3.PureComponent {
     this.statusRef = /*#__PURE__*/p$1();
     this.toolRef = /*#__PURE__*/p$1();
     this.wposRef = /*#__PURE__*/p$1();
+    this.cnc = getCnc({
+      type: 'EspWebUi',
+      ip: props.ip
+    });
   }
   componentWillUnmount() {
     if (this.listener) {
-      cnc.removeGrblStatusListener(this.listener);
+      this.cnc.removeGrblStatusListener(this.listener);
     }
   }
   componentDidMount() {
     this.listener = grbl => this.updateStatus(grbl);
-    cnc.addGrblStatusListener(this.listener);
+    this.cnc.addGrblStatusListener(this.listener);
   }
   updateStatus(grbl) {
     if (this.statusRef.current) {
       this.statusRef.current.innerText = JSON.stringify(grbl);
     }
     if (this.toolRef.current) {
-      const [mx, my] = cnc.grbl.mpos;
+      const [mx, my] = this.cnc.grbl.mpos;
       this.toolRef.current.setAttribute('cx', mx);
       this.toolRef.current.setAttribute('cy', my);
-      if (cnc.grbl.spindleSpeed === 0) {
+      if (this.cnc.grbl.spindleSpeed === 0) {
         this.toolRef.current.setAttribute('fill', 'black');
       } else {
         this.toolRef.current.setAttribute('fill', 'red');
       }
     }
     if (this.mposRef.current) {
-      const [mx, my, mz] = cnc.grbl.mpos;
+      const [mx, my, mz] = this.cnc.grbl.mpos;
       this.mposRef.current.innerText = `${mx} ${my} ${mz}`;
     }
     if (this.wposRef.current) {
-      const [wx, wy, wz] = cnc.grbl.mpos;
+      const [wx, wy, wz] = this.cnc.grbl.mpos;
       this.wposRef.current.innerText = `${wx} ${wy} ${wz}`;
     }
   }
@@ -42462,13 +42487,16 @@ class Make extends ReactDOM$3.PureComponent {
   }
   async zeroWorkCoordinatesAtCursor() {
     // Zero the first coordinate system at this offset.
-    await cnc.run('G10L20P1X0Y0Z0');
+    await this.cnc.run('G10L20P1X0Y0Z0');
   }
   async jogToCursor() {
     // Jog in machine coordinates.
-    await cnc.run(`$Jog=G53G91${this.getCposCode()}F5000`);
+    await this.cnc.run(`$Jog=G53G91${this.getCposCode()}F5000`);
   }
   render() {
+    const {
+      ip
+    } = this.props;
     const setCpos = e => {
       if (e.key !== 'enter' && e.key !== 'j' && e.key !== 'w') {
         return;
@@ -42493,7 +42521,7 @@ class Make extends ReactDOM$3.PureComponent {
           break;
       }
     };
-    const result = v$1("div", null, "Machine position", v$1("div", {
+    const result = v$1("div", null, "IP Address", v$1("div", null, ip), "Machine position", v$1("div", {
       id: "make/mpos",
       ref: this.mposRef
     }, "0 0 0"), "Work position", v$1("div", {
@@ -42531,7 +42559,7 @@ class Make extends ReactDOM$3.PureComponent {
       id: "make/svg/cursor",
       d: "M -5 0 L 5 0 M 0 -5 L 0 5"
     }))))), v$1("br", null), v$1(ButtonGroup, null, v$1(Button, {
-      onClick: event => cnc.home()
+      onClick: event => this.cnc.home()
     }, v$1("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
@@ -42542,7 +42570,7 @@ class Make extends ReactDOM$3.PureComponent {
     }, v$1("path", {
       d: "M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
     }))), v$1(Button, {
-      onClick: event => cnc.pause()
+      onClick: event => this.cnc.pause()
     }, v$1("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
@@ -42553,7 +42581,7 @@ class Make extends ReactDOM$3.PureComponent {
     }, v$1("path", {
       d: "M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"
     }))), v$1(Button, {
-      onClick: event => cnc.resume()
+      onClick: event => this.cnc.resume()
     }, v$1("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
@@ -42564,7 +42592,7 @@ class Make extends ReactDOM$3.PureComponent {
     }, v$1("path", {
       d: "M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"
     }))), v$1(Button, {
-      onClick: event => cnc.reset()
+      onClick: event => this.cnc.reset()
     }, v$1("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
@@ -42579,9 +42607,9 @@ class Make extends ReactDOM$3.PureComponent {
     }))), v$1(Button, {
       onClick: () => this.jogToCursor()
     }, "jog"), v$1(Button, {
-      onClick: () => cnc.run('$Jog=G91X-10F5000')
+      onClick: () => this.cnc.run('$Jog=G91X-10F5000')
     }, "l"), v$1(Button, {
-      onClick: () => cnc.run('$Jog=G91X10F5000')
+      onClick: () => this.cnc.run('$Jog=G91X10F5000')
     }, "r")), v$1("div", {
       ref: this.statusRef
     }));
@@ -44111,29 +44139,11 @@ const downloadFile = async ({
   });
   saveAs(blob, filename);
 };
-const runGcode = async ({
-  filename,
-  path,
-  data,
-  type,
-  workspace
-}) => {
-  if (path && !data) {
-    data = await readOrWatch(path, {
-      workspace
-    });
-  }
-  console.log(`QQ/runCode/upload`);
-  await cnc.upload('tmp.gcode', data);
-  console.log(`QQ/runCode/run`);
-  await cnc.run(`G54`); // Use the first coordinate system.
-  await cnc.run(`$SD/Run=tmp.gcode`);
-  console.log(`QQ/runCode/run/done`);
-};
 class DownloadNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
       download: propTypes$2.exports.object,
+      runGcode: propTypes$2.exports.func,
       selected: propTypes$2.exports.boolean,
       style: propTypes$2.exports.object,
       workspace: propTypes$2.exports.string
@@ -44142,6 +44152,7 @@ class DownloadNote extends ReactDOM$3.PureComponent {
   render() {
     const {
       download,
+      runGcode,
       selected,
       style = {},
       workspace
@@ -44180,11 +44191,11 @@ class DownloadNote extends ReactDOM$3.PureComponent {
       })), ' ', filename));
       if (filename.endsWith('.gcode')) {
         buttons.push(v$1(Button, {
-          onClick: event => runGcode({
-            event,
-            filename,
+          onClick: e => runGcode({
+            e,
             path,
             data,
+            filename,
             type,
             workspace
           })
@@ -44199,56 +44210,6 @@ class DownloadNote extends ReactDOM$3.PureComponent {
           d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
         }), v$1("path", {
           d: "M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"
-        }))));
-        buttons.push(v$1(Button, {
-          onClick: event => cnc.home()
-        }, v$1("svg", {
-          xmlns: "http://www.w3.org/2000/svg",
-          width: "16",
-          height: "16",
-          fill: "currentColor",
-          class: "bi bi-house",
-          viewBox: "0 0 16 16"
-        }, v$1("path", {
-          d: "M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
-        }))));
-        buttons.push(v$1(Button, {
-          onClick: event => cnc.pause()
-        }, v$1("svg", {
-          xmlns: "http://www.w3.org/2000/svg",
-          width: "16",
-          height: "16",
-          fill: "currentColor",
-          class: "bi bi-pause",
-          viewBox: "0 0 16 16"
-        }, v$1("path", {
-          d: "M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"
-        }))));
-        buttons.push(v$1(Button, {
-          onClick: event => cnc.resume()
-        }, v$1("svg", {
-          xmlns: "http://www.w3.org/2000/svg",
-          width: "16",
-          height: "16",
-          fill: "currentColor",
-          class: "bi bi-caret-right",
-          viewBox: "0 0 16 16"
-        }, v$1("path", {
-          d: "M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"
-        }))));
-        buttons.push(v$1(Button, {
-          onClick: event => cnc.reset()
-        }, v$1("svg", {
-          xmlns: "http://www.w3.org/2000/svg",
-          width: "16",
-          height: "16",
-          fill: "currentColor",
-          class: "bi bi-bootstrap-reboot",
-          viewBox: "0 0 16 16"
-        }, v$1("path", {
-          d: "M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 1 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.8 6.8 0 0 0 1.16 8z"
-        }), v$1("path", {
-          d: "M6.641 11.671V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352zm0-3.75V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324z"
         }))));
       }
     }
@@ -47260,6 +47221,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
       note: propTypes$2.exports.object,
       notebookPath: propTypes$2.exports.string,
       onClickView: propTypes$2.exports.func,
+      runGcode: propTypes$2.exports.func,
       selected: propTypes$2.exports.boolean,
       workspace: propTypes$2.exports.string
     };
@@ -47269,6 +47231,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
       notebookPath,
       note,
       onClickView,
+      runGcode,
       workspace
     } = this.props;
     const {
@@ -47301,6 +47264,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
       downloadNote = v$1(DownloadNote, {
         key: note.hash,
         download: download,
+        runGcode: runGcode,
         workspace: workspace
       });
     }
@@ -47325,6 +47289,7 @@ class Section extends ReactDOM$3.PureComponent {
       onClickView: propTypes$2.exports.func,
       onKeyDown: propTypes$2.exports.func,
       path: propTypes$2.exports.string,
+      runGcode: propTypes$2.exports.func,
       section: propTypes$2.exports.object,
       workspace: propTypes$2.exports.string
     };
@@ -47337,6 +47302,7 @@ class Section extends ReactDOM$3.PureComponent {
         onChange,
         onClickView,
         onKeyDown,
+        runGcode,
         section,
         workspace
       } = this.props;
@@ -47348,6 +47314,7 @@ class Section extends ReactDOM$3.PureComponent {
       const downloads = section.downloads.map(note => v$1(DownloadNote, {
         key: note.hash,
         download: note.download,
+        runGcode: runGcode,
         workspace: workspace
       }));
       const errors = section.errors.map((note, key) => v$1(Card$1.Body, {
@@ -47365,6 +47332,7 @@ class Section extends ReactDOM$3.PureComponent {
         key: note.hash,
         note: note,
         onClickView: onClickView,
+        runGcode: runGcode,
         workspace: workspace
       }));
       const editor = v$1(AceEditNote, {
@@ -47406,6 +47374,7 @@ class Notebook extends ReactDOM$3.PureComponent {
       onKeyDown: propTypes$2.exports.func,
       notebookPath: propTypes$2.exports.string,
       notebookText: propTypes$2.exports.string,
+      runGcode: propTypes$2.exports.func,
       state: propTypes$2.exports.string,
       version: propTypes$2.exports.number,
       workspace: propTypes$2.exports.string
@@ -47418,6 +47387,7 @@ class Notebook extends ReactDOM$3.PureComponent {
         onChange,
         onClickView,
         onKeyDown,
+        runGcode,
         sections,
         workspace
       } = this.props;
@@ -47430,6 +47400,7 @@ class Notebook extends ReactDOM$3.PureComponent {
           onChange: onChange,
           onClickView: onClickView,
           onKeyDown: onKeyDown,
+          runGcode: runGcode,
           section: section,
           workspace: workspace
         }));
@@ -47876,8 +47847,31 @@ const defaultModelConfig = {
       id: 'Make',
       type: 'tab',
       name: 'Make',
+      weight: 300,
+      enableDeleteWhenEmpty: false,
       component: 'Make',
-      enableClose: false
+      config: {
+        model: {
+          global: {
+            tabSetTabLocation: 'top'
+          },
+          borders: [],
+          layout: {
+            type: 'row',
+            id: 'Make/Tabs',
+            children: [{
+              type: 'tabset',
+              id: 'Make/Tabset',
+              children: [{
+                id: 'Make/Tabset/Tab',
+                type: 'tab',
+                name: '+',
+                component: 'Make/Tabset/Tab'
+              }]
+            }]
+          }
+        }
+      }
     }, {
       id: 'Share',
       type: 'tab',
@@ -48013,6 +48007,7 @@ class App extends ReactDOM$3.Component {
     };
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
     this.layoutRef = /*#__PURE__*/ReactDOM$3.createRef();
+    this.makeLayoutRef = /*#__PURE__*/ReactDOM$3.createRef();
     this.Draft = {};
     this.Draft.append = data => {
       this.Draft.change(this.Draft.getCode() + data);
@@ -48252,18 +48247,16 @@ class App extends ReactDOM$3.Component {
       await animationFrame();
       this.View.store();
     };
-    this.Notebook.clickMake = async ({
-      path,
-      id,
-      sourceLocation
-    }) => {
-      await this.updateState({
-        Make: {
-          path,
-          id,
-          sourceLocation
-        }
-      });
+    this.Notebook.clickMake = async e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const {
+        model
+      } = this.state;
+      // This is a bit of a hack, since selectTab toggles.
+      model.getNodeById('Make').getParent()._setSelected(-1);
+      model.doAction(FlexLayout.Actions.selectTab('Make'));
+      await animationFrame();
     };
     this.Notebook.updateSections = async (path, workspace) => {
       const notebookFile = `source/${path}`;
@@ -49172,6 +49165,43 @@ class App extends ReactDOM$3.Component {
       } = this.state;
       NotebookSections.get(id).source = code;
     };
+    const runGcode = async ({
+      e,
+      path,
+      data,
+      workspace
+    }) => {
+      const {
+        model
+      } = this.state;
+      await this.Notebook.clickMake(e);
+      // Find the active Cnc (if any).
+      const makeNode = model.getNodeById('Make');
+      const subModel = makeNode.getExtraData().model;
+      const tabsetNode = subModel.getNodeById('Make/Tabset');
+      const selected = tabsetNode.getSelected();
+      if (selected === -1) {
+        return;
+      }
+      const tabNode = tabsetNode.getChildren()[selected];
+      if (tabNode.id === 'Make/Tabset/Tab') {
+        return;
+      }
+      const {
+        ip,
+        type
+      } = tabNode.getConfig();
+      const cnc = getCnc({
+        ip,
+        type
+      });
+      if (path && !data) {
+        data = await readOrWatch(path, {
+          workspace
+        });
+      }
+      await cnc.uploadAndRun(data);
+    };
     this.factory = node => {
       switch (node.getComponent()) {
         case 'Workspace':
@@ -49279,9 +49309,7 @@ class App extends ReactDOM$3.Component {
             }, "Upload from Computer"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Workspace"), v$1(Card$1.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Workspace.reset
-            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
-              QQcontrolId: "AddLocalFilesystemPrefixId"
-            }, v$1(Form$1.Control, {
+            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, null, v$1(Form$1.Control, {
               id: "AddLocalFilesystemPrefix",
               placeholder: "Prefix",
               value: ""
@@ -49295,13 +49323,73 @@ class App extends ReactDOM$3.Component {
           }
         case 'Make':
           {
+            try {
+              let model = node.getExtraData().model;
+              if (model == null) {
+                node.getExtraData().model = FlexLayout.Model.fromJson(node.getConfig().model);
+                model = node.getExtraData().model;
+                // save submodel on save event
+                node.setEventListener('save', p => {
+                  this.state.model.doAction(FlexLayout.Actions.updateNodeAttributes(node.getId(), {
+                    config: {
+                      model: node.getExtraData().model.toJson()
+                    }
+                  }));
+                  //  node.getConfig().model = node.getExtraData().model.toJson();
+                });
+              }
+              return v$1(FlexLayout.Layout, {
+                model: model,
+                factory: this.factory,
+                ref: this.makeLayoutRef,
+                onModelChange: this.Model.change
+              });
+            } catch (error) {
+              console.log(error.stack);
+              return;
+            }
+          }
+        case 'Make/Tabset/Tab':
+          {
+            const addMachine = type => {
+              const name = document.getElementById('Make/Tabset/Tab/Name').value;
+              const ip = document.getElementById('Make/Tabset/Tab/IP').value;
+              const id = new Date().getTime();
+              const nodeId = `Make/Tabset/Tab/${id}`;
+              this.makeLayoutRef.current.addTabToTabSet('Make/Tabset', {
+                id: nodeId,
+                type: 'tab',
+                name,
+                component: `Make/Tabset/Tab/${type}`,
+                config: {
+                  ip,
+                  type
+                }
+              });
+            };
+            return v$1(Form$1, null, v$1(Form$1.Control, {
+              id: "Make/Tabset/Tab/Name",
+              placeholder: "name"
+            }), v$1(Form$1.Control, {
+              id: "Make/Tabset/Tab/IP",
+              placeholder: "IP Address"
+            }), v$1(Button, {
+              onClick: () => addMachine('EspWebUi')
+            }, "Add ESP WebUI Machine"));
+          }
+        case 'Make/Tabset/Tab/EspWebUi':
+          {
             const {
               workspace
             } = this.props;
             const {
               View = {}
             } = this.state;
-            return v$1(Make, {
+            const {
+              ip
+            } = node.getConfig();
+            return v$1(MakeEspWebUi, {
+              ip: ip,
               path: View.path,
               workspace: workspace
             });
@@ -49326,6 +49414,7 @@ class App extends ReactDOM$3.Component {
                     onChange: onCodeChange,
                     onClickView: this.Notebook.clickView,
                     onKeyDown: e => this.onKeyDown(e),
+                    runGcode: e => runGcode(e),
                     sections: NotebookSections,
                     version: NotebookVersion,
                     workspace: workspace
@@ -49351,6 +49440,7 @@ class App extends ReactDOM$3.Component {
                     onClickView: this.Notebook.clickView,
                     onChange: onCodeChange,
                     onKeyDown: e => this.onKeyDown(e),
+                    runGcode: e => runGcode(e),
                     sections: NotebookSections,
                     version: NotebookVersion,
                     workspace: workspace

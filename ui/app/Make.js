@@ -6,17 +6,18 @@ import React, { createRef } from 'react';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import { cnc } from './Cnc.js';
+import { getCnc } from './Cnc.js';
 
-export class Make extends React.PureComponent {
+export class MakeEspWebUi extends React.PureComponent {
   static get propTypes() {
     return {
+      ip: PropTypes.string,
       path: PropTypes.string,
       workspace: PropTypes.string,
     };
   }
 
-  constructor() {
+  constructor(props) {
     super();
     this.cpos = [0, 0, undefined];
     this.cposRef = createRef();
@@ -25,17 +26,18 @@ export class Make extends React.PureComponent {
     this.statusRef = createRef();
     this.toolRef = createRef();
     this.wposRef = createRef();
+    this.cnc = getCnc({ type: 'EspWebUi', ip: props.ip });
   }
 
   componentWillUnmount() {
     if (this.listener) {
-      cnc.removeGrblStatusListener(this.listener);
+      this.cnc.removeGrblStatusListener(this.listener);
     }
   }
 
   componentDidMount() {
     this.listener = (grbl) => this.updateStatus(grbl);
-    cnc.addGrblStatusListener(this.listener);
+    this.cnc.addGrblStatusListener(this.listener);
   }
 
   updateStatus(grbl) {
@@ -43,21 +45,21 @@ export class Make extends React.PureComponent {
       this.statusRef.current.innerText = JSON.stringify(grbl);
     }
     if (this.toolRef.current) {
-      const [mx, my] = cnc.grbl.mpos;
+      const [mx, my] = this.cnc.grbl.mpos;
       this.toolRef.current.setAttribute('cx', mx);
       this.toolRef.current.setAttribute('cy', my);
-      if (cnc.grbl.spindleSpeed === 0) {
+      if (this.cnc.grbl.spindleSpeed === 0) {
         this.toolRef.current.setAttribute('fill', 'black');
       } else {
         this.toolRef.current.setAttribute('fill', 'red');
       }
     }
     if (this.mposRef.current) {
-      const [mx, my, mz] = cnc.grbl.mpos;
+      const [mx, my, mz] = this.cnc.grbl.mpos;
       this.mposRef.current.innerText = `${mx} ${my} ${mz}`;
     }
     if (this.wposRef.current) {
-      const [wx, wy, wz] = cnc.grbl.mpos;
+      const [wx, wy, wz] = this.cnc.grbl.mpos;
       this.wposRef.current.innerText = `${wx} ${wy} ${wz}`;
     }
   }
@@ -83,15 +85,17 @@ export class Make extends React.PureComponent {
 
   async zeroWorkCoordinatesAtCursor() {
     // Zero the first coordinate system at this offset.
-    await cnc.run('G10L20P1X0Y0Z0');
+    await this.cnc.run('G10L20P1X0Y0Z0');
   }
 
   async jogToCursor() {
     // Jog in machine coordinates.
-    await cnc.run(`$Jog=G53G91${this.getCposCode()}F5000`);
+    await this.cnc.run(`$Jog=G53G91${this.getCposCode()}F5000`);
   }
 
   render() {
+    const { ip } = this.props;
+
     const setCpos = (e) => {
       if (e.key !== 'enter' && e.key !== 'j' && e.key !== 'w') {
         return;
@@ -121,6 +125,8 @@ export class Make extends React.PureComponent {
 
     const result = (
       <div>
+        IP Address
+        <div>{ip}</div>
         Machine position
         <div id="make/mpos" ref={this.mposRef}>
           0 0 0
@@ -168,7 +174,7 @@ export class Make extends React.PureComponent {
         </svg>
         <br />
         <ButtonGroup>
-          <Button onClick={(event) => cnc.home()}>
+          <Button onClick={(event) => this.cnc.home()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -180,7 +186,7 @@ export class Make extends React.PureComponent {
               <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z" />
             </svg>
           </Button>
-          <Button onClick={(event) => cnc.pause()}>
+          <Button onClick={(event) => this.cnc.pause()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -192,7 +198,7 @@ export class Make extends React.PureComponent {
               <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5" />
             </svg>
           </Button>
-          <Button onClick={(event) => cnc.resume()}>
+          <Button onClick={(event) => this.cnc.resume()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -204,7 +210,7 @@ export class Make extends React.PureComponent {
               <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753" />
             </svg>
           </Button>
-          <Button onClick={(event) => cnc.reset()}>
+          <Button onClick={(event) => this.cnc.reset()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -218,8 +224,8 @@ export class Make extends React.PureComponent {
             </svg>
           </Button>
           <Button onClick={() => this.jogToCursor()}>jog</Button>
-          <Button onClick={() => cnc.run('$Jog=G91X-10F5000')}>l</Button>
-          <Button onClick={() => cnc.run('$Jog=G91X10F5000')}>r</Button>
+          <Button onClick={() => this.cnc.run('$Jog=G91X-10F5000')}>l</Button>
+          <Button onClick={() => this.cnc.run('$Jog=G91X10F5000')}>r</Button>
         </ButtonGroup>
         <div ref={this.statusRef}></div>
       </div>
@@ -227,5 +233,3 @@ export class Make extends React.PureComponent {
     return result;
   }
 }
-
-export default Make;

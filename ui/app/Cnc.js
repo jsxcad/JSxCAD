@@ -1,6 +1,6 @@
 /* global WebSocket */
 
-export class FluidNcMachine {
+export class EspWebUiBridge {
   constructor(address) {
     this.address = address;
     this.queries = new Set();
@@ -309,6 +309,13 @@ export class FluidNcMachine {
     }
   }
 
+  async uploadAndRun(data) {
+    await this.upload('tmp.gcode', data);
+    await this.run(`G54`); // Use the first coordinate system.
+    await this.run(`$SD/Run=tmp.gcode`);
+    console.log(`QQ/runCode/run/done`);
+  }
+
   async realtime(commandText) {
     try {
       await this.start();
@@ -348,4 +355,16 @@ export class FluidNcMachine {
   }
 }
 
-export const cnc = new FluidNcMachine('192.168.31.195');
+const espWebUiBridges = new Map();
+
+export const getCnc = (config) => {
+  switch (config.type) {
+    case 'EspWebUi': {
+      const { ip } = config;
+      if (!espWebUiBridges.has(ip)) {
+        espWebUiBridges.set(ip, new EspWebUiBridge(ip));
+      }
+      return espWebUiBridges.get(ip);
+    }
+  }
+};
