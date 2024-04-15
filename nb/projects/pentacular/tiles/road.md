@@ -199,12 +199,10 @@ const doubleToSingleLaneCurvedFourWayIntersectionTile = await tile
 
 ```JavaScript
 const extrudeTile = () => async (shape) => {
-  console.log(`QQ/extrudeTile/shape: ${JSON.stringify(shape)}`);
   const result = await shape
     .on(getAll('user:road_marking'), ez(1.2 * mm))
     .on(getAll('user:road_surface'), ez(1 * mm))
     .on(getAll('user:pavement'), ez(2 * mm));
-  console.log(`QQ/extrudeTile/result: ${JSON.stringify(result)}`);
   return result;
 }
 ```
