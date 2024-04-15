@@ -23,6 +23,7 @@ export class EspWebUiBridge {
     };
     this.grblStatusListeners = new Set();
     this.runQueue = [];
+    this.webSocketState = 'DISCONNECTED';
   }
 
   wait(ms) {
@@ -30,36 +31,42 @@ export class EspWebUiBridge {
   }
 
   async ensureWebSocket() {
-    if (this.webSocket) {
-      return this.webSocket;
+    if (this.webSocketState === 'DISCONNECTED') {
+      this.webSocketState = 'CONNECTING';
+      this.webSocket = new Promise((resolve, reject) => {
+        const webSocket = new WebSocket(`ws://${this.address}:81/`);
+        webSocket.binaryType = 'arraybuffer';
+        webSocket.onmessage = ({ data }) => {
+          let line;
+          if (data instanceof ArrayBuffer) {
+            line = this.decoder.decode(data);
+          } else {
+            line = data;
+          }
+          console.log(line);
+          for (const query of [...this.queries]) {
+            query(line);
+          }
+          if (line.startsWith('<')) {
+            console.log(JSON.stringify(this.parseGrblStatus(line, this.grbl)));
+            for (const listener of [...this.grblStatusListeners]) {
+              listener(this.grbl);
+            }
+          }
+        };
+        webSocket.onclose = () => {
+          this.webSocketState = 'DISCONNECTED';
+          reject(Error('WebSocket closed'));
+          // Attempt to re-open.
+          this.ensureWebSocket();
+        };
+        webSocket.onopen = () => {
+          this.webSocketState = 'CONNECTED';
+          resolve();
+        };
+      });
     }
-    const webSocket = new WebSocket(`ws://${this.address}:81/`);
-    webSocket.binaryType = 'arraybuffer';
-    webSocket.onmessage = ({ data }) => {
-      let line;
-      if (data instanceof ArrayBuffer) {
-        line = this.decoder.decode(data);
-      } else {
-        line = data;
-      }
-      console.log(line);
-      for (const query of [...this.queries]) {
-        query(line);
-      }
-      if (line.startsWith('<')) {
-        console.log(JSON.stringify(this.parseGrblStatus(line, this.grbl)));
-        for (const listener of [...this.grblStatusListeners]) {
-          listener(this.grbl);
-        }
-      }
-    };
-    webSocket.onclose = () => {
-      this.webSocket = null;
-    };
-    await new Promise((resolve, reject) => {
-      webSocket.onopen = resolve;
-    });
-    this.webSocket = webSocket;
+    return this.webSocket;
   }
 
   async start() {
