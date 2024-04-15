@@ -49,6 +49,7 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/eslint-parser": "^7.22.5",
+    "@lerna/legacy-package-management": "^7.3.0",
     "ava": "^4.3.0",
     "eslint": "^8.43.0",
     "eslint-config-standard": "^12.0.0",
@@ -58,8 +59,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
-    "lerna": "^7.3.0",
-    "@lerna/legacy-package-management": "^7.3.0",
+    "lerna": "^6.4.1",
     "prettier": "^2.3.1"
   },
   "publishConfig": {
