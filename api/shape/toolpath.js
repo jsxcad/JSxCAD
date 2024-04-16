@@ -12,6 +12,7 @@ export const toolpath = Shape.registerMethod3(
     'number',
     'number',
     'geometry',
+    'modes:simple',
   ],
   (
     geometry,
@@ -21,7 +22,8 @@ export const toolpath = Shape.registerMethod3(
     annealingMax,
     annealingMin,
     annealingDecay,
-    target
+    target,
+    modes
   ) =>
     computeToolpath(
       target,
@@ -31,6 +33,7 @@ export const toolpath = Shape.registerMethod3(
       toolCutDepth,
       annealingMax,
       annealingMin,
-      annealingDecay
+      annealingDecay,
+      modes
     )
 );

@@ -9574,10 +9574,57 @@ ace.define("ace/lib/report_error",["require","exports","module"], function(requi
 
 });
 
-ace.define("ace/lib/app_config",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/report_error"], function(require, exports, module){"no use strict";
+ace.define("ace/lib/default_english_messages",["require","exports","module"], function(require, exports, module){var defaultEnglishMessages = {
+    "autocomplete.popup.aria-roledescription": "Autocomplete suggestions",
+    "autocomplete.popup.aria-label": "Autocomplete suggestions",
+    "autocomplete.popup.item.aria-roledescription": "item",
+    "autocomplete.loading": "Loading...",
+    "editor.scroller.aria-roledescription": "editor",
+    "editor.scroller.aria-label": "Editor content, press Enter to start editing, press Escape to exit",
+    "editor.gutter.aria-roledescription": "editor",
+    "editor.gutter.aria-label": "Editor gutter, press Enter to interact with controls using arrow keys, press Escape to exit",
+    "error-marker.good-state": "Looks good!",
+    "prompt.recently-used": "Recently used",
+    "prompt.other-commands": "Other commands",
+    "prompt.no-matching-commands": "No matching commands",
+    "search-box.find.placeholder": "Search for",
+    "search-box.find-all.text": "All",
+    "search-box.replace.placeholder": "Replace with",
+    "search-box.replace-next.text": "Replace",
+    "search-box.replace-all.text": "All",
+    "search-box.toggle-replace.title": "Toggle Replace mode",
+    "search-box.toggle-regexp.title": "RegExp Search",
+    "search-box.toggle-case.title": "CaseSensitive Search",
+    "search-box.toggle-whole-word.title": "Whole Word Search",
+    "search-box.toggle-in-selection.title": "Search In Selection",
+    "search-box.search-counter": "$0 of $1",
+    "text-input.aria-roledescription": "editor",
+    "text-input.aria-label": "Cursor at row $0",
+    "gutter.code-folding.range.aria-label": "Toggle code folding, rows $0 through $1",
+    "gutter.code-folding.closed.aria-label": "Toggle code folding, rows $0 through $1",
+    "gutter.code-folding.open.aria-label": "Toggle code folding, row $0",
+    "gutter.code-folding.closed.title": "Unfold code",
+    "gutter.code-folding.open.title": "Fold code",
+    "gutter.annotation.aria-label.error": "Error, read annotations row $0",
+    "gutter.annotation.aria-label.warning": "Warning, read annotations row $0",
+    "gutter.annotation.aria-label.info": "Info, read annotations row $0",
+    "inline-fold.closed.title": "Unfold code",
+    "gutter-tooltip.aria-label.error.singular": "error",
+    "gutter-tooltip.aria-label.error.plural": "errors",
+    "gutter-tooltip.aria-label.warning.singular": "warning",
+    "gutter-tooltip.aria-label.warning.plural": "warnings",
+    "gutter-tooltip.aria-label.info.singular": "information message",
+    "gutter-tooltip.aria-label.info.plural": "information messages"
+};
+exports.defaultEnglishMessages = defaultEnglishMessages;
+
+});
+
+ace.define("ace/lib/app_config",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/report_error","ace/lib/default_english_messages"], function(require, exports, module){"no use strict";
 var oop = require("./oop");
 var EventEmitter = require("./event_emitter").EventEmitter;
 var reportError = require("./report_error").reportError;
+var defaultEnglishMessages = require("./default_english_messages").defaultEnglishMessages;
 var optionsProvider = {
     setOptions: function (optList) {
         Object.keys(optList).forEach(function (key) {
@@ -9633,6 +9680,7 @@ var messages;
 var AppConfig = /** @class */ (function () {
     function AppConfig() {
         this.$defaultOptions = {};
+        messages = defaultEnglishMessages;
     }
     AppConfig.prototype.defineOptions = function (obj, path, options) {
         if (!obj.$options)
@@ -9680,11 +9728,14 @@ var AppConfig = /** @class */ (function () {
     AppConfig.prototype.setMessages = function (value) {
         messages = value;
     };
-    AppConfig.prototype.nls = function (string, params) {
-        if (messages && !messages[string]) {
-            warn("No message found for '" + string + "' in the provided messages, falling back to default English message.");
+    AppConfig.prototype.nls = function (key, defaultString, params) {
+        if (!messages[key]) {
+            warn("No message found for the key '" + key + "' in the provided messages, trying to find a translation for the default string '" + defaultString + "'.");
+            if (!messages[defaultString]) {
+                warn("No message found for the default string '" + defaultString + "' in the provided messages. Falling back to the default English message.");
+            }
         }
-        var translated = messages && messages[string] || string;
+        var translated = messages[key] || messages[defaultString] || defaultString;
         if (params) {
             translated = translated.replace(/\$(\$|[\d]+)/g, function (_, name) {
                 if (name == "$")
@@ -9861,7 +9912,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.32.7";
+exports.version = "1.33.0";
 
 });
 
@@ -10657,10 +10708,10 @@ TextInput = function (parentNode, host) {
             text.setAttribute("role", options.role);
         }
         if (options.setLabel) {
-            text.setAttribute("aria-roledescription", nls("editor"));
+            text.setAttribute("aria-roledescription", nls("text-input.aria-roledescription", "editor"));
             if (host.session) {
                 var row = host.session.selection.cursor.row;
-                text.setAttribute("aria-label", nls("Cursor at row $0", [row + 1]));
+                text.setAttribute("aria-label", nls("text-input.aria-label", "Cursor at row $0", [row + 1]));
             }
         }
     };
@@ -12035,9 +12086,18 @@ var GutterTooltip = /** @class */ (function (_super) {
     Object.defineProperty(GutterTooltip, "annotationLabels", {
         get: function () {
             return {
-                error: { singular: nls("error"), plural: nls("errors") },
-                warning: { singular: nls("warning"), plural: nls("warnings") },
-                info: { singular: nls("information message"), plural: nls("information messages") }
+                error: {
+                    singular: nls("gutter-tooltip.aria-label.error.singular", "error"),
+                    plural: nls("gutter-tooltip.aria-label.error.plural", "errors")
+                },
+                warning: {
+                    singular: nls("gutter-tooltip.aria-label.warning.singular", "warning"),
+                    plural: nls("gutter-tooltip.aria-label.warning.plural", "warnings")
+                },
+                info: {
+                    singular: nls("gutter-tooltip.aria-label.info.singular", "information message"),
+                    plural: nls("gutter-tooltip.aria-label.info.plural", "information messages")
+                }
             };
         },
         enumerable: false,
@@ -19732,6 +19792,14 @@ var EditSession = /** @class */ (function () {
             return [screenColumn, column];
         };
     };
+    EditSession.prototype.getPrecedingCharacter = function () {
+        var pos = this.selection.getCursor();
+        if (pos.column === 0) {
+            return pos.row === 0 ? "" : this.doc.getNewLineCharacter();
+        }
+        var currentLine = this.getLine(pos.row);
+        return currentLine[pos.column - 1];
+    };
     EditSession.prototype.destroy = function () {
         if (!this.destroyed) {
             this.bgTokenizer.setDocument(null);
@@ -24028,16 +24096,16 @@ config.defineOptions(Editor.prototype, "editor", {
                 this.textInput.setNumberOfExtraLines(useragent.isWin ? 3 : 0);
                 this.renderer.scroller.setAttribute("tabindex", 0);
                 this.renderer.scroller.setAttribute("role", "group");
-                this.renderer.scroller.setAttribute("aria-roledescription", nls("editor"));
+                this.renderer.scroller.setAttribute("aria-roledescription", nls("editor.scroller.aria-roledescription", "editor"));
                 this.renderer.scroller.classList.add(this.renderer.keyboardFocusClassName);
-                this.renderer.scroller.setAttribute("aria-label", nls("Editor content, press Enter to start editing, press Escape to exit"));
+                this.renderer.scroller.setAttribute("aria-label", nls("editor.scroller.aria-label", "Editor content, press Enter to start editing, press Escape to exit"));
                 this.renderer.scroller.addEventListener("keyup", focusOnEnterKeyup.bind(this));
                 this.commands.addCommand(blurCommand);
                 this.renderer.$gutter.setAttribute("tabindex", 0);
                 this.renderer.$gutter.setAttribute("aria-hidden", false);
                 this.renderer.$gutter.setAttribute("role", "group");
-                this.renderer.$gutter.setAttribute("aria-roledescription", nls("editor"));
-                this.renderer.$gutter.setAttribute("aria-label", nls("Editor gutter, press Enter to interact with controls using arrow keys, press Escape to exit"));
+                this.renderer.$gutter.setAttribute("aria-roledescription", nls("editor.gutter.aria-roledescription", "editor"));
+                this.renderer.$gutter.setAttribute("aria-label", nls("editor.gutter.aria-label", "Editor gutter, press Enter to interact with controls using arrow keys, press Escape to exit"));
                 this.renderer.$gutter.classList.add(this.renderer.keyboardFocusClassName);
                 this.renderer.content.setAttribute("aria-hidden", true);
                 if (!gutterKeyboardHandler)
@@ -24534,20 +24602,20 @@ var Gutter = /** @class */ (function () {
             foldWidget.setAttribute("tabindex", "-1");
             var foldRange = session.getFoldWidgetRange(row);
             if (foldRange)
-                foldWidget.setAttribute("aria-label", nls("Toggle code folding, rows $0 through $1", [foldRange.start.row + 1, foldRange.end.row + 1]));
+                foldWidget.setAttribute("aria-label", nls("gutter.code-folding.range.aria-label", "Toggle code folding, rows $0 through $1", [foldRange.start.row + 1, foldRange.end.row + 1]));
             else {
                 if (fold)
-                    foldWidget.setAttribute("aria-label", nls("Toggle code folding, rows $0 through $1", [fold.start.row + 1, fold.end.row + 1]));
+                    foldWidget.setAttribute("aria-label", nls("gutter.code-folding.closed.aria-label", "Toggle code folding, rows $0 through $1", [fold.start.row + 1, fold.end.row + 1]));
                 else
-                    foldWidget.setAttribute("aria-label", nls("Toggle code folding, row $0", [row + 1]));
+                    foldWidget.setAttribute("aria-label", nls("gutter.code-folding.open.aria-label", "Toggle code folding, row $0", [row + 1]));
             }
             if (isClosedFold) {
                 foldWidget.setAttribute("aria-expanded", "false");
-                foldWidget.setAttribute("title", nls("Unfold code"));
+                foldWidget.setAttribute("title", nls("gutter.code-folding.closed.title", "Unfold code"));
             }
             else {
                 foldWidget.setAttribute("aria-expanded", "true");
-                foldWidget.setAttribute("title", nls("Fold code"));
+                foldWidget.setAttribute("title", nls("gutter.code-folding.open.title", "Fold code"));
             }
         }
         else {
@@ -24565,7 +24633,16 @@ var Gutter = /** @class */ (function () {
             dom.setStyle(annotationIconNode.style, "height", lineHeight);
             dom.setStyle(annotationNode.style, "display", "block");
             dom.setStyle(annotationNode.style, "height", lineHeight);
-            annotationNode.setAttribute("aria-label", nls("Read annotations row $0", [rowText]));
+            var ariaLabel;
+            switch (foldAnnotationClass) {
+                case " ace_error_fold":
+                    ariaLabel = nls("gutter.annotation.aria-label.error", "Read annotations row $0", [rowText]);
+                    break;
+                case " ace_warning_fold":
+                    ariaLabel = nls("gutter.annotation.aria-label.warning", "Read annotations row $0", [rowText]);
+                    break;
+            }
+            annotationNode.setAttribute("aria-label", ariaLabel);
             annotationNode.setAttribute("tabindex", "-1");
             annotationNode.setAttribute("role", "button");
         }
@@ -24579,7 +24656,19 @@ var Gutter = /** @class */ (function () {
             dom.setStyle(annotationIconNode.style, "height", lineHeight);
             dom.setStyle(annotationNode.style, "display", "block");
             dom.setStyle(annotationNode.style, "height", lineHeight);
-            annotationNode.setAttribute("aria-label", nls("Read annotations row $0", [rowText]));
+            var ariaLabel;
+            switch (this.$annotations[row].className) {
+                case " ace_error":
+                    ariaLabel = nls("gutter.annotation.aria-label.error", "Read annotations row $0", [rowText]);
+                    break;
+                case " ace_warning":
+                    ariaLabel = nls("gutter.annotation.aria-label.warning", "Read annotations row $0", [rowText]);
+                    break;
+                case " ace_info":
+                    ariaLabel = nls("gutter.annotation.aria-label.info", "Read annotations row $0", [rowText]);
+                    break;
+            }
+            annotationNode.setAttribute("aria-label", ariaLabel);
             annotationNode.setAttribute("tabindex", "-1");
             annotationNode.setAttribute("role", "button");
         }
@@ -25164,7 +25253,7 @@ var Text = /** @class */ (function () {
             var span = this.dom.createElement("span");
             if (token.type == "fold") {
                 span.style.width = (token.value.length * this.config.characterWidth) + "px";
-                span.setAttribute("title", nls("Unfold code"));
+                span.setAttribute("title", nls("inline-fold.closed.title", "Unfold code"));
             }
             span.className = classes;
             span.appendChild(valueFragment);
@@ -27486,14 +27575,14 @@ var VirtualRenderer = /** @class */ (function () {
             var el = this.container;
             var height = el.getBoundingClientRect().height;
             var ghostTextHeight = textLines.length * this.lineHeight;
-            var fitsY = ghostTextHeight < height - pixelPosition.top;
+            var fitsY = ghostTextHeight < (height - pixelPosition.top);
             if (fitsY)
                 return;
             if (ghostTextHeight < height) {
                 this.scrollBy(0, (textLines.length - 1) * this.lineHeight);
             }
             else {
-                this.scrollBy(0, pixelPosition.top);
+                this.scrollToRow(insertPosition.row);
             }
         }
     };
@@ -29373,7 +29462,7 @@ exports.showErrorMarker = function (editor, dir) {
     }
     else {
         gutterAnno = {
-            text: [nls("Looks good!")],
+            text: [nls("error-marker.good-state", "Looks good!")],
             className: "ace_ok"
         };
     }
@@ -37273,24 +37362,24 @@ var SearchBox = /** @class */ (function () {
         dom.buildDom(["div", { class: "ace_search right" },
             ["span", { action: "hide", class: "ace_searchbtn_close" }],
             ["div", { class: "ace_search_form" },
-                ["input", { class: "ace_search_field", placeholder: nls("Search for"), spellcheck: "false" }],
+                ["input", { class: "ace_search_field", placeholder: nls("search-box.find.placeholder", "Search for"), spellcheck: "false" }],
                 ["span", { action: "findPrev", class: "ace_searchbtn prev" }, "\u200b"],
                 ["span", { action: "findNext", class: "ace_searchbtn next" }, "\u200b"],
-                ["span", { action: "findAll", class: "ace_searchbtn", title: "Alt-Enter" }, nls("All")]
+                ["span", { action: "findAll", class: "ace_searchbtn", title: "Alt-Enter" }, nls("search-box.find-all.text", "All")]
             ],
             ["div", { class: "ace_replace_form" },
-                ["input", { class: "ace_search_field", placeholder: nls("Replace with"), spellcheck: "false" }],
-                ["span", { action: "replaceAndFindNext", class: "ace_searchbtn" }, nls("Replace")],
-                ["span", { action: "replaceAll", class: "ace_searchbtn" }, nls("All")]
+                ["input", { class: "ace_search_field", placeholder: nls("search-box.replace.placeholder", "Replace with"), spellcheck: "false" }],
+                ["span", { action: "replaceAndFindNext", class: "ace_searchbtn" }, nls("search-box.replace-next.text", "Replace")],
+                ["span", { action: "replaceAll", class: "ace_searchbtn" }, nls("search-box.replace-all.text", "All")]
             ],
             ["div", { class: "ace_search_options" },
-                ["span", { action: "toggleReplace", class: "ace_button", title: nls("Toggle Replace mode"),
+                ["span", { action: "toggleReplace", class: "ace_button", title: nls("search-box.toggle-replace.title", "Toggle Replace mode"),
                         style: "float:left;margin-top:-2px;padding:0 5px;" }, "+"],
                 ["span", { class: "ace_search_counter" }],
-                ["span", { action: "toggleRegexpMode", class: "ace_button", title: nls("RegExp Search") }, ".*"],
-                ["span", { action: "toggleCaseSensitive", class: "ace_button", title: nls("CaseSensitive Search") }, "Aa"],
-                ["span", { action: "toggleWholeWords", class: "ace_button", title: nls("Whole Word Search") }, "\\b"],
-                ["span", { action: "searchInSelection", class: "ace_button", title: nls("Search In Selection") }, "S"]
+                ["span", { action: "toggleRegexpMode", class: "ace_button", title: nls("search-box.toggle-regexp.title", "RegExp Search") }, ".*"],
+                ["span", { action: "toggleCaseSensitive", class: "ace_button", title: nls("search-box.toggle-case.title", "CaseSensitive Search") }, "Aa"],
+                ["span", { action: "toggleWholeWords", class: "ace_button", title: nls("search-box.toggle-whole-word.title", "Whole Word Search") }, "\\b"],
+                ["span", { action: "searchInSelection", class: "ace_button", title: nls("search-box.toggle-in-selection.title", "Search In Selection") }, "S"]
             ]
         ], div);
         this.element = div.firstChild;
@@ -37434,7 +37523,7 @@ var SearchBox = /** @class */ (function () {
                 }
             }
         }
-        this.searchCounter.textContent = nls("$0 of $1", [before, (all > MAX_COUNT ? MAX_COUNT + "+" : all)]);
+        this.searchCounter.textContent = nls("search-box.search-counter", "$0 of $1", [before, (all > MAX_COUNT ? MAX_COUNT + "+" : all)]);
     };
     SearchBox.prototype.findNext = function () {
         this.find(true, false);
@@ -39527,8 +39616,8 @@ var AcePopup = /** @class */ (function () {
         popup.renderer.content.style.cursor = "default";
         popup.renderer.setStyle("ace_autocomplete");
         popup.renderer.$textLayer.element.setAttribute("role", popupAriaRole);
-        popup.renderer.$textLayer.element.setAttribute("aria-roledescription", nls("Autocomplete suggestions"));
-        popup.renderer.$textLayer.element.setAttribute("aria-label", nls("Autocomplete suggestions"));
+        popup.renderer.$textLayer.element.setAttribute("aria-roledescription", nls("autocomplete.popup.aria-roledescription", "Autocomplete suggestions"));
+        popup.renderer.$textLayer.element.setAttribute("aria-label", nls("autocomplete.popup.aria-label", "Autocomplete suggestions"));
         popup.renderer.textarea.setAttribute("aria-hidden", "true");
         popup.setOption("displayIndentGuides", false);
         popup.setOption("dragDelay", 150);
@@ -39608,7 +39697,7 @@ var AcePopup = /** @class */ (function () {
                 t.element.setAttribute("aria-activedescendant", ariaId);
                 el.setAttribute("aria-activedescendant", ariaId);
                 selected.setAttribute("role", optionAriaRole);
-                selected.setAttribute("aria-roledescription", nls("item"));
+                selected.setAttribute("aria-roledescription", nls("autocomplete.popup.item.aria-roledescription", "item"));
                 selected.setAttribute("aria-label", popup.getData(row).caption || popup.getData(row).value);
                 selected.setAttribute("aria-setsize", popup.data.length);
                 selected.setAttribute("aria-posinset", row + 1);
@@ -40000,14 +40089,13 @@ exports.getCompletionPrefix = function (editor) {
     }.bind(this));
     return prefix || this.retrievePrecedingIdentifier(line, pos.column);
 };
-exports.triggerAutocomplete = function (editor) {
-    var pos = editor.getCursorPosition();
-    var line = editor.session.getLine(pos.row);
-    var column = (pos.column === 0) ? 0 : pos.column - 1;
-    var previousChar = line[column];
-    return editor.completers.some(function (el) {
-        if (el.triggerCharacters && Array.isArray(el.triggerCharacters)) {
-            return el.triggerCharacters.includes(previousChar);
+exports.triggerAutocomplete = function (editor, previousChar) {
+    var previousChar = previousChar == null
+        ? editor.session.getPrecedingCharacter()
+        : previousChar;
+    return editor.completers.some(function (completer) {
+        if (completer.triggerCharacters && Array.isArray(completer.triggerCharacters)) {
+            return completer.triggerCharacters.includes(previousChar);
         }
     });
 };
@@ -40067,7 +40155,7 @@ var Autocomplete = /** @class */ (function () {
     Object.defineProperty(Autocomplete, "completionsForLoading", {
         get: function () {
             return [{
-                    caption: config.nls("Loading..."),
+                    caption: config.nls("autocomplete.loading", "Loading..."),
                     value: ""
                 }];
         },
@@ -40257,9 +40345,6 @@ var Autocomplete = /** @class */ (function () {
                 this.updateDocTooltip();
             }
         }
-        else if (keepPopupPosition && !prefix) {
-            this.detach();
-        }
         this.changeTimer.cancel();
         this.observeLayoutChanges();
     };
@@ -40414,6 +40499,7 @@ var Autocomplete = /** @class */ (function () {
                         this.completions = new FilteredList(completionsForEmpty);
                         this.openPopup(this.editor, prefix, keepPopupPosition);
                         this.popup.renderer.setStyle("ace_loading", false);
+                        this.popup.renderer.setStyle("ace_empty-message", true);
                         return;
                     }
                     return this.detach();
@@ -40428,6 +40514,7 @@ var Autocomplete = /** @class */ (function () {
                 new FilteredList(Autocomplete.completionsForLoading.concat(filtered), completions.filterText) :
                 completions;
             this.openPopup(this.editor, prefix, keepPopupPosition);
+            this.popup.renderer.setStyle("ace_empty-message", false);
             this.popup.renderer.setStyle("ace_loading", !finished);
         }.bind(this));
         if (this.showLoadingState && !this.autoShown && !(this.popup && this.popup.isOpen)) {
@@ -40567,6 +40654,12 @@ Autocomplete.prototype.commands = {
             editor.completer.goTo("down");
         else
             return result;
+    },
+    "Backspace": function (editor) {
+        editor.execCommand("backspace");
+        var prefix = util.getCompletionPrefix(editor);
+        if (!prefix && editor.completer)
+            editor.completer.detach();
     },
     "PageUp": function (editor) { editor.completer.popup.gotoPageUp(); },
     "PageDown": function (editor) { editor.completer.popup.gotoPageDown(); }
@@ -41006,7 +41099,8 @@ var liveAutocompleteTimer = lang.delayedCall(function () {
 var showLiveAutocomplete = function (e) {
     var editor = e.editor;
     var prefix = util.getCompletionPrefix(editor);
-    var triggerAutocomplete = util.triggerAutocomplete(editor);
+    var previousChar = e.args;
+    var triggerAutocomplete = util.triggerAutocomplete(editor, previousChar);
     if (prefix && prefix.length >= editor.$liveAutocompletionThreshold || triggerAutocomplete) {
         var completer = Autocomplete.for(editor);
         completer.autoShown = true;
@@ -42048,6 +42142,568 @@ ListGroup.displayName = 'ListGroup';
 var ListGroup$1 = Object.assign(ListGroup, {
   Item: ListGroupItem$1
 });
+
+/* global WebSocket */
+
+class EspWebUiBridge {
+  constructor(address) {
+    this.address = address;
+    this.queries = new Set();
+    this.decoder = new TextDecoder();
+    this.encoder = new TextEncoder();
+    this.grbl = {
+      stateName: '',
+      message: '',
+      wco: [0, 0, 0],
+      mpos: [0, 0, 0],
+      wpos: [0, 0, 0],
+      feedrate: 0,
+      spindle: undefined,
+      spindleSpeed: 0,
+      ovr: [0, 0, 0],
+      lineNumber: 0,
+      flood: undefined,
+      mist: undefined,
+      pins: undefined
+    };
+    this.grblStatusListeners = new Set();
+    this.runQueue = [];
+    this.webSocketState = 'DISCONNECTED';
+  }
+  wait(ms) {
+    return new Promise((resolve, reject) => setTimeout(resolve, ms));
+  }
+  async ensureWebSocket() {
+    if (this.webSocketState === 'DISCONNECTED') {
+      this.webSocketState = 'CONNECTING';
+      this.webSocket = new Promise((resolve, reject) => {
+        const webSocket = new WebSocket(`ws://${this.address}:81/`);
+        webSocket.binaryType = 'arraybuffer';
+        webSocket.onmessage = ({
+          data
+        }) => {
+          let line;
+          if (data instanceof ArrayBuffer) {
+            line = this.decoder.decode(data);
+          } else {
+            line = data;
+          }
+          console.log(line);
+          for (const query of [...this.queries]) {
+            query(line);
+          }
+          if (line.startsWith('<')) {
+            console.log(JSON.stringify(this.parseGrblStatus(line, this.grbl)));
+            for (const listener of [...this.grblStatusListeners]) {
+              listener(this.grbl);
+            }
+          }
+        };
+        webSocket.onclose = () => {
+          this.webSocketState = 'DISCONNECTED';
+          reject(Error('WebSocket closed'));
+          // Attempt to re-open.
+          this.ensureWebSocket();
+        };
+        webSocket.onopen = () => {
+          this.webSocketState = 'CONNECTED';
+          resolve();
+        };
+      });
+    }
+    return this.webSocket;
+  }
+  async start() {
+    if (this.did_start) {
+      return;
+    }
+    this.did_start = true;
+    await this.ensureWebSocket();
+  }
+  parseGrblStatus(response, grbl) {
+    let isMposDirty = false;
+    let isWposDirty = false;
+    response = response.replace('<', '').replace('>', '');
+    for (const field of response.split('|')) {
+      const [tag, value] = field.split(':');
+      switch (tag) {
+        case 'Door':
+          grbl.stateName = tag;
+          grbl.message = field;
+          break;
+        case 'Hold':
+          grbl.stateName = tag;
+          grbl.message = field;
+          break;
+        case 'Run':
+        case 'Jog':
+        case 'Idle':
+        case 'Home':
+        case 'Alarm':
+        case 'Check':
+        case 'Sleep':
+          grbl.stateName = tag;
+          break;
+        case 'Ln':
+          grbl.lineNumber = parseInt(value);
+          break;
+        case 'MPos':
+          grbl.mpos = value.split(',').map(function (v) {
+            return parseFloat(v);
+          });
+          isMposDirty = true;
+          break;
+        case 'WPos':
+          grbl.wpos = value.split(',').map(function (v) {
+            return parseFloat(v);
+          });
+          isWposDirty = true;
+          break;
+        case 'WCO':
+          grbl.wco = value.split(',').map(function (v) {
+            return parseFloat(v);
+          });
+          break;
+        case 'FS':
+          {
+            const rates = value.split(',');
+            grbl.feedrate = parseFloat(rates[0]);
+            grbl.spindleSpeed = parseInt(rates[1]);
+            break;
+          }
+        case 'Ov':
+          {
+            const rates = value.split(',');
+            grbl.ovr = {
+              feed: parseInt(rates[0]),
+              rapid: parseInt(rates[1]),
+              spindle: parseInt(rates[2])
+            };
+            break;
+          }
+        case 'A':
+          grbl.spindleDirection = 'M5';
+          for (const v of value) {
+            switch (v) {
+              case 'S':
+                grbl.spindleDirection = 'M3';
+                break;
+              case 'C':
+                grbl.spindleDirection = 'M4';
+                break;
+              case 'F':
+                grbl.flood = true;
+                break;
+              case 'M':
+                grbl.mist = true;
+                break;
+            }
+          }
+          break;
+        case 'SD':
+          {
+            const sdinfo = value.split(',');
+            grbl.sdPercent = parseFloat(sdinfo[0]);
+            grbl.sdName = sdinfo[1];
+            break;
+          }
+        case 'Pn':
+          // pin status
+          grbl.pins = value;
+          break;
+      }
+    }
+    if (isMposDirty) {
+      const [mx, my, mz] = grbl.mpos;
+      const [ox, oy, oz] = grbl.wco;
+      grbl.wpos = [mx - ox, my - oy, mz - oz];
+    }
+    if (isWposDirty) {
+      const [wx, wy, wz] = grbl.wpos;
+      const [ox, oy, oz] = grbl.wco;
+      grbl.mpos = [wx + ox, wy + oy, wz + oz];
+    }
+    return grbl;
+  }
+  pauseGrblStatusUpdates() {
+    this.setReportInterval(0);
+  }
+  resumeGrblStatusUpdates() {
+    this.setReportInterval(500);
+  }
+  addGrblStatusListener(listener) {
+    if (this.grblStatusListeners.size === 0) {
+      this.resumeGrblStatusUpdates();
+    }
+    this.grblStatusListeners.add(listener);
+  }
+  removeGrblStatusListener(listener) {
+    this.grblStatusListeners.delete(listener);
+    if (this.grblStatusListeners.size === 0) {
+      this.pauseGrblStatusUpdates();
+    }
+  }
+  async runAcquire() {
+    return new Promise((resolve, reject) => {
+      this.runQueue.push(resolve);
+      if (this.runQueue.length === 1) {
+        resolve();
+      }
+    });
+  }
+  runRelease() {
+    this.runQueue.shift();
+    if (this.runQueue.length > 0) {
+      // Resolve the next runAcquire promise to let the next one through.
+      const resolve = this.runQueue[0];
+      resolve();
+    }
+  }
+  async runStatus() {
+    await this.runAcquire();
+    return new Promise((resolve, reject) => {
+      const op = data => {
+        const lines = data.split('\r\n');
+        const line = lines[0];
+        console.log(`QQ/status: line=[${line}]`);
+        if (line === 'ok') {
+          resolve(line);
+          this.queries.delete(op);
+          this.runRelease();
+          return true;
+        } else if (line.startsWith('error:')) {
+          reject(line);
+          this.queries.delete(op);
+          this.runRelease();
+          return true;
+        } else {
+          return false;
+        }
+      };
+      this.queries.add(op);
+    });
+  }
+  async uploadStatus() {
+    return new Promise((resolve, reject) => {
+      const op = data => {
+        const lines = data.split('\r\n');
+        const line = lines[0];
+        console.log(`QQ/status: line=[${line}]`);
+        if (line === '[MSG:Files changed]') {
+          resolve(line);
+          this.queries.delete(op);
+          return true;
+        } else if (line.startsWith('[MSG:ERR')) {
+          reject(line);
+          this.queries.delete(op);
+          return true;
+        } else {
+          return false;
+        }
+      };
+      this.queries.add(op);
+    });
+  }
+  async upload(filename, data) {
+    try {
+      await this.start();
+      await this.pauseGrblStatusUpdates();
+      // Give time for the status update buffers to drain?
+      await this.wait(1000);
+      const formData = new FormData();
+      formData.append('path', `/${filename}`);
+      formData.append(`/${filename}S`, data.length);
+      formData.append('myfile[]', new Blob([data], {
+        type: 'text/plain'
+      }), `/${filename}`);
+      const status = this.uploadStatus();
+      await fetch(`http://${this.address}/upload`, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      });
+      await status;
+      // Give time for the upload buffers to drain?
+      await this.wait(1000);
+      await this.resumeGrblStatusUpdates();
+    } catch (error) {
+      throw error;
+    }
+  }
+  async run(commandText) {
+    try {
+      await this.start();
+      const status = this.runStatus();
+      console.log(`QQ/run: commandText=${commandText}`);
+      await fetch(`http://${this.address}/command?${new URLSearchParams({
+        commandText
+      })}`, {
+        method: 'POST',
+        body: '',
+        mode: 'no-cors'
+      });
+      return status;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async uploadAndRun(data) {
+    await this.upload('tmp.gcode', data);
+    await this.run(`G54`); // Use the first coordinate system.
+    await this.run(`$SD/Run=tmp.gcode`);
+    console.log(`QQ/runCode/run/done`);
+  }
+  async realtime(commandText) {
+    try {
+      await this.start();
+      await fetch(`http://${this.address}/command?${new URLSearchParams({
+        commandText
+      })}`, {
+        method: 'POST',
+        body: '',
+        mode: 'no-cors'
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+  async home() {
+    await this.run('$H');
+  }
+  async pause() {
+    await this.realtime('!');
+  }
+  async reboot() {
+    await this.realtime('$Bye');
+  }
+  async resume() {
+    await this.realtime('~');
+  }
+  async reset() {
+    await this.realtime('\x18');
+  }
+  async setReportInterval(ms) {
+    await this.run(`$Report/Interval=${ms}`);
+  }
+}
+const espWebUiBridges = new Map();
+const getCnc = config => {
+  switch (config.type) {
+    case 'EspWebUi':
+      {
+        const {
+          ip
+        } = config;
+        if (!espWebUiBridges.has(ip)) {
+          espWebUiBridges.set(ip, new EspWebUiBridge(ip));
+        }
+        return espWebUiBridges.get(ip);
+      }
+  }
+};
+
+class MakeEspWebUi extends ReactDOM$3.PureComponent {
+  static get propTypes() {
+    return {
+      ip: propTypes$2.exports.string,
+      path: propTypes$2.exports.string,
+      workspace: propTypes$2.exports.string
+    };
+  }
+  constructor(props) {
+    super();
+    this.cpos = [0, 0, undefined];
+    this.cposRef = /*#__PURE__*/p$1();
+    this.cursorRef = /*#__PURE__*/p$1();
+    this.mposRef = /*#__PURE__*/p$1();
+    this.statusRef = /*#__PURE__*/p$1();
+    this.toolRef = /*#__PURE__*/p$1();
+    this.wposRef = /*#__PURE__*/p$1();
+    this.cnc = getCnc({
+      type: 'EspWebUi',
+      ip: props.ip
+    });
+  }
+  componentWillUnmount() {
+    if (this.listener) {
+      this.cnc.removeGrblStatusListener(this.listener);
+    }
+  }
+  componentDidMount() {
+    this.listener = grbl => this.updateStatus(grbl);
+    this.cnc.addGrblStatusListener(this.listener);
+  }
+  updateStatus(grbl) {
+    if (this.statusRef.current) {
+      this.statusRef.current.innerText = JSON.stringify(grbl);
+    }
+    if (this.toolRef.current) {
+      const [mx, my] = this.cnc.grbl.mpos;
+      this.toolRef.current.setAttribute('cx', mx);
+      this.toolRef.current.setAttribute('cy', my);
+      if (this.cnc.grbl.spindleSpeed === 0) {
+        this.toolRef.current.setAttribute('fill', 'black');
+      } else {
+        this.toolRef.current.setAttribute('fill', 'red');
+      }
+    }
+    if (this.mposRef.current) {
+      const [mx, my, mz] = this.cnc.grbl.mpos;
+      this.mposRef.current.innerText = `${mx} ${my} ${mz}`;
+    }
+    if (this.wposRef.current) {
+      const [wx, wy, wz] = this.cnc.grbl.mpos;
+      this.wposRef.current.innerText = `${wx} ${wy} ${wz}`;
+    }
+  }
+  setCpos(x, y, z = this.cpos[2]) {
+    this.cpos = [x, y, z];
+    if (this.cposRef.current) {
+      this.cposRef.current.innerText = JSON.stringify(this.cpos);
+    }
+    if (this.cursorRef.current) {
+      this.cursorRef.current.setAttribute('transform', `translate(${x},${y})`);
+    }
+  }
+  getCposCode() {
+    const [x = 0, y = 0, z] = this.cpos;
+    if (z === undefined) {
+      return `X${x}Y${y}`;
+    } else {
+      return `X${x}Y${y}Z${z}`;
+    }
+  }
+  async zeroWorkCoordinatesAtCursor() {
+    // Zero the first coordinate system at this offset.
+    await this.cnc.run('G10L20P1X0Y0Z0');
+  }
+  async jogToCursor() {
+    // Jog in machine coordinates.
+    await this.cnc.run(`$Jog=G53G91${this.getCposCode()}F5000`);
+  }
+  render() {
+    const {
+      ip
+    } = this.props;
+    const setCpos = e => {
+      if (e.key !== 'enter' && e.key !== 'j' && e.key !== 'w') {
+        return;
+      }
+      const value = document.getElementById('make/cpos/set').value;
+      const [x, y, z] = value.split(',');
+      if (z === undefined) {
+        this.setCpos(Number(x), Number(y));
+      } else {
+        this.setCpos(Number(x), Number(y), Number(z));
+      }
+      switch (e.key) {
+        case 'j':
+          this.jogToCursor();
+          e.preventDefault();
+          e.stopPropagation();
+          break;
+        case 'w':
+          this.zeroWorkCoordinatesAtCursor();
+          e.preventDefault();
+          e.stopPropagation();
+          break;
+      }
+    };
+    const result = v$1("div", null, "IP Address", v$1("div", null, ip), "Machine position", v$1("div", {
+      id: "make/mpos",
+      ref: this.mposRef
+    }, "0 0 0"), "Work position", v$1("div", {
+      id: "make/wpos",
+      ref: this.wposRef
+    }, "0 0 0"), "Cursor position", v$1("div", null, v$1("span", {
+      id: "make/cpos",
+      ref: this.cposRef
+    }, JSON.stringify(this.cpos)), v$1("span", null, v$1("input", {
+      id: "make/cpos/set",
+      onKeyDown: setCpos
+    }))), v$1("svg", {
+      id: "make/svg",
+      width: "300",
+      height: "300",
+      style: "border: solid black 1px",
+      onClick: ({
+        offsetX,
+        offsetY
+      }) => this.setCpos(offsetX, 300 - offsetY)
+    }, v$1("g", {
+      transform: "translate(0,300)"
+    }, v$1("g", {
+      transform: "scale(1,-1)"
+    }, v$1("circle", {
+      id: "make/svg/tool",
+      cx: "0",
+      cy: "0",
+      r: "6",
+      ref: this.toolRef
+    }), v$1("g", {
+      ref: this.cursorRef
+    }, v$1("path", {
+      stroke: "green",
+      id: "make/svg/cursor",
+      d: "M -5 0 L 5 0 M 0 -5 L 0 5"
+    }))))), v$1("br", null), v$1(ButtonGroup, null, v$1(Button, {
+      onClick: event => this.cnc.home()
+    }, v$1("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "16",
+      height: "16",
+      fill: "currentColor",
+      class: "bi bi-house",
+      viewBox: "0 0 16 16"
+    }, v$1("path", {
+      d: "M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
+    }))), v$1(Button, {
+      onClick: event => this.cnc.pause()
+    }, v$1("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "16",
+      height: "16",
+      fill: "currentColor",
+      class: "bi bi-pause",
+      viewBox: "0 0 16 16"
+    }, v$1("path", {
+      d: "M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"
+    }))), v$1(Button, {
+      onClick: event => this.cnc.resume()
+    }, v$1("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "16",
+      height: "16",
+      fill: "currentColor",
+      class: "bi bi-caret-right",
+      viewBox: "0 0 16 16"
+    }, v$1("path", {
+      d: "M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"
+    }))), v$1(Button, {
+      onClick: event => this.cnc.reset()
+    }, v$1("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "16",
+      height: "16",
+      fill: "currentColor",
+      class: "bi bi-bootstrap-reboot",
+      viewBox: "0 0 16 16"
+    }, v$1("path", {
+      d: "M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 1 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.8 6.8 0 0 0 1.16 8z"
+    }), v$1("path", {
+      d: "M6.641 11.671V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352zm0-3.75V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324z"
+    }))), v$1(Button, {
+      onClick: () => this.jogToCursor()
+    }, "jog"), v$1(Button, {
+      onClick: () => this.cnc.run('$Jog=G91X-10F5000')
+    }, "l"), v$1(Button, {
+      onClick: () => this.cnc.run('$Jog=G91X10F5000')
+    }, "r")), v$1("div", {
+      ref: this.statusRef
+    }));
+    return result;
+  }
+}
 
 /**
  * Returns the owner document of a given element.
@@ -43575,6 +44231,7 @@ class DownloadNote extends ReactDOM$3.PureComponent {
   static get propTypes() {
     return {
       download: propTypes$2.exports.object,
+      runGcode: propTypes$2.exports.func,
       selected: propTypes$2.exports.boolean,
       style: propTypes$2.exports.object,
       workspace: propTypes$2.exports.string
@@ -43583,6 +44240,7 @@ class DownloadNote extends ReactDOM$3.PureComponent {
   render() {
     const {
       download,
+      runGcode,
       selected,
       style = {},
       workspace
@@ -43619,6 +44277,29 @@ class DownloadNote extends ReactDOM$3.PureComponent {
       }), v$1("path", {
         d: "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
       })), ' ', filename));
+      if (filename.endsWith('.gcode')) {
+        buttons.push(v$1(Button, {
+          onClick: e => runGcode({
+            e,
+            path,
+            data,
+            filename,
+            type,
+            workspace
+          })
+        }, v$1("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          class: "bi bi-upload",
+          viewBox: "0 0 16 16"
+        }, v$1("path", {
+          d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
+        }), v$1("path", {
+          d: "M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"
+        }))));
+      }
     }
     const ref = selected && /*#__PURE__*/p$1();
     return v$1(ButtonGroup, {
@@ -46628,6 +47309,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
       note: propTypes$2.exports.object,
       notebookPath: propTypes$2.exports.string,
       onClickView: propTypes$2.exports.func,
+      runGcode: propTypes$2.exports.func,
       selected: propTypes$2.exports.boolean,
       workspace: propTypes$2.exports.string
     };
@@ -46637,6 +47319,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
       notebookPath,
       note,
       onClickView,
+      runGcode,
       workspace
     } = this.props;
     const {
@@ -46669,6 +47352,7 @@ class ViewNote extends ReactDOM$3.PureComponent {
       downloadNote = v$1(DownloadNote, {
         key: note.hash,
         download: download,
+        runGcode: runGcode,
         workspace: workspace
       });
     }
@@ -46693,6 +47377,7 @@ class Section extends ReactDOM$3.PureComponent {
       onClickView: propTypes$2.exports.func,
       onKeyDown: propTypes$2.exports.func,
       path: propTypes$2.exports.string,
+      runGcode: propTypes$2.exports.func,
       section: propTypes$2.exports.object,
       workspace: propTypes$2.exports.string
     };
@@ -46705,6 +47390,7 @@ class Section extends ReactDOM$3.PureComponent {
         onChange,
         onClickView,
         onKeyDown,
+        runGcode,
         section,
         workspace
       } = this.props;
@@ -46716,6 +47402,7 @@ class Section extends ReactDOM$3.PureComponent {
       const downloads = section.downloads.map(note => v$1(DownloadNote, {
         key: note.hash,
         download: note.download,
+        runGcode: runGcode,
         workspace: workspace
       }));
       const errors = section.errors.map((note, key) => v$1(Card$1.Body, {
@@ -46733,6 +47420,7 @@ class Section extends ReactDOM$3.PureComponent {
         key: note.hash,
         note: note,
         onClickView: onClickView,
+        runGcode: runGcode,
         workspace: workspace
       }));
       const editor = v$1(AceEditNote, {
@@ -46774,6 +47462,7 @@ class Notebook extends ReactDOM$3.PureComponent {
       onKeyDown: propTypes$2.exports.func,
       notebookPath: propTypes$2.exports.string,
       notebookText: propTypes$2.exports.string,
+      runGcode: propTypes$2.exports.func,
       state: propTypes$2.exports.string,
       version: propTypes$2.exports.number,
       workspace: propTypes$2.exports.string
@@ -46786,6 +47475,7 @@ class Notebook extends ReactDOM$3.PureComponent {
         onChange,
         onClickView,
         onKeyDown,
+        runGcode,
         sections,
         workspace
       } = this.props;
@@ -46798,6 +47488,7 @@ class Notebook extends ReactDOM$3.PureComponent {
           onChange: onChange,
           onClickView: onClickView,
           onKeyDown: onKeyDown,
+          runGcode: runGcode,
           section: section,
           workspace: workspace
         }));
@@ -47244,8 +47935,31 @@ const defaultModelConfig = {
       id: 'Make',
       type: 'tab',
       name: 'Make',
+      weight: 300,
+      enableDeleteWhenEmpty: false,
       component: 'Make',
-      enableClose: false
+      config: {
+        model: {
+          global: {
+            tabSetTabLocation: 'top'
+          },
+          borders: [],
+          layout: {
+            type: 'row',
+            id: 'Make/Tabs',
+            children: [{
+              type: 'tabset',
+              id: 'Make/Tabset',
+              children: [{
+                id: 'Make/Tabset/Tab',
+                type: 'tab',
+                name: '+',
+                component: 'Make/Tabset/Tab'
+              }]
+            }]
+          }
+        }
+      }
     }, {
       id: 'Share',
       type: 'tab',
@@ -47381,6 +48095,7 @@ class App extends ReactDOM$3.Component {
     };
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
     this.layoutRef = /*#__PURE__*/ReactDOM$3.createRef();
+    this.makeLayoutRef = /*#__PURE__*/ReactDOM$3.createRef();
     this.Draft = {};
     this.Draft.append = data => {
       this.Draft.change(this.Draft.getCode() + data);
@@ -47620,18 +48335,16 @@ class App extends ReactDOM$3.Component {
       await animationFrame();
       this.View.store();
     };
-    this.Notebook.clickMake = async ({
-      path,
-      id,
-      sourceLocation
-    }) => {
-      await this.updateState({
-        Make: {
-          path,
-          id,
-          sourceLocation
-        }
-      });
+    this.Notebook.clickMake = async e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const {
+        model
+      } = this.state;
+      // This is a bit of a hack, since selectTab toggles.
+      model.getNodeById('Make').getParent()._setSelected(-1);
+      model.doAction(FlexLayout.Actions.selectTab('Make'));
+      await animationFrame();
     };
     this.Notebook.updateSections = async (path, workspace) => {
       const notebookFile = `source/${path}`;
@@ -48540,6 +49253,43 @@ class App extends ReactDOM$3.Component {
       } = this.state;
       NotebookSections.get(id).source = code;
     };
+    const runGcode = async ({
+      e,
+      path,
+      data,
+      workspace
+    }) => {
+      const {
+        model
+      } = this.state;
+      await this.Notebook.clickMake(e);
+      // Find the active Cnc (if any).
+      const makeNode = model.getNodeById('Make');
+      const subModel = makeNode.getExtraData().model;
+      const tabsetNode = subModel.getNodeById('Make/Tabset');
+      const selected = tabsetNode.getSelected();
+      if (selected === -1) {
+        return;
+      }
+      const tabNode = tabsetNode.getChildren()[selected];
+      if (tabNode.id === 'Make/Tabset/Tab') {
+        return;
+      }
+      const {
+        ip,
+        type
+      } = tabNode.getConfig();
+      const cnc = getCnc({
+        ip,
+        type
+      });
+      if (path && !data) {
+        data = await readOrWatch(path, {
+          workspace
+        });
+      }
+      await cnc.uploadAndRun(data);
+    };
     this.factory = node => {
       switch (node.getComponent()) {
         case 'Workspace':
@@ -48647,9 +49397,7 @@ class App extends ReactDOM$3.Component {
             }, "Upload from Computer"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Workspace"), v$1(Card$1.Text, null, v$1(Button, {
               variant: "primary",
               onClick: this.Workspace.reset
-            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
-              QQcontrolId: "AddLocalFilesystemPrefixId"
-            }, v$1(Form$1.Control, {
+            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, null, v$1(Form$1.Control, {
               id: "AddLocalFilesystemPrefix",
               placeholder: "Prefix",
               value: ""
@@ -48660,6 +49408,79 @@ class App extends ReactDOM$3.Component {
                 this.Workspace.setLocalFilesystem(document.getElementById('AddLocalFilesystemPrefix').value, handle);
               }
             }, "Add Local Filesystem"), localFilesystemEntries)))));
+          }
+        case 'Make':
+          {
+            try {
+              let model = node.getExtraData().model;
+              if (model == null) {
+                node.getExtraData().model = FlexLayout.Model.fromJson(node.getConfig().model);
+                model = node.getExtraData().model;
+                // save submodel on save event
+                node.setEventListener('save', p => {
+                  this.state.model.doAction(FlexLayout.Actions.updateNodeAttributes(node.getId(), {
+                    config: {
+                      model: node.getExtraData().model.toJson()
+                    }
+                  }));
+                  //  node.getConfig().model = node.getExtraData().model.toJson();
+                });
+              }
+              return v$1(FlexLayout.Layout, {
+                model: model,
+                factory: this.factory,
+                ref: this.makeLayoutRef,
+                onModelChange: this.Model.change
+              });
+            } catch (error) {
+              console.log(error.stack);
+              return;
+            }
+          }
+        case 'Make/Tabset/Tab':
+          {
+            const addMachine = type => {
+              const name = document.getElementById('Make/Tabset/Tab/Name').value;
+              const ip = document.getElementById('Make/Tabset/Tab/IP').value;
+              const id = new Date().getTime();
+              const nodeId = `Make/Tabset/Tab/${id}`;
+              this.makeLayoutRef.current.addTabToTabSet('Make/Tabset', {
+                id: nodeId,
+                type: 'tab',
+                name,
+                component: `Make/Tabset/Tab/${type}`,
+                config: {
+                  ip,
+                  type
+                }
+              });
+            };
+            return v$1(Form$1, null, v$1(Form$1.Control, {
+              id: "Make/Tabset/Tab/Name",
+              placeholder: "name"
+            }), v$1(Form$1.Control, {
+              id: "Make/Tabset/Tab/IP",
+              placeholder: "IP Address"
+            }), v$1(Button, {
+              onClick: () => addMachine('EspWebUi')
+            }, "Add ESP WebUI Machine"));
+          }
+        case 'Make/Tabset/Tab/EspWebUi':
+          {
+            const {
+              workspace
+            } = this.props;
+            const {
+              View = {}
+            } = this.state;
+            const {
+              ip
+            } = node.getConfig();
+            return v$1(MakeEspWebUi, {
+              ip: ip,
+              path: View.path,
+              workspace: workspace
+            });
           }
         case 'Notebook':
           {
@@ -48681,6 +49502,7 @@ class App extends ReactDOM$3.Component {
                     onChange: onCodeChange,
                     onClickView: this.Notebook.clickView,
                     onKeyDown: e => this.onKeyDown(e),
+                    runGcode: e => runGcode(e),
                     sections: NotebookSections,
                     version: NotebookVersion,
                     workspace: workspace
@@ -48706,6 +49528,7 @@ class App extends ReactDOM$3.Component {
                     onClickView: this.Notebook.clickView,
                     onChange: onCodeChange,
                     onKeyDown: e => this.onKeyDown(e),
+                    runGcode: e => runGcode(e),
                     sections: NotebookSections,
                     version: NotebookVersion,
                     workspace: workspace

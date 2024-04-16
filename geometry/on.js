@@ -31,8 +31,7 @@ export const on = (geometry, selection, op = (g) => g) => {
   const results = [];
   for (const { inputLeaf, localInputLeaf, global } of onPre(
     geometry,
-    selection,
-    op
+    selection
   )) {
     const localOutputLeaf = op(localInputLeaf);
     results.push({ inputLeaf, localOutputLeaf, global });

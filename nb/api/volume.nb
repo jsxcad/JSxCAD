@@ -9,9 +9,9 @@ See: [area](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/area.
 `;
 
 Box(1, 1, 1)
-  .note("Box(1, 1, 1).volume((value) => note('' + value)")
-  .volume((value) => note('' + value));
+  .note("Box(1, 1, 1).volume((value) => note(value.toFixed(2))")
+  .volume((value) => note(value.toFixed(2)));
 
 Orb(1)
-  .note("Orb(1).volume((value) => note('' + value))")
-  .volume((value) => note('' + value));
+  .note("Orb(1).volume((value) => note(value.toFixed(2)))")
+  .volume((value) => note(value.toFixed(2)));

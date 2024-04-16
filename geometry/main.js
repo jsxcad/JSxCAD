@@ -6,6 +6,7 @@ export {
   rotateZ,
   rotateZs,
 } from './rotate.js';
+export { turnX, turnXs, turnY, turnYs, turnZ, turnZs } from './turn.js';
 export { scale, scaleLazy, scaleToFit } from './scale.js';
 
 export { replacer, rewrite, visit } from './tagged/visit.js';
@@ -54,6 +55,7 @@ export { approximate } from './approximate.js';
 export { allTags } from './tagged/allTags.js';
 export { assemble } from './tagged/assemble.js';
 export { at } from './at.js';
+export { base } from './base.js';
 export { bb } from './bb.js';
 export { bend } from './bend.js';
 export { by } from './by.js';

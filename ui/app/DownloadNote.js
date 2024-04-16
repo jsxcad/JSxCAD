@@ -20,6 +20,7 @@ export class DownloadNote extends React.PureComponent {
   static get propTypes() {
     return {
       download: PropTypes.object,
+      runGcode: PropTypes.func,
       selected: PropTypes.boolean,
       style: PropTypes.object,
       workspace: PropTypes.string,
@@ -27,7 +28,7 @@ export class DownloadNote extends React.PureComponent {
   }
 
   render() {
-    const { download, selected, style = {}, workspace } = this.props;
+    const { download, runGcode, selected, style = {}, workspace } = this.props;
     const buttons = [];
     for (let { path, base64Data, data, filename, type } of download.entries) {
       if (base64Data) {
@@ -53,6 +54,27 @@ export class DownloadNote extends React.PureComponent {
           {filename}
         </Button>
       );
+      if (filename.endsWith('.gcode')) {
+        buttons.push(
+          <Button
+            onClick={(e) =>
+              runGcode({ e, path, data, filename, type, workspace })
+            }
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-upload"
+              viewBox="0 0 16 16"
+            >
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
+            </svg>
+          </Button>
+        );
+      }
     }
     const ref = selected && createRef();
     return (

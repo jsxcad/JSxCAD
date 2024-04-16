@@ -11,7 +11,8 @@ export const computeToolpath = (
   toolCutDepth = 1,
   annealingMax = 1,
   annealingMin = 0.01,
-  annealingDecay = 0.99
+  annealingDecay = 0.99,
+  simple = false
 ) =>
   withCgalGeometry('computeToolpath', inputs, (cgalGeometry, g) => {
     const status = g.ComputeToolpath(
@@ -22,7 +23,8 @@ export const computeToolpath = (
       Number(toolCutDepth),
       Number(annealingMax),
       Number(annealingMin),
-      Number(annealingDecay)
+      Number(annealingDecay),
+      simple
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:

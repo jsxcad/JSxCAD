@@ -14,7 +14,8 @@ export const computeToolpath = (
   toolCutDepth,
   annealingMax,
   annealingMin,
-  annealingDecay
+  annealingDecay,
+  { simple = false } = {}
 ) => {
   const inputs = [];
   linearize(geometry, filter, inputs);
@@ -28,7 +29,8 @@ export const computeToolpath = (
     toolCutDepth,
     annealingMax,
     annealingMin,
-    annealingDecay
+    annealingDecay,
+    simple
   );
   return taggedGroup({}, ...outputs);
 };

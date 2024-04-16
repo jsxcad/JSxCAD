@@ -14,6 +14,7 @@ export class Notebook extends React.PureComponent {
       onKeyDown: PropTypes.func,
       notebookPath: PropTypes.string,
       notebookText: PropTypes.string,
+      runGcode: PropTypes.func,
       state: PropTypes.string,
       version: PropTypes.number,
       workspace: PropTypes.string,
@@ -27,6 +28,7 @@ export class Notebook extends React.PureComponent {
         onChange,
         onClickView,
         onKeyDown,
+        runGcode,
         sections,
         workspace,
       } = this.props;
@@ -41,6 +43,7 @@ export class Notebook extends React.PureComponent {
             onChange={onChange}
             onClickView={onClickView}
             onKeyDown={onKeyDown}
+            runGcode={runGcode}
             section={section}
             workspace={workspace}
           />

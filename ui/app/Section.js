@@ -23,6 +23,7 @@ export class Section extends React.PureComponent {
       onClickView: PropTypes.func,
       onKeyDown: PropTypes.func,
       path: PropTypes.string,
+      runGcode: PropTypes.func,
       section: PropTypes.object,
       workspace: PropTypes.string,
     };
@@ -30,8 +31,16 @@ export class Section extends React.PureComponent {
 
   render() {
     try {
-      const { id, path, onChange, onClickView, onKeyDown, section, workspace } =
-        this.props;
+      const {
+        id,
+        path,
+        onChange,
+        onClickView,
+        onKeyDown,
+        runGcode,
+        section,
+        workspace,
+      } = this.props;
       const controls = section.controls.map((note) => (
         <ControlNote key={note.hash} note={note} workspace={workspace} />
       ));
@@ -39,6 +48,7 @@ export class Section extends React.PureComponent {
         <DownloadNote
           key={note.hash}
           download={note.download}
+          runGcode={runGcode}
           workspace={workspace}
         />
       ));
@@ -57,6 +67,7 @@ export class Section extends React.PureComponent {
           key={note.hash}
           note={note}
           onClickView={onClickView}
+          runGcode={runGcode}
           workspace={workspace}
         />
       ));

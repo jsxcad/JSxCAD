@@ -10,13 +10,14 @@ export class ViewNote extends React.PureComponent {
       note: PropTypes.object,
       notebookPath: PropTypes.string,
       onClickView: PropTypes.func,
+      runGcode: PropTypes.func,
       selected: PropTypes.boolean,
       workspace: PropTypes.string,
     };
   }
 
   render() {
-    const { notebookPath, note, onClickView, workspace } = this.props;
+    const { notebookPath, note, onClickView, runGcode, workspace } = this.props;
     const { sourceLocation, view } = note;
     const { download, name = '', width } = view;
     const onClick = (event) => {
@@ -41,6 +42,7 @@ export class ViewNote extends React.PureComponent {
         <DownloadNote
           key={note.hash}
           download={download}
+          runGcode={runGcode}
           workspace={workspace}
         />
       );

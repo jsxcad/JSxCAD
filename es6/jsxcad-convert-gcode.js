@@ -173,9 +173,9 @@ const toGcode = async (
 
   cM5();
   cG0({ z: jumpHeight });
-  cG0({ x: 0, y: 0 });
+  // cG0({ x: 0, y: 0 });
   codes.push('');
-  return new TextEncoder('utf8').encode(codes.join('\n'));
+  return new TextEncoder('utf8').encode(codes.join('\r\n'));
 };
 
 export { toGcode };

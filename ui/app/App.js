@@ -41,6 +41,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import JsEditorUi from './JsEditorUi.js';
 import ListGroup from 'react-bootstrap/ListGroup';
+import { MakeEspWebUi } from './Make.js';
 import Notebook from './Notebook.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
@@ -52,6 +53,7 @@ import Table from 'react-bootstrap/Table';
 import TableOfContents from './TableOfContents.js';
 import { animationFrame } from './schedule.js';
 import { execute } from '@jsxcad/api';
+import { getCnc } from './Cnc.js';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import { toEcmascript } from '@jsxcad/compiler';
 
@@ -106,8 +108,35 @@ const defaultModelConfig = {
           id: 'Make',
           type: 'tab',
           name: 'Make',
+          weight: 300,
+          enableDeleteWhenEmpty: false,
           component: 'Make',
-          enableClose: false,
+          config: {
+            model: {
+              global: {
+                tabSetTabLocation: 'top',
+              },
+              borders: [],
+              layout: {
+                type: 'row',
+                id: 'Make/Tabs',
+                children: [
+                  {
+                    type: 'tabset',
+                    id: 'Make/Tabset',
+                    children: [
+                      {
+                        id: 'Make/Tabset/Tab',
+                        type: 'tab',
+                        name: '+',
+                        component: 'Make/Tabset/Tab',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
         {
           id: 'Share',
@@ -255,6 +284,7 @@ class App extends React.Component {
       askService(this.serviceSpec, question, transfer, context).answer;
 
     this.layoutRef = React.createRef();
+    this.makeLayoutRef = React.createRef();
 
     this.Draft = {};
 
@@ -461,8 +491,14 @@ class App extends React.Component {
       this.View.store();
     };
 
-    this.Notebook.clickMake = async ({ path, id, sourceLocation }) => {
-      await this.updateState({ Make: { path, id, sourceLocation } });
+    this.Notebook.clickMake = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const { model } = this.state;
+      // This is a bit of a hack, since selectTab toggles.
+      model.getNodeById('Make').getParent()._setSelected(-1);
+      model.doAction(FlexLayout.Actions.selectTab('Make'));
+      await animationFrame();
     };
 
     this.Notebook.updateSections = async (path, workspace) => {
@@ -1298,6 +1334,29 @@ class App extends React.Component {
       NotebookSections.get(id).source = code;
     };
 
+    const runGcode = async ({ e, path, data, workspace }) => {
+      const { model } = this.state;
+      await this.Notebook.clickMake(e);
+      // Find the active Cnc (if any).
+      const makeNode = model.getNodeById('Make');
+      const subModel = makeNode.getExtraData().model;
+      const tabsetNode = subModel.getNodeById('Make/Tabset');
+      const selected = tabsetNode.getSelected();
+      if (selected === -1) {
+        return;
+      }
+      const tabNode = tabsetNode.getChildren()[selected];
+      if (tabNode.id === 'Make/Tabset/Tab') {
+        return;
+      }
+      const { ip, type } = tabNode.getConfig();
+      const cnc = getCnc({ ip, type });
+      if (path && !data) {
+        data = await readOrWatch(path, { workspace });
+      }
+      await cnc.uploadAndRun(data);
+    };
+
     this.factory = (node) => {
       switch (node.getComponent()) {
         case 'Workspace': {
@@ -1499,7 +1558,7 @@ class App extends React.Component {
                   <Card.Title>Local Filesystem</Card.Title>
                   <Card.Text>
                     <Form>
-                      <Form.Group QQcontrolId="AddLocalFilesystemPrefixId">
+                      <Form.Group>
                         <Form.Control
                           id="AddLocalFilesystemPrefix"
                           placeholder="Prefix"
@@ -1527,6 +1586,73 @@ class App extends React.Component {
             </div>
           );
         }
+        case 'Make': {
+          try {
+            let model = node.getExtraData().model;
+            if (model == null) {
+              node.getExtraData().model = FlexLayout.Model.fromJson(
+                node.getConfig().model
+              );
+              model = node.getExtraData().model;
+              // save submodel on save event
+              node.setEventListener('save', (p) => {
+                this.state.model.doAction(
+                  FlexLayout.Actions.updateNodeAttributes(node.getId(), {
+                    config: { model: node.getExtraData().model.toJson() },
+                  })
+                );
+                //  node.getConfig().model = node.getExtraData().model.toJson();
+              });
+            }
+            return (
+              <FlexLayout.Layout
+                model={model}
+                factory={this.factory}
+                ref={this.makeLayoutRef}
+                onModelChange={this.Model.change}
+              />
+            );
+          } catch (error) {
+            console.log(error.stack);
+            return;
+          }
+        }
+        case 'Make/Tabset/Tab': {
+          const addMachine = (type) => {
+            const name = document.getElementById('Make/Tabset/Tab/Name').value;
+            const ip = document.getElementById('Make/Tabset/Tab/IP').value;
+            const id = new Date().getTime();
+            const nodeId = `Make/Tabset/Tab/${id}`;
+            this.makeLayoutRef.current.addTabToTabSet('Make/Tabset', {
+              id: nodeId,
+              type: 'tab',
+              name,
+              component: `Make/Tabset/Tab/${type}`,
+              config: { ip, type },
+            });
+          };
+          return (
+            <Form>
+              <Form.Control id="Make/Tabset/Tab/Name" placeholder="name" />
+              <Form.Control id="Make/Tabset/Tab/IP" placeholder="IP Address" />
+              <Button onClick={() => addMachine('EspWebUi')}>
+                Add ESP WebUI Machine
+              </Button>
+            </Form>
+          );
+        }
+        case 'Make/Tabset/Tab/EspWebUi': {
+          const { workspace } = this.props;
+          const { View = {} } = this.state;
+          const { ip } = node.getConfig();
+          return (
+            <MakeEspWebUi
+              ip={ip}
+              path={View.path}
+              workspace={workspace}
+            ></MakeEspWebUi>
+          );
+        }
         case 'Notebook': {
           const path = this.Notebook.getSelectedPath();
           const {
@@ -1547,6 +1673,7 @@ class App extends React.Component {
                     onChange={onCodeChange}
                     onClickView={this.Notebook.clickView}
                     onKeyDown={(e) => this.onKeyDown(e)}
+                    runGcode={(e) => runGcode(e)}
                     sections={NotebookSections}
                     version={NotebookVersion}
                     workspace={workspace}
@@ -1577,6 +1704,7 @@ class App extends React.Component {
                   onClickView={this.Notebook.clickView}
                   onChange={onCodeChange}
                   onKeyDown={(e) => this.onKeyDown(e)}
+                  runGcode={(e) => runGcode(e)}
                   sections={NotebookSections}
                   version={NotebookVersion}
                   workspace={workspace}
