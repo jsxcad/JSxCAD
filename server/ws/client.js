@@ -37,12 +37,12 @@ class JotClient {
 
   async run(module, script) {
     this.sendMessage({ op: 'run', module, script });
-    return await this.getJsonMessage();
+    return this.getJsonMessage();
   }
 
   async read(pathname) {
     this.sendMessage({ op: 'read', pathname });
-    return await this.getMessage();
+    return this.getMessage();
   }
 
   async close() {
@@ -51,14 +51,12 @@ class JotClient {
 }
 
 const run = async () => {
-  const decoder = new TextDecoder();
   const c = new JotClient('ws://localhost:8080');
   await c.isOpen;
   const script = `Box(10).cut(Box(5)).svg('box')`;
   const notes = await c.run('$', script);
-  console.log(`QQ/script=${script}`);
   const svg = await c.read('download/svg/$/$1/$1_box');
-  console.log(`QQ/svg=${decoder.decode(svg)}`);
+  console.log({ notes, svg });
   await c.close();
 };
 

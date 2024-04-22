@@ -7,10 +7,13 @@ import {
   resolvePending,
   setupWorkspace,
 } from '@jsxcad/sys';
+
 import api, { importScript } from '@jsxcad/api';
 import { parentPort } from 'worker_threads';
 
 const run = async () => {
+  await boot();
+
   let pending = null;
   const queue = [];
 
@@ -74,7 +77,6 @@ const run = async () => {
         break;
       default:
         throw Error(`Unknown op ${op}`);
-        break;
     }
   }
 };

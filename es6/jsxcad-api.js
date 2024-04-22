@@ -2,7 +2,7 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, evalScript, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
@@ -159,8 +159,10 @@ const evaluate = async (ecmascript, { api, id, path }) => {
       'api/core/evaluate/script',
       `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`
     );
-    const builder = evalScript(ecmascript, api);
-    // const builder = new Function( `{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
+    const builder = new Function(
+      `{ ${Object.keys(api).join(', ')} }`,
+      `return async () => { ${ecmascript} };`
+    );
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
     return await op();
@@ -177,6 +179,7 @@ const evaluate = async (ecmascript, { api, id, path }) => {
 const execute = async (
   script,
   {
+    api,
     evaluate,
     replay,
     path,
@@ -197,6 +200,7 @@ const execute = async (
       const replays = {};
       const exports = [];
       await toEcmascript(script, {
+        api,
         path,
         topLevel,
         updates,
@@ -330,6 +334,7 @@ const importScript = async (
       replay = (script) => evaluate(script, { api, path });
     }
     const builtModule = await execute(scriptText, {
+      api,
       evaluate: evaluate$1,
       replay,
       path,
@@ -441,11 +446,24 @@ const api = {
   ...mathApi,
   ...shapeApi,
   ...notesApi,
+  JSON: {
+    parse: JSON.parse,
+    stringify: JSON.stringify,
+  },
+  Math: {
+    PI: Math.PI,
+    pow: Math.pow,
+    sqrt: Math.sqrt,
+  },
+  console: {
+    log: console.log,
+  },
   control,
   readObj,
   readOff,
   setToSourceFromNameFunction,
   toSvg,
+  undefined,
 };
 
 const importModule = buildImportModule(api);

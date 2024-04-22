@@ -487,8 +487,12 @@ const processProgram = async (program, options) => {
     }
     const update = options.updates[key];
     if (update.generateProgram) {
-      update.program = await update.generateProgram();
-      delete update.generateProgram;
+      try {
+        update.program = await update.generateProgram();
+        delete update.generateProgram;
+      } catch (error) {
+        throw error;
+      }
     }
   }
 };
@@ -508,16 +512,42 @@ export const toEcmascript = async (
     workspace,
   } = {}
 ) => {
-  const lines = noLines ? undefined : script.split('\n');
-  const ast = parse(script, parseOptions);
+  try {
+    const lines = noLines ? undefined : script.split('\n');
+    const ast = parse(script, parseOptions);
 
-  // Start by loading the controls
-  const controls = (await read(`control/${path}`, { workspace })) || {};
+    // Start by loading the controls
+    const controls = (await read(`control/${path}`, { workspace })) || {};
 
-  // Do it twice, so that topLevel is populated.
-  // FIX: Don't actually do it twice -- just populate topLevel before calling generateCode.
-  {
-    // Keep these local for the first run.
+    // Do it twice, so that topLevel is populated.
+    // FIX: Don't actually do it twice -- just populate topLevel before calling generateCode.
+    {
+      // Keep these local for the first run.
+      let topLevelExpressionCount = 0;
+      const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
+
+      const out = [];
+      const exportNames = [];
+      const sideEffectors = [];
+
+      await processProgram(ast, {
+        api,
+        lines,
+        out,
+        updates,
+        replays,
+        exportNames,
+        controls,
+        path,
+        topLevel,
+        nextTopLevelExpressionId,
+        sideEffectors,
+        exports,
+        imports,
+        indirectImports,
+      });
+    }
+
     let topLevelExpressionCount = 0;
     const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
 
@@ -541,46 +571,24 @@ export const toEcmascript = async (
       imports,
       indirectImports,
     });
-  }
 
-  let topLevelExpressionCount = 0;
-  const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
-
-  const out = [];
-  const exportNames = [];
-  const sideEffectors = [];
-
-  await processProgram(ast, {
-    api,
-    lines,
-    out,
-    updates,
-    replays,
-    exportNames,
-    controls,
-    path,
-    topLevel,
-    nextTopLevelExpressionId,
-    sideEffectors,
-    exports,
-    imports,
-    indirectImports,
-  });
-
-  // Return the exports as an object.
-  if (exportNames.length > 0) {
-    exports.push(
-      await generateCode(
-        {
-          isNotCacheable: true,
-          dependencies: [...exportNames, ...sideEffectors],
-          id: '$exports',
-          path,
-          emitSourceLocation: false, // FIX: Hack for source location.
-          imports: [],
-        },
-        { api, topLevel, exportNames }
-      )
-    );
+    // Return the exports as an object.
+    if (exportNames.length > 0) {
+      exports.push(
+        await generateCode(
+          {
+            isNotCacheable: true,
+            dependencies: [...exportNames, ...sideEffectors],
+            id: '$exports',
+            path,
+            emitSourceLocation: false, // FIX: Hack for source location.
+            imports: [],
+          },
+          { api, topLevel, exportNames }
+        )
+      );
+    }
+  } catch (error) {
+    throw error;
   }
 };
