@@ -48075,14 +48075,6 @@ class App extends ReactDOM$3.Component {
         case 'log':
           return log(entry);
         case 'notes':
-          // console.log(`QQ/id: ${sourceLocation.id}`);
-          /*
-          return updateNotebookState(this, {
-            notes,
-            sourceLocation,
-            workspace,
-          });
-          */
           break;
         default:
           throw Error(`Unknown operation ${op}`);

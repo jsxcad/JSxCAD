@@ -16,14 +16,6 @@ const Track = (length) =>
 const peg = Peg().stl('peg');
 ```
 
-![Image](train.md.peg_peg.png)
-
-[peg.stl](train.peg.stl)
-
-![Image](train.md.peg_peg.png)
-
-[peg.stl](train.peg.stl)
-
 ```JavaScript
 const BasePeg = (play = 0) =>
   Arc(11.5 / 2 + play)
@@ -102,10 +94,6 @@ const t70 = Track(70).stl('t70', getNot('peg'));
 ```JavaScript
 const t141 = Track(141).stl('t141', getNot('peg'));
 ```
-
-![Image](train.md.t141_t141.png)
-
-[t141.stl](train.t141.stl)
 
 ```JavaScript
 const Curve = (diameter, segments = 1) =>

@@ -237,6 +237,11 @@ export const updateNotebook = async (
     });
     await resolvePending();
     sortNotebook(notebook);
+    for (const note of notebook) {
+      if (note.error) {
+        throw new Error(note.error.text);
+      }
+    }
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',

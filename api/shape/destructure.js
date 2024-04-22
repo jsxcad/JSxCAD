@@ -119,7 +119,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
       case 'input': {
         output.push(input);
         if (input && input.geometry.geometry) {
-          throw Error(`QQ: malformedGeometry`);
+          throw Error(`Error: malformedGeometry`);
         }
         rest.push(...args);
         break;

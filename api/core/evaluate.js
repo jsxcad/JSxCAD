@@ -39,6 +39,7 @@ export const evaluate = async (ecmascript, { api, id, path }) => {
 export const execute = async (
   script,
   {
+    api,
     evaluate,
     replay,
     path,
@@ -59,6 +60,7 @@ export const execute = async (
       const replays = {};
       const exports = [];
       await toEcmascript(script, {
+        api,
         path,
         topLevel,
         updates,

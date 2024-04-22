@@ -9,7 +9,7 @@ import { webWorker } from './webWorker.js';
 
 let serviceId = 0;
 
-const newWorker = (spec) => {
+export const newWorker = (spec) => {
   if (isNode) {
     return nodeWorker(spec);
   } else if (isBrowser) {

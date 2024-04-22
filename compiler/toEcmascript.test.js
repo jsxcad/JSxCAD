@@ -15,7 +15,7 @@ test('Wrap and return.', async (t) => {
          let a = 10;
          return circle(foo(a));
        }`,
-    { imports, exports, updates, replays, noLines: true }
+    { api: { circle: true }, imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -55,7 +55,6 @@ return {
   main
 };
 
-
 } catch (error) { throw error; }
 `,
       ],
@@ -78,7 +77,6 @@ const foo = await $run(async () => {
   sha: '4a895d9c02e128e4fd8a43b06efc39df3250b1dc',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -114,7 +112,6 @@ const main = await $run(async () => {
   sha: '651c145e8eebd00e06775eb159836571e43964f3',
   line: 2
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -160,7 +157,6 @@ const $1 = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -175,6 +171,7 @@ test("Don't return declarations.", async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript(`let a = 10;`, {
+    api: { control: true, importModule: true },
     imports,
     exports,
     updates,
@@ -205,7 +202,6 @@ const a = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -220,6 +216,7 @@ test('Replace control with constant default.', async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript(`const length = control('length', 10, 'number');`, {
+    api: { control: true },
     imports,
     exports,
     updates,
@@ -249,7 +246,6 @@ const length = await $run(async () => {
   sha: 'fb058c1c6fcdc16667bf48f34fb6f4c49064bac4',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -296,7 +292,6 @@ const length = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -320,7 +315,7 @@ test('Control can be used with cached output.', async (t) => {
     `
 const length = control('length', 16, 'number');
 const foo = bar(length);`,
-    { imports, exports, updates, replays, noLines: true }
+    { api: { bar: true, control: true }, imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -351,7 +346,7 @@ test('Bind await to calls properly.', async (t) => {
   const exports = [];
   const updates = {};
   const replays = {};
-  await toEcmascript(`foo().bar()`, { updates, noLines: true });
+  await toEcmascript(`foo().bar()`, { api: { foo: true }, updates, noLines: true });
   t.deepEqual(
     { imports, exports, updates, replays },
     {
@@ -376,7 +371,6 @@ const $1 = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -391,6 +385,7 @@ test('Top level await.', async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript(`await foo()`, {
+    api: { foo: true },
     noLines: true,
     imports,
     exports,
@@ -421,7 +416,6 @@ const $1 = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -441,7 +435,7 @@ foo();
 // Hello.
 await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagh: 1 }, 2);
 `,
-    { imports, exports, updates, replays, noLines: true }
+    { api: { bar: true, foo: true }, imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -467,7 +461,6 @@ const $1 = await $run(async () => {
   line: 2
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -490,7 +483,6 @@ const $2 = await $run(async () => {
   line: 4
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -505,6 +497,7 @@ test('Import', async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript('import { foo } from "bar";', {
+    api: { bar: true, foo: true, importModule: true },
     imports,
     exports,
     updates,
@@ -534,7 +527,6 @@ const foo = await $run(async () => {
   sha: '7abdb5e864e76b06e553a96c19528b1b2367604b',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -580,7 +572,6 @@ const a = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -600,7 +591,6 @@ const b = await $run(async () => {
   sha: '2504d846458f7a2204ad1e6084c382111bd08b3b',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -646,7 +636,6 @@ const a = await $run(async () => {
   line: 1
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -678,7 +667,6 @@ const b = await $run(async () => {
   sha: 'a1c4d611f87b788313eda91ada2774a81e64e0bb',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -723,7 +711,6 @@ const c = await $run(async () => {
   sha: 'b6b2ce926049bb8b928989f1202cf963e041c2ed',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -798,6 +785,7 @@ test('Default Import', async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript('import Foo from "bar";', {
+    api: { importModule: true },
     imports,
     exports,
     updates,
@@ -827,7 +815,6 @@ const Foo = await $run(async () => {
   sha: '3399fa096575d2c783f995a364fe9950b1839a28',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -843,6 +830,7 @@ test('Used Import', async (t) => {
   const updates = {};
   const replays = {};
   await toEcmascript('import Foo from "bar"; const foo = Foo();', {
+    api: { importModule: true },
     imports,
     exports,
     updates,
@@ -872,7 +860,6 @@ const Foo = await $run(async () => {
   sha: '3399fa096575d2c783f995a364fe9950b1839a28',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -905,7 +892,6 @@ const foo = await $run(async () => {
   sha: '059296860b176e3d5c2b467d41a7cccf84e0ba0a',
   line: 1
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -1019,7 +1005,6 @@ const $1 = await $run(async () => {
   line: 4
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -1039,7 +1024,6 @@ const Mountain = await $run(async () => {
   sha: '9844099332903654038735bce39b0bf4d52db958',
   line: 2
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -1072,7 +1056,6 @@ const mountainView = await $run(async () => {
   sha: 'd184afa8d04d4b8d99e468a5dd039a60baaa60c1',
   line: 3
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -1150,7 +1133,6 @@ const $1 = await $run(async () => {
   line: 4
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -1170,7 +1152,6 @@ const Mountain = await $run(async () => {
   sha: 'ce3270865c37b124c55e3fa21acc4ca267626353',
   line: 2
 });
-
 
 } catch (error) { throw error; }
 `,
@@ -1204,7 +1185,6 @@ const mountainView = await $run(async () => {
   line: 3
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -1223,7 +1203,7 @@ test('Top level definitions are frozen', async (t) => {
 const a = [];
 log(a);
 `,
-    { imports, exports, updates, replays, noLines: true }
+    { api: { log: true }, imports, exports, updates, replays, noLines: true }
   );
   t.deepEqual(
     { imports, exports, updates, replays },
@@ -1261,7 +1241,6 @@ const $1 = await $run(async () => {
   line: 3
 });
 
-
 } catch (error) { throw error; }
 `,
         },
@@ -1282,11 +1261,54 @@ const a = await $run(async () => {
   line: 2
 });
 
-
 } catch (error) { throw error; }
 `,
         },
       },
     }
+  );
+});
+
+test('Unbound variables are an error if not in api', async (t) => {
+  const imports = [];
+  const exports = [];
+  const updates = {};
+  const replays = {};
+  await t.throwsAsync(() => toEcmascript(
+    `
+const a = [];
+log(b);
+`,
+    { imports, exports, updates, replays, noLines: true }
+  ), { instanceOf: Error, message: 'Unbound variable: log' });
+});
+
+test('Unbound variables are ok if in api', async (t) => {
+  const api = { log: true, b: true };
+  const imports = [];
+  const exports = [];
+  const updates = {};
+  const replays = {};
+  await t.notThrowsAsync(() => toEcmascript(
+    `
+const a = [];
+log(b);
+`,
+    { api, imports, exports, updates, replays, noLines: true }));
+});
+
+test('Arrow function parameters are not unbound variables', async (t) => {
+  const imports = [];
+  const exports = [];
+  const updates = {};
+  const replays = {};
+  await t.notThrowsAsync(
+    () =>
+      toEcmascript(
+        `
+(a) => a
+`,
+        { imports, exports, updates, replays, noLines: true }
+      )
   );
 });

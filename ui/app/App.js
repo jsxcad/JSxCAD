@@ -260,14 +260,6 @@ class App extends React.Component {
         case 'log':
           return log(entry);
         case 'notes':
-          // console.log(`QQ/id: ${sourceLocation.id}`);
-          /*
-          return updateNotebookState(this, {
-            notes,
-            sourceLocation,
-            workspace,
-          });
-*/
           break;
         default:
           throw Error(`Unknown operation ${op}`);

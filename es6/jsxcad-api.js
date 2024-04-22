@@ -2,7 +2,7 @@ import './jsxcad-api-v1-tools.js';
 import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, evalScript, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
@@ -159,10 +159,8 @@ const evaluate = async (ecmascript, { api, id, path }) => {
       'api/core/evaluate/script',
       `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`
     );
-    const builder = new Function(
-      `{ ${Object.keys(api).join(', ')} }`,
-      `return async () => { ${ecmascript} };`
-    );
+    const builder = evalScript(ecmascript, api);
+    // const builder = new Function( `{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
     // Add import to make import.meta.url available.
     const op = await builder({ ...api, import: { meta: { url: path } } });
     return await op();
@@ -318,8 +316,7 @@ const importScript = async (
     topLevel = new Map(),
     evaluate: evaluate$1,
     replay,
-    doRelease = true,
-    readCache = true,
+    updateCache = true,
     workspace,
   } = {}
 ) => {
@@ -341,7 +338,9 @@ const importScript = async (
       clearUpdateEmits,
       workspace,
     });
-    CACHED_MODULES.set(name, builtModule);
+    if (updateCache) {
+      CACHED_MODULES.set(name, builtModule);
+    }
     return builtModule;
   } catch (error) {
     throw error;
@@ -493,4 +492,4 @@ registerDynamicModule(
 
 setApi(api);
 
-export { api as default, evaluate, execute, importScript };
+export { api as default, evaluate, execute, importModule, importScript };

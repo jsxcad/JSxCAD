@@ -14,7 +14,7 @@ export {
   startTime,
 } from './profile.js';
 export { getConfig, setConfig } from './config.js';
-export { createService } from './service.js';
+export { createService, newWorker } from './service.js';
 export { getControlValue, setControlValue } from './control.js';
 export { read, readNonblocking, readOrWatch } from './read.js';
 export { ask, setHandleAskUser } from './ask.js';

@@ -123,13 +123,6 @@ class Standalone extends React.Component {
       this.setState({ [`NotebookState/${module}`]: 'idle' });
 
       removeOnEmitHandler(onEmitHandler);
-      /*
-      clearNotebookState(this, {
-        path: module,
-        workspace,
-        isToBeKept: (note) => note.version === version,
-      });
-      */
     };
 
     const onKeyDown = (e) => {
