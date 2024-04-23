@@ -179,6 +179,7 @@ const evaluate = async (ecmascript, { api, id, path }) => {
 const execute = async (
   script,
   {
+    api,
     evaluate,
     replay,
     path,
@@ -199,6 +200,7 @@ const execute = async (
       const replays = {};
       const exports = [];
       await toEcmascript(script, {
+        api,
         path,
         topLevel,
         updates,
@@ -318,8 +320,7 @@ const importScript = async (
     topLevel = new Map(),
     evaluate: evaluate$1,
     replay,
-    doRelease = true,
-    readCache = true,
+    updateCache = true,
     workspace,
   } = {}
 ) => {
@@ -333,6 +334,7 @@ const importScript = async (
       replay = (script) => evaluate(script, { api, path });
     }
     const builtModule = await execute(scriptText, {
+      api,
       evaluate: evaluate$1,
       replay,
       path,
@@ -341,7 +343,9 @@ const importScript = async (
       clearUpdateEmits,
       workspace,
     });
-    CACHED_MODULES.set(name, builtModule);
+    if (updateCache) {
+      CACHED_MODULES.set(name, builtModule);
+    }
     return builtModule;
   } catch (error) {
     throw error;
@@ -442,11 +446,24 @@ const api = {
   ...mathApi,
   ...shapeApi,
   ...notesApi,
+  JSON: {
+    parse: JSON.parse,
+    stringify: JSON.stringify,
+  },
+  Math: {
+    PI: Math.PI,
+    pow: Math.pow,
+    sqrt: Math.sqrt,
+  },
+  console: {
+    log: console.log,
+  },
   control,
   readObj,
   readOff,
   setToSourceFromNameFunction,
   toSvg,
+  undefined,
 };
 
 const importModule = buildImportModule(api);
@@ -493,4 +510,4 @@ registerDynamicModule(
 
 setApi(api);
 
-export { api as default, evaluate, execute, importScript };
+export { api as default, evaluate, execute, importModule, importScript };

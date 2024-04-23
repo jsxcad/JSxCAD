@@ -26,6 +26,7 @@ export default {
         'node-fetch':
           'export const AbortError = undefined; export default _ => _;',
         './nodeWorker.js': 'export const nodeWorker = () => {};',
+        './eval.js': `export { evalScript } from './browserEval.js';`,
         v8: 'export default {};',
       },
     }),

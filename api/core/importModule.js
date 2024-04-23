@@ -25,8 +25,7 @@ export const importScript = async (
     topLevel = new Map(),
     evaluate,
     replay,
-    doRelease = true,
-    readCache = true,
+    updateCache = true,
     workspace,
   } = {}
 ) => {
@@ -40,6 +39,7 @@ export const importScript = async (
       replay = (script) => baseEvaluate(script, { api, path });
     }
     const builtModule = await execute(scriptText, {
+      api,
       evaluate,
       replay,
       path,
@@ -48,7 +48,9 @@ export const importScript = async (
       clearUpdateEmits,
       workspace,
     });
-    CACHED_MODULES.set(name, builtModule);
+    if (updateCache) {
+      CACHED_MODULES.set(name, builtModule);
+    }
     return builtModule;
   } catch (error) {
     throw error;

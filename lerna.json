@@ -20,6 +20,7 @@
     "data/*",
     "doc",
     "geometry",
+    "server/*",
     "sys",
     "typecheck",
     "eslint-plugin-typelint",

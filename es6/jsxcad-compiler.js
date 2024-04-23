@@ -29815,14 +29815,120 @@ const strip = (ast) => {
 const collectDependencies = (declarator, sideEffectors) => {
   const dependencies = [...sideEffectors];
 
-  // FIX: This needs to exclude local bindings.
-  const Identifier = (node, state, c) => {
-    if (!dependencies.includes(node.name)) {
-      dependencies.push(node.name);
-    }
+  const dispatch = {
+    BlockStatement: (node, bound, c) => {
+      const local = new Set([...bound]);
+      for (const entry of node.body) {
+        switch (entry.type) {
+          case 'VariableDeclaration':
+            for (const declarator of entry.declarations) {
+              switch (declarator.type) {
+                case 'VariableDeclarator':
+                  recursive(declarator.id, undefined, {
+                    Identifier: (node) => local.add(node.name),
+                  });
+                  recursive(declarator.init, local, dispatch);
+                  break;
+              }
+            }
+            break;
+          case 'ForStatement':
+            for (const declarator of entry.init.declarations) {
+              switch (declarator.type) {
+                case 'VariableDeclarator':
+                  recursive(declarator.id, undefined, {
+                    Identifier: (node) => local.add(node.name),
+                  });
+                  recursive(declarator.init, local, dispatch);
+                  break;
+              }
+            }
+            c(entry.body, local);
+            break;
+          default:
+            c(entry, local);
+            break;
+        }
+      }
+    },
+    ArrowFunctionExpression: (node, bound, c) => {
+      const { params, defaults, body } = node;
+      const local = new Set([...bound]);
+      for (const param of params) {
+        switch (param.type) {
+          case 'AssignmentPattern':
+            switch (param.left.type) {
+              case 'ObjectPattern':
+                for (const { key, value } of param.left.properties) {
+                  recursive(key, undefined, {
+                    Identifier: (node) => local.add(node.name),
+                  });
+                  recursive(value, local, dispatch);
+                }
+                break;
+              case 'Identifier':
+                recursive(param.left, undefined, {
+                  Identifier: (node) => local.add(node.name),
+                });
+                break;
+            }
+            recursive(param.right, local, dispatch);
+            break;
+          case 'ObjectPattern':
+            for (const { key, value } of param.properties) {
+              recursive(key, undefined, {
+                Identifier: (node) => local.add(node.name),
+              });
+              recursive(value, local, dispatch);
+            }
+            break;
+          case 'Identifier':
+            recursive(param, undefined, {
+              Identifier: (node) => local.add(node.name),
+            });
+            break;
+          case 'RestElement':
+            recursive(param.argument, undefined, {
+              Identifier: (node) => local.add(node.name),
+            });
+            break;
+        }
+      }
+      if (defaults) {
+        c(defaults, local);
+      }
+      // TODO: Capture local bindings in the body.
+      if (body) {
+        switch (body.type) {
+          case 'BlockStatement':
+            for (const entry of body.body) {
+              switch (entry.type) {
+                case 'VariableDeclaration':
+                  for (const declarator of entry.declarations) {
+                    switch (declarator.type) {
+                      case 'VariableDeclarator':
+                        recursive(declarator.id, undefined, {
+                          Identifier: (node) => local.add(node.name),
+                        });
+                        break;
+                    }
+                  }
+                  break;
+              }
+            }
+            break;
+        }
+        c(body, local);
+      }
+    },
+    Identifier: (node, local, c) => {
+      if (!local.has(node.name) && !dependencies.includes(node.name)) {
+        dependencies.push(node.name);
+      }
+    },
   };
 
-  recursive(declarator, undefined, { Identifier });
+  recursive(declarator, new Set(), dispatch);
 
   return dependencies;
 };
@@ -29836,11 +29942,11 @@ const fromIdToSha = (id, { topLevel }) => {
 
 const generateCode = async (
   { path, id, dependencies, imports },
-  { topLevel, exportNames }
+  { api, topLevel, exportNames }
 ) => {
   const body = [];
   const seen = new Set();
-  const walk = async (dependencies) => {
+  const walk = async (dependencies, depth = 0) => {
     for (const dependency of dependencies) {
       if (seen.has(dependency)) {
         continue;
@@ -29848,9 +29954,14 @@ const generateCode = async (
       seen.add(dependency);
       const entry = topLevel.get(dependency);
       if (entry === undefined) {
-        continue;
+        // FIX: $exports.
+        if (api.hasOwnProperty(dependency) || dependency === '$exports') {
+          continue;
+        } else {
+          throw Error(`Unbound variable: ${dependency}`);
+        }
       }
-      await walk(entry.dependencies);
+      await walk(entry.dependencies, depth + 1);
       if (entry.importSource) {
         add(imports, entry.importSource);
       }
@@ -29911,6 +30022,7 @@ const declareVariable = async (
   declaration,
   declarator,
   {
+    api,
     path,
     updates,
     replays,
@@ -30004,7 +30116,7 @@ const declareVariable = async (
   updates[id] = {
     dependencies,
     imports: entry.imports,
-    program: await generateCode(entry, { topLevel }),
+    generateProgram: () => generateCode(entry, { api, topLevel }),
   };
 };
 
@@ -30142,11 +30254,26 @@ const processProgram = async (program, options) => {
   for (const statement of program.body) {
     await processStatement(statement, options);
   }
+  for (const key of Object.keys(options.updates)) {
+    if (!options.updates.hasOwnProperty(key)) {
+      continue;
+    }
+    const update = options.updates[key];
+    if (update.generateProgram) {
+      try {
+        update.program = await update.generateProgram();
+        delete update.generateProgram;
+      } catch (error) {
+        throw error;
+      }
+    }
+  }
 };
 
 const toEcmascript = async (
   script,
   {
+    api = {},
     path = '',
     topLevel = new Map(),
     updates = {},
@@ -30158,16 +30285,42 @@ const toEcmascript = async (
     workspace,
   } = {}
 ) => {
-  const lines = noLines ? undefined : script.split('\n');
-  const ast = parse(script, parseOptions);
+  try {
+    const lines = noLines ? undefined : script.split('\n');
+    const ast = parse(script, parseOptions);
 
-  // Start by loading the controls
-  const controls = (await read$1(`control/${path}`, { workspace })) || {};
+    // Start by loading the controls
+    const controls = (await read$1(`control/${path}`, { workspace })) || {};
 
-  // Do it twice, so that topLevel is populated.
-  // FIX: Don't actually do it twice -- just populate topLevel before calling generateCode.
-  {
-    // Keep these local for the first run.
+    // Do it twice, so that topLevel is populated.
+    // FIX: Don't actually do it twice -- just populate topLevel before calling generateCode.
+    {
+      // Keep these local for the first run.
+      let topLevelExpressionCount = 0;
+      const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
+
+      const out = [];
+      const exportNames = [];
+      const sideEffectors = [];
+
+      await processProgram(ast, {
+        api,
+        lines,
+        out,
+        updates,
+        replays,
+        exportNames,
+        controls,
+        path,
+        topLevel,
+        nextTopLevelExpressionId,
+        sideEffectors,
+        exports,
+        imports,
+        indirectImports,
+      });
+    }
+
     let topLevelExpressionCount = 0;
     const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
 
@@ -30176,6 +30329,7 @@ const toEcmascript = async (
     const sideEffectors = [];
 
     await processProgram(ast, {
+      api,
       lines,
       out,
       updates,
@@ -30190,46 +30344,25 @@ const toEcmascript = async (
       imports,
       indirectImports,
     });
-  }
 
-  let topLevelExpressionCount = 0;
-  const nextTopLevelExpressionId = () => ++topLevelExpressionCount;
-
-  const out = [];
-  const exportNames = [];
-  const sideEffectors = [];
-
-  await processProgram(ast, {
-    lines,
-    out,
-    updates,
-    replays,
-    exportNames,
-    controls,
-    path,
-    topLevel,
-    nextTopLevelExpressionId,
-    sideEffectors,
-    exports,
-    imports,
-    indirectImports,
-  });
-
-  // Return the exports as an object.
-  if (exportNames.length > 0) {
-    exports.push(
-      await generateCode(
-        {
-          isNotCacheable: true,
-          dependencies: [...exportNames, ...sideEffectors],
-          id: '$exports',
-          path,
-          emitSourceLocation: false, // FIX: Hack for source location.
-          imports: [],
-        },
-        { topLevel, exportNames }
-      )
-    );
+    // Return the exports as an object.
+    if (exportNames.length > 0) {
+      exports.push(
+        await generateCode(
+          {
+            isNotCacheable: true,
+            dependencies: [...exportNames, ...sideEffectors],
+            id: '$exports',
+            path,
+            emitSourceLocation: false, // FIX: Hack for source location.
+            imports: [],
+          },
+          { api, topLevel, exportNames }
+        )
+      );
+    }
+  } catch (error) {
+    throw error;
   }
 };
 

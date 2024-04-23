@@ -23,14 +23,27 @@ const api = {
   ...mathApi,
   ...shapeApi,
   ...notesApi,
+  JSON: {
+    parse: JSON.parse,
+    stringify: JSON.stringify,
+  },
+  Math: {
+    PI: Math.PI,
+    pow: Math.pow,
+    sqrt: Math.sqrt,
+  },
+  console: {
+    log: console.log,
+  },
   control,
   readObj,
   readOff,
   setToSourceFromNameFunction,
   toSvg,
+  undefined,
 };
 
-const importModule = buildImportModule(api);
+export const importModule = buildImportModule(api);
 
 api.importModule = importModule;
 
