@@ -1459,7 +1459,7 @@ const dilateXY = Shape.registerMethod3(
 
 const disjoint = Shape.registerMethod3(
   'disjoint',
-  ['inputGeometry', 'modes:backward,exact'],
+  ['inputGeometry'],
   disjoint$1
 );
 

@@ -2,8 +2,11 @@
 
 #define JOT_MANIFOLD_ENABLED
 
-#include "cgal.h"
-#include "Geometry.h"
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+
+#include "API.h"
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
 namespace jot_cgal {
 
@@ -48,7 +51,7 @@ static void fill_strategies(const Napi::Array& js_strategies, std::vector<int>& 
   }
 }
 
-static Transformation to_transform(const Napi::Value& v) {
+static CGAL::Aff_transformation_3<EK> to_transform(const Napi::Value& v) {
   Napi::Array js = v.As<Napi::Array>();
   if (js.Has(16)) {
     return ::to_transform(js.Get(uint32_t(16)).As<Napi::String>().Utf8Value());
@@ -71,7 +74,7 @@ static Transformation to_transform(const Napi::Value& v) {
   }
 }
 
-static void to_js(const Transformation& transform, Napi::Array& o) {
+static void to_js(const CGAL::Aff_transformation_3<EK>& transform, Napi::Array& o) {
   double doubles[16];
   to_doubles(transform, doubles);
   for (uint32_t nth = 0; nth < 16; nth++) {
@@ -583,16 +586,14 @@ static Napi::Value ComputeImplicitVolume(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Disjoint(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 4);
+  assertArgCount(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   Napi::Array js_is_masked = info[1].As<Napi::Array>();
-  uint32_t mode = info[2].As<Napi::Number>().Uint32Value();
-  bool exact = info[3].As<Napi::Boolean>().Value();
-  uint32_t size = geometry->size();
+  bool exact = info[2].As<Napi::Boolean>().Value();
   std::vector<bool> is_masked;
   fill_is_masked(js_is_masked, is_masked);
-  size_t status = ::Disjoint(geometry, is_masked, mode, exact);
+  size_t status = ::Disjoint(geometry, is_masked, exact);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -687,6 +688,15 @@ static Napi::Value Fill(const Napi::CallbackInfo& info) {
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   size_t status = ::Fill(geometry);
+  return Napi::Number::New(info.Env(), status);
+}
+
+static Napi::Value Fix(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 2);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  bool remove_self_intersections = info[1].As<Napi::Boolean>().Value();
+  size_t status = ::Fix(geometry, remove_self_intersections);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -933,15 +943,15 @@ static Napi::Value InverseSegmentTransform(const Napi::CallbackInfo& info) {
   double normaly = info[7].As<Napi::Number>().DoubleValue();
   double normalz = info[8].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[9].As<Napi::Array>();
-  to_js(::InverseSegmentTransform(Point(startx, starty, startz), Point(endx, endy, endz), Vector(normalx, normaly, normalz)), out);
+  to_js(::InverseSegmentTransform(EK::Point_3(startx, starty, startz), EK::Point_3(endx, endy, endz), EK::Vector_3(normalx, normaly, normalz)), out);
   return info.Env().Undefined();
 }
 
 static Napi::Value InvertTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Array out = info[1].As<Napi::Array>();
-  Transformation t = to_transform(info[0]);
-  Transformation inverse_t = t.inverse();
+  CGAL::Aff_transformation_3<EK> t = to_transform(info[0]);
+  CGAL::Aff_transformation_3<EK> inverse_t = t.inverse();
   to_js(inverse_t, out);
   return info.Env().Undefined();
 }
@@ -1171,7 +1181,7 @@ static Napi::Value Shell(const Napi::CallbackInfo& info) {
   double approx = info[6].As<Napi::Number>().DoubleValue();
   double edge_size = info[7].As<Napi::Number>().DoubleValue();
   size_t status = ::Shell(geometry, inner_offset, outer_offset, protect, angle, sizing, approx, edge_size);
-  return Napi::Number::New(info.Env(), STATUS_OK);
+  return Napi::Number::New(info.Env(), status);
 }
 
 static Napi::Value Simplify(const Napi::CallbackInfo& info) {
@@ -1183,7 +1193,7 @@ static Napi::Value Simplify(const Napi::CallbackInfo& info) {
   double sharp_edge_threshold = info[3].As<Napi::Number>().DoubleValue();
   bool use_bounded_normal_change_filter = info[2].As<Napi::Boolean>().Value();
   size_t status = ::Simplify(geometry, face_count, simplify_points, sharp_edge_threshold, use_bounded_normal_change_filter);
-  return Napi::Number::New(info.Env(), STATUS_OK);
+  return Napi::Number::New(info.Env(), status);
 }
 
 static Napi::Value Smooth(const Napi::CallbackInfo& info) {
@@ -1197,7 +1207,7 @@ static Napi::Value Smooth(const Napi::CallbackInfo& info) {
   uint32_t remesh_iterations = info[5].As<Napi::Number>().Uint32Value();
   uint32_t remesh_relaxation_steps = info[6].As<Napi::Number>().Uint32Value();
   size_t status = ::Smooth(geometry, count, resolution, iterations, time, remesh_iterations, remesh_relaxation_steps);
-  return Napi::Number::New(info.Env(), STATUS_OK);
+  return Napi::Number::New(info.Env(), status);
 }
 
 static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
@@ -1216,7 +1226,7 @@ static Napi::Value Twist(const Napi::CallbackInfo& info) {
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double turns_per_mm = info[1].As<Napi::Number>().DoubleValue();
   size_t status = ::Twist(geometry, turns_per_mm);
-  return Napi::Number::New(info.Env(), STATUS_OK);
+  return Napi::Number::New(info.Env(), status);
 }
 
 static Napi::Value Unfold(const Napi::CallbackInfo& info) {
@@ -1260,7 +1270,7 @@ static Napi::Value XTurnTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   double turn = info[0].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[1].As<Napi::Array>();
-  to_js(TransformationFromXTurn<Transformation, RT>(turn), out);
+  to_js(TransformationFromXTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(turn), out);
   return info.Env().Undefined();
 }
 
@@ -1268,7 +1278,7 @@ static Napi::Value YTurnTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   double turn = info[0].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[1].As<Napi::Array>();
-  to_js(TransformationFromYTurn<Transformation, RT>(turn), out);
+  to_js(TransformationFromYTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(turn), out);
   return info.Env().Undefined();
 }
 
@@ -1276,7 +1286,7 @@ static Napi::Value ZTurnTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   double turn = info[0].As<Napi::Number>().DoubleValue();
   Napi::Array out = info[1].As<Napi::Array>();
-  to_js(TransformationFromZTurn<Transformation, RT>(turn), out);
+  to_js(TransformationFromZTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(turn), out);
   return info.Env().Undefined();
 }
 
@@ -1316,6 +1326,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Fair"), Napi::Function::New(env, Fair));
   exports.Set(Napi::String::New(env, "FaceEdges"), Napi::Function::New(env, FaceEdges));
   exports.Set(Napi::String::New(env, "Fill"), Napi::Function::New(env, Fill));
+  exports.Set(Napi::String::New(env, "Fix"), Napi::Function::New(env, Fix));
   exports.Set(Napi::String::New(env, "FromPolygonSoup"), Napi::Function::New(env, FromPolygonSoup));
   exports.Set(Napi::String::New(env, "FromPolygons"), Napi::Function::New(env, FromPolygons));
   exports.Set(Napi::String::New(env, "Fuse"), Napi::Function::New(env, Fuse));

@@ -4378,7 +4378,7 @@ const filter$y = (geometry) =>
   ) &&
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
-const Disjoint = (geometries, { backward, exact }) => {
+const Disjoint = (geometries, { exact } = {}) => {
   const concreteGeometries = geometries.map((geometry) =>
     toConcreteGeometry(geometry)
   );
@@ -4386,7 +4386,7 @@ const Disjoint = (geometries, { backward, exact }) => {
   for (const concreteGeometry of concreteGeometries) {
     linearize(concreteGeometry, filter$y, inputs);
   }
-  const outputs = disjoint$1(inputs, backward === true, exact);
+  const outputs = disjoint$1(inputs, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
   for (const concreteGeometry of concreteGeometries) {

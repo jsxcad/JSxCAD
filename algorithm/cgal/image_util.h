@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CGAL/Complex_2_in_triangulation_3.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Gray_level_image_3.h>
 #include <CGAL/IO/facets_in_complex_2_to_triangle_mesh.h>
 #include <CGAL/Image_3.h>
@@ -16,6 +17,9 @@ static bool build_surface_mesh_as_relief_from_graymap(
     int x_max, int y_max, int z_max, unsigned char* data, double angular_bound,
     double radius_bound, double distance_bound, double error_bound,
     double max_height, Surface_mesh& mesh) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef std::map<EK::Point_3, CGAL::Surface_mesh<EK::Point_3>::Vertex_index>
+      Vertex_map;
   Vertex_map vertices;
   double brightness = max_height / z_max;
   std::cout << "x_max=" << x_max << std::endl;
@@ -32,19 +36,19 @@ static bool build_surface_mesh_as_relief_from_graymap(
     for (int x = -1; x < x_max; x++) {
       std::cout << "Handling x=" << x << std::endl;
       for (int y = -1; y < y_max; y++) {
-        Vector v00((x + 0), (y + 0), getPixel(x + 0, y + 0));
-        Vector v01((x + 0), (y + 1), getPixel(x + 0, y + 1));
-        Vector v11((x + 1), (y + 1), getPixel(x + 1, y + 1));
-        Vector v10((x + 1), (y + 0), getPixel(x + 1, y + 0));
-        Point pmm = Point(0, 0, 0) + (v00 + v01 + v11 + v10) / 4;
+        EK::Vector_3 v00((x + 0), (y + 0), getPixel(x + 0, y + 0));
+        EK::Vector_3 v01((x + 0), (y + 1), getPixel(x + 0, y + 1));
+        EK::Vector_3 v11((x + 1), (y + 1), getPixel(x + 1, y + 1));
+        EK::Vector_3 v10((x + 1), (y + 0), getPixel(x + 1, y + 0));
+        EK::Point_3 pmm = EK::Point_3(0, 0, 0) + (v00 + v01 + v11 + v10) / 4;
         if (pmm.z() == 0) {
           // This is outside the relief.
           continue;
         }
-        Point p00 = Point(0, 0, 0) + (v00);
-        Point p01 = Point(0, 0, 0) + (v01);
-        Point p11 = Point(0, 0, 0) + (v11);
-        Point p10 = Point(0, 0, 0) + (v10);
+        EK::Point_3 p00 = EK::Point_3(0, 0, 0) + (v00);
+        EK::Point_3 p01 = EK::Point_3(0, 0, 0) + (v01);
+        EK::Point_3 p11 = EK::Point_3(0, 0, 0) + (v11);
+        EK::Point_3 p10 = EK::Point_3(0, 0, 0) + (v10);
         if (mesh.add_face(ensureVertex(mesh, vertices, pmm),
                           ensureVertex(mesh, vertices, p01),
                           ensureVertex(mesh, vertices, p00)) ==
@@ -70,10 +74,10 @@ static bool build_surface_mesh_as_relief_from_graymap(
           std::cout << "Failed to add face p10 p00 pmm" << std::endl;
         }
         // Now add the floor.
-        Point f00 = Point(p00.x(), p00.y(), 0);
-        Point f01 = Point(p01.x(), p01.y(), 0);
-        Point f11 = Point(p11.x(), p11.y(), 0);
-        Point f10 = Point(p10.x(), p10.y(), 0);
+        EK::Point_3 f00 = EK::Point_3(p00.x(), p00.y(), 0);
+        EK::Point_3 f01 = EK::Point_3(p01.x(), p01.y(), 0);
+        EK::Point_3 f11 = EK::Point_3(p11.x(), p11.y(), 0);
+        EK::Point_3 f10 = EK::Point_3(p10.x(), p10.y(), 0);
         if (mesh.add_face(ensureVertex(mesh, vertices, f00),
                           ensureVertex(mesh, vertices, f01),
                           ensureVertex(mesh, vertices, f11)) ==

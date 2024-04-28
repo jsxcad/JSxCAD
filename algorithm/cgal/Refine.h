@@ -1,13 +1,17 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Polygon_mesh_processing/refine.h>
+#include <CGAL/Surface_mesh.h>
 
 #include "Geometry.h"
-#include "cgal.h"
+#include "random_util.h"
 #include "surface_mesh_util.h"
 
 static int Refine(Geometry* geometry, size_t count, double density) {
-  std::cout << "Refine" << std::endl;
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   size_t size = geometry->getSize();
 
   if (density == 0) {
@@ -48,14 +52,14 @@ static int Refine(Geometry* geometry, size_t count, double density) {
       std::cout << "Selecting faces" << std::endl;
       // Select all faces within any selection.
       for (Surface_mesh::Face_index face : mesh.faces()) {
-        Halfedge_index a = mesh.halfedge(face);
-        Halfedge_index b = mesh.next(a);
-        Point pa = mesh.point(mesh.source(a));
-        Point pb = mesh.point(mesh.source(b));
-        Point pc = mesh.point(mesh.target(b));
-        Point midpoint((pa.x() + pb.x() + pc.x()) / 3,
-                       (pa.y() + pb.y() + pc.y()) / 3,
-                       (pa.z() + pb.z() + pc.z()) / 3);
+        auto a = mesh.halfedge(face);
+        auto b = mesh.next(a);
+        auto pa = mesh.point(mesh.source(a));
+        auto pb = mesh.point(mesh.source(b));
+        auto pc = mesh.point(mesh.target(b));
+        EK::Point_3 midpoint((pa.x() + pb.x() + pc.x()) / 3,
+                             (pa.y() + pb.y() + pc.y()) / 3,
+                             (pa.z() + pb.z() + pc.z()) / 3);
         for (size_t selection = count; selection < size; selection++) {
           if (geometry->on_side(selection)(midpoint) == CGAL::ON_BOUNDED_SIDE) {
             // This face may be refined.

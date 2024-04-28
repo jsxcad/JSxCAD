@@ -1,3 +1,5 @@
+#include "Geometry.h"
+
 static int Link(Geometry* geometry, bool close, bool reverse) {
   size_t size = geometry->size();
 
@@ -7,7 +9,7 @@ static int Link(Geometry* geometry, bool close, bool reverse) {
 
   int target = geometry->add(GEOMETRY_SEGMENTS);
   geometry->setIdentityTransform(target);
-  std::vector<Segment>& out = geometry->segments(target);
+  auto& out = geometry->segments(target);
 
   bool has_last = false;
   Point last;
@@ -15,7 +17,7 @@ static int Link(Geometry* geometry, bool close, bool reverse) {
   for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_SEGMENTS: {
-        std::vector<Segment>& segments = geometry->segments(nth);
+        auto& segments = geometry->segments(nth);
         if (segments.empty()) {
           continue;
         }
@@ -31,7 +33,7 @@ static int Link(Geometry* geometry, bool close, bool reverse) {
       }
       case GEOMETRY_POINTS: {
         // A point is equivalent to a zero-length segment.
-        Points& points = geometry->points(nth);
+        auto& points = geometry->points(nth);
         if (points.empty()) {
           continue;
         }

@@ -1,9 +1,20 @@
 #define CGAL_EIGEN3_ENABLED
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
+#include <CGAL/Side_of_triangle_mesh.h>
+
+#include "Geometry.h"
+#include "demesh_util.h"
+#include "random_util.h"
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
 
 struct Constrained_vertex_map {
  public:
+  typedef CGAL::Surface_mesh<EK>::Vertex_index Vertex_index;
   Constrained_vertex_map(CGAL::Unique_hash_map<Vertex_index, bool>& map)
       : map_(map) {}
   friend bool get(Constrained_vertex_map& self, Vertex_index key) {
@@ -17,6 +28,8 @@ struct Constrained_vertex_map {
 static int Smooth(Geometry* geometry, size_t count, double resolution,
                   int iterations, double time, int remesh_iterations,
                   int remesh_relaxation_steps) {
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+  typedef CGAL::Surface_mesh<IK::Point_3> Epick_surface_mesh;
   std::cout << "Smooth: resolution=" << resolution
             << " iterations=" << iterations << " time=" << time
             << " remesh_iterations=" << remesh_iterations
@@ -38,7 +51,7 @@ static int Smooth(Geometry* geometry, size_t count, double resolution,
     }
     Surface_mesh& mesh = geometry->mesh(nth);
 
-    std::unordered_map<Vertex_index, bool> constrained_vertices;
+    std::unordered_map<Surface_mesh::Vertex_index, bool> constrained_vertices;
 
     std::cout << "Smooth: remesh" << std::endl;
     remesh<Kernel>(mesh, selections, remesh_iterations, remesh_relaxation_steps,
@@ -50,7 +63,7 @@ static int Smooth(Geometry* geometry, size_t count, double resolution,
       // Remesh will handle adding the selection edges.
       for (const Surface_mesh* selection : selections) {
         CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(*selection);
-        for (Vertex_index vertex : mesh.vertices()) {
+        for (const auto& vertex : mesh.vertices()) {
           if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
             // This vertex may be smoothed.
             constrained_vertices[vertex] = false;
@@ -59,7 +72,7 @@ static int Smooth(Geometry* geometry, size_t count, double resolution,
       }
     } else {
       std::cout << "Smooth: use all vertices" << std::endl;
-      for (Vertex_index vertex : mesh.vertices()) {
+      for (const auto& vertex : mesh.vertices()) {
         constrained_vertices[vertex] = false;
       }
     }

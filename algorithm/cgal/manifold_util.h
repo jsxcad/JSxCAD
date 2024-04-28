@@ -2,10 +2,17 @@
 
 #ifdef JOT_MANIFOLD_ENABLED
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
+
 #include "manifold.h"
 
-static void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
-                                         manifold::Manifold& manifold) {
+static void buildManifoldFromSurfaceMesh(
+    CGAL::Surface_mesh<EK::Point_3>& surface_mesh,
+    manifold::Manifold& manifold) {
   if (surface_mesh.has_garbage()) {
     surface_mesh.collect_garbage();
   }
@@ -36,8 +43,10 @@ static void buildManifoldFromSurfaceMesh(Surface_mesh& surface_mesh,
   manifold = manifold::Manifold(manifold_mesh);
 }
 
-void buildSurfaceMeshFromManifold(const manifold::Manifold& manifold,
-                                  Surface_mesh& surface_mesh) {
+void buildSurfaceMeshFromManifold(
+    const manifold::Manifold& manifold,
+    CGAL::Surface_mesh<EK::Point_3>& surface_mesh) {
+  typedef CGAL::Surface_mesh<EK::Point_3>::Vertex_index Vertex_index;
   manifold::Mesh mesh = manifold.GetMesh();
   for (std::size_t nth = 0; nth < mesh.vertPos.size(); nth++) {
     const glm::vec3& p = mesh.vertPos[nth];

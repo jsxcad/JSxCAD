@@ -1,10 +1,18 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_mesh_processing/manifoldness.h>
 #include <CGAL/Polygon_mesh_processing/merge_border_vertices.h>
 #include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
+#include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
 
 #include "wrap_util.h"
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
 
 template <typename Surface_mesh>
 static int number_of_self_intersections(const Surface_mesh& mesh) {
@@ -32,7 +40,7 @@ enum RepairStrategy {
   REPAIR_CLOSE = 3
 };
 
-template <typename Kernel, typename Surface_mesh>
+template <typename EK, typename Surface_mesh>
 static bool repair_self_intersections(Surface_mesh& mesh,
                                       const std::vector<int>& strategies) {
   std::cout << "QQ/repair_self_intersections: strategies=" << strategies.size()
@@ -89,8 +97,8 @@ static bool repair_self_intersections(Surface_mesh& mesh,
           double wrap_relative_alpha = 300;
           double wrap_relative_offset = 5000;
           // Use a wrapping pass to remove self-intersection.
-          CGAL::Cartesian_converter<Kernel, Epick_kernel> to_cartesian;
-          Epick_points points;
+          CGAL::Cartesian_converter<EK, IK> to_cartesian;
+          std::vector<IK::Point_3> points;
           std::vector<std::vector<size_t>> faces;
           wrap_add_mesh_epick(to_cartesian, mesh, points, faces);
           double alpha;
@@ -143,9 +151,9 @@ static bool repair_self_intersections(Surface_mesh& mesh,
   return false;
 }
 
-template <typename Kernel, typename Surface_mesh>
+template <typename EK, typename Surface_mesh>
 static bool repair_self_intersections(Surface_mesh& mesh) {
-  return repair_self_intersections<Kernel>(
+  return repair_self_intersections<EK>(
       mesh, {REPAIR_AUTOREFINE_AND_REMOVE_SELF_INTERSECTIONS,
              REPAIR_TRY_REMOVE_SELF_INTERSECTIONS});
 }

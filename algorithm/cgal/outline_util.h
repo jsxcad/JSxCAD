@@ -1,8 +1,15 @@
 #pragma once
 
-static void outlinePolygonsWithHoles(const Polygons_with_holes_2& pwhs,
-                                     const Plane& plane, Segments& segments) {
-  for (const Polygon_with_holes_2& polygon : pwhs) {
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_2.h>
+#include <CGAL/Surface_mesh.h>
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
+static void outlinePolygonsWithHoles(
+    const std::vector<CGAL::Polygon_with_holes_2<EK>>& pwhs,
+    const EK::Plane_3& plane, std::vector<EK::Segment_3>& segments) {
+  for (const auto& polygon : pwhs) {
     for (auto s2 = polygon.outer_boundary().edges_begin();
          s2 != polygon.outer_boundary().edges_end(); ++s2) {
       segments.emplace_back(plane.to_3d(s2->source()),
@@ -26,7 +33,7 @@ static void outlineSurfaceMesh(const Surface_mesh& mesh, Segments& segments) {
     if (mesh.is_removed(start)) {
       continue;
     }
-    Halfedge_index edge = start;
+    auto edge = start;
     do {
       if (!is_coplanar_edge(mesh, mesh.points(), edge)) {
         segments.emplace_back(mesh.point(mesh.source(edge)),

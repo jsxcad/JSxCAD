@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Geometry.h"
 #include "validate_util.h"
 
 static int Validate(Geometry* geometry, const std::vector<int>& strategies) {
@@ -10,7 +11,7 @@ static int Validate(Geometry* geometry, const std::vector<int>& strategies) {
   for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->type(nth)) {
       case GEOMETRY_MESH: {
-        const Surface_mesh& mesh = geometry->input_mesh(nth);
+        const auto& mesh = geometry->input_mesh(nth);
         if (!validate(mesh, strategies)) {
           isValid = false;
         }

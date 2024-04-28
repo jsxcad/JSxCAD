@@ -1,8 +1,13 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Nef_polyhedron_3.h>
+#include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
 #include <CGAL/minkowski_sum_3.h>
 
+#include "Geometry.h"
+
 static int DilateXY(Geometry* geometry, double amount) {
-  typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron;
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Nef_polyhedron_3<EK> Nef_polyhedron;
 
   size_t size = geometry->getSize();
 
@@ -12,16 +17,16 @@ static int DilateXY(Geometry* geometry, double amount) {
   Nef_polyhedron tool;
   // Build a rough circle in XY.
   {
-    const double segments = 16;
-    Points points;
-    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / segments) {
-      points.push_back(Point(compute_approximate_point_value(sin(-a) * amount),
-                             compute_approximate_point_value(cos(-a) * amount),
-                             0));
-    }
-    typedef Points::iterator point_iterator;
+    typedef std::vector<EK::Point_3>::iterator point_iterator;
     typedef std::pair<point_iterator, point_iterator> point_range;
     typedef std::list<point_range> polyline;
+
+    const double segments = 16;
+    std::vector<EK::Point_3> points;
+    for (double a = 0; a < CGAL_PI * 2; a += CGAL_PI / segments) {
+      points.emplace_back(compute_approximate_point_value(sin(-a) * amount),
+                          compute_approximate_point_value(cos(-a) * amount), 0);
+    }
     polyline poly;
     poly.push_back(point_range(points.begin(), points.end()));
     tool = Nef_polyhedron(poly.begin(), poly.end(),
@@ -32,7 +37,7 @@ static int DilateXY(Geometry* geometry, double amount) {
     if (geometry->type(nth) != GEOMETRY_MESH) {
       continue;
     }
-    Surface_mesh& mesh = geometry->mesh(nth);
+    auto& mesh = geometry->mesh(nth);
     Nef_polyhedron nef(mesh);
     Nef_polyhedron result = CGAL::minkowski_sum_3(nef, tool);
     mesh.clear();

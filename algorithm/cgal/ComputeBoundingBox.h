@@ -12,7 +12,7 @@ static int ComputeBoundingBox(Geometry* geometry, std::vector<double>& out) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         const Surface_mesh& mesh = geometry->mesh(nth);
-        for (const Vertex_index vertex : mesh.vertices()) {
+        for (const auto vertex : mesh.vertices()) {
           bbox += mesh.point(vertex).bbox();
         }
         break;

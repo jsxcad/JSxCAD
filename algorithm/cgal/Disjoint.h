@@ -1,6 +1,16 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/clip.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_with_holes_2.h>
+
+#include "Geometry.h"
+#include "manifold_util.h"
+
 // This tries to make the largest disjoints first.
 static int disjointBackward(Geometry* geometry,
                             const std::vector<bool>& is_masked, bool exact) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
   int size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -43,7 +53,8 @@ static int disjointBackward(Geometry* geometry,
 #else
               {
 #endif
-                Surface_mesh cutMeshCopy(geometry->mesh(nth));
+                CGAL::Surface_mesh<EK::Point_3> cutMeshCopy(
+                    geometry->mesh(nth));
                 if (!CGAL::Polygon_mesh_processing::
                         corefine_and_compute_difference(
                             geometry->mesh(start), cutMeshCopy,
@@ -87,10 +98,10 @@ static int disjointBackward(Geometry* geometry,
               break;
             }
             case GEOMETRY_MESH: {
-              Polygons_with_holes_2 pwhs;
+              std::vector<CGAL::Polygon_with_holes_2<EK>> pwhs;
               SurfaceMeshSectionToPolygonsWithHoles(
                   geometry->mesh(nth), geometry->plane(start), pwhs);
-              for (const Polygon_with_holes_2& pwh : pwhs) {
+              for (const auto& pwh : pwhs) {
                 geometry->gps(start).difference(pwh);
               }
               geometry->updateBounds2(start);
@@ -110,9 +121,9 @@ static int disjointBackward(Geometry* geometry,
               Segments out;
               // TODO: See if we can leverage std::back_inserter instead of an
               // lexical closure.
-              AABB_tree& tree = geometry->aabb_tree(nth);
-              Side_of_triangle_mesh& on_side = geometry->on_side(nth);
-              for (const Segment& segment : geometry->segments(start)) {
+              auto& tree = geometry->aabb_tree(nth);
+              auto& on_side = geometry->on_side(nth);
+              for (const auto& segment : geometry->segments(start)) {
                 cut_segment_with_volume(segment, tree, on_side, out);
               }
               geometry->segments(start).swap(out);
@@ -148,9 +159,8 @@ static int disjointBackward(Geometry* geometry,
   return STATUS_OK;
 }
 
-// This tries to make the smallest disjoints.
-static int disjointForward(Geometry* geometry,
-                           const std::vector<bool>& is_masked, bool exact) {
+static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
+                    bool exact) {
   int size = geometry->size();
   if (size < 2) {
     // Already disjoint.
@@ -190,10 +200,9 @@ static int disjointForward(Geometry* geometry,
                 geometry->mesh(start).clear();
                 buildSurfaceMeshFromManifold(target_manifold,
                                              geometry->mesh(start));
-              } else {
-#else
-              {
+              } else
 #endif
+              {
                 Surface_mesh cutMeshCopy(geometry->mesh(nth));
                 if (!CGAL::Polygon_mesh_processing::
                         corefine_and_compute_difference(
@@ -241,7 +250,7 @@ static int disjointForward(Geometry* geometry,
               Polygons_with_holes_2 pwhs;
               SurfaceMeshSectionToPolygonsWithHoles(
                   geometry->mesh(nth), geometry->plane(start), pwhs);
-              for (const Polygon_with_holes_2& pwh : pwhs) {
+              for (const auto& pwh : pwhs) {
                 geometry->gps(start).difference(pwh);
               }
               geometry->updateBounds2(start);
@@ -298,16 +307,4 @@ static int disjointForward(Geometry* geometry,
   geometry->transformToLocalFrame();
 
   return STATUS_OK;
-}
-
-static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
-                    int mode, bool exact) {
-  switch (mode) {
-    case 0:
-      return disjointForward(geometry, is_masked, exact);
-    case 1:
-      return disjointBackward(geometry, is_masked, exact);
-    default:
-      return STATUS_INVALID_INPUT;
-  }
 }

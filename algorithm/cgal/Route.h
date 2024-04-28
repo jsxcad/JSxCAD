@@ -1,15 +1,21 @@
 #pragma once
 
+#include <CGAL/Bounded_kernel.h>
 #include <CGAL/Cartesian_converter.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Nef_polyhedron_3.h>
+#include <CGAL/Polygon_convex_decomposition_2.h>
+#include <CGAL/Surface_mesh.h>
 #include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
+#include <CGAL/convex_hull_3.h>
 
-#include "cgal.h"
 #include "wrap_util.h"
 
 // Simulates running a vertically oriented router along each segment.
 
 static int Route(Geometry* geometry, size_t tool_count) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -46,10 +52,10 @@ static int Route(Geometry* geometry, size_t tool_count) {
     }
   }
 
-  std::set<std::pair<Point, Point>> known;
-  std::vector<std::pair<Point, Point>> segments;
+  std::set<std::pair<EK::Point_3, EK::Point_3>> known;
+  std::vector<std::pair<EK::Point_3, EK::Point_3>> segments;
 
-  auto add_edge = [&](const Point& a, const Point& b) {
+  auto add_edge = [&](const EK::Point_3& a, const EK::Point_3& b) {
     if (!known.insert(std::make_pair(a, b)).second) {
       // Already handled.
       return;
@@ -91,15 +97,15 @@ static int Route(Geometry* geometry, size_t tool_count) {
   }
 
   for (const auto& [source, target] : segments) {
-    Transformation xs = translate_to(source);
-    Transformation xt = translate_to(target);
+    auto xs = translate_to(source);
+    auto xt = translate_to(target);
 
     for (const auto& tool : tools) {
       size_t result = geometry->add(GEOMETRY_MESH);
       Surface_mesh& output = geometry->mesh(result);
-      std::list<Point> points;
-      for (const auto vertex : tool.vertices()) {
-        const Point& point = tool.point(vertex);
+      std::list<EK::Point_3> points;
+      for (const auto& vertex : tool.vertices()) {
+        const auto& point = tool.point(vertex);
         points.push_back(point.transform(xs));
         points.push_back(point.transform(xt));
       }

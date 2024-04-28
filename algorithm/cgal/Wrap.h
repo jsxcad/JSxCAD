@@ -1,8 +1,14 @@
+#include <CGAL/Cartesian_converter.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+
 #include "wrap_util.h"
 
 static int Wrap(Geometry* geometry, double alpha, double offset) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
   try {
-    CGAL::Cartesian_converter<Kernel, Epick_kernel> to_cartesian;
+    CGAL::Cartesian_converter<EK, IK> to_cartesian;
 
     size_t size = geometry->size();
 
@@ -12,7 +18,7 @@ static int Wrap(Geometry* geometry, double alpha, double offset) {
     geometry->transformToAbsoluteFrame();
     geometry->convertPlanarMeshesToPolygons();
 
-    Epick_points points;
+    std::vector<IK::Point_3> points;
     std::vector<std::vector<size_t>> faces;
 
     for (size_t nth = 0; nth < size; nth++) {

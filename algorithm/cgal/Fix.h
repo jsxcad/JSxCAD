@@ -1,3 +1,7 @@
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+
+#include "Geometry.h"
+
 static int Fix(Geometry* geometry, bool remove_self_intersections) {
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
@@ -5,7 +9,7 @@ static int Fix(Geometry* geometry, bool remove_self_intersections) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    Surface_mesh& mesh = geometry->mesh(nth);
+    auto& mesh = geometry->mesh(nth);
     if (remove_self_intersections) {
       CGAL::Polygon_mesh_processing::experimental::
           autorefine_and_remove_self_intersections(mesh);

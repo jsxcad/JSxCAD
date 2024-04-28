@@ -1,11 +1,16 @@
 #pragma once
 
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Surface_mesh_approximation/approximate_triangle_mesh.h>
 
-#include "cgal.h"
+#include "kernel_util.h"
+#include "random_util.h"
+#include "repair_util.h"
+#include "surface_mesh_util.h"
 
 static void approximate_mesh(Surface_mesh& mesh, int face_count,
                              double min_error_drop = 0.01) {
+  typedef CGAL::Surface_mesh<Epick_kernel::Point_3> Epick_surface_mesh;
   Epick_surface_mesh epick_mesh;
   copy_face_graph(mesh, epick_mesh);
   std::vector<Epick_kernel::Point_3> epick_anchors;

@@ -5,6 +5,8 @@
 #include <CGAL/Polygon_mesh_processing/distance.h>
 #include <CGAL/Random.h>
 
+#include "random_util.h"
+
 // Note: this does not yet handle overlapping paths.
 
 static int ComputeToolpath(Geometry* geometry, size_t material_start,
@@ -197,9 +199,9 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
 
   int toolpath = geometry->add(GEOMETRY_SEGMENTS);
   geometry->setIdentityTransform(toolpath);
-  Segments& best_segments = geometry->segments(toolpath);
+  std::vector<EK::Segment_3>& best_segments = geometry->segments(toolpath);
 
-  Segments segments;
+  std::vector<EK::Segment_3> segments;
   double best_total_cost = std::numeric_limits<double>::infinity();
 
   double annealing = annealing_max;
@@ -360,22 +362,21 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
       }
       if (current_cell && cell) {
         // Emit a cut.
-        Segment segment(
-            Point(std::get<0>(current_cell->location),
-                  std::get<1>(current_cell->location),
-                  std::get<2>(current_cell->location)),
-            Point(std::get<0>(cell->location), std::get<1>(cell->location),
-                  std::get<2>(cell->location)));
-        segments.push_back(segment);
+        segments.emplace_back(EK::Point_3(std::get<0>(current_cell->location),
+                                          std::get<1>(current_cell->location),
+                                          std::get<2>(current_cell->location)),
+                              EK::Point_3(std::get<0>(cell->location),
+                                          std::get<1>(cell->location),
+                                          std::get<2>(cell->location)));
       } else {
         PickJumpCell(current_cell, cost, cell);
         // Emit a drill-down.
-        Segment segment(
-            Point(std::get<0>(cell->location), std::get<1>(cell->location),
-                  max_z_location),
-            Point(std::get<0>(cell->location), std::get<1>(cell->location),
-                  std::get<2>(cell->location)));
-        segments.push_back(segment);
+        segments.emplace_back(
+            EK::Point_3(std::get<0>(cell->location),
+                        std::get<1>(cell->location), max_z_location),
+            EK::Point_3(std::get<0>(cell->location),
+                        std::get<1>(cell->location),
+                        std::get<2>(cell->location)));
       }
       if (!cell) {
         // We're done -- no available moves.
@@ -458,7 +459,7 @@ static int ComputeToolpath(Geometry* geometry, size_t material_start,
   {
     int target = geometry->add(GEOMETRY_POINTS);
     geometry->setIdentityTransform(target);
-    Points& points = geometry->points(target);
+    std::vector<EK::Point_3>& points = geometry->points(target);
     for (auto& [coord, cell] : rough) {
       if (!cell.is_too_close) {
         continue;

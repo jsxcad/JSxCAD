@@ -1,11 +1,21 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Side_of_triangle_mesh.h>
+#include <CGAL/Surface_mesh.h>
+
+#include "Geometry.h"
+
 static int Separate(Geometry* geometry, bool keep_shapes,
                     bool keep_holes_in_shapes, bool keep_holes_as_shapes) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   int size = geometry->size();
 
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        const Surface_mesh& input_mesh = geometry->input_mesh(nth);
+        const auto& input_mesh = geometry->input_mesh(nth);
         if (!CGAL::is_closed(input_mesh)) {
           continue;
         }
@@ -29,7 +39,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
         if (keep_shapes) {
           for (auto& mesh : volumes) {
             if (keep_holes_in_shapes) {
-              CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(mesh);
+              CGAL::Side_of_triangle_mesh<Surface_mesh, EK> inside(mesh);
               for (auto& cavity : cavities) {
                 for (const auto vertex : cavity.vertices()) {
                   if (inside(cavity.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
@@ -58,7 +68,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        for (const Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
+        for (const auto& polygon : geometry->pwh(nth)) {
           if (keep_shapes) {
             int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
             geometry->setTransform(target, geometry->transform(nth));
@@ -76,7 +86,7 @@ static int Separate(Geometry* geometry, bool keep_shapes,
               int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
               geometry->setTransform(target, geometry->transform(nth));
               geometry->plane(target) = geometry->plane(nth);
-              Polygon_2 shape = *hole;
+              auto shape = *hole;
               shape.reverse_orientation();
               geometry->pwh(target).emplace_back(shape);
             }

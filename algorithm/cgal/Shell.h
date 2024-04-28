@@ -2,9 +2,12 @@
 
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/AABB_traits.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Labeled_mesh_domain_3.h>
 #include <CGAL/Mesh_criteria_3.h>
 #include <CGAL/Mesh_domain_with_polyline_features_3.h>
+#include <CGAL/Mesh_triangulation_3.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polyhedral_mesh_domain_with_features_3.h>
@@ -13,9 +16,11 @@
 #include <CGAL/make_mesh_3.h>
 
 namespace {
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
 
 typedef CGAL::Polyhedral_mesh_domain_with_features_3<
-    Epick_kernel, Epick_surface_mesh, CGAL::Default, int>
+    IK, CGAL::Surface_mesh<IK::Point_3>, CGAL::Default, int>
     Polyhedral_mesh_domain;
 
 typedef CGAL::Kernel_traits<Polyhedral_mesh_domain>::Kernel
@@ -93,6 +98,7 @@ class Offset_function {
 static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
                  bool protect, double angle, double sizing, double approx,
                  double edge_size) {
+  typedef CGAL::Surface_mesh<IK::Point_3> Epick_surface_mesh;
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -103,9 +109,9 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
       continue;
     }
 
-    Epick_surface_mesh& mesh = geometry->epick_mesh(nth);
+    auto& mesh = geometry->epick_mesh(nth);
 
-    typedef Epick_kernel GT;
+    typedef IK GT;
     typedef CGAL::Labeled_mesh_domain_3<GT, int, int> Mesh_domain_base;
     typedef CGAL::Mesh_domain_with_polyline_features_3<Mesh_domain_base>
         Mesh_domain;
@@ -133,7 +139,7 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
     namespace p = CGAL::parameters;
 
     Mesh_domain domain = Mesh_domain::create_implicit_mesh_domain(
-        p::function = Offset_function<Epick_surface_mesh, Epick_kernel>(
+        p::function = Offset_function<Epick_surface_mesh, IK>(
             mesh, inner_min, inner_max, outer_min, outer_max),
         p::bounding_object = Sphere_3(center, rad2),
         p::relative_error_bound = 1e-7,
@@ -153,9 +159,8 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
 
     if (protect) {
       // Protect sharp edges (more than 30 degrees).
-      std::vector<std::vector<Epick_kernel::Point_3>> polylines;
-      auto add_polyline = [&polylines](Epick_kernel::Point_3 source,
-                                       Epick_kernel::Point_3 target) {
+      std::vector<std::vector<IK::Point_3>> polylines;
+      auto add_polyline = [&polylines](IK::Point_3 source, IK::Point_3 target) {
         for (const auto& entry : polylines) {
           if ((entry[0] == source && entry[1] == target) ||
               (entry[1] == source && entry[0] == target)) {
@@ -163,7 +168,7 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
             return;
           }
         }
-        std::vector<Epick_kernel::Point_3> polyline{source, target};
+        std::vector<IK::Point_3> polyline{source, target};
         polylines.push_back(polyline);
       };
       const auto& m = mesh;
@@ -181,8 +186,8 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
         {
           const auto& facet = mesh.face(e);
           auto normal = unitVector(
-              NormalOfSurfaceMeshFacet<Epick_surface_mesh,
-                                       Epick_kernel::Vector_3>(mesh, facet));
+              NormalOfSurfaceMeshFacet<Epick_surface_mesh, IK::Vector_3>(
+                  mesh, facet));
           add_polyline(mesh.point(mesh.source(e)) + normal * outer_offset,
                        mesh.point(mesh.target(e)) + normal * outer_offset);
           if (maybe_hollow) {
@@ -193,8 +198,8 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
         {
           const auto& facet = mesh.face(opposite(e, m));
           auto normal = unitVector(
-              NormalOfSurfaceMeshFacet<Epick_surface_mesh,
-                                       Epick_kernel::Vector_3>(mesh, facet));
+              NormalOfSurfaceMeshFacet<Epick_surface_mesh, IK::Vector_3>(
+                  mesh, facet));
           add_polyline(mesh.point(mesh.source(e)) + normal * outer_offset,
                        mesh.point(mesh.target(e)) + normal * outer_offset);
           if (maybe_hollow) {
@@ -214,7 +219,7 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
     const Tr& tr = c3t3.triangulation();
 
     if (tr.number_of_vertices() > 0) {
-      Epick_surface_mesh& epick_result = geometry->epick_mesh(nth);
+      auto& epick_result = geometry->epick_mesh(nth);
       epick_result.clear();
       // if the thread is interrupted before the mesh is returned, delete it.
       CGAL::facets_in_complex_3_to_triangle_mesh(c3t3, epick_result);

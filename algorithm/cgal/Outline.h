@@ -1,3 +1,4 @@
+#include "Geometry.h"
 #include "outline_util.h"
 
 static int Outline(Geometry* geometry) {
@@ -11,7 +12,7 @@ static int Outline(Geometry* geometry) {
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        const Plane& plane = geometry->plane(nth);
+        const auto& plane = geometry->plane(nth);
         geometry->setType(nth, GEOMETRY_SEGMENTS);
         outlinePolygonsWithHoles(geometry->pwh(nth), plane,
                                  geometry->segments(nth));
