@@ -883,7 +883,9 @@ const moveAlongNormal = (geometry, deltas) =>
   moveAlong(geometry, computeNormalCoordinate(geometry), deltas);
 
 const filter$J = (noVoid) => (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  ['graph', 'polygonsWithHoles', 'points', 'segments'].includes(
+    geometry.type
+  ) &&
   (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid));
 
 const extrude = (geometry, top, bottom, { noVoid } = {}) => {

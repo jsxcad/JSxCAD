@@ -1,8 +1,8 @@
+import api, { execute } from './jsxcad-api.js';
 import { readOrWatch, read, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystems, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
-import { execute } from './jsxcad-api.js';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
@@ -48339,6 +48339,9 @@ class App extends ReactDOM$3.Component {
       await animationFrame();
     };
     this.Notebook.updateSections = async (path, workspace) => {
+      const {
+        sha
+      } = this.props;
       const notebookFile = `source/${path}`;
       const topLevel = new Map();
       const updates = {};
@@ -48351,6 +48354,10 @@ class App extends ReactDOM$3.Component {
       const sections = new Map();
       try {
         await toEcmascript(script, {
+          api: {
+            ...api,
+            sha
+          },
           exports,
           path,
           replays,
@@ -48654,6 +48661,10 @@ class App extends ReactDOM$3.Component {
         NotebookAdvice.definitions = topLevel;
         try {
           await execute(script, {
+            api: {
+              ...api,
+              sha
+            },
             evaluate,
             replay,
             path: NotebookPath,
@@ -48668,13 +48679,6 @@ class App extends ReactDOM$3.Component {
         // A bit of a race condition here.
         this.Draft.change('');
         await resolvePending();
-        /*
-        clearNotebookState(this, {
-          path: NotebookPath,
-          workspace,
-          isToBeKept: (note) => !note.blur,
-        });
-        */
       } catch (error) {
         // Include any high level notebook errors in the output.
         // window.alert(error.stack);

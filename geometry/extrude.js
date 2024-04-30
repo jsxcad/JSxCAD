@@ -11,7 +11,9 @@ import { moveAlong } from './moveAlong.js';
 import { replacer } from './tagged/visit.js';
 
 const filter = (noVoid) => (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  ['graph', 'polygonsWithHoles', 'points', 'segments'].includes(
+    geometry.type
+  ) &&
   (isNotTypeGhost(geometry) || (!noVoid && isTypeVoid));
 
 export const extrude = (geometry, top, bottom, { noVoid } = {}) => {

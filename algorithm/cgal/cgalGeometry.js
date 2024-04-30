@@ -245,6 +245,19 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       }
     }
   }
+  // Coallesce
+  for (let nth = start; nth < length; nth++) {
+    const origin = geometry.getOrigin(nth);
+    if (origin === nth) {
+      continue;
+    }
+    if (results[origin] === undefined) {
+      results[origin] = { type: 'group', content: [], tags: [] };
+    } else if (results[origin].type !== 'group') {
+      results[origin] = { type: 'group', content: [results[origin]], tags: [] };
+    }
+    results[origin].content.push(results[nth]);
+  }
   let output;
   if (start === 0) {
     output = results;

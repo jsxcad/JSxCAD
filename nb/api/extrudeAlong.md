@@ -5,7 +5,7 @@ Parameter|Default|Type
 |direction|_required_|Reference shape
 |...extents||List of begin and end extents.
 
-Extrudes the surface by the extents provided.
+Extrudes surfaces, segments, and points by the extents provided.
 If the number of extents is odd, 0 will be appended.
 
 The operator [e](../../nb/api/e.md) is supplied as shorthand for extrudeAlong(normal(), ...)
@@ -65,4 +65,37 @@ Box(10)
   .note(
     'Box(10).rx(1 / 8).extrudeAlong(normal(), [1, -1]) extrudes along the normal'
   );
+```
+
+![Image](extrudeAlong.md.$6.png)
+
+Arc(32).points().ez(1).loop()
+
+```JavaScript
+Arc(32).points().ez(1).loop().view().note(`Arc(32).points().ez(1).loop()`);
+```
+
+![Image](extrudeAlong.md.$7.png)
+
+![Image](extrudeAlong.md.$8.png)
+
+Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100)).ez(50)
+
+```JavaScript
+Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))
+  .ez(50)
+  .view()
+  .note(`Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100)).ez(50)`);
+```
+
+![Image](extrudeAlong.md.$9.png)
+
+Wave({ from: -100, to: 100 }, (t) => Point().y(sin(t * 3) * 100)).ez(50).e([20])
+
+```JavaScript
+Wave({ from: -100, to: 100 }, (t) => Point().y(sin(t * 3) * 100))
+  .ez(50)
+  .e([20])
+  .view()
+  .note(`Wave({ from: -100, to: 100 }, (t) => Point().y(sin(t * 3) * 100)).ez(50).e([20])`);
 ```
