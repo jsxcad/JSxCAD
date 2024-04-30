@@ -13,8 +13,29 @@ See: [remesh](#https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/rem
 `;
 
 Box(40, 1, 5)
-  .y(20)
-  .and(remesh().bend(20))
-  .align()
+  .and(bend(20))
   .view()
-  .note('Box(40, 1, 5).y(20).and(remesh().bend(20))');
+  .note('Box(40, 1, 5).and(bend(20))');
+
+Line(20)
+  .bend(10)
+  .view()
+  .note('Line(20).bend(10)');
+
+Box(20, 5)
+  .cut(Triangle(4))
+  .bend(10)
+  .view()
+  .note('Box(20, 5).cut(Triangle(4)).bend(10)');
+
+Arc(20, 5)
+  .cut(Triangle(4))
+  .bend(10)
+  .view()
+  .note('Box(20, 5).cut(Triangle(4)).bend(10)');
+
+Point()
+  .x({ from: -10, to: 10, by: 1 / 4 })
+  .bend(5)
+  .view()
+  .note('Point().x({ from: -10, to: 10, by: 1 / 4 }).bend(5)');

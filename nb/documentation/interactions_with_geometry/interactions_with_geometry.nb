@@ -165,7 +165,6 @@ md`Once a shape is remeshed it can be twisted or bent about the origin.`;
 
 Box(157, 20)
   .ez([1])
-  .y(25)
   .remesh(10)
   .op((s) => s.bend(25).and(s.outline()))
   .gridView()

@@ -4433,11 +4433,14 @@ const base = (geometry) => {
   return transform(geometry, local);
 };
 
-const filter$x = (geometry) => ['graph'].includes(geometry.type);
+const filter$x = (geometry) =>
+  ['graph', 'points', 'segments', 'polygonsWithHoles'].includes(
+    geometry.type
+  ) && isNotTypeGhost(geometry);
 
-const bend = (geometry, radius = 100) => {
+const bend = (geometry, radius = 100, edgeLength = 1) => {
   const inputs = linearize(geometry, filter$x);
-  const outputs = bend$1(inputs, radius);
+  const outputs = bend$1(inputs, radius, edgeLength);
   return replacer(inputs, outputs)(geometry);
 };
 

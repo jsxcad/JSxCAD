@@ -375,11 +375,12 @@ static Napi::Value Approximate(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Bend(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 2);
+  assertArgCount(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double reference_radius = info[1].As<Napi::Number>().DoubleValue();
-  int status = ::Bend(geometry, reference_radius);
+  double edge_length = info[2].As<Napi::Number>().DoubleValue();
+  int status = ::Bend(geometry, reference_radius, edge_length);
   return Napi::Number::New(info.Env(), status);
 }
 

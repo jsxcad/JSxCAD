@@ -871,9 +871,13 @@ const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
     }
   });
 
-const bend = (inputs, targetsLength) =>
+const bend = (inputs, targetsLength, edgeLength = 1) =>
   withCgalGeometry('bend', inputs, (cgalGeometry, g) => {
-    const status = g.Bend(cgalGeometry, Number(targetsLength));
+    const status = g.Bend(
+      cgalGeometry,
+      Number(targetsLength),
+      Number(edgeLength)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by bend');

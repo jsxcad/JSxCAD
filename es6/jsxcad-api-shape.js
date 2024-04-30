@@ -1285,7 +1285,7 @@ const bb = Shape.registerMethod3(
 
 const bend = Shape.registerMethod3(
   'bend',
-  ['inputGeometry', 'number'],
+  ['inputGeometry', 'number', 'number'],
   bend$1
 );
 

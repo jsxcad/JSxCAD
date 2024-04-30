@@ -3,6 +3,6 @@ import { bend as op } from '@jsxcad/geometry';
 
 export const bend = Shape.registerMethod3(
   'bend',
-  ['inputGeometry', 'number'],
+  ['inputGeometry', 'number', 'number'],
   op
 );
