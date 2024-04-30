@@ -2,16 +2,24 @@
 
 #define CGAL_EIGEN3_ENABLED
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/fair.h>
 #include <CGAL/Polygon_mesh_processing/tangential_relaxation.h>
 
 #include "Geometry.h"
-#include "cgal.h"
+#include "random_util.h"
 #include "surface_mesh_util.h"
 
 static int Fair(Geometry* geometry, size_t count, double resolution,
                 int number_of_iterations, int remesh_iterations,
                 int remesh_relaxation_steps) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+  typedef CGAL::Surface_mesh<IK::Point_3> Epick_surface_mesh;
+  typedef CGAL::Side_of_triangle_mesh<Surface_mesh, EK> Side_of_triangle_mesh;
+
   std::cout << "Fair: resolution=" << resolution
             << " number_of_iterations=" << number_of_iterations
             << " remesh_iterations=" << remesh_iterations
@@ -33,22 +41,22 @@ static int Fair(Geometry* geometry, size_t count, double resolution,
     }
     Surface_mesh& mesh = geometry->mesh(nth);
 
-    std::unordered_set<Vertex_index> movable_vertices;
+    std::unordered_set<Surface_mesh::Vertex_index> movable_vertices;
 
     std::cout << "Fair: remesh" << std::endl;
     // Fair seems very sensitive to non-uniform meshing, so we remesh
     // everything for now.
     std::vector<const Surface_mesh*> no_selections;
-    remesh<Kernel>(mesh, no_selections, remesh_iterations,
-                   remesh_relaxation_steps, resolution);
+    remesh<EK>(mesh, no_selections, remesh_iterations, remesh_relaxation_steps,
+               resolution);
 
     if (count < size) {
       std::cout << "Fair: use selected vertices" << std::endl;
       // Apply selections.
       // Remesh will handle adding the selection edges.
       for (const Surface_mesh* selection : selections) {
-        CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(*selection);
-        for (Vertex_index vertex : mesh.vertices()) {
+        Side_of_triangle_mesh inside(*selection);
+        for (const auto vertex : mesh.vertices()) {
           if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
             movable_vertices.insert(vertex);
           }
@@ -56,7 +64,7 @@ static int Fair(Geometry* geometry, size_t count, double resolution,
       }
     } else {
       std::cout << "Fair: use all vertices" << std::endl;
-      for (Vertex_index vertex : mesh.vertices()) {
+      for (const auto vertex : mesh.vertices()) {
         movable_vertices.insert(vertex);
       }
     }

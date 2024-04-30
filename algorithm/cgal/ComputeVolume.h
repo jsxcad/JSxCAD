@@ -1,3 +1,9 @@
+#pragma once
+
+#include <CGAL/Polygon_mesh_processing/measure.h>
+
+#include "Geometry.h"
+
 static double ComputeVolume(Geometry* geometry) {
   FT volume = 0;
   int size = geometry->size();

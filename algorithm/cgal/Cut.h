@@ -1,4 +1,15 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/clip.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+
+#include "Geometry.h"
+#include "segment_util.h"
+
 static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
@@ -104,8 +115,8 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          AABB_tree& tree = geometry->aabb_tree(nth);
-          Side_of_triangle_mesh& on_side = geometry->on_side(nth);
+          auto& tree = geometry->aabb_tree(nth);
+          auto& on_side = geometry->on_side(nth);
           for (const Segment& segment : in) {
             cut_segment_with_volume(segment, tree, on_side, out);
           }
@@ -116,15 +127,15 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
         break;
       }
       case GEOMETRY_POINTS: {
-        std::vector<Point> in;
+        std::vector<EK::Point_3> in;
         geometry->points(target).swap(in);
-        std::vector<Point> out;
+        std::vector<EK::Point_3> out;
         for (size_t nth = targets; nth < size; nth++) {
           if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
             continue;
           }
-          Side_of_triangle_mesh& on_side = geometry->on_side(nth);
-          for (const Point& point : in) {
+          auto& on_side = geometry->on_side(nth);
+          for (const auto& point : in) {
             if (on_side(point) == CGAL::ON_UNBOUNDED_SIDE) {
               out.push_back(point);
             }

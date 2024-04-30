@@ -1,13 +1,161 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Polygon_triangulation_decomposition_2.h>
+
 #include <iostream>
 #include <sstream>
 #include <string>
 
+#include "surface_mesh_util.h"
 #include "transform_util.h"
+#include "unit_util.h"
 
 // Denotes which methods are exposed to javascript.
 #define JS_BINDING
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
+
+static std::shared_ptr<CGAL::Surface_mesh<EK::Point_3>> DeserializeMesh(
+    const std::string& serialization) {
+  CGAL::Surface_mesh<EK::Point_3>* mesh = new Surface_mesh();
+  std::istringstream s(serialization);
+  std::size_t number_of_vertices;
+  s >> number_of_vertices;
+  for (std::size_t vertex = 0; vertex < number_of_vertices; vertex++) {
+    Point p;
+    read_point(p, s);
+    mesh->add_vertex(p);
+    // We don't use the approximate point, but we need to read past it.
+    read_point_approximate(p, s);
+  }
+  std::size_t number_of_facets;
+  s >> number_of_facets;
+  for (std::size_t facet = 0; facet < number_of_facets; facet++) {
+    std::size_t number_of_vertices_in_facet;
+    s >> number_of_vertices_in_facet;
+    std::vector<CGAL::Surface_mesh<EK::Point_3>::Vertex_index> vertices;
+    for (std::size_t nth = 0; nth < number_of_vertices_in_facet; nth++) {
+      std::size_t vertex;
+      s >> vertex;
+      if (vertex > number_of_vertices) {
+        std::cout << "DeserializeMesh: Vertex " << vertex << " out of range "
+                  << number_of_vertices << std::endl;
+      }
+      vertices.emplace_back(vertex);
+    }
+    mesh->add_face(vertices);
+  }
+  return std::shared_ptr<Surface_mesh>(mesh);
+}
+
+static std::string serializeMesh(const CGAL::Surface_mesh<EK::Point_3>& mesh) {
+  std::ostringstream s;
+  size_t number_of_vertices = mesh.number_of_vertices();
+  s << number_of_vertices << "\n";
+  std::unordered_map<CGAL::Surface_mesh<EK::Point_3>::Vertex_index, size_t>
+      vertex_map;
+  size_t vertex_count = 0;
+  for (const auto vertex : mesh.vertices()) {
+    const Point& p = mesh.point(vertex);
+    write_point(p, s);
+    s << " ";
+    write_approximate_point(p, s);
+    s << "\n";
+    vertex_map[vertex] = vertex_count++;
+  }
+  s << "\n";
+  s << mesh.number_of_faces() << "\n";
+  for (const auto facet : mesh.faces()) {
+    const auto& start = mesh.halfedge(facet);
+    std::size_t edge_count = 0;
+    {
+      auto edge = start;
+      do {
+        edge_count++;
+        edge = mesh.next(edge);
+      } while (edge != start);
+    }
+    s << edge_count;
+    {
+      auto edge = start;
+      do {
+        std::size_t vertex(vertex_map[mesh.source(edge)]);
+        if (vertex >= number_of_vertices) {
+          std::cout << "SerializeMesh: Vertex " << vertex << " out of range "
+                    << number_of_vertices << std::endl;
+          return "<invalid>";
+        }
+        s << " " << vertex;
+        edge = mesh.next(edge);
+      } while (edge != start);
+    }
+    s << "\n";
+  }
+  return s.str();
+}
+
+static void PlanarSurfaceMeshToPolygonsWithHoles(
+    const Plane& plane, const Surface_mesh& mesh,
+    std::vector<Polygon_with_holes_2>& polygons) {
+  typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
+  typedef Traits_2::X_monotone_curve_2 Segment_2;
+  typedef CGAL::Arr_extended_dcel<Traits_2, size_t, size_t, size_t>
+      Dcel_with_regions;
+  typedef CGAL::Arrangement_2<Traits_2, Dcel_with_regions>
+      Arrangement_with_regions_2;
+
+  Arrangement_with_regions_2 arrangement;
+
+  std::set<std::vector<Kernel::FT>> segments;
+
+  // Construct the border.
+  for (const Surface_mesh::Edge_index edge : mesh.edges()) {
+    if (!mesh.is_border(edge)) {
+      continue;
+    }
+    Segment_2 segment{
+        plane.to_2d(mesh.point(mesh.source(mesh.halfedge(edge)))),
+        plane.to_2d(mesh.point(mesh.target(mesh.halfedge(edge))))};
+    insert(arrangement, segment);
+  }
+  convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
+}
+
+static bool PolygonsWithHolesToSurfaceMesh(
+    const EK::Plane_3& plane,
+    std::vector<CGAL::Polygon_with_holes_2<EK>>& polygons,
+    CGAL::Surface_mesh<EK::Point_3>& result,
+    std::map<EK::Point_3, CGAL::Surface_mesh<EK::Point_3>::Vertex_index>&
+        vertex_map,
+    bool flip = false) {
+  CGAL::Polygon_triangulation_decomposition_2<EK> triangulator;
+  for (const auto& polygon : polygons) {
+    std::vector<CGAL::Polygon_2<EK>> facets;
+    triangulator(polygon, std::back_inserter(facets));
+    for (auto& facet : facets) {
+      if (facet.orientation() != CGAL::Sign::POSITIVE) {
+        facet.reverse_orientation();
+      }
+      std::vector<CGAL::Surface_mesh<EK::Point_3>::Vertex_index> vertices;
+      for (const auto& point : facet) {
+        vertices.push_back(
+            ensureVertex(result, vertex_map, plane.to_3d(point)));
+      }
+      if (flip) {
+        std::reverse(vertices.begin(), vertices.end());
+      }
+      if (result.add_face(vertices) == Surface_mesh::null_face()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 enum Status {
   STATUS_OK = 0,
@@ -32,12 +180,28 @@ enum GeometryType {
 
 class DN {
  public:
-  DN(int key) : key_(key){};
+  DN(int key) : key_(key) {};
   ~DN() {}
   int key_;
 };
 
 class Geometry {
+  typedef CGAL::AABB_face_graph_triangle_primitive<
+      CGAL::Surface_mesh<EK::Point_3>>
+      AABB_primitive;
+  typedef CGAL::AABB_traits<EK, AABB_primitive> AABB_traits;
+  typedef CGAL::AABB_tree<AABB_traits> AABB_tree;
+  typedef CGAL::Side_of_triangle_mesh<CGAL::Surface_mesh<EK::Point_3>, EK>
+      Side_of_triangle_mesh;
+
+  typedef CGAL::AABB_face_graph_triangle_primitive<
+      CGAL::Surface_mesh<IK::Point_3>>
+      Epick_aabb_primitive;
+  typedef CGAL::AABB_traits<IK, Epick_aabb_primitive> Epick_aabb_traits;
+  typedef CGAL::AABB_tree<Epick_aabb_traits> Epick_aabb_tree;
+  typedef CGAL::Side_of_triangle_mesh<CGAL::Surface_mesh<IK::Point_3>, IK>
+      Epick_side_of_triangle_mesh;
+
  public:
   Geometry() : test_mode_(false), size_(0), is_absolute_frame_(false) {}
 
@@ -70,7 +234,7 @@ class Geometry {
   void resize(size_t size) {
     size_ = size;
     types_.resize(size);
-    transforms_.resize(size, Transformation(CGAL::IDENTITY));
+    transforms_.resize(size, CGAL::Aff_transformation_3<EK>(CGAL::IDENTITY));
     planes_.resize(size);
     gps_.resize(size);
     pwh_.resize(size);
@@ -115,7 +279,9 @@ class Geometry {
 
   bool has_transform(size_t nth) { return true; }
 
-  const Transformation& transform(size_t nth) { return transforms_[nth]; }
+  const CGAL::Aff_transformation_3<EK>& transform(size_t nth) {
+    return transforms_[nth];
+  }
 
   bool has_plane(size_t nth) { return is_polygons(nth); }
   Plane& plane(size_t nth) { return planes_[nth]; }
@@ -137,9 +303,9 @@ class Geometry {
 
   bool has_epick_mesh(size_t nth) { return epick_meshes_[nth] != nullptr; }
 
-  Epick_surface_mesh& epick_mesh(size_t nth) {
+  CGAL::Surface_mesh<IK::Point_3>& epick_mesh(size_t nth) {
     if (!has_epick_mesh(nth)) {
-      epick_meshes_[nth].reset(new Epick_surface_mesh);
+      epick_meshes_[nth].reset(new CGAL::Surface_mesh<IK::Point_3>);
       copy_face_graph(mesh(nth), *epick_meshes_[nth]);
     }
     return *epick_meshes_[nth];
@@ -161,9 +327,9 @@ class Geometry {
   }
 
   void update_epick_aabb_tree(size_t nth) {
-    Epick_surface_mesh& m = epick_mesh(nth);
+    CGAL::Surface_mesh<IK::Point_3>& m = epick_mesh(nth);
     epick_aabb_trees_[nth].reset(
-        new Epick_AABB_tree(faces(m).first, faces(m).second, m));
+        new Epick_aabb_tree(faces(m).first, faces(m).second, m));
   }
 
   AABB_tree& aabb_tree(size_t nth) {
@@ -173,7 +339,7 @@ class Geometry {
     return *aabb_trees_[nth];
   }
 
-  Epick_AABB_tree& epick_aabb_tree(size_t nth) {
+  Epick_aabb_tree& epick_aabb_tree(size_t nth) {
     if (!has_epick_aabb_tree(nth)) {
       update_epick_aabb_tree(nth);
     }
@@ -296,16 +462,17 @@ class Geometry {
     }
   }
 
-  JS_BINDING void setTransform(size_t nth, const Transformation& transform) {
+  JS_BINDING void setTransform(
+      size_t nth, const CGAL::Aff_transformation_3<EK>& transform) {
     transforms_[nth] = transform;
   }
 
-  void applyTransform(size_t nth, const Transformation& xform) {
+  void applyTransform(size_t nth, const CGAL::Aff_transformation_3<EK>& xform) {
     setTransform(nth, xform * transform(nth));
   }
 
   void setIdentityTransform(size_t nth) {
-    setTransform(nth, Transformation(CGAL::IDENTITY));
+    setTransform(nth, CGAL::Aff_transformation_3<EK>(CGAL::IDENTITY));
   }
 
   JS_BINDING void setInputMesh(
@@ -444,7 +611,8 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_polygons(nth)) {
         // Convert to planar mesh.
-        Vertex_map vertex_map;
+        std::map<EK::Point_3, CGAL::Surface_mesh<EK::Point_3>::Vertex_index>
+            vertex_map;
         setMesh(nth, new Surface_mesh);
         // Note: a set of polygons might not be convertible to a single mesh
         // due to zero width junctions.
@@ -561,7 +729,8 @@ class Geometry {
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
-          Transformation local_to_absolute_transform = transform(nth);
+          CGAL::Aff_transformation_3<EK> local_to_absolute_transform =
+              transform(nth);
           Plane local_plane = plane(nth);
           Plane absolute_plane = unitPlane<Kernel>(
               local_plane.transform(local_to_absolute_transform));
@@ -603,7 +772,8 @@ class Geometry {
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
-          Transformation absolute_to_local_transform = transform(nth).inverse();
+          CGAL::Aff_transformation_3<EK> absolute_to_local_transform =
+              transform(nth).inverse();
           Plane absolute_plane = plane(nth);
           Plane local_plane = unitPlane<Kernel>(
               absolute_plane.transform(absolute_to_local_transform));
@@ -703,15 +873,15 @@ class Geometry {
   size_t size_;
   bool is_absolute_frame_;
   std::vector<GeometryType> types_;
-  std::vector<Transformation> transforms_;
+  std::vector<CGAL::Aff_transformation_3<EK>> transforms_;
   std::vector<Plane> planes_;
   std::vector<std::unique_ptr<Polygons_with_holes_2>> pwh_;
   std::vector<std::unique_ptr<General_polygon_set_2>> gps_;
   std::vector<std::shared_ptr<const Surface_mesh>> input_meshes_;
   std::vector<std::shared_ptr<Surface_mesh>> meshes_;
-  std::vector<std::shared_ptr<Epick_surface_mesh>> epick_meshes_;
+  std::vector<std::shared_ptr<CGAL::Surface_mesh<IK::Point_3>>> epick_meshes_;
   std::vector<std::unique_ptr<AABB_tree>> aabb_trees_;
-  std::vector<std::unique_ptr<Epick_AABB_tree>> epick_aabb_trees_;
+  std::vector<std::unique_ptr<Epick_aabb_tree>> epick_aabb_trees_;
   std::vector<std::unique_ptr<Side_of_triangle_mesh>> on_sides_;
   std::vector<std::unique_ptr<Epick_side_of_triangle_mesh>> on_epick_sides_;
   std::vector<std::unique_ptr<Segments>> input_segments_;

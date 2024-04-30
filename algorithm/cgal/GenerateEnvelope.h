@@ -1,3 +1,14 @@
+#pragma once
+
+#include <CGAL/Env_triangle_traits_3.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/envelope_3.h>
+
 #include "outline_util.h"
 
 template <typename Kernel, typename Edge, typename Face, typename Point>
@@ -27,18 +38,17 @@ static bool projectPointToEnvelope(const Edge& edge, const Face& face,
 
 static int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
                             bool do_project_faces, bool do_project_edges) {
-  // Unfortunately we seem to need Epeck here, which is quite slow.
-  typedef Epeck_kernel Envelope_kernel;
-  typedef std::vector<Envelope_kernel::Segment_3> Envelope_segments;
-  typedef CGAL::Surface_mesh<Envelope_kernel::Point_3> Envelope_mesh;
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef std::vector<EK::Segment_3> Envelope_segments;
+  typedef CGAL::Surface_mesh<EK::Point_3> Envelope_mesh;
   const int kUpper = 0;
   const int kLower = 1;
   if (envelope_type != kUpper && envelope_type != kLower) {
     return STATUS_INVALID_INPUT;
   }
 
-  typedef CGAL::Env_triangle_traits_3<Envelope_kernel> Traits_3;
-  typedef Envelope_kernel::Point_3 Point_3;
+  typedef CGAL::Env_triangle_traits_3<EK> Traits_3;
+  typedef EK::Point_3 Point_3;
   typedef Traits_3::Surface_3 Env_triangle_3;
   typedef CGAL::Envelope_diagram_2<Traits_3> Envelope_diagram_2;
 
@@ -62,12 +72,12 @@ static int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
         std::cout << "Prepare triangles." << std::endl;
         {
           auto& points = mesh.points();
-          for (const Face_index face : faces(mesh)) {
-            Halfedge_index a = halfedge(face, mesh);
-            Halfedge_index b = mesh.next(a);
-            Envelope_kernel::Triangle_3 triangle(points[mesh.source(a)],
-                                                 points[mesh.source(b)],
-                                                 points[mesh.target(b)]);
+          for (const auto face : faces(mesh)) {
+            auto a = halfedge(face, mesh);
+            auto b = mesh.next(a);
+            EK::Triangle_3 triangle(points[mesh.source(a)],
+                                    points[mesh.source(b)],
+                                    points[mesh.target(b)]);
             if (!triangle.is_degenerate()) {
               triangles.emplace_back(triangle);
             }
@@ -81,7 +91,7 @@ static int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
           CGAL::lower_envelope_3(triangles.begin(), triangles.end(), diagram);
         }
 
-        std::vector<Point_3> points;
+        std::vector<EK::Point_3> points;
         std::vector<std::vector<size_t>> polygons;
 
         std::cout << "Project envelope." << std::endl;
@@ -99,7 +109,7 @@ static int GenerateEnvelope(Geometry* geometry, int envelope_type, bool do_plan,
           // are non-zero.
           do {
             Point_3 point;
-            if (projectPointToEnvelope<Envelope_kernel>(edge, face, point)) {
+            if (projectPointToEnvelope<EK>(edge, face, point)) {
               size_t vertex = points.size();
               points.push_back(point);
               polygon.push_back(vertex);

@@ -1,4 +1,10 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+
+#include "Geometry.h"
+
 static int Involute(Geometry* geometry) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   for (int nth = 0; nth < size; nth++) {
@@ -11,14 +17,14 @@ static int Involute(Geometry* geometry) {
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         geometry->plane(nth) = geometry->plane(nth).opposite();
         // Why are we reflecting along y?
-        for (Polygon_with_holes_2& polygon : geometry->pwh(nth)) {
-          for (Point_2& point : polygon.outer_boundary()) {
-            point = Point_2(point.x(), point.y() * -1);
+        for (auto& polygon : geometry->pwh(nth)) {
+          for (auto& point : polygon.outer_boundary()) {
+            point = EK::Point_2(point.x(), point.y() * -1);
           }
           for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
                ++hole) {
-            for (Point_2& point : *hole) {
-              point = Point_2(point.x(), point.y() * -1);
+            for (auto& point : *hole) {
+              point = EK::Point_2(point.x(), point.y() * -1);
             }
           }
         }

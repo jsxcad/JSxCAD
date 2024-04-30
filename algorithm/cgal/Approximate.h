@@ -2,6 +2,7 @@
 
 #include <CGAL/Surface_mesh_approximation/approximate_triangle_mesh.h>
 
+#include "Geometry.h"
 #include "approximate_util.h"
 
 static int Approximate(Geometry* geometry, size_t face_count,

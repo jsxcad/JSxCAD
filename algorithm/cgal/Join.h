@@ -1,4 +1,13 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+
+#include "Geometry.h"
+#include "manifold_util.h"
+#include "segment_util.h"
+
 static int Join(Geometry* geometry, size_t targets, bool exact) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -65,7 +74,7 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
               Polygons_with_holes_2 pwhs;
               SurfaceMeshSectionToPolygonsWithHoles(
                   geometry->mesh(nth), geometry->plane(target), pwhs);
-              for (const Polygon_with_holes_2& pwh : pwhs) {
+              for (const auto& pwh : pwhs) {
                 geometry->gps(target).join(pwh);
               }
               geometry->updateBounds2(target);
@@ -80,7 +89,7 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
           if (!geometry->has_segments(nth)) {
             continue;
           }
-          for (const Segment& segment : geometry->segments(nth)) {
+          for (const auto& segment : geometry->segments(nth)) {
             geometry->addSegment(target, segment);
           }
         }
@@ -91,7 +100,7 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
           if (!geometry->has_points(nth)) {
             continue;
           }
-          for (const Point& point : geometry->points(nth)) {
+          for (const auto& point : geometry->points(nth)) {
             geometry->addPoint(target, point);
           }
         }

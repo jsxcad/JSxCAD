@@ -1,35 +1,63 @@
+#pragma once
+
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/extrude.h>
+#include <CGAL/Polygon_mesh_processing/measure.h>
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Surface_mesh.h>
+
+#include "Geometry.h"
+#include "surface_mesh_util.h"
+
+template <typename MAP>
+struct Project {
+  Project(MAP map, EK::Vector_3 vector) : map(map), vector(vector) {}
+
+  template <typename VD, typename T>
+  void operator()(const T&, VD vd) const {
+    put(map, vd, get(map, vd) + vector);
+  }
+
+  MAP map;
+  EK::Vector_3 vector;
+};
+
 static int Extrude(Geometry* geometry, size_t count) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
-  typedef typename boost::property_map<Surface_mesh, CGAL::vertex_point_t>::type
-      VPMap;
+  typedef typename boost::property_map<CGAL::Surface_mesh<EK::Point_3>,
+                                       CGAL::vertex_point_t>::type VPMap;
 
-  const Transformation& top = geometry->transform(count);
-  const Transformation& bottom = geometry->transform(count + 1);
+  const auto& top = geometry->transform(count);
+  const auto& bottom = geometry->transform(count + 1);
 
-  Vector up = Point(0, 0, 0).transform(top) - Point(0, 0, 0);
-  Vector down = Point(0, 0, 0).transform(bottom) - Point(0, 0, 0);
+  auto up = Point(0, 0, 0).transform(top) - Point(0, 0, 0);
+  auto down = Point(0, 0, 0).transform(bottom) - Point(0, 0, 0);
 
   for (size_t nth = 0; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        const Surface_mesh& mesh = geometry->mesh(nth);
+        const auto& mesh = geometry->mesh(nth);
         if (CGAL::is_closed(mesh) || CGAL::is_empty(mesh)) {
           // TODO: Support extrusion of an upper envelope of a solid.
           continue;
         }
         // No protection against self-intersection.
-        std::unique_ptr<Surface_mesh> extruded_mesh(new Surface_mesh);
+        auto extruded_mesh = std::make_unique<Surface_mesh>();
         Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
         Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
         CGAL::Polygon_mesh_processing::extrude_mesh(mesh, *extruded_mesh,
                                                     bottom, top);
         CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
-        FT volume = CGAL::Polygon_mesh_processing::volume(
+        EK::FT volume = CGAL::Polygon_mesh_processing::volume(
             *extruded_mesh, CGAL::parameters::all_default());
         if (volume == 0) {
           std::cout << "Extrude/zero-volume" << std::endl;
@@ -43,7 +71,7 @@ static int Extrude(Geometry* geometry, size_t count) {
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         Surface_mesh flat_mesh;
-        Vertex_map vertex_map;
+        std::map<Surface_mesh::Point, Surface_mesh::Vertex_index> vertex_map;
         if (!PolygonsWithHolesToSurfaceMesh(geometry->plane(nth),
                                             geometry->pwh(nth), flat_mesh,
                                             vertex_map)) {
@@ -60,13 +88,13 @@ static int Extrude(Geometry* geometry, size_t count) {
                     << std::endl;
           continue;
         }
-        std::unique_ptr<Surface_mesh> extruded_mesh(new Surface_mesh);
+        auto extruded_mesh = std::make_unique<Surface_mesh>();
         Project<VPMap> top(get(CGAL::vertex_point, *extruded_mesh), up);
         Project<VPMap> bottom(get(CGAL::vertex_point, *extruded_mesh), down);
         CGAL::Polygon_mesh_processing::extrude_mesh(flat_mesh, *extruded_mesh,
                                                     bottom, top);
         CGAL::Polygon_mesh_processing::triangulate_faces(*extruded_mesh);
-        FT volume = CGAL::Polygon_mesh_processing::volume(
+        EK::FT volume = CGAL::Polygon_mesh_processing::volume(
             *extruded_mesh, CGAL::parameters::all_default());
         if (volume == 0) {
           std::cout << "Extrude/zero-volume" << std::endl;

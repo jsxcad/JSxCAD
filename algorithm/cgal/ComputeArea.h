@@ -1,5 +1,14 @@
+#pragma once
+
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/measure.h>
+
+#include "Geometry.h"
+
 static double ComputeArea(Geometry* geometry) {
-  FT area = 0;
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
+  EK::FT area = 0;
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
@@ -11,9 +20,9 @@ static double ComputeArea(Geometry* geometry) {
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
-        for (const Polygon_with_holes_2& pwh : geometry->pwh(nth)) {
+        for (const auto& pwh : geometry->pwh(nth)) {
           area += pwh.outer_boundary().area();
-          for (const Polygon_2& hole : pwh.holes()) {
+          for (const auto& hole : pwh.holes()) {
             area += hole.area();
           }
         }

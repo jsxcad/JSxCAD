@@ -1,15 +1,23 @@
 #pragma once
 
-#include "cgal.h"
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Surface_mesh.h>
+
+#include "Geometry.h"
 
 static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
   geometry->convertPolygonsToPlanarMeshes();
 
-  Point reference = Point(0, 0, 0).transform(geometry->transform(count));
+  EK::Point_3 reference =
+      EK::Point_3(0, 0, 0).transform(geometry->transform(count));
   FT amount = reference.z();
 
   bool hasSelections = count + 1 < size;
@@ -17,7 +25,7 @@ static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
   for (size_t nth = 0; nth < count; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
-        Surface_mesh& mesh = geometry->mesh(nth);
+        auto& mesh = geometry->mesh(nth);
         for (size_t selection = count + 1; selection < size; selection++) {
           if (!geometry->is_mesh(selection)) {
             continue;
@@ -28,10 +36,11 @@ static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
               CGAL::parameters::all_default());
         }
         bool is_vertex_normal_map_created = false;
-        Surface_mesh::Property_map<Vertex_index, Vector> vertex_normal_map;
+        Surface_mesh::Property_map<Surface_mesh::Vertex_index, EK::Vector_3>
+            vertex_normal_map;
         std::tie(vertex_normal_map, is_vertex_normal_map_created) =
-            mesh.add_property_map<Vertex_index, Vector>("v:normal_map",
-                                                        CGAL::NULL_VECTOR);
+            mesh.add_property_map<Surface_mesh::Vertex_index, EK::Vector_3>(
+                "v:normal_map", CGAL::NULL_VECTOR);
 
         if (is_vertex_normal_map_created) {
           CGAL::Polygon_mesh_processing::compute_vertex_normals(
@@ -51,8 +60,8 @@ static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
         will be.
         */
 
-        for (const Vertex_index vertex : mesh.vertices()) {
-          const Point& point = mesh.point(vertex);
+        for (const auto vertex : mesh.vertices()) {
+          const auto& point = mesh.point(vertex);
           // By default all points are grown.
           bool inside = true;
           if (hasSelections) {
@@ -70,9 +79,9 @@ static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
             // them.
             continue;
           }
-          const Vector& n = vertex_normal_map[vertex];
-          Vector direction =
-              unitVector(Vector(x ? n.x() : 0, y ? n.y() : 0, z ? n.z() : 0));
+          const auto& n = vertex_normal_map[vertex];
+          auto direction = unitVector(
+              EK::Vector_3(x ? n.x() : 0, y ? n.y() : 0, z ? n.z() : 0));
           mesh.point(vertex) = point + direction * amount;
         }
       }

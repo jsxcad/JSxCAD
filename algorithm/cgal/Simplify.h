@@ -1,3 +1,4 @@
+#include "Geometry.h"
 #include "simplify_util.h"
 
 static int Simplify(Geometry* geometry, double face_count, bool simplify_points,
@@ -14,7 +15,7 @@ static int Simplify(Geometry* geometry, double face_count, bool simplify_points,
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    Surface_mesh& mesh = geometry->mesh(nth);
+    auto& mesh = geometry->mesh(nth);
 
     simplify(face_count, sharp_edge_threshold, mesh,
              geometry->segments(sharp_edges));

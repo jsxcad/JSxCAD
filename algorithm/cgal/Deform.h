@@ -1,9 +1,24 @@
+#ifndef FE_UNDERFLOW
+// Required by Surface_mesh_deformation under wasm.
+#define FE_UNDERFLOW 0
+#endif
+
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Surface_mesh_deformation.h>
+
+#include "Geometry.h"
+
 // FIX
 static int Deform(Geometry* geometry, size_t length, size_t iterations,
                   double tolerance, double alpha) {
-  typedef CGAL::Cartesian_converter<Cartesian_kernel, Kernel> converter;
-  typedef CGAL::Surface_mesh_deformation<Cartesian_surface_mesh, CGAL::Default,
-                                         CGAL::Default, CGAL::SRE_ARAP>
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef CGAL::Simple_cartesian<double> CK;
+
+  typedef CGAL::Cartesian_converter<CK, EK> converter;
+  typedef CGAL::Surface_mesh_deformation<CGAL::Surface_mesh<CK::Point_3>,
+                                         CGAL::Default, CGAL::Default,
+                                         CGAL::SRE_ARAP>
       Surface_mesh_deformation;
 
   converter from_cartesian;
@@ -36,7 +51,7 @@ static int Deform(Geometry* geometry, size_t length, size_t iterations,
       }
     }
 
-    Cartesian_surface_mesh cartesian_mesh;
+    CGAL::Surface_mesh<CK::Point_3> cartesian_mesh;
     copy_face_graph(working_input, cartesian_mesh);
 
     // FIX: Need a pass to remove zero length edges.
@@ -45,7 +60,7 @@ static int Deform(Geometry* geometry, size_t length, size_t iterations,
     deformation.set_sre_arap_alpha(alpha);
 
     // All vertices are in the region of interest.
-    for (Vertex_index vertex : vertices(cartesian_mesh)) {
+    for (const auto vertex : vertices(cartesian_mesh)) {
       deformation.insert_roi_vertex(vertex);
     }
 
@@ -61,8 +76,8 @@ static int Deform(Geometry* geometry, size_t length, size_t iterations,
       CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(
           working_selection);
       // Deform with the local-to-absolute transform of the selection.
-      const Transformation& deform_transform = geometry->transform(nth);
-      Cartesian_kernel::Aff_transformation_3 cartesian_deform_transform(
+      const auto& deform_transform = geometry->transform(nth);
+      CK::Aff_transformation_3 cartesian_deform_transform(
           CGAL::to_double(deform_transform.m(0, 0)),
           CGAL::to_double(deform_transform.m(0, 1)),
           CGAL::to_double(deform_transform.m(0, 2)),
@@ -76,7 +91,7 @@ static int Deform(Geometry* geometry, size_t length, size_t iterations,
           CGAL::to_double(deform_transform.m(2, 2)),
           CGAL::to_double(deform_transform.m(2, 3)),
           CGAL::to_double(deform_transform.m(3, 3)));
-      for (const Vertex_index vertex : vertices(cartesian_mesh)) {
+      for (const auto vertex : vertices(cartesian_mesh)) {
         const auto& p = cartesian_mesh.point(vertex);
         if (inside(from_cartesian(p)) != CGAL::ON_UNBOUNDED_SIDE) {
           deformation.insert_control_vertex(vertex);

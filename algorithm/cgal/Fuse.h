@@ -1,3 +1,6 @@
+#include "Geometry.h"
+#include "manifold_util.h"
+
 static int Fuse(Geometry* geometry, bool exact) {
   size_t size = geometry->size();
 
@@ -93,7 +96,7 @@ static int Fuse(Geometry* geometry, bool exact) {
       target = geometry->add(GEOMETRY_POINTS);
       geometry->setIdentityTransform(target);
     }
-    for (const Point& point : geometry->input_points(nth)) {
+    for (const auto& point : geometry->input_points(nth)) {
       geometry->addPoint(target, point);
     }
   }

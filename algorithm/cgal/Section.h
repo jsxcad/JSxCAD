@@ -1,21 +1,27 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_2.h>
+
+#include "Geometry.h"
+
 static int Section(Geometry* geometry, int count) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->copyInputPointsToOutputPoints();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
-  const Plane base_plane(Point(0, 0, 0), Vector(0, 0, 1));
+  const EK::Plane_3 base_plane(EK::Point_3(0, 0, 0), EK::Vector_3(0, 0, 1));
 
   for (int nthTransform = count; nthTransform < size; nthTransform++) {
-    Plane plane = base_plane.transform(geometry->transform(nthTransform));
+    auto plane = base_plane.transform(geometry->transform(nthTransform));
     for (int nth = 0; nth < count; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
-          Polygons_with_holes_2 pwhs;
+          std::vector<CGAL::Polygon_with_holes_2<EK>> pwhs;
           SurfaceMeshSectionToPolygonsWithHoles(geometry->mesh(nth), plane,
                                                 pwhs);
-          Transformation disorientation =
+          auto disorientation =
               disorient_plane_along_z(unitPlane<Kernel>(plane));
           int target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
           geometry->origin(target) = nth;
@@ -40,7 +46,7 @@ static int Section(Geometry* geometry, int count) {
           int target = geometry->add(GEOMETRY_SEGMENTS);
           geometry->origin(target) = nth;
           geometry->setTransform(target, geometry->transform(nthTransform));
-          for (const Segment& segment : geometry->segments(nth)) {
+          for (const auto& segment : geometry->segments(nth)) {
             if (plane.has_on(segment.source()) &&
                 plane.has_on(segment.target())) {
               geometry->addSegment(target, segment);
@@ -53,7 +59,7 @@ static int Section(Geometry* geometry, int count) {
           int target = geometry->add(GEOMETRY_POINTS);
           geometry->origin(target) = nth;
           geometry->setTransform(target, geometry->transform(nthTransform));
-          for (const Point& point : geometry->points(nth)) {
+          for (const auto& point : geometry->points(nth)) {
             if (plane.has_on(point)) {
               geometry->addPoint(target, point);
             }

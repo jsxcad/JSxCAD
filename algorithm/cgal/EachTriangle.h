@@ -1,3 +1,7 @@
+#pragma once
+
+#include "Geometry.h"
+
 static int EachTriangle(Geometry* geometry, std::vector<Point>& points) {
   size_t size = geometry->getSize();
 
@@ -8,8 +12,8 @@ static int EachTriangle(Geometry* geometry, std::vector<Point>& points) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    const Surface_mesh& mesh = geometry->mesh(nth);
-    for (const Face_index facet : mesh.faces()) {
+    const auto& mesh = geometry->mesh(nth);
+    for (const auto facet : mesh.faces()) {
       const auto& a = mesh.halfedge(facet);
       const auto& b = mesh.next(a);
       const auto& c = mesh.next(b);

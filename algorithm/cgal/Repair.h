@@ -1,3 +1,4 @@
+#include "Geometry.h"
 #include "repair_util.h"
 
 static int Repair(Geometry* geometry, const std::vector<int>& strategies) {
@@ -10,7 +11,7 @@ static int Repair(Geometry* geometry, const std::vector<int>& strategies) {
     if (!geometry->is_mesh(nth)) {
       continue;
     }
-    Surface_mesh& mesh = geometry->mesh(nth);
+    auto& mesh = geometry->mesh(nth);
     repair_self_intersections<Epeck_kernel>(mesh, strategies);
     demesh(mesh);
   }

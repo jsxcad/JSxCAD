@@ -1,5 +1,8 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Surface_mesh.h>
 #include <CGAL/Surface_mesh_simplification/Edge_collapse_visitor_base.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
@@ -8,8 +11,12 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
+
 struct Constrained_edge_map {
-  typedef boost::graph_traits<Epick_surface_mesh>::edge_descriptor
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
+  typedef boost::graph_traits<CGAL::Surface_mesh<IK::Point_3>>::edge_descriptor
       edge_descriptor;
   typedef boost::readable_property_map_tag category;
   typedef bool value_type;
@@ -34,7 +41,8 @@ struct Constrained_edge_map {
 static void simplify(double face_count, double sharp_edge_threshold,
                      Surface_mesh& epeck_mesh, Segments& sharp_edges) {
   double sharp_edge_threshold_degrees = sharp_edge_threshold * 360;
-  typedef Epick_kernel::Point_3 Point_3;
+  typedef IK::Point_3 Point_3;
+  typedef CGAL::Surface_mesh<IK::Point_3> Epick_surface_mesh;
   typedef boost::graph_traits<Epick_surface_mesh>::edge_descriptor
       edge_descriptor;
   typedef boost::graph_traits<Epick_surface_mesh>::halfedge_descriptor
@@ -63,7 +71,7 @@ static void simplify(double face_count, double sharp_edge_threshold,
     std::map<edge_descriptor, std::pair<Point_3, Point_3>> constrained_edges;
     std::size_t nb_sharp_edges = 0;
     // detect sharp edges
-    CGAL::Cartesian_converter<Epick_kernel, Epeck_kernel> c2e;
+    CGAL::Cartesian_converter<IK, EK> c2e;
     for (edge_descriptor ed : edges(mesh)) {
       halfedge_descriptor hd = halfedge(ed, mesh);
       if (mesh.is_border(ed)) {

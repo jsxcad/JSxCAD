@@ -1,5 +1,9 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_2.h>
+
+#include "Geometry.h"
 #include "mu3d.h"
 
 struct UnfoldTag {
@@ -11,6 +15,9 @@ struct UnfoldTag {
 
 static int Unfold(Geometry* geometry, bool enable_tabs,
                   std::vector<UnfoldTag>& tags) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+  typedef EK::Point_2 Point_2;
+  typedef CGAL::Polygon_2<EK> Polygon_2;
   size_t size = geometry->getSize();
 
   geometry->copyInputMeshesToOutputMeshes();
@@ -75,16 +82,16 @@ static int Unfold(Geometry* geometry, bool enable_tabs,
             // This edge was split, include both sides.
             {
               int edge = geometry->add(GEOMETRY_SEGMENTS);
-              Transformation t =
-                  computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
+              auto t =
+                  computeInverseSegmentTransform(s1, s2, EK::Vector_3(0, 0, 1));
               geometry->segments(edge).emplace_back(s1, s2);
               geometry->setTransform(edge, t.inverse());
               tags.emplace_back(edge, "unfold:edge");
             }
             {
               int edge = geometry->add(GEOMETRY_SEGMENTS);
-              Transformation t =
-                  computeInverseSegmentTransform(t2, t1, Vector(0, 0, 1));
+              auto t =
+                  computeInverseSegmentTransform(t2, t1, EK::Vector_3(0, 0, 1));
               geometry->segments(edge).emplace_back(t2, t1);
               geometry->setTransform(edge, t.inverse());
               tags.emplace_back(edge, "unfold:edge");
@@ -92,8 +99,8 @@ static int Unfold(Geometry* geometry, bool enable_tabs,
           } else {
             // This edge was not split, but with a fold -- include one side.
             int edge = geometry->add(GEOMETRY_SEGMENTS);
-            Transformation t =
-                computeInverseSegmentTransform(s1, s2, Vector(0, 0, 1));
+            auto t =
+                computeInverseSegmentTransform(s1, s2, EK::Vector_3(0, 0, 1));
             geometry->segments(edge).emplace_back(s1, s2);
             geometry->setTransform(edge, t.inverse());
             tags.emplace_back(edge, "unfold:edge");

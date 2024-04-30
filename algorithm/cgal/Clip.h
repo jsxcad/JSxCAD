@@ -1,3 +1,9 @@
+#include <CGAL/Polygon_mesh_processing/clip.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+
+#include "manifold_util.h"
+#include "segment_util.h"
+
 static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
   try {
     size_t size = geometry->size();

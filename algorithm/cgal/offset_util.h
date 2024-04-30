@@ -1,14 +1,24 @@
 #pragma once
 
-#include "cgal.h"
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/General_polygon_set_2.h>
+#include <CGAL/Gps_traits_2.h>
+#include <CGAL/minkowski_sum_2.h>
+
+#include "point_util.h"
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
 static void offsetPolygonWithHoles(
     double initial, double step, double limit, int segments,
-    const Polygon_with_holes_2& polygon,
-    std::vector<Polygon_with_holes_2>& offset_polygons) {
+    const CGAL::Polygon_with_holes_2<EK>& polygon,
+    std::vector<CGAL::Polygon_with_holes_2<EK>>& offset_polygons) {
+  typedef CGAL::Gps_segment_traits_2<EK> Traits;
+  typedef CGAL::Polygon_2<EK> Polygon_2;
+  typedef CGAL::Polygon_with_holes_2<EK> Polygon_with_holes_2;
+
   auto& boundary = polygon.outer_boundary();
   auto& holes = polygon.holes();
-  typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
 
   Polygon_with_holes_2 insetting_boundary;
 
@@ -95,6 +105,9 @@ static void insetPolygonWithHoles(
     double initial, double step, double limit, int segments,
     const Polygon_with_holes_2& polygon,
     std::vector<Polygon_with_holes_2>& inset_polygons) {
+  typedef CGAL::Polygon_2<EK> Polygon_2;
+  typedef CGAL::Polygon_with_holes_2<EK> Polygon_with_holes_2;
+
   auto boundary = polygon.outer_boundary();
 
   if (boundary.orientation() == CGAL::Sign::POSITIVE) {

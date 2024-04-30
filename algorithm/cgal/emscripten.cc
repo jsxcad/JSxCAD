@@ -1,15 +1,17 @@
-#include <emscripten/bind.h>
-
 #define JOT_MANIFOLD_ENABLE
 
-#include "cgal.h"
-#include "convert.h"
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <emscripten/bind.h>
+
+#include "API.h"
 
 using emscripten::base;
 using emscripten::select_overload;
 
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
 namespace wrapped {
-static Transformation to_transform(emscripten::val& js) {
+static EK::Aff_transformation_3 to_transform(emscripten::val& js) {
   if (js[16] != js.undefined()) {
     return ::to_transform(js[16].as<std::string>());
   } else {
@@ -31,7 +33,8 @@ static Transformation to_transform(emscripten::val& js) {
   }
 }
 
-static void to_js(const Transformation& transform, emscripten::val& js) {
+static void to_js(const EK::Aff_transformation_3& transform,
+                  emscripten::val& js) {
   double doubles[16];
   to_doubles(transform, doubles);
   for (size_t nth = 0; nth < 16; nth++) {
@@ -47,8 +50,8 @@ static int ComposeTransforms(emscripten::val js_a, emscripten::val js_b,
 }
 
 static int InvertTransform(emscripten::val js_in, emscripten::val js_out) {
-  Transformation t = to_transform(js_in);
-  Transformation inverse = t.inverse();
+  EK::Aff_transformation_3 t = to_transform(js_in);
+  EK::Aff_transformation_3 inverse = t.inverse();
   to_js(inverse, js_out);
   return STATUS_OK;
 }
@@ -66,17 +69,20 @@ static int ScaleTransform(double x, double y, double z,
 }
 
 static int XTurnTransform(double turn, emscripten::val js_out) {
-  to_js(TransformationFromXTurn<Transformation, RT>(turn), js_out);
+  to_js(TransformationFromXTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(turn),
+        js_out);
   return STATUS_OK;
 }
 
 static int YTurnTransform(double turn, emscripten::val js_out) {
-  to_js(TransformationFromYTurn<Transformation, RT>(turn), js_out);
+  to_js(TransformationFromYTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(turn),
+        js_out);
   return STATUS_OK;
 }
 
 static int ZTurnTransform(double turn, emscripten::val js_out) {
-  to_js(TransformationFromZTurn<Transformation, RT>(turn), js_out);
+  to_js(TransformationFromZTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(turn),
+        js_out);
   return STATUS_OK;
 }
 
@@ -84,9 +90,9 @@ static int InverseSegmentTransform(double startx, double starty, double startz,
                                    double endx, double endy, double endz,
                                    double normalx, double normaly,
                                    double normalz, emscripten::val js_out) {
-  to_js(::InverseSegmentTransform(Point(startx, starty, startz),
-                                  Point(endx, endy, endz),
-                                  Vector(normalx, normaly, normalz)),
+  to_js(::InverseSegmentTransform(EK::Point_3(startx, starty, startz),
+                                  EK::Point_3(endx, endy, endz),
+                                  EK::Vector_3(normalx, normaly, normalz)),
         js_out);
   return STATUS_OK;
 }
@@ -122,14 +128,14 @@ static int ComputeImplicitVolume(Geometry* geometry, emscripten::val op,
       radius, angular_bound, radius_bound, distance_bound, error_bound);
 }
 
-static int Disjoint(Geometry* geometry, emscripten::val js_is_masked, int mode,
+static int Disjoint(Geometry* geometry, emscripten::val js_is_masked,
                     bool exact) {
   size_t size = geometry->size();
   std::vector<bool> is_masked;
   for (size_t nth = 0; nth < size; nth++) {
     is_masked.push_back(js_is_masked[nth].as<bool>());
   }
-  return ::Disjoint(geometry, is_masked, mode, exact);
+  return ::Disjoint(geometry, is_masked, exact);
 }
 
 static static int EachPoint(Geometry* geometry, emscripten::val emit_point) {

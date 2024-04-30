@@ -1,10 +1,27 @@
 #pragma once
 
+#include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Cartesian_converter.h>
+#include <CGAL/General_polygon_set_2.h>
+#include <CGAL/Gps_segment_traits_2.h>
+#include <CGAL/Gps_traits_2.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
+#include <CGAL/intersections.h>
 
 #include "printing.h"
+
+typedef CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<Kernel>>
+    General_polygon_set_2;
+
+typedef CGAL::Polygon_2<Kernel> Polygon_2;
+typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2;
+typedef std::vector<CGAL::Polygon_with_holes_2<Kernel>> Polygons_with_holes_2;
+typedef std::vector<std::size_t> Polygon;
+typedef std::vector<Polygon> Polygons;
+
+typedef std::vector<Point> Polyline;
+typedef std::vector<Polyline> Polylines;
 
 template <typename Polygon_2, typename Segments>
 static void polygonToSegments(Polygon_2& polygon, Segments& segments) {
@@ -348,3 +365,51 @@ static void simplifyPolygonsWithHoles(const Polygons_with_holes_2& complex,
       complex, boundaries, holes);
   toSimplePolygonsWithHolesFromBoundariesAndHoles(boundaries, holes, simple);
 };
+
+static void PolygonToPolyline(const Plane& plane, const Polygon_2& polygon,
+                              Polyline& polyline) {
+  for (const Point_2& p2 : polygon) {
+    polyline.push_back(plane.to_3d(p2));
+  }
+}
+
+static double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
+                                                  const Polyline& polyline_b,
+                                                  size_t& offset_b) {
+  size_t size_b = polyline_b.size();
+  double distance = std::numeric_limits<double>::infinity();
+  offset_b = 0;
+  for (size_t trial_offset_b = 0; trial_offset_b < size_b; trial_offset_b++) {
+    const double trial_distance =
+        CGAL::sqrt(CGAL::to_double(CGAL::squared_distance(
+            polyline_a.front(), polyline_b[trial_offset_b])));
+    if (trial_distance < distance) {
+      distance = trial_distance;
+      offset_b = trial_offset_b;
+    }
+  }
+  return distance;
+}
+
+// Write a function to determine the closest alignment between two polyline.
+static void alignPolylines3(Polyline& polyline_a, Polyline& polyline_b) {
+  size_t offset_b;
+  computeBestDistanceBetweenPolylines(polyline_a, polyline_b, offset_b);
+  if (offset_b != 0) {
+    std::rotate(polyline_b.begin(), polyline_b.begin() + offset_b,
+                polyline_b.end());
+  }
+}
+
+static CGAL::Bbox_2 computePolygonSetBounds(const General_polygon_set_2& gps) {
+  CGAL::Bbox_2 bound;
+  for (auto it = gps.arrangement().vertices_begin();
+       it != gps.arrangement().vertices_end(); ++it) {
+    auto& p = it->point();
+    // Really this should use inf and sub to get conservative
+    // containment.
+    bound += CGAL::Bbox_2(CGAL::to_double(p.x()), CGAL::to_double(p.y()),
+                          CGAL::to_double(p.x()), CGAL::to_double(p.y()));
+  }
+  return bound;
+}

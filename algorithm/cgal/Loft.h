@@ -1,3 +1,15 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
+
+#include "Geometry.h"
+#include "demesh_util.h"
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
 // This weight calculator refuses weights for triangles within the same lofting
 // span.
 template <class Weight_>
@@ -18,23 +30,18 @@ struct Loft_weight_calculator {
   Weight operator()(const std::vector<Point_3>& P,
                     const std::vector<Point_3>& Q, int i, int j, int k,
                     const LookupTable& lambda) const {
-    std::cout << "LWC/1" << std::endl;
     if (CGAL::collinear(P[i], P[j], P[k])) {
       return Weight::NOT_VALID();
     }
-    std::cout << "LWC/2" << std::endl;
     int top_count = in_top(i) + in_top(j) + in_top(k);
     if (top_count >= 3) {
       return Weight::NOT_VALID();
     }
-    std::cout << "LWC/3" << std::endl;
     int bottom_count = in_bottom(i) + in_bottom(j) + in_bottom(k);
     if (bottom_count >= 3) {
       return Weight::NOT_VALID();
     }
-    std::cout << "LWC/4" << std::endl;
     auto result = Weight(P, Q, i, j, k, lambda);
-    std::cout << "LWC/5" << std::endl;
     return result;
   }
 
@@ -44,10 +51,12 @@ struct Loft_weight_calculator {
   int bottom_end;
 };
 
-static void loftBetweenPolylines(Polyline& lower, Polyline& upper,
-                                 Points& points, Polygons& polygons) {
+static void loftBetweenPolylines(
+    std::vector<EK::Point_3>& lower, std::vector<EK::Point_3>& upper,
+    std::vector<EK::Point_3>& points,
+    std::vector<std::vector<std::size_t>>& polygons) {
   alignPolylines3(lower, upper);
-  Polyline joined;
+  std::vector<EK::Point_3> joined;
   int bottom_start = joined.size();
   joined.push_back(lower.front());
   for (size_t nth = 1; nth < lower.size(); nth++) {
@@ -65,17 +74,16 @@ static void loftBetweenPolylines(Polyline& lower, Polyline& upper,
   // Here's where we jump back.
   std::size_t start = points.size();
   points.insert(points.end(), joined.begin(), joined.end());
-  std::vector<Triangle_int> triangles;
+  std::vector<CGAL::Triple<int, int, int>> triangles;
 
   typedef CGAL::internal::Weight_min_max_dihedral_and_area Weight;
   typedef Loft_weight_calculator<Weight> WC;
 
-  std::cout << "LT/1" << std::endl;
   CGAL::Polygon_mesh_processing::triangulate_hole_polyline(
       joined, std::back_inserter(triangles),
       CGAL::parameters::use_2d_constrained_delaunay_triangulation(false)
           .weight_calculator(WC(top_start, top_end, bottom_start, bottom_end)));
-  std::cout << "LT/2" << std::endl;
+
   if (triangles.empty()) {
     std::cout << "QQ/triangulate_hole_polyline/non-productive" << std::endl;
   }
@@ -87,32 +95,29 @@ static void loftBetweenPolylines(Polyline& lower, Polyline& upper,
   }
 }
 
-static void buildMeshFromPolygons(Points& points, Polygons& polygons,
-                                  bool close, Surface_mesh& mesh) {
-  std::cout << "bMFP/1" << std::endl;
+static void buildMeshFromPolygons(
+    std::vector<EK::Point_3>& points,
+    std::vector<std::vector<std::size_t>>& polygons, bool close,
+    CGAL::Surface_mesh<EK::Point_3>& mesh) {
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+
   CGAL::Polygon_mesh_processing::repair_polygon_soup(
       points, polygons, CGAL::parameters::all_default());
-  std::cout << "bMFP/2" << std::endl;
   CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-  std::cout << "bMFP/3" << std::endl;
   CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, polygons,
                                                               mesh);
-  std::cout << "bMFP/4" << std::endl;
   assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
   // Make an attempt to close holes.
   if (close) {
-    std::cout << "bMFP/5" << std::endl;
     bool failed = false;
     while (!failed && !CGAL::is_closed(mesh)) {
       for (const Surface_mesh::Halfedge_index edge : mesh.halfedges()) {
         if (mesh.is_border(edge)) {
-          std::vector<Face_index> faces;
-          std::cout << "bMFP/6" << std::endl;
+          std::vector<Surface_mesh::Face_index> faces;
           CGAL::Polygon_mesh_processing::triangulate_hole(
               mesh, edge, std::back_inserter(faces),
               CGAL::parameters::use_2d_constrained_delaunay_triangulation(
                   false));
-          std::cout << "bMFP/7" << std::endl;
           if (faces.empty()) {
             failed = true;
           }
@@ -121,14 +126,10 @@ static void buildMeshFromPolygons(Points& points, Polygons& polygons,
       }
     }
   }
-  std::cout << "bMFP/8" << std::endl;
   if (CGAL::is_closed(mesh)) {
-    std::cout << "bMFP/9" << std::endl;
     // Make sure it isn't inside out.
     // CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
-    std::cout << "bMFP/10" << std::endl;
   }
-  std::cout << "bMFP/11" << std::endl;
   if (false && CGAL::Polygon_mesh_processing::does_self_intersect(
                    mesh, CGAL::parameters::all_default())) {
     std::cout << "Loft: self-intersection detected; attempting repair."
@@ -141,7 +142,12 @@ static void buildMeshFromPolygons(Points& points, Polygons& polygons,
 }
 
 static int Loft(Geometry* geometry, bool close) {
-  std::cout << "Loft/0" << std::endl;
+  typedef std::vector<EK::Point_3> Points;
+  typedef std::vector<std::size_t> Polygon;
+  typedef std::vector<Polygon> Polygons;
+  typedef std::vector<EK::Point_3> Polyline;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+
   size_t size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
@@ -172,12 +178,12 @@ static int Loft(Geometry* geometry, bool close) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
         Polyline polyline;
-        Surface_mesh& mesh = geometry->mesh(nth);
+        auto& mesh = geometry->mesh(nth);
         for (const auto start : mesh.halfedges()) {
           if (mesh.is_border(start)) {
-            Halfedge_index h = start;
+            Surface_mesh::Halfedge_index h = start;
             do {
-              Point p = mesh.point(mesh.source(h));
+              const auto& p = mesh.point(mesh.source(h));
               if (polyline.empty() || polyline.back() != p) {
                 polyline.push_back(p);
               }
@@ -198,8 +204,8 @@ static int Loft(Geometry* geometry, bool close) {
         if (geometry->pwh(nth).size() == 0) {
           continue;
         }
-        Polygons_with_holes_2& pwhs = geometry->pwh(nth);
-        for (Polygon_with_holes_2& pwh : pwhs) {
+        auto& pwhs = geometry->pwh(nth);
+        for (auto& pwh : pwhs) {
           Polyline_with_holes polyline_with_holes;
           PolygonToPolyline(geometry->plane(nth), pwh.outer_boundary(),
                             polyline_with_holes.boundary);
@@ -268,21 +274,17 @@ static int Loft(Geometry* geometry, bool close) {
   }
 
   std::unique_ptr<Surface_mesh> islands(new Surface_mesh);
-  std::cout << "Loft/1" << std::endl;
   buildMeshFromPolygons(points, polygons, close, *islands);
-  std::cout << "Loft/2" << std::endl;
 
   Surface_mesh holes;
   buildMeshFromPolygons(hole_points, hole_polygons, close, holes);
 
   if (close) {
-    std::cout << "Loft/3" << std::endl;
     if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
             *islands, holes, *islands, CGAL::parameters::all_default(),
             CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
       return STATUS_ZERO_THICKNESS;
     }
-    std::cout << "Loft/4" << std::endl;
   } else {
     islands->join(holes);
   }
@@ -291,8 +293,6 @@ static int Loft(Geometry* geometry, bool close) {
   geometry->setIdentityTransform(target);
   geometry->setMesh(target, islands);
   // Clean up the mesh.
-  std::cout << "Loft/5" << std::endl;
   demesh(geometry->mesh(target));
-  std::cout << "Loft/6" << std::endl;
   return STATUS_OK;
 }
