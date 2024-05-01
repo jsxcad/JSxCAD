@@ -223,7 +223,6 @@ A rectangle bent into a ring with a central radius of 25
 ```JavaScript
 Box(157, 20)
   .ez([1])
-  .y(25)
   .remesh(10)
   .op((s) => s.bend(25).and(s.outline()))
   .gridView()

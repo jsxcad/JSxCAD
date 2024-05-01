@@ -24,8 +24,8 @@ typedef std::vector<Point> Polyline;
 typedef std::vector<Polyline> Polylines;
 
 template <typename Polygon_2, typename Segments>
-static void polygonToSegments(Polygon_2& polygon, Segments& segments) {
-  Plane base(0, 0, 1, 0);
+static void polygonToSegments(Polygon_2& polygon, Segments& segments,
+                              const Plane& base = Plane(0, 0, 1, 0)) {
   for (size_t nth = 0, limit = polygon.size(); nth < limit; nth++) {
     const Point_2& a = polygon[nth];
     const Point_2& b = polygon[(nth + 1) % limit];

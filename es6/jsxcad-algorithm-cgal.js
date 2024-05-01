@@ -812,6 +812,19 @@ const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, c
       }
     }
   }
+  // Coallesce
+  for (let nth = start; nth < length; nth++) {
+    const origin = geometry.getOrigin(nth);
+    if (origin === nth) {
+      continue;
+    }
+    if (results[origin] === undefined) {
+      results[origin] = { type: 'group', content: [], tags: [] };
+    } else if (results[origin].type !== 'group') {
+      results[origin] = { type: 'group', content: [results[origin]], tags: [] };
+    }
+    results[origin].content.push(results[nth]);
+  }
   let output;
   if (start === 0) {
     output = results;
@@ -858,9 +871,13 @@ const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
     }
   });
 
-const bend = (inputs, targetsLength) =>
+const bend = (inputs, targetsLength, edgeLength = 1) =>
   withCgalGeometry('bend', inputs, (cgalGeometry, g) => {
-    const status = g.Bend(cgalGeometry, Number(targetsLength));
+    const status = g.Bend(
+      cgalGeometry,
+      Number(targetsLength),
+      Number(edgeLength)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by bend');
@@ -1319,7 +1336,7 @@ const extrude = (inputs, count) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by extrude');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, count);
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
         throw new Error(`Unexpected status ${status}`);
     }

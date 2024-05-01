@@ -30,6 +30,8 @@ static int Extrude(Geometry* geometry, size_t count) {
   size_t size = geometry->size();
 
   geometry->copyInputMeshesToOutputMeshes();
+  geometry->copyInputPointsToOutputPoints();
+  geometry->copyInputSegmentsToOutputSegments();
   geometry->transformToAbsoluteFrame();
   geometry->convertPlanarMeshesToPolygons();
 
@@ -105,6 +107,42 @@ static int Extrude(Geometry* geometry, size_t count) {
         }
         geometry->setType(nth, GEOMETRY_MESH);
         geometry->setMesh(nth, extruded_mesh);
+        break;
+      }
+      case GEOMETRY_SEGMENTS: {
+        typedef std::map<EK::Point_3,
+                         CGAL::Surface_mesh<EK::Point_3>::Vertex_index>
+            Vertex_map;
+        Vertex_map vertices;
+        // FIX: Group polygons by common plane.
+        for (const auto& segment : geometry->segments(nth)) {
+          size_t target = geometry->add(GEOMETRY_POLYGONS_WITH_HOLES);
+          geometry->origin(target) = nth;
+          auto& pwh = geometry->pwh(target);
+          const auto& s = segment.source();
+          const auto& t = segment.target();
+          auto a = s + down;
+          auto b = t + down;
+          auto c = t + up;
+          auto d = s + up;
+          EK::Plane_3 plane(a, b, c);
+          geometry->plane(target) = plane;
+          CGAL::Polygon_2<EK> polygon;
+          polygon.push_back(plane.to_2d(a));
+          polygon.push_back(plane.to_2d(b));
+          polygon.push_back(plane.to_2d(c));
+          polygon.push_back(plane.to_2d(d));
+          pwh.emplace_back(std::move(polygon));
+        }
+        geometry->setType(nth, GEOMETRY_EMPTY);
+        break;
+      }
+      case GEOMETRY_POINTS: {
+        auto& segments = geometry->segments(nth);
+        for (const auto& point : geometry->points(nth)) {
+          segments.emplace_back(point + down, point + up);
+        }
+        geometry->setType(nth, GEOMETRY_SEGMENTS);
         break;
       }
       default: {

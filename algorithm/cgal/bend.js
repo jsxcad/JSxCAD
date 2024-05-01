@@ -3,9 +3,13 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const bend = (inputs, targetsLength) =>
+export const bend = (inputs, targetsLength, edgeLength = 1) =>
   withCgalGeometry('bend', inputs, (cgalGeometry, g) => {
-    const status = g.Bend(cgalGeometry, Number(targetsLength));
+    const status = g.Bend(
+      cgalGeometry,
+      Number(targetsLength),
+      Number(edgeLength)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by bend');

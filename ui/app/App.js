@@ -5,6 +5,8 @@ import './react-multi-split-pane.css';
 
 import * as PropTypes from 'prop-types';
 
+import api, { execute } from '@jsxcad/api';
+
 import {
   askService,
   ask as askSys,
@@ -52,7 +54,6 @@ import SplitPaneModule from 'react-multi-split-pane';
 import Table from 'react-bootstrap/Table';
 import TableOfContents from './TableOfContents.js';
 import { animationFrame } from './schedule.js';
-import { execute } from '@jsxcad/api';
 import { getCnc } from './Cnc.js';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
 import { toEcmascript } from '@jsxcad/compiler';
@@ -494,6 +495,7 @@ class App extends React.Component {
     };
 
     this.Notebook.updateSections = async (path, workspace) => {
+      const { sha } = this.props;
       const notebookFile = `source/${path}`;
       const topLevel = new Map();
       const updates = {};
@@ -505,6 +507,7 @@ class App extends React.Component {
       const sections = new Map();
       try {
         await toEcmascript(script, {
+          api: { ...api, sha },
           exports,
           path,
           replays,
@@ -803,6 +806,7 @@ class App extends React.Component {
 
         try {
           await execute(script, {
+            api: { ...api, sha },
             evaluate,
             replay,
             path: NotebookPath,
@@ -818,13 +822,6 @@ class App extends React.Component {
         this.Draft.change('');
 
         await resolvePending();
-        /*
-        clearNotebookState(this, {
-          path: NotebookPath,
-          workspace,
-          isToBeKept: (note) => !note.blur,
-        });
-        */
       } catch (error) {
         // Include any high level notebook errors in the output.
         // window.alert(error.stack);
