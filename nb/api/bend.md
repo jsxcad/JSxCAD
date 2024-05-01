@@ -16,7 +16,7 @@ Box(40, 1, 5).and(bend(20))
 
 ```JavaScript
 Box(40, 1, 5)
-  .and(bend(20))
+  .And(y(20), bend(20))
   .view()
   .note('Box(40, 1, 5).and(bend(20))');
 ```
