@@ -17,7 +17,7 @@ export const faceEdges = (inputs, count) => {
           inputs.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in faceEdges`);
     }
   });
 };

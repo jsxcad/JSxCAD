@@ -1,6 +1,11 @@
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+
 #include "Geometry.h"
+#include "point_util.h"
 
 static int EachPoint(Geometry* geometry, std::vector<Point>& points) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
   try {
     size_t size = geometry->size();
 
@@ -12,31 +17,19 @@ static int EachPoint(Geometry* geometry, std::vector<Point>& points) {
     for (size_t nth = 0; nth < size; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
-          const auto& mesh = geometry->mesh(nth);
-          for (const auto vertex : mesh.vertices()) {
-            points.push_back(mesh.point(vertex));
-          }
+          to_points<EK>(geometry->mesh(nth), points);
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           const auto& plane = geometry->plane(nth);
           for (const auto& polygon : geometry->pwh(nth)) {
-            for (const auto& point : polygon.outer_boundary()) {
-              points.push_back(plane.to_3d(point));
-            }
-            for (auto hole = polygon.holes_begin(); hole != polygon.holes_end();
-                 ++hole) {
-              for (const auto& point : *hole) {
-                points.push_back(plane.to_3d(point));
-              }
-            }
+            to_points<EK>(polygon, plane, points);
           }
           break;
         }
         case GEOMETRY_SEGMENTS: {
           for (const auto& segment : geometry->segments(nth)) {
-            points.push_back(segment.source());
-            points.push_back(segment.target());
+            to_points<EK>(segment, points);
           }
           break;
         }
@@ -49,7 +42,17 @@ static int EachPoint(Geometry* geometry, std::vector<Point>& points) {
       }
     }
 
+    std::cout << "EachPoints: points=" << points.size() << std::endl;
+    for (const auto& point : points) {
+      std::cout << "EachPoints: point=" << point << std::endl;
+    }
+
     unique_points(points);
+
+    std::cout << "EachPoints: upoints=" << points.size() << std::endl;
+    for (const auto& point : points) {
+      std::cout << "EachPoints: upoint=" << point << std::endl;
+    }
 
     return STATUS_OK;
   } catch (const std::exception& e) {

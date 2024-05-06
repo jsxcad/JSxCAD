@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Surface_mesh_approximation/approximate_triangle_mesh.h>
 
 #include "Geometry.h"
@@ -7,6 +8,7 @@
 
 static int Approximate(Geometry* geometry, size_t face_count,
                        double min_error_drop) {
+  typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
   try {
     int size = geometry->size();
     geometry->copyInputMeshesToOutputMeshes();

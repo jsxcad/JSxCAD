@@ -232,10 +232,12 @@ Septagon(5)
 Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 ```
 
-Spiral()
+![Image](shapes.md.$22.png)
+
+Spiral({ to: 3, by: 1/32 })
 
 ```JavaScript
-Spiral().gridView().note(`Spiral()`);
+Spiral({ to: 3, by: 1/32 }).gridView().note(`Spiral({ to: 3, by: 1/32 })`);
 ```
 
 ![Image](shapes.md.$23.png)
@@ -248,13 +250,13 @@ Triangle(5).gridView().note(`Triangle(5)`);
 
 ![Image](shapes.md.$24.png)
 
-Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
+Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })
 
 ```JavaScript
-Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
+Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })
   .align('xy')
   .gridView()
-  .note(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
+  .note(`Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })`);
 ```
 
 ![Image](shapes.md.$25.png)
@@ -395,7 +397,7 @@ Box(10).cut(Box(5)).ez([1, -1]).section().view();
 
 ```JavaScript
 Box(10, 10, 20)
-  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
+  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(Arc(2)))
   .view();
 ```
 
@@ -403,7 +405,7 @@ Box(10, 10, 20)
 
 ```JavaScript
 Box(10, 10, 20)
-  .grow(2, Box(10, 10, [7, 10]))
+  .grow(Orb(2))
   .view(3);
 ```
 
@@ -412,7 +414,7 @@ Box(10, 10, 20)
 ```JavaScript
 Box(10, 10, 20)
   .seam(Box(10, 10, [6, 11]))
-  .grow(1, Box(10, 10, [7, 10]))
+  .grow(Box(1))
   .view(3, rx(1 / 2).align('z>'));
 ```
 

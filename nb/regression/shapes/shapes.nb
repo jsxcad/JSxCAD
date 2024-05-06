@@ -105,14 +105,14 @@ Polyhedron(
 
 Arc(5, { sides: 7 }).gridView().note(`Septagon(5)`);
 
-Spiral().gridView().note(`Spiral()`);
+Spiral({ to: 3, by: 1/32 }).gridView().note(`Spiral({ to: 3, by: 1/32 })`);
 
 Triangle(5).gridView().note(`Triangle(5)`);
 
-Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })
+Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })
   .align('xy')
   .gridView()
-  .note(`Wave((t) => Point(0, sin(t * 3) * 100), { to: 360 })`);
+  .note(`Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })`);
 
 Group(Arc(4).x(-1), Box(5).x(1))
   .fill()
@@ -195,16 +195,16 @@ Orb(10)
 Box(10).cut(Box(5)).ez([1, -1]).section().view();
 
 Box(10, 10, 20)
-  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(2, 'xy'))
+  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(Arc(2)))
   .view();
 
 Box(10, 10, 20)
-  .grow(2, Box(10, 10, [7, 10]))
+  .grow(Orb(2))
   .view(3);
 
 Box(10, 10, 20)
   .seam(Box(10, 10, [6, 11]))
-  .grow(1, Box(10, 10, [7, 10]))
+  .grow(Box(1))
   .view(3, rx(1 / 2).align('z>'));
 
 const red = Arc(2).color('red');
@@ -272,17 +272,6 @@ Box(10).cut(Triangle(11)).view(1);
 Box(10).cut(Triangle(11)).clean().view(2);
 
 Triangle(11).eachPoint(Arc(5).to, cut).view(5);
-
-/*
-// Grow is producing self-intersections here.
-// We need a new implementation.
-Box(10)
-  .cut(Arc(5))
-  .ez([5])
-  .grow(1, 'xy', Box(8).ez([1, 4]))
-  .grow(1.5, 'xy', Box(16).cut(Box(8)).ez([2, 3]))
-  .view();
-*/
 
 Box(10, 10, [0, 3])
   .smooth(10, Box(11).cut(Box(5)).ez([1.5, 3.1]))

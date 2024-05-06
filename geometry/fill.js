@@ -8,10 +8,10 @@ const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments'].includes(geometry.type) &&
   isNotTypeGhost(geometry);
 
-export const fill = (geometry, tags = []) => {
+export const fill = (geometry, { holes = false } = {}, tags = []) => {
   const concreteGeometry = toConcreteGeometry(geometry);
   const inputs = [];
   linearize(concreteGeometry, filter, inputs);
-  const outputs = fillWithCgal(inputs);
+  const outputs = fillWithCgal(inputs, holes);
   return taggedGroup({}, ...outputs.map((output) => ({ ...output, tags })));
 };

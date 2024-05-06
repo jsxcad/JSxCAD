@@ -48681,7 +48681,7 @@ class App extends ReactDOM$3.Component {
         await resolvePending();
       } catch (error) {
         // Include any high level notebook errors in the output.
-        // window.alert(error.stack);
+        window.alert(error.stack);
       } finally {
         await this.updateState({
           [`NotebookState/${NotebookPath}`]: 'idle'
@@ -48725,6 +48725,7 @@ class App extends ReactDOM$3.Component {
             });
           } catch (error) {
             console.log(error);
+            throw error;
           }
         }
         return data;

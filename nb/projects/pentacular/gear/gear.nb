@@ -2,6 +2,10 @@
 // Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)
 // version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
 
+const acos = (a) => (Math.acos(a) / (Math.PI * 2)) * 360;
+const cos = (a) => Math.cos((a / 360) * Math.PI * 2);
+const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
+
 // convert polar to cartesian coordinates
 export const polar = (radius, theta) => [
   radius * sin(theta),
@@ -25,12 +29,12 @@ export const q7 = (
     baseRadius,
     side,
     angle,
-    (1 - fraction) * max(baseRadius, rootRadius) + fraction * outerRadius
+    (1 - fraction) * Math.max(baseRadius, rootRadius) + fraction * outerRadius
   );
 
 // unwind a string this many degrees to go from radius r1 to radius r2
 export const iang = (baseRadius, pitchRadius) =>
-  (sqrt((pitchRadius / baseRadius) * (pitchRadius / baseRadius) - 1) /
+  (Math.sqrt((pitchRadius / baseRadius) * (pitchRadius / baseRadius) - 1) /
     Math.PI) *
     180 -
   acos(baseRadius / pitchRadius);

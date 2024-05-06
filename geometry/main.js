@@ -210,6 +210,7 @@ export { minimizeOverhang } from './minimizeOverhang.js';
 export { moveAlong, moveAlongNormal } from './moveAlong.js';
 export { noGhost } from './noGhost.js';
 export { nth } from './nth.js';
+export { obb } from './computeOrientedBoundingBox.js';
 export { offset } from './offset.js';
 export { on, onPre, onPost } from './on.js';
 export { op } from './tagged/op.js';

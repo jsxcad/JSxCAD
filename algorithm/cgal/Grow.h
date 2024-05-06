@@ -1,96 +1,287 @@
 #pragma once
 
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/Polygon_triangulation_decomposition_2.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/boost/graph/generators.h>
+#include <CGAL/connect_holes.h>
+#include <CGAL/convex_hull_3.h>
+#include <CGAL/mark_domain_in_triangulation.h>
+#include <CGAL/partition_2.h>
 
 #include "Geometry.h"
+#include "manifold_util.h"
+#include "transform_util.h"
 
-static int Grow(Geometry* geometry, size_t count, bool x, bool y, bool z) {
-  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
-  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
-  size_t size = geometry->size();
+static int Grow(Geometry* geometry, size_t count) {
+  std::cout << "QQ/Grow/1" << std::endl;
+  try {
+    typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+    typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+    size_t size = geometry->size();
 
-  geometry->copyInputMeshesToOutputMeshes();
-  geometry->transformToAbsoluteFrame();
-  geometry->convertPolygonsToPlanarMeshes();
+    geometry->copyInputMeshesToOutputMeshes();
+    geometry->copyInputPointsToOutputPoints();
+    geometry->copyInputSegmentsToOutputSegments();
+    geometry->transformToAbsoluteFrame();
+    geometry->convertPlanarMeshesToPolygons();
 
-  EK::Point_3 reference =
-      EK::Point_3(0, 0, 0).transform(geometry->transform(count));
-  FT amount = reference.z();
+    std::vector<EK::Point_3> tool_points;
 
-  bool hasSelections = count + 1 < size;
-
-  for (size_t nth = 0; nth < count; nth++) {
-    switch (geometry->getType(nth)) {
-      case GEOMETRY_MESH: {
-        auto& mesh = geometry->mesh(nth);
-        for (size_t selection = count + 1; selection < size; selection++) {
-          if (!geometry->is_mesh(selection)) {
-            continue;
+    // For now we assume the tool is convex.
+    for (size_t nth = count; nth < size; nth++) {
+      switch (geometry->type(nth)) {
+        case GEOMETRY_MESH:
+          to_points<EK>(geometry->mesh(nth), tool_points);
+          break;
+        case GEOMETRY_POLYGONS_WITH_HOLES: {
+          const auto& plane = geometry->plane(nth);
+          for (const auto& pwh : geometry->pwh(nth)) {
+            to_points<EK>(pwh, plane, tool_points);
           }
-          Surface_mesh working_selection(geometry->mesh(selection));
-          CGAL::Polygon_mesh_processing::corefine(
-              mesh, working_selection, CGAL::parameters::all_default(),
-              CGAL::parameters::all_default());
+          break;
         }
-        bool is_vertex_normal_map_created = false;
-        Surface_mesh::Property_map<Surface_mesh::Vertex_index, EK::Vector_3>
-            vertex_normal_map;
-        std::tie(vertex_normal_map, is_vertex_normal_map_created) =
-            mesh.add_property_map<Surface_mesh::Vertex_index, EK::Vector_3>(
-                "v:normal_map", CGAL::NULL_VECTOR);
+        case GEOMETRY_SEGMENTS:
+          for (const auto& segment : geometry->segments(nth)) {
+            to_points<EK>(segment, tool_points);
+          }
+          break;
+        case GEOMETRY_POINTS:
+          for (const auto& point : geometry->points(nth)) {
+            to_points<EK>(point, tool_points);
+          }
+          break;
+      }
+    }
 
-        if (is_vertex_normal_map_created) {
-          CGAL::Polygon_mesh_processing::compute_vertex_normals(
-              mesh, vertex_normal_map,
-              CGAL::Polygon_mesh_processing::parameters::vertex_point_map(
-                  mesh.points())
-                  .geom_traits(Kernel()));
-        }
+    std::cout << "QQ/Grow/2" << std::endl;
+    for (size_t nth = 0; nth < count; nth++) {
+      switch (geometry->getType(nth)) {
+        case GEOMETRY_MESH: {
+          typedef CGAL::Nef_polyhedron_3<Epeck_kernel> Nef;
+          auto& mesh = geometry->mesh(nth);
 
-        /*
-        There are some useful ideas in "Offset Triangular Mesh Using the
-        Multiple Normal Vectors of a Vertex".
-        (https://www.cad-journal.net/files/vol_1/CAD_1(1-4)_2004_285-291.pdf)
+          Nef nef(mesh);
 
-        The most significant problem with using the average face normal is that
-        the greater the angle between the faces the smaller the resulting offset
-        will be.
-        */
+          std::cout << "QQ/Grow/3" << std::endl;
+          try {
+            CGAL::convex_decomposition_3(nef);
+          } catch (const std::exception& e) {
+            std::cout << "QQ/Grow: mesh=" << mesh << std::endl;
+            throw;
+          }
+          std::cout << "QQ/Grow/4" << std::endl;
 
-        for (const auto vertex : mesh.vertices()) {
-          const auto& point = mesh.point(vertex);
-          // By default all points are grown.
-          bool inside = true;
-          if (hasSelections) {
-            inside = false;
-            for (size_t selection = count + 1; selection < size; selection++) {
-              if (geometry->on_side(selection)(point) !=
-                  CGAL::ON_UNBOUNDED_SIDE) {
-                inside = true;
-                break;
+          auto ci = nef.volumes_begin();
+          if (ci == nef.volumes_end()) {
+            // The mesh was empty.
+            break;
+          }
+
+          EK::Point_3 zero(0, 0, 0);
+
+          if (++ci == nef.volumes_end()) {
+            // The mesh is already completely convex.
+            std::vector<EK::Point_3> points;
+            for (const auto& vertex : mesh.vertices()) {
+              const auto& offset = mesh.point(vertex) - zero;
+              for (const auto& point : tool_points) {
+                points.push_back(point + offset);
+              }
+            }
+            mesh.clear();
+            CGAL::convex_hull_3(points.begin(), points.end(), mesh);
+          } else {
+            mesh.clear();
+            // Split out the convex parts.
+            for (; ci != nef.volumes_end(); ++ci) {
+              CGAL::Polyhedron_3<Epeck_kernel> shell;
+              nef.convert_inner_shell_to_polyhedron(ci->shells_begin(), shell);
+              std::vector<EK::Point_3> points;
+              for (const auto& point : shell.points()) {
+                const auto& offset = point - zero;
+                for (const auto& point : tool_points) {
+                  points.push_back(point + offset);
+                }
+              }
+              CGAL::Surface_mesh<EK::Point_3> hull;
+              CGAL::convex_hull_3(points.begin(), points.end(), hull);
+              if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                      mesh, hull, mesh)) {
+                return STATUS_ZERO_THICKNESS;
               }
             }
           }
-          if (!inside) {
-            // There were selections provided, but the point wasn't in any of
-            // them.
-            continue;
+          std::cout << "QQ/Grow/5" << std::endl;
+          break;
+        }
+        case GEOMETRY_POINTS: {
+          auto& mesh = geometry->mesh(nth);
+          CGAL::Surface_mesh<EK::Point_3> tool;
+          CGAL::convex_hull_3(tool_points.begin(), tool_points.end(), tool);
+#ifdef JOT_MANIFOLD_ENABLED
+          manifold::Manifold tool_manifold;
+          buildManifoldFromSurfaceMesh(tool, tool_manifold);
+          manifold::Manifold target_manifold;
+          for (const auto& point : geometry->points(nth)) {
+            target_manifold += tool_manifold.Translate({to_double(point.x()),
+                                                        to_double(point.y()),
+                                                        to_double(point.z())});
           }
-          const auto& n = vertex_normal_map[vertex];
-          auto direction = unitVector(
-              EK::Vector_3(x ? n.x() : 0, y ? n.y() : 0, z ? n.z() : 0));
-          mesh.point(vertex) = point + direction * amount;
+          buildSurfaceMeshFromManifold(target_manifold, mesh);
+#else
+          for (const auto& point : geometry->points(nth)) {
+            CGAL::Surface_mesh<EK> copy = tool;
+            CGAL::Polygon_mesh_processing::transform(translate(point), copy);
+          transform(nth), mesh(nth), CGAL::parameters::all_default());
+          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                  mesh, copy, mesh)) {
+            return STATUS_ZERO_THICKNESS;
+          }
+          }
+#endif
+          geometry->setType(nth, GEOMETRY_MESH);
+          break;
+        }
+        case GEOMETRY_SEGMENTS: {
+          EK::Point_3 zero(0, 0, 0);
+#ifdef JOT_MANIFOLD_ENABLED
+          manifold::Manifold joined_manifold;
+#endif
+          for (const auto& segment : geometry->segments(nth)) {
+            const EK::Vector_3 source_offset = segment.source() - zero;
+            const EK::Vector_3 target_offset = segment.target() - zero;
+            std::vector<EK::Point_3> points;
+            for (const auto& point : tool_points) {
+              points.push_back(point + source_offset);
+              points.push_back(point + target_offset);
+            }
+            CGAL::Surface_mesh<EK::Point_3> hull;
+            CGAL::convex_hull_3(points.begin(), points.end(), hull);
+#ifdef JOT_MANIFOLD_ENABLED
+            manifold::Manifold hull_manifold;
+            buildManifoldFromSurfaceMesh(hull, hull_manifold);
+            joined_manifold += hull_manifold;
+#else
+            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                    geometry->mesh(nth), hull, geometry->mesh(nth))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+#endif
+          }
+#ifdef JOT_MANIFOLD_ENABLED
+          buildSurfaceMeshFromManifold(joined_manifold, geometry->mesh(nth));
+#endif
+          geometry->setType(nth, GEOMETRY_MESH);
+          break;
+        }
+        case GEOMETRY_POLYGONS_WITH_HOLES: {
+          std::cout << "QQ/Grow/6" << std::endl;
+          EK::Point_3 zero(0, 0, 0);
+          CGAL::Polygon_triangulation_decomposition_2<EK> triangulator;
+          const auto& plane = geometry->plane(nth);
+          size_t pwh_count = 0;
+          size_t p_count = 0;
+          size_t h_count = 0;
+#ifdef JOT_MANIFOLD_ENABLED
+          manifold::Manifold manifold;
+#endif
+          auto add_hull = [&](const std::vector<EK::Point_3>& points) {
+            CGAL::Surface_mesh<EK::Point_3> hull;
+            CGAL::convex_hull_3(points.begin(), points.end(), hull);
+#ifdef JOT_MANIFOLD_ENABLED
+            manifold::Manifold hull_manifold;
+            buildManifoldFromSurfaceMesh(hull, hull_manifold);
+            manifold += hull_manifold;
+#else
+            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
+                    geometry->mesh(nth), hull, geometry->mesh(nth))) {
+              return STATUS_ZERO_THICKNESS;
+            }
+#endif
+          };
+          for (const auto& pwh : geometry->pwh(nth)) {
+            if (pwh.holes_begin() == pwh.holes_end()) {
+              // We can use optimal partitioning if there are no holes.
+              typedef CGAL::Partition_traits_2<EK> Traits;
+              typedef Traits::Polygon_2 Polygon_2;
+              typedef Traits::Point_2 Point_2;
+              typedef std::list<Polygon_2> Polygon_list;
+              Polygon_list partition_polys;
+              // We invest more here to minimize unions below.
+              CGAL::optimal_convex_partition_2(
+                  pwh.outer_boundary().vertices_begin(),
+                  pwh.outer_boundary().vertices_end(),
+                  std::back_inserter(partition_polys));
+              for (const auto& polygon : partition_polys) {
+                std::vector<EK::Point_3> points;
+                for (const auto& point_2 : polygon) {
+                  const auto point = plane.to_3d(point_2);
+                  const auto offset = point - zero;
+                  for (const auto& tool_point : tool_points) {
+                    points.push_back(tool_point + offset);
+                  }
+                }
+                add_hull(points);
+              }
+            } else {
+              typedef CGAL::Exact_predicates_tag Itag;
+              typedef CGAL::Constrained_Delaunay_triangulation_2<
+                  EK, CGAL::Default, Itag>
+                  CDT;
+              CDT cdt;
+              cdt.insert_constraint(pwh.outer_boundary().vertices_begin(),
+                                    pwh.outer_boundary().vertices_end(), true);
+              for (auto hole = pwh.holes_begin(); hole != pwh.holes_end();
+                   ++hole) {
+                cdt.insert_constraint(hole->vertices_begin(),
+                                      hole->vertices_end(), true);
+              }
+              std::unordered_map<CDT::Face_handle, bool> in_domain_map;
+              boost::associative_property_map<
+                  std::unordered_map<CDT::Face_handle, bool>>
+                  in_domain(in_domain_map);
+              CGAL::mark_domain_in_triangulation(cdt, in_domain);
+              for (auto face : cdt.finite_face_handles()) {
+                if (!get(in_domain, face)) {
+                  continue;
+                }
+                std::vector<EK::Point_3> points;
+                auto add_point = [&](const EK::Point_2& p2) {
+                  auto offset = plane.to_3d(p2) - zero;
+                  for (const auto& tool_point : tool_points) {
+                    points.push_back(tool_point + offset);
+                  }
+                };
+                add_point(face->vertex(0)->point());
+                add_point(face->vertex(1)->point());
+                add_point(face->vertex(2)->point());
+                add_hull(points);
+              }
+            }
+          }
+#ifdef JOT_MANIFOLD_ENABLED
+          buildSurfaceMeshFromManifold(manifold, geometry->mesh(nth));
+#endif
+          geometry->setType(nth, GEOMETRY_MESH);
+          std::cout << "QQ/Grow/7" << std::endl;
+          break;
         }
       }
     }
+
+    geometry->removeEmptyMeshes();
+    geometry->convertPlanarMeshesToPolygons();
+    geometry->transformToLocalFrame();
+
+    std::cout << "QQ/Grow/8" << std::endl;
+    return STATUS_OK;
+  } catch (const std::exception& e) {
+    std::cout << "QQ/grow: " << e.what() << std::endl;
+    throw;
   }
-
-  geometry->removeEmptyMeshes();
-  geometry->convertPlanarMeshesToPolygons();
-  geometry->transformToLocalFrame();
-
-  return STATUS_OK;
 }

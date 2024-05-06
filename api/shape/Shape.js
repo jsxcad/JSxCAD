@@ -399,33 +399,6 @@ const registerMethod = (names, op) => {
   return chainable(op);
 };
 
-/*
-const registerMethod2 = (names, signature, op) => {
-  const method =
-    (...args) =>
-    async (shape) => {
-      try {
-        // console.log(`QQ/method2: ${names} shape=${shape}`);
-        const parameters = await Shape.destructure2(
-          names,
-          shape,
-          args,
-          ...signature
-        );
-        return op(...parameters);
-      } catch (error) {
-        console.log(
-          `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
-        );
-        throw error;
-      }
-    };
-  return registerMethod(names, method);
-};
-*/
-
-// Shape.registerMethod2 = registerMethod2;
-
 Shape.fromGeometry = (geometry) => {
   if (geometry === undefined) {
     return new Shape(taggedGroup({}));
@@ -481,8 +454,11 @@ export const registerMethod3 = (
             )}`
           );
         }
+        // console.log(`QQ/method3/preOp: ${names} shape=${shape} args=${args}`);
         const processedParameters = await preOp(...parameters);
+        // console.log(`QQ/method3/op: ${names} shape=${shape} args=${args}`);
         const r1 = await op(...processedParameters);
+        // console.log(`QQ/method3/postOp: ${names} shape=${shape} args=${args}`);
         const r2 = await postOp(r1, parameters);
         // console.log(`QQ/method3/done: ${names}`);
         return r2;

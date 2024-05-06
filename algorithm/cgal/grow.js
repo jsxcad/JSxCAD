@@ -3,21 +3,15 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const grow = (inputs, count, { x = true, y = true, z = true } = {}) =>
+export const grow = (inputs, count) =>
   withCgalGeometry('grow', inputs, (cgalGeometry, g) => {
-    const status = g.Grow(
-      cgalGeometry,
-      Number(count),
-      Boolean(x),
-      Boolean(y),
-      Boolean(z)
-    );
+    const status = g.Grow(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by grow');
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, count);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in grow`);
     }
   });

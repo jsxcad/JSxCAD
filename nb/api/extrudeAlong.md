@@ -79,23 +79,23 @@ Arc(32).points().ez(1).loop().view().note(`Arc(32).points().ez(1).loop()`);
 
 ![Image](extrudeAlong.md.$8.png)
 
-Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100)).ez(50)
+Wave({ from: -360, to: 360 }, (t) => Point().y(times(100, sin(t * 3 / 360)))).ez(50)
 
 ```JavaScript
-Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100))
+Wave({ from: -360, to: 360 }, (t) => Point().y(times(100, sin(t * 3 / 360))))
   .ez(50)
   .view()
-  .note(`Wave({ from: -360, to: 360 }, (t) => Point().y(sin(t * 3) * 100)).ez(50)`);
+  .note(`Wave({ from: -360, to: 360 }, (t) => Point().y(times(100, sin(t * 3 / 360)))).ez(50)`);
 ```
 
 ![Image](extrudeAlong.md.$9.png)
 
-Wave({ from: -100, to: 100 }, (t) => Point().y(sin(t * 3) * 100)).ez(50).e([20])
+Wave({ from: -100, to: 100 }, (t) => Point().y(times(100, sin(t * 3 / 360))).ez(50).e([20])
 
 ```JavaScript
-Wave({ from: -100, to: 100 }, (t) => Point().y(sin(t * 3) * 100))
+Wave({ from: -100, to: 100 }, (t) => Point().y(times(100, sin(t * 3 / 360))))
   .ez(50)
   .e([20])
   .view()
-  .note(`Wave({ from: -100, to: 100 }, (t) => Point().y(sin(t * 3) * 100)).ez(50).e([20])`);
+  .note(`Wave({ from: -100, to: 100 }, (t) => Point().y(times(100, sin(t * 3 / 360))).ez(50).e([20])`);
 ```

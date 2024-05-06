@@ -14,6 +14,6 @@ export const eagerTransform = (inputs) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, inputs.length - 1);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in eagerTransform`);
     }
   });

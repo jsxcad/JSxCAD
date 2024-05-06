@@ -32,7 +32,9 @@ export const fromPolygonSoup = (
     );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by fromPolygons');
+        throw new ErrorZeroThickness(
+          'Zero thickness produced by fromPolygonSoup'
+        );
       case STATUS_OK:
         return fromCgalGeometry(
           cgalGeometry,
@@ -41,6 +43,6 @@ export const fromPolygonSoup = (
           jsPolygons.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in fromPolygonSoup`);
     }
   });

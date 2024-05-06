@@ -24,9 +24,7 @@ Line(20).stroke(1).view();
 
 const Squiggle = (seed = 0, to = 10) =>
   Curve(
-    Seq({ to }, (t) =>
-      Point(random(seed).in(-10, 10)(t), random(seed + 1).in(-10, 10)(t))
-    ),
+    Seq({ to }, (t) => random(3, t + seed * to, (x, y, z) => Point(10 * x, 10 * y, 10 * z))),
     to * 10
   );
 

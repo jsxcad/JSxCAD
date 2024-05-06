@@ -11,14 +11,30 @@ const filter = (geometry) =>
   ) && isNotTypeGhost(geometry);
 
 // These defaults need some rethinking.
-export const Wrap = (geometries, offset = 1, alpha = 0.1) => {
+export const Wrap = (
+  geometries,
+  offset = 1,
+  alpha = 0.1,
+  faceCount = 0,
+  minErrorDrop = 0.01
+) => {
   const inputs = [];
   for (const geometry of geometries) {
     linearize(geometry, filter, inputs);
   }
-  const outputs = wrapWithCgal(inputs, offset, alpha);
+  const outputs = wrapWithCgal(inputs, offset, alpha, faceCount, minErrorDrop);
   return Group(outputs);
 };
 
-export const wrap = (geometry, geometries, offset, alpha) =>
-  tag(Wrap([geometry, ...geometries], offset, alpha), tags(geometry));
+export const wrap = (
+  geometry,
+  geometries,
+  offset,
+  alpha,
+  faceCount,
+  minErrorDrop
+) =>
+  tag(
+    Wrap([geometry, ...geometries], offset, alpha, faceCount, minErrorDrop),
+    tags(geometry)
+  );

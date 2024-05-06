@@ -3874,7 +3874,7 @@ const Random = (seed = 0) => {
   return g;
 };
 
-const random = (seed = 0) => {
+const deprecatedRandom = (seed = 0) => {
   const generator = Random(seed);
   // CHECK: We could use reset and skip instead of caching.
   const values = [];
@@ -3993,16 +3993,4 @@ const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
 
 const sqrt = Math.sqrt;
 
-// Determines the number of sides required for a circle of diameter such that deviation does not exceed tolerance.
-// See: https://math.stackexchange.com/questions/4132060/compute-number-of-regular-polgy-sides-to-approximate-circle-to-defined-precision
-
-// For ellipses, use the major diameter for a convervative result.
-
-const zag = (diameter, tolerance = 1) => {
-  const r = diameter / 2;
-  const k = tolerance / r;
-  const s = Math.ceil(Math.PI / Math.sqrt(k * 2));
-  return s;
-};
-
-export { Noise, Random, acos, cos, ease, linear, max, min, random, sin, sqrt, zag };
+export { Noise, Random, acos, cos, deprecatedRandom, ease, linear, max, min, sin, sqrt };

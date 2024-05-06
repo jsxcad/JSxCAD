@@ -4,13 +4,13 @@ import { Shape } from './Shape.js';
 
 export const Wrap = Shape.registerMethod3(
   'Wrap',
-  ['geometries', 'number', 'number'],
+  ['geometries', 'number', 'number', 'number', 'number'],
   WrapOp
 );
 
 export const wrap = Shape.registerMethod3(
   'wrap',
-  ['inputGeometry', 'geometries', 'number', 'number'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'number', 'number'],
   wrapOp
 );
 

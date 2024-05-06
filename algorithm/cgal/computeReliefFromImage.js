@@ -39,7 +39,9 @@ export const computeReliefFromImage = (
         case STATUS_OK:
           return fromCgalGeometry(cgalGeometry, [], cgalGeometry.getSize());
         default:
-          throw new Error(`Unexpected status ${status}`);
+          throw new Error(
+            `Unexpected status ${status} in computeReliefFromImage`
+          );
       }
     } finally {
       g._free(cStorage);

@@ -1,3 +1,5 @@
+#include <CGAL/Polygon_mesh_processing/manifoldness.h>
+
 #pragma once
 
 enum ValidateStrategy {
@@ -13,6 +15,8 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
   for (int strategy : strategies) {
     switch (strategy) {
       case VALIDATE_IS_NOT_SELF_INTERSECTING: {
+        std::cout << "validate: running is not self intersecting check."
+                  << std::endl;
         if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
           std::cout << "validate: failed is not self intersecting check."
                     << std::endl;
@@ -24,6 +28,7 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
         break;
       }
       case VALIDATE_IS_CLOSED: {
+        std::cout << "validate: running is closed check." << std::endl;
         if (!CGAL::is_closed(mesh)) {
           std::cout << "validate: failed is closed check." << std::endl;
           valid = false;
@@ -33,18 +38,20 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
         break;
       }
       case VALIDATE_IS_MANIFOLD: {
-        for (auto vertex : CGAL::vertices(mesh)) {
-          if (CGAL::Polygon_mesh_processing::is_non_manifold_vertex(vertex,
-                                                                    mesh)) {
-            std::cout << "validate: failed is manifold check." << std::endl;
-            valid = false;
-            break;
-          }
+        std::cout << "validate: running is manifold check." << std::endl;
+        std::vector<typename Surface_mesh::Halfedge_index> non_manifold;
+        CGAL::Polygon_mesh_processing::non_manifold_vertices(
+            mesh, std::back_inserter(non_manifold));
+        if (non_manifold.empty()) {
+          std::cout << "validate: passed is manifold check." << std::endl;
+        } else {
+          std::cout << "validate: failed is manifold check." << std::endl;
+          valid = false;
         }
-        std::cout << "validate: passed is manifold check." << std::endl;
         break;
       }
       case VALIDATE_IS_NOT_DEGENERATE: {
+        std::cout << "validate: running is not degenerate check." << std::endl;
         std::vector<typename Surface_mesh::Edge_index> degenerate_edges;
         CGAL::Polygon_mesh_processing::degenerate_edges(
             mesh, std::back_inserter(degenerate_edges));
@@ -67,6 +74,11 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
         break;
       }
     }
+  }
+  if (valid) {
+    std::cout << "validate: passed" << std::endl;
+  } else {
+    std::cout << "validate: failed" << std::endl;
   }
   return valid;
 }

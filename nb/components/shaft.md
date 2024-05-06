@@ -7,7 +7,7 @@ export const Flat = ({ diameter = 10, length = 10, thickness = 5 } = {}) =>
 
 ```JavaScript
 export const Shaft = ({ diameter = 10, length = 10, play = 0.2 } = {}) =>
-  Arc(diameter).ez([length]).clean().masked(grow(play)).as('shaft');
+  Arc(diameter).ez([length]).clean().masked(grow(Orb(play))).as('shaft');
 ```
 
 ```JavaScript
@@ -25,7 +25,7 @@ export const FlatShaft = ({
     )
   )
     .clean()
-    .masked(grow(play))
+    .masked(grow(Orb(play)))
     .as('shaft');
 ```
 

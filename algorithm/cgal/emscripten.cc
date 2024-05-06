@@ -144,6 +144,7 @@ static static int EachPoint(Geometry* geometry, emscripten::val emit_point) {
   if (status != STATUS_OK) {
     return status;
   }
+  std::cout << "QQ/EachPoint: size=" << points.size() << std::endl;
   for (const Point& point : points) {
     std::ostringstream o;
     o << point.x().exact() << " " << point.y().exact() << " "

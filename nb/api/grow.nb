@@ -14,24 +14,35 @@ Amount may be negative.
 _Note: May produce self-intersection._
 `;
 Box(5, 5, 5)
-  .and(grow(1).ghost())
+  .and(grow(Orb(5)).ghost())
   .view()
-  .note('The ghost is grown by 5 mm in all directions.');
-Box(5, 5, 5)
-  .and(grow(1, 'xz').ghost())
-  .view()
-  .note('The ghost is grown by 5 mm in only x and z directions.');
+  .note('The box is grown by 5 mm in all directions.');
 
 Box(5, 5, 5)
-  .op(ghost(), grow(-1))
+  .and(grow(ArcY(5)).ghost())
   .view()
-  .note(
-    'Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.'
-  );
+  .note('The box is rounded out by 5 mm in Y.');
 
 Box(5, 5, 20)
-  .grow(4, 'xy', Box(5, 5, 5))
+  .and(grow(Box(4)).ghost())
   .view()
   .note(
-    "Box(5, 5, 20).grow(4, 'xy', Box(5, 5, 5)) grows the middle of the pillar outward by 5 mm."
+    "Box(5, 5, 20).and(grow(Box(4)).ghost()) grows the box 4 mm horizontally with sharp corners."
   );
+
+Arc(20)
+  .grow(Orb(1))
+  .view()
+  .note("Arc(20).grow(Orb(1)) thickens a disc");
+
+Arc(20)
+  .points()
+  .grow(Orb(1))
+  .view()
+  .note("Arc(20).points().grow(Orb(1)) grows the points of an circle into spheres");
+
+Arc(20)
+  .outline()
+  .grow(Orb(1))
+  .view()
+  .note("Arc(20).outline().grow(Orb(1)) grows the rim of a circle into a tube");

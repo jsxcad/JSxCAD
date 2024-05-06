@@ -18,6 +18,6 @@ export const section = (inputs, count) =>
           /* regroup= */ true
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in section`);
     }
   });

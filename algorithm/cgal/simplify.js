@@ -18,6 +18,6 @@ export const simplify = (inputs, cornerThreshold, eps) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in simplify`);
     }
   });

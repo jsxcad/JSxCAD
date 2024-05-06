@@ -14,6 +14,8 @@ export const convertPolygonsToMeshes = (inputs) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(
+          `Unexpected status ${status} in convertPolygonsToMeshes`
+        );
     }
   });

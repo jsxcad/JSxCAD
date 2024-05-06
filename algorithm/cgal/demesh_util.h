@@ -1,5 +1,15 @@
 #pragma once
 
+#include <CGAL/Polygon_mesh_processing/remesh_planar_patches.h>
+#include <CGAL/Surface_mesh.h>
+
+template <typename Surface_mesh>
+static void demesh(Surface_mesh& mesh) {
+  Surface_mesh out;
+  CGAL::Polygon_mesh_processing::remesh_planar_patches(mesh, out);
+  mesh = out;
+}
+
 #include <CGAL/Kernel_traits.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
@@ -17,6 +27,7 @@ static bool is_coplanar_edge(const Surface_mesh& m, const Vertex_point_map& p,
   return plane.has_on(p[m.target(m.next(m.opposite(e)))]);
 }
 
+#if 0
 template <typename Mesh, typename Vertex_point_map, typename Halfedge_index>
 static bool is_sufficiently_coplanar_edge(const Mesh& m,
                                           const Vertex_point_map& p,
@@ -100,3 +111,4 @@ static void demesh(Surface_mesh& mesh) {
   CGAL::Surface_mesh_simplification::edge_collapse(
       mesh, stop, CGAL::parameters::get_cost(cost).get_placement(placement));
 }
+#endif

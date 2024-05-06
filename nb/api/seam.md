@@ -31,17 +31,3 @@ Box(5, 5, 5)
   .view('wireframe')
   .note('Box(5, 5, 5).seam(Arc(4, 3, 5)) adds cylindrical seams');
 ```
-
-![Image](seam.md.$4.png)
-
-Box(2, 2, [0, 10]).seam(Box(3, 3, [8, 10])).grow(1, 'xy', Box(3, 3, [9, 10])) makes grow fold at the seam, rather than at the far end.
-
-```JavaScript
-Box(2, 2, [0, 10])
-  .seam(Box(3, 3, [8, 10]))
-  .grow(1, 'xy', Box(3, 3, [9, 10]))
-  .view('wireframe')
-  .note(
-    "Box(2, 2, [0, 10]).seam(Box(3, 3, [8, 10])).grow(1, 'xy', Box(3, 3, [9, 10])) makes grow fold at the seam, rather than at the far end."
-  );
-```

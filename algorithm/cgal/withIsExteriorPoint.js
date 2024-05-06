@@ -11,6 +11,6 @@ export const withIsExteriorPoint = (inputs, op) =>
         return op(isExteriorPoint);
       }
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in withIsExteriorPoint`);
     }
   });

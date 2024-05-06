@@ -12,6 +12,6 @@ export const fix = (inputs, selfIntersection = true) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in fix`);
     }
   });

@@ -19,7 +19,7 @@ export const computeBoundingBox = (inputs) => {
       case STATUS_EMPTY:
         return;
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in computeBoundingBox`);
     }
   });
 };

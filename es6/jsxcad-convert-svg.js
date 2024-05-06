@@ -4080,6 +4080,7 @@ const fromSvg = async (
             geometry.content.push(
               fill(
                 { ...segments, matrix: scale(matrix) },
+                { holes: true },
                 toTagsFromName(fill$1, definitions)
               )
             );

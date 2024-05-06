@@ -95,7 +95,7 @@ md`
 Expands the shape outwards by the input distance. May result in self intersections if not used cautiously.
 `;
 
-Arc(10, 10, 5).grow(1).view();
+Arc(10, 10, 5).grow(Orb(1)).view();
 
 md`
 ---

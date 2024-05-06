@@ -60,7 +60,7 @@ export const StepperMotor28byj48 = ({
         Box(connectorBaseHeight, connectorBaseWidth).x(bodyDiameter / -2 + 2)
       )
       .ez([-bodyHeight])
-      .masked(grow(bodyPlay)),
+      .masked(grow(Orb(bodyPlay))),
     Group(
       Arc(shaftBaseDiameter).ez([0, -shaftBaseHeight]),
       FlatShaft({

@@ -22,6 +22,6 @@ export const disjoint = (inputs, exact = false) =>
       case STATUS_UNCHANGED:
         return inputs;
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in disjoint`);
     }
   });

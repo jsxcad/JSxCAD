@@ -17,6 +17,6 @@ export const route = (inputs, toolCount) =>
           inputs.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in route`);
     }
   });

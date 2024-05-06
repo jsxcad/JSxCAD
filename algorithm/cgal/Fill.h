@@ -7,7 +7,7 @@
 
 #include "Geometry.h"
 
-static int Fill(Geometry* geometry) {
+static int Fill(Geometry* geometry, bool holes) {
   typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
   typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
   typedef CGAL::Arr_extended_dcel<Traits_2, size_t, size_t, size_t>
@@ -130,8 +130,13 @@ static int Fill(Geometry* geometry) {
     geometry->plane(target) = plane;
     geometry->setIdentityTransform(target);
     std::vector<CGAL::Polygon_with_holes_2<EK>> polygons;
-    convertArrangementToPolygonsWithHolesEvenOdd(arrangement,
-                                                 geometry->pwh(target));
+    if (holes) {
+      convertArrangementToPolygonsWithHolesEvenOdd(arrangement,
+                                                   geometry->pwh(target));
+    } else {
+      convertArrangementToPolygonsWithHolesNonZero(arrangement,
+                                                   geometry->pwh(target));
+    }
   }
 
   geometry->transformToLocalFrame();

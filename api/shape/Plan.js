@@ -1,5 +1,5 @@
 import { Shape } from './Shape.js';
-import { zag as toSidesFromZag } from '@jsxcad/api-v1-math';
+import { zag as toSidesFromZag } from './zag.js';
 
 export const zagSides = Shape.registerMethod3(
   'zagSides',

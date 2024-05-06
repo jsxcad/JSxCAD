@@ -17,7 +17,7 @@ export const Random = (seed = 0) => {
 
 export default Random;
 
-export const random = (seed = 0) => {
+export const deprecatedRandom = (seed = 0) => {
   const generator = Random(seed);
   // CHECK: We could use reset and skip instead of caching.
   const values = [];

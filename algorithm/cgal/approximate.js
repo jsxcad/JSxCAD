@@ -5,6 +5,7 @@ import { ErrorZeroThickness } from './error.js';
 
 export const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
   withCgalGeometry('approximate', inputs, (cgalGeometry, g) => {
+    console.log(`QQ/approximate: ${typeof faceCount} ${typeof minErrorDrop}`);
     const status = g.Approximate(
       cgalGeometry,
       Number(faceCount),
@@ -16,6 +17,6 @@ export const approximate = (inputs, faceCount = 0, minErrorDrop = 0) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in approximate`);
     }
   });
