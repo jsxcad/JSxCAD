@@ -31,6 +31,12 @@ static int Grow(Geometry* geometry, size_t count) {
 
     std::vector<EK::Point_3> tool_points;
 
+    auto add_hull = [&](size_t nth, const std::vector<EK::Point_3>& points) {
+      size_t target = geometry->add(GEOMETRY_MESH);
+      CGAL::convex_hull_3(points.begin(), points.end(), geometry->mesh(target));
+      geometry->origin(target) = nth;
+    };
+
     // For now we assume the tool is convex.
     for (size_t nth = count; nth < size; nth++) {
       switch (geometry->type(nth)) {
@@ -88,8 +94,7 @@ static int Grow(Geometry* geometry, size_t count) {
                 points.push_back(point + offset);
               }
             }
-            mesh.clear();
-            CGAL::convex_hull_3(points.begin(), points.end(), mesh);
+            add_hull(nth, points);
           } else {
             mesh.clear();
             // Split out the convex parts.
@@ -103,49 +108,27 @@ static int Grow(Geometry* geometry, size_t count) {
                   points.push_back(point + offset);
                 }
               }
-              CGAL::Surface_mesh<EK::Point_3> hull;
-              CGAL::convex_hull_3(points.begin(), points.end(), hull);
-              if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                      mesh, hull, mesh)) {
-                return STATUS_ZERO_THICKNESS;
-              }
+              add_hull(nth, points);
             }
           }
+          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_POINTS: {
           auto& mesh = geometry->mesh(nth);
           CGAL::Surface_mesh<EK::Point_3> tool;
           CGAL::convex_hull_3(tool_points.begin(), tool_points.end(), tool);
-#ifdef JOT_MANIFOLD_ENABLED
-          manifold::Manifold tool_manifold;
-          buildManifoldFromSurfaceMesh(tool, tool_manifold);
-          manifold::Manifold target_manifold;
           for (const auto& point : geometry->points(nth)) {
-            target_manifold += tool_manifold.Translate({to_double(point.x()),
-                                                        to_double(point.y()),
-                                                        to_double(point.z())});
+            size_t target = geometry->add(GEOMETRY_MESH);
+            geometry->mesh(target) = tool;
+            CGAL::Polygon_mesh_processing::transform(translate_to(point),
+                                                     geometry->mesh(target));
           }
-          buildSurfaceMeshFromManifold(target_manifold, mesh);
-#else
-          for (const auto& point : geometry->points(nth)) {
-            CGAL::Surface_mesh<EK> copy = tool;
-            CGAL::Polygon_mesh_processing::transform(translate(point), copy);
-          transform(nth), mesh(nth), CGAL::parameters::all_default());
-          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                  mesh, copy, mesh)) {
-            return STATUS_ZERO_THICKNESS;
-          }
-          }
-#endif
-          geometry->setType(nth, GEOMETRY_MESH);
+          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_SEGMENTS: {
           EK::Point_3 zero(0, 0, 0);
-#ifdef JOT_MANIFOLD_ENABLED
-          manifold::Manifold joined_manifold;
-#endif
           for (const auto& segment : geometry->segments(nth)) {
             const EK::Vector_3 source_offset = segment.source() - zero;
             const EK::Vector_3 target_offset = segment.target() - zero;
@@ -154,49 +137,15 @@ static int Grow(Geometry* geometry, size_t count) {
               points.push_back(point + source_offset);
               points.push_back(point + target_offset);
             }
-            CGAL::Surface_mesh<EK::Point_3> hull;
-            CGAL::convex_hull_3(points.begin(), points.end(), hull);
-#ifdef JOT_MANIFOLD_ENABLED
-            manifold::Manifold hull_manifold;
-            buildManifoldFromSurfaceMesh(hull, hull_manifold);
-            joined_manifold += hull_manifold;
-#else
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                    geometry->mesh(nth), hull, geometry->mesh(nth))) {
-              return STATUS_ZERO_THICKNESS;
-            }
-#endif
+            add_hull(nth, points);
           }
-#ifdef JOT_MANIFOLD_ENABLED
-          buildSurfaceMeshFromManifold(joined_manifold, geometry->mesh(nth));
-#endif
-          geometry->setType(nth, GEOMETRY_MESH);
+          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           EK::Point_3 zero(0, 0, 0);
           CGAL::Polygon_triangulation_decomposition_2<EK> triangulator;
           const auto& plane = geometry->plane(nth);
-          size_t pwh_count = 0;
-          size_t p_count = 0;
-          size_t h_count = 0;
-#ifdef JOT_MANIFOLD_ENABLED
-          manifold::Manifold manifold;
-#endif
-          auto add_hull = [&](const std::vector<EK::Point_3>& points) {
-            CGAL::Surface_mesh<EK::Point_3> hull;
-            CGAL::convex_hull_3(points.begin(), points.end(), hull);
-#ifdef JOT_MANIFOLD_ENABLED
-            manifold::Manifold hull_manifold;
-            buildManifoldFromSurfaceMesh(hull, hull_manifold);
-            manifold += hull_manifold;
-#else
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                    geometry->mesh(nth), hull, geometry->mesh(nth))) {
-              return STATUS_ZERO_THICKNESS;
-            }
-#endif
-          };
           for (const auto& pwh : geometry->pwh(nth)) {
             if (pwh.holes_begin() == pwh.holes_end()) {
               // We can use optimal partitioning if there are no holes.
@@ -219,7 +168,7 @@ static int Grow(Geometry* geometry, size_t count) {
                     points.push_back(tool_point + offset);
                   }
                 }
-                add_hull(points);
+                add_hull(nth, points);
               }
             } else {
               typedef CGAL::Exact_predicates_tag Itag;
@@ -253,14 +202,11 @@ static int Grow(Geometry* geometry, size_t count) {
                 add_point(face->vertex(0)->point());
                 add_point(face->vertex(1)->point());
                 add_point(face->vertex(2)->point());
-                add_hull(points);
+                add_hull(nth, points);
               }
             }
           }
-#ifdef JOT_MANIFOLD_ENABLED
-          buildSurfaceMeshFromManifold(manifold, geometry->mesh(nth));
-#endif
-          geometry->setType(nth, GEOMETRY_MESH);
+          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
       }

@@ -86,9 +86,8 @@ static bool repair_self_intersections(Surface_mesh& mesh,
                     << number_of_self_intersections(working_mesh) << std::endl;
 
         } catch (const std::exception& e) {
-          std::cout
-              << "repair_self_intersections: remove intersections error: "
-              << e.what() << std::endl;
+          std::cout << "repair_self_intersections: remove intersections error: "
+                    << e.what() << std::endl;
         }
         break;
       }

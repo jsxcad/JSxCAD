@@ -1621,7 +1621,7 @@ const grow = (inputs, count) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by grow');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, count);
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
         throw new Error(`Unexpected status ${status} in grow`);
     }
