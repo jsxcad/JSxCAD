@@ -115,9 +115,9 @@ Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })
   .note(`Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })`);
 
 Group(Arc(4).x(-1), Box(5).x(1))
-  .fill()
+  .fill('holes')
   .gridView()
-  .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
+  .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill('holes')`);
 
 const extentsA = [
   [2, 5],

@@ -12,10 +12,10 @@ Links the points produced by _op_ to form a wave.
 
 ![Image](Wave.md.$2.png)
 
-Wave({ from: -360, to: 360 }, (t) => Point().y(times(100, sin(t * 3 / 360))))
+Wave({ from: -3, to: 3, by: 1 / 32 }, (t) => Point().y(sin(t)))
 
 ```JavaScript
-Wave({ from: -360, to: 360 }, (t) => Point().y(times(100, sin(t * 3 / 360))))
-  .view()
-  .note('Wave({ from: -360, to: 360 }, (t) => Point().y(times(100, sin(t * 3 / 360))))');
+Wave({ from: -3, to: 3, by: 1 / 32 }, (t) => Point().y(sin(t)))
+  .view('top')
+  .note('Wave({ from: -3, to: 3, by: 1 / 32 }, (t) => Point().y(sin(t)))');
 ```

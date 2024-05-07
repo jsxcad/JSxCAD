@@ -159,7 +159,7 @@ static void simplify(double face_count, double sharp_edge_threshold,
 
   Edge_collapse_stats edge_collapse_stats;
 
-  std::cout << "QQ/simplify: edge collapse begin" << std::endl;
+  std::cout << "simplify: edge collapse begin" << std::endl;
   int r = SMS::edge_collapse(
       mesh, stop,
       CGAL::parameters::get_cost(gh_cost)

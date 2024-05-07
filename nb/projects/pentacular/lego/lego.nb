@@ -28,7 +28,7 @@ export const SocketBoard = (length, width, height, { sockets = [] } = {}) => {
     }
   }
   return Group(Box(length * 8, width * 8).align('x>y>'), ...pieces)
-    .fill()
+    .fill('holes')
     .ez([height])
     .align('xy')
     .as(`SocketBoard ${length} x ${width} x ${height}`);

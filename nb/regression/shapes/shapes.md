@@ -261,13 +261,13 @@ Wave((t) => Point(0, sin(t)), { to: 10, by: 1/16 })
 
 ![Image](shapes.md.$25.png)
 
-Group(Arc(5).x(-1), Box(5).x(1)).fill()
+Group(Arc(5).x(-1), Box(5).x(1)).fill('holes')
 
 ```JavaScript
 Group(Arc(4).x(-1), Box(5).x(1))
-  .fill()
+  .fill('holes')
   .gridView()
-  .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill()`);
+  .note(`Group(Arc(5).x(-1), Box(5).x(1)).fill('holes')`);
 ```
 
 ```JavaScript

@@ -44,37 +44,37 @@ enum RepairStrategy {
 template <typename EK, typename Surface_mesh>
 static bool repair_self_intersections(Surface_mesh& mesh,
                                       const std::vector<int>& strategies) {
-  std::cout << "QQ/repair_self_intersections: strategies=" << strategies.size()
+  std::cout << "repair_self_intersections: strategies=" << strategies.size()
             << std::endl;
 
   for (const int strategy : strategies) {
-    std::cout << "QQ/repair_self_intersections: strategy=" << strategy
+    std::cout << "repair_self_intersections: strategy=" << strategy
               << std::endl;
     switch (strategy) {
       case REPAIR_AUTOREFINE_AND_REMOVE_SELF_INTERSECTIONS: {
         // Should be precise.
         try {
           // Keep the autorefinements for later stages.
-          std::cout << "QQ/repair_self_intersections: autorefine" << std::endl;
+          std::cout << "repair_self_intersections: autorefine" << std::endl;
           if (CGAL::Polygon_mesh_processing::experimental::
                   autorefine_and_remove_self_intersections(mesh)) {
-            std::cout << "QQ/repair_self_intersections: autorefine succeeded"
+            std::cout << "repair_self_intersections: autorefine succeeded"
                       << std::endl;
             return true;
           }
         } catch (const std::exception& e) {
-          std::cout << "QQ/repair_self_intersections: autorefine failed: "
+          std::cout << "repair_self_intersections: autorefine failed: "
                     << e.what() << std::endl;
         }
 
-        std::cout << "QQ/repair_self_intersections: count="
+        std::cout << "repair_self_intersections: count="
                   << number_of_self_intersections(mesh) << std::endl;
         break;
       }
       case REPAIR_TRY_REMOVE_SELF_INTERSECTIONS: {
         try {
           auto working_mesh = mesh;
-          std::cout << "QQ/repair_self_intersections: remove intersections"
+          std::cout << "repair_self_intersections: remove intersections"
                     << std::endl;
           if (CGAL::Polygon_mesh_processing::experimental::
                   remove_self_intersections(working_mesh)) {
@@ -82,19 +82,19 @@ static bool repair_self_intersections(Surface_mesh& mesh,
             return true;
           }
 
-          std::cout << "QQ/repair_self_intersections: after count="
+          std::cout << "repair_self_intersections: after count="
                     << number_of_self_intersections(working_mesh) << std::endl;
 
         } catch (const std::exception& e) {
           std::cout
-              << "QQ/repair_self_intersections: remove intersections error: "
+              << "repair_self_intersections: remove intersections error: "
               << e.what() << std::endl;
         }
         break;
       }
       case REPAIR_WRAP: {
         try {
-          std::cout << "QQ/repair_self_intersections: wrap" << std::endl;
+          std::cout << "repair_self_intersections: wrap" << std::endl;
           double wrap_relative_alpha = 300;
           double wrap_relative_offset = 5000;
           // Use a wrapping pass to remove self-intersection.
@@ -116,31 +116,31 @@ static bool repair_self_intersections(Surface_mesh& mesh,
           mesh.clear();
           wrap_epick(points, faces, alpha, offset, mesh);
         } catch (const std::exception& e) {
-          std::cout << "QQ/repair_self_intersections: wrap error: " << e.what()
+          std::cout << "repair_self_intersections: wrap error: " << e.what()
                     << std::endl;
         }
         break;
       }
       case REPAIR_CLOSE: {
         try {
-          std::cout << "QQ/repair_self_intersections: close" << std::endl;
+          std::cout << "repair_self_intersections: close" << std::endl;
           CGAL::Polygon_mesh_processing::stitch_boundary_cycles(mesh);
           CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(mesh);
           std::vector<typename Surface_mesh::halfedge_index> border_cycles;
           CGAL::Polygon_mesh_processing::extract_boundary_cycles(
               mesh, std::back_inserter(border_cycles));
-          std::cout << "QQ/repair_self_intersections: count="
+          std::cout << "repair_self_intersections: count="
                     << border_cycles.size() << std::endl;
           size_t nth = 0;
           for (const typename Surface_mesh::halfedge_index hole :
                border_cycles) {
-            std::cout << "QQ/repair_self_intersections: close nth=" << ++nth
+            std::cout << "repair_self_intersections: close nth=" << ++nth
                       << std::endl;
             CGAL::Polygon_mesh_processing::triangulate_hole(mesh, hole);
           }
-          std::cout << "QQ/repair_self_intersections: close done" << std::endl;
+          std::cout << "repair_self_intersections: close done" << std::endl;
         } catch (const std::exception& e) {
-          std::cout << "QQ/repair_self_intersections: wrap error: " << e.what()
+          std::cout << "repair_self_intersections: wrap error: " << e.what()
                     << std::endl;
         }
         break;
@@ -148,7 +148,7 @@ static bool repair_self_intersections(Surface_mesh& mesh,
     }
   }
 
-  std::cout << "QQ/repair_self_intersections: done" << std::endl;
+  std::cout << "repair_self_intersections: done" << std::endl;
   return false;
 }
 

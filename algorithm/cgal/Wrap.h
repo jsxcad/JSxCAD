@@ -64,11 +64,11 @@ static int Wrap(Geometry* geometry, double alpha, double offset,
     wrap_epick(points, faces, alpha, offset, geometry->mesh(target));
 
     if (face_count > 0) {
-      std::cout << "QQ/Wrap/approximate: face_count=" << face_count
+      std::cout << "Wrap/approximate: face_count=" << face_count
                 << " min_error_drop=" << min_error_drop << std::endl;
       approximate_mesh(geometry->mesh(target), face_count, min_error_drop);
       geometry->copyEpickMeshToEpeckMesh(target);
-      std::cout << "QQ/Wrap/approximate: number_of_faces="
+      std::cout << "Wrap/approximate: number_of_faces="
                 << geometry->mesh(target).number_of_faces() << std::endl;
     }
 

@@ -2764,7 +2764,10 @@ const random = Shape.registerMethod3(
   'random',
   ['inputGeometry', 'function', 'number', 'number', 'number'],
   (geometry) => geometry,
-  async (geometry, [_, op = () => (s) => s, count = 1, offset = 0, seed = 0xffff]) => {
+  async (
+    geometry,
+    [_, op = () => (s) => s, count = 1, offset = 0, seed = 0xffff]
+  ) => {
     const input = Shape.fromGeometry(geometry);
     const values = [];
     const r = new Prando(seed);

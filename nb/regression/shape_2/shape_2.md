@@ -53,7 +53,7 @@ Line(20).stroke(1).view();
 ```JavaScript
 const Squiggle = (seed = 0, to = 10) =>
   Curve(
-    Seq({ to }, (t) => random(3, t + seed * to, (x, y, z) => Point(10 * x, 10 * y, 10 * z))),
+    Seq({ to }, (t) => random(2, t + seed * to, (x, y) => Point(10 * x, 10 * y))),
     to * 10
   );
 ```
@@ -84,7 +84,7 @@ Box(8, 12)
 ```JavaScript
 Box(10)
   .and(Arc(plus(diameter(), 1)))
-  .fill()
+  .fill('holes')
   .view();
 ```
 
@@ -93,7 +93,7 @@ Box(10)
 ```JavaScript
 Box(10)
   .and(Arc(times(diameter(), 3/4)))
-  .fill()
+  .fill('holes')
   .view();
 ```
 

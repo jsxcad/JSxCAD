@@ -18,7 +18,6 @@
 #include "transform_util.h"
 
 static int Grow(Geometry* geometry, size_t count) {
-  std::cout << "QQ/Grow/1" << std::endl;
   try {
     typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
     typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
@@ -58,7 +57,6 @@ static int Grow(Geometry* geometry, size_t count) {
       }
     }
 
-    std::cout << "QQ/Grow/2" << std::endl;
     for (size_t nth = 0; nth < count; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
@@ -67,14 +65,11 @@ static int Grow(Geometry* geometry, size_t count) {
 
           Nef nef(mesh);
 
-          std::cout << "QQ/Grow/3" << std::endl;
           try {
             CGAL::convex_decomposition_3(nef);
           } catch (const std::exception& e) {
-            std::cout << "QQ/Grow: mesh=" << mesh << std::endl;
             throw;
           }
-          std::cout << "QQ/Grow/4" << std::endl;
 
           auto ci = nef.volumes_begin();
           if (ci == nef.volumes_end()) {
@@ -116,7 +111,6 @@ static int Grow(Geometry* geometry, size_t count) {
               }
             }
           }
-          std::cout << "QQ/Grow/5" << std::endl;
           break;
         }
         case GEOMETRY_POINTS: {
@@ -180,7 +174,6 @@ static int Grow(Geometry* geometry, size_t count) {
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
-          std::cout << "QQ/Grow/6" << std::endl;
           EK::Point_3 zero(0, 0, 0);
           CGAL::Polygon_triangulation_decomposition_2<EK> triangulator;
           const auto& plane = geometry->plane(nth);
@@ -268,7 +261,6 @@ static int Grow(Geometry* geometry, size_t count) {
           buildSurfaceMeshFromManifold(manifold, geometry->mesh(nth));
 #endif
           geometry->setType(nth, GEOMETRY_MESH);
-          std::cout << "QQ/Grow/7" << std::endl;
           break;
         }
       }
@@ -278,10 +270,9 @@ static int Grow(Geometry* geometry, size_t count) {
     geometry->convertPlanarMeshesToPolygons();
     geometry->transformToLocalFrame();
 
-    std::cout << "QQ/Grow/8" << std::endl;
     return STATUS_OK;
   } catch (const std::exception& e) {
-    std::cout << "QQ/grow: " << e.what() << std::endl;
+    std::cout << "Grow: " << e.what() << std::endl;
     throw;
   }
 }

@@ -42,21 +42,12 @@ static int EachPoint(Geometry* geometry, std::vector<Point>& points) {
       }
     }
 
-    std::cout << "EachPoints: points=" << points.size() << std::endl;
-    for (const auto& point : points) {
-      std::cout << "EachPoints: point=" << point << std::endl;
-    }
-
+    // FIX: Remove repeated, rather than unique points?
     unique_points(points);
-
-    std::cout << "EachPoints: upoints=" << points.size() << std::endl;
-    for (const auto& point : points) {
-      std::cout << "EachPoints: upoint=" << point << std::endl;
-    }
 
     return STATUS_OK;
   } catch (const std::exception& e) {
-    std::cout << "QQ/EachPoint/exception" << std::endl;
+    std::cout << "EachPoint: " << std::endl;
     std::cout << e.what() << std::endl;
     throw;
   }
