@@ -249,7 +249,7 @@ const hook2 = Link(
   Point(-1.5 + 1 + 0.5, 5),
   Point(-1.5 + 1 - 0.5 + 0.5, 4 + 0.5)
 )
-  .stroke(1)
+  .grow(Arc(1))
   .ez([3])
   .and(peg.cut(YZ(0)).rz(1 / 4))
   .fuse()
@@ -263,13 +263,9 @@ const hook2 = Link(
   );
 ```
 
-![Image](train.md.hook_hook.png)
-
-[hook.stl](train.hook.stl)
-
 ```JavaScript
 const hook = Link(Point(-7 + 4, 1), Point(-10 + 4, -2), Point(0))
-  .stroke(0.4)
+  .grow(Arc(0.4))
   .ez([3])
   .align('x<')
   .x(1 / 8)
@@ -395,10 +391,6 @@ const car26x11 = Car({ length: 26, wheelBase: 11 });
 
 [hook4.stl](train.hook4.stl)
 
-![Image](train.md.hook3_bar4.png)
-
-[bar4.stl](train.bar4.stl)
-
 ```JavaScript
 const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
   .y(0.5)
@@ -418,7 +410,7 @@ const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
       'bar',
       And(Arc(2), Arc(2).y(7), LineY([6.5]))
         .y(0.5)
-        .stroke(3)
+        .grow(Arc(3))
         .ez([3.5, 5.5])
     )
   )

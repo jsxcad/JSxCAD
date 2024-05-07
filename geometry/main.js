@@ -47,7 +47,6 @@ export { Page, ensurePages, page } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Route } from './route.js';
 export { Segments } from './Segments.js';
-export { Stroke } from './stroke.js';
 export { abstract } from './abstract.js';
 export { align } from './align.js';
 export { alignment } from './alignment.js';
