@@ -263,6 +263,10 @@ const hook2 = Link(
   );
 ```
 
+![Image](train.md.hook_hook.png)
+
+[hook.stl](train.hook.stl)
+
 ```JavaScript
 const hook = Link(Point(-7 + 4, 1), Point(-10 + 4, -2), Point(0))
   .grow(Arc(0.4))
@@ -390,6 +394,10 @@ const car26x11 = Car({ length: 26, wheelBase: 11 });
 ![Image](train.md.hook3_hook4.png)
 
 [hook4.stl](train.hook4.stl)
+
+![Image](train.md.hook3_bar4.png)
+
+[bar4.stl](train.bar4.stl)
 
 ```JavaScript
 const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))

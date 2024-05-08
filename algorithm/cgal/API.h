@@ -56,6 +56,7 @@
 #include "Shell.h"
 #include "Simplify.h"
 #include "Smooth.h"
+#include "Trim.h"
 #include "Twist.h"
 #include "Unfold.h"
 #include "Validate.h"

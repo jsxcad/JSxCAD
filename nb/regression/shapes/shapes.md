@@ -570,6 +570,8 @@ Box(10)
   .view();
 ```
 
+![Image](shapes.md.$57.png)
+
 ```JavaScript
 Curve([0, 12], [1, 12], [5, 10], [12.5 + 5, 0], [16, -12], [21, -12])
   .color('red')

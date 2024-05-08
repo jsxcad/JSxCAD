@@ -1221,6 +1221,15 @@ static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
   return info.Env().Undefined();
 }
 
+static Napi::Value Trim(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 2);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  uint32_t count = info[1].As<Napi::Number>().Uint32Value();
+  size_t status = ::Trim(geometry, count);
+  return Napi::Number::New(info.Env(), status);
+}
+
 static Napi::Value Twist(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1369,6 +1378,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Simplify"), Napi::Function::New(env, Simplify));
   exports.Set(Napi::String::New(env, "Smooth"), Napi::Function::New(env, Smooth));
   exports.Set(Napi::String::New(env, "TranslateTransform"), Napi::Function::New(env, TranslateTransform));
+  exports.Set(Napi::String::New(env, "Trim"), Napi::Function::New(env, Trim));
   exports.Set(Napi::String::New(env, "Twist"), Napi::Function::New(env, Twist));
   exports.Set(Napi::String::New(env, "Unfold"), Napi::Function::New(env, Unfold));
   exports.Set(Napi::String::New(env, "Validate"), Napi::Function::New(env, Validate));

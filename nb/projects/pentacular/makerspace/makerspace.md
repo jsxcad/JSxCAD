@@ -63,6 +63,7 @@ const bug = And(
     Curve([6, -16.8], [4, -16], [3, -15], [2, -13], [1.2, -9.5])
   )
     .grow(Arc(0.6))
+    .fuse()
     .as('antenna')
     .color('red')
     .sx(1, -1)

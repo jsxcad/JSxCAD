@@ -3,16 +3,11 @@ md`
 ### grow()
 Parameter|Default|Type
 ---|---|---
-amount|0|Number of mm to grow by.
-axes|'xyz'|String specifiying axis constraints.
-...selections||Shapes limiting the growth region.
+tool||shape to grow by
 
-Expands a solid by amount mm along the axes specified (any combination of 'xyz').
-
-Amount may be negative.
-
-_Note: May produce self-intersection._
+Generates a shape around the input by growing it with a minkowski sum with the tool.
 `;
+
 Box(5, 5, 5)
   .and(grow(Orb(5)).ghost())
   .view()

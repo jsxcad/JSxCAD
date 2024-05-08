@@ -525,6 +525,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
+  emscripten::function("Trim", &Trim, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
   emscripten::function("Unfold", &wrapped::Unfold,
                        emscripten::allow_raw_pointers());

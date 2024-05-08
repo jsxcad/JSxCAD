@@ -145,7 +145,9 @@ static int Grow(Geometry* geometry, size_t count) {
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           EK::Point_3 zero(0, 0, 0);
           CGAL::Polygon_triangulation_decomposition_2<EK> triangulator;
-          const auto& plane = geometry->plane(nth);
+          // We need to copy plane to survive vector reallocation due to
+          // geometry->add().
+          const auto plane = geometry->plane(nth);
           for (const auto& pwh : geometry->pwh(nth)) {
             if (pwh.holes_begin() == pwh.holes_end()) {
               // We can use optimal partitioning if there are no holes.

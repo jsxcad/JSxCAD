@@ -79,6 +79,7 @@ export { repair } from './repair.js';
 export { shell } from './shell.js';
 export { simplify } from './simplify.js';
 export { smooth } from './smooth.js';
+export { trim } from './trim.js';
 export { twist } from './twist.js';
 export { unfold } from './unfold.js';
 export { validate } from './validate.js';

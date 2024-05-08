@@ -275,6 +275,7 @@ export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
 export { transformCoordinate, transformingCoordinates } from './transform.js';
 export { translate } from './translate.js';
+export { trim } from './trim.js';
 export { to } from './to.js';
 export { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 export { toCoordinates } from './eachPoint.js';

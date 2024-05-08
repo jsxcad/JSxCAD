@@ -2,15 +2,9 @@
 ### grow()
 Parameter|Default|Type
 ---|---|---
-amount|0|Number of mm to grow by.
-axes|'xyz'|String specifiying axis constraints.
-...selections||Shapes limiting the growth region.
+tool||shape to grow by
 
-Expands a solid by amount mm along the axes specified (any combination of 'xyz').
-
-Amount may be negative.
-
-_Note: May produce self-intersection._
+Generates a shape around the input by growing it with a minkowski sum with the tool.
 
 ![Image](grow.md.$2.png)
 
@@ -57,8 +51,6 @@ Arc(20)
   .view()
   .note("Arc(20).grow(Orb(1)) thickens a disc");
 ```
-
-![Image](grow.md.$6.png)
 
 Arc(20).points().grow(Orb(1)) grows the points of an circle into spheres
 

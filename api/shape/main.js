@@ -196,6 +196,7 @@ export { toDisplayGeometry } from './toDisplayGeometry.js';
 export { tool } from './tool.js';
 export { toolpath } from './toolpath.js';
 export { transform } from './transform.js';
+export { trim } from './trim.js';
 export { turnX, tx } from './tx.js';
 export { turnY, ty } from './ty.js';
 export { turnZ, tz } from './tz.js';
