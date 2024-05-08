@@ -10,8 +10,6 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
   typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   size_t size = geometry->size();
 
-  std::cout << "Join: size=" << size << std::endl;
-
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputSegmentsToOutputSegments();
   geometry->copyInputPointsToOutputPoints();
@@ -37,20 +35,16 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
             geometry->mesh(target).join(geometry->mesh(nth));
 #ifdef JOT_MANIFOLD_ENABLED
           } else if (!exact) {
-            std::cout << "Join/manifold/0" << std::endl;
             // TODO: Optimize out unnecessary conversions.
             manifold::Manifold target_manifold;
             buildManifoldFromSurfaceMesh(geometry->mesh(target),
                                          target_manifold);
-            std::cout << "Join/manifold/1" << std::endl;
             manifold::Manifold nth_manifold;
             buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
-            std::cout << "Join/manifold/2" << std::endl;
             target_manifold += nth_manifold;
             geometry->mesh(target).clear();
             buildSurfaceMeshFromManifold(target_manifold,
                                          geometry->mesh(target));
-            std::cout << "Join/manifold/3" << std::endl;
 #endif
           } else {
             Surface_mesh cutMeshCopy(geometry->mesh(nth));
@@ -62,9 +56,7 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
           }
           geometry->updateBounds3(target);
         }
-        std::cout << "Join/demesh/0" << std::endl;
         demesh(geometry->mesh(target));
-        std::cout << "Join/demesh/1" << std::endl;
         break;
       }
       case GEOMETRY_POLYGONS_WITH_HOLES: {
