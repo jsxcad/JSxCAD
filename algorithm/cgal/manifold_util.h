@@ -47,6 +47,9 @@ void buildSurfaceMeshFromManifold(
     const manifold::Manifold& manifold,
     CGAL::Surface_mesh<EK::Point_3>& surface_mesh) {
   typedef CGAL::Surface_mesh<EK::Point_3>::Vertex_index Vertex_index;
+  if (surface_mesh.number_of_vertices() != 0) {
+    std::cout << "QQ/buildSurfaceMeshFromManifold: mesh is not empty" << std::endl;
+  }
   manifold::Mesh mesh = manifold.GetMesh();
   for (std::size_t nth = 0; nth < mesh.vertPos.size(); nth++) {
     const glm::vec3& p = mesh.vertPos[nth];

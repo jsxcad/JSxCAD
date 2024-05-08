@@ -29,26 +29,31 @@ server.listen(5001);
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
 const processArgs = (args) => {
+  const isNoHtml = args.includes('--nohtml');
   const isQuiet = args.includes('--quiet');
   const last = args[args.length - 1];
   const baseDirectory = last && !last.startsWith('--') ? last : '.';
-  return { isQuiet, baseDirectory };
+  return { isQuiet, baseDirectory, isNoHtml };
 };
 
 const build = async (...args) => {
-  const { isQuiet, baseDirectory } = processArgs(args.filter((arg) => arg));
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    // dumpio: true,
-    // pipe: true,
-    args: [
-      '--disable-features=BlockInsecurePrivateNetworkRequests',
-      '--disable-web-security',
-      '--disable-features=IsolateOrigins',
-      '--disable-site-isolation-trials',
-      '--js-flags="--experimental-wasm-eh"',
-    ],
-  });
+  const { isNoHtml, isQuiet, baseDirectory } = processArgs(
+    args.filter((arg) => arg)
+  );
+  const browser = isNoHtml
+    ? undefined
+    : await puppeteer.launch({
+        headless: 'new',
+        // dumpio: true,
+        // pipe: true,
+        args: [
+          '--disable-features=BlockInsecurePrivateNetworkRequests',
+          '--disable-web-security',
+          '--disable-features=IsolateOrigins',
+          '--disable-site-isolation-trials',
+          '--js-flags="--experimental-wasm-eh"',
+        ],
+      });
   const notebookDurations = [];
   const startTime = new Date();
   setLocalFilesystem(

@@ -38,8 +38,8 @@ static int Extrude(Geometry* geometry, size_t count) {
   typedef typename boost::property_map<CGAL::Surface_mesh<EK::Point_3>,
                                        CGAL::vertex_point_t>::type VPMap;
 
-  const auto& top = geometry->transform(count);
-  const auto& bottom = geometry->transform(count + 1);
+  const auto top = geometry->transform(count);
+  const auto bottom = geometry->transform(count + 1);
 
   auto up = Point(0, 0, 0).transform(top) - Point(0, 0, 0);
   auto down = Point(0, 0, 0).transform(bottom) - Point(0, 0, 0);

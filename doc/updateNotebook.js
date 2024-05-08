@@ -242,6 +242,10 @@ export const updateNotebook = async (
         throw new Error(note.error.text);
       }
     }
+    if (!browser) {
+      console.log('no browser');
+      return;
+    }
     const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',
