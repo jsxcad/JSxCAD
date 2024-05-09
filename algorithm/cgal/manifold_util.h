@@ -47,7 +47,8 @@ static void buildManifoldFromSurfaceMesh(
 void buildSurfaceMeshFromManifold(
     const manifold::Manifold& manifold,
     CGAL::Surface_mesh<EK::Point_3>& surface_mesh) {
-  typedef CGAL::Surface_mesh<EK::Point_3>::Vertex_index Vertex_index;
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+  typedef Surface_mesh::Vertex_index Vertex_index;
   if (surface_mesh.number_of_vertices() != 0) {
     std::cout << "QQ/buildSurfaceMeshFromManifold: mesh is not empty" << std::endl;
   }
@@ -67,6 +68,10 @@ void buildSurfaceMeshFromManifold(
     const glm::ivec3& t = mesh.triVerts[nth];
     auto face_index = surface_mesh.add_face(Vertex_index(t[0]), Vertex_index(t[1]),
                                      Vertex_index(t[2]));
+    if (face_index == Surface_mesh::null_face()) {
+      std::cout << "buildSurfaceMeshFromManifold: add_face failed" << std::endl;
+      throw std::runtime_error("buildSurfaceMeshFromManifold: add_face failed");
+    }
     if (size_t(face_index) != nth) {
       std::cout << "buildSurfaceMeshFromManifold: face index misaligned"
                 << " face_index=" << face_index << " nth=" << nth
