@@ -716,15 +716,6 @@ static Napi::Value FromPolygonSoup(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
-static Napi::Value FromPolygons(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 2);
-  Napi::Object jsGeometry = info[0].As<Napi::Object>();
-  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  bool close = info[1].As<Napi::Boolean>().Value();
-  size_t status = ::FromPolygons(geometry, close);
-  return Napi::Number::New(info.Env(), status);
-}
-
 static Napi::Value Fuse(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1071,6 +1062,14 @@ static Napi::Value Outline(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
+static Napi::Value Pack(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 1);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  size_t status = ::Pack(geometry);
+  return Napi::Number::New(info.Env(), status);
+}
+
 static Napi::Value Repair(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1340,7 +1339,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Fill"), Napi::Function::New(env, Fill));
   exports.Set(Napi::String::New(env, "Fix"), Napi::Function::New(env, Fix));
   exports.Set(Napi::String::New(env, "FromPolygonSoup"), Napi::Function::New(env, FromPolygonSoup));
-  exports.Set(Napi::String::New(env, "FromPolygons"), Napi::Function::New(env, FromPolygons));
   exports.Set(Napi::String::New(env, "Fuse"), Napi::Function::New(env, Fuse));
   exports.Set(Napi::String::New(env, "GenerateEnvelope"), Napi::Function::New(env, GenerateEnvelope));
   exports.Set(Napi::String::New(env, "GetPolygonsWithHoles"), Napi::Function::New(env, GetPolygonsWithHoles));
@@ -1364,6 +1362,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "MinimizeOverhang"), Napi::Function::New(env, MinimizeOverhang));
   exports.Set(Napi::String::New(env, "Offset"), Napi::Function::New(env, Offset));
   exports.Set(Napi::String::New(env, "Outline"), Napi::Function::New(env, Outline));
+  exports.Set(Napi::String::New(env, "Pack"), Napi::Function::New(env, Pack));
   exports.Set(Napi::String::New(env, "Reconstruct"), Napi::Function::New(env, Reconstruct));
   exports.Set(Napi::String::New(env, "Refine"), Napi::Function::New(env, Refine));
   exports.Set(Napi::String::New(env, "Remesh"), Napi::Function::New(env, Remesh));

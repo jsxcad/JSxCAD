@@ -1459,33 +1459,6 @@ const fix = (inputs, selfIntersection = true) =>
     }
   });
 
-const fromPolygons = (jsPolygons, close = false, tolerance = 0.001) => {
-  return withCgalGeometry('fromPolygons', [], (cgalGeometry, g) => {
-    cgalGeometry.setSize(jsPolygons.length);
-    for (let nth = 0; nth < jsPolygons.length; nth++) {
-      const { points } = jsPolygons[nth];
-      cgalGeometry.setType(nth, GEOMETRY_POINTS);
-      for (const [x, y, z] of points) {
-        cgalGeometry.addInputPoint(nth, x, y, z);
-      }
-    }
-    const status = g.FromPolygons(cgalGeometry, Boolean(close));
-    switch (status) {
-      case STATUS_ZERO_THICKNESS:
-        throw new ErrorZeroThickness('Zero thickness produced by fromPolygons');
-      case STATUS_OK:
-        return fromCgalGeometry(
-          cgalGeometry,
-          [],
-          cgalGeometry.getSize(),
-          jsPolygons.length
-        );
-      default:
-        throw new Error(`Unexpected status ${status} in fromPolygons`);
-    }
-  });
-};
-
 const generateRepairStrategyCodes = (strategies) => {
   const strategyCodes = [];
   for (const strategy of strategies) {
@@ -1549,6 +1522,7 @@ const fromPolygonSoup = (
       Number(minErrorDrop),
       generateRepairStrategyCodes(strategies)
     );
+    console.log(`QQ/fromPolygonSoup/1`);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness(
@@ -2222,4 +2196,4 @@ const wrap = (
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromPolygons, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pushSurfaceMesh, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, trim, twist, unfold, validate, withIsExteriorPoint, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pushSurfaceMesh, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, trim, twist, unfold, validate, withIsExteriorPoint, wrap };

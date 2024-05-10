@@ -100,7 +100,7 @@ export { fair } from './fair.js';
 export { fix } from './fix.js';
 export { flat } from './flat.js';
 export { fresh } from './tagged/fresh.js';
-export { fromPolygons } from './fromPolygons.js';
+// export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
 export {
   identity,

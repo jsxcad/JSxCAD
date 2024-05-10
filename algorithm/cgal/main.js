@@ -48,7 +48,7 @@ export { fair } from './fair.js';
 export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
-export { fromPolygons } from './fromPolygons.js';
+// export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
 export { fuse } from './fuse.js';
 export { generateEnvelope } from './generateEnvelope.js';

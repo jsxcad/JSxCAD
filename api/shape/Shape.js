@@ -1,6 +1,6 @@
 import { endTime, getSourceLocation, startTime } from '@jsxcad/sys';
 import {
-  fromPolygons,
+  fromPolygonSoup,
   taggedGraph,
   taggedGroup,
   taggedPoints,
@@ -517,7 +517,7 @@ Shape.fromOpenPath = (path) => {
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPoint = (point) => fromGeometry(taggedPoints({}, [point]));
 Shape.fromPoints = (points) => fromGeometry(taggedPoints({}, points));
-Shape.fromPolygons = (polygons) => fromGeometry(fromPolygons(polygons));
+Shape.fromPolygons = (polygons) => fromGeometry(fromPolygonSoup(polygons));
 
 Shape.registerMethod = registerMethod;
 

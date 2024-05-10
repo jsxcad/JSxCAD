@@ -279,7 +279,7 @@ class Geometry {
 
   bool has_transform(size_t nth) { return true; }
 
-  const CGAL::Aff_transformation_3<EK>& transform(size_t nth) {
+  CGAL::Aff_transformation_3<EK>& transform(size_t nth) {
     return transforms_[nth];
   }
 
@@ -618,7 +618,7 @@ class Geometry {
         // due to zero width junctions.
         if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh(nth),
                                             vertex_map)) {
-          std::cout << "QQ/convertPolygonsToPlanarMeshes failed";
+          std::cout << "convertPolygonsToPlanarMeshes failed";
           return;
         }
         CGAL::Polygon_mesh_processing::triangulate_faces(mesh(nth));

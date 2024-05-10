@@ -30,6 +30,7 @@ export const fromPolygonSoup = (
       Number(minErrorDrop),
       generateRepairStrategyCodes(strategies)
     );
+    console.log(`QQ/fromPolygonSoup/1`);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness(

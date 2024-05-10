@@ -6,7 +6,6 @@
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_triangulation_decomposition_2.h>
-#include <CGAL/Surface_mesh.h>
 #include <CGAL/boost/graph/generators.h>
 #include <CGAL/connect_holes.h>
 #include <CGAL/convex_hull_3.h>
@@ -22,7 +21,6 @@
 static int Trim(Geometry* geometry, size_t count) {
   try {
     typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
-    typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
     size_t size = geometry->size();
 
     geometry->copyInputMeshesToOutputMeshes();

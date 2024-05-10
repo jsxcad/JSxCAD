@@ -144,7 +144,6 @@ static static int EachPoint(Geometry* geometry, emscripten::val emit_point) {
   if (status != STATUS_OK) {
     return status;
   }
-  std::cout << "QQ/EachPoint: size=" << points.size() << std::endl;
   for (const Point& point : points) {
     std::ostringstream o;
     o << point.x().exact() << " " << point.y().exact() << " "
@@ -469,8 +468,6 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygons", &FromPolygons,
-                       emscripten::allow_raw_pointers());
   emscripten::function("FromPolygonSoup", &wrapped::FromPolygonSoup,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
@@ -508,6 +505,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
+  emscripten::function("Pack", &Pack, emscripten::allow_raw_pointers());
   emscripten::function("Reconstruct", &Reconstruct,
                        emscripten::allow_raw_pointers());
   emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());

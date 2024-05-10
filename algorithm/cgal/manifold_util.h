@@ -2,10 +2,10 @@
 
 #ifdef JOT_MANIFOLD_ENABLED
 
-#include <stdexcept>
-
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+
+#include <stdexcept>
 
 #include "manifold.h"
 
@@ -50,7 +50,8 @@ void buildSurfaceMeshFromManifold(
   typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   typedef Surface_mesh::Vertex_index Vertex_index;
   if (surface_mesh.number_of_vertices() != 0) {
-    std::cout << "QQ/buildSurfaceMeshFromManifold: mesh is not empty" << std::endl;
+    std::cout << "QQ/buildSurfaceMeshFromManifold: mesh is not empty"
+              << std::endl;
   }
   manifold::Mesh mesh = manifold.GetMesh();
   for (std::size_t nth = 0; nth < mesh.vertPos.size(); nth++) {
@@ -61,22 +62,23 @@ void buildSurfaceMeshFromManifold(
       std::cout << "buildSurfaceMeshFromManifold: point index misaligned"
                 << " vertex_index=" << vertex_index << " nth=" << nth
                 << std::endl;
-      throw std::runtime_error("buildSurfaceMeshFromManifold: point index misaligned");
+      throw std::runtime_error(
+          "buildSurfaceMeshFromManifold: point index misaligned");
     }
   }
   for (std::size_t nth = 0; nth < mesh.triVerts.size(); nth++) {
     const glm::ivec3& t = mesh.triVerts[nth];
-    auto face_index = surface_mesh.add_face(Vertex_index(t[0]), Vertex_index(t[1]),
-                                     Vertex_index(t[2]));
+    auto face_index = surface_mesh.add_face(
+        Vertex_index(t[0]), Vertex_index(t[1]), Vertex_index(t[2]));
     if (face_index == Surface_mesh::null_face()) {
       std::cout << "buildSurfaceMeshFromManifold: add_face failed" << std::endl;
       throw std::runtime_error("buildSurfaceMeshFromManifold: add_face failed");
     }
     if (size_t(face_index) != nth) {
       std::cout << "buildSurfaceMeshFromManifold: face index misaligned"
-                << " face_index=" << face_index << " nth=" << nth
-                << std::endl;
-      throw std::runtime_error("buildSurfaceMeshFromManifold: face index misaligned");
+                << " face_index=" << face_index << " nth=" << nth << std::endl;
+      throw std::runtime_error(
+          "buildSurfaceMeshFromManifold: face index misaligned");
     }
   }
 }
