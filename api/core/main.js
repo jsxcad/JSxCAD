@@ -1,6 +1,6 @@
 import '@jsxcad/api-v1-tools';
 
-import * as mathApi from '@jsxcad/api-v1-math';
+// import * as mathApi from '@jsxcad/api-v1-math';
 import * as notesApi from './recordNotes.js';
 import * as shapeApi from '@jsxcad/api-shape';
 
@@ -20,7 +20,7 @@ export { importScript } from './importModule.js';
 
 const api = {
   _: undefined,
-  ...mathApi,
+  // ...mathApi,
   ...shapeApi,
   ...notesApi,
   JSON: {
@@ -29,7 +29,12 @@ const api = {
   },
   Math: {
     PI: Math.PI,
+    acos: Math.acos,
+    cos: Math.cos,
+    max: Math.max,
+    min: Math.min,
     pow: Math.pow,
+    sin: Math.sin,
     sqrt: Math.sqrt,
   },
   console: {

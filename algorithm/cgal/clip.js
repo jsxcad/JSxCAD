@@ -17,6 +17,6 @@ export const clip = (inputs, targetsLength, open = false, exact = false) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in clip`);
     }
   });

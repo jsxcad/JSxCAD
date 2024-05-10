@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { fromPolygons } from '@jsxcad/geometry';
+import { fromPolygonSoup } from '@jsxcad/geometry';
 
 export const Polyhedron = Shape.registerMethod3(
   'Polyhedron',
@@ -9,7 +9,7 @@ export const Polyhedron = Shape.registerMethod3(
     for (const coordinates of coordinateLists) {
       out.push({ points: coordinates });
     }
-    return fromPolygons(out);
+    return fromPolygonSoup(out);
   }
 );
 

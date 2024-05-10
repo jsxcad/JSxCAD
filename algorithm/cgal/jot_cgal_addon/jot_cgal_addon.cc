@@ -457,10 +457,12 @@ static Napi::Value ComputeNormal(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value ComputeOrientedBoundingBox(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 1);
+  assertArgCount(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  int status = ::ComputeOrientedBoundingBox(geometry);
+  bool do_segments = info[1].As<Napi::Boolean>().Value();
+  bool do_mesh = info[2].As<Napi::Boolean>().Value();
+  int status = ::ComputeOrientedBoundingBox(geometry, do_segments, do_mesh);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -685,10 +687,11 @@ static Napi::Value FaceEdges(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Fill(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 1);
+  assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  size_t status = ::Fill(geometry);
+  bool holes = info[1].As<Napi::Boolean>().Value();
+  size_t status = ::Fill(geometry, holes);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -710,15 +713,6 @@ static Napi::Value FromPolygonSoup(const Napi::CallbackInfo& info) {
   std::vector<int> strategies;
   fill_strategies(info[3].As<Napi::Array>(), strategies);
   size_t status = ::FromPolygonSoup(geometry, face_count, min_error_drop, strategies);
-  return Napi::Number::New(info.Env(), status);
-}
-
-static Napi::Value FromPolygons(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 2);
-  Napi::Object jsGeometry = info[0].As<Napi::Object>();
-  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  bool close = info[1].As<Napi::Boolean>().Value();
-  size_t status = ::FromPolygons(geometry, close);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -909,14 +903,11 @@ static Napi::Value GetTransform(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Grow(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 5);
+  assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   uint32_t count = info[1].As<Napi::Number>().Uint32Value();
-  bool x = info[2].As<Napi::Boolean>().Value();
-  bool y = info[3].As<Napi::Boolean>().Value();
-  bool z = info[4].As<Napi::Boolean>().Value();
-  size_t status = ::Grow(geometry, count, x, y, z);
+  size_t status = ::Grow(geometry, count);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -1071,6 +1062,14 @@ static Napi::Value Outline(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
+static Napi::Value Pack(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 1);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  size_t status = ::Pack(geometry);
+  return Napi::Number::New(info.Env(), status);
+}
+
 static Napi::Value Repair(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1221,6 +1220,15 @@ static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
   return info.Env().Undefined();
 }
 
+static Napi::Value Trim(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 2);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  uint32_t count = info[1].As<Napi::Number>().Uint32Value();
+  size_t status = ::Trim(geometry, count);
+  return Napi::Number::New(info.Env(), status);
+}
+
 static Napi::Value Twist(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1248,7 +1256,7 @@ static Napi::Value Unfold(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Validate(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 3);
+  assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   std::vector<int> strategies;
@@ -1258,12 +1266,14 @@ static Napi::Value Validate(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Wrap(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 3);
+  assertArgCount(info, 5);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   double alpha = info[1].As<Napi::Number>().DoubleValue();
   double offset = info[2].As<Napi::Number>().DoubleValue();
-  int status = ::Wrap(geometry, alpha, offset);
+  uint32_t face_count = info[3].As<Napi::Number>().Uint32Value();
+  double min_error_drop = info[4].As<Napi::Number>().DoubleValue();
+  int status = ::Wrap(geometry, alpha, offset, face_count, min_error_drop);
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -1297,7 +1307,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Surface_mesh"), Surface_mesh::GetClass(env));
 
   // Functions
-  exports.Set(Napi::String::New(env, "Approximate"), Napi::Function::New(env, ComposeTransforms));
+  exports.Set(Napi::String::New(env, "Approximate"), Napi::Function::New(env, Approximate));
   exports.Set(Napi::String::New(env, "Bend"), Napi::Function::New(env, Bend));
   exports.Set(Napi::String::New(env, "Cast"), Napi::Function::New(env, Cast));
   exports.Set(Napi::String::New(env, "Clip"), Napi::Function::New(env, Clip));
@@ -1329,7 +1339,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Fill"), Napi::Function::New(env, Fill));
   exports.Set(Napi::String::New(env, "Fix"), Napi::Function::New(env, Fix));
   exports.Set(Napi::String::New(env, "FromPolygonSoup"), Napi::Function::New(env, FromPolygonSoup));
-  exports.Set(Napi::String::New(env, "FromPolygons"), Napi::Function::New(env, FromPolygons));
   exports.Set(Napi::String::New(env, "Fuse"), Napi::Function::New(env, Fuse));
   exports.Set(Napi::String::New(env, "GenerateEnvelope"), Napi::Function::New(env, GenerateEnvelope));
   exports.Set(Napi::String::New(env, "GetPolygonsWithHoles"), Napi::Function::New(env, GetPolygonsWithHoles));
@@ -1353,6 +1362,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "MinimizeOverhang"), Napi::Function::New(env, MinimizeOverhang));
   exports.Set(Napi::String::New(env, "Offset"), Napi::Function::New(env, Offset));
   exports.Set(Napi::String::New(env, "Outline"), Napi::Function::New(env, Outline));
+  exports.Set(Napi::String::New(env, "Pack"), Napi::Function::New(env, Pack));
   exports.Set(Napi::String::New(env, "Reconstruct"), Napi::Function::New(env, Reconstruct));
   exports.Set(Napi::String::New(env, "Refine"), Napi::Function::New(env, Refine));
   exports.Set(Napi::String::New(env, "Remesh"), Napi::Function::New(env, Remesh));
@@ -1367,6 +1377,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Simplify"), Napi::Function::New(env, Simplify));
   exports.Set(Napi::String::New(env, "Smooth"), Napi::Function::New(env, Smooth));
   exports.Set(Napi::String::New(env, "TranslateTransform"), Napi::Function::New(env, TranslateTransform));
+  exports.Set(Napi::String::New(env, "Trim"), Napi::Function::New(env, Trim));
   exports.Set(Napi::String::New(env, "Twist"), Napi::Function::New(env, Twist));
   exports.Set(Napi::String::New(env, "Unfold"), Napi::Function::New(env, Unfold));
   exports.Set(Napi::String::New(env, "Validate"), Napi::Function::New(env, Validate));

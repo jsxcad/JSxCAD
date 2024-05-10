@@ -29,7 +29,7 @@ export const fromPolygons = (jsPolygons, close = false, tolerance = 0.001) => {
           jsPolygons.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in fromPolygons`);
     }
   });
 };

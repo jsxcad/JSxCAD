@@ -1,5 +1,5 @@
 import Shape from './Shape.js';
-import { fromPolygons as op } from '@jsxcad/geometry';
+import { fromPolygonSoup as op } from '@jsxcad/geometry';
 
 export const Polygon = Shape.registerMethod3(
   ['Face', 'Polygon'],

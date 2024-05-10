@@ -12,7 +12,6 @@ export {
 } from './transform.js';
 
 export { approximate } from './approximate.js';
-// export { arrangeSegments, arrangeSegmentsIntoTriangles, } from './arrangeSegments.js';
 export { bend } from './bend.js';
 export {
   STATUS_OK,
@@ -49,7 +48,7 @@ export { fair } from './fair.js';
 export { fill } from './fill.js';
 export { fitPlaneToPoints } from './fitPlaneToPoints.js';
 export { fix } from './fix.js';
-export { fromPolygons } from './fromPolygons.js';
+// export { fromPolygons } from './fromPolygons.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
 export { fuse } from './fuse.js';
 export { generateEnvelope } from './generateEnvelope.js';
@@ -64,8 +63,6 @@ export { loft } from './loft.js';
 export { offset } from './offset.js';
 export { outline } from './outline.js';
 export { makeAbsolute } from './makeAbsolute.js';
-// export { makeOcctBox } from './occt.js';
-// export { makeOcctSphere } from './occt.js';
 export { makeUnitSphere } from './makeUnitSphere.js';
 export { minimizeOverhang } from './minimizeOverhang.js';
 export { pushSurfaceMesh } from './pushSurfaceMesh.js';
@@ -82,9 +79,9 @@ export { repair } from './repair.js';
 export { shell } from './shell.js';
 export { simplify } from './simplify.js';
 export { smooth } from './smooth.js';
+export { trim } from './trim.js';
 export { twist } from './twist.js';
 export { unfold } from './unfold.js';
 export { validate } from './validate.js';
-// export { withAabbTreeQuery } from './aabbTreeQuery.js';
 export { withIsExteriorPoint } from './withIsExteriorPoint.js';
 export { wrap } from './wrap.js';

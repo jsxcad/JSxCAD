@@ -16,6 +16,6 @@ export const bend = (inputs, targetsLength, edgeLength = 1) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in bend`);
     }
   });

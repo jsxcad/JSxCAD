@@ -1,4 +1,4 @@
-import { fromPolygons } from './fromPolygons.js';
+import { fromPolygonSoup } from './fromPolygonSoup.js';
 import { linearize } from './tagged/linearize.js';
 import { measureBoundingBox } from './measureBoundingBox.js';
 import { withIsExteriorPoint } from '@jsxcad/algorithm-cgal';
@@ -70,7 +70,7 @@ export const toVoxelsFromGeometry = (geometry, resolution = 1) => {
       }
     }
   );
-  return fromPolygons(polygons);
+  return fromPolygonSoup(polygons);
 };
 
 export const toVoxelsFromCoordinates = (coordinates) => {
@@ -124,5 +124,5 @@ export const toVoxelsFromCoordinates = (coordinates) => {
       }
     }
   }
-  return fromPolygons(polygons);
+  return fromPolygonSoup(polygons);
 };

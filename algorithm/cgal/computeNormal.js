@@ -9,11 +9,11 @@ export const computeNormal = (inputs) =>
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness(
-          'Zero thickness produced by compute normal'
+          'Zero thickness produced by computeNormal'
         );
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in computeNormal`);
     }
   });

@@ -2,7 +2,7 @@ import { STATUS_EMPTY, STATUS_OK, STATUS_ZERO_THICKNESS } from './status.js';
 import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 import { ErrorZeroThickness } from './error.js';
 
-export const computeOrientedBoundingBox = (inputs) => {
+export const computeOrientedBoundingBox = (inputs, segments, mesh) => {
   if (inputs.length === 0) {
     return;
   }
@@ -10,7 +10,7 @@ export const computeOrientedBoundingBox = (inputs) => {
     'computeOrientedBoundingBox',
     inputs,
     (cgalGeometry, g) => {
-      const status = g.ComputeOrientedBoundingBox(cgalGeometry);
+      const status = g.ComputeOrientedBoundingBox(cgalGeometry, segments, mesh);
       // This adds segments with twelve entries: length, depth, height, ...
       switch (status) {
         case STATUS_ZERO_THICKNESS:
@@ -21,13 +21,15 @@ export const computeOrientedBoundingBox = (inputs) => {
           return fromCgalGeometry(
             cgalGeometry,
             inputs,
-            inputs.length + 1,
+            cgalGeometry.getSize(),
             inputs.length
           );
         case STATUS_EMPTY:
           return;
         default:
-          throw new Error(`Unexpected status ${status}`);
+          throw new Error(
+            `Unexpected status ${status} in computeOrientedBoundingBox`
+          );
       }
     }
   );

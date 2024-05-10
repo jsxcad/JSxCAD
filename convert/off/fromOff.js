@@ -1,4 +1,4 @@
-import { fromPolygons } from '@jsxcad/geometry';
+import { fromPolygonSoup } from '@jsxcad/geometry';
 
 // First line (optional): the letters OFF to mark the file type.
 // Second line: the number of vertices, number of faces, and number of edges, in order (the latter can be ignored by writing 0 instead).
@@ -34,7 +34,7 @@ export const fromOffSync = (data) => {
     const polygon = vertices.map((nthVertex) => points[nthVertex]);
     polygons.push({ points: polygon });
   }
-  return fromPolygons(polygons);
+  return fromPolygonSoup(polygons);
 };
 
 export const fromOff = async (data) => fromOffSync(data);

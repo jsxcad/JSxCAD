@@ -21,7 +21,7 @@ export const eachTriangle = (inputs, emitTriangle) => {
       case STATUS_OK:
         return;
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in eachTriangles`);
     }
   });
 };

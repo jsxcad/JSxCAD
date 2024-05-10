@@ -2,60 +2,74 @@
 ### grow()
 Parameter|Default|Type
 ---|---|---
-amount|0|Number of mm to grow by.
-axes|'xyz'|String specifiying axis constraints.
-...selections||Shapes limiting the growth region.
+tool||shape to grow by
 
-Expands a solid by amount mm along the axes specified (any combination of 'xyz').
-
-Amount may be negative.
-
-_Note: May produce self-intersection._
+Generates a shape around the input by growing it with a minkowski sum with the tool.
 
 ![Image](grow.md.$2.png)
 
-The ghost is grown by 5 mm in all directions.
+The box is grown by 5 mm in all directions.
 
 ```JavaScript
 Box(5, 5, 5)
-  .and(grow(1).ghost())
+  .and(grow(Orb(5)).ghost())
   .view()
-  .note('The ghost is grown by 5 mm in all directions.');
+  .note('The box is grown by 5 mm in all directions.');
 ```
 
 ![Image](grow.md.$3.png)
 
-The ghost is grown by 5 mm in only x and z directions.
+The box is rounded out by 5 mm in Y.
 
 ```JavaScript
 Box(5, 5, 5)
-  .and(grow(1, 'xz').ghost())
+  .and(grow(ArcY(5)).ghost())
   .view()
-  .note('The ghost is grown by 5 mm in only x and z directions.');
+  .note('The box is rounded out by 5 mm in Y.');
 ```
 
 ![Image](grow.md.$4.png)
 
-Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.
+Box(5, 5, 20).and(grow(Box(4)).ghost()) grows the box 4 mm horizontally with sharp corners.
 
 ```JavaScript
-Box(5, 5, 5)
-  .op(ghost(), grow(-1))
+Box(5, 5, 20)
+  .and(grow(Box(4)).ghost())
   .view()
   .note(
-    'Box(5, 5, 5).op(ghost(), grow(-1)) shrinks the box by 1 mm, leaving a ghost for reference.'
+    "Box(5, 5, 20).and(grow(Box(4)).ghost()) grows the box 4 mm horizontally with sharp corners."
   );
 ```
 
 ![Image](grow.md.$5.png)
 
-Box(5, 5, 20).grow(4, 'xy', Box(5, 5, 5)) grows the middle of the pillar outward by 5 mm.
+Arc(20).grow(Orb(1)) thickens a disc
 
 ```JavaScript
-Box(5, 5, 20)
-  .grow(4, 'xy', Box(5, 5, 5))
+Arc(20)
+  .grow(Orb(1))
   .view()
-  .note(
-    "Box(5, 5, 20).grow(4, 'xy', Box(5, 5, 5)) grows the middle of the pillar outward by 5 mm."
-  );
+  .note("Arc(20).grow(Orb(1)) thickens a disc");
+```
+
+Arc(20).points().grow(Orb(1)) grows the points of an circle into spheres
+
+```JavaScript
+Arc(20)
+  .points()
+  .grow(Orb(1))
+  .view()
+  .note("Arc(20).points().grow(Orb(1)) grows the points of an circle into spheres");
+```
+
+![Image](grow.md.$7.png)
+
+Arc(20).outline().grow(Orb(1)) grows the rim of a circle into a tube
+
+```JavaScript
+Arc(20)
+  .outline()
+  .grow(Orb(1))
+  .view()
+  .note("Arc(20).outline().grow(Orb(1)) grows the rim of a circle into a tube");
 ```

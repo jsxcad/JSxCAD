@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Surface_mesh_approximation/approximate_triangle_mesh.h>
 
 #include "Geometry.h"
@@ -16,7 +17,9 @@ static int Approximate(Geometry* geometry, size_t face_count,
       if (!geometry->is_mesh(nth)) {
         continue;
       }
-      approximate_mesh(geometry->mesh(nth), face_count, min_error_drop);
+      if (!approximate_mesh(geometry->mesh(nth), face_count, min_error_drop)) {
+        return STATUS_INVALID_INPUT;
+      }
     }
 
     geometry->transformToLocalFrame();

@@ -17,6 +17,6 @@ export const link = (inputs, close, reverse) =>
           inputs.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in link`);
     }
   });

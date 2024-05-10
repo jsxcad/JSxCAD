@@ -54,7 +54,7 @@ static int EagerTransform(Geometry* geometry, int count) {
 
     return STATUS_OK;
   } catch (const std::exception& e) {
-    std::cout << "QQ/EagerTransform failed: " << e.what() << std::endl;
+    std::cout << "EagerTransform: " << e.what() << std::endl;
     throw;
   }
 }

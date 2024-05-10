@@ -29,6 +29,6 @@ export const offset = (
           inputs.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in offset`);
     }
   });

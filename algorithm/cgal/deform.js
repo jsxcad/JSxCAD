@@ -25,7 +25,7 @@ export const deform = (
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, 1);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in deform`);
     }
   });
 };

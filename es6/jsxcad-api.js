@@ -1,5 +1,4 @@
 import './jsxcad-api-v1-tools.js';
-import * as mathApi from './jsxcad-api-v1-math.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
 import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
@@ -58,7 +57,7 @@ const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
 const emitError = (exception) => {
-  const error = { text: '' + exception, level: 'serious' };
+  const error = { text: '' + exception.stack, level: 'serious' };
   emit({ hash: computeHash(error), error });
 };
 
@@ -443,7 +442,7 @@ const control = (label, defaultValue, type, options) => {
 
 const api = {
   _: undefined,
-  ...mathApi,
+  // ...mathApi,
   ...shapeApi,
   ...notesApi,
   JSON: {
@@ -452,7 +451,12 @@ const api = {
   },
   Math: {
     PI: Math.PI,
+    acos: Math.acos,
+    cos: Math.cos,
+    max: Math.max,
+    min: Math.min,
     pow: Math.pow,
+    sin: Math.sin,
     sqrt: Math.sqrt,
   },
   console: {

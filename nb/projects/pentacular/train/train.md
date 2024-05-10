@@ -249,7 +249,7 @@ const hook2 = Link(
   Point(-1.5 + 1 + 0.5, 5),
   Point(-1.5 + 1 - 0.5 + 0.5, 4 + 0.5)
 )
-  .stroke(1)
+  .grow(Arc(1))
   .ez([3])
   .and(peg.cut(YZ(0)).rz(1 / 4))
   .fuse()
@@ -269,7 +269,7 @@ const hook2 = Link(
 
 ```JavaScript
 const hook = Link(Point(-7 + 4, 1), Point(-10 + 4, -2), Point(0))
-  .stroke(0.4)
+  .grow(Arc(0.4))
   .ez([3])
   .align('x<')
   .x(1 / 8)
@@ -402,7 +402,6 @@ const car26x11 = Car({ length: 26, wheelBase: 11 });
 ```JavaScript
 const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
   .y(0.5)
-  //.maskedBy(grow(0.5))
   .and(
     rz(1 / 2)
       .y(8)
@@ -419,7 +418,7 @@ const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
       'bar',
       And(Arc(2), Arc(2).y(7), LineY([6.5]))
         .y(0.5)
-        .stroke(3)
+        .grow(Arc(3))
         .ez([3.5, 5.5])
     )
   )
@@ -427,38 +426,6 @@ const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
   .stl('hook4', getNot('bar'))
   .stl('bar4', get('bar'))
   .v(4);
-```
-
-![Image](train.md.container.png)
-
-![Image](train.md.container_container26.png)
-
-[container26.stl](train.container26.stl)
-
-```JavaScript
-const container = As('container', Box(26 - 2.2, 10.5 - 2.2, [5, 18]))
-  .join(Box(26 - 2.2, 10.5 - 2.2).Loft(z(18), offset(1).z(18.5)))
-  .join(
-    Arc(0.5)
-      .ez([5, 18.5])
-      .x((26 - 2.2) / 2, (26 - 2.2) / -2)
-      .y({ from: (10.5 - 2.2 + 0.1) / -2, to: (10.5 - 2.2) / 2, by: 4.1 })
-  )
-  .cut(
-    Arc(2, { sides: 6 })
-      .rz(1 / 12)
-      .ez([6, 17])
-      .clip(RX(55 / 360).z(17))
-      .y((10.5 - 2.2) / 2)
-      .and(sy(-1))
-      .x({ from: (26 - 2.2) / -2 + 2, to: (26 - 2.2) / 2 - 1, by: 3.3 }),
-    Box(26 - 3, 10.5 - 3, [17.7, 18])
-  )
-  .view()
-
-  .fitTo(car26x11)
-  .fitTo(get('container').grow(0.1).z(13.25).gap())
-  .stl('container26', get('container'));
 ```
 
 ![Image](train.md.c200_c200.png)

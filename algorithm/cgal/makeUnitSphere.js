@@ -17,6 +17,6 @@ export const makeUnitSphere = (angularBound, radiusBound, distanceBound) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, [], cgalGeometry.getSize())[0];
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in makeOrb`);
     }
   });

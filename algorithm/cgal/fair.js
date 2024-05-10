@@ -26,6 +26,6 @@ export const fair = (
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, count);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in fair`);
     }
   });

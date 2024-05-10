@@ -22,7 +22,6 @@ static int FromPolygonSoup(Geometry* geometry, size_t face_count,
     geometry->setIdentityTransform(target);
 
     {
-      std::cout << "QQ/FromPolygonSoup/Load" << std::endl;
       std::vector<EK::Point_3> points;
       std::vector<Polygon> polygons;
       for (size_t nth = 0; nth < size; nth++) {
@@ -34,30 +33,29 @@ static int FromPolygonSoup(Geometry* geometry, size_t face_count,
         polygons.push_back(std::move(polygon));
       }
 
-      std::cout << "QQ/FromPolygonSoup/Repair" << std::endl;
       CGAL::Polygon_mesh_processing::repair_polygon_soup(points, polygons);
-
-      std::cout << "QQ/FromPolygonSoup/Orient" << std::endl;
       CGAL::Polygon_mesh_processing::orient_polygon_soup(points, polygons);
-
-      std::cout << "QQ/FromPolygonSoup/Mesh" << std::endl;
       CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(
           points, polygons, mesh);
+
+      assert(CGAL::Polygon_mesh_processing::triangulate_faces(mesh) == true);
+
+      if (CGAL::is_closed(mesh)) {
+        CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(mesh);
+      }
     }
 
     if (face_count > 0 || min_error_drop > 0) {
       // Simplify the non-self-intersecting mesh.
-      std::cout << "QQ/FromPolygonSoup/Simplify" << std::endl;
       // Enable simplification to reduce polygon count.
       approximate_mesh(mesh, face_count, min_error_drop);
     }
 
     repair_self_intersections<EK>(mesh, strategies);
 
-    std::cout << "QQ/FromPolygonSoup/Demesh" << std::endl;
     demesh(mesh);
   } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
+    std::cout << "FromPolygonSoup: " << e.what() << std::endl;
     throw;
   }
   return STATUS_OK;

@@ -35,14 +35,12 @@ export const validate = (inputs, strategies = []) => {
     strategyCodes.push(0, 1, 2, 3);
   }
   return withCgalGeometry('validate', inputs, (cgalGeometry, g) => {
-    const status = g.Validate(cgalGeometry, () =>
-      strategyCodes.length >= 1 ? strategyCodes.shift() : -1
-    );
+    const status = g.Validate(cgalGeometry, strategyCodes);
     switch (status) {
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in validate`);
     }
   });
 };

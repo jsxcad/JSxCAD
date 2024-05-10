@@ -1,7 +1,7 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, read, logInfo } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import * as g$1 from './jsxcad-geometry.js';
-import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygons, isSeqSpec, seq as seq$1, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, As as As$1, as as as$1, AsPart as AsPart$1, asPart as asPart$1, And as And$1, at as at$1, base as base$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, samplePointCloud, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, exterior as exterior$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fair as fair$1, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, Gauge, gauge as gauge$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, hold as hold$1, separate as separate$1, ConvexHull, convexHull, inItem, inset as inset$1, involute as involute$1, Iron as Iron$1, iron as iron$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, computeOrientedBoundingBox, maskedBy as maskedBy$1, masking as masking$1, hasMaterial, minimizeOverhang as minimizeOverhang$1, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, hasShowOverlay, pack as pack$1, Page as Page$1, page as page$1, toPoints, ref as ref$1, Ref as Ref$1, repair as repair$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, Route as Route$1, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, measureBoundingBox, ComputeSkeleton, computeSkeleton, taggedSketch, smooth as smooth$1, getLeafs, Stroke as Stroke$1, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, turnXs, turnYs, turnZs, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, validate as validate$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, Label as Label$1, computeReliefFromImage, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, hash, Triangle as Triangle$1 } from './jsxcad-geometry.js';
+import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygonSoup, isSeqSpec, seq as seq$1, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, As as As$1, as as as$1, AsPart as AsPart$1, asPart as asPart$1, And as And$1, at as at$1, base as base$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, samplePointCloud, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, exterior as exterior$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fair as fair$1, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, Gauge, gauge as gauge$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, hold as hold$1, separate as separate$1, ConvexHull, convexHull, inItem, inset as inset$1, involute as involute$1, Iron as Iron$1, iron as iron$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, computeOrientedBoundingBox, maskedBy as maskedBy$1, masking as masking$1, hasMaterial, minimizeOverhang as minimizeOverhang$1, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, obb as obb$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, hasShowOverlay, pack as pack$1, Page as Page$1, page as page$1, toPoints, ref as ref$1, Ref as Ref$1, repair as repair$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, Route as Route$1, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, measureBoundingBox, ComputeSkeleton, computeSkeleton, taggedSketch, smooth as smooth$1, getLeafs, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, trim as trim$1, turnXs, turnYs, turnZs, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, validate as validate$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, Label as Label$1, computeReliefFromImage, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, hash, Triangle as Triangle$1 } from './jsxcad-geometry.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
@@ -10,7 +10,6 @@ import { toPdf } from './jsxcad-convert-pdf.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
-import { zag } from './jsxcad-api-v1-math.js';
 import { fromLDraw, fromLDrawPart } from './jsxcad-convert-ldraw.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
@@ -405,33 +404,6 @@ const registerMethod = (names, op) => {
   return chainable(op);
 };
 
-/*
-const registerMethod2 = (names, signature, op) => {
-  const method =
-    (...args) =>
-    async (shape) => {
-      try {
-        // console.log(`QQ/method2: ${names} shape=${shape}`);
-        const parameters = await Shape.destructure2(
-          names,
-          shape,
-          args,
-          ...signature
-        );
-        return op(...parameters);
-      } catch (error) {
-        console.log(
-          `Method ${names}: error "${'' + error}" args=${JSON.stringify(args)}`
-        );
-        throw error;
-      }
-    };
-  return registerMethod(names, method);
-};
-*/
-
-// Shape.registerMethod2 = registerMethod2;
-
 Shape.fromGeometry = (geometry) => {
   if (geometry === undefined) {
     return new Shape(taggedGroup({}));
@@ -487,8 +459,11 @@ const registerMethod3 = (
             )}`
           );
         }
+        // console.log(`QQ/method3/preOp: ${names} shape=${shape} args=${args}`);
         const processedParameters = await preOp(...parameters);
+        // console.log(`QQ/method3/op: ${names} shape=${shape} args=${args}`);
         const r1 = await op(...processedParameters);
+        // console.log(`QQ/method3/postOp: ${names} shape=${shape} args=${args}`);
         const r2 = await postOp(r1, parameters);
         // console.log(`QQ/method3/done: ${names}`);
         return r2;
@@ -547,7 +522,7 @@ Shape.fromOpenPath = (path) => {
 Shape.fromSegments = (segments) => fromGeometry(taggedSegments({}, segments));
 Shape.fromPoint = (point) => fromGeometry(taggedPoints({}, [point]));
 Shape.fromPoints = (points) => fromGeometry(taggedPoints({}, points));
-Shape.fromPolygons = (polygons) => fromGeometry(fromPolygons(polygons));
+Shape.fromPolygons = (polygons) => fromGeometry(fromPolygonSoup(polygons));
 
 Shape.registerMethod = registerMethod;
 
@@ -1176,6 +1151,73 @@ const abstract = Shape.registerMethod3(
   abstract$1
 );
 
+// These should probably be polymorphic and handle vector operations, etc.
+
+const acos = Shape.registerMethod3(
+  'acos',
+  ['number'],
+  (number) => Math.acos(number) / (Math.PI * 2),
+  (value) => value
+);
+
+const cos = Shape.registerMethod3(
+  'cos',
+  ['number'],
+  (number) => Math.cos(number * Math.PI * 2),
+  (value) => value
+);
+
+const lerp = Shape.registerMethod3(
+  'lerp',
+  ['number', 'number', 'number'],
+  (min, max, position) => position * (max - min) + min,
+  (value) => value
+);
+
+const max = Shape.registerMethod3(
+  'max',
+  ['numbers'],
+  (numbers) => Math.max(...numbers),
+  (value) => value
+);
+
+const min = Shape.registerMethod3(
+  'min',
+  ['numbers'],
+  (numbers) => Math.min(...numbers),
+  (value) => value
+);
+
+// e.g., a.x(plus(diameter(), -2))
+const plus = Shape.registerMethod3(
+  'plus',
+  ['numbers'],
+  (numbers) => numbers.reduce((a, b) => a + b, 0),
+  (value) => value
+);
+
+// e.g., a.x(times(diameter(), 1/2))
+const times = Shape.registerMethod3(
+  'times',
+  ['numbers'],
+  (numbers) => numbers.reduce((a, b) => a * b, 1),
+  (value) => value
+);
+
+const sin = Shape.registerMethod3(
+  'sin',
+  ['number'],
+  (number) => Math.sin(number * Math.PI * 2),
+  (value) => value
+);
+
+const sqrt = Shape.registerMethod3(
+  'sqrt',
+  ['number'],
+  (number) => Math.sqrt(number),
+  (value) => value
+);
+
 const approximate = Shape.registerMethod3(
   'approximate',
   ['inputGeometry', 'number', 'number'],
@@ -1278,7 +1320,7 @@ const at = Shape.registerMethod3(
 const base = Shape.registerMethod3(['base'], ['inputGeometry'], base$1);
 
 const bb = Shape.registerMethod3(
-  'bb',
+  ['bb', 'boundingBox'],
   ['inputGeometry', 'number', 'number', 'number'],
   bb$1
 );
@@ -1997,7 +2039,11 @@ const fair = Shape.registerMethod3(
     })
 );
 
-const fill = Shape.registerMethod3(['fill', 'f'], ['inputGeometry'], fill$1);
+const fill = Shape.registerMethod3(
+  ['fill', 'f'],
+  ['inputGeometry', 'modes:holes'],
+  fill$1
+);
 
 const fit = Shape.registerMethod3(
   'fit',
@@ -2159,9 +2205,11 @@ const getNot = Shape.registerMethod3(
 
 const gn = getNot;
 
+const Grow = Shape.registerMethod3('Grow', ['geometry', 'geometry'], grow$1);
+
 const grow = Shape.registerMethod3(
   'grow',
-  ['inputGeometry', 'number', 'string', 'geometries'],
+  ['inputGeometry', 'geometry'],
   grow$1
 );
 
@@ -2426,6 +2474,12 @@ const nth = Shape.registerMethod3(
 
 const n = nth;
 
+const obb = Shape.registerMethod3(
+  ['obb', 'orientedBoundingBox'],
+  ['inputGeometry'],
+  obb$1
+);
+
 const offset = Shape.registerMethod3(
   'offset',
   ['inputGeometry', 'number', 'options'],
@@ -2526,30 +2580,206 @@ const pdf = Shape.registerMethod3(
   }
 );
 
-// These should probably be polymorphic and handle vector operations, etc.
-
-// e.g., a.x(times(diameter(), 1/2))
-const times = Shape.registerMethod3(
-  'times',
-  ['numbers'],
-  (numbers) => numbers.reduce((a, b) => a * b, 1),
-  (value) => value
-);
-
-// e.g., a.x(plus(diameter(), -2))
-const plus = Shape.registerMethod3(
-  'plus',
-  ['numbers'],
-  (numbers) => numbers.reduce((a, b) => a + b, 0),
-  (value) => value
-);
-
 const points = Shape.registerMethod3('points', ['inputGeometry'], toPoints);
 
 const put = Shape.registerMethod3(
   'put',
   ['inputGeometry', 'geometries'],
   (geometry, geometries) => on$1(geometry, geometry, () => Group$1(geometries))
+);
+
+var Prando = /** @class */ (function () {
+    // ================================================================================================================
+    // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
+    /**
+     * Generate a new Prando pseudo-random number generator.
+     *
+     * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
+     */
+    function Prando(seed) {
+        this._value = NaN;
+        if (typeof (seed) === "string") {
+            // String seed
+            this._seed = this.hashCode(seed);
+        }
+        else if (typeof (seed) === "number") {
+            // Numeric seed
+            this._seed = this.getSafeSeed(seed);
+        }
+        else {
+            // Pseudo-random seed
+            this._seed = this.getSafeSeed(Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random()));
+        }
+        this.reset();
+    }
+    // ================================================================================================================
+    // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
+    /**
+     * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
+     *
+     * @param min - The minimum number that can be randomly generated.
+     * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
+     * @return The generated pseudo-random number.
+     */
+    Prando.prototype.next = function (min, pseudoMax) {
+        if (min === void 0) { min = 0; }
+        if (pseudoMax === void 0) { pseudoMax = 1; }
+        this.recalculate();
+        return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
+    };
+    /**
+     * Generates a pseudo-random integer number in a range (inclusive).
+     *
+     * @param min - The minimum number that can be randomly generated.
+     * @param max - The maximum number that can be randomly generated.
+     * @return The generated pseudo-random number.
+     */
+    Prando.prototype.nextInt = function (min, max) {
+        if (min === void 0) { min = 10; }
+        if (max === void 0) { max = 100; }
+        this.recalculate();
+        return Math.floor(this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1));
+    };
+    /**
+     * Generates a pseudo-random string sequence of a particular length from a specific character range.
+     *
+     * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
+     * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
+     * pre-existing ids, or employ a robust GUID/UUID generator.
+     *
+     * @param length - Length of the strting to be generated.
+     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+     * @return The generated string sequence.
+     */
+    Prando.prototype.nextString = function (length, chars) {
+        if (length === void 0) { length = 16; }
+        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
+        var str = "";
+        while (str.length < length) {
+            str += this.nextChar(chars);
+        }
+        return str;
+    };
+    /**
+     * Generates a pseudo-random string of 1 character specific character range.
+     *
+     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+     * @return The generated character.
+     */
+    Prando.prototype.nextChar = function (chars) {
+        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
+        this.recalculate();
+        return chars.substr(this.nextInt(0, chars.length - 1), 1);
+    };
+    /**
+     * Picks a pseudo-random item from an array. The array is left unmodified.
+     *
+     * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
+     * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
+     * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
+     * apply a *shuffle* transformation to the array instead, then read it linearly.
+     *
+     * @param array - Array of any type containing one or more candidates for random picking.
+     * @return An item from the array.
+     */
+    Prando.prototype.nextArrayItem = function (array) {
+        this.recalculate();
+        return array[this.nextInt(0, array.length - 1)];
+    };
+    /**
+     * Generates a pseudo-random boolean.
+     *
+     * @return A value of true or false.
+     */
+    Prando.prototype.nextBoolean = function () {
+        this.recalculate();
+        return this._value > 0.5;
+    };
+    /**
+     * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
+     * calling next() a specified number of times, but faster since it doesn't need to map the
+     * new random numbers to a range and return it.
+     *
+     * @param iterations - The number of items to skip ahead.
+     */
+    Prando.prototype.skip = function (iterations) {
+        if (iterations === void 0) { iterations = 1; }
+        while (iterations-- > 0) {
+            this.recalculate();
+        }
+    };
+    /**
+     * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
+     * will then produce the same sequence of numbers it had produced before. This is equivalent to
+     * creating a new Prando instance with the same seed as another Prando instance.
+     *
+     * Example:
+     * let rng = new Prando(12345678);
+     * console.log(rng.next()); // 0.6177754114889017
+     * console.log(rng.next()); // 0.5784605181725837
+     * rng.reset();
+     * console.log(rng.next()); // 0.6177754114889017 again
+     * console.log(rng.next()); // 0.5784605181725837 again
+     */
+    Prando.prototype.reset = function () {
+        this._value = this._seed;
+    };
+    // ================================================================================================================
+    // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
+    Prando.prototype.recalculate = function () {
+        this._value = this.xorshift(this._value);
+    };
+    Prando.prototype.xorshift = function (value) {
+        // Xorshift*32
+        // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
+        value ^= value << 13;
+        value ^= value >> 17;
+        value ^= value << 5;
+        return value;
+    };
+    Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
+        return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
+    };
+    Prando.prototype.hashCode = function (str) {
+        var hash = 0;
+        if (str) {
+            var l = str.length;
+            for (var i = 0; i < l; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+                hash = this.xorshift(hash);
+            }
+        }
+        return this.getSafeSeed(hash);
+    };
+    Prando.prototype.getSafeSeed = function (seed) {
+        if (seed === 0)
+            return 1;
+        return seed;
+    };
+    Prando.MIN = -2147483648; // Int32 min
+    Prando.MAX = 2147483647; // Int32 max
+    return Prando;
+}());
+
+const random = Shape.registerMethod3(
+  'random',
+  ['inputGeometry', 'function', 'number', 'number', 'number'],
+  (geometry) => geometry,
+  async (
+    geometry,
+    [_, op = () => (s) => s, count = 1, offset = 0, seed = 0xffff]
+  ) => {
+    const input = Shape.fromGeometry(geometry);
+    const values = [];
+    const r = new Prando(seed);
+    r.skip(offset * count);
+    for (let nth = 0; nth < count; nth++) {
+      values.push(r.next());
+    }
+    const result = await op(...values)(input);
+    return result;
+  }
 );
 
 const ref = Shape.registerMethod3(
@@ -3116,20 +3346,6 @@ const stl = Shape.registerMethod3(
   }
 );
 
-const Stroke = Shape.registerMethod3(
-  'Stroke',
-  ['geometries', 'number', 'options'],
-  (geometries, implicitWidth = 1, { width = implicitWidth } = {}) =>
-    Stroke$1(geometries, width)
-);
-
-const stroke = Shape.registerMethod3(
-  'stroke',
-  ['inputGeometry', 'geometries', 'number', 'options'],
-  (geometry, geometries, implicitWidth = 1, { width = implicitWidth } = {}) =>
-    Stroke$1([geometry, ...geometries], width)
-);
-
 const LoadSvg = Shape.registerMethod3(
   'LoadSvg',
   ['string', 'options'],
@@ -3299,6 +3515,14 @@ const transform = Shape.registerMethod3(
   transform$1
 );
 
+Shape.registerMethod3('Trim', ['geometry', 'geometry'], trim$1);
+
+const trim = Shape.registerMethod3(
+  'trim',
+  ['inputGeometry', 'geometry'],
+  trim$1
+);
+
 const tx = Shape.registerMethod3(
   ['turnX', 'tx'],
   ['inputGeometry', 'numbers'],
@@ -3364,13 +3588,13 @@ const Voxels = Shape.registerMethod3(
 
 const Wrap = Shape.registerMethod3(
   'Wrap',
-  ['geometries', 'number', 'number'],
+  ['geometries', 'number', 'number', 'number', 'number'],
   Wrap$1
 );
 
 const wrap = Shape.registerMethod3(
   'wrap',
-  ['inputGeometry', 'geometries', 'number', 'number'],
+  ['inputGeometry', 'geometries', 'number', 'number', 'number', 'number'],
   wrap$1
 );
 
@@ -3409,6 +3633,18 @@ const z = Shape.registerMethod3(
     return Group$1(moved);
   }
 );
+
+// Determines the number of sides required for a circle of diameter such that deviation does not exceed tolerance.
+// See: https://math.stackexchange.com/questions/4132060/compute-number-of-regular-polgy-sides-to-approximate-circle-to-defined-precision
+
+// For ellipses, use the major diameter for a convervative result.
+
+const zag = (diameter, tolerance = 1) => {
+  const r = diameter / 2;
+  const k = tolerance / r;
+  const s = Math.ceil(Math.PI / Math.sqrt(k * 2));
+  return s;
+};
 
 const zagSides = Shape.registerMethod3(
   'zagSides',
@@ -3499,7 +3735,7 @@ const Empty = Shape.registerMethod3('Empty', [], Empty$1);
 const Polygon = Shape.registerMethod3(
   ['Face', 'Polygon'],
   ['coordinates'],
-  (coordinates) => fromPolygons([{ points: coordinates }])
+  (coordinates) => fromPolygonSoup([{ points: coordinates }])
 );
 
 const Face = Polygon;
@@ -3762,7 +3998,7 @@ const Polyhedron = Shape.registerMethod3(
     for (const coordinates of coordinateLists) {
       out.push({ points: coordinates });
     }
-    return fromPolygons(out);
+    return fromPolygonSoup(out);
   }
 );
 
@@ -3820,4 +4056,4 @@ const Wave = Shape.registerMethod3(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Assembly, Box, Cached, ChainHull, Clip, Cloud, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Hershey, Hexagon, Hull, Icosahedron, Implicit, Iron, Join, LDraw, LDrawPart, Label, Line, LineX, LineY, LineZ, Link, List, LoadDxf, LoadLDraw, LoadPng, LoadPngAsRelief, LoadStl, LoadSvg, Loft, Loop, MaskedBy, Note, Octagon, Off, Orb, Page, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Route, Segments, Seq, Shape, Skeleton, Spiral, Stl, Stroke, SurfaceMesh, Svg, To, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, addTo, align, alignment, and, approximate, area, as, asPart, at, base, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, cloud, color, commonVolume, copy, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, dxf, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, exterior, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fair, fill, fit, fitTo, fix, flat, fuse, g, gap, gauge, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, holes, hull, image, inFn, input, inset, involute, iron, join, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, maskedBy, masking, material, md, minimizeOverhang, move, moveAlong, n, noGap, noHoles, noOp, noVoid, normal, note, nth, o, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, plus, points, put, reconstruct, ref, refine, remesh, repair, rotateX, rotateY, rotateZ, route, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, size, skeleton, sketch, smooth, sort, split, stl, stroke, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, turnX, turnY, turnZ, twist, tx, ty, tz, unfold, untag, upperEnvelope, v, validate, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Assembly, Box, Cached, ChainHull, Clip, Cloud, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Grow, Hershey, Hexagon, Hull, Icosahedron, Implicit, Iron, Join, LDraw, LDrawPart, Label, Line, LineX, LineY, LineZ, Link, List, LoadDxf, LoadLDraw, LoadPng, LoadPngAsRelief, LoadStl, LoadSvg, Loft, Loop, MaskedBy, Note, Octagon, Off, Orb, Page, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Route, Segments, Seq, Shape, Skeleton, Spiral, Stl, SurfaceMesh, Svg, To, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, acos, addTo, align, alignment, and, approximate, area, as, asPart, at, base, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, cloud, color, commonVolume, copy, cos, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, dxf, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, exterior, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fair, fill, fit, fitTo, fix, flat, fuse, g, gap, gauge, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, holes, hull, image, inFn, input, inset, involute, iron, join, lerp, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, maskedBy, masking, material, max, md, min, minimizeOverhang, move, moveAlong, n, noGap, noHoles, noOp, noVoid, normal, note, nth, o, obb, offset, on, op, orient, origin, outline, overlay, pack, page, pdf, plus, points, put, random, reconstruct, ref, refine, remesh, repair, rotateX, rotateY, rotateZ, route, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, sin, size, skeleton, sketch, smooth, sort, split, sqrt, stl, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, trim, turnX, turnY, turnZ, twist, tx, ty, tz, unfold, untag, upperEnvelope, v, validate, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

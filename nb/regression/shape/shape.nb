@@ -374,7 +374,7 @@ Arc(10, 10, 10, { sides: 7 })
       Box(2, 2, [0, l])
         .clip(
           Arc(2, 2, [0, l], { start: 1/4, end: 3/4 })
-            .grow(0.01)
+            .grow(Orb(0.01))
         )
         .to(e)
     )

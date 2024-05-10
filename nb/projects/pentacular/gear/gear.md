@@ -1,4 +1,16 @@
 ```JavaScript
+const acos = (a) => (Math.acos(a) / (Math.PI * 2)) * 360;
+```
+
+```JavaScript
+const cos = (a) => Math.cos((a / 360) * Math.PI * 2);
+```
+
+```JavaScript
+const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
+```
+
+```JavaScript
 export const polar = (radius, theta) => [
   radius * sin(theta),
   radius * cos(theta),
@@ -23,13 +35,13 @@ export const q7 = (
     baseRadius,
     side,
     angle,
-    (1 - fraction) * max(baseRadius, rootRadius) + fraction * outerRadius
+    (1 - fraction) * Math.max(baseRadius, rootRadius) + fraction * outerRadius
   );
 ```
 
 ```JavaScript
 export const iang = (baseRadius, pitchRadius) =>
-  (sqrt((pitchRadius / baseRadius) * (pitchRadius / baseRadius) - 1) /
+  (Math.sqrt((pitchRadius / baseRadius) * (pitchRadius / baseRadius) - 1) /
     Math.PI) *
     180 -
   acos(baseRadius / pitchRadius);

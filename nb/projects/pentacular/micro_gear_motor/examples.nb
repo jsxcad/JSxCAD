@@ -6,6 +6,6 @@ await Assembly(
   MicroGearMotor()
     .ry(-1 / 4)
     .rx(1 / 4)
-    .grow(0.1)
+    .grow(Orb(0.1))
     .void()
 ).stl('motor case');

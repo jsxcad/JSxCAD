@@ -1,4 +1,4 @@
-import { fromPolygons, taggedGroup } from '@jsxcad/geometry';
+import { fromPolygonSoup, taggedGroup } from '@jsxcad/geometry';
 
 import ObjFile from 'obj-file-parser';
 
@@ -15,7 +15,7 @@ export const fromObjSync = (data) => {
       });
       polygons.push({ points: polygon });
     }
-    group.push(fromPolygons(polygons));
+    group.push(fromPolygonSoup(polygons));
   }
   return taggedGroup({}, ...group);
 };

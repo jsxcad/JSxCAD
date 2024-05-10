@@ -12,6 +12,6 @@ export const iron = (inputs, turn = 1 / 360) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in iron`);
     }
   });

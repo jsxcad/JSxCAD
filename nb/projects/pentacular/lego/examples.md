@@ -7,7 +7,7 @@ SocketBoard 16x16x2
 ![Image](examples.md.socketBoard16x16x2.png)
 
 ```JavaScript
-export const socketBoard16x16x2 = await SocketBoard(2, 2, 2)
+export const socketBoard16x16x2 = SocketBoard(2, 2, 2)
   .as('SocketBoard 16x16x2')
   .note('SocketBoard 16x16x2')
   .view();
@@ -18,7 +18,7 @@ SocketBoard 32x32x3.2
 ![Image](examples.md.socketBoard32x8x3_2.png)
 
 ```JavaScript
-export const socketBoard32x8x3_2 = await SocketBoard(4, 1, 3.2)
+export const socketBoard32x8x3_2 = SocketBoard(4, 1, 3.2)
   .as('SocketBoard 32x32x3.2')
   .note('SocketBoard 32x32x3.2')
   .view();
@@ -27,7 +27,7 @@ export const socketBoard32x8x3_2 = await SocketBoard(4, 1, 3.2)
 ![Image](examples.md.axleHole.png)
 
 ```JavaScript
-export const axleHole = await Arc({ apothem: 5.2 })
+export const axleHole = Arc({ apothem: 5.2 })
   .add(
     Arc({ apothem: 4 })
       .y(1.5 / 2)
@@ -41,19 +41,19 @@ export const axleHole = await Arc({ apothem: 5.2 })
 ![Image](examples.md.block8x8x3_2.png)
 
 ```JavaScript
-export const block8x8x3_2 = await Block(1, 1, 3.2).as('lego block 8x8x3.2').view();
+export const block8x8x3_2 = Block(1, 1, 3.2).as('lego block 8x8x3.2').view();
 ```
 
 ![Image](examples.md.block8x8x6_4.png)
 
 ```JavaScript
-export const block8x8x6_4 = await Block(1, 1, 6.4).as('lego block 8x8x6.4').view();
+export const block8x8x6_4 = Block(1, 1, 6.4).as('lego block 8x8x6.4').view();
 ```
 
 ![Image](examples.md.block16x16x3_2.png)
 
 ```JavaScript
-export const block16x16x3_2 = await Block(2, 2, 3.2)
+export const block16x16x3_2 = Block(2, 2, 3.2)
   .as('lego block 16x16x3.2')
   .view();
 ```
@@ -61,7 +61,7 @@ export const block16x16x3_2 = await Block(2, 2, 3.2)
 ![Image](examples.md.block16x16x6_4.png)
 
 ```JavaScript
-export const block16x16x6_4 = await Block(2, 2, 6.4)
+export const block16x16x6_4 = Block(2, 2, 6.4)
   .as('lego block 24x24x6.4')
   .view();
 ```
@@ -69,7 +69,7 @@ export const block16x16x6_4 = await Block(2, 2, 6.4)
 ![Image](examples.md.socket24x24x1_6.png)
 
 ```JavaScript
-export const socket24x24x1_6 = await SocketBoard(3, 3, 1.6)
+export const socket24x24x1_6 = SocketBoard(3, 3, 1.6)
   .as('lego socket 24x24x1.6')
   .view();
 ```
@@ -77,7 +77,7 @@ export const socket24x24x1_6 = await SocketBoard(3, 3, 1.6)
 ![Image](examples.md.socket24x24x3_2.png)
 
 ```JavaScript
-export const socket24x24x3_2 = await SocketBoard(3, 3, 3.2)
+export const socket24x24x3_2 = SocketBoard(3, 3, 3.2)
   .as('lego socket 24x24x3.2')
   .view();
 ```
@@ -85,7 +85,7 @@ export const socket24x24x3_2 = await SocketBoard(3, 3, 3.2)
 ![Image](examples.md.block24x24x3_2.png)
 
 ```JavaScript
-export const block24x24x3_2 = await Block(3, 3, 3.2)
+export const block24x24x3_2 = Block(3, 3, 3.2)
   .as('lego block 24x24x3.2')
   .view();
 ```
@@ -93,7 +93,7 @@ export const block24x24x3_2 = await Block(3, 3, 3.2)
 ![Image](examples.md.block24x24x6_4.png)
 
 ```JavaScript
-export const block24x24x6_4 = await Block(3, 3, 6.4)
+export const block24x24x6_4 = Block(3, 3, 6.4)
   .as('lego block 24x24x6.4')
   .view();
 ```
@@ -101,7 +101,7 @@ export const block24x24x6_4 = await Block(3, 3, 6.4)
 ![Image](examples.md.block16x8x9_6.png)
 
 ```JavaScript
-export const block16x8x9_6 = await Block(2, 1, 3.2 * 3)
+export const block16x8x9_6 = Block(2, 1, 3.2 * 3)
   .cut(axleHole)
   .view();
 ```
@@ -111,7 +111,7 @@ export const block16x8x9_6 = await Block(2, 1, 3.2 * 3)
 [block32x8x9_6e.stl](examples.block32x8x9_6e.stl)
 
 ```JavaScript
-export const block32x8x9_6 = await Block(4, 1, 3.2 * 3)
+export const block32x8x9_6 = Block(4, 1, 3.2 * 3)
   .cut(axleHole)
   .as('block32x8x9_6e')
   .stl('block32x8x9_6e');
@@ -140,7 +140,7 @@ Axle Profile
 ![Image](examples.md.axleProfile.png)
 
 ```JavaScript
-export const axleProfile = await AxleProfile().note('Axle Profile').topView();
+export const axleProfile = AxleProfile().note('Axle Profile').topView();
 ```
 
 ```JavaScript
@@ -154,13 +154,13 @@ Axle Joiner 16mm
 [AxleJoiner16.stl](examples.AxleJoiner16.stl)
 
 ```JavaScript
-export const axleJoiner16 = await AxleJoiner(16)
+export const axleJoiner16 = AxleJoiner(16)
   .note('Axle Joiner 16mm')
   .stl('AxleJoiner16');
 ```
 
 ```JavaScript
-const box = await Box(8, 3.2 * 4).y(3.2 * 2);
+const box = Box(8, 3.2 * 4).y(3.2 * 2);
 ```
 
 ![Image](examples.md.technic_technic.png)
@@ -168,7 +168,7 @@ const box = await Box(8, 3.2 * 4).y(3.2 * 2);
 [technic.stl](examples.technic.stl)
 
 ```JavaScript
-const technic = await Group(box, Arc(4.8 + 0.2).y(5.6))
+const technic = Group(box, Arc(4.8 + 0.2).y(5.6))
   .fill()
   .ez([8 - 0.8, 0.8])
   .and(
@@ -187,7 +187,7 @@ const technic = await Group(box, Arc(4.8 + 0.2).y(5.6))
 ![Image](examples.md.technic_1x6.png)
 
 ```JavaScript
-const technic_1x6 = await Group(seq((n) => technic.x(n), { to: 48, by: 8 }))
+const technic_1x6 = Group(seq((n) => technic.x(n), { to: 48, by: 8 }))
   .align()
   .view();
 ```
@@ -197,7 +197,7 @@ const technic_1x6 = await Group(seq((n) => technic.x(n), { to: 48, by: 8 }))
 [technicConnector.stl](examples.technicConnector.stl)
 
 ```JavaScript
-const technicConnector = await Arc(4.8)
+const technicConnector = Arc(4.8)
   .ez([8, -8])
   .to(XZ())
   .add(
@@ -237,7 +237,7 @@ const technicConnector = await Arc(4.8)
 [halfTechnicConnector.stl](examples.halfTechnicConnector.stl)
 
 ```JavaScript
-const halfTechnicConnector = await Arc(4.8)
+const halfTechnicConnector = Arc(4.8)
   .ez([8])
   .to(XZ())
   .add(
@@ -271,7 +271,7 @@ const halfTechnicConnector = await Arc(4.8)
 [technicPlug5mm.stl](examples.technicPlug5mm.stl)
 
 ```JavaScript
-const technicPlug5mm = await halfTechnicConnector
+const technicPlug5mm = halfTechnicConnector
   .and(Arc(5).clip(Box(4.5, 5)).ez([-8]).to(XZ()))
   .stl('technicPlug5mm');
 ```

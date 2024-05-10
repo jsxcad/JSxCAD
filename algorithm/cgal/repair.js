@@ -28,20 +28,18 @@ export const generateRepairStrategyCodes = (strategies) => {
   return strategyCodes;
 };
 
-export const provideRepairStrategies = (strategies) => {
-  const strategyCodes = generateRepairStrategyCodes(strategies);
-  return () => (strategyCodes.length >= 1 ? strategyCodes.shift() : -1);
-};
-
 export const repair = (inputs, strategies = []) =>
   withCgalGeometry('repair', inputs, (cgalGeometry, g) => {
-    const status = g.Repair(cgalGeometry, provideRepairStrategies(strategies));
+    const status = g.Repair(
+      cgalGeometry,
+      generateRepairStrategyCodes(strategies)
+    );
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by repair');
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in repair`);
     }
   });

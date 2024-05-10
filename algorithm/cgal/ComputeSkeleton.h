@@ -44,7 +44,7 @@ static int ComputeSkeleton(Geometry* geometry) {
     geometry->transformToLocalFrame();
     return STATUS_OK;
   } catch (const std::exception& e) {
-    std::cout << "QQ/EachPoint/exception" << std::endl;
+    std::cout << "ComputeSkeleton: " << std::endl;
     std::cout << e.what() << std::endl;
     throw;
   }

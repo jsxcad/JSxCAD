@@ -468,8 +468,6 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Fill", &Fill, emscripten::allow_raw_pointers());
   emscripten::function("Fix", &Fix, emscripten::allow_raw_pointers());
-  emscripten::function("FromPolygons", &FromPolygons,
-                       emscripten::allow_raw_pointers());
   emscripten::function("FromPolygonSoup", &wrapped::FromPolygonSoup,
                        emscripten::allow_raw_pointers());
   emscripten::function("Fuse", &Fuse, emscripten::allow_raw_pointers());
@@ -507,6 +505,7 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
+  emscripten::function("Pack", &Pack, emscripten::allow_raw_pointers());
   emscripten::function("Reconstruct", &Reconstruct,
                        emscripten::allow_raw_pointers());
   emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());
@@ -524,6 +523,7 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("Simplify", &Simplify, emscripten::allow_raw_pointers());
   emscripten::function("Smooth", &Smooth, emscripten::allow_raw_pointers());
   emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
+  emscripten::function("Trim", &Trim, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
   emscripten::function("Unfold", &wrapped::Unfold,
                        emscripten::allow_raw_pointers());

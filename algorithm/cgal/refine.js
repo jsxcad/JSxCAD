@@ -12,6 +12,6 @@ export const refine = (inputs, count, density = 0) =>
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, count);
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in refine`);
     }
   });

@@ -168,7 +168,7 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
     geometry->transformToLocalFrame();
 
   } catch (const std::exception& e) {
-    std::cout << "QQ/EachPoint/exception" << std::endl;
+    std::cout << "Clip: " << std::endl;
     std::cout << e.what() << std::endl;
     throw;
   }

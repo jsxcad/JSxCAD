@@ -1,6 +1,6 @@
 import {
   Group,
-  fromPolygons,
+  fromPolygonSoup,
   read as readGeometry,
   rotateX,
   scale,
@@ -108,7 +108,7 @@ const fromPartToPolygons = async (
   });
   if (type === 'part' /* && top */) {
     if (polygons.length > 0) {
-      const geometry = fromPolygons(polygons, {
+      const geometry = fromPolygonSoup(polygons, {
         tags: [`ldraw:${part}`],
         tolerance: 0.1,
         close: false,
@@ -304,7 +304,7 @@ export const fromLDrawPart = async (
   });
   if (polygons) {
     content.push(
-      fromPolygons(polygons, {
+      fromPolygonSoup(polygons, {
         tags: ['ldraw:data'],
         tolerance: 0.1,
         close: false,
@@ -330,7 +330,7 @@ export const fromLDraw = async (
   });
   if (polygons) {
     content.push(
-      fromPolygons(polygons, {
+      fromPolygonSoup(polygons, {
         tags: ['ldraw:data'],
         tolerance: 0.1,
         close: false,

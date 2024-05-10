@@ -12,12 +12,12 @@
 typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel IK;
 
-struct Constrained_vertex_map {
+struct Smooth_constrained_vertex_map {
  public:
   typedef CGAL::Surface_mesh<EK>::Vertex_index Vertex_index;
-  Constrained_vertex_map(CGAL::Unique_hash_map<Vertex_index, bool>& map)
+  Smooth_constrained_vertex_map(CGAL::Unique_hash_map<Vertex_index, bool>& map)
       : map_(map) {}
-  friend bool get(Constrained_vertex_map& self, Vertex_index key) {
+  friend bool get(Smooth_constrained_vertex_map& self, Vertex_index key) {
     return self.map_[key];
   }
 
@@ -64,7 +64,7 @@ static int Smooth(Geometry* geometry, size_t count, double resolution,
       for (const Surface_mesh* selection : selections) {
         CGAL::Side_of_triangle_mesh<Surface_mesh, Kernel> inside(*selection);
         for (const auto& vertex : mesh.vertices()) {
-          if (inside(mesh.point(vertex)) == CGAL::ON_BOUNDED_SIDE) {
+          if (inside(mesh.point(vertex)) != CGAL::ON_UNBOUNDED_SIDE) {
             // This vertex may be smoothed.
             constrained_vertices[vertex] = false;
           }
@@ -100,7 +100,7 @@ static int Smooth(Geometry* geometry, size_t count, double resolution,
         CGAL::Polygon_mesh_processing::parameters::number_of_iterations(
             iterations)
             .vertex_is_constrained_map(
-                Constrained_vertex_map(constrained_epick_vertices)));
+                Smooth_constrained_vertex_map(constrained_epick_vertices)));
 
     std::cout << "Smooth: copy output" << std::endl;
     mesh.clear();

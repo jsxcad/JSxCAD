@@ -8,7 +8,7 @@
 #include "repair_util.h"
 #include "surface_mesh_util.h"
 
-static void approximate_mesh(Surface_mesh& mesh, int face_count,
+static bool approximate_mesh(Surface_mesh& mesh, int face_count,
                              double min_error_drop = 0.01) {
   typedef CGAL::Surface_mesh<Epick_kernel::Point_3> Epick_surface_mesh;
   Epick_surface_mesh epick_mesh;
@@ -18,11 +18,16 @@ static void approximate_mesh(Surface_mesh& mesh, int face_count,
   MakeDeterministic();
   std::cout << "approximate_mesh: face_count=" << face_count
             << " min_error_drop=" << min_error_drop << std::endl;
-  CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
-      epick_mesh, CGAL::parameters::anchors(std::back_inserter(epick_anchors))
-                      .triangles(std::back_inserter(triangles))
-                      .min_error_drop(min_error_drop)
-                      .max_number_of_proxies(face_count));
+  if (!CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
+          epick_mesh,
+          CGAL::parameters::anchors(std::back_inserter(epick_anchors))
+              .triangles(std::back_inserter(triangles))
+              .min_error_drop(min_error_drop)
+              .max_number_of_proxies(face_count))) {
+    std::cout << "approximate_mesh failed to produce manifold output"
+              << std::endl;
+    return false;
+  }
 
   std::vector<Point> anchors;
   for (const auto& epick_anchor : epick_anchors) {
@@ -35,4 +40,5 @@ static void approximate_mesh(Surface_mesh& mesh, int face_count,
                                                               triangles, mesh);
   std::cout << "approximate_mesh: faces=" << mesh.number_of_faces()
             << std::endl;
+  return true;
 }

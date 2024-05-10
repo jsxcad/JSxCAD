@@ -17,6 +17,6 @@ export const fuse = (inputs, exact = false) =>
           inputs.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in fuse`);
     }
   });

@@ -199,6 +199,7 @@ export const fromSvg = async (
             geometry.content.push(
               fillGeometry(
                 { ...segments, matrix: scale(matrix) },
+                { holes: true },
                 toTagsFromName(fill, definitions)
               )
             );

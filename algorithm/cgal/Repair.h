@@ -13,7 +13,9 @@ static int Repair(Geometry* geometry, const std::vector<int>& strategies) {
     }
     auto& mesh = geometry->mesh(nth);
     repair_self_intersections<Epeck_kernel>(mesh, strategies);
+    std::cout << "QQ/Repair/demesh/begin" << std::endl;
     demesh(mesh);
+    std::cout << "QQ/Repair/demesh/done" << std::endl;
   }
 
   geometry->transformToLocalFrame();

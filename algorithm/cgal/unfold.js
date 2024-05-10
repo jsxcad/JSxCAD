@@ -31,6 +31,6 @@ export const unfold = (inputs, enableTabs = false) =>
         }
         return output;
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in section`);
     }
   });

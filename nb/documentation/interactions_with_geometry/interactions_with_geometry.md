@@ -132,7 +132,7 @@ Expands the shape outwards by the input distance. May result in self intersectio
 ![Image](interactions_with_geometry.md.$17.png)
 
 ```JavaScript
-Arc(10, 10, 5).grow(1).view();
+Arc(10, 10, 5).grow(Orb(1)).view();
 ```
 
 ---

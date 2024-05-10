@@ -3,9 +3,9 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const fill = (inputs) =>
+export const fill = (inputs, holes = false) =>
   withCgalGeometry('fill', inputs, (cgalGeometry, g) => {
-    const status = g.Fill(cgalGeometry);
+    const status = g.Fill(cgalGeometry, holes);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fill');
@@ -17,6 +17,6 @@ export const fill = (inputs) =>
           inputs.length
         );
       default:
-        throw new Error(`Unexpected status ${status}`);
+        throw new Error(`Unexpected status ${status} in fill`);
     }
   });

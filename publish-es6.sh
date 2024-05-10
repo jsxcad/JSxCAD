@@ -12,7 +12,6 @@ cp api/shape/dist/main.js es6/jsxcad-api-shape.js
 cp api/threejs/dist/main.js es6/jsxcad-api-threejs.js
 cp api/v1-dst/dist/main.js es6/jsxcad-api-v1-dst.js
 cp api/v1-font/dist/main.js es6/jsxcad-api-v1-font.js
-cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
 cp api/v1-obj/dist/main.js es6/jsxcad-api-v1-obj.js
 cp api/v1-off/dist/main.js es6/jsxcad-api-v1-off.js
 cp api/v1-shapefile/dist/main.js es6/jsxcad-api-v1-shapefile.js

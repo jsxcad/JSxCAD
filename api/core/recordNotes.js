@@ -64,7 +64,7 @@ export const emitSourceText = (sourceText) =>
   emit({ hash: computeHash(sourceText), sourceText });
 
 export const emitError = (exception) => {
-  const error = { text: '' + exception, level: 'serious' };
+  const error = { text: '' + exception.stack, level: 'serious' };
   emit({ hash: computeHash(error), error });
 };
 
