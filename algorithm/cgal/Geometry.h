@@ -174,6 +174,7 @@ enum GeometryType {
   GEOMETRY_EMPTY = 5,
   GEOMETRY_REFERENCE = 6,
   GEOMETRY_EDGES = 7,
+  GEOMETRY_GROUP = 8,
 };
 
 #include "Edge.h"
@@ -224,6 +225,7 @@ class Geometry {
     bbox2_.clear();
     bbox3_.clear();
     origin_.clear();
+    tags_.clear();
     resize(size);
   }
 
@@ -253,6 +255,7 @@ class Geometry {
     bbox2_.resize(size);
     bbox3_.resize(size);
     origin_.resize(size, -1);
+    tags_.resize(size);
   }
 
   GeometryType& type(size_t nth) { return types_[nth]; }
@@ -461,6 +464,8 @@ class Geometry {
       return origin_[nth];
     }
   }
+
+  std::vector<std::string>& tags(size_t nth) { return tags_[nth]; }
 
   JS_BINDING void setTransform(
       size_t nth, const CGAL::Aff_transformation_3<EK>& transform) {
@@ -892,4 +897,5 @@ class Geometry {
   std::vector<CGAL::Bbox_2> bbox2_;
   std::vector<CGAL::Bbox_3> bbox3_;
   std::vector<int> origin_;
+  std::vector<std::vector<std::string>> tags_;
 };

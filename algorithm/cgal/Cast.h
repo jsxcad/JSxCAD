@@ -1,11 +1,12 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 #include "Geometry.h"
-
-typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+#include "cast_util.h"
 
 // REVIEW: Should we keep this?
 static int Cast(Geometry* geometry) {
+  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->transformToAbsoluteFrame();
@@ -24,6 +25,9 @@ static int Cast(Geometry* geometry) {
   for (int nth = 2; nth < size; nth++) {
     switch (geometry->getType(nth)) {
       case GEOMETRY_MESH: {
+        cast_mesh_to_gps(geometry->mesh(nth), reference_plane, reference_vector,
+                         geometry->gps(target));
+#if 0
         Surface_mesh& mesh = geometry->mesh(nth);
         Surface_mesh projected_mesh(mesh);
         auto& input_map = mesh.points();
@@ -41,6 +45,7 @@ static int Cast(Geometry* geometry) {
         }
         PlanarSurfaceMeshFacetsToPolygonSet(reference_plane, projected_mesh,
                                             geometry->gps(target));
+#endif
       }
     }
   }

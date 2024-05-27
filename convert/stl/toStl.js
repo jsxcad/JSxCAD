@@ -121,7 +121,6 @@ const compareTriangles = (t1, t2) => {
 
 export const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
   const triangles = [];
-  console.log(`QQ/toStl/1`);
   eachTriangle(await geometry, ([a, b, c]) => {
     triangles.push(
       orderVertices([
@@ -131,12 +130,9 @@ export const toStl = async (geometry, { tolerance = 0.001 } = {}) => {
       ])
     );
   });
-  console.log(`QQ/toStl/2`);
   triangles.sort(compareTriangles);
-  console.log(`QQ/toStl/3`);
   const output = `solid JSxCAD\n${convertToFacets(
     triangles
   )}\nendsolid JSxCAD\n`;
-  console.log(`QQ/toStl/4`);
   return new TextEncoder('utf8').encode(output);
 };

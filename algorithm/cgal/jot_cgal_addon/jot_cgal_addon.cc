@@ -892,6 +892,19 @@ static Napi::Value GetEdges(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), STATUS_OK);
 }
 
+static Napi::Value GetTags(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 3);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
+  Napi::Array js_tags = info[2].As<Napi::Array>();
+  size_t index = js_tags.Length();
+  for (const auto& tag : geometry->tags(nth)) {
+    js_tags.Set(index++, tag);
+  }
+  return Napi::Number::New(info.Env(), STATUS_OK);
+}
+
 static Napi::Value GetTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1063,10 +1076,24 @@ static Napi::Value Outline(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Pack(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 1);
+  assertArgCount(info, 7);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
-  size_t status = ::Pack(geometry);
+  uint32_t count = info[1].As<Napi::Number>().Uint32Value();
+  Napi::Array js_orientations = info[2].As<Napi::Array>();
+  double perimeter_weight = info[3].As<Napi::Number>().DoubleValue();
+  double bounds_weight = info[4].As<Napi::Number>().DoubleValue();
+  double holes_weight = info[5].As<Napi::Number>().DoubleValue();
+  Napi::Array js_sheet_by_input = info[6].As<Napi::Array>();
+  std::vector<double> orientations;
+  for (size_t nth = 0; nth < js_orientations.Length(); nth++) {
+    orientations.push_back(js_orientations.Get(nth).As<Napi::Number>().DoubleValue());
+  }
+  std::vector<size_t> sheet_by_input;
+  size_t status = ::Pack(geometry, count, orientations, perimeter_weight, bounds_weight, holes_weight, sheet_by_input);
+  for (size_t nth = 0; nth < sheet_by_input.size(); nth++) {
+    js_sheet_by_input.Set(nth, sheet_by_input[nth]);
+  }
   return Napi::Number::New(info.Env(), status);
 }
 
@@ -1345,6 +1372,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "GetPoints"), Napi::Function::New(env, GetPoints));
   exports.Set(Napi::String::New(env, "GetSegments"), Napi::Function::New(env, GetSegments));
   exports.Set(Napi::String::New(env, "GetEdges"), Napi::Function::New(env, GetEdges));
+  exports.Set(Napi::String::New(env, "GetTags"), Napi::Function::New(env, GetTags));
   exports.Set(Napi::String::New(env, "GetTransform"), Napi::Function::New(env, GetTransform));
   exports.Set(Napi::String::New(env, "Grow"), Napi::Function::New(env, Grow));
   exports.Set(Napi::String::New(env, "Inset"), Napi::Function::New(env, Inset));

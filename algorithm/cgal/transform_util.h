@@ -247,6 +247,22 @@ static Transformation TransformationFromZTurn(double turn) {
                         0, 0, w, 0, w);
 }
 
+template <typename K>
+static CGAL::Aff_transformation_3<K> zturn(double turn) {
+  typename K::RT sin_alpha, cos_alpha, w;
+  compute_turn(turn, sin_alpha, cos_alpha, w);
+  return CGAL::Aff_transformation_3<K>(cos_alpha, sin_alpha, 0, 0, -sin_alpha,
+                                       cos_alpha, 0, 0, 0, 0, w, 0, w);
+}
+
+template <typename K>
+static CGAL::Aff_transformation_2<K> zturn2(double turn) {
+  typename K::RT sin_alpha, cos_alpha, w;
+  compute_turn(turn, sin_alpha, cos_alpha, w);
+  return CGAL::Aff_transformation_2<K>(cos_alpha, -sin_alpha, 0, sin_alpha,
+                                       cos_alpha, 0, w);
+}
+
 // Why does this exist?
 template <typename Point>
 static CGAL::Aff_transformation_3<typename CGAL::Kernel_traits<Point>::Kernel>

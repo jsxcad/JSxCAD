@@ -1574,7 +1574,8 @@ const baseViewOp = async (
   }
   const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
   const displayGeometry = toDisplayGeometry$1(viewGeometry);
-  for (const pageGeometry of await ensurePages(displayGeometry)) {
+  // for (const pageGeometry of await ensurePages(displayGeometry)) {
+  for (const pageGeometry of [displayGeometry]) {
     const viewPath = `view/${path}/${id}/${viewId}.view`;
     const hash = generateUniqueId();
     const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;
@@ -2530,7 +2531,7 @@ const overlay = Shape.registerMethod3('overlay', ['inputGeometry'], hasShowOverl
 
 const pack = Shape.registerMethod3(
   'pack',
-  ['inputGeometry', 'function', 'options'],
+  ['inputGeometry', 'geometries', 'numbers', 'options'],
   pack$1
 );
 

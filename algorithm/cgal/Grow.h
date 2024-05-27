@@ -20,7 +20,6 @@
 static int Grow(Geometry* geometry, size_t count) {
   try {
     typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
-    typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
     size_t size = geometry->size();
 
     geometry->copyInputMeshesToOutputMeshes();
@@ -115,7 +114,6 @@ static int Grow(Geometry* geometry, size_t count) {
           break;
         }
         case GEOMETRY_POINTS: {
-          auto& mesh = geometry->mesh(nth);
           CGAL::Surface_mesh<EK::Point_3> tool;
           CGAL::convex_hull_3(tool_points.begin(), tool_points.end(), tool);
           for (const auto& point : geometry->points(nth)) {
@@ -153,7 +151,6 @@ static int Grow(Geometry* geometry, size_t count) {
               // We can use optimal partitioning if there are no holes.
               typedef CGAL::Partition_traits_2<EK> Traits;
               typedef Traits::Polygon_2 Polygon_2;
-              typedef Traits::Point_2 Point_2;
               typedef std::list<Polygon_2> Polygon_list;
               Polygon_list partition_polys;
               // We invest more here to minimize unions below.

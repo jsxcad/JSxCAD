@@ -1,11 +1,14 @@
 #pragma once
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
 
 #include "kernel_util.h"
 #include "polygon_util.h"
 #include "segment_util.h"
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
 template <typename Arrangement_2>
 static void analyzeCcb(typename Arrangement_2::Ccb_halfedge_circulator start,
@@ -264,4 +267,12 @@ static bool convertArrangementToPolygonsWithHolesNonZero(
   Segments non_simple;
   return convertArrangementToPolygonsWithHolesNonZero(arrangement, out,
                                                       non_simple);
+}
+
+static void copy_gps_to_pwhs(
+    const General_polygon_set_2& gps,
+    std::vector<CGAL::Polygon_with_holes_2<EK>>& simple_pwhs) {
+  std::vector<CGAL::Polygon_with_holes_2<EK>> complex_pwhs;
+  gps.polygons_with_holes(std::back_inserter(complex_pwhs));
+  simplifyPolygonsWithHoles(complex_pwhs, simple_pwhs);
 }

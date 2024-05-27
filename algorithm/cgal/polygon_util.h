@@ -237,8 +237,9 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
       continue;
     }
     if (!boundary.is_simple()) {
-      std::cout << "PWHFBAH/1: ";
-      print_polygon_nl(boundary);
+      std::cout
+          << "toPolygonsWithHolesFromBoundariesAndHoles: non_simple_boundary="
+          << boundary << std::endl;
       return false;
     }
     if (boundary.orientation() != CGAL::Sign::POSITIVE) {
@@ -250,12 +251,14 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
         continue;
       }
       if (!hole.is_simple()) {
-        std::cout << "PWHFBAH/2: ";
-        print_polygon_nl(hole);
+        std::cout
+            << "toPolygonsWithHolesFromBoundariesAndHoles: non_simple_hole="
+            << hole << std::endl;
         return false;
       }
       const typename Polygon_2::Point_2& representative_point = hole[0];
-      if (boundary.has_on_positive_side(representative_point)) {
+      if (!boundary.has_on_negative_side(representative_point)) {
+        // We permit holes to touch a boundary.
         if (hole.orientation() != CGAL::Sign::NEGATIVE) {
           hole.reverse_orientation();
         }
@@ -269,7 +272,9 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
       // FIX: Find a better way.
       // Turn all of the holes outside in.
       for (size_t a = 0; a < local_holes.size(); a++) {
-        local_holes[a].reverse_orientation();
+        if (local_holes[a].orientation() != CGAL::Sign::POSITIVE) {
+          local_holes[a].reverse_orientation();
+        }
       }
       for (size_t a = 0; a < local_holes.size(); a++) {
         bool is_distinct = true;
@@ -287,14 +292,20 @@ static bool toPolygonsWithHolesFromBoundariesAndHoles(
         if (is_distinct) {
           distinct_holes.push_back(local_holes[a]);
         }
-        // Then turn them back inside out.
-        for (size_t a = 0; a < distinct_holes.size(); a++) {
-          distinct_holes[a].reverse_orientation();
-        }
+      }
+      // Then turn them back inside out.
+      for (size_t a = 0; a < distinct_holes.size(); a++) {
+        distinct_holes[a].reverse_orientation();
       }
       pwhs.emplace_back(boundary, distinct_holes.begin(), distinct_holes.end());
     } else {
       pwhs.emplace_back(boundary, local_holes.begin(), local_holes.end());
+    }
+  }
+  for (auto& pwh : pwhs) {
+    assert(pwh.outer_boundary().orientation() == CGAL::Sign::POSITIVE);
+    for (const auto& hole : pwh.holes()) {
+      assert(hole.orientation() == CGAL::Sign::NEGATIVE);
     }
   }
   return true;

@@ -9,11 +9,11 @@
 
 #include "manifold.h"
 
+typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
+
 static void buildManifoldFromSurfaceMesh(
     CGAL::Surface_mesh<EK::Point_3>& surface_mesh,
     manifold::Manifold& manifold) {
-  typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
-
   if (surface_mesh.has_garbage()) {
     surface_mesh.collect_garbage();
   }

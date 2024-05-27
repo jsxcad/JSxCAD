@@ -151,7 +151,7 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const g = getCgal();
-  const results = [];
+  let results = [];
   for (let nth = start; nth < length; nth++) {
     const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
     switch (geometry.getType(nth)) {
@@ -244,6 +244,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         results[nth] = { type: 'group', content: [], tags: [] };
       }
     }
+    g.GetTags(geometry, nth, results[nth].tags);
   }
   // Coallesce
   for (let nth = start; nth < length; nth++) {
@@ -257,6 +258,7 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       results[origin] = { type: 'group', content: [results[origin]], tags: [] };
     }
     results[origin].content.push(results[nth]);
+    results[nth] = undefined;
   }
   let output;
   if (start === 0) {
@@ -264,10 +266,12 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
   } else {
     output = results.slice(start);
   }
+  /*
   if (output.some(value => value === undefined)) {
     throw Error(`QQ/producing undefined output`);
   }
-  return output;
+  */
+  return output.filter(value => value !== undefined);
 };
 
 export const withCgalGeometry = (name, inputs, op) => {

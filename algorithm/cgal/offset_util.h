@@ -6,6 +6,7 @@
 #include <CGAL/minkowski_sum_2.h>
 
 #include "point_util.h"
+#include "printing.h"
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
@@ -66,7 +67,7 @@ static void offsetPolygonWithHoles(
       for (auto hole = inset_boundary.holes_begin();
            hole != inset_boundary.holes_end(); ++hole) {
         if (!hole->is_simple()) {
-          std::cout << "OffsetOfPolygonWithHoles: hole is not simple"
+          std::cout << "offsetPolygonWithHoles: hole is not simple"
                     << std::endl;
           print_polygon_nl(*hole);
         }
@@ -122,6 +123,7 @@ static void insetPolygonWithHoles(
   {
     // Stick a box around the boundary (which will now form a hole).
     CGAL::Bbox_2 bb = boundary.bbox();
+    // FIX: Figure out a sensible number.
     bb.dilate(10);
 
     Polygon_2 frame;
@@ -200,4 +202,115 @@ static void insetPolygonWithHoles(
       break;
     }
   }
+}
+
+std::ostream& operator<<(
+    std::ostream& os,
+    const CGAL::General_polygon_set_2<CGAL::Gps_segment_traits_2<EK>>& gps) {
+  std::vector<CGAL::Polygon_with_holes_2<EK>> pwhs;
+  gps.polygons_with_holes(std::back_inserter(pwhs));
+  os << pwhs;
+  return os;
+}
+
+// We trim the sheet by the tool, then we can attempt to place along the edges
+// of the trimmed sheet.
+//
+// This works nicely except where there is a perfect interior fit, which erases
+// the edge we want to traverse.
+
+static void compute_inner_fit_polygon(
+    const std::vector<Polygon_with_holes_2>& sheet_pwhs,
+    const std::vector<Polygon_with_holes_2>& part_pwhs,
+    const std::vector<Polygon_with_holes_2>& part_npwhs,
+    std::vector<Polygon_with_holes_2>& nfps) {
+  typedef CGAL::Polygon_with_holes_2<EK> Polygon_with_holes_2;
+  typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
+
+  CGAL::General_polygon_set_2<Traits> gps;
+
+  if (sheet_pwhs.empty()) {
+    nfps.clear();
+    return;
+  }
+
+  for (const auto& sheet_pwh : sheet_pwhs) {
+    gps.join(sheet_pwh.outer_boundary());
+  }
+
+  CGAL::Bbox_2 bb = bbox_2(sheet_pwhs.begin(), sheet_pwhs.end());
+
+  if (!std::isfinite(bb.xmax())) {
+    nfps.clear();
+    return;
+  }
+
+  CGAL::Polygon_2<EK> frame;
+  frame.push_back(EK::Point_2(bb.xmin() - 10, bb.ymin() - 10));
+  frame.push_back(EK::Point_2(bb.xmax() + 10, bb.ymin() - 10));
+  frame.push_back(EK::Point_2(bb.xmax() + 10, bb.ymax() + 10));
+  frame.push_back(EK::Point_2(bb.xmin() - 10, bb.ymax() + 10));
+
+  // Stick a box around the boundary (which will now form a hole).
+  Polygon_with_holes_2 unexpanded_border;
+  {
+    std::vector<CGAL::Polygon_2<EK>> boundary_as_holes;
+    for (const auto& sheet_pwh : sheet_pwhs) {
+      auto boundary = sheet_pwh.outer_boundary();
+      boundary.reverse_orientation();
+      boundary_as_holes.push_back(std::move(boundary));
+    }
+    unexpanded_border = Polygon_with_holes_2(frame, boundary_as_holes.begin(),
+                                             boundary_as_holes.end());
+  }
+
+  // What about internal boundaries?
+  for (const auto& part_npwh : part_npwhs) {
+    CGAL::Polygon_with_holes_2<EK> expanded_border =
+        CGAL::minkowski_sum_2(unexpanded_border, part_npwh.outer_boundary());
+    // We trim the sheet by the expanded border.
+    gps.difference(expanded_border);
+  }
+  for (const auto& part_pwh : part_npwhs) {
+    for (const auto& sheet_pwh : sheet_pwhs) {
+      for (auto hole : sheet_pwh.holes()) {
+        if (hole.orientation() == CGAL::Sign::NEGATIVE) {
+          hole.reverse_orientation();
+        }
+        CGAL::Polygon_with_holes_2<EK> expanded_hole =
+            CGAL::minkowski_sum_2(hole, part_pwh.outer_boundary());
+        // Now we trim the sheet by the expanded holes.
+        gps.difference(expanded_hole);
+      }
+    }
+  }
+
+  nfps.clear();
+  gps.polygons_with_holes(std::back_inserter(nfps));
+}
+
+static void compute_outer_fit_polygon(
+    const std::vector<Polygon_with_holes_2>& sheet_pwhs,
+    const std::vector<Polygon_with_holes_2>& part_pwhs,
+    const std::vector<Polygon_with_holes_2>& part_npwhs,
+    std::vector<Polygon_with_holes_2>& nfps) {
+  typedef CGAL::Gps_segment_traits_2<Kernel> Traits;
+  CGAL::General_polygon_set_2<Traits> gps;
+
+  if (sheet_pwhs.empty()) {
+    nfps.clear();
+    return;
+  }
+
+  // In the unbounded case we can simply expand the already placed parts.
+  for (const auto& part_pwh : part_npwhs) {
+    for (const auto& sheet_pwh : sheet_pwhs) {
+      CGAL::Polygon_with_holes_2<EK> expanded_hole =
+          CGAL::minkowski_sum_2(sheet_pwh, part_pwh.outer_boundary());
+      gps.join(expanded_hole);
+    }
+  }
+
+  nfps.clear();
+  gps.polygons_with_holes(std::back_inserter(nfps));
 }

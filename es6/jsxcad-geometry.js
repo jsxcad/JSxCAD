@@ -1,4 +1,4 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, invertTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, trim as trim$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, invertTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, cast as cast$1, pack as pack$1, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, trim as trim$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-material.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-color.js';
@@ -74,17 +74,16 @@ const update = (geometry, updates, changes) => {
 };
 
 const replacer = (from, to, limit = from.length) => {
-  const map = new Map();
-  for (let nth = 0; nth < limit; nth++) {
-    map.set(from[nth], to[nth]);
-  }
+  // We need to consider the case that there are duplicates in from.
   const update = (geometry, descend) => {
-    const cut = map.get(geometry);
-    if (cut) {
-      return cut;
-    } else {
-      return descend();
+    for (let nth = 0; nth < limit; nth++) {
+      if (from[nth] === geometry) {
+        // Prevent this from being matched twice.
+        from[nth] = undefined;
+        return to[nth];
+      }
     }
+    return descend();
   };
   return (geometry) => rewrite(geometry, update);
 };
@@ -365,15 +364,19 @@ const linearize = (
   geometry,
   filter,
   out = [],
-  includeSketches = false
+  { includeSketches = false, includeItems = true } = {},
 ) => {
   const collect = (geometry, descend) => {
     if (filter(geometry)) {
       out.push(geometry);
     }
-    if (includeSketches || geometry.type !== 'sketch') {
-      descend();
+    if (geometry.type === 'sketch' && !includeSketches) {
+      return;
     }
+    if (geometry.type === 'item' && !includeItems) {
+      return;
+    }
+    descend();
   };
   visit(geometry, collect);
   return out;
@@ -410,9 +413,9 @@ const filter$O = (geometry) =>
 const measureBoundingBox = (geometry) =>
   computeBoundingBox(linearize(geometry, filter$O));
 
-const X$b = 0;
-const Y$b = 1;
-const Z$9 = 2;
+const X$a = 0;
+const Y$a = 1;
+const Z$8 = 2;
 
 const scale$1 = (geometry, [x = 1, y = 1, z = 1]) => {
   const negatives = (x < 0) + (y < 0) + (z < 0);
@@ -463,9 +466,9 @@ const scaleToFit = (geometry, [x, y, z]) => {
     return geometry;
   }
   const [min, max] = bounds;
-  const length = max[X$b] - min[X$b];
-  const width = max[Y$b] - min[Y$b];
-  const height = max[Z$9] - min[Z$9];
+  const length = max[X$a] - min[X$a];
+  const width = max[Y$a] - min[Y$a];
+  const height = max[Z$8] - min[Z$8];
   if (x === undefined) {
     x = length;
   }
@@ -504,12 +507,6 @@ const getLeafs = (geometry) => {
   visit(geometry, op);
   return leafs;
 };
-
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -687,9 +684,9 @@ const loop = (geometry, geometries, mode = {}) =>
 const Loop = (geometries, mode = {}) =>
   Link(geometries, { ...mode, close: true });
 
-const X$a = 0;
-const Y$a = 1;
-const Z$8 = 2;
+const X$9 = 0;
+const Y$9 = 1;
+const Z$7 = 2;
 
 const buildCorners = (x = 1, y = x, z = 0) => {
   const c1 = [0, 0, 0];
@@ -699,45 +696,45 @@ const buildCorners = (x = 1, y = x, z = 0) => {
       x.push(0);
     }
     if (x[0] < x[1]) {
-      c1[X$a] = x[1];
-      c2[X$a] = x[0];
+      c1[X$9] = x[1];
+      c2[X$9] = x[0];
     } else {
-      c1[X$a] = x[0];
-      c2[X$a] = x[1];
+      c1[X$9] = x[0];
+      c2[X$9] = x[1];
     }
   } else {
-    c1[X$a] = x / 2;
-    c2[X$a] = x / -2;
+    c1[X$9] = x / 2;
+    c2[X$9] = x / -2;
   }
   if (y instanceof Array) {
     while (y.length < 2) {
       y.push(0);
     }
     if (y[0] < y[1]) {
-      c1[Y$a] = y[1];
-      c2[Y$a] = y[0];
+      c1[Y$9] = y[1];
+      c2[Y$9] = y[0];
     } else {
-      c1[Y$a] = y[0];
-      c2[Y$a] = y[1];
+      c1[Y$9] = y[0];
+      c2[Y$9] = y[1];
     }
   } else {
-    c1[Y$a] = y / 2;
-    c2[Y$a] = y / -2;
+    c1[Y$9] = y / 2;
+    c2[Y$9] = y / -2;
   }
   if (z instanceof Array) {
     while (z.length < 2) {
       z.push(0);
     }
     if (z[0] < z[1]) {
-      c1[Z$8] = z[1];
-      c2[Z$8] = z[0];
+      c1[Z$7] = z[1];
+      c2[Z$7] = z[0];
     } else {
-      c1[Z$8] = z[0];
-      c2[Z$8] = z[1];
+      c1[Z$7] = z[0];
+      c2[Z$7] = z[1];
     }
   } else {
-    c1[Z$8] = z / 2;
-    c2[Z$8] = z / -2;
+    c1[Z$7] = z / 2;
+    c2[Z$7] = z / -2;
   }
   return [c1, c2];
 };
@@ -748,9 +745,9 @@ const computeScale = (
 ) => [ax - bx, ay - by, az - bz];
 
 const computeMiddle = (c1, c2) => [
-  (c1[X$a] + c2[X$a]) * 0.5,
-  (c1[Y$a] + c2[Y$a]) * 0.5,
-  (c1[Z$8] + c2[Z$8]) * 0.5,
+  (c1[X$9] + c2[X$9]) * 0.5,
+  (c1[Y$9] + c2[Y$9]) * 0.5,
+  (c1[Z$7] + c2[Z$7]) * 0.5,
 ];
 
 const taggedPoints = (
@@ -825,18 +822,6 @@ const squaredLength = ([x = 0, y = 0, z = 0]) => x * x + y * y + z * z;
 
 const length = ([x = 0, y = 0, z = 0]) =>
   Math.sqrt(x * x + y * y + z * z);
-
-const max = ([ax, ay, az], [bx, by, bz]) => [
-  Math.max(ax, bx),
-  Math.max(ay, by),
-  Math.max(az, bz),
-];
-
-const min = ([ax, ay, az], [bx, by, bz]) => [
-  Math.min(ax, bx),
-  Math.min(ay, by),
-  Math.min(az, bz),
-];
 
 const scale = (amount, [x = 0, y = 0, z = 0]) => [
   x * amount,
@@ -1055,12 +1040,12 @@ const isSeqSpec = (value) => {
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
 
-const X$9 = 0;
-const Y$9 = 1;
-const Z$7 = 2;
+const X$8 = 0;
+const Y$8 = 1;
+const Z$6 = 2;
 
 const makeArc =
-  (axis = Z$7) =>
+  (axis = Z$6) =>
   ({ c1, c2, start = 0, end = 1, zag, sides }) => {
     while (start > end) {
       start -= 1;
@@ -1069,14 +1054,14 @@ const makeArc =
     const scale = computeScale(c1, c2);
     const middle = computeMiddle(c1, c2);
 
-    const left = c1[X$9];
-    const right = c2[X$9];
+    const left = c1[X$8];
+    const right = c2[X$8];
 
-    const front = c1[Y$9];
-    const back = c2[Y$9];
+    const front = c1[Y$8];
+    const back = c2[Y$8];
 
-    const bottom = c1[Z$7];
-    const top = c2[Z$7];
+    const bottom = c1[Z$6];
+    const top = c2[Z$6];
 
     const step = 1 / computeSides(c1, c2, sides, zag);
     const steps = Math.ceil((end - start) / step);
@@ -1092,40 +1077,40 @@ const makeArc =
 
     if (
       end - start === 1 ||
-      (axis === X$9 && left !== right) ||
-      (axis === Y$9 && front !== back) ||
-      (axis === Z$7 && top !== bottom)
+      (axis === X$8 && left !== right) ||
+      (axis === Y$8 && front !== back) ||
+      (axis === Z$6 && top !== bottom)
     ) {
       spiral = fill$1(Loop([spiral]));
     }
 
     switch (axis) {
-      case X$9: {
-        scale[X$9] = 1;
+      case X$8: {
+        scale[X$8] = 1;
         spiral = translate(scale$1(rotateY(spiral, -1 / 4), scale), middle);
         if (left !== right) {
           spiral = extrudeAlongX(spiral, [
-            [left - middle[X$9], right - middle[X$9]],
+            [left - middle[X$8], right - middle[X$8]],
           ]);
         }
         break;
       }
-      case Y$9: {
-        scale[Y$9] = 1;
+      case Y$8: {
+        scale[Y$8] = 1;
         spiral = translate(scale$1(rotateX(spiral, -1 / 4), scale), middle);
         if (front !== back) {
           spiral = extrudeAlongY(spiral, [
-            [front - middle[Y$9], back - middle[Y$9]],
+            [front - middle[Y$8], back - middle[Y$8]],
           ]);
         }
         break;
       }
-      case Z$7: {
-        scale[Z$7] = 1;
+      case Z$6: {
+        scale[Z$6] = 1;
         spiral = translate(scale$1(spiral, scale), middle);
         if (top !== bottom) {
           spiral = extrudeAlongZ(spiral, [
-            [top - middle[Z$7], bottom - middle[Z$7]],
+            [top - middle[Z$6], bottom - middle[Z$6]],
           ]);
         }
         break;
@@ -1138,9 +1123,9 @@ const makeArc =
     return makeAbsolute(spiral);
   };
 
-const makeArcX = makeArc(X$9);
-const makeArcY = makeArc(Y$9);
-const makeArcZ = makeArc(Z$7);
+const makeArcX = makeArc(X$8);
+const makeArcY = makeArc(Y$8);
+const makeArcZ = makeArc(Z$6);
 
 const ArcOp =
   (type) =>
@@ -1230,9 +1215,9 @@ const Edge = (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
   return taggedSegments({ matrix }, [baseSegment]);
 };
 
-const X$8 = 0;
-const Y$8 = 1;
-const Z$6 = 2;
+const X$7 = 0;
+const Y$7 = 1;
+const Z$5 = 2;
 
 let fundamentalShapes;
 
@@ -1258,14 +1243,14 @@ const buildFs = () => {
 const makeBox = (corner1, corner2) => {
   const build = () => {
     const fs = buildFs();
-    const left = corner2[X$8];
-    const right = corner1[X$8];
+    const left = corner2[X$7];
+    const right = corner1[X$7];
 
-    const front = corner2[Y$8];
-    const back = corner1[Y$8];
+    const front = corner2[Y$7];
+    const back = corner1[Y$7];
 
-    const bottom = corner2[Z$6];
-    const top = corner1[Z$6];
+    const bottom = corner2[Z$5];
+    const top = corner1[Z$5];
 
     if (top === bottom) {
       if (left === right) {
@@ -2949,9 +2934,9 @@ const Segment = (segment) => taggedSegments({}, [segment]);
 
 const Segments = (segments) => taggedSegments({}, segments);
 
-const X$7 = 0;
-const Y$7 = 1;
-const Z$5 = 2;
+const X$6 = 0;
+const Y$6 = 1;
+const Z$4 = 2;
 
 const MIN$1 = 0;
 const MAX$1 = 1;
@@ -2977,45 +2962,45 @@ const computeOffset = (geometry, spec, origin) => {
       case 'x': {
         switch (spec[index]) {
           case '>':
-            offset[X$7] = -min[X$7];
+            offset[X$6] = -min[X$6];
             index += 1;
             break;
           case '<':
-            offset[X$7] = -max[X$7];
+            offset[X$6] = -max[X$6];
             index += 1;
             break;
           default:
-            offset[X$7] = -center[X$7];
+            offset[X$6] = -center[X$6];
         }
         break;
       }
       case 'y': {
         switch (spec[index]) {
           case '>':
-            offset[Y$7] = -min[Y$7];
+            offset[Y$6] = -min[Y$6];
             index += 1;
             break;
           case '<':
-            offset[Y$7] = -max[Y$7];
+            offset[Y$6] = -max[Y$6];
             index += 1;
             break;
           default:
-            offset[Y$7] = -center[Y$7];
+            offset[Y$6] = -center[Y$6];
         }
         break;
       }
       case 'z': {
         switch (spec[index]) {
           case '>':
-            offset[Z$5] = -min[Z$5];
+            offset[Z$4] = -min[Z$4];
             index += 1;
             break;
           case '<':
-            offset[Z$5] = -max[Z$5];
+            offset[Z$4] = -max[Z$4];
             index += 1;
             break;
           default:
-            offset[Z$5] = -center[Z$5];
+            offset[Z$4] = -center[Z$4];
         }
         break;
       }
@@ -3264,19 +3249,19 @@ const orZero = (v) => {
   return r;
 };
 
-const X$6 = (xs) =>
+const X$5 = (xs) =>
   Group(
     orZero(xs).map((x) =>
       ref(translate(rotateY(Point(0, 0, 0), -1 / 4), [x, 0, 0]))
     )
   );
-const Y$6 = (ys) =>
+const Y$5 = (ys) =>
   Group(
     orZero(ys).map((y) =>
       ref(translate(rotateX(Point(0, 0, 0), -1 / 4), [0, y, 0]))
     )
   );
-const Z$4 = (zs) =>
+const Z$3 = (zs) =>
   Group(orZero(zs).map((z) => ref(translate(Point(0, 0, 0), [0, 0, z]))));
 
 const YZ = (xs) =>
@@ -3349,8 +3334,8 @@ const section = (inputGeometry, referenceGeometries = []) => {
   return Group([...outputs, ...ghosts]);
 };
 
-const X$5 = 0;
-const Y$5 = 1;
+const X$4 = 0;
+const Y$4 = 1;
 
 const Gauge = (
   geometry,
@@ -3367,9 +3352,9 @@ const Gauge = (
       continue;
     }
     const [min, max] = bounds;
-    const left = min[X$5];
-    const right = max[X$5];
-    const back = max[Y$5];
+    const left = min[X$4];
+    const right = max[X$4];
+    const back = max[Y$4];
     const width = right - left;
     const base = back - length;
     const offsetBase = back + offset;
@@ -3595,357 +3580,72 @@ const getNot = (geometry, tags) => get(geometry, tags, { not: true });
 const getNotList = (geometry, tags) =>
   getList(geometry, tags, { not: true });
 
-var binPacking = createCommonjsModule(function (module, exports) {
-(function (global, factory) {
-  factory(exports) ;
-}(commonjsGlobal, (function (exports) {
-/******************************************************************************
-
-This is a binary tree based bin packing algorithm that is more complex than
-the simple Packer (packer.js). Instead of starting off with a fixed width and
-height, it starts with the width and height of the first block passed and then
-grows as necessary to accomodate each subsequent block. As it grows it attempts
-to maintain a roughly square ratio by making 'smart' choices about whether to
-grow right or down.
-
-When growing, the algorithm can only grow to the right OR down. Therefore, if
-the new block is BOTH wider and taller than the current target then it will be
-rejected. This makes it very important to initialize with a sensible starting
-width and height. If you are providing sorted input (largest first) then this
-will not be an issue.
-
-A potential way to solve this limitation would be to allow growth in BOTH
-directions at once, but this requires maintaining a more complex tree
-with 3 children (down, right and center) and that complexity can be avoided
-by simply chosing a sensible starting block.
-
-Best results occur when the input blocks are sorted by height, or even better
-when sorted by max(width,height).
-
-Inputs:
-------
-
-  blocks: array of any objects that have .w and .h attributes
-
-Outputs:
--------
-
-  marks each block that fits with a .fit attribute pointing to a
-  node with .x and .y coordinates
-
-Example:
--------
-
-  var blocks = [
-    { w: 100, h: 100 },
-    { w: 100, h: 100 },
-    { w:  80, h:  80 },
-    { w:  80, h:  80 },
-    etc
-    etc
-  ];
-
-  var packer = new GrowingPacker();
-  packer.fit(blocks);
-
-  for(var n = 0 ; n < blocks.length ; n++) {
-    var block = blocks[n];
-    if (block.fit) {
-      Draw(block.fit.x, block.fit.y, block.w, block.h);
-    }
-  }
-
-
-******************************************************************************/
-
-function GrowingPacker() {}
-
-GrowingPacker.prototype = {
-
-  fit: function fit(blocks) {
-    var n,
-        node,
-        block,
-        len = blocks.length;
-    var w = len > 0 ? blocks[0].w : 0;
-    var h = len > 0 ? blocks[0].h : 0;
-    this.root = { x: 0, y: 0, w: w, h: h };
-    for (n = 0; n < len; n++) {
-      block = blocks[n];
-      if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);else block.fit = this.growNode(block.w, block.h);
-    }
-  },
-
-  findNode: function findNode(root, w, h) {
-    if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
-  },
-
-  splitNode: function splitNode(node, w, h) {
-    node.used = true;
-    node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
-    node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
-    return node;
-  },
-
-  growNode: function growNode(w, h) {
-    var canGrowDown = w <= this.root.w;
-    var canGrowRight = h <= this.root.h;
-
-    var shouldGrowRight = canGrowRight && this.root.h >= this.root.w + w; // attempt to keep square-ish by growing right when height is much greater than width
-    var shouldGrowDown = canGrowDown && this.root.w >= this.root.h + h; // attempt to keep square-ish by growing down  when width  is much greater than height
-
-    if (shouldGrowRight) return this.growRight(w, h);else if (shouldGrowDown) return this.growDown(w, h);else if (canGrowRight) return this.growRight(w, h);else if (canGrowDown) return this.growDown(w, h);else return null; // need to ensure sensible root starting size to avoid this happening
-  },
-
-  growRight: function growRight(w, h) {
-    var node;
-    this.root = {
-      used: true,
-      x: 0,
-      y: 0,
-      w: this.root.w + w,
-      h: this.root.h,
-      down: this.root,
-      right: { x: this.root.w, y: 0, w: w, h: this.root.h }
-    };
-    if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
-  },
-
-  growDown: function growDown(w, h) {
-    var node;
-    this.root = {
-      used: true,
-      x: 0,
-      y: 0,
-      w: this.root.w,
-      h: this.root.h + h,
-      down: { x: 0, y: this.root.h, w: this.root.w, h: h },
-      right: this.root
-    };
-    if (node = this.findNode(this.root, w, h)) return this.splitNode(node, w, h);else return null;
-  }
-
-};
-
-/******************************************************************************
-
-This is a very simple binary tree based bin packing algorithm that is initialized
-with a fixed width and height and will fit each block into the first node where
-it fits and then split that node into 2 parts (down and right) to track the
-remaining whitespace.
-
-Best results occur when the input blocks are sorted by height, or even better
-when sorted by max(width,height).
-
-Inputs:
-------
-
-  w:       width of target rectangle
-  h:      height of target rectangle
-  blocks: array of any objects that have .w and .h attributes
-
-Outputs:
--------
-
-  marks each block that fits with a .fit attribute pointing to a
-  node with .x and .y coordinates
-
-Example:
--------
-
-  var blocks = [
-    { w: 100, h: 100 },
-    { w: 100, h: 100 },
-    { w:  80, h:  80 },
-    { w:  80, h:  80 },
-    etc
-    etc
-  ];
-
-  var packer = new Packer(500, 500);
-  packer.fit(blocks);
-
-  for(var n = 0 ; n < blocks.length ; n++) {
-    var block = blocks[n];
-    if (block.fit) {
-      Draw(block.fit.x, block.fit.y, block.w, block.h);
-    }
-  }
-
-
-******************************************************************************/
-
-function Packer(w, h) {
-  this.init(w, h);
-}
-
-Packer.prototype = {
-
-  init: function init(w, h) {
-    this.root = { x: 0, y: 0, w: w, h: h };
-  },
-
-  fit: function fit(blocks) {
-    var n, node, block;
-    for (n = 0; n < blocks.length; n++) {
-      block = blocks[n];
-      if (node = this.findNode(this.root, block.w, block.h)) block.fit = this.splitNode(node, block.w, block.h);
-    }
-  },
-
-  findNode: function findNode(root, w, h) {
-    if (root.used) return this.findNode(root.right, w, h) || this.findNode(root.down, w, h);else if (w <= root.w && h <= root.h) return root;else return null;
-  },
-
-  splitNode: function splitNode(node, w, h) {
-    node.used = true;
-    node.down = { x: node.x, y: node.y + h, w: node.w, h: node.h - h };
-    node.right = { x: node.x + w, y: node.y, w: node.w - w, h: h };
-    return node;
-  }
-
-};
-
-exports.GrowingPacker = GrowingPacker;
-exports.Packer = Packer;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-});
-
-var BinPackingEs = unwrapExports(binPacking);
-
-const { GrowingPacker, Packer } = BinPackingEs;
-
-const X$4 = 0;
-const Y$4 = 1;
-const Z$3 = 2;
-
-const measureSize = (geometry) => {
-  const bounds = measureBoundingBox(geometry);
-  if (bounds === undefined) {
-    return;
-  }
-  const [min, max] = bounds;
-  const width = max[X$4] - min[X$4];
-  const height = max[Y$4] - min[Y$4];
-  return [width, height, min[Z$3]];
-};
-
-const measureOrigin = (geometry) => {
-  const [min] = measureBoundingBox(geometry);
-  const [x, y] = min;
-  return [x, y];
-};
-
-const measureOffsets = (size, pageMargin) => {
-  if (size) {
-    const [width, height] = size;
-
-    // Center the output to match pages.
-    const xOffset = width / -2;
-    const yOffset = height / -2;
-    const packer = new Packer(width - pageMargin * 2, height - pageMargin * 2);
-
-    return [xOffset, yOffset, packer];
-  } else {
-    const packer = new GrowingPacker();
-    return [0, 0, packer];
-  }
-};
-
-const packImpl = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
-  const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
-
-  const packedGeometries = [];
-  const unpackedGeometries = [];
-
-  const blocks = [];
-
-  for (const geometry of geometries) {
-    const size = measureSize(geometry);
-    if (size === undefined) {
-      continue;
-    }
-    const [width, height, minZ] = size;
-    if (!isFinite(width) || !isFinite(height)) {
-      continue;
-    }
-    const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
-    blocks.push({ w, h, minZ, geometry });
-  }
-
-  // Place largest cells first
-  blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
-
-  packer.fit(blocks);
-
-  let minPoint = [Infinity, Infinity, 0];
-  let maxPoint = [-Infinity, -Infinity, 0];
-
-  for (const { geometry, fit, minZ } of blocks) {
-    if (fit && fit.used) {
-      const [x, y] = measureOrigin(geometry);
-      const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
-      const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
-      minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
-      maxPoint = max(
-        [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
-        maxPoint
-      );
-      packedGeometries.push(translate(geometry, [xo, yo, -minZ]));
-    } else {
-      unpackedGeometries.push(geometry);
-    }
-  }
-
-  return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
-};
-
-const pack = (
-  geometry,
-  adviseSize = (_min, _max) => {},
-  { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity } = {}
+const filter$C = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  isNotTypeGhost(geometry);
+
+const filterReferences = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
+    geometry.type
+  );
+
+const cast = (
+  planeReference = XY([0]),
+  sourceReference = XY([1]),
+  geometry
 ) => {
-  if (perLayout === 0) {
-    // Packing was disabled -- do nothing.
-    return geometry;
-  }
+  const inputs = [];
+  linearize(planeReference, filterReferences, inputs);
+  inputs.length = 1;
+  linearize(sourceReference, filterReferences, inputs);
+  inputs.length = 2;
+  linearize(geometry, filter$C, inputs);
+  const outputs = cast$1(inputs);
+  return taggedGroup({}, ...outputs);
+};
 
-  let todo = [];
-  for (const leaf of getLeafs(geometry)) {
-    todo.push(leaf);
+const filterCast = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'item'].includes(geometry.type) &&
+  isNotTypeGhost(geometry) &&
+  isNotTypeVoid(geometry);
+
+const filterSheet = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  isNotTypeGhost(geometry) &&
+  isNotTypeVoid(geometry);
+
+const pack = (geometry, sheets, orientations = [], options = {}) => {
+  // Convert all of the geometry into silhouettes.
+  const inputs = linearize(geometry, filterCast, [], { includeItems: false });
+  const silhouettes = inputs.map((input) => cast(undefined, undefined, input));
+  const count = silhouettes.length;
+  for (const sheet of sheets) {
+    linearize(sheet, filterSheet, silhouettes);
   }
-  const packedLayers = [];
-  while (todo.length > 0) {
-    const input = [];
-    while (todo.length > 0 && input.length < perLayout) {
-      input.push(todo.shift());
-    }
-    const [packed, unpacked, minPoint, maxPoint] = packImpl(
-      { size, pageMargin, itemMargin },
-      ...input
-    );
-    if (minPoint.every(isFinite) && maxPoint.every(isFinite)) {
-      // CHECK: Why is this being overwritten by each pass?
-      adviseSize(minPoint, maxPoint);
-      if (packed.length === 0) {
-        break;
-      } else {
-        packedLayers.push(taggedItem({ tags: ['pack:layout'] }, Group(packed)));
+  const sheetByInput = [];
+  const packed = pack$1(silhouettes, count, orientations, options, sheetByInput);
+  const outputs = [];
+  // This places the parts and their silhouettes.
+  for (let nth = 0; nth < count; nth++) {
+    outputs[nth] = transform(inputs[nth], packed[nth].matrix);
+    silhouettes[nth] = transform(silhouettes[nth], packed[nth].matrix);
+  }
+  // Now construct items with the sheet and the content.
+  const pages = [];
+  for (let nth = 0; nth < sheetByInput.length; nth++) {
+    const sheet = sheetByInput[nth] - count;
+    if (pages[sheet] === undefined) {
+      pages[sheet] = taggedItem({}, Group([]));
+      if (sheets[sheet] !== undefined) {
+        // Need to distinguish the sheet somehow.
+        // Put the sheet 0.01 mm below the surface.
+        pages[sheet].content[0].content.push(translate(sheets[sheet], [0, 0, -0.01]));
       }
-      todo.unshift(...unpacked);
     }
+    pages[sheet].content[0].content.push(outputs[nth]);
+    pages[sheet].content[0].content.push(hasTypeGhost(silhouettes[nth]));
   }
-  // CHECK: Can this distinguish between a set of packed paged, and a single
-  // page that's packed?
-  let packedGeometry = Group(packedLayers);
-  if (size === undefined) {
-    packedGeometry = align(packedGeometry, 'xy');
-  }
-  return packedGeometry;
+  return Group(pages.filter(page => page !== undefined));
 };
 
 const taggedLayout = (
@@ -4277,10 +3977,10 @@ const abstract = (geometry, types) => {
   return geometry;
 };
 
-const filter$C = (geometry) => ['graph'].includes(geometry.type);
+const filter$B = (geometry) => ['graph'].includes(geometry.type);
 
 const approximate = (geometry, faceCount, minErrorDrop) => {
-  const inputs = linearize(geometry, filter$C);
+  const inputs = linearize(geometry, filter$B);
   const outputs = approximate$1(inputs, faceCount, minErrorDrop);
   return replacer(inputs, outputs)(geometry);
 };
@@ -4299,7 +3999,7 @@ const allTags = (geometry) => {
   return collectedTags;
 };
 
-const filter$B = (geometry) =>
+const filter$A = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
@@ -4311,7 +4011,7 @@ const Disjoint = (geometries, { exact } = {}) => {
   );
   const inputs = [];
   for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter$B, inputs);
+    linearize(concreteGeometry, filter$A, inputs);
   }
   const outputs = disjoint$1(inputs, exact);
   const disjointGeometries = [];
@@ -4358,23 +4058,23 @@ const base = (geometry) => {
   return transform(geometry, local);
 };
 
-const filter$A = (geometry) =>
+const filter$z = (geometry) =>
   ['graph', 'points', 'segments', 'polygonsWithHoles'].includes(
     geometry.type
   ) && isNotTypeGhost(geometry);
 
 const bend = (geometry, radius = 100, edgeLength = 1) => {
-  const inputs = linearize(geometry, filter$A);
+  const inputs = linearize(geometry, filter$z);
   const outputs = bend$1(inputs, radius, edgeLength);
   return replacer(inputs, outputs)(geometry);
 };
 
-const filter$z = (geometry) =>
+const filter$y = (geometry) =>
   geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
 
 const serialize = (geometry) => {
   const inputs = [];
-  linearize(geometry, filter$z, inputs, /* includeSketches= */ true);
+  linearize(geometry, filter$y, inputs, /* includeSketches= */ true);
   if (inputs.length === 0) {
     return geometry;
   }
@@ -4580,30 +4280,6 @@ const cached =
     addPending(write(path, result));
     return result;
   };
-
-const filter$y = (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
-
-const filterReferences = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
-    geometry.type
-  );
-
-const cast = (
-  planeReference = XY([0]),
-  sourceReference = XY([1]),
-  geometry
-) => {
-  const inputs = [];
-  linearize(planeReference, filterReferences, inputs);
-  inputs.length = 1;
-  linearize(sourceReference, filterReferences, inputs);
-  inputs.length = 2;
-  linearize(geometry, filter$y, inputs);
-  const outputs = cast$1(inputs);
-  return taggedGroup({}, ...outputs);
-};
 
 const filter$x = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
@@ -6202,4 +5878,4 @@ const wrap = (
     tags(geometry)
   );
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Triangle, Wrap, X$6 as X, XY, XZ, Y$6 as Y, YX, YZ, Z$4 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, base, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, obb, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, trim, turnX, turnXs, turnY, turnYs, turnZ, turnZs, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Triangle, Wrap, X$5 as X, XY, XZ, Y$5 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, base, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, obb, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, trim, turnX, turnXs, turnY, turnYs, turnZ, turnZs, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

@@ -1,17 +1,16 @@
 import { update } from './update.js';
 
 export const replacer = (from, to, limit = from.length) => {
-  const map = new Map();
-  for (let nth = 0; nth < limit; nth++) {
-    map.set(from[nth], to[nth]);
-  }
+  // We need to consider the case that there are duplicates in from.
   const update = (geometry, descend) => {
-    const cut = map.get(geometry);
-    if (cut) {
-      return cut;
-    } else {
-      return descend();
+    for (let nth = 0; nth < limit; nth++) {
+      if (from[nth] === geometry) {
+        // Prevent this from being matched twice.
+        from[nth] = undefined;
+        return to[nth];
+      }
     }
+    return descend();
   };
   return (geometry) => rewrite(geometry, update);
 };
