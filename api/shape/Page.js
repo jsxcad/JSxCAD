@@ -1,3 +1,4 @@
+/*
 import { Page as PageOp, page as pageOp } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
@@ -13,3 +14,4 @@ export const page = Shape.registerMethod3(
   ['inputGeometry', 'modes:pack,center,a4,individual', 'options'],
   pageOp
 );
+*/

@@ -27,10 +27,6 @@ await r
   .view();
 ```
 
-![Image](fold.md.$2_cube.png)
-
-[cube.stl](fold.cube.stl)
-
 ```JavaScript
 r.ez([-0.5]).cut(e).stl('cube');
 ```

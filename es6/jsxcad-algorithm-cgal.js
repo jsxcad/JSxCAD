@@ -1803,9 +1803,23 @@ const minimizeOverhang = (inputs, threshold, split = false) =>
     }
   });
 
-const pack = (inputs, count, orientations = [], { perimeterWeight = 1, boundsWeight = 1, holesWeight = 1 } = {}, sheetByInput = []) =>
+const pack = (
+  inputs,
+  count,
+  orientations = [],
+  { perimeterWeight = 1, boundsWeight = 1, holesWeight = 1 } = {},
+  sheetByInput = []
+) =>
   withCgalGeometry('pack', inputs, (cgalGeometry, g) => {
-    const status = g.Pack(cgalGeometry, Number(count), orientations, perimeterWeight, boundsWeight, holesWeight, sheetByInput);
+    const status = g.Pack(
+      cgalGeometry,
+      Number(count),
+      orientations,
+      perimeterWeight,
+      boundsWeight,
+      holesWeight,
+      sheetByInput
+    );
     switch (status) {
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
@@ -1925,13 +1939,7 @@ const section = (inputs, count) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');
       case STATUS_OK:
-        return fromCgalGeometry(
-          cgalGeometry,
-          inputs,
-          cgalGeometry.getSize(),
-          inputs.length,
-          /* regroup= */ true
-        );
+        return fromCgalGeometry(cgalGeometry, inputs);
       default:
         throw new Error(`Unexpected status ${status} in section`);
     }

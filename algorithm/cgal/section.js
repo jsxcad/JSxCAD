@@ -10,13 +10,7 @@ export const section = (inputs, count) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');
       case STATUS_OK:
-        return fromCgalGeometry(
-          cgalGeometry,
-          inputs,
-          cgalGeometry.getSize(),
-          inputs.length,
-          /* regroup= */ true
-        );
+        return fromCgalGeometry(cgalGeometry, inputs);
       default:
         throw new Error(`Unexpected status ${status} in section`);
     }

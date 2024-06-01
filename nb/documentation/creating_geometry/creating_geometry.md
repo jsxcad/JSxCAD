@@ -55,6 +55,8 @@ Create a bezier curve. The number of segments is scaled automatically to match t
 await Curve(Point(0, 0), Point(10, 10), Point(20, 30), Point(40, 0)).view();
 ```
 
+![Image](creating_geometry.md.$7.png)
+
 ```JavaScript
 await Curve([0, 0], [10, 0], [10, 10], [20, 10])
   .rx(1 / 4)
@@ -65,6 +67,8 @@ await Curve([0, 0], [10, 0], [10, 10], [20, 10])
 ---
 ### Empty
 Creates a new empty geometry
+
+![Image](creating_geometry.md.$9.png)
 
 ```JavaScript
 Empty().view();

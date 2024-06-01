@@ -5,8 +5,8 @@
 typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
 std::ostream& operator<<(std::ostream& os, const EK::Point_2& p) {
-  // os << "[" << p.x().exact() << ", " << p.y().exact() << "]";
-  os << "[" << p.x() << ", " << p.y() << "]";
+  os << "[" << p.x().exact() << ", " << p.y().exact() << "]";
+  // os << "[" << p.x() << ", " << p.y() << "]";
   return os;
 }
 

@@ -1,14 +1,16 @@
-import { Empty } from './Empty.js';
-import { Group } from './Group.js';
-import { alignment } from './alignment.js';
-import { by } from './by.js';
-import { getLayouts } from './tagged/getLayouts.js';
-import { getLeafs } from './tagged/getLeafs.js';
-import { getList } from './get.js';
-import { measureBoundingBox } from './measureBoundingBox.js';
-import { pack as packOp } from './pack.js';
-import { taggedLayout } from './tagged/taggedLayout.js';
+// import { Empty } from './Empty.js';
+// import { Group } from './Group.js';
+// import { alignment } from './alignment.js';
+// import { by } from './by.js';
+import { eachItem } from './tagged/eachItem.js';
+// import { getLayouts } from './tagged/getLayouts.js';
+// import { getLeafs } from './tagged/getLeafs.js';
+// import { getList } from './get.js';
+// import { measureBoundingBox } from './measureBoundingBox.js';
+// import { pack as packOp } from './pack.js';
+// import { taggedLayout } from './tagged/taggedLayout.js';
 
+/*
 const MIN = 0;
 const MAX = 1;
 const X = 0;
@@ -219,12 +221,14 @@ export const page = (
     { pack, center, a4, individual },
     { size, pageMargin, itemMargin, itemsPerPage }
   );
+*/
 
 export const ensurePages = (geometry, depth = 0) => {
-  const pages = getLayouts(geometry);
-  if (pages.length === 0 && depth === 0) {
-    return ensurePages(Page([geometry], { pack: false }), depth + 1);
-  } else {
-    return pages;
-  }
+  const sheets = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'item' && item.tags.includes('pack:sheet')) {
+      sheets.push(item);
+    }
+  });
+  return sheets;
 };

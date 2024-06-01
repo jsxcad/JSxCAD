@@ -1,4 +1,4 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, invertTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, cast as cast$1, pack as pack$1, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, trim as trim$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, invertTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, pack as pack$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, trim as trim$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
 export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-material.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-color.js';
@@ -74,6 +74,9 @@ const update = (geometry, updates, changes) => {
 };
 
 const replacer = (from, to, limit = from.length) => {
+  if (from === to) {
+    return (geometry) => geometry;
+  }
   // We need to consider the case that there are duplicates in from.
   const update = (geometry, descend) => {
     for (let nth = 0; nth < limit; nth++) {
@@ -92,6 +95,7 @@ const validateContent = (geometry, content) => {
   if (content && content.some((value) => !value)) {
     for (const v of content) {
       console.log(`QQ/content: ${v}`);
+      console.log(`QQ/geometry= ${JSON.stringify(geometry)}`);
     }
     throw Error(
       `Invalid content: ${JSON.stringify(geometry, (k, v) =>
@@ -364,7 +368,7 @@ const linearize = (
   geometry,
   filter,
   out = [],
-  { includeSketches = false, includeItems = true } = {},
+  { includeSketches = false, includeItems = true } = {}
 ) => {
   const collect = (geometry, descend) => {
     if (filter(geometry)) {
@@ -413,8 +417,8 @@ const filter$O = (geometry) =>
 const measureBoundingBox = (geometry) =>
   computeBoundingBox(linearize(geometry, filter$O));
 
-const X$a = 0;
-const Y$a = 1;
+const X$9 = 0;
+const Y$9 = 1;
 const Z$8 = 2;
 
 const scale$1 = (geometry, [x = 1, y = 1, z = 1]) => {
@@ -466,8 +470,8 @@ const scaleToFit = (geometry, [x, y, z]) => {
     return geometry;
   }
   const [min, max] = bounds;
-  const length = max[X$a] - min[X$a];
-  const width = max[Y$a] - min[Y$a];
+  const length = max[X$9] - min[X$9];
+  const width = max[Y$9] - min[Y$9];
   const height = max[Z$8] - min[Z$8];
   if (x === undefined) {
     x = length;
@@ -684,8 +688,8 @@ const loop = (geometry, geometries, mode = {}) =>
 const Loop = (geometries, mode = {}) =>
   Link(geometries, { ...mode, close: true });
 
-const X$9 = 0;
-const Y$9 = 1;
+const X$8 = 0;
+const Y$8 = 1;
 const Z$7 = 2;
 
 const buildCorners = (x = 1, y = x, z = 0) => {
@@ -696,30 +700,30 @@ const buildCorners = (x = 1, y = x, z = 0) => {
       x.push(0);
     }
     if (x[0] < x[1]) {
-      c1[X$9] = x[1];
-      c2[X$9] = x[0];
+      c1[X$8] = x[1];
+      c2[X$8] = x[0];
     } else {
-      c1[X$9] = x[0];
-      c2[X$9] = x[1];
+      c1[X$8] = x[0];
+      c2[X$8] = x[1];
     }
   } else {
-    c1[X$9] = x / 2;
-    c2[X$9] = x / -2;
+    c1[X$8] = x / 2;
+    c2[X$8] = x / -2;
   }
   if (y instanceof Array) {
     while (y.length < 2) {
       y.push(0);
     }
     if (y[0] < y[1]) {
-      c1[Y$9] = y[1];
-      c2[Y$9] = y[0];
+      c1[Y$8] = y[1];
+      c2[Y$8] = y[0];
     } else {
-      c1[Y$9] = y[0];
-      c2[Y$9] = y[1];
+      c1[Y$8] = y[0];
+      c2[Y$8] = y[1];
     }
   } else {
-    c1[Y$9] = y / 2;
-    c2[Y$9] = y / -2;
+    c1[Y$8] = y / 2;
+    c2[Y$8] = y / -2;
   }
   if (z instanceof Array) {
     while (z.length < 2) {
@@ -745,8 +749,8 @@ const computeScale = (
 ) => [ax - bx, ay - by, az - bz];
 
 const computeMiddle = (c1, c2) => [
-  (c1[X$9] + c2[X$9]) * 0.5,
-  (c1[Y$9] + c2[Y$9]) * 0.5,
+  (c1[X$8] + c2[X$8]) * 0.5,
+  (c1[Y$8] + c2[Y$8]) * 0.5,
   (c1[Z$7] + c2[Z$7]) * 0.5,
 ];
 
@@ -1040,8 +1044,8 @@ const isSeqSpec = (value) => {
 const toDiameterFromApothem = (apothem, sides = 32) =>
   apothem / Math.cos(Math.PI / sides);
 
-const X$8 = 0;
-const Y$8 = 1;
+const X$7 = 0;
+const Y$7 = 1;
 const Z$6 = 2;
 
 const makeArc =
@@ -1054,11 +1058,11 @@ const makeArc =
     const scale = computeScale(c1, c2);
     const middle = computeMiddle(c1, c2);
 
-    const left = c1[X$8];
-    const right = c2[X$8];
+    const left = c1[X$7];
+    const right = c2[X$7];
 
-    const front = c1[Y$8];
-    const back = c2[Y$8];
+    const front = c1[Y$7];
+    const back = c2[Y$7];
 
     const bottom = c1[Z$6];
     const top = c2[Z$6];
@@ -1077,30 +1081,30 @@ const makeArc =
 
     if (
       end - start === 1 ||
-      (axis === X$8 && left !== right) ||
-      (axis === Y$8 && front !== back) ||
+      (axis === X$7 && left !== right) ||
+      (axis === Y$7 && front !== back) ||
       (axis === Z$6 && top !== bottom)
     ) {
       spiral = fill$1(Loop([spiral]));
     }
 
     switch (axis) {
-      case X$8: {
-        scale[X$8] = 1;
+      case X$7: {
+        scale[X$7] = 1;
         spiral = translate(scale$1(rotateY(spiral, -1 / 4), scale), middle);
         if (left !== right) {
           spiral = extrudeAlongX(spiral, [
-            [left - middle[X$8], right - middle[X$8]],
+            [left - middle[X$7], right - middle[X$7]],
           ]);
         }
         break;
       }
-      case Y$8: {
-        scale[Y$8] = 1;
+      case Y$7: {
+        scale[Y$7] = 1;
         spiral = translate(scale$1(rotateX(spiral, -1 / 4), scale), middle);
         if (front !== back) {
           spiral = extrudeAlongY(spiral, [
-            [front - middle[Y$8], back - middle[Y$8]],
+            [front - middle[Y$7], back - middle[Y$7]],
           ]);
         }
         break;
@@ -1123,8 +1127,8 @@ const makeArc =
     return makeAbsolute(spiral);
   };
 
-const makeArcX = makeArc(X$8);
-const makeArcY = makeArc(Y$8);
+const makeArcX = makeArc(X$7);
+const makeArcY = makeArc(Y$7);
 const makeArcZ = makeArc(Z$6);
 
 const ArcOp =
@@ -1215,8 +1219,8 @@ const Edge = (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
   return taggedSegments({ matrix }, [baseSegment]);
 };
 
-const X$7 = 0;
-const Y$7 = 1;
+const X$6 = 0;
+const Y$6 = 1;
 const Z$5 = 2;
 
 let fundamentalShapes;
@@ -1243,11 +1247,11 @@ const buildFs = () => {
 const makeBox = (corner1, corner2) => {
   const build = () => {
     const fs = buildFs();
-    const left = corner2[X$7];
-    const right = corner1[X$7];
+    const left = corner2[X$6];
+    const right = corner1[X$6];
 
-    const front = corner2[Y$7];
-    const back = corner1[Y$7];
+    const front = corner2[Y$6];
+    const back = corner1[Y$6];
 
     const bottom = corner2[Z$5];
     const top = corner1[Z$5];
@@ -2934,12 +2938,12 @@ const Segment = (segment) => taggedSegments({}, [segment]);
 
 const Segments = (segments) => taggedSegments({}, segments);
 
-const X$6 = 0;
-const Y$6 = 1;
+const X$5 = 0;
+const Y$5 = 1;
 const Z$4 = 2;
 
-const MIN$1 = 0;
-const MAX$1 = 1;
+const MIN = 0;
+const MAX = 1;
 
 // Round to the nearest 0.001 mm
 
@@ -2952,8 +2956,8 @@ const computeOffset = (geometry, spec, origin) => {
   if (boundingBox === undefined) {
     return [0, 0, 0];
   }
-  const max = roundCoordinate(boundingBox[MAX$1]);
-  const min = roundCoordinate(boundingBox[MIN$1]);
+  const max = roundCoordinate(boundingBox[MAX]);
+  const min = roundCoordinate(boundingBox[MIN]);
   const center = roundCoordinate(scale(0.5, add(min, max)));
   const offset = [0, 0, 0];
   let index = 0;
@@ -2962,30 +2966,30 @@ const computeOffset = (geometry, spec, origin) => {
       case 'x': {
         switch (spec[index]) {
           case '>':
-            offset[X$6] = -min[X$6];
+            offset[X$5] = -min[X$5];
             index += 1;
             break;
           case '<':
-            offset[X$6] = -max[X$6];
+            offset[X$5] = -max[X$5];
             index += 1;
             break;
           default:
-            offset[X$6] = -center[X$6];
+            offset[X$5] = -center[X$5];
         }
         break;
       }
       case 'y': {
         switch (spec[index]) {
           case '>':
-            offset[Y$6] = -min[Y$6];
+            offset[Y$5] = -min[Y$5];
             index += 1;
             break;
           case '<':
-            offset[Y$6] = -max[Y$6];
+            offset[Y$5] = -max[Y$5];
             index += 1;
             break;
           default:
-            offset[Y$6] = -center[Y$6];
+            offset[Y$5] = -center[Y$5];
         }
         break;
       }
@@ -3041,11 +3045,18 @@ const bb = (
   geometry,
   xOffset = 1,
   yOffset = xOffset,
-  zOffset = yOffset
+  zOffset = yOffset,
+  { flat = false } = {}
 ) => {
   const bounds = measureBoundingBox(geometry);
   if (bounds === undefined) {
     return Empty();
+  } else if (flat) {
+    const [min, max] = bounds;
+    return Box([], {
+      c2: add(min, [-xOffset, -yOffset, 0]),
+      c1: add(max, [xOffset, yOffset, 0]),
+    });
   } else {
     const [min, max] = bounds;
     return Box([], {
@@ -3249,13 +3260,13 @@ const orZero = (v) => {
   return r;
 };
 
-const X$5 = (xs) =>
+const X$4 = (xs) =>
   Group(
     orZero(xs).map((x) =>
       ref(translate(rotateY(Point(0, 0, 0), -1 / 4), [x, 0, 0]))
     )
   );
-const Y$5 = (ys) =>
+const Y$4 = (ys) =>
   Group(
     orZero(ys).map((y) =>
       ref(translate(rotateX(Point(0, 0, 0), -1 / 4), [0, y, 0]))
@@ -3315,8 +3326,8 @@ const filterReferences$1 = (geometry) =>
     geometry.type
   );
 
-const section = (inputGeometry, referenceGeometries = []) => {
-  const inputs = linearize(inputGeometry, filterInputs$1);
+const section = (geometry, referenceGeometries = []) => {
+  const inputs = linearize(geometry, filterInputs$1);
   const count = inputs.length;
   if (referenceGeometries.length === 0) {
     // Default to the Z(0) plane.
@@ -3326,16 +3337,17 @@ const section = (inputGeometry, referenceGeometries = []) => {
       linearize(referenceGeometry, filterReferences$1, inputs);
     }
   }
-  const outputs = section$1(inputs, count);
   const ghosts = [];
   for (let nth = 0; nth < count; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
-  return Group([...outputs, ...ghosts]);
+  const outputs = section$1(inputs, count);
+  const updated = replacer(inputs, outputs, count)(geometry);
+  return Group([updated, ...ghosts]);
 };
 
-const X$4 = 0;
-const Y$4 = 1;
+const X$3 = 0;
+const Y$3 = 1;
 
 const Gauge = (
   geometry,
@@ -3352,9 +3364,9 @@ const Gauge = (
       continue;
     }
     const [min, max] = bounds;
-    const left = min[X$4];
-    const right = max[X$4];
-    const back = max[Y$4];
+    const left = min[X$3];
+    const right = max[X$3];
+    const back = max[Y$3];
     const width = right - left;
     const base = back - length;
     const offsetBase = back + offset;
@@ -3473,211 +3485,19 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
-const getLayouts = (geometry) => {
-  const layouts = [];
-  eachItem(geometry, (item) => {
-    if (item.type === 'layout') {
-      layouts.push(item);
-    }
-  });
-  return layouts;
-};
+// import { Empty } from './Empty.js';
+// import { getLayouts } from './tagged/getLayouts.js';
+// import { getLeafs } from './tagged/getLeafs.js';
+// import { getList } from './get.js';
+// import { measureBoundingBox } from './measureBoundingBox.js';
+// import { pack as packOp } from './pack.js';
+// import { taggedLayout } from './tagged/taggedLayout.js';
 
-const getSimpleList = (
-  geometry,
-  tags,
-  { inItem = false, not = false } = {}
-) => {
-  const isMatch = oneOfTagMatcher(tags, 'item');
-  const picks = [];
-  const walk = (geometry, descend) => {
-    const { tags, type } = geometry;
-    if (type === 'group') {
-      return descend();
-    }
-    let matched = false;
-    if (isMatch(`type:${geometry.type}`)) {
-      matched = true;
-    } else {
-      for (const tag of tags) {
-        if (isMatch(tag)) {
-          matched = true;
-          break;
-        }
-      }
-    }
-    if (not) {
-      if (!matched) {
-        picks.push(geometry);
-      }
-    } else {
-      if (matched) {
-        picks.push(geometry);
-      }
-    }
-    if (inItem || type !== 'item') {
-      return descend();
-    }
-  };
-  visit(geometry, walk);
-  return picks;
-};
-
-const getList = (geometry, tags, options) => {
-  const simple = [];
-  const complex = [];
-  for (const tag of tags) {
-    if (tag.includes('/')) {
-      complex.push(tag);
-    } else {
-      simple.push(tag);
-    }
-  }
-  const picks =
-    simple.length > 0 ? getSimpleList(geometry, simple, options) : [];
-  if (complex.length === 0) {
-    return picks;
-  }
-  for (const tag of complex) {
-    const parts = tag.split('/');
-    let last = [geometry];
-    while (parts.length > 1) {
-      const next = [];
-      const part = parts.shift();
-      for (const geometry of last) {
-        for (const item of getSimpleList(geometry, [part], options)) {
-          if (item.type !== 'item') {
-            continue;
-          }
-          next.push(item.content[0]);
-        }
-      }
-      last = next;
-    }
-    // parts now contains just the final part.
-    for (const geometry of last) {
-      for (const value of getSimpleList(geometry, parts, options)) {
-        picks.push(value);
-      }
-    }
-  }
-  if (picks.length === 0 && !options.pass) {
-    throw Error(`getList found no matches for ${tags.join(', ')}`);
-  }
-  return picks;
-};
-
-const get = (geometry, tags, options) =>
-  Group(getList(geometry, tags, options));
-
-const getAll = (geometry, tags) => get(geometry, tags, { inItem: true });
-
-const getAllList = (geometry, tags) =>
-  getList(geometry, tags, { inItem: true });
-
-const getNot = (geometry, tags) => get(geometry, tags, { not: true });
-
-const getNotList = (geometry, tags) =>
-  getList(geometry, tags, { not: true });
-
-const filter$C = (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry);
-
-const filterReferences = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
-    geometry.type
-  );
-
-const cast = (
-  planeReference = XY([0]),
-  sourceReference = XY([1]),
-  geometry
-) => {
-  const inputs = [];
-  linearize(planeReference, filterReferences, inputs);
-  inputs.length = 1;
-  linearize(sourceReference, filterReferences, inputs);
-  inputs.length = 2;
-  linearize(geometry, filter$C, inputs);
-  const outputs = cast$1(inputs);
-  return taggedGroup({}, ...outputs);
-};
-
-const filterCast = (geometry) =>
-  ['graph', 'polygonsWithHoles', 'item'].includes(geometry.type) &&
-  isNotTypeGhost(geometry) &&
-  isNotTypeVoid(geometry);
-
-const filterSheet = (geometry) =>
-  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
-  isNotTypeGhost(geometry) &&
-  isNotTypeVoid(geometry);
-
-const pack = (geometry, sheets, orientations = [], options = {}) => {
-  // Convert all of the geometry into silhouettes.
-  const inputs = linearize(geometry, filterCast, [], { includeItems: false });
-  const silhouettes = inputs.map((input) => cast(undefined, undefined, input));
-  const count = silhouettes.length;
-  for (const sheet of sheets) {
-    linearize(sheet, filterSheet, silhouettes);
-  }
-  const sheetByInput = [];
-  const packed = pack$1(silhouettes, count, orientations, options, sheetByInput);
-  const outputs = [];
-  // This places the parts and their silhouettes.
-  for (let nth = 0; nth < count; nth++) {
-    outputs[nth] = transform(inputs[nth], packed[nth].matrix);
-    silhouettes[nth] = transform(silhouettes[nth], packed[nth].matrix);
-  }
-  // Now construct items with the sheet and the content.
-  const pages = [];
-  for (let nth = 0; nth < sheetByInput.length; nth++) {
-    const sheet = sheetByInput[nth] - count;
-    if (pages[sheet] === undefined) {
-      pages[sheet] = taggedItem({}, Group([]));
-      if (sheets[sheet] !== undefined) {
-        // Need to distinguish the sheet somehow.
-        // Put the sheet 0.01 mm below the surface.
-        pages[sheet].content[0].content.push(translate(sheets[sheet], [0, 0, -0.01]));
-      }
-    }
-    pages[sheet].content[0].content.push(outputs[nth]);
-    pages[sheet].content[0].content.push(hasTypeGhost(silhouettes[nth]));
-  }
-  return Group(pages.filter(page => page !== undefined));
-};
-
-const taggedLayout = (
-  { tags = [], matrix, provenance, size, margin, title },
-  ...content
-) => {
-  if (content.some((value) => value === undefined)) {
-    throw Error(`Undefined Layout content`);
-  }
-  if (content.some((value) => value.length)) {
-    throw Error(`Layout content is an array`);
-  }
-  if (content.some((value) => value.then)) {
-    throw Error(`Layout content is a promise`);
-  }
-  if (content.some((value) => value.geometry)) {
-    throw Error(`Likely Shape in Layout`);
-  }
-  return {
-    type: 'layout',
-    layout: { size, margin, title },
-    tags,
-    matrix,
-    provenance,
-    content,
-  };
-};
-
+/*
 const MIN = 0;
 const MAX = 1;
-const X$3 = 0;
-const Y$3 = 1;
+const X = 0;
+const Y = 1;
 
 const buildLayout = ({
   layer,
@@ -3694,9 +3514,9 @@ const buildLayout = ({
   return layout;
 };
 
-const Page = (
+export const Page = (
   geometries,
-  { pack: pack$1, center, a4, individual },
+  { pack, center, a4, individual },
   { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
 ) => {
   if (a4) {
@@ -3704,7 +3524,7 @@ const Page = (
   }
 
   if (individual) {
-    pack$1 = true;
+    pack = true;
     itemsPerPage = 1;
   }
 
@@ -3715,7 +3535,7 @@ const Page = (
       layers.push(leaf);
     }
   }
-  if (!pack$1 && size) {
+  if (!pack && size) {
     const layer = Group(layers);
     const [width, height] = size;
     const packSize = [
@@ -3725,15 +3545,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$3] * 2),
-        Math.abs(packSize[MIN][X$3] * 2)
+        Math.abs(packSize[MAX][X] * 2),
+        Math.abs(packSize[MIN][X] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$3] * 2),
-        Math.abs(packSize[MIN][Y$3] * 2)
+        Math.abs(packSize[MAX][Y] * 2),
+        Math.abs(packSize[MIN][Y] * 2)
       ) +
       pageMargin * 2;
     return buildLayout({
@@ -3743,7 +3563,7 @@ const Page = (
       margin,
       center,
     });
-  } else if (!pack$1 && !size) {
+  } else if (!pack && !size) {
     const layer = Group(layers);
     const packSize = measureBoundingBox(layer);
     if (packSize === undefined) {
@@ -3752,15 +3572,15 @@ const Page = (
     const pageWidth =
       Math.max(
         1,
-        Math.abs(packSize[MAX][X$3] * 2),
-        Math.abs(packSize[MIN][X$3] * 2)
+        Math.abs(packSize[MAX][X] * 2),
+        Math.abs(packSize[MIN][X] * 2)
       ) +
       pageMargin * 2;
     const pageLength =
       Math.max(
         1,
-        Math.abs(packSize[MAX][Y$3] * 2),
-        Math.abs(packSize[MIN][Y$3] * 2)
+        Math.abs(packSize[MAX][Y] * 2),
+        Math.abs(packSize[MIN][Y] * 2)
       ) +
       pageMargin * 2;
     if (isFinite(pageWidth) && isFinite(pageLength)) {
@@ -3780,10 +3600,10 @@ const Page = (
         center,
       });
     }
-  } else if (pack$1 && size) {
+  } else if (pack && size) {
     // Content fits to page size.
     const packSize = [];
-    const content = pack(
+    const content = packOp(
       Group(layers),
       (min, max) => {
         packSize[MIN] = min;
@@ -3799,8 +3619,8 @@ const Page = (
     if (packSize.length === 0) {
       throw Error('Packing failed');
     }
-    const pageWidth = Math.max(1, packSize[MAX][X$3] - packSize[MIN][X$3]);
-    const pageLength = Math.max(1, packSize[MAX][Y$3] - packSize[MIN][Y$3]);
+    const pageWidth = Math.max(1, packSize[MAX][X] - packSize[MIN][X]);
+    const pageLength = Math.max(1, packSize[MAX][Y] - packSize[MIN][Y]);
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of getList(content, ['pack:layout'])) {
@@ -3825,10 +3645,10 @@ const Page = (
         center,
       });
     }
-  } else if (pack$1 && !size) {
+  } else if (pack && !size) {
     const packSize = [];
     // Page fits to content size.
-    const contents = pack(
+    const contents = packOp(
       Group(layers),
       (min, max) => {
         packSize[MIN] = min;
@@ -3845,8 +3665,8 @@ const Page = (
     }
     // FIX: Using content.size() loses the margin, which is a problem for repacking.
     // Probably page plans should be generated by pack and count toward the size.
-    const pageWidth = packSize[MAX][X$3] - packSize[MIN][X$3];
-    const pageLength = packSize[MAX][Y$3] - packSize[MIN][Y$3];
+    const pageWidth = packSize[MAX][X] - packSize[MIN][X];
+    const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of getList(contents, ['pack:layout'])) {
@@ -3874,7 +3694,7 @@ const Page = (
   }
 };
 
-const page = (
+export const page = (
   geometry,
   { pack, center, a4, individual },
   { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity } = {}
@@ -3884,14 +3704,16 @@ const page = (
     { pack, center, a4, individual },
     { size, pageMargin, itemMargin, itemsPerPage }
   );
+*/
 
 const ensurePages = (geometry, depth = 0) => {
-  const pages = getLayouts(geometry);
-  if (pages.length === 0 && depth === 0) {
-    return ensurePages(Page([geometry], { pack: false }), depth + 1);
-  } else {
-    return pages;
-  }
+  const sheets = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'item' && item.tags.includes('pack:sheet')) {
+      sheets.push(item);
+    }
+  });
+  return sheets;
 };
 
 const toolFilter = (geometry) =>
@@ -3977,10 +3799,10 @@ const abstract = (geometry, types) => {
   return geometry;
 };
 
-const filter$B = (geometry) => ['graph'].includes(geometry.type);
+const filter$C = (geometry) => ['graph'].includes(geometry.type);
 
 const approximate = (geometry, faceCount, minErrorDrop) => {
-  const inputs = linearize(geometry, filter$B);
+  const inputs = linearize(geometry, filter$C);
   const outputs = approximate$1(inputs, faceCount, minErrorDrop);
   return replacer(inputs, outputs)(geometry);
 };
@@ -3999,27 +3821,24 @@ const allTags = (geometry) => {
   return collectedTags;
 };
 
-const filter$A = (geometry) =>
+const filter$B = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
     geometry.type
   ) &&
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
 const Disjoint = (geometries, { exact } = {}) => {
-  const concreteGeometries = geometries.map((geometry) =>
-    toConcreteGeometry(geometry)
-  );
   const inputs = [];
-  for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter$A, inputs);
+  for (const geometry of geometries) {
+    linearize(geometry, filter$B, inputs);
   }
   const outputs = disjoint$1(inputs, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
-  for (const concreteGeometry of concreteGeometries) {
-    disjointGeometries.push(update(concreteGeometry));
+  for (const geometry of geometries) {
+    disjointGeometries.push(update(geometry));
   }
-  return taggedGroup({}, ...disjointGeometries);
+  return Group(disjointGeometries);
 };
 
 const fit = (geometry, geometries, modes) =>
@@ -4058,23 +3877,23 @@ const base = (geometry) => {
   return transform(geometry, local);
 };
 
-const filter$z = (geometry) =>
+const filter$A = (geometry) =>
   ['graph', 'points', 'segments', 'polygonsWithHoles'].includes(
     geometry.type
   ) && isNotTypeGhost(geometry);
 
 const bend = (geometry, radius = 100, edgeLength = 1) => {
-  const inputs = linearize(geometry, filter$z);
+  const inputs = linearize(geometry, filter$A);
   const outputs = bend$1(inputs, radius, edgeLength);
   return replacer(inputs, outputs)(geometry);
 };
 
-const filter$y = (geometry) =>
+const filter$z = (geometry) =>
   geometry.type === 'graph' && !geometry.graph.serializedSurfaceMesh;
 
 const serialize = (geometry) => {
   const inputs = [];
-  linearize(geometry, filter$y, inputs, /* includeSketches= */ true);
+  linearize(geometry, filter$z, inputs, /* includeSketches= */ true);
   if (inputs.length === 0) {
     return geometry;
   }
@@ -4280,6 +4099,30 @@ const cached =
     addPending(write(path, result));
     return result;
   };
+
+const filter$y = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  isNotTypeGhost(geometry);
+
+const filterReferences = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'segments', 'points', 'empty'].includes(
+    geometry.type
+  );
+
+const cast = (
+  planeReference = XY([0]),
+  sourceReference = XY([1]),
+  geometry
+) => {
+  const inputs = [];
+  linearize(planeReference, filterReferences, inputs);
+  inputs.length = 1;
+  linearize(sourceReference, filterReferences, inputs);
+  inputs.length = 2;
+  linearize(geometry, filter$y, inputs);
+  const outputs = cast$1(inputs);
+  return taggedGroup({}, ...outputs);
+};
 
 const filter$x = (geometry) =>
   ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
@@ -4830,6 +4673,103 @@ const generateUpperEnvelope = (geometry, modes) => {
   return replacer(inputs, outputs)(concreteGeometry);
 };
 
+const getSimpleList = (
+  geometry,
+  tags,
+  { inItem = false, not = false } = {}
+) => {
+  const isMatch = oneOfTagMatcher(tags, 'item');
+  const picks = [];
+  const walk = (geometry, descend) => {
+    const { tags, type } = geometry;
+    if (type === 'group') {
+      return descend();
+    }
+    let matched = false;
+    if (isMatch(`type:${geometry.type}`)) {
+      matched = true;
+    } else {
+      for (const tag of tags) {
+        if (isMatch(tag)) {
+          matched = true;
+          break;
+        }
+      }
+    }
+    if (not) {
+      if (!matched) {
+        picks.push(geometry);
+      }
+    } else {
+      if (matched) {
+        picks.push(geometry);
+      }
+    }
+    if (inItem || type !== 'item') {
+      return descend();
+    }
+  };
+  visit(geometry, walk);
+  return picks;
+};
+
+const getList = (geometry, tags, options) => {
+  const simple = [];
+  const complex = [];
+  for (const tag of tags) {
+    if (tag.includes('/')) {
+      complex.push(tag);
+    } else {
+      simple.push(tag);
+    }
+  }
+  const picks =
+    simple.length > 0 ? getSimpleList(geometry, simple, options) : [];
+  if (complex.length === 0) {
+    return picks;
+  }
+  for (const tag of complex) {
+    const parts = tag.split('/');
+    let last = [geometry];
+    while (parts.length > 1) {
+      const next = [];
+      const part = parts.shift();
+      for (const geometry of last) {
+        for (const item of getSimpleList(geometry, [part], options)) {
+          if (item.type !== 'item') {
+            continue;
+          }
+          next.push(item.content[0]);
+        }
+      }
+      last = next;
+    }
+    // parts now contains just the final part.
+    for (const geometry of last) {
+      for (const value of getSimpleList(geometry, parts, options)) {
+        picks.push(value);
+      }
+    }
+  }
+  if (picks.length === 0 && !options.pass) {
+    throw Error(`getList found no matches for ${tags.join(', ')}`);
+  }
+  return picks;
+};
+
+const get = (geometry, tags, options) =>
+  Group(getList(geometry, tags, options));
+
+const getAll = (geometry, tags) => get(geometry, tags, { inItem: true });
+
+const getAllList = (geometry, tags) =>
+  getList(geometry, tags, { inItem: true });
+
+const getNot = (geometry, tags) => get(geometry, tags, { not: true });
+
+const getNotList = (geometry, tags) =>
+  getList(geometry, tags, { not: true });
+
 const getAnySurfaces = (geometry) => {
   const surfaces = [];
   eachItem(geometry, (item) => {
@@ -4857,6 +4797,16 @@ const getItems = (geometry) => {
   };
   visit(geometry, op);
   return items;
+};
+
+const getLayouts = (geometry) => {
+  const layouts = [];
+  eachItem(geometry, (item) => {
+    if (item.type === 'item' && item.tags.includes('pack:sheet')) {
+      layouts.push(item);
+    }
+  });
+  return layouts;
 };
 
 // Retrieve leaf geometry.
@@ -5268,6 +5218,82 @@ const orient = (
   return c;
 };
 
+const filterCast = (geometry) =>
+  ['graph', 'polygonsWithHoles', 'item'].includes(geometry.type) &&
+  isNotTypeGhost(geometry) &&
+  isNotTypeVoid(geometry);
+
+const filterSheet = (geometry) =>
+  ['graph', 'polygonsWithHoles'].includes(geometry.type) &&
+  isNotTypeGhost(geometry) &&
+  isNotTypeVoid(geometry);
+
+const pack = (
+  geometry,
+  sheets = [],
+  orientations = [],
+  options = {},
+  strategy = 'bb'
+) => {
+  // Convert all of the geometry into silhouettes.
+  const inputs = linearize(geometry, filterCast, [], { includeItems: false });
+  let silhouettes;
+  switch (strategy) {
+    case 'bb':
+      // silhouettes are bounding boxes.
+      silhouettes = inputs.map((input) =>
+        cast(undefined, undefined, bb(input, 0, 0, 0, { flat: true }))
+      );
+      break;
+    case 'hull':
+      // silhouettes are convex hulls.
+      silhouettes = inputs.map((input) =>
+        cast(undefined, undefined, ConvexHull([input]))
+      );
+      break;
+    case 'outline':
+      // silhouettes are the actual shape outlines.
+      silhouettes = inputs.map((input) => cast(undefined, undefined, input));
+      break;
+  }
+  const count = silhouettes.length;
+  for (const sheet of sheets) {
+    linearize(sheet, filterSheet, silhouettes);
+  }
+  const sheetByInput = [];
+  const packed = pack$1(
+    silhouettes,
+    count,
+    orientations,
+    options,
+    sheetByInput
+  );
+  const outputs = [];
+  // This places the parts and their silhouettes.
+  for (let nth = 0; nth < count; nth++) {
+    outputs[nth] = transform(inputs[nth], packed[nth].matrix);
+    silhouettes[nth] = transform(silhouettes[nth], packed[nth].matrix);
+  }
+  // Now construct items with the sheet and the content.
+  const pages = [];
+  for (let nth = 0; nth < sheetByInput.length; nth++) {
+    const sheet = sheetByInput[nth] - count;
+    if (pages[sheet] === undefined) {
+      pages[sheet] = taggedItem({ tags: ['pack:sheet'] }, Group([]));
+      if (sheets[sheet] !== undefined) {
+        // Need to distinguish the sheet somehow.
+        // Put the sheet 0.01 mm below the surface.
+        pages[sheet].content[0].content.push(
+          translate(sheets[sheet], [0, 0, -0.01])
+        );
+      }
+    }
+    pages[sheet].content[0].content.push(outputs[nth]);
+    pages[sheet].content[0].content.push(hasTypeGhost(silhouettes[nth]));
+  }
+  return Group(pages.filter((page) => page !== undefined));
+};
+
 const filter$b = () => (geometry) =>
   ['graph'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
@@ -5665,6 +5691,32 @@ const taggedGraph = ({ tags = [], matrix, provenance }, graph) => {
   };
 };
 
+const taggedLayout = (
+  { tags = [], matrix, provenance, size, margin, title },
+  ...content
+) => {
+  if (content.some((value) => value === undefined)) {
+    throw Error(`Undefined Layout content`);
+  }
+  if (content.some((value) => value.length)) {
+    throw Error(`Layout content is an array`);
+  }
+  if (content.some((value) => value.then)) {
+    throw Error(`Layout content is a promise`);
+  }
+  if (content.some((value) => value.geometry)) {
+    throw Error(`Likely Shape in Layout`);
+  }
+  return {
+    type: 'layout',
+    layout: { size, margin, title },
+    tags,
+    matrix,
+    provenance,
+    content,
+  };
+};
+
 const taggedPlan = ({ tags = [], matrix, provenance }, plan) => ({
   type: 'plan',
   tags,
@@ -5878,4 +5930,4 @@ const wrap = (
     tags(geometry)
   );
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Page, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Triangle, Wrap, X$5 as X, XY, XZ, Y$5 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, base, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, obb, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, page, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, trim, turnX, turnXs, turnY, turnYs, turnZ, turnZs, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Triangle, Wrap, X$4 as X, XY, XZ, Y$4 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, base, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, obb, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, read, readNonblocking, reconstruct, ref, refine, reify, remesh, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, trim, turnX, turnXs, turnY, turnYs, turnZ, turnZs, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

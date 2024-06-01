@@ -37,6 +37,8 @@ ChainHull(Point(), Box(5).z(5), Arc(3).z(8))
   .note(`ChainHull(Point(), Box(5).z(5), Arc(3).z(8))`);
 ```
 
+![Image](shapes.md.$5.png)
+
 Empty()
 
 ```JavaScript

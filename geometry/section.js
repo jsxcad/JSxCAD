@@ -4,6 +4,7 @@ import { Group } from './Group.js';
 import { Ref } from './Ref.js';
 import { hasMaterial } from './hasMaterial.js';
 import { linearize } from './tagged/linearize.js';
+import { replacer } from './tagged/visit.js';
 import { section as sectionWithCgal } from '@jsxcad/algorithm-cgal';
 
 const filterInputs = (geometry) =>
@@ -16,8 +17,8 @@ const filterReferences = (geometry) =>
     geometry.type
   );
 
-export const section = (inputGeometry, referenceGeometries = []) => {
-  const inputs = linearize(inputGeometry, filterInputs);
+export const section = (geometry, referenceGeometries = []) => {
+  const inputs = linearize(geometry, filterInputs);
   const count = inputs.length;
   if (referenceGeometries.length === 0) {
     // Default to the Z(0) plane.
@@ -27,10 +28,11 @@ export const section = (inputGeometry, referenceGeometries = []) => {
       linearize(referenceGeometry, filterReferences, inputs);
     }
   }
-  const outputs = sectionWithCgal(inputs, count);
   const ghosts = [];
   for (let nth = 0; nth < count; nth++) {
     ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
   }
-  return Group([...outputs, ...ghosts]);
+  const outputs = sectionWithCgal(inputs, count);
+  const updated = replacer(inputs, outputs, count)(geometry);
+  return Group([updated, ...ghosts]);
 };

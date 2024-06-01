@@ -1,10 +1,9 @@
 import { isNotTypeGhost, isTypeVoid } from './tagged/type.js';
 
+import { Group } from './Group.js';
 import { disjoint as disjointWithCgal } from '@jsxcad/algorithm-cgal';
 import { linearize } from './tagged/linearize.js';
 import { replacer } from './tagged/visit.js';
-import { taggedGroup } from './tagged/taggedGroup.js';
-import { toConcreteGeometry } from './tagged/toConcreteGeometry.js';
 
 const filter = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
@@ -13,20 +12,17 @@ const filter = (geometry) =>
   (isNotTypeGhost(geometry) || isTypeVoid(geometry));
 
 export const Disjoint = (geometries, { exact } = {}) => {
-  const concreteGeometries = geometries.map((geometry) =>
-    toConcreteGeometry(geometry)
-  );
   const inputs = [];
-  for (const concreteGeometry of concreteGeometries) {
-    linearize(concreteGeometry, filter, inputs);
+  for (const geometry of geometries) {
+    linearize(geometry, filter, inputs);
   }
   const outputs = disjointWithCgal(inputs, exact);
   const disjointGeometries = [];
   const update = replacer(inputs, outputs);
-  for (const concreteGeometry of concreteGeometries) {
-    disjointGeometries.push(update(concreteGeometry));
+  for (const geometry of geometries) {
+    disjointGeometries.push(update(geometry));
   }
-  return taggedGroup({}, ...disjointGeometries);
+  return Group(disjointGeometries);
 };
 
 export const fit = (geometry, geometries, modes) =>

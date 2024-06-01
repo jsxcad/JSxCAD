@@ -22,7 +22,7 @@ export const toSvg = async (
   baseGeometry,
   { padding = 0, definitions } = {}
 ) => {
-  const sectioned = section(await baseGeometry, [{ type: 'points', tags: [] }]);
+  const sectioned = section(await baseGeometry);
   const disjointed = disjoint(sectioned, {});
   // svg reverses the Y axis.
   const scaled = scale(disjointed, [1, -1, 1]);

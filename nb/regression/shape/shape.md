@@ -68,6 +68,8 @@ Box(5).color('red').cut(Arc(6).color('blue')).gridView();
 Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView();
 ```
 
+![Image](shape.md.$12.png)
+
 ```JavaScript
 Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
@@ -362,10 +364,6 @@ Arc(2)
   .simplify({ ratio: 0.1, eps: 0.01 })
   .view();
 ```
-
-![Image](shape.md.$51_triangle.png)
-
-[triangle.svg](shape.triangle.svg)
 
 ```JavaScript
 Triangle(14).svg('triangle');

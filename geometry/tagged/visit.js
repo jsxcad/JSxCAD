@@ -1,6 +1,9 @@
 import { update } from './update.js';
 
 export const replacer = (from, to, limit = from.length) => {
+  if (from === to) {
+    return (geometry) => geometry;
+  }
   // We need to consider the case that there are duplicates in from.
   const update = (geometry, descend) => {
     for (let nth = 0; nth < limit; nth++) {
@@ -19,6 +22,7 @@ const validateContent = (geometry, content) => {
   if (content && content.some((value) => !value)) {
     for (const v of content) {
       console.log(`QQ/content: ${v}`);
+      console.log(`QQ/geometry= ${JSON.stringify(geometry)}`);
     }
     throw Error(
       `Invalid content: ${JSON.stringify(geometry, (k, v) =>

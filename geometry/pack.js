@@ -1,6 +1,8 @@
 import { hasTypeGhost, isNotTypeGhost, isNotTypeVoid } from './tagged/type.js';
 
+import { ConvexHull } from './convexHull.js';
 import { Group } from './Group.js';
+import { bb as bbOp } from './bb.js';
 import { cast } from './cast.js';
 import { linearize } from './tagged/linearize.js';
 import { pack as packWithCgal } from '@jsxcad/algorithm-cgal';
@@ -18,10 +20,34 @@ const filterSheet = (geometry) =>
   isNotTypeGhost(geometry) &&
   isNotTypeVoid(geometry);
 
-export const pack = (geometry, sheets, orientations = [], options = {}) => {
+export const pack = (
+  geometry,
+  sheets = [],
+  orientations = [],
+  options = {},
+  strategy = 'bb'
+) => {
   // Convert all of the geometry into silhouettes.
   const inputs = linearize(geometry, filterCast, [], { includeItems: false });
-  const silhouettes = inputs.map((input) => cast(undefined, undefined, input));
+  let silhouettes;
+  switch (strategy) {
+    case 'bb':
+      // silhouettes are bounding boxes.
+      silhouettes = inputs.map((input) =>
+        cast(undefined, undefined, bbOp(input, 0, 0, 0, { flat: true }))
+      );
+      break;
+    case 'hull':
+      // silhouettes are convex hulls.
+      silhouettes = inputs.map((input) =>
+        cast(undefined, undefined, ConvexHull([input]))
+      );
+      break;
+    case 'outline':
+      // silhouettes are the actual shape outlines.
+      silhouettes = inputs.map((input) => cast(undefined, undefined, input));
+      break;
+  }
   const count = silhouettes.length;
   for (const sheet of sheets) {
     linearize(sheet, filterSheet, silhouettes);
@@ -45,7 +71,7 @@ export const pack = (geometry, sheets, orientations = [], options = {}) => {
   for (let nth = 0; nth < sheetByInput.length; nth++) {
     const sheet = sheetByInput[nth] - count;
     if (pages[sheet] === undefined) {
-      pages[sheet] = taggedItem({}, Group([]));
+      pages[sheet] = taggedItem({ tags: ['pack:sheet'] }, Group([]));
       if (sheets[sheet] !== undefined) {
         // Need to distinguish the sheet somehow.
         // Put the sheet 0.01 mm below the surface.
