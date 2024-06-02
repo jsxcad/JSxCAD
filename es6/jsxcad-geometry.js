@@ -3337,13 +3337,8 @@ const section = (geometry, referenceGeometries = []) => {
       linearize(referenceGeometry, filterReferences$1, inputs);
     }
   }
-  const ghosts = [];
-  for (let nth = 0; nth < count; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
-  }
   const outputs = section$1(inputs, count);
-  const updated = replacer(inputs, outputs, count)(geometry);
-  return Group([updated, ...ghosts]);
+  return replacer(inputs, outputs, count)(geometry);
 };
 
 const X$3 = 0;
@@ -4875,11 +4870,7 @@ const grow = (geometry, tool) => {
   const count = inputs.length;
   linearize(tool, filter$j, inputs);
   const outputs = grow$1(inputs, count);
-  const ghosts = [];
-  for (let nth = count; nth < inputs.length; nth++) {
-    ghosts.push(hasMaterial(hasTypeGhost(inputs[nth]), 'ghost'));
-  }
-  return Group([replacer(inputs, outputs)(geometry), ...ghosts]);
+  return replacer(inputs, outputs)(geometry);
 };
 
 const hold = (geometry, geometries) => {

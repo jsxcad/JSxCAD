@@ -154,11 +154,12 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
   let results = [];
   for (let nth = start; nth < length; nth++) {
     const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
+    const tags = [];
     switch (geometry.getType(nth)) {
       case GEOMETRY_MESH: {
         const matrix = [];
         g.GetTransform(geometry, nth, matrix);
-        let { tags = [], graph } = inputs[origin] || {};
+        let { graph } = inputs[origin] || {};
         let update = false;
         let newMesh;
         let serializedSurfaceMesh;
@@ -193,7 +194,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       case GEOMETRY_POLYGONS_WITH_HOLES: {
         const matrix = [];
         g.GetTransform(geometry, nth, matrix);
-        const { tags = [] } = inputs[origin] || {};
         results[nth] = {
           type: 'polygonsWithHoles',
           tags,
@@ -205,7 +205,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       case GEOMETRY_SEGMENTS: {
         const matrix = [];
         g.GetTransform(geometry, nth, matrix);
-        const { tags = [] } = inputs[origin] || {};
         results[nth] = {
           type: 'segments',
           matrix,
@@ -217,7 +216,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
       case GEOMETRY_POINTS: {
         const matrix = [];
         g.GetTransform(geometry, nth, matrix);
-        const { tags = [] } = inputs[origin] || {};
         results[nth] = {
           type: 'points',
           matrix,
@@ -230,7 +228,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         const matrix = [];
         g.GetTransform(geometry, nth, matrix);
         // TODO: Figure out segments vs edges.
-        const { tags = [] } = inputs[origin] || {};
         results[nth] = {
           type: 'segments',
           matrix,
@@ -244,11 +241,16 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
         results[nth] = { type: 'group', content: [], tags: [] };
       }
     }
-    g.GetTags(geometry, nth, results[nth].tags);
+    g.GetTags(geometry, nth, tags);
   }
   // Coallesce
   for (let nth = start; nth < length; nth++) {
     const origin = geometry.getOrigin(nth);
+    // Merge the input tags.
+    // This is really the wrong thing to do, as we can't strip tags this way.
+    if (inputs[origin]) {
+      results[nth].tags = [...inputs[origin].tags, ...results[nth].tags];
+    }
     if (origin === nth) {
       continue;
     }

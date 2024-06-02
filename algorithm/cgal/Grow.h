@@ -38,6 +38,8 @@ static int Grow(Geometry* geometry, size_t count) {
 
     // For now we assume the tool is convex.
     for (size_t nth = count; nth < size; nth++) {
+      geometry->tags(nth).push_back("type:ghost");
+      geometry->tags(nth).push_back("material:ghost");
       switch (geometry->type(nth)) {
         case GEOMETRY_MESH:
           to_points<EK>(geometry->mesh(nth), tool_points);
@@ -110,7 +112,6 @@ static int Grow(Geometry* geometry, size_t count) {
               add_hull(nth, points);
             }
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_POINTS: {
@@ -118,11 +119,11 @@ static int Grow(Geometry* geometry, size_t count) {
           CGAL::convex_hull_3(tool_points.begin(), tool_points.end(), tool);
           for (const auto& point : geometry->points(nth)) {
             size_t target = geometry->add(GEOMETRY_MESH);
+            geometry->origin(target) = nth;
             geometry->mesh(target) = tool;
             CGAL::Polygon_mesh_processing::transform(translate_to(point),
                                                      geometry->mesh(target));
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_SEGMENTS: {
@@ -137,7 +138,6 @@ static int Grow(Geometry* geometry, size_t count) {
             }
             add_hull(nth, points);
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -205,7 +205,6 @@ static int Grow(Geometry* geometry, size_t count) {
               }
             }
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
       }

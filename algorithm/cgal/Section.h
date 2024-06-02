@@ -18,6 +18,8 @@ static int Section(Geometry* geometry, int count) {
     for (int nth = 0; nth < count; nth++) {
       switch (geometry->getType(nth)) {
         case GEOMETRY_MESH: {
+          geometry->tags(nth).push_back("type:ghost");
+          geometry->tags(nth).push_back("material:ghost");
           std::vector<CGAL::Polygon_with_holes_2<EK>> pwhs;
           SurfaceMeshSectionToPolygonsWithHoles(geometry->mesh(nth), plane,
                                                 pwhs);
@@ -31,6 +33,8 @@ static int Section(Geometry* geometry, int count) {
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
+          geometry->tags(nth).push_back("type:ghost");
+          geometry->tags(nth).push_back("material:ghost");
           if (geometry->plane(nth) != plane) {
             // FIX: Should produce segments given non-coplanar intersection.
             break;
@@ -43,6 +47,8 @@ static int Section(Geometry* geometry, int count) {
           break;
         }
         case GEOMETRY_SEGMENTS: {
+          geometry->tags(nth).push_back("type:ghost");
+          geometry->tags(nth).push_back("material:ghost");
           int target = geometry->add(GEOMETRY_SEGMENTS);
           geometry->origin(target) = nth;
           geometry->setTransform(target, geometry->transform(nthTransform));
@@ -56,6 +62,8 @@ static int Section(Geometry* geometry, int count) {
           break;
         }
         case GEOMETRY_POINTS: {
+          geometry->tags(nth).push_back("type:ghost");
+          geometry->tags(nth).push_back("material:ghost");
           int target = geometry->add(GEOMETRY_POINTS);
           geometry->origin(target) = nth;
           geometry->setTransform(target, geometry->transform(nthTransform));
