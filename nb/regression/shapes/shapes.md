@@ -384,7 +384,7 @@ Group(Box(1), Box(1).rx(1 / 4))
 
 ```JavaScript
 Orb(10)
-  .op(lowerEnvelope().ez([-1]).z(-5), upperEnvelope().ez([1]).z(5))
+  .op(lowerEnvelope('face').ez([-1]).z(-5), upperEnvelope('face').ez([1]).z(5))
   .align('z>')
   .view(1);
 ```
