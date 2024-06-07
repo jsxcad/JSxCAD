@@ -35,16 +35,5 @@ jobs:
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
       - run: npm run doc -- --quiet
-      - name: Upload Artifacts
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: differences
-          path: |
-            **/*.difference.png
-            **/*.observed.*
-            **/*.md
-            **/*.stl
-            !**/node_modules/**
         env:
           NODE_OPTIONS: --max_old_space_size=4096

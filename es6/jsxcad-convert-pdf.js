@@ -1,4 +1,4 @@
-import { measureBoundingBox, section, disjoint, scaleLazy, linearize, isNotTypeGhost, transformCoordinate, transformingCoordinates } from './jsxcad-geometry.js';
+import { cast, measureBoundingBox, disjoint, scaleLazy, linearize, isNotTypeGhost, transformCoordinate, transformingCoordinates } from './jsxcad-geometry.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const X = 0;
@@ -69,15 +69,15 @@ const toPdf = async (
   geometry,
   { lineWidth = 0.096, size = [210, 297], definitions } = {}
 ) => {
-  const [min, max] = measureBoundingBox(geometry);
+  const flat = cast(undefined, undefined, await geometry);
+  const [min, max] = measureBoundingBox(flat);
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const lines = [];
-  const section$1 = section(await geometry);
-  const disjoint$1 = disjoint(section$1, {});
+  const disjoint$1 = disjoint(flat);
   const prepared = scaleLazy(disjoint$1, [scale, scale, scale]);
 
   for (const { matrix, tags, polygonsWithHoles } of linearize(

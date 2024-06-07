@@ -54,6 +54,8 @@ Arc(20)
   .note("Arc(20).trim(Orb(1)) trims a disc");
 ```
 
+![Image](trim.md.$6.png)
+
 Arc(20).points().trim(Orb(1)) trims the points of an circle into spheres
 
 ```JavaScript
@@ -63,6 +65,8 @@ Arc(20)
   .view()
   .note("Arc(20).points().trim(Orb(1)) trims the points of an circle into spheres");
 ```
+
+![Image](trim.md.$7.png)
 
 Arc(20).outline().trim(Orb(1)) trims the rim of a circle into a tube
 

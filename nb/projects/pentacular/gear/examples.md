@@ -233,6 +233,10 @@ const planetaryDesign4 = planetaryDesign4c.color('green').as('solar');
 
 ![Image](examples.md.planetaryDesign.png)
 
+![Image](examples.md.planetaryDesign_hoop.png)
+
+[hoop.stl](examples.hoop.stl)
+
 ![Image](examples.md.planetaryDesign_ring.png)
 
 [ring.stl](examples.ring.stl)
@@ -244,6 +248,10 @@ const planetaryDesign4 = planetaryDesign4c.color('green').as('solar');
 ![Image](examples.md.planetaryDesign_solar.png)
 
 [solar.stl](examples.solar.stl)
+
+![Image](examples.md.planetaryDesign_axle.png)
+
+[axle.stl](examples.axle.stl)
 
 ```JavaScript
 const planetaryDesign = planetaryDesign3

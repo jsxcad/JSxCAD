@@ -19,7 +19,7 @@ Seq({ to: 9 }, (r) =>
     ).fill()
   )
 )
-  .pack()
+  .pack('hull')
   .color('red')
   .view('top')
 ```

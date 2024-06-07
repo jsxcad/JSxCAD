@@ -343,6 +343,31 @@ static int GetEdges(Geometry* geometry, int nth, emscripten::val js) {
   return STATUS_OK;
 }
 
+static int Pack(Geometry* geometry, int count, emscripten::val js_orientations,
+                double perimeter_weight, double bounds_weight,
+                double holes_weight, emscripten::val js_sheet_by_input) {
+  std::vector<double> orientations;
+  uint32_t length = js_orientations["length"].as<uint32_t>();
+  for (uint32_t nth = 0; nth < length; nth++) {
+    orientations.push_back(js_orientations[nth].as<double>());
+  }
+  std::vector<size_t> sheet_by_input;
+  auto result = ::Pack(geometry, count, orientations, perimeter_weight,
+                       bounds_weight, holes_weight, sheet_by_input);
+  for (size_t nth = 0; nth < sheet_by_input.size(); nth++) {
+    js_sheet_by_input.set(nth, sheet_by_input[nth]);
+  }
+  return result;
+}
+
+static int GetTags(Geometry* geometry, int nth, emscripten::val js) {
+  size_t index = js["length"].as<uint32_t>();
+  for (const auto& tag : geometry->tags(nth)) {
+    js.set(index++, tag);
+  }
+  return STATUS_OK;
+}
+
 static int GetTransform(Geometry* geometry, int nth, emscripten::val js) {
   to_js(geometry->transform(nth), js);
   return STATUS_OK;
@@ -481,6 +506,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("GetPoints", &wrapped::GetPoints,
                        emscripten::allow_raw_pointers());
+  emscripten::function("GetTags", &wrapped::GetTags,
+                       emscripten::allow_raw_pointers());
   emscripten::function("GetTransform", &wrapped::GetTransform,
                        emscripten::allow_raw_pointers());
   emscripten::function("Grow", &Grow, emscripten::allow_raw_pointers());
@@ -505,7 +532,8 @@ EMSCRIPTEN_BINDINGS(module) {
                        emscripten::allow_raw_pointers());
   emscripten::function("Offset", &Offset, emscripten::allow_raw_pointers());
   emscripten::function("Outline", &Outline, emscripten::allow_raw_pointers());
-  emscripten::function("Pack", &Pack, emscripten::allow_raw_pointers());
+  emscripten::function("Pack", &wrapped::Pack,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Reconstruct", &Reconstruct,
                        emscripten::allow_raw_pointers());
   emscripten::function("Refine", &Refine, emscripten::allow_raw_pointers());

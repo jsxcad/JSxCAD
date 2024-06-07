@@ -41,5 +41,5 @@ await a.section(seq({ to: height, by: spacing }, XY, Group))
   .note(`Stl sliced each ${spacing}mm up to ${height}mm.`)
   .view()
   .note('Laid out on a single sheet for cutting.')
-  .pdf('slices', each(flat()).page('pack'));
+  .pdf('slices', each(flat()).pack('bb'));
 ```

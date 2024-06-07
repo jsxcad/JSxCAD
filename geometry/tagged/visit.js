@@ -1,17 +1,19 @@
 import { update } from './update.js';
 
 export const replacer = (from, to, limit = from.length) => {
-  const map = new Map();
-  for (let nth = 0; nth < limit; nth++) {
-    map.set(from[nth], to[nth]);
+  if (from === to) {
+    return (geometry) => geometry;
   }
+  // We need to consider the case that there are duplicates in from.
   const update = (geometry, descend) => {
-    const cut = map.get(geometry);
-    if (cut) {
-      return cut;
-    } else {
-      return descend();
+    for (let nth = 0; nth < limit; nth++) {
+      if (from[nth] === geometry) {
+        // Prevent this from being matched twice.
+        from[nth] = undefined;
+        return to[nth];
+      }
     }
+    return descend();
   };
   return (geometry) => rewrite(geometry, update);
 };
@@ -20,6 +22,7 @@ const validateContent = (geometry, content) => {
   if (content && content.some((value) => !value)) {
     for (const v of content) {
       console.log(`QQ/content: ${v}`);
+      console.log(`QQ/geometry= ${JSON.stringify(geometry)}`);
     }
     throw Error(
       `Invalid content: ${JSON.stringify(geometry, (k, v) =>

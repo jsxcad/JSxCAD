@@ -27,7 +27,6 @@
     "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-material": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
-    "bin-packing-es": "^0.0.3",
     "curve-interpolator": "^3.1.1",
     "kdbush": "^3.0.0",
     "parse-number": "^1.0.1",

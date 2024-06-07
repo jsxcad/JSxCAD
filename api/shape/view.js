@@ -5,7 +5,7 @@ import {
   isNode,
   write,
 } from '@jsxcad/sys';
-import { ensurePages, retag, toDisplayGeometry } from '@jsxcad/geometry';
+import { retag, toDisplayGeometry } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 import { dataUrl } from '@jsxcad/ui-threejs';
@@ -73,7 +73,7 @@ export const baseViewOp = async (
   }
   const { id, path, viewId } = qualifyViewId(name, getSourceLocation());
   const displayGeometry = toDisplayGeometry(viewGeometry);
-  for (const pageGeometry of await ensurePages(displayGeometry)) {
+  for (const pageGeometry of [displayGeometry]) {
     const viewPath = `view/${path}/${id}/${viewId}.view`;
     const hash = generateUniqueId();
     const thumbnailPath = `thumbnail/${path}/${id}/${viewId}.thumbnail`;

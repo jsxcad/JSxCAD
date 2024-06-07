@@ -238,13 +238,17 @@ static void PlanarSurfaceMeshFacetsToPolygonSet(
     Arrangement_with_regions_2 arrangement;
     typename Surface_mesh::Halfedge_index edge = start;
     do {
-      Segment_2 segment{plane.to_2d(mesh.point(mesh.source(edge))),
-                        plane.to_2d(mesh.point(mesh.target(edge)))};
-      insert(arrangement, segment);
+      auto source = plane.to_2d(mesh.point(mesh.source(edge)));
+      auto target = plane.to_2d(mesh.point(mesh.target(edge)));
+      if (source != target) {
+        Segment_2 segment{source, target};
+        insert(arrangement, segment);
+      }
       edge = mesh.next(edge);
     } while (edge != start);
     // The arrangement shouldn't produce polygons with holes, so this might be
     // simplified.
+    // FIX: This is probably completely wrong.
     std::vector<CGAL::Polygon_with_holes_2<EK>> polygons;
     convertArrangementToPolygonsWithHolesEvenOdd(arrangement, polygons);
     for (const auto& polygon : polygons) {

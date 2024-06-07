@@ -20,7 +20,6 @@
 static int Grow(Geometry* geometry, size_t count) {
   try {
     typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
-    typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
     size_t size = geometry->size();
 
     geometry->copyInputMeshesToOutputMeshes();
@@ -39,6 +38,8 @@ static int Grow(Geometry* geometry, size_t count) {
 
     // For now we assume the tool is convex.
     for (size_t nth = count; nth < size; nth++) {
+      geometry->tags(nth).push_back("type:ghost");
+      geometry->tags(nth).push_back("material:ghost");
       switch (geometry->type(nth)) {
         case GEOMETRY_MESH:
           to_points<EK>(geometry->mesh(nth), tool_points);
@@ -111,20 +112,18 @@ static int Grow(Geometry* geometry, size_t count) {
               add_hull(nth, points);
             }
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_POINTS: {
-          auto& mesh = geometry->mesh(nth);
           CGAL::Surface_mesh<EK::Point_3> tool;
           CGAL::convex_hull_3(tool_points.begin(), tool_points.end(), tool);
           for (const auto& point : geometry->points(nth)) {
             size_t target = geometry->add(GEOMETRY_MESH);
+            geometry->origin(target) = nth;
             geometry->mesh(target) = tool;
             CGAL::Polygon_mesh_processing::transform(translate_to(point),
                                                      geometry->mesh(target));
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_SEGMENTS: {
@@ -139,7 +138,6 @@ static int Grow(Geometry* geometry, size_t count) {
             }
             add_hull(nth, points);
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
         case GEOMETRY_POLYGONS_WITH_HOLES: {
@@ -153,7 +151,6 @@ static int Grow(Geometry* geometry, size_t count) {
               // We can use optimal partitioning if there are no holes.
               typedef CGAL::Partition_traits_2<EK> Traits;
               typedef Traits::Polygon_2 Polygon_2;
-              typedef Traits::Point_2 Point_2;
               typedef std::list<Polygon_2> Polygon_list;
               Polygon_list partition_polys;
               // We invest more here to minimize unions below.
@@ -208,7 +205,6 @@ static int Grow(Geometry* geometry, size_t count) {
               }
             }
           }
-          geometry->setType(nth, GEOMETRY_EMPTY);
           break;
         }
       }

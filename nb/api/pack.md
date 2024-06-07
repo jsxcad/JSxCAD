@@ -2,48 +2,48 @@
 ### pack()
 Parameter|Default|Type
 ---|---|---
-{size}||Pair of numbers [width, height]
-{pageMargin}|5|Number of mm to reserve around the edge of the page
-{itemMargin}|1|Number of mm to reserve around each item on the page
-{perLayout}|Infinity|Maximum number of shapes per page
-packSize|[]|Array of [width, height] filled in with the width and height decided by pack
+sheets|[]|Shapes to pack into.
+orientations|[]|List of z turns for orienting pieces.
+{perimeterWeight}|1|Importance of perimeter minimization.
+{boundsWeight}|1|Importance of not increasing bounding box.
+{holesWeight}|1|Importance of not adding holes.
 
-Packs a number of shapes into a page.
+Packs the input objects into a set of sheets.
 
-The page may have a provided size, otherwise it will be considered unlimited.
+Items are packed as individual shapes.
 
-If packing exceeds the capacity of a page, it will spill over onto another page.
+Items which do not fit into any sheet are packed into a final unbounded sheet.
 
-These pages may be packed as items, or downloaded as a series.
-
-The packaged page is an item, accessing the content will require using in().
+The packaged sheet is an item, accessing the content will require using in().
 
 See: [in](../../nb/api/in.md)
 
+And(Triangle(1).ez([1]), Arc(1).ez([1]), Hexagon(1).ez([1])).copy(3).pack(1 / 6, 2 / 6, 3 / 6, Arc(6).cut(Hexagon(4)), { perimeterWeight: 1, boundsWeight: 1, holesWeight: 1 })
+
 ![Image](pack.md.$2.png)
 
-Seq({ to: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.
-
 ```JavaScript
-Seq({ to: 10 }, Box, Group)
-  .pack()
+And(Triangle(1).ez([1]), Arc(1).ez([1]), Hexagon(1).ez([1]))
+  .copy(3)
+  .pack(1 / 6, 2 / 6, 3 / 6, Arc(6).cut(Hexagon(4)), {
+    perimeterWeight: 1,
+    boundsWeight: 1,
+    holesWeight: 1,
+  })
+  .note(`And(Triangle(1).ez([1]), Arc(1).ez([1]), Hexagon(1).ez([1])).copy(3).pack(1 / 6, 2 / 6, 3 / 6, Arc(6).cut(Hexagon(4)), { perimeterWeight: 1, boundsWeight: 1, holesWeight: 1 })`)
   .view()
-  .note(
-    'Seq({ to: 10 }, Box, Group).pack() arranges 10 boxes of various sizes on an unlimited page.'
-  );
 ```
+
+Hexagon(2).color('red').copy(20).pack(1 / 12, Box(8).copy(3)).pack()
 
 ![Image](pack.md.$3.png)
 
-pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those.
-
 ```JavaScript
-Seq({ to: 10 }, Box, Group)
-  .pack({ size: [20, 20] })
-  .each(and(bb(1, 1, 0).outline().color('red')).as('page'))
+Hexagon(2)
+  .color('red')
+  .copy(20)
+  .pack(1 / 12, Box(8).copy(3))
   .pack()
+  .note(`Hexagon(2).color('red').copy(20).pack(1 / 12, Box(8).copy(3)).pack()`)
   .view()
-  .note(
-    "pack({ size: [20, 20] }).each(and(bb(1, 1, 0).outline().color('red')).as('page')) packs the boxes into 20x20 pages, adds a border and then packs those."
-  );
 ```

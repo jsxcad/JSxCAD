@@ -52,6 +52,8 @@ Arc(20)
   .note("Arc(20).grow(Orb(1)) thickens a disc");
 ```
 
+![Image](grow.md.$6.png)
+
 Arc(20).points().grow(Orb(1)) grows the points of an circle into spheres
 
 ```JavaScript

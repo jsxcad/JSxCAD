@@ -68,6 +68,8 @@ Box(5).color('red').cut(Arc(6).color('blue')).gridView();
 Box(5).color('red').cutFrom(Arc(6).color('blue')).gridView();
 ```
 
+![Image](shape.md.$12.png)
+
 ```JavaScript
 Assembly(Box(5), Arc(6))
   .each((leafs) => leafs[0])
