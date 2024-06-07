@@ -240,9 +240,9 @@ static int Pack(Geometry* geometry, size_t count,
         case GEOMETRY_POLYGONS_WITH_HOLES: {
           Part part;
           part.geometry_index = nth;
-          cast_polygons_with_holes_to_polygons_with_holes(
-              geometry->pwh(nth), geometry->plane(nth), EK::Plane_3(0, 0, 1, 0),
-              EK::Vector_3(0, 0, 1), part.pwhs);
+          cast_polygons_with_holes(geometry->pwh(nth), geometry->plane(nth),
+                                   EK::Plane_3(0, 0, 1, 0),
+                                   EK::Vector_3(0, 0, 1), part.pwhs);
           setup_part(part);
           parts.push_back(std::move(part));
           break;
@@ -258,9 +258,9 @@ static int Pack(Geometry* geometry, size_t count,
           Sheet sheet;
           sheet.geometry_index = nth;
           sheet.is_bounded = true;
-          cast_polygons_with_holes_to_polygons_with_holes(
-              geometry->pwh(nth), geometry->plane(nth), EK::Plane_3(0, 0, 1, 0),
-              EK::Vector_3(0, 0, 1), sheet.pwhs);
+          cast_polygons_with_holes(geometry->pwh(nth), geometry->plane(nth),
+                                   EK::Plane_3(0, 0, 1, 0),
+                                   EK::Vector_3(0, 0, 1), sheet.pwhs);
           sheets.push_back(std::move(sheet));
           std::cout << "Setting pack:sheet on nth=" << nth << std::endl;
           geometry->setType(nth, GEOMETRY_EMPTY);

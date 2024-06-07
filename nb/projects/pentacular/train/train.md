@@ -8,6 +8,10 @@ const Track = (length) =>
     .fitTo(peg);
 ```
 
+![Image](train.md.peg_peg.png)
+
+[peg.stl](train.peg.stl)
+
 ```JavaScript
 const peg = Peg().stl('peg');
 ```
@@ -32,6 +36,18 @@ const Peg = (play = 0.3) => As('peg', BasePeg(0).maskedBy(BasePeg(play)));
 ```
 
 ![Image](train.md.bogey.png)
+
+![Image](train.md.bogey_chassis.png)
+
+[chassis.stl](train.chassis.stl)
+
+![Image](train.md.bogey_wheel.png)
+
+[wheel.stl](train.wheel.stl)
+
+![Image](train.md.bogey_axle.png)
+
+[axle.stl](train.axle.stl)
 
 ```JavaScript
 const bogey = ArcY(12, 2, 12)
@@ -63,9 +79,17 @@ const bogey = ArcY(12, 2, 12)
   .v(2);
 ```
 
+![Image](train.md.t70_t70.png)
+
+[t70.stl](train.t70.stl)
+
 ```JavaScript
 const t70 = Track(70).stl('t70', getNot('peg'));
 ```
+
+![Image](train.md.t141_t141.png)
+
+[t141.stl](train.t141.stl)
 
 ```JavaScript
 const t141 = Track(141).stl('t141', getNot('peg'));
@@ -116,6 +140,10 @@ const Curve = (diameter, segments = 1) =>
     .material('wood');
 ```
 
+![Image](train.md.j200_j200.png)
+
+[j200.stl](train.j200.stl)
+
 ```JavaScript
 const j200 = Curve(200)
   .getNot('peg')
@@ -133,6 +161,10 @@ const j200 = Curve(200)
 ```JavaScript
 ArcY(5, 0, 5).y(1).hull(ArcY(3, 0, 3).y(3)).view();
 ```
+
+![Image](train.md.c100_c100.png)
+
+[c100.stl](train.c100.stl)
 
 ```JavaScript
 const c100 = Curve(100).stl('c100', getNot('peg'));
@@ -203,6 +235,10 @@ const wheel = As(
 ).view();
 ```
 
+![Image](train.md.hook2_hook2.png)
+
+[hook2.stl](train.hook2.stl)
+
 ```JavaScript
 const hook2 = Link(
   //Point(-5, 1.5),
@@ -227,6 +263,10 @@ const hook2 = Link(
   );
 ```
 
+![Image](train.md.hook_hook.png)
+
+[hook.stl](train.hook.stl)
+
 ```JavaScript
 const hook = Link(Point(-7 + 4, 1), Point(-10 + 4, -2), Point(0))
   .grow(Arc(0.4))
@@ -237,9 +277,21 @@ const hook = Link(Point(-7 + 4, 1), Point(-10 + 4, -2), Point(0))
   .stl('hook');
 ```
 
+![Image](train.md.jig_jig.png)
+
+[jig.stl](train.jig.stl)
+
 ```JavaScript
 const jig = Box(15, 5, 5).cut(ArcX(15, 2.3, 2.3)).stl('jig');
 ```
+
+![Image](train.md.b200_b200a.png)
+
+[b200a.stl](train.b200a.stl)
+
+![Image](train.md.b200_b200b.png)
+
+[b200b.stl](train.b200b.stl)
 
 ```JavaScript
 const b200 = Curve(200)
@@ -255,9 +307,17 @@ const b200 = Curve(200)
   .stl('b200b', sx(-1));
 ```
 
+![Image](train.md.c400_c400.png)
+
+[c400.stl](train.c400.stl)
+
 ```JavaScript
 const c400 = Curve(400).stl('c400', getNot('peg'));
 ```
+
+![Image](train.md.x70_x70.png)
+
+[x70.stl](train.x70.stl)
 
 ```JavaScript
 const x70 = Track(70)
@@ -301,11 +361,27 @@ And(
 
 ![Image](train.md.car.png)
 
+![Image](train.md.car_body.png)
+
+[body.stl](train.body.stl)
+
+![Image](train.md.car_wheel.png)
+
+[wheel.stl](train.wheel.stl)
+
 ```JavaScript
 const car = Car();
 ```
 
 ![Image](train.md.car26x11.png)
+
+![Image](train.md.car26x11_body.png)
+
+[body.stl](train.body.stl)
+
+![Image](train.md.car26x11_wheel.png)
+
+[wheel.stl](train.wheel.stl)
 
 ```JavaScript
 const car26x11 = Car({ length: 26, wheelBase: 11 });
@@ -314,6 +390,14 @@ const car26x11 = Car({ length: 26, wheelBase: 11 });
 ![Image](train.md.hook3_peg_0.5.png)
 
 ![Image](train.md.hook3.png)
+
+![Image](train.md.hook3_hook4.png)
+
+[hook4.stl](train.hook4.stl)
+
+![Image](train.md.hook3_bar4.png)
+
+[bar4.stl](train.bar4.stl)
 
 ```JavaScript
 const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
@@ -344,6 +428,10 @@ const hook3 = Group(Arc(5).ez([3]), Arc(3).ez([3, 6]))
   .v(4);
 ```
 
+![Image](train.md.c200_c200.png)
+
+[c200.stl](train.c200.stl)
+
 ```JavaScript
 const c200 = Curve(200).stl('c200', getNot('peg'));
 ```
@@ -358,6 +446,18 @@ c400
 ```
 
 ![Image](train.md.locomotive.png)
+
+![Image](train.md.locomotive_locomotive_hull.png)
+
+[locomotive_hull.stl](train.locomotive_hull.stl)
+
+![Image](train.md.locomotive_locomotive_tank.png)
+
+[locomotive_tank.stl](train.locomotive_tank.stl)
+
+![Image](train.md.locomotive_locomotive_feet.png)
+
+[locomotive_feet.stl](train.locomotive_feet.stl)
 
 ```JavaScript
 const locomotive = As(
@@ -410,6 +510,14 @@ const locomotive = As(
 
 ![Image](train.md.express.png)
 
+![Image](train.md.express_express_hull.png)
+
+[express_hull.stl](train.express_hull.stl)
+
+![Image](train.md.express_express_feet.png)
+
+[express_feet.stl](train.express_feet.stl)
+
 ```JavaScript
 const express = As(
   'hull',
@@ -458,6 +566,10 @@ const express = As(
   .stl('express_feet', get('feet').n(0));
 ```
 
+![Image](train.md.j100_j100.png)
+
+[j100.stl](train.j100.stl)
+
 ```JavaScript
 const j100 = Curve(100)
   .getNot('peg')
@@ -470,9 +582,17 @@ const j100 = Curve(100)
   .stl('j100');
 ```
 
+![Image](train.md.t35_t35.png)
+
+[t35.stl](train.t35.stl)
+
 ```JavaScript
 const t35 = Track(35).stl('t35', getNot('peg'));
 ```
+
+![Image](train.md.y100_y100.png)
+
+[y100.stl](train.y100.stl)
 
 ```JavaScript
 const y100 = Curve(100, 2)
@@ -488,6 +608,10 @@ const y100 = Curve(100, 2)
   .stl('y100');
 ```
 
+![Image](train.md.s100_s100.png)
+
+[s100.stl](train.s100.stl)
+
 ```JavaScript
 const s100 = Curve(100, 2)
   .rz(1 / 16)
@@ -502,6 +626,14 @@ const s100 = Curve(100, 2)
 ```
 
 ![Image](train.md.carriage.png)
+
+![Image](train.md.carriage_carriage_hull.png)
+
+[carriage_hull.stl](train.carriage_hull.stl)
+
+![Image](train.md.carriage_carriage_feet.png)
+
+[carriage_feet.stl](train.carriage_feet.stl)
 
 ```JavaScript
 const carriage = As(
@@ -543,6 +675,10 @@ const carriage = As(
   .stl('carriage_hull', get('hull'))
   .stl('carriage_feet', get('feet').n(0));
 ```
+
+![Image](train.md.yy100_yy100.png)
+
+[yy100.stl](train.yy100.stl)
 
 ```JavaScript
 const yy100 = Curve(100, 2)

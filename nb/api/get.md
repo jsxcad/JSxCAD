@@ -14,7 +14,7 @@ See: [getNot](https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/api/getN
 
 ![Image](get.md.design_1.png)
 
-const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack().in();
+const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack('bb', Box(11)).n(0).in();
 
 ```JavaScript
 const design = Group(
@@ -22,11 +22,12 @@ const design = Group(
   Arc(5).color('blue'),
   Triangle(5).color('blue').as('triangle')
 )
-  .pack()
+  .pack('bb', Box(11))
+  .n(0)
   .in()
   .view(1)
   .note(
-    "const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack().in();"
+    "const design = Group(Box().as('box'), Arc().color('blue'), Triangle().color('blue').as('triangle')).pack('bb', Box(11)).n(0).in();"
   );
 ```
 

@@ -3,15 +3,17 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const section = (inputs, count) =>
-  withCgalGeometry('section', inputs, (cgalGeometry, g) => {
+export const section = (inputs, count) => {
+  return withCgalGeometry('section', inputs, (cgalGeometry, g) => {
     const status = g.Section(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');
-      case STATUS_OK:
+      case STATUS_OK: {
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
+      }
       default:
         throw new Error(`Unexpected status ${status} in section`);
     }
   });
+};

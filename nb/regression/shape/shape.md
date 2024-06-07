@@ -365,6 +365,10 @@ Arc(2)
   .view();
 ```
 
+![Image](shape.md.$51_triangle.png)
+
+[triangle.svg](shape.triangle.svg)
+
 ```JavaScript
 Triangle(14).svg('triangle');
 ```

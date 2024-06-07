@@ -16,6 +16,10 @@ const spacing = control('spacing', 2, 'input');
 const a = await LoadStl(url).align('z>');
 ```
 
+![Image](bear.md.$2_bear.png)
+
+[bear.stl](bear.bear.stl)
+
 This is a low-poly model of a bear.
 
 ```JavaScript

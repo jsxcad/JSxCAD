@@ -1,10 +1,10 @@
 import {
+  cast as castGeometry,
   disjoint as disjointGeometry,
   isNotTypeGhost,
   linearize,
   measureBoundingBox,
   scaleLazy as scaleGeometry,
-  section as sectionGeometry,
   transformCoordinate,
   transformingCoordinates,
 } from '@jsxcad/geometry';
@@ -79,15 +79,15 @@ export const toPdf = async (
   geometry,
   { lineWidth = 0.096, size = [210, 297], definitions } = {}
 ) => {
-  const [min, max] = measureBoundingBox(geometry);
+  const flat = castGeometry(undefined, undefined, await geometry);
+  const [min, max] = measureBoundingBox(flat);
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const lines = [];
-  const section = sectionGeometry(await geometry);
-  const disjoint = disjointGeometry(section, {});
+  const disjoint = disjointGeometry(flat);
   const prepared = scaleGeometry(disjoint, [scale, scale, scale]);
 
   for (const { matrix, tags, polygonsWithHoles } of linearize(

@@ -1,3 +1,7 @@
+![Image](makerspace.md.peg_peg.png)
+
+[peg.stl](makerspace.peg.stl)
+
 ```JavaScript
 const peg = Box(7.5, 12)
   .Loft(
@@ -14,6 +18,14 @@ const peg = Box(7.5, 12)
 ```
 
 ![Image](makerspace.md.bug.png)
+
+![Image](makerspace.md.bug_ladybird_body.png)
+
+[ladybird_body.svg](makerspace.ladybird_body.svg)
+
+![Image](makerspace.md.bug_ladybird_wings.png)
+
+[ladybird_wings.svg](makerspace.ladybird_wings.svg)
 
 ```JavaScript
 const bug = And(
@@ -64,6 +76,10 @@ const bug = And(
   .v(5);
 ```
 
+![Image](makerspace.md.awlHolder_awl_holder.png)
+
+[awl_holder.stl](makerspace.awl_holder.stl)
+
 ```JavaScript
 const awlHolder = Arc(18)
   .ez([-8, 10])
@@ -94,6 +110,10 @@ const awl = Arc(5)
   .view('side');
 ```
 
+![Image](makerspace.md.holder_holder.png)
+
+[holder.stl](makerspace.holder.stl)
+
 ```JavaScript
 const holder = Arc(18)
   .ez([-8, 10])
@@ -105,9 +125,17 @@ const holder = Arc(18)
   .v(2);
 ```
 
+![Image](makerspace.md.awlHolderTilt_awl_holder_tilt.png)
+
+[awl_holder_tilt.stl](makerspace.awl_holder_tilt.stl)
+
 ```JavaScript
 const awlHolderTilt = holder.cut(awl.ry(-TILT)).stl('awl_holder_tilt');
 ```
+
+![Image](makerspace.md.pegHolder_peg_holder.png)
+
+[peg_holder.stl](makerspace.peg_holder.stl)
 
 ```JavaScript
 const pegHolder = ChainHull(
@@ -131,6 +159,10 @@ const SimpleInset = (diameter = 14) =>
 ```JavaScript
 const TILT = 3 / 48;
 ```
+
+![Image](makerspace.md.simpleInset_simple_inset.png)
+
+[simple_inset.stl](makerspace.simple_inset.stl)
 
 ```JavaScript
 const simpleInset = SimpleInset(13.75)

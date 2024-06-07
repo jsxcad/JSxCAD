@@ -905,12 +905,7 @@ const cast = (inputs) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cast');
       case STATUS_OK:
-        return fromCgalGeometry(
-          cgalGeometry,
-          inputs,
-          cgalGeometry.getSize(),
-          inputs.length
-        );
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
         throw new Error(`Unexpected status ${status} in cast`);
     }
@@ -1934,18 +1929,20 @@ const seam = (inputs, count) =>
     }
   });
 
-const section = (inputs, count) =>
-  withCgalGeometry('section', inputs, (cgalGeometry, g) => {
+const section = (inputs, count) => {
+  return withCgalGeometry('section', inputs, (cgalGeometry, g) => {
     const status = g.Section(cgalGeometry, Number(count));
     switch (status) {
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by section');
-      case STATUS_OK:
+      case STATUS_OK: {
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
+      }
       default:
         throw new Error(`Unexpected status ${status} in section`);
     }
   });
+};
 
 const separate = (
   inputs,

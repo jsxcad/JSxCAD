@@ -35,7 +35,7 @@ void cast_mesh_to_polygons_with_holes(
   simplifyPolygonsWithHoles(pwhs, simple_pwhs);
 }
 
-void cast_polygons_with_holes_to_polygons_with_holes(
+void cast_polygons_with_holes(
     const std::vector<CGAL::Polygon_with_holes_2<EK>>& input_pwhs,
     const EK::Plane_3& input_plane, const EK::Plane_3& reference_plane,
     const EK::Vector_3& reference_vector,
@@ -62,6 +62,41 @@ void cast_polygons_with_holes_to_polygons_with_holes(
     assert(pwh.outer_boundary().is_simple());
     for (auto hole = pwh.holes_begin(); hole != pwh.holes_end(); ++hole) {
       assert(hole->is_simple());
+    }
+  }
+}
+
+void cast_segments(const std::vector<EK::Segment_3>& input,
+                   const EK::Plane_3& reference_plane,
+                   const EK::Vector_3& reference_vector,
+                   std::vector<EK::Segment_3>& output) {
+  for (const auto& s : input) {
+    const EK::Line_3 source_line(s.source(), s.source() + reference_vector);
+    const EK::Line_3 target_line(s.target(), s.target() + reference_vector);
+    auto source_result = CGAL::intersection(source_line, reference_plane);
+    auto target_result = CGAL::intersection(target_line, reference_plane);
+    if (source_result && target_result) {
+      EK::Point_3* source_point = std::get_if<EK::Point_3>(&*source_result);
+      EK::Point_3* target_point = std::get_if<EK::Point_3>(&*target_result);
+      if (source_point && target_point) {
+        output.emplace_back(*source_point, *target_point);
+      }
+    }
+  }
+}
+
+void cast_points(const std::vector<EK::Point_3>& input,
+                 const EK::Plane_3& reference_plane,
+                 const EK::Vector_3& reference_vector,
+                 std::vector<EK::Point_3>& output) {
+  for (const auto& s : input) {
+    const EK::Line_3 line(s, s + reference_vector);
+    auto result = CGAL::intersection(line, reference_plane);
+    if (result) {
+      EK::Point_3* point = std::get_if<EK::Point_3>(&*result);
+      if (point) {
+        output.push_back(*point);
+      }
     }
   }
 }

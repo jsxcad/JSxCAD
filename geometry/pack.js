@@ -10,6 +10,9 @@ import { taggedItem } from './tagged/taggedItem.js';
 import { transform } from './tagged/transform.js';
 import { translate } from './translate.js';
 
+const filterSilhouettes = (geometry) =>
+  geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry);
+
 const filterCast = (geometry) =>
   ['graph', 'polygonsWithHoles', 'item'].includes(geometry.type) &&
   isNotTypeGhost(geometry) &&
@@ -29,23 +32,32 @@ export const pack = (
 ) => {
   // Convert all of the geometry into silhouettes.
   const inputs = linearize(geometry, filterCast, [], { includeItems: false });
-  let silhouettes;
+  const silhouettes = [];
   switch (strategy) {
     case 'bb':
       // silhouettes are bounding boxes.
-      silhouettes = inputs.map((input) =>
-        cast(undefined, undefined, bbOp(input, 0, 0, 0, { flat: true }))
-      );
+      for (const input of inputs) {
+        const silhouette = cast(
+          undefined,
+          undefined,
+          bbOp(input, 0, 0, 0, { flat: true })
+        );
+        linearize(silhouette, filterSilhouettes, silhouettes);
+      }
       break;
     case 'hull':
       // silhouettes are convex hulls.
-      silhouettes = inputs.map((input) =>
-        cast(undefined, undefined, ConvexHull([input]))
-      );
+      for (const input of inputs) {
+        const silhouette = cast(undefined, undefined, ConvexHull([input]));
+        linearize(silhouette, filterSilhouettes, silhouettes);
+      }
       break;
     case 'outline':
       // silhouettes are the actual shape outlines.
-      silhouettes = inputs.map((input) => cast(undefined, undefined, input));
+      for (const input of inputs) {
+        const silhouette = cast(undefined, undefined, input);
+        linearize(silhouette, filterSilhouettes, silhouettes);
+      }
       break;
   }
   const count = silhouettes.length;

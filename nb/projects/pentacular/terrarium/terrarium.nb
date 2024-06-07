@@ -111,7 +111,7 @@ const makeTerrarium = () => (shape) =>
     .note(
       "These are the profiles you'll need to cut out to assemble the terrarium."
     )
-    .pdf('faces', outline().pack({ itemsPerPage: 1 }))
+    .pdf('faces', pack({ itemsPerPage: 1 }))
     .note('Fit the profiles together to form a box with the hole on the top.');
 
 md`### Preview`;

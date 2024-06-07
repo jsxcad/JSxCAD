@@ -138,7 +138,7 @@ const makeTerrarium = () => (shape) =>
     .note(
       "These are the profiles you'll need to cut out to assemble the terrarium."
     )
-    .pdf('faces', outline().pack({ itemsPerPage: 1 }))
+    .pdf('faces', pack({ itemsPerPage: 1 }))
     .note('Fit the profiles together to form a box with the hole on the top.');
 ```
 
@@ -197,11 +197,27 @@ The lid should have a snug fit internally, but a loose connection to the top pan
 
 These are the profiles you'll need to cut out to assemble the terrarium.
 
+![Image](terrarium.md.$7_faces.png)
+
+[faces.pdf](terrarium.faces.pdf)
+
 Fit the profiles together to form a box with the hole on the top.
 
 #### Lid
 
 These profiles assemble to form the lid
+
+![Image](terrarium.md.$7_lid_base.png)
+
+[lid_base.pdf](terrarium.lid_base.pdf)
+
+![Image](terrarium.md.$7_lid_top.png)
+
+[lid_top.pdf](terrarium.lid_top.pdf)
+
+![Image](terrarium.md.$7_lid_pin.png)
+
+[lid_pin.pdf](terrarium.lid_pin.pdf)
 
 Stack the larger disc on the smaller and then push the rectangular pin through to connect them.
 

@@ -32,6 +32,10 @@ const base = await core
 const grabber = await Arc(12).ez([10]).z(-2).view();
 ```
 
+![Image](thing.md.final_test_shape.png)
+
+[test shape.stl](thing.test%20shape.stl)
+
 ```JavaScript
 const final = await base.cut(grabber).stl('test shape');
 ```
