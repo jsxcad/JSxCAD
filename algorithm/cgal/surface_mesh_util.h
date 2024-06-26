@@ -200,7 +200,7 @@ static void remesh(Surface_mesh& mesh,
 }
 
 template <typename Surface_mesh>
-static typename Surface_mesh::Vertex_index ensureVertex(
+static typename Surface_mesh::Vertex_index ensure_vertex(
     Surface_mesh& mesh,
     std::map<typename Surface_mesh::Point, typename Surface_mesh::Vertex_index>&
         vertices,
@@ -212,6 +212,15 @@ static typename Surface_mesh::Vertex_index ensureVertex(
     return new_vertex;
   }
   return it->second;
+}
+
+template <typename Surface_mesh>
+static typename Surface_mesh::Vertex_index ensureVertex(
+    Surface_mesh& mesh,
+    std::map<typename Surface_mesh::Point, typename Surface_mesh::Vertex_index>&
+        vertices,
+    const typename Surface_mesh::Point& point) {
+  return ensure_vertex(mesh, vertices, point);
 }
 
 // This handles potentially overlapping facets.

@@ -77,11 +77,16 @@ static void intersect_segment_with_volume(const Segment& segment,
 static void clip_segment_with_volume(const Segment& segment, AABB_tree& tree,
                                      Side_of_triangle_mesh& on_side,
                                      Segments& segments) {
-  return intersect_segment_with_volume(segment, tree, on_side, true, segments);
+  if (!segment.is_degenerate()) {
+    return intersect_segment_with_volume(segment, tree, on_side, true,
+                                         segments);
+  }
 }
 
 static void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
                                     Side_of_triangle_mesh& on_side,
                                     Segments& segments) {
-  return intersect_segment_with_volume(segment, tree, on_side, false, segments);
+  if (!segment.is_degenerate()) {
+    intersect_segment_with_volume(segment, tree, on_side, false, segments);
+  }
 }
