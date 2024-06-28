@@ -4,6 +4,7 @@
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 
 #include "Geometry.h"
+#include "cut_util.h"
 #include "segment_util.h"
 
 static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
@@ -42,8 +43,8 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
               geometry->noOverlap3(target, nth)) {
             continue;
           }
-          Surface_mesh cutMeshCopy(geometry->mesh(nth));
           if (open) {
+            Surface_mesh cutMeshCopy = geometry->mesh(nth);
             CGAL::Polygon_mesh_processing::reverse_face_orientations(
                 cutMeshCopy);
             Surface_mesh mask(geometry->mesh(target));
@@ -53,25 +54,9 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
                     CGAL::parameters::use_compact_clipper(true))) {
               return STATUS_ZERO_THICKNESS;
             }
-#ifdef JOT_MANIFOLD_ENABLED
-          } else if (!exact) {
-            // TODO: Optimize out unnecessary conversions.
-            manifold::Manifold target_manifold;
-            buildManifoldFromSurfaceMesh(geometry->mesh(target),
-                                         target_manifold);
-            manifold::Manifold nth_manifold;
-            buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
-            target_manifold -= nth_manifold;
-            geometry->mesh(target).clear();
-            buildSurfaceMeshFromManifold(target_manifold,
-                                         geometry->mesh(target));
-#endif
           } else {
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-                    geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default(),
-                    CGAL::parameters::all_default())) {
+            if (!cut_mesh_by_mesh(geometry->mesh(target),
+                                  geometry->mesh(nth))) {
               return STATUS_ZERO_THICKNESS;
             }
           }
