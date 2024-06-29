@@ -172,10 +172,12 @@ static void build_mesh_from_triangles(std::vector<EK::Triangle_3>& triangles,
 
   for (const auto& triangle : triangles) {
     std::vector<std::size_t> face_indices;
-    for (int i = 0; i < 3; ++i) {
-      face_indices.push_back(vertices.size());
-      vertices.push_back(triangle[i]);
-    }
+    face_indices.push_back(vertices.size());
+    vertices.push_back(triangle[2]);
+    face_indices.push_back(vertices.size());
+    vertices.push_back(triangle[1]);
+    face_indices.push_back(vertices.size());
+    vertices.push_back(triangle[0]);
     faces.push_back(face_indices);
   }
 
@@ -300,10 +302,15 @@ static int Loft(Geometry* geometry, bool close) {
   build_mesh(positive_points, positive_faces, close, positive_mesh);
 
   Surface_mesh negative_mesh;
-  build_mesh(negative_points, negative_faces, true, negative_mesh);
+  build_mesh(negative_points, negative_faces, close, negative_mesh);
 
-  if (!cut_mesh_by_mesh(positive_mesh, negative_mesh)) {
-    return STATUS_ZERO_THICKNESS;
+  if (CGAL::is_closed(positive_mesh)) {
+    if (!cut_mesh_by_mesh(positive_mesh, negative_mesh)) {
+      return STATUS_ZERO_THICKNESS;
+    }
+  } else {
+    CGAL::Polygon_mesh_processing::reverse_face_orientations(positive_mesh);
+    positive_mesh.join(negative_mesh);
   }
 
   int target = geometry->add(GEOMETRY_MESH);

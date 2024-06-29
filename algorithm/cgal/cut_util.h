@@ -6,6 +6,13 @@
 #include "manifold_util.h"
 
 bool cut_mesh_by_mesh(Surface_mesh& a, Surface_mesh& b) {
+  if (!CGAL::is_closed(a)) {
+    Surface_mesh cutMeshCopy = b;
+    CGAL::Polygon_mesh_processing::reverse_face_orientations(cutMeshCopy);
+    return CGAL::Polygon_mesh_processing::clip(
+        a, cutMeshCopy, CGAL::parameters::use_compact_clipper(true),
+        CGAL::parameters::use_compact_clipper(true));
+  }
 #ifdef JOT_MANIFOLD_ENABLED
   manifold::Manifold target_manifold;
   buildManifoldFromSurfaceMesh(a, target_manifold);

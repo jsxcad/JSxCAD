@@ -47,7 +47,6 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
             Surface_mesh cutMeshCopy = geometry->mesh(nth);
             CGAL::Polygon_mesh_processing::reverse_face_orientations(
                 cutMeshCopy);
-            Surface_mesh mask(geometry->mesh(target));
             if (!CGAL::Polygon_mesh_processing::clip(
                     geometry->mesh(target), cutMeshCopy,
                     CGAL::parameters::use_compact_clipper(true),

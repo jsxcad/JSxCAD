@@ -17,6 +17,7 @@ await Assembly(
     .ry(-1 / 4)
     .rx(1 / 4)
     .grow(Orb(0.1))
+    .fuse()
     .void()
 ).stl('motor case');
 ```
