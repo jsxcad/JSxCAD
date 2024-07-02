@@ -3205,7 +3205,12 @@ const sort = Shape.registerMethod3(
   (geometry, spec = 'z<y<x<', resolution = 0.01) => {
     let leafs = [];
     for (const leaf of getLeafs(geometry)) {
-      const [min, max] = measureBoundingBox(leaf);
+      console.log(JSON.stringify(leaf));
+      const bounds = measureBoundingBox(leaf);
+      if (bounds === undefined) {
+        continue;
+      }
+      const [min, max] = bounds;
       leafs.push({
         min: round(min, resolution),
         max: round(max, resolution),

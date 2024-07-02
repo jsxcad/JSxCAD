@@ -20,64 +20,72 @@ static bool loft_between_cycles(std::vector<EK::Segment_3>& lower_segments,
                                 std::vector<EK::Segment_3>& upper_segments,
                                 std::vector<EK::Point_3>& points,
                                 std::vector<std::vector<size_t>>& faces) {
+  MakeDeterministic();
+  CGAL::Random random(0);
+
   // Each segment forms a triangle with one point in the other set.
   // The triangles must not intersect.
   // The polygon soup must be manifold.
 
-  auto score_triangle = [](const EK::Point_3& p0, const EK::Point_3& p1,
-                           const EK::Point_3& p2) {
-    // If this is flat it should be 180.
-    const auto a = CGAL::abs(CGAL::approximate_angle(p0, p1, p2) - 180);
-    const auto b = CGAL::abs(CGAL::approximate_angle(p2, p0, p1) - 180);
-    const auto c = CGAL::abs(CGAL::approximate_angle(p1, p2, p0) - 180);
-    auto minimum_angle = CGAL::min(a, CGAL::min(b, c));
-    return minimum_angle;
-  };
-
-  auto score_candidate = [&](const EK::Segment_3& segment,
-                             const EK::Point_3& point, EK::FT& best_score) {
-    auto score = 1000 / (CGAL::sqrt(to_double(
-                             CGAL::squared_distance(segment.source(), point))) +
-                         CGAL::sqrt(to_double(
-                             CGAL::squared_distance(segment.target(), point))));
-    // auto score = score_triangle(segment.source(), point, segment.target());
-    if (score > best_score) {
-      best_score = score;
+  auto candidate_cost = [&](const EK::Segment_3& segment,
+                            const EK::Point_3& point, EK::FT& best_cost) {
+    const auto cost =
+        CGAL::sqrt(to_double(CGAL::squared_distance(segment.source(), point))) +
+        CGAL::sqrt(to_double(CGAL::squared_distance(segment.target(), point)));
+    if (cost < best_cost) {
+      best_cost = cost;
       return true;
     } else {
       return false;
     }
   };
 
-  auto find_best_candidate = [&](size_t upper_begin, size_t upper_end,
-                                 size_t& best_upper, size_t lower_begin,
-                                 size_t lower_end, size_t& best_lower,
-                                 bool& is_base_upper, EK::FT& best_score) {
-    bool has_candidate = false;
-    for (size_t upper = upper_begin; upper < upper_end; upper++) {
-      for (size_t lower = lower_begin; lower <= lower_end; lower++) {
-        if (score_candidate(upper_segments[upper],
-                            lower_segments[lower].source(), best_score)) {
-          best_upper = upper;
-          best_lower = lower;
-          is_base_upper = true;
-          has_candidate = true;
+  auto find_best_candidate =
+      [&](size_t upper_begin, size_t upper_end, size_t& best_upper,
+          size_t lower_begin, size_t lower_end, size_t& best_lower,
+          bool& is_base_upper, EK::FT& best_cost, int stripe) {
+        bool has_candidate = false;
+        auto find_upper_candidate = [&]() {
+          for (size_t upper = upper_begin; upper < upper_end; upper++) {
+            for (size_t lower = lower_begin; lower <= lower_end; lower++) {
+              if (candidate_cost(upper_segments[upper],
+                                 lower_segments[lower].source(), best_cost)) {
+                best_upper = upper;
+                best_lower = lower;
+                is_base_upper = true;
+                has_candidate = true;
+              }
+            }
+          }
+        };
+        auto find_lower_candidate = [&]() {
+          for (size_t lower = lower_begin; lower < lower_end; lower++) {
+            for (size_t upper = upper_begin; upper <= upper_end; upper++) {
+              if (candidate_cost(lower_segments[lower],
+                                 upper_segments[upper].source(), best_cost)) {
+                best_upper = upper;
+                best_lower = lower;
+                is_base_upper = false;
+                has_candidate = true;
+              }
+            }
+          }
+        };
+        if (stripe) {
+          find_upper_candidate();
+        } else {
+          find_lower_candidate();
         }
-      }
-    }
-    for (size_t lower = lower_begin; lower < lower_end; lower++) {
-      for (size_t upper = upper_begin; upper <= upper_end; upper++) {
-        if (score_candidate(lower_segments[lower],
-                            upper_segments[upper].source(), best_score)) {
-          best_upper = upper;
-          best_lower = lower;
-          is_base_upper = false;
-          has_candidate = true;
+        if (has_candidate) {
+          return has_candidate;
         }
-      }
-    }
-    return has_candidate;
-  };
+        if (stripe) {
+          find_lower_candidate();
+        } else {
+          find_upper_candidate();
+        }
+        return has_candidate;
+      };
 
   auto add_face_from_points = [&](const EK::Point_3& p1, const EK::Point_3& p2,
                                   const EK::Point_3& p3) {
@@ -101,9 +109,10 @@ static bool loft_between_cycles(std::vector<EK::Segment_3>& lower_segments,
     size_t upper;
     size_t lower;
     bool is_base_upper;
-    EK::FT score = 0;
+    EK::FT cost = 1000000000;  // Do this better.
     if (!find_best_candidate(upper_begin, upper_end, upper, lower_begin,
-                             lower_end, lower, is_base_upper, score)) {
+                             lower_end, lower, is_base_upper, cost,
+                             depth % 2)) {
       // We should really check to see if there are any open segments.
       return true;
     }
@@ -127,11 +136,10 @@ static bool loft_between_cycles(std::vector<EK::Segment_3>& lower_segments,
     size_t upper;
     size_t lower;
     bool is_base_upper;
-    EK::FT score = 0;
+    EK::FT cost = 1000000000;
     if (!find_best_candidate(0, upper_segments.size() - 1, upper, 0,
                              lower_segments.size() - 1, lower, is_base_upper,
-                             score)) {
-      std::cout << "no candidates" << std::endl;
+                             cost, 1)) {
       return true;
     }
     upper_segments.pop_back();
@@ -163,27 +171,6 @@ static void loft_between_layers(
                           faces);
     }
   };
-}
-
-static void build_mesh_from_triangles(std::vector<EK::Triangle_3>& triangles,
-                                      CGAL::Surface_mesh<EK::Point_3>& mesh) {
-  std::vector<Kernel::Point_3> vertices;
-  std::vector<std::vector<std::size_t>> faces;
-
-  for (const auto& triangle : triangles) {
-    std::vector<std::size_t> face_indices;
-    face_indices.push_back(vertices.size());
-    vertices.push_back(triangle[2]);
-    face_indices.push_back(vertices.size());
-    vertices.push_back(triangle[1]);
-    face_indices.push_back(vertices.size());
-    vertices.push_back(triangle[0]);
-    faces.push_back(face_indices);
-  }
-
-  CGAL::Polygon_mesh_processing::orient_polygon_soup(vertices, faces);
-  CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(vertices, faces,
-                                                              mesh);
 }
 
 static int Loft(Geometry* geometry, bool close) {
@@ -278,7 +265,6 @@ static int Loft(Geometry* geometry, bool close) {
     // FIX: Could we intersect the surface with a ray to figure out the winding
     // order?
     CGAL::Polygon_mesh_processing::orient_polygon_soup(points, faces);
-
     CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh(points, faces,
                                                                 mesh);
 
