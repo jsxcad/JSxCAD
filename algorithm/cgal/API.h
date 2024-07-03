@@ -38,7 +38,7 @@
 #include "IsExteriorPoint.h"
 #include "Join.h"
 #include "Link.h"
-#include "Loft.h"
+#include "Loft2.h"
 #include "MakeAbsolute.h"
 #include "MakeUnitSphere.h"
 #include "MinimizeOverhang.h"

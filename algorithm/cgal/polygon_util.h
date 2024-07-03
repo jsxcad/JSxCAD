@@ -384,6 +384,23 @@ static void PolygonToPolyline(const Plane& plane, const Polygon_2& polygon,
   }
 }
 
+static void polygon_to_points(const Plane& plane, const Polygon_2& polygon,
+                              std::vector<EK::Point_3>& points) {
+  for (const Point_2& p2 : polygon) {
+    points.push_back(plane.to_3d(p2));
+  }
+}
+
+static void polygon_to_segments(const Plane& plane, const Polygon_2& polygon,
+                                std::vector<EK::Segment_3>& segments) {
+  auto start = polygon.vertices_circulator();
+  auto edge = start;
+  do {
+    segments.emplace_back(plane.to_3d(edge[0]), plane.to_3d(edge[1]));
+    ++edge;
+  } while (edge != start);
+}
+
 static double computeBestDistanceBetweenPolylines(const Polyline& polyline_a,
                                                   const Polyline& polyline_b,
                                                   size_t& offset_b) {
