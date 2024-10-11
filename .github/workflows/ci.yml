@@ -27,6 +27,7 @@ jobs:
       - run: (sudo apt-get install libboost-all-dev)
       - run: npm ci
       - run: (cd algorithm/cgal; ./install_native.sh)
+      - run: (cd algorithm/cgal; ./install_wasm.sh)
       - run: npm run bootstrap
       - run: npm run depcheck
       - run: npm run lint
@@ -37,3 +38,8 @@ jobs:
       - run: npm run doc -- --quiet
         env:
           NODE_OPTIONS: --max_old_space_size=4096
+      - name: Make wasm available
+        uses: actions/upload-artifact@v4
+        with:
+          name: cgal_browser.wasm
+          path: es6/cgal_browser.wasm
