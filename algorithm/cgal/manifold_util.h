@@ -14,6 +14,7 @@ typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 static void buildManifoldFromSurfaceMesh(
     CGAL::Surface_mesh<EK::Point_3>& surface_mesh,
     manifold::Manifold& manifold) {
+  std::cout << "QQ/buildManifoldFromSurfaceMesh/begin" << std::endl;
   if (surface_mesh.has_garbage()) {
     surface_mesh.collect_garbage();
   }
@@ -48,11 +49,13 @@ static void buildManifoldFromSurfaceMesh(
     triVerts[offset + 2] = surface_mesh.source(c);
   }
   manifold = manifold::Manifold(manifold_mesh);
+  std::cout << "QQ/buildManifoldFromSurfaceMesh/end" << std::endl;
 }
 
 void buildSurfaceMeshFromManifold(
     const manifold::Manifold& manifold,
     CGAL::Surface_mesh<EK::Point_3>& surface_mesh) {
+  std::cout << "QQ/buildSurfaceMeshFromManifold/begin" << std::endl;
   typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   typedef Surface_mesh::Vertex_index Vertex_index;
   if (surface_mesh.number_of_vertices() != 0) {
@@ -89,6 +92,7 @@ void buildSurfaceMeshFromManifold(
           "buildSurfaceMeshFromManifold: face index misaligned");
     }
   }
+  std::cout << "QQ/buildSurfaceMeshFromManifold/end" << std::endl;
 }
 
 #endif
