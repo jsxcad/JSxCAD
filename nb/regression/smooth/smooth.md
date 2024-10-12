@@ -18,19 +18,3 @@ remeshed
 ```JavaScript
 const remeshed = await fused.remesh().view(1, 'wireframe').note('remeshed');
 ```
-
-![Image](smooth.md.smoothed_1.png)
-
-smoothed
-
-```JavaScript
-const smoothed = await remeshed.smooth().view(1).note('smoothed');
-```
-
-![Image](smooth.md.simplified_1.png)
-
-simplified
-
-```JavaScript
-const simplified = await smoothed.simplify().view(1).note('simplified');
-```

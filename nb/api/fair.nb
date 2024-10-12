@@ -9,9 +9,10 @@ resolution|1|Mesh resolution to apply for fairing.
 Makes curves within the selected region as smooth as possible.
 `;
 
+/*
 Box(10, 10, [-5, 3])
   .join(Box(6, 6, [3, 5]))
   .fair(0.5, outline().route(Box(1, 1, 1)))
   .view(clean())
   .note('Box(10, 10, [-5, 3]).join(Box(6, 6, [3, 5])).fair(0.5, outline().route(Box(1, 1, 1)))');
-
+*/

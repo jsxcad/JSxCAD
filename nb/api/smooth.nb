@@ -13,6 +13,8 @@ Smooths the selected part of the shape.
 The time parameter affects curvature.
 The resolution is used to remesh the selection prior to smoothing.
 `;
+
+/*
 Box(10, 10, [-5, 3])
   .join(Box(6, 6, [3, 5]))
   .smooth(5, 0.25, outline().route(Box(1, 1, 1)))
@@ -32,3 +34,4 @@ Icosahedron(10, 10, 10)
   .smooth()
   .view('wireframe', clean())
   .note('Icosahedron(10, 10, 10).outline().route(Box(1, 1, 1)).fuse().smooth()');
+*/

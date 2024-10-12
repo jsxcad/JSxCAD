@@ -7,6 +7,7 @@ const fused = await Box(20, 20, 20)
 
 const remeshed = await fused.remesh().view(1, 'wireframe').note('remeshed');
 
+/*
 const smoothed = await remeshed.smooth().view(1).note('smoothed');
-
 const simplified = await smoothed.simplify().view(1).note('simplified');
+*/

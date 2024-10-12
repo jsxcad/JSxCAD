@@ -1,6 +1,7 @@
 import { MicroGearMotor } from './micro_gear_motor.nb';
 import { horizontalConnector } from '../lego/lego.nb';
 
+/*
 await Assembly(
   horizontalConnector.y(-8, 8).join(Box([-4 * 8], 3 * 8, 4)),
   MicroGearMotor()
@@ -10,3 +11,4 @@ await Assembly(
     .fuse()
     .void()
 ).stl('motor case');
+*/

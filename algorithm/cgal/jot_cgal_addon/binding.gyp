@@ -7,8 +7,9 @@
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       # 'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a', '../../native/lib/libmanifold.a', '../../native/lib/libClipper2.a', '../../native/lib/libpolygon.a'],
       'libraries': ['../../native/lib/libglpk.a', '../../native/lib/libgmpxx.a', '../../native/lib/libmpfr.a', '../../native/lib/libgmp.a', '../../native/lib/libmanifold.a'],
-      'cflags_cc': ['-O3', '-fPIC', '-DCGAL_USE_GLPK'],
       # 'cflags_cc': ['-O3', '-fPIC', '-DCGAL_USE_GLPK', '-fsanitize=address'],
+      # 'cflags_cc': ['-O3', '-fPIC', '-DCGAL_USE_GLPK'],
+      'cflags_cc': ['-fPIC', '-DCGAL_USE_GLPK'],
       'cflags_cc!': ['-fno-exceptions', '-fno-rtti'],
       'clang': 1,
       'xcode_settings': {
