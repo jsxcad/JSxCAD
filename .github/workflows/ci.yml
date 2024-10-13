@@ -35,9 +35,9 @@ jobs:
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
-      # - run: npm run doc -- --quiet
-      #  env:
-      #    NODE_OPTIONS: --max_old_space_size=4096
+      - run: npm run doc -- --quiet
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
       - name: Make wasm available
         uses: actions/upload-artifact@v4
         with:
