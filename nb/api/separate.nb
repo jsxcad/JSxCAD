@@ -10,7 +10,6 @@ Parameter|Default|Type
 Separates the disconnected elements of a shape.
 `;
 
-/*
 Box(3, 3, 3)
   .cut(Box(1, 3, 3))
   .view(1)
@@ -32,4 +31,3 @@ Box(10)
   .pack()
   .note("separate('holesAsShapes').pack() shows the extracted hole.")
   .view(3);
-*/

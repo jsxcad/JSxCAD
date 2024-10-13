@@ -9,7 +9,6 @@ tool||The tool shape to route.
 Follows the provided segment paths with the vertically oriented tool shape.
 `;
 
-/*
 const tool = Arc(3)
   .Loft(z(-1), z(-0.5), inset(1).z(-0.5), inset(1).z(0.5), z(0.5), z(1))
   .view()
@@ -19,4 +18,3 @@ const path = Box(20, 20, 20)
   .cut(Route(tool, outline()))
   .view(clean())
   .note('path = Box(20, 20, 20).cut(Route(tool, outline()))');
-*/

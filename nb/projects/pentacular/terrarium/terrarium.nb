@@ -13,7 +13,6 @@ md`
 ### Parameters
 `;
 
-/*
 const length = control('box length', 50, 'input');
 const width = control('box width', 50, 'input');
 const height = control('box height', 50, 'input');
@@ -164,4 +163,3 @@ await terrarium
   .z(-height)
   .note('### Laser cut profiles')
   .op(makeTerrarium(), makeLid());
-*/
