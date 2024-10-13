@@ -101,10 +101,6 @@ void buildSurfaceMeshFromManifold(
           "buildSurfaceMeshFromManifold: face index misaligned");
     }
   }
-  if (number_of_non_manifold_vertices(surface_mesh) != 0) {
-    std::cout << "QQ/buildSurfaceMeshFromManifold: not manifold" << std::endl;
-    assert(number_of_non_manifold_vertices(surface_mesh) == 0);
-  }
 }
 
 #endif

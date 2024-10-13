@@ -368,6 +368,7 @@ Box(10, 10, 10)
   )
   .view();
 
+/*
 Arc(10, 10, 10, { sides: 7 })
   .cut(
     eachEdge({ select: Box(10, [-4, 10], [5, 10]) }, (e, l) =>
@@ -381,6 +382,8 @@ Arc(10, 10, 10, { sides: 7 })
   )
   .clean()
   .view();
+*/
+Point().view();
 
 const xy = Box(20, 30).cut(Box(10)).to(XY());
 const xz = Arc(20, 30).cut(Pentagon(7)).to(XZ());

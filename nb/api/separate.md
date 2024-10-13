@@ -7,3 +7,45 @@ Parameter|Default|Type
 'holesAsShapes'|false|Turn holes into shapes when separating.
 
 Separates the disconnected elements of a shape.
+
+![Image](separate.md.$2_1.png)
+
+Box(3, 3, 3).cut(Box(1, 3, 3)) produces a shape with two disconnected elements.
+
+![Image](separate.md.$2_2.png)
+
+separate().on(n(0), color('blue')) turns the first part blue, demonstrating that they are now separate shapes.
+
+```JavaScript
+Box(3, 3, 3)
+  .cut(Box(1, 3, 3))
+  .view(1)
+  .note(
+    'Box(3, 3, 3).cut(Box(1, 3, 3)) produces a shape with two disconnected elements.'
+  )
+  .separate()
+  .on(n(0), color('blue'))
+  .view(2)
+  .note(
+    "separate().on(n(0), color('blue')) turns the first part blue, demonstrating that they are now separate shapes."
+  );
+```
+
+![Image](separate.md.$3_1.png)
+
+Box(10).cut(Arc(3)) produces a box with a hole in it
+
+separate('holesAsShapes').pack() shows the extracted hole.
+
+![Image](separate.md.$3_3.png)
+
+```JavaScript
+Box(10)
+  .cut(Arc(3))
+  .view(1)
+  .note('Box(10).cut(Arc(3)) produces a box with a hole in it')
+  .separate('holesAsShapes')
+  .pack()
+  .note("separate('holesAsShapes').pack() shows the extracted hole.")
+  .view(3);
+```

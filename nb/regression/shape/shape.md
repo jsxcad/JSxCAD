@@ -375,8 +375,17 @@ Triangle(14).svg('triangle');
 
 ![Image](shape.md.$52.png)
 
+![Image](shape.md.$52.png)
+
 ```JavaScript
-Point().view();
+Box(10)
+  .ez([50, -50])
+  .rx(0, 1 / 4)
+  .fuse()
+  .view(0)
+  .remesh(1, Box(20, 20, 20))
+  .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
+  .view();
 ```
 
 ![Image](shape.md.$53_1.png)
@@ -720,6 +729,10 @@ Box(10, 10, 10)
 ```
 
 ![Image](shape.md.$86.png)
+
+```JavaScript
+Point().view();
+```
 
 ```JavaScript
 const xy = Box(20, 30).cut(Box(10)).to(XY());

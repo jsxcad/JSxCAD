@@ -398,7 +398,9 @@ Box(10).cut(Box(5)).ez([1, -1]).section().view();
 ![Image](shapes.md.$35.png)
 
 ```JavaScript
-Point().view();
+Box(10, 10, 20)
+  .cutOut(Box(20, 20, [8, 100]), noOp(), grow(Arc(2)))
+  .view();
 ```
 
 ![Image](shapes.md.$36_3.png)
@@ -544,7 +546,21 @@ Triangle(11).eachPoint(Arc(5).to, cut).view(5);
 
 ![Image](shapes.md.$54.png)
 
+```JavaScript
+Box(10, 10, [0, 3])
+  .smooth(10, Box(11).cut(Box(5)).ez([1.5, 3.1]))
+  .view();
+```
+
 ![Image](shapes.md.$55.png)
+
+```JavaScript
+Box(5, 5, 20)
+  .rx(0 / 4, 1 / 6)
+  .fuse()
+  .smooth(50, 1, ArcX(6, 16, 16))
+  .view();
+```
 
 ![Image](shapes.md.$56.png)
 
