@@ -82,7 +82,7 @@ void buildSurfaceMeshFromManifold(
       continue;
     }
     auto p = mesh.GetVertPos(vertex);
-    Point point(p[0], p[0], p[0]);
+    Point point(p[0], p[1], p[2]);
     vertex_map[vertex] = surface_mesh.add_vertex(point);
   }
   size_t tri_count = mesh.NumTri();
