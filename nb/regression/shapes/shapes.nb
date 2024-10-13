@@ -199,6 +199,7 @@ Box(10, 10, 20)
   .cutOut(Box(20, 20, [8, 100]), noOp(), grow(Arc(2)))
   .view();
 */
+Point().view();
 
 Box(10, 10, 20)
   .grow(Orb(2))
@@ -280,6 +281,7 @@ Box(10, 10, [0, 3])
   .smooth(10, Box(11).cut(Box(5)).ez([1.5, 3.1]))
   .view();
 */
+Point().view();
 
 /*
 Box(5, 5, 20)
@@ -288,6 +290,7 @@ Box(5, 5, 20)
   .smooth(50, 1, ArcX(6, 16, 16))
   .view();
 */
+Point().view();
 
 Box(10)
   .cut(Box(5).cut(Box(3).cut(Box(1))))

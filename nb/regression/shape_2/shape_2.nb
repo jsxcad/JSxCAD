@@ -15,18 +15,22 @@ Box(20)
 /*
 Box(10, 10, 10).shell().clip(YZ()).view();
 */
+Point().view();
 
 /*
 Box(10, 10, 10).shell(5).clip(YZ()).view();
 */
+Point().view();
 
 /*
 Box(10, 10, 10).shell(1, { approx: 1 }).clip(YZ()).view();
 */
+Point().view();
 
 /*
 Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
 */
+Point().view();
 
 Line(20).grow(Arc(1)).view();
 

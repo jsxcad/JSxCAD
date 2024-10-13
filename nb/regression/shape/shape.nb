@@ -171,6 +171,7 @@ Box(10)
   .smooth({ method: 'shape', iterations: 1, time: 1 }, Box(9, 20, 20))
   .view();
 */
+Point().view();
 
 Box(20, 20, 20)
   .view(1, 'wireframe')
