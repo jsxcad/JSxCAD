@@ -9,4 +9,5 @@ Box(10, 10, 10).seq({ upto: 32 }, (t) => random(3, t, (a, b, c) => ry(a).rz(b).x
 // 128 gives 0.34
 // 256 gives 0.61
 
-Box(10).seq({ upto: 256 }, (t) => random(3, t, (a, b) => rz(a).x(lerp(-50, 50, b))), Group).view(1).disjoint().pack('bb').view(2);
+// Box(10).seq({ upto: 256 }, (t) => random(3, t, (a, b) => rz(a).x(lerp(-50, 50, b))), Group).view(1).disjoint().pack('bb').view(2);
+Point().view();

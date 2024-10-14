@@ -181,7 +181,7 @@ enum GeometryType {
 
 class DN {
  public:
-  DN(int key) : key_(key) {};
+  DN(int key) : key_(key){};
   ~DN() {}
   int key_;
 };

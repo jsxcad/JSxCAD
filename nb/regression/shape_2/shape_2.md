@@ -23,26 +23,14 @@ Box(20)
 ![Image](shape_2.md.$3.png)
 
 ```JavaScript
-Box(10, 10, 10).shell().clip(YZ()).view();
+Point().view();
 ```
 
 ![Image](shape_2.md.$4.png)
 
-```JavaScript
-Box(10, 10, 10).shell(5).clip(YZ()).view();
-```
-
 ![Image](shape_2.md.$5.png)
 
-```JavaScript
-Box(10, 10, 10).shell(1, { approx: 1 }).clip(YZ()).view();
-```
-
 ![Image](shape_2.md.$6.png)
-
-```JavaScript
-Box(10, 10, 10).shell(1, { approx: 0.01 }).clip(YZ()).color('green').view();
-```
 
 ![Image](shape_2.md.$7.png)
 

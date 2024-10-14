@@ -1,6 +1,6 @@
 ([[ -d manifold ]] || git clone https://github.com/pentacular/manifold &&
   cd manifold &&
-  git checkout jot
+  # git checkout jot
   mkdir -p native &&
   cd native &&
   rm -f ../CMakeCache.txt &&

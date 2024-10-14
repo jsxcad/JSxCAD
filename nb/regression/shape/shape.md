@@ -731,19 +731,7 @@ Box(10, 10, 10)
 ![Image](shape.md.$86.png)
 
 ```JavaScript
-Arc(10, 10, 10, { sides: 7 })
-  .cut(
-    eachEdge({ select: Box(10, [-4, 10], [5, 10]) }, (e, l) =>
-      Box(2, 2, [0, l])
-        .clip(
-          Arc(2, 2, [0, l], { start: 1/4, end: 3/4 })
-            .grow(Orb(0.01))
-        )
-        .to(e)
-    )
-  )
-  .clean()
-  .view();
+Point().view();
 ```
 
 ```JavaScript
