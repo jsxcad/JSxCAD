@@ -32,6 +32,7 @@ export const restoreEmitGroup = ({ savedSourceLocations, savedEmitGroup }) => {
 const onEmitHandlers = new Set();
 
 export const emit = (value) => {
+  console.log(`QQ/sys/emit: ${JSON.stringify(value)}`);
   if (value.sourceLocation === undefined) {
     value.sourceLocation = getSourceLocation();
   }

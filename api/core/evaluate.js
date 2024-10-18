@@ -27,6 +27,7 @@ export const evaluate = async (ecmascript, { api, id, path }) => {
     const op = await builder({ ...api, import: { meta: { url: path } } });
     return await op();
   } catch (error) {
+    console.log(error);
     throw error;
   } finally {
     if (emitGroup) {
@@ -125,7 +126,7 @@ export const execute = async (
             const task = async () => {
               try {
                 console.log(`Evaluating ${id}`);
-                await evaluate(updates[id].program, { id, path });
+                await evaluate(updates[id].program, { api, id, path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {

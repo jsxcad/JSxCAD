@@ -163,6 +163,7 @@ enum Status {
   STATUS_ZERO_THICKNESS = 2,
   STATUS_UNCHANGED = 3,
   STATUS_INVALID_INPUT = 4,
+  STATUS_FAILED = 5,
 };
 
 enum GeometryType {
