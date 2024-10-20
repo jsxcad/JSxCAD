@@ -10,7 +10,7 @@ export const LoadStl = Shape.registerMethod3(
   [
     'string',
     'modes:binary,ascii',
-    'strings:wrap,patch,auto',
+    'strings:wrap,patch,auto,close',
     'number',
     'number',
   ],

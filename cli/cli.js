@@ -28,6 +28,10 @@ process.on('uncaughtException', (err) => {
 const run = async (scriptPath, ...args) => {
   const outputMap = new Map();
   for (const arg of args) {
+    if (arg.startsWith('--var=')) {
+      const [name, value] = arg.substr('--var='.length).split(':');
+      api[name] = eval(value);
+    }
     if (arg.startsWith('--input=')) {
       const [filename, path] = arg.substr('--input='.length).split(':');
       const data = readFileSync(filename);
@@ -54,6 +58,7 @@ const run = async (scriptPath, ...args) => {
     const emittedNotes = [];
     const onEmitHandler = addOnEmitHandler((notes) => emittedNotes.push(...notes));
     const path = scriptPath;
+    
     await execute(ecmascript, { api, path, evaluate });
     await resolvePending();
     for (const note of emittedNotes) {
