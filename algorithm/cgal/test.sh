@@ -1,0 +1,3 @@
+# c++ -Wunused -Wunused-function -DJOT_MANIFOLD_ENABLED -DGLM_ENABLE_EXPERIMENTAL -DCGAL_USE_GLPK -DCGAL_ALWAYS_ROUND_TO_NEAREST -DCGAL_WITH_GMPXX -DCGAL_USE_GMPXX=1 -DCGAL_DO_NOT_USE_BOOST_MP -DBOOST_ALL_NO_LIB test.cc -I . -I ./glm -I ~/opt/include -I ~/opt/include/manifold -L ~/opt_node/lib -static -O3 -std=c++1z -lglpk -lgmpxx -lmpfr -lgmp -lmanifold -lcollider -lpolygon -lutilities -lgraphlite
+
+c++ -fPIC -DCGAL_USE_GKPK -I . -I ./glm -I ./glm/glm -I ./native/include -I ./native/include/manifold ./native/lib/libglpk.a ./native/lib/libgmpxx.a ./native/lib/libmpfr.a ./native/lib/libgmp.a ./native/lib/libmanifold.a test.cc

@@ -7,6 +7,7 @@
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_slicer.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/linear_least_squares_fitting_3.h>
 
 #include "arrangement_util.h"
 #include "random_util.h"

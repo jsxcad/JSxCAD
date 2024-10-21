@@ -45,6 +45,7 @@
 #include "Offset.h"
 #include "Outline.h"
 #include "Pack.h"
+#include "Raycast.h"
 #include "Reconstruct.h"
 #include "Refine.h"
 #include "Remesh.h"

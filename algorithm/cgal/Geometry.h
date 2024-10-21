@@ -188,6 +188,7 @@ class DN {
 };
 
 class Geometry {
+ public:
   typedef CGAL::AABB_face_graph_triangle_primitive<
       CGAL::Surface_mesh<EK::Point_3>>
       AABB_primitive;
@@ -204,7 +205,6 @@ class Geometry {
   typedef CGAL::Side_of_triangle_mesh<CGAL::Surface_mesh<IK::Point_3>, IK>
       Epick_side_of_triangle_mesh;
 
- public:
   Geometry() : test_mode_(false), size_(0), is_absolute_frame_(false) {}
 
   JS_BINDING void setSize(size_t size) {
