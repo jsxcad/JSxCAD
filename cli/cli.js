@@ -1,9 +1,6 @@
 import {
   addOnEmitHandler,
-  clearFileCache,
-  getTimes,
   read,
-  reportTimes,
   resolvePending,
   setLocalFilesystem,
   watchLog,
@@ -11,12 +8,8 @@ import {
 } from '@jsxcad/sys';
 
 import api, { evaluate, execute } from '@jsxcad/api';
-import { argv } from 'process';
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-
 import { readFileSync, writeFileSync } from 'fs';
+import { argv } from 'process';
 
 Error.stackTraceLimit = Infinity;
 
@@ -30,7 +23,7 @@ const run = async (scriptPath, ...args) => {
   for (const arg of args) {
     if (arg.startsWith('--var=')) {
       const [name, value] = arg.substr('--var='.length).split(':');
-      api[name] = eval(value);
+      api[name] = JSON.parse(value);
     }
     if (arg.startsWith('--input=')) {
       const [filename, path] = arg.substr('--input='.length).split(':');
@@ -48,7 +41,7 @@ const run = async (scriptPath, ...args) => {
     cwd
   );
   const script = readFileSync(scriptPath, 'utf8');
-  const lines = script.split('\n')
+  const lines = script.split('\n');
   const ecmascript = lines.slice(1).join('\n');
   const logWatcher = ({ type, source, text }) => {
     console.log(`[${type}] ${source} ${text}`);
@@ -56,9 +49,9 @@ const run = async (scriptPath, ...args) => {
   watchLog(logWatcher);
   try {
     const emittedNotes = [];
-    const onEmitHandler = addOnEmitHandler((notes) => emittedNotes.push(...notes));
+    addOnEmitHandler((notes) => emittedNotes.push(...notes));
     const path = scriptPath;
-    
+
     await execute(ecmascript, { api, path, evaluate });
     await resolvePending();
     for (const note of emittedNotes) {
