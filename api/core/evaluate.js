@@ -1,16 +1,10 @@
 import { acquire, release } from './evaluateLock.js';
-import {
-  isWebWorker,
-  logInfo,
-  restoreEmitGroup,
-  saveEmitGroup,
-} from '@jsxcad/sys';
+import { restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 import { getApi } from './api.js';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, id, path }) => {
-  const where = isWebWorker ? 'worker' : 'browser';
   let emitGroup;
   try {
     await acquire();
