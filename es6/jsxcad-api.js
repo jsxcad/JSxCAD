@@ -1,7 +1,7 @@
 import './jsxcad-api-v1-tools.js';
 import * as shapeApi from './jsxcad-api-shape.js';
 import { Group, Shape, save, load } from './jsxcad-api-shape.js';
-import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isWebWorker, isNode, getSourceLocation } from './jsxcad-sys.js';
+import { addOnEmitHandler, write, read, emit, flushEmitGroup, computeHash, logInfo, startTime, beginEmitGroup, resolvePending, finishEmitGroup, endTime, saveEmitGroup, restoreEmitGroup, isNode, getSourceLocation } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { readObj } from './jsxcad-api-v1-obj.js';
 import { readOff } from './jsxcad-api-v1-off.js';
@@ -62,6 +62,7 @@ const emitError = (exception) => {
 };
 
 const $run = async (op, { path, id, text, sha, line }) => {
+  console.log(`QQ/$run`);
   const meta = await read(`meta/def/${path}/${id}.meta`);
   if (!meta || meta.sha !== sha) {
     logInfo('api/core/$run', text);
@@ -149,15 +150,10 @@ const setApi = (value) => {
 const getApi = () => api$1;
 
 const evaluate = async (ecmascript, { api, id, path }) => {
-  const where = isWebWorker ? 'worker' : 'browser';
   let emitGroup;
   try {
     await acquire();
     emitGroup = saveEmitGroup();
-    logInfo(
-      'api/core/evaluate/script',
-      `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`
-    );
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
@@ -166,6 +162,7 @@ const evaluate = async (ecmascript, { api, id, path }) => {
     const op = await builder({ ...api, import: { meta: { url: path } } });
     return await op();
   } catch (error) {
+    console.log(error);
     throw error;
   } finally {
     if (emitGroup) {
@@ -264,7 +261,7 @@ const execute = async (
             const task = async () => {
               try {
                 console.log(`Evaluating ${id}`);
-                await evaluate(updates[id].program, { id, path });
+                await evaluate(updates[id].program, { api, id, path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {

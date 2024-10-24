@@ -1,8 +1,5 @@
 import { acquire, release } from './evaluateLock.js';
-import {
-  restoreEmitGroup,
-  saveEmitGroup,
-} from '@jsxcad/sys';
+import { restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 import { getApi } from './api.js';
 import { toEcmascript } from '@jsxcad/compiler';
