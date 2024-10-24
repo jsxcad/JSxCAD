@@ -15,6 +15,7 @@
     "algorithm/*",
     "api/*",
     "cache",
+    "cli",
     "compiler",
     "convert/*",
     "data/*",

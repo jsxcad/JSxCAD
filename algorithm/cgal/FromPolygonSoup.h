@@ -45,13 +45,15 @@ static int FromPolygonSoup(Geometry* geometry, size_t face_count,
       }
     }
 
+    repair_self_intersections<EK>(mesh, strategies);
+
     if (face_count > 0 || min_error_drop > 0) {
       // Simplify the non-self-intersecting mesh.
       // Enable simplification to reduce polygon count.
-      approximate_mesh(mesh, face_count, min_error_drop);
+      if (!approximate_mesh(mesh, face_count, min_error_drop)) {
+        return STATUS_FAILED;
+      }
     }
-
-    repair_self_intersections<EK>(mesh, strategies);
 
     demesh(mesh);
   } catch (const std::exception& e) {

@@ -1,24 +1,14 @@
 import { acquire, release } from './evaluateLock.js';
-import {
-  isWebWorker,
-  logInfo,
-  restoreEmitGroup,
-  saveEmitGroup,
-} from '@jsxcad/sys';
+import { restoreEmitGroup, saveEmitGroup } from '@jsxcad/sys';
 
 import { getApi } from './api.js';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const evaluate = async (ecmascript, { api, id, path }) => {
-  const where = isWebWorker ? 'worker' : 'browser';
   let emitGroup;
   try {
     await acquire();
     emitGroup = saveEmitGroup();
-    logInfo(
-      'api/core/evaluate/script',
-      `${where}: ${ecmascript.replace(/\n/g, '\n|   ')}`
-    );
     const builder = new Function(
       `{ ${Object.keys(api).join(', ')} }`,
       `return async () => { ${ecmascript} };`
@@ -27,6 +17,7 @@ export const evaluate = async (ecmascript, { api, id, path }) => {
     const op = await builder({ ...api, import: { meta: { url: path } } });
     return await op();
   } catch (error) {
+    console.log(error);
     throw error;
   } finally {
     if (emitGroup) {
@@ -125,7 +116,7 @@ export const execute = async (
             const task = async () => {
               try {
                 console.log(`Evaluating ${id}`);
-                await evaluate(updates[id].program, { id, path });
+                await evaluate(updates[id].program, { api, id, path });
                 completed.add(id);
                 console.log(`Completed ${id}`);
               } catch (error) {
