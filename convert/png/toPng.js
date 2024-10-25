@@ -1,4 +1,4 @@
 import UPNG from 'upng-js';
 
-export const toPng = async ({ width, height, pixels }) =>
-  UPNG.encode([pixels], width, height, 256);
+export const toPng = async ({ width, height, bytes }) =>
+  new Uint8Array(UPNG.encode([bytes], width, height, 256));
