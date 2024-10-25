@@ -1,9 +1,25 @@
-import { Group, computeReliefFromImage } from '@jsxcad/geometry';
+import {
+  Group,
+  computeReliefFromImage,
+  ensurePages,
+  render,
+} from '@jsxcad/geometry';
+import { fromPng, toPng } from '@jsxcad/convert-png';
+import { generateUniqueId, getSourceLocation, read, write } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
-import { fromPng } from '@jsxcad/convert-png';
 import { fromRaster } from '@jsxcad/algorithm-contour';
-import { read } from '@jsxcad/sys';
+import { view as viewOp } from './view.js';
+
+const computeDotProduct = ([x1, y1, z1], [x2, y2, z2]) =>
+  x1 * x2 + y1 * y2 + z1 * z2;
+
+const computeLength = (v) => Math.sqrt(computeDotProduct(v, v));
+
+const normalize = (v) => {
+  const l = computeLength(v);
+  return [v[0] / l, v[1] / l, v[2] / l];
+};
 
 const readPngAsRasta = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
@@ -101,5 +117,90 @@ export const LoadPngAsRelief = Shape.registerMethod3(
       extrusion,
       doClose
     );
+  }
+);
+
+export const png = Shape.registerMethod3(
+  'png',
+  [
+    'inputGeometry',
+    'string',
+    'function',
+    'number',
+    'number',
+    'number',
+    'number',
+    'options',
+  ],
+  async (
+    geometry,
+    name,
+    op = (_v) => (s) => s,
+    implicitLength,
+    implicitWidth,
+    implicitHeight,
+    implicitResolution,
+    {
+      length = implicitLength,
+      width = implicitWidth,
+      height = implicitHeight,
+      resolution = implicitResolution,
+      view = {},
+    } = {}
+  ) => {
+    const light = [0, 0, 1];
+    const color = [1, 1, 1];
+    const { path } = getSourceLocation();
+    let index = 0;
+    const updatedGeometry = await Shape.applyToGeometry(geometry, op);
+    for (const entry of ensurePages(updatedGeometry)) {
+      const pngPath = `download/png/${path}/${generateUniqueId()}`;
+      const { xSteps, ySteps, points } = render(entry, {
+        length,
+        width,
+        height,
+        resolution,
+      });
+      const pixels = [];
+      for (let nth = 0; nth < points.length; nth += 4) {
+        const normal = normalize([
+          points[nth + 1],
+          points[nth + 2],
+          points[nth + 3],
+        ]);
+        const dot = computeDotProduct(light, normal);
+        if (dot < 0) {
+          pixels.push(0, 0, 0, 0);
+        } else {
+          const cos = Math.abs(dot);
+          const r = color[0] * cos;
+          const g = color[1] * cos;
+          const b = color[2] * cos;
+          const i = 1;
+          pixels.push(
+            Math.floor(r * 256),
+            Math.floor(g * 256),
+            Math.floor(b * 256),
+            Math.floor(i * 256)
+          );
+        }
+      }
+      await write(
+        pngPath,
+        await toPng(entry, { width: xSteps, height: ySteps, pixels })
+      );
+      const suffix = index++ === 0 ? '' : `_${index}`;
+      const filename = `${name}${suffix}.png`;
+      const record = {
+        path: pngPath,
+        filename,
+        type: 'image/png',
+      };
+      // Produce a view of what will be downloaded.
+      await viewOp(name, { ...view, download: { entries: [record] } })(
+        Shape.fromGeometry(entry)
+      );
+    }
+    return geometry;
   }
 );

@@ -7621,6 +7621,39 @@ const serialize = (inputs) => {
   });
 };
 
+const raycast = (
+  inputs,
+  {
+    xStart = 0,
+    xStride = 0,
+    xSteps = 0,
+    yStart = 0,
+    yStride = 0,
+    ySteps = 0,
+    z = 0,
+    points = [],
+  }
+) =>
+  withCgalGeometry('raycast', inputs, (cgalGeometry, g) => {
+    const status = g.Raycast(
+      cgalGeometry,
+      Number(xStart),
+      Number(xStride),
+      Number(xSteps),
+      Number(yStart),
+      Number(yStride),
+      Number(ySteps),
+      Number(z),
+      points
+    );
+    switch (status) {
+      case STATUS_OK:
+        return true;
+      default:
+        throw new Error(`Unexpected status ${status} in raycast`);
+    }
+  });
+
 const shell = (
   inputs,
   innerOffset,
@@ -7849,4 +7882,4 @@ const wrap = (
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pack, pushSurfaceMesh, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, trim, twist, unfold, validate, withIsExteriorPoint, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pack, pushSurfaceMesh, raycast, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, trim, twist, unfold, validate, withIsExteriorPoint, wrap };

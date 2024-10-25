@@ -1,7 +1,7 @@
 import { getSourceLocation, startTime, endTime, emit, computeHash, generateUniqueId, write, isNode, read, logInfo } from './jsxcad-sys.js';
 export { elapsed, emit, read, write } from './jsxcad-sys.js';
 import * as g$1 from './jsxcad-geometry.js';
-import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygonSoup, isSeqSpec, seq as seq$1, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, As as As$1, as as as$1, AsPart as AsPart$1, asPart as asPart$1, And as And$1, at as at$1, base as base$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, samplePointCloud, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, exterior as exterior$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fair as fair$1, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, Gauge, gauge as gauge$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, hold as hold$1, separate as separate$1, ConvexHull, convexHull, inItem, inset as inset$1, involute as involute$1, Iron as Iron$1, iron as iron$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, computeOrientedBoundingBox, maskedBy as maskedBy$1, masking as masking$1, hasMaterial, minimizeOverhang as minimizeOverhang$1, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, obb as obb$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, hasShowOverlay, pack as pack$1, toPoints, ref as ref$1, Ref as Ref$1, repair as repair$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, Route as Route$1, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, measureBoundingBox, ComputeSkeleton, computeSkeleton, taggedSketch, smooth as smooth$1, getLeafs, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, trim as trim$1, turnXs, turnYs, turnZs, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, validate as validate$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, Label as Label$1, computeReliefFromImage, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, hash, Triangle as Triangle$1 } from './jsxcad-geometry.js';
+import { taggedGroup, taggedGraph, taggedSegments, taggedPoints, fromPolygonSoup, isSeqSpec, seq as seq$1, abstract as abstract$1, approximate as approximate$1, makeAbsolute, and as and$1, joinTo, align as align$1, alignment as alignment$1, measureArea, As as As$1, as as as$1, AsPart as AsPart$1, asPart as asPart$1, And as And$1, at as at$1, base as base$1, bb as bb$1, bend as bend$1, note as note$1, emitNote, tags as tags$1, by as by$1, computeCentroid, ChainConvexHull, chainConvexHull, noGhost, clip as clip$1, clipFrom as clipFrom$1, samplePointCloud, retag, commonVolume as commonVolume$1, copy as copy$1, Curve as Curve$1, curve as curve$1, cut as cut$1, cutFrom as cutFrom$1, cutOut as cutOut$1, deform as deform$1, demesh as demesh$1, computeGeneralizedDiameter, dilateXY as dilateXY$1, disjoint as disjoint$1, drop as drop$1, toDisplayGeometry as toDisplayGeometry$1, ensurePages, each as each$1, toOrientedFaceEdgesList, toPointList, toSegmentList, eagerTransform as eagerTransform$1, exterior as exterior$1, extrudeAlongX, extrudeAlongY, extrudeAlongZ, extrudeAlong as extrudeAlong$1, extrudeAlongNormal, toFaceEdgesList, fair as fair$1, fill as fill$1, fit as fit$1, fitTo as fitTo$1, fix as fix$1, flat as flat$1, origin as origin$1, Fuse as Fuse$1, join as join$1, fuse as fuse$1, getList, gap as gap$1, Gauge, gauge as gauge$1, getAllList, getValue, ghost as ghost$1, getNotList, grow as grow$1, hold as hold$1, separate as separate$1, ConvexHull, convexHull, inItem, inset as inset$1, involute as involute$1, Iron as Iron$1, iron as iron$1, Link as Link$1, Points as Points$1, link as link$1, load as load$1, read as read$1, loft as loft$1, log as log$1, Loop as Loop$1, loop as loop$1, generateLowerEnvelope, computeOrientedBoundingBox, maskedBy as maskedBy$1, masking as masking$1, hasMaterial, minimizeOverhang as minimizeOverhang$1, translate, Group as Group$1, moveAlong as moveAlong$1, moveAlongNormal, computeNormal, on as on$1, get as get$1, Empty as Empty$1, nth as nth$1, obb as obb$1, offset as offset$1, onPre, onPost, outline as outline$1, orient as orient$1, hasShowOverlay, pack as pack$1, toPoints, ref as ref$1, Ref as Ref$1, repair as repair$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, rotateXs, rotateYs, rotateZs, Route as Route$1, linearize, store, write as write$1, scale as scale$2, scaleToFit as scaleToFit$1, seam as seam$1, section as section$1, serialize as serialize$1, rewriteTags, cast, shell as shell$1, simplify as simplify$1, measureBoundingBox, ComputeSkeleton, computeSkeleton, taggedSketch, smooth as smooth$1, getLeafs, tag as tag$1, tagMatcher, to as to$1, toCoordinates as toCoordinates$1, computeToolpath, transform as transform$1, trim as trim$1, turnXs, turnYs, turnZs, twist as twist$1, untag as untag$1, generateUpperEnvelope, unfold as unfold$1, measureVolume, toVoxelsFromGeometry, toVoxelsFromCoordinates, Wrap as Wrap$1, wrap as wrap$1, validate as validate$1, Arc as Arc$1, ArcX as ArcX$1, ArcY as ArcY$1, ArcZ as ArcZ$1, Disjoint, Box as Box$1, Edge as Edge$1, Hershey as Hershey$1, Hexagon as Hexagon$1, Icosahedron as Icosahedron$1, computeImplicitVolume, Label as Label$1, computeReliefFromImage, render, Octagon as Octagon$1, Orb as Orb$1, Pentagon as Pentagon$1, Point as Point$1, Segments as Segments$1, rotateZ as rotateZ$1, hash, Triangle as Triangle$1 } from './jsxcad-geometry.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
 import { dataUrl } from './jsxcad-ui-threejs.js';
@@ -11,7 +11,7 @@ import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
 import { fromLDraw, fromLDrawPart } from './jsxcad-convert-ldraw.js';
-import { fromPng } from './jsxcad-convert-png.js';
+import { toPng, fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
 import { fromOff } from './jsxcad-convert-off.js';
 
@@ -3847,6 +3847,16 @@ const LineZ = Shape.registerMethod3(
   }
 );
 
+const computeDotProduct = ([x1, y1, z1], [x2, y2, z2]) =>
+  x1 * x2 + y1 * y2 + z1 * z2;
+
+const computeLength = (v) => Math.sqrt(computeDotProduct(v, v));
+
+const normalize = (v) => {
+  const l = computeLength(v);
+  return [v[0] / l, v[1] / l, v[2] / l];
+};
+
 const readPngAsRasta = async (path) => {
   let data = await read(`source/${path}`, { sources: [path] });
   if (data === undefined) {
@@ -3943,6 +3953,91 @@ const LoadPngAsRelief = Shape.registerMethod3(
       extrusion,
       doClose
     );
+  }
+);
+
+Shape.registerMethod3(
+  'png',
+  [
+    'inputGeometry',
+    'string',
+    'function',
+    'number',
+    'number',
+    'number',
+    'number',
+    'options',
+  ],
+  async (
+    geometry,
+    name,
+    op = (_v) => (s) => s,
+    implicitLength,
+    implicitWidth,
+    implicitHeight,
+    implicitResolution,
+    {
+      length = implicitLength,
+      width = implicitWidth,
+      height = implicitHeight,
+      resolution = implicitResolution,
+      view: view$1 = {},
+    } = {}
+  ) => {
+    const light = [0, 0, 1];
+    const color = [1, 1, 1];
+    const { path } = getSourceLocation();
+    let index = 0;
+    const updatedGeometry = await Shape.applyToGeometry(geometry, op);
+    for (const entry of ensurePages(updatedGeometry)) {
+      const pngPath = `download/png/${path}/${generateUniqueId()}`;
+      const { xSteps, ySteps, points } = render(entry, {
+        length,
+        width,
+        height,
+        resolution,
+      });
+      const pixels = [];
+      for (let nth = 0; nth < points.length; nth += 4) {
+        const normal = normalize([
+          points[nth + 1],
+          points[nth + 2],
+          points[nth + 3],
+        ]);
+        const dot = computeDotProduct(light, normal);
+        if (dot < 0) {
+          pixels.push(0, 0, 0, 0);
+        } else {
+          const cos = Math.abs(dot);
+          const r = color[0] * cos;
+          const g = color[1] * cos;
+          const b = color[2] * cos;
+          const i = 1;
+          pixels.push(
+            Math.floor(r * 256),
+            Math.floor(g * 256),
+            Math.floor(b * 256),
+            Math.floor(i * 256)
+          );
+        }
+      }
+      await write(
+        pngPath,
+        await toPng(entry, { width: xSteps, height: ySteps, pixels })
+      );
+      const suffix = index++ === 0 ? '' : `_${index}`;
+      const filename = `${name}${suffix}.png`;
+      const record = {
+        path: pngPath,
+        filename,
+        type: 'image/png',
+      };
+      // Produce a view of what will be downloaded.
+      await view(name, { ...view$1, download: { entries: [record] } })(
+        Shape.fromGeometry(entry)
+      );
+    }
+    return geometry;
   }
 );
 
