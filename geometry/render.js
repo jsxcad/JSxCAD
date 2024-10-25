@@ -15,10 +15,10 @@ export const render = (
   const inputs = linearize(geometry, filter);
   const points = [];
   const xStart = length / -2;
-  const xStride = length * resolution;
+  const xStride = resolution;
   const xSteps = Math.ceil(length / resolution);
   const yStart = width / -2;
-  const yStride = width * resolution;
+  const yStride = resolution;
   const ySteps = Math.ceil(width / resolution);
   const z = height;
   raycast(inputs, {

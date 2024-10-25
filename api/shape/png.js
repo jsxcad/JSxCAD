@@ -148,14 +148,12 @@ export const png = Shape.registerMethod3(
       view = {},
     } = {}
   ) => {
-    console.log(`QQ/png/1`);
     const light = [0, 0, 1];
     const color = [1, 1, 1];
     const { path } = getSourceLocation();
     let index = 0;
     const updatedGeometry = await Shape.applyToGeometry(geometry, op);
     for (const entry of ensurePages(updatedGeometry)) {
-      console.log(`QQ/png/2`);
       const pngPath = `download/png/${path}/${generateUniqueId()}`;
       const { xSteps, ySteps, points } = render(entry, {
         length,
@@ -163,11 +161,9 @@ export const png = Shape.registerMethod3(
         height,
         resolution,
       });
-      console.log(`QQ/png/3`);
-      const pixels = new Int8Array(points.length);
+      const pixels = new Uint8Array(points.length);
       let lastPixel = 0;
       for (let nth = 0; nth < points.length; nth += 4) {
-        console.log(`QQ/png/4`);
         const normal = normalize([
           points[nth + 1],
           points[nth + 2],
@@ -185,13 +181,12 @@ export const png = Shape.registerMethod3(
           const g = color[1] * cos;
           const b = color[2] * cos;
           const i = 1;
-          pixels[lastPixel++] = Math.floor(r * 256);
-          pixels[lastPixel++] = Math.floor(g * 256);
-          pixels[lastPixel++] = Math.floor(b * 256);
-          pixels[lastPixel++] = Math.floor(i * 256);
+          pixels[lastPixel++] = Math.floor(r * 255);
+          pixels[lastPixel++] = Math.floor(g * 255);
+          pixels[lastPixel++] = Math.floor(b * 255);
+          pixels[lastPixel++] = Math.floor(i * 255);
         }
       }
-      console.log(`QQ/png/5`);
       await write(
         pngPath,
         await toPng({ width: xSteps, height: ySteps, bytes: pixels })
@@ -203,13 +198,11 @@ export const png = Shape.registerMethod3(
         filename,
         type: 'image/png',
       };
-      console.log(`QQ/png/6`);
       // Produce a view of what will be downloaded.
       await viewOp(name, { ...view, download: { entries: [record] } })(
         Shape.fromGeometry(entry)
       );
     }
-    console.log(`QQ/png/7`);
     return geometry;
   }
 );

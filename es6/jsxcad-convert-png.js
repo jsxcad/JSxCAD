@@ -7681,7 +7681,7 @@ const fromPng = async (data) => {
   return { width, height, pixels };
 };
 
-const toPng = async ({ width, height, pixels }) =>
-  UPNG.encode([pixels], width, height, 256);
+const toPng = async ({ width, height, bytes }) =>
+  new Uint8Array(UPNG.encode([bytes], width, height, 256));
 
 export { fromPng, toPng };
