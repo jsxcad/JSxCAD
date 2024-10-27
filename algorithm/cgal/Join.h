@@ -34,33 +34,8 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
           } else {
-            if (!join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth), exact)) {
-              return STATUS_ZERO_THICKNESS;
-            }
+            assert(join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth), exact));
           }
-#if 0
-#ifdef JOT_MANIFOLD_ENABLED
-          } else if (!exact) {
-            // TODO: Optimize out unnecessary conversions.
-            manifold::Manifold target_manifold;
-            buildManifoldFromSurfaceMesh(geometry->mesh(target),
-                                         target_manifold);
-            manifold::Manifold nth_manifold;
-            buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
-            target_manifold += nth_manifold;
-            geometry->mesh(target).clear();
-            buildSurfaceMeshFromManifold(target_manifold,
-                                         geometry->mesh(target));
-#endif
-          } else {
-            Surface_mesh cutMeshCopy(geometry->mesh(nth));
-            if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                    geometry->mesh(target), cutMeshCopy,
-                    geometry->mesh(target))) {
-              return STATUS_ZERO_THICKNESS;
-            }
-          }
-#endif
           geometry->updateBounds3(target);
         }
         demesh(geometry->mesh(target));

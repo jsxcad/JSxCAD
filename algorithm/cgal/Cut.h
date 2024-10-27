@@ -43,10 +43,8 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
               geometry->noOverlap3(target, nth)) {
             continue;
           }
-          if (!cut_mesh_by_mesh(geometry->mesh(target),
-                                geometry->mesh(nth), open, exact)) {
-            return STATUS_ZERO_THICKNESS;
-          }
+          assert(cut_mesh_by_mesh(geometry->mesh(target),
+                                geometry->mesh(nth), open, exact));
           geometry->updateBounds3(target);
         }
         demesh(geometry->mesh(target));

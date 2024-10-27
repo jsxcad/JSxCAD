@@ -42,40 +42,6 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
               break;
             }
             assert(clip_mesh_by_mesh(geometry->mesh(target), geometry->mesh(nth), open, exact));
-#if 0
-            Surface_mesh clipMeshCopy(geometry->mesh(nth));
-            if (open) {
-              if (!CGAL::Polygon_mesh_processing::clip(
-                      geometry->mesh(target), clipMeshCopy,
-                      CGAL::parameters::use_compact_clipper(true),
-                      CGAL::parameters::use_compact_clipper(true))) {
-                return STATUS_ZERO_THICKNESS;
-              }
-#ifdef JOT_MANIFOLD_ENABLED
-            } else if (!exact) {
-              // TODO: Optimize out unnecessary conversions.
-              manifold::Manifold target_manifold;
-              buildManifoldFromSurfaceMesh(geometry->mesh(target),
-                                           target_manifold);
-              manifold::Manifold nth_manifold;
-              buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
-              target_manifold ^= nth_manifold;
-              geometry->mesh(target).clear();
-              buildSurfaceMeshFromManifold(target_manifold,
-                                           geometry->mesh(target));
-#endif
-            } else {
-              if (!CGAL::Polygon_mesh_processing::
-                      corefine_and_compute_intersection(
-                          geometry->mesh(target), clipMeshCopy,
-                          geometry->mesh(target),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default(),
-                          CGAL::parameters::all_default())) {
-                return STATUS_ZERO_THICKNESS;
-              }
-            }
-#endif
             geometry->updateBounds3(target);
           }
           demesh(geometry->mesh(target));
