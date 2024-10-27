@@ -1,7 +1,7 @@
 #include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 
-#include "manifold_util.h"
+#include "boolean_util.h"
 #include "segment_util.h"
 
 static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
@@ -41,9 +41,10 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
               geometry->setType(target, GEOMETRY_EMPTY);
               break;
             }
+            assert(clip_mesh_by_mesh(geometry->mesh(target), geometry->mesh(nth), open, exact));
+#if 0
             Surface_mesh clipMeshCopy(geometry->mesh(nth));
             if (open) {
-              Surface_mesh mask(geometry->mesh(target));
               if (!CGAL::Polygon_mesh_processing::clip(
                       geometry->mesh(target), clipMeshCopy,
                       CGAL::parameters::use_compact_clipper(true),
@@ -74,6 +75,7 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
                 return STATUS_ZERO_THICKNESS;
               }
             }
+#endif
             geometry->updateBounds3(target);
           }
           demesh(geometry->mesh(target));

@@ -4,7 +4,7 @@
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 
 #include "Geometry.h"
-#include "cut_util.h"
+#include "boolean_util.h"
 #include "segment_util.h"
 
 static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
@@ -43,21 +43,9 @@ static int Cut(Geometry* geometry, size_t targets, bool open, bool exact) {
               geometry->noOverlap3(target, nth)) {
             continue;
           }
-          if (open) {
-            Surface_mesh cutMeshCopy = geometry->mesh(nth);
-            CGAL::Polygon_mesh_processing::reverse_face_orientations(
-                cutMeshCopy);
-            if (!CGAL::Polygon_mesh_processing::clip(
-                    geometry->mesh(target), cutMeshCopy,
-                    CGAL::parameters::use_compact_clipper(true),
-                    CGAL::parameters::use_compact_clipper(true))) {
-              return STATUS_ZERO_THICKNESS;
-            }
-          } else {
-            if (!cut_mesh_by_mesh(geometry->mesh(target),
-                                  geometry->mesh(nth))) {
-              return STATUS_ZERO_THICKNESS;
-            }
+          if (!cut_mesh_by_mesh(geometry->mesh(target),
+                                geometry->mesh(nth), open, exact)) {
+            return STATUS_ZERO_THICKNESS;
           }
           geometry->updateBounds3(target);
         }

@@ -2,7 +2,7 @@
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 
 #include "Geometry.h"
-#include "manifold_util.h"
+#include "boolean_util.h"
 #include "segment_util.h"
 
 static int Join(Geometry* geometry, size_t targets, bool exact) {
@@ -33,6 +33,12 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
           }
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
+          } else {
+            if (!join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth), exact)) {
+              return STATUS_ZERO_THICKNESS;
+            }
+          }
+#if 0
 #ifdef JOT_MANIFOLD_ENABLED
           } else if (!exact) {
             // TODO: Optimize out unnecessary conversions.
@@ -54,6 +60,7 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
               return STATUS_ZERO_THICKNESS;
             }
           }
+#endif
           geometry->updateBounds3(target);
         }
         demesh(geometry->mesh(target));
