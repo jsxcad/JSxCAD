@@ -115,6 +115,7 @@
 * [overlay](../../nb/api/overlay.md)
 * [pack](../../nb/api/pack.md)
 * [page](../../nb/api/page.md)
+* [png](../../nb/api/png.md)
 * [points](../../nb/api/points.md)
 * [remesh](../../nb/api/remesh.md)
 * [route](../../nb/api/route.md)

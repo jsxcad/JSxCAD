@@ -1097,6 +1097,29 @@ static Napi::Value Pack(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
+static Napi::Value Raycast(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 9);
+  Napi::Object jsGeometry = info[0].As<Napi::Object>();
+  ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
+  double x_start = info[1].As<Napi::Number>().DoubleValue();
+  double x_step = info[2].As<Napi::Number>().DoubleValue();
+  double x_end = info[3].As<Napi::Number>().DoubleValue();
+  double y_start = info[4].As<Napi::Number>().DoubleValue();
+  double y_step = info[5].As<Napi::Number>().DoubleValue();
+  double y_end = info[6].As<Napi::Number>().DoubleValue();
+  double z = info[7].As<Napi::Number>().DoubleValue();
+  Napi::Array out = info[8].As<Napi::Array>();
+  uint32_t index = 0;
+  auto thunk = [&](size_t x_step, size_t y_step, const IK::FT& value, const IK::Vector_3& normal) {
+    out.Set(index++, CGAL::to_double(value));
+    out.Set(index++, CGAL::to_double(normal.x()));
+    out.Set(index++, CGAL::to_double(normal.y()));
+    out.Set(index++, CGAL::to_double(normal.z()));
+  };
+  int status = ::Raycast(geometry, x_start, x_step, x_end, y_start, y_step, y_end, z, thunk);
+  return Napi::Number::New(info.Env(), status);
+}
+
 static Napi::Value Repair(const Napi::CallbackInfo& info) {
   assertArgCount(info, 2);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1391,6 +1414,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Offset"), Napi::Function::New(env, Offset));
   exports.Set(Napi::String::New(env, "Outline"), Napi::Function::New(env, Outline));
   exports.Set(Napi::String::New(env, "Pack"), Napi::Function::New(env, Pack));
+  exports.Set(Napi::String::New(env, "Raycast"), Napi::Function::New(env, Raycast));
   exports.Set(Napi::String::New(env, "Reconstruct"), Napi::Function::New(env, Reconstruct));
   exports.Set(Napi::String::New(env, "Refine"), Napi::Function::New(env, Refine));
   exports.Set(Napi::String::New(env, "Remesh"), Napi::Function::New(env, Remesh));

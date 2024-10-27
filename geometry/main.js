@@ -43,7 +43,6 @@ export { Iron } from './iron.js';
 export { Label } from './label.js';
 export { Orb } from './Orb.js';
 export { OrientedPoint } from './Point.js';
-// export { Page, ensurePages, page } from './Page.js';
 export { ensurePages } from './Page.js';
 export { Point, Points } from './Point.js';
 export { Route } from './route.js';
@@ -239,6 +238,7 @@ export { reconstruct } from './reconstruct.js';
 export { reify } from './tagged/reify.js';
 export { refine } from './refine.js';
 export { remesh } from './remesh.js';
+export { render } from './render.js';
 export { repair } from './repair.js';
 export {
   as,

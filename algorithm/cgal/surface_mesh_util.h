@@ -7,6 +7,7 @@
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_slicer.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/linear_least_squares_fitting_3.h>
 
 #include "arrangement_util.h"
 #include "random_util.h"
@@ -72,9 +73,20 @@ static Plane ensureFacetPlane(
   }
 }
 
+/*
 template <typename Surface_mesh, typename Vector>
 static Vector NormalOfSurfaceMeshFacet(
     const Surface_mesh& mesh, typename Surface_mesh::Face_index facet) {
+  const auto h = mesh.halfedge(facet);
+  return CGAL::normal(mesh.point(mesh.source(h)),
+                      mesh.point(mesh.source(mesh.next(h))),
+                      mesh.point(mesh.source(mesh.next(mesh.next(h)))));
+}
+*/
+
+template <typename K>
+static typename K::Vector_3 NormalOfSurfaceMeshFacet(
+    const CGAL::Surface_mesh<typename K::Point_3>& mesh, typename CGAL::Surface_mesh<typename K::Point_3>::Face_index facet) {
   const auto h = mesh.halfedge(facet);
   return CGAL::normal(mesh.point(mesh.source(h)),
                       mesh.point(mesh.source(mesh.next(h))),

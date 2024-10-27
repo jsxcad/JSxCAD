@@ -29,7 +29,9 @@ const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/api/image.md.$2.observed.png',
   'nb/api/iron.md.$2.observed.png',
   'nb/api/minimizeOverhang.md.$2.observed.png',
+  'nb/api/route.md.path.observed.png',
   'nb/api/smooth.md.$4.observed.png',
+  'nb/projects/pentacular/micro_gear_motor/examples.md.$1_motor_case.observed.png',
   'nb/regression/smooth/smooth.md.simplified_1.observed.png',
   'nb/regression/shape/shape.md.$50.observed.png',
   'nb/regression/shape_2/shape_2.md.$5.observed.png',
@@ -79,6 +81,7 @@ const writeMarkdown = async (
       if (download) {
         const { entries } = download;
         for (let { base64Data, filename, data, path } of entries) {
+          console.log(`QQ/download: filename=${filename} path=${path}`);
           if (!data && base64Data) {
             data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
           }

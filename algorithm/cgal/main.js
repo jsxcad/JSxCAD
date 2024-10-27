@@ -75,6 +75,7 @@ export { section } from './section.js';
 export { separate } from './separate.js';
 export { serialize } from './serialize.js';
 export { clearMeshCache, setTestMode } from './cgalGeometry.js';
+export { raycast } from './raycast.js';
 export { repair } from './repair.js';
 export { shell } from './shell.js';
 export { simplify } from './simplify.js';
