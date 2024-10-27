@@ -19,17 +19,21 @@ bool cut_mesh_by_mesh(Surface_mesh& a, Surface_mesh& b) {
   manifold::Manifold nth_manifold;
   buildManifoldFromSurfaceMesh(b, nth_manifold);
   target_manifold -= nth_manifold;
-  a.clear();
-  buildSurfaceMeshFromManifold(target_manifold, a);
-#else
+  if (target_manifold.Status() == manifold::Manifold::Error::NoError) {
+    a.clear();
+    buildSurfaceMeshFromManifold(target_manifold, a);
+    demesh(a);
+    return true;
+  }
+  std::cout << "QQ/cut_mesh_by_mesh: Manifold cut failed. Falling back to exact." << std::endl;
+#endif
   Surface_mesh cutMeshCopy(b);
   if (!CGAL::Polygon_mesh_processing::corefine_and_compute_difference(
-          a, cutMeshCopy, a),
+          a, cutMeshCopy, a,
       CGAL::parameters::all_default(), CGAL::parameters::all_default(),
       CGAL::parameters::all_default())) {
     return false;
   }
-#endif
   demesh(a);
   return true;
 };
