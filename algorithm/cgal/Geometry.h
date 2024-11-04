@@ -2,6 +2,7 @@
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/Polygon_triangulation_decomposition_2.h>
@@ -613,21 +614,82 @@ class Geometry {
   }
 
   void convertPolygonsToPlanarMeshes() {
+    typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
     assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_polygons(nth)) {
         // Convert to planar mesh.
-        std::map<EK::Point_3, CGAL::Surface_mesh<EK::Point_3>::Vertex_index>
+        std::map<EK::Point_3, Surface_mesh::Vertex_index>
             vertex_map;
-        setMesh(nth, new Surface_mesh);
+        Surface_mesh& mesh = this->mesh(nth);
+        // There might be junk in the mesh.
+        mesh.clear();
         // Note: a set of polygons might not be convertible to a single mesh
         // due to zero width junctions.
-        if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh(nth),
+        if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh,
                                             vertex_map)) {
           std::cout << "convertPolygonsToPlanarMeshes failed";
           return;
         }
-        CGAL::Polygon_mesh_processing::triangulate_faces(mesh(nth));
+        assert(CGAL::Polygon_mesh_processing::remove_degenerate_edges(mesh));
+        assert(CGAL::Polygon_mesh_processing::remove_degenerate_faces(mesh));
+        // FIX: this doesn't solve the problem of having a zero gap between the duplicates.
+        // We need to separate the vertices slightly to avoid self-intersection.
+        std::cout << "Fixing non-manifold vertices" << std::endl;
+        std::vector<std::vector<Surface_mesh::Vertex_index>> vertex_groups;
+        CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(mesh, CGAL::parameters::output_iterator(std::back_inserter(vertex_groups)));
+        for (auto& vertex_group : vertex_groups) {
+          for (auto& duplicated_vertex : vertex_group) {
+            // Split each outgoing edge close to the duplicated vertex.
+            // Then relax the duplicated vertex, moving it away from its twin.
+            // This should resolve self-intersection.
+
+            std::cout << "Adjusting " << duplicated_vertex << std::endl;
+
+            std::vector<Surface_mesh::Halfedge_index> edges_to_split;
+          
+            Surface_mesh::Halfedge_index start = mesh.halfedge(duplicated_vertex);
+            Surface_mesh::Halfedge_index edge = start;
+
+            std::cout << "Start is " << start << std::endl;
+
+            // Collect the edges to split before disrupting the graph.
+            do {
+              edges_to_split.push_back(edge);
+              std::cout << "edge_to_split: edge=" << edge << " source=" << mesh.source(edge) << " target=" << mesh.target(edge) << std::endl;
+              edge = mesh.next_around_source(edge);
+            } while (edge != start);
+
+            std::cout << "edges_to_split.size: " << edges_to_split.size() << std::endl;
+
+            // Split the edges and adjust the positions.
+            EK::Vector_3 sum(0, 0, 0);
+            const EK::Point_3 zero(0, 0, 0);
+            for (const auto edge : edges_to_split) {
+              Surface_mesh::Halfedge_index split = CGAL::Euler::split_edge(edge, mesh);
+              auto target = mesh.target(edge);
+              auto source = mesh.source(edge);
+              auto position = CGAL::midpoint(mesh.point(source), mesh.point(target));
+              std::cout << "edge=" << edge << " target=" << target << " source=" << source << " position=" << position << std::endl;
+              std::cout << "edge_to_split: split=" << split << " source=" << mesh.source(split) << " target=" << mesh.target(split) << std::endl;
+              // mesh.point(source) = position;
+              sum += position - zero;
+              std::cout << "edge: sum=" << sum << std::endl;
+            }
+            // Relax the central vertex so that it moves away from its twin.
+            std::cout << "QQ/1: size=" << edges_to_split.size() << std::endl;
+            double size = edges_to_split.size();
+            EK::FT count(edges_to_split.size());
+            std::cout << "QQ/2: count=" << count << std::endl;
+            std::cout << "QQ/3: sum=" << sum << std::endl;
+            EK::Vector_3 average(CGAL::to_double(sum.x()) / size, CGAL::to_double(sum.y()) / size, CGAL::to_double(sum.z()) / size);
+            std::cout << "QQ/4: average=" << average << std::endl;
+            EK::Point_3 position = zero + average;
+            std::cout << "sum=" << sum << " average=" << average << " position=" << position << std::endl;
+            mesh.point(duplicated_vertex) = position;
+          }
+        }
+        CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
         setType(nth, GEOMETRY_MESH);
       }
     }

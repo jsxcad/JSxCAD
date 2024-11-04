@@ -6349,6 +6349,9 @@ const toCgalGeometry = (inputs, g = getCgal()) => {
 
 const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const g = getCgal();
+  if (g.Validate(geometry, [0, /* 1, */ 2, 3], false, true) !== STATUS_OK) {
+    throw Error('fromCgalGeometry: invalid geometry');
+  }
   let results = [];
   for (let nth = start; nth < length; nth++) {
     const origin = copyOriginal ? geometry.getOrigin(nth) : nth;
@@ -6529,8 +6532,9 @@ const bend = (inputs, targetsLength, edgeLength = 1) =>
 const graphSymbol = Symbol('graph');
 const surfaceMeshSymbol = Symbol('surfaceMeshSymbol');
 
-const cast = (inputs) =>
-  withCgalGeometry('cast', inputs, (cgalGeometry, g) => {
+const cast = (inputs) => {
+  console.log(`QQ/cast: inputs=${JSON.stringify(inputs)}`);
+  return withCgalGeometry('cast', inputs, (cgalGeometry, g) => {
     const status = g.Cast(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -6541,6 +6545,7 @@ const cast = (inputs) =>
         throw new Error(`Unexpected status ${status} in cast`);
     }
   });
+};
 
 const clip = (inputs, targetsLength, open = false, exact = false) =>
   withCgalGeometry('clip', inputs, (cgalGeometry, g) => {
@@ -6825,8 +6830,9 @@ const convexHull = (inputs) =>
     }
   });
 
-const cut = (inputs, targetsLength, open = false, exact = false) =>
-  withCgalGeometry('cut', inputs, (cgalGeometry, g) => {
+const cut = (inputs, targetsLength, open = false, exact = false) => {
+  // console.log(`QQ/cut: inputs=${JSON.stringify({ inputs, targetsLength, open, exact })}`);
+  return withCgalGeometry('cut', inputs, (cgalGeometry, g) => {
     const status = g.Cut(
       cgalGeometry,
       Number(targetsLength),
@@ -6837,11 +6843,14 @@ const cut = (inputs, targetsLength, open = false, exact = false) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by cut');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
+        const result = fromCgalGeometry(cgalGeometry, inputs, targetsLength);
+        // console.log(`QQ/cut: result=${JSON.stringify(result)}`);
+        return result;
       default:
         throw new Error(`Unexpected status ${status} in cut`);
     }
   });
+};
 
 // FIX
 const deform = (
@@ -7179,12 +7188,14 @@ const fuse = (inputs, exact = false) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fuse');
       case STATUS_OK:
-        return fromCgalGeometry(
+        const result = fromCgalGeometry(
           cgalGeometry,
           inputs,
           cgalGeometry.getSize(),
           inputs.length
         );
+        // console.log(`QQ/fuse: result=${JSON.stringify(result)}`);
+        return result;
       default:
         throw new Error(`Unexpected status ${status} in fuse`);
     }
@@ -7825,7 +7836,7 @@ const validate = (inputs, strategies = []) => {
     strategyCodes.push(0, 1, 2, 3);
   }
   return withCgalGeometry('validate', inputs, (cgalGeometry, g) => {
-    const status = g.Validate(cgalGeometry, strategyCodes);
+    const status = g.Validate(cgalGeometry, strategyCodes, true, false);
     switch (status) {
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());

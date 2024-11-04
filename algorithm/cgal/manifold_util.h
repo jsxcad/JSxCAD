@@ -4,6 +4,7 @@
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
 
 #include <stdexcept>
 
@@ -48,6 +49,14 @@ static void buildManifoldFromSurfaceMesh(
     triVerts[offset + 2] = surface_mesh.source(c);
   }
   manifold = manifold::Manifold(manifold_mesh);
+}
+
+static void buildManifoldFromSurfaceMesh(
+    const CGAL::Surface_mesh<EK::Point_3>& surface_mesh,
+    manifold::Manifold& manifold) {
+  // FIX: This is not efficient.
+  CGAL::Surface_mesh<EK::Point_3> copy(surface_mesh);
+  buildManifoldFromSurfaceMesh(copy, manifold);
 }
 
 void buildSurfaceMeshFromManifold(
@@ -101,6 +110,17 @@ void buildSurfaceMeshFromManifold(
           "buildSurfaceMeshFromManifold: face index misaligned");
     }
   }
+  assert(CGAL::Polygon_mesh_processing::remove_degenerate_edges(surface_mesh));
+  assert(CGAL::Polygon_mesh_processing::remove_degenerate_faces(surface_mesh));
+}
+
+// Let's see if we can validate a mesh by attempting to eliminate it via manifold.
+bool validate_with_manifold(const Surface_mesh& mesh) {
+  manifold::Manifold manifold;
+  buildManifoldFromSurfaceMesh(mesh, manifold);
+  // I wonder if this will work?
+  manifold -= manifold;
+  return manifold.Status() == manifold::Manifold::Error::NoError;
 }
 
 #endif

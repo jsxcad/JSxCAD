@@ -45,7 +45,7 @@ static int FromPolygonSoup(Geometry* geometry, size_t face_count,
       }
     }
 
-    repair_self_intersections<EK>(mesh, strategies);
+    assert(repair_self_intersections<EK>(mesh, strategies));
 
     if (face_count > 0 || min_error_drop > 0) {
       // Simplify the non-self-intersecting mesh.

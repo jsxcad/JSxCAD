@@ -1306,12 +1306,14 @@ static Napi::Value Unfold(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Value Validate(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 2);
+  assertArgCount(info, 4);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
   ::Geometry* geometry = Geometry::Unwrap(jsGeometry)->get();
   std::vector<int> strategies;
   fill_strategies(info[1].As<Array>(), strategies);
-  int status = ::Validate(geometry, strategies);
+  bool input = info[2].As<Napi::Boolean>().Value();
+  bool output = info[3].As<Napi::Boolean>().Value();
+  int status = ::Validate(geometry, strategies, input, output);
   return Napi::Number::New(info.Env(), status);
 }
 

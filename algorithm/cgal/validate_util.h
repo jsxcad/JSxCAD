@@ -1,6 +1,8 @@
+#pragma once
+
 #include <CGAL/Polygon_mesh_processing/manifoldness.h>
 
-#pragma once
+#include "manifold_util.h"
 
 enum ValidateStrategy {
   VALIDATE_IS_NOT_SELF_INTERSECTING = 0,
@@ -38,7 +40,13 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
         break;
       }
       case VALIDATE_IS_MANIFOLD: {
-        std::cout << "validate: running is manifold check." << std::endl;
+        if (CGAL::is_closed(mesh)) {
+          std::cout << "validate: running is manifold check." << std::endl;
+          if (!validate_with_manifold(mesh)) {
+            std::cout << "validate: failed validate_with_manifold test." << std::endl;
+            valid = false;
+          }
+        }
         std::vector<typename Surface_mesh::Halfedge_index> non_manifold;
         CGAL::Polygon_mesh_processing::non_manifold_vertices(
             mesh, std::back_inserter(non_manifold));
@@ -47,6 +55,9 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
         } else {
           std::cout << "validate: failed is manifold check." << std::endl;
           valid = false;
+          for (const auto& vertex : non_manifold) {
+            std::cout << "validate: non-manifold vertex " << vertex << std::endl;
+          }
         }
         break;
       }
