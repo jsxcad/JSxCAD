@@ -43,10 +43,11 @@ const build = async (...args) => {
   const browser = isNoHtml
     ? undefined
     : await puppeteer.launch({
-        headless: 'new',
-        // dumpio: true,
-        // pipe: true,
+        headless: false,
+        // headless: 'new',
         args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
           '--disable-features=BlockInsecurePrivateNetworkRequests',
           '--disable-web-security',
           '--disable-features=IsolateOrigins',

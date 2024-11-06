@@ -639,16 +639,19 @@ class Geometry {
         std::vector<std::vector<Surface_mesh::Vertex_index>> vertex_groups;
         CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(mesh, CGAL::parameters::output_iterator(std::back_inserter(vertex_groups)));
         for (auto& vertex_group : vertex_groups) {
+          std::cout << "QQ/-1" << std::endl;
           for (auto& duplicated_vertex : vertex_group) {
+            std::cout << "QQ/0" << std::endl;
             // Split each outgoing edge close to the duplicated vertex.
             // Then relax the duplicated vertex, moving it away from its twin.
             // This should resolve self-intersection.
 
-            std::cout << "Adjusting " << duplicated_vertex << std::endl;
+            std::cout << "Adjusting vertex=" << duplicated_vertex << " point=" << mesh.point(duplicated_vertex) << std::endl;
 
             std::vector<Surface_mesh::Halfedge_index> edges_to_split;
           
-            Surface_mesh::Halfedge_index start = mesh.halfedge(duplicated_vertex);
+	    // mesh.halfedge(vertex) produces an incoming edge, but we need an outgoing edge.
+            Surface_mesh::Halfedge_index start = mesh.opposite(mesh.halfedge(duplicated_vertex));
             Surface_mesh::Halfedge_index edge = start;
 
             std::cout << "Start is " << start << std::endl;
@@ -666,30 +669,43 @@ class Geometry {
             EK::Vector_3 sum(0, 0, 0);
             const EK::Point_3 zero(0, 0, 0);
             for (const auto edge : edges_to_split) {
-              Surface_mesh::Halfedge_index split = CGAL::Euler::split_edge(edge, mesh);
-              auto target = mesh.target(edge);
               auto source = mesh.source(edge);
-              auto position = CGAL::midpoint(mesh.point(source), mesh.point(target));
-              std::cout << "edge=" << edge << " target=" << target << " source=" << source << " position=" << position << std::endl;
-              std::cout << "edge_to_split: split=" << split << " source=" << mesh.source(split) << " target=" << mesh.target(split) << std::endl;
-              // mesh.point(source) = position;
+              auto source_point = mesh.point(source);
+              auto target = mesh.target(edge);
+              auto target_point = mesh.point(target);
+              auto vector = target_point - source_point;
+              auto direction = unitVector(vector);
+              // EK::FT iota(0.0001);
+              EK::FT iota(0.5);
+              auto position = source_point + direction * iota;
+              Surface_mesh::Halfedge_index split = CGAL::Euler::split_edge(edge, mesh);
+              mesh.point(mesh.source(edge)) = position;
               sum += position - zero;
-              std::cout << "edge: sum=" << sum << std::endl;
             }
+
+            // Construct the new faces along the splits.
+            for (size_t nth_edge = 0; nth_edge < edges_to_split.size(); nth_edge++) {
+              auto edge = edges_to_split[nth_edge];
+              if (mesh.face(mesh.opposite(edge)) == Surface_mesh::null_face()) {
+                // This edge is on a border, we cannot split it.
+                continue;
+              }
+              auto next = edges_to_split[(nth_edge + 1) % edges_to_split.size()];
+              CGAL::Euler::split_face(mesh.opposite(edge), next, mesh);
+            }
+
             // Relax the central vertex so that it moves away from its twin.
-            std::cout << "QQ/1: size=" << edges_to_split.size() << std::endl;
             double size = edges_to_split.size();
             EK::FT count(edges_to_split.size());
-            std::cout << "QQ/2: count=" << count << std::endl;
-            std::cout << "QQ/3: sum=" << sum << std::endl;
-            EK::Vector_3 average(CGAL::to_double(sum.x()) / size, CGAL::to_double(sum.y()) / size, CGAL::to_double(sum.z()) / size);
-            std::cout << "QQ/4: average=" << average << std::endl;
+            EK::Vector_3 average = sum / count;
             EK::Point_3 position = zero + average;
-            std::cout << "sum=" << sum << " average=" << average << " position=" << position << std::endl;
             mesh.point(duplicated_vertex) = position;
+            std::cout << "QQ/6" << std::endl;
           }
         }
+        std::cout << "QQ/7" << std::endl;
         CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
+        std::cout << "QQ/8" << std::endl;
         setType(nth, GEOMETRY_MESH);
       }
     }
