@@ -5,11 +5,11 @@ const url = control('url', 'https://raw.githubusercontent.com/jsxcad/JSxCAD/mast
 const height = control('height', 200, 'input');
 const spacing = control('spacing', 2, 'input');
 
-const a = await LoadStl(url).align('z>');
+const a = LoadStl(url, 'patch').align('z>');
 
-await a.stl('bear').note('This is a low-poly model of a bear.');
+a.stl('bear').note('This is a low-poly model of a bear.');
 
-await a.section(seq({ to: height, by: spacing }, XY, Group))
+a.section(seq({ to: height, by: spacing }, XY, Group))
   .note(`Stl sliced each ${spacing}mm up to ${height}mm.`)
   .view()
   .note('Laid out on a single sheet for cutting.')

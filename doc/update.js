@@ -43,8 +43,7 @@ const build = async (...args) => {
   const browser = isNoHtml
     ? undefined
     : await puppeteer.launch({
-        headless: false,
-        // headless: 'new',
+        headless: 'new',
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -156,7 +155,9 @@ const build = async (...args) => {
     console.log(error.stack);
     exitCode = 1;
   }
-  await browser.close();
+  if (browser) {
+    await browser.close();
+  }
   process.stderr.write('', () =>
     process.stdout.write('', () => process.exit(exitCode))
   );

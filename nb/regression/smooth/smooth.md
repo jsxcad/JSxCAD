@@ -26,11 +26,3 @@ smoothed
 ```JavaScript
 const smoothed = await remeshed.smooth().view(1).note('smoothed');
 ```
-
-![Image](smooth.md.simplified_1.png)
-
-simplified
-
-```JavaScript
-const simplified = await smoothed.simplify().view(1).note('simplified');
-```

@@ -49,27 +49,27 @@ static bool build_surface_mesh_as_relief_from_graymap(
         EK::Point_3 p01 = EK::Point_3(0, 0, 0) + (v01);
         EK::Point_3 p11 = EK::Point_3(0, 0, 0) + (v11);
         EK::Point_3 p10 = EK::Point_3(0, 0, 0) + (v10);
-        if (mesh.add_face(ensureVertex(mesh, vertices, pmm),
-                          ensureVertex(mesh, vertices, p01),
-                          ensureVertex(mesh, vertices, p00)) ==
+        if (mesh.add_face(ensureVertex<EK>(mesh, vertices, pmm),
+                          ensureVertex<EK>(mesh, vertices, p01),
+                          ensureVertex<EK>(mesh, vertices, p00)) ==
             Surface_mesh::null_face()) {
           std::cout << "Failed to add face p00 p01 pmm" << std::endl;
         }
-        if (mesh.add_face(ensureVertex(mesh, vertices, pmm),
-                          ensureVertex(mesh, vertices, p11),
-                          ensureVertex(mesh, vertices, p01)) ==
+        if (mesh.add_face(ensureVertex<EK>(mesh, vertices, pmm),
+                          ensureVertex<EK>(mesh, vertices, p11),
+                          ensureVertex<EK>(mesh, vertices, p01)) ==
             Surface_mesh::null_face()) {
           std::cout << "Failed to add face p01 p11 pmm" << std::endl;
         }
-        if (mesh.add_face(ensureVertex(mesh, vertices, pmm),
-                          ensureVertex(mesh, vertices, p10),
-                          ensureVertex(mesh, vertices, p11)) ==
+        if (mesh.add_face(ensureVertex<EK>(mesh, vertices, pmm),
+                          ensureVertex<EK>(mesh, vertices, p10),
+                          ensureVertex<EK>(mesh, vertices, p11)) ==
             Surface_mesh::null_face()) {
           std::cout << "Failed to add face p11 p10 pmm" << std::endl;
         }
-        if (mesh.add_face(ensureVertex(mesh, vertices, pmm),
-                          ensureVertex(mesh, vertices, p00),
-                          ensureVertex(mesh, vertices, p10)) ==
+        if (mesh.add_face(ensureVertex<EK>(mesh, vertices, pmm),
+                          ensureVertex<EK>(mesh, vertices, p00),
+                          ensureVertex<EK>(mesh, vertices, p10)) ==
             Surface_mesh::null_face()) {
           std::cout << "Failed to add face p10 p00 pmm" << std::endl;
         }
@@ -78,15 +78,15 @@ static bool build_surface_mesh_as_relief_from_graymap(
         EK::Point_3 f01 = EK::Point_3(p01.x(), p01.y(), 0);
         EK::Point_3 f11 = EK::Point_3(p11.x(), p11.y(), 0);
         EK::Point_3 f10 = EK::Point_3(p10.x(), p10.y(), 0);
-        if (mesh.add_face(ensureVertex(mesh, vertices, f00),
-                          ensureVertex(mesh, vertices, f01),
-                          ensureVertex(mesh, vertices, f11)) ==
+        if (mesh.add_face(ensureVertex<EK>(mesh, vertices, f00),
+                          ensureVertex<EK>(mesh, vertices, f01),
+                          ensureVertex<EK>(mesh, vertices, f11)) ==
             Surface_mesh::null_face()) {
           std::cout << "Failed to add face f00 f01 f11" << std::endl;
         }
-        if (mesh.add_face(ensureVertex(mesh, vertices, f11),
-                          ensureVertex(mesh, vertices, f10),
-                          ensureVertex(mesh, vertices, f00)) ==
+        if (mesh.add_face(ensureVertex<EK>(mesh, vertices, f11),
+                          ensureVertex<EK>(mesh, vertices, f10),
+                          ensureVertex<EK>(mesh, vertices, f00)) ==
             Surface_mesh::null_face()) {
           std::cout << "Failed to add face f11 f01 f00" << std::endl;
         }

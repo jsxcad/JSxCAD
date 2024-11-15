@@ -10,5 +10,7 @@ path||The path or url to load
 await LoadStl('https://jsxcad.js.org/stl/bear.stl')
 
 ```JavaScript
-await LoadStl('https://jsxcad.js.org/stl/bear.stl').view().note(`await LoadStl('https://jsxcad.js.org/stl/bear.stl')`);
+LoadStl('https://jsxcad.js.org/stl/bear.stl', 'auto')
+  .view()
+  .note(`await LoadStl('https://jsxcad.js.org/stl/bear.stl')`);
 ```

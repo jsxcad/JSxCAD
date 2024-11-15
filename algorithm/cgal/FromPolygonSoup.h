@@ -45,7 +45,11 @@ static int FromPolygonSoup(Geometry* geometry, size_t face_count,
       }
     }
 
+    std::cout << "QQ/FromPolygonSoup/1: " << mesh << std::endl;
+
     assert(repair_self_intersections<EK>(mesh, strategies));
+
+    std::cout << "QQ/FromPolygonSoup/2: " << mesh << std::endl;
 
     if (face_count > 0 || min_error_drop > 0) {
       // Simplify the non-self-intersecting mesh.
@@ -53,9 +57,14 @@ static int FromPolygonSoup(Geometry* geometry, size_t face_count,
       if (!approximate_mesh(mesh, face_count, min_error_drop)) {
         return STATUS_FAILED;
       }
+      assert(repair_self_intersections<EK>(mesh, strategies));
     }
 
+    std::cout << "QQ/FromPolygonSoup/3: " << mesh << std::endl;
+
     demesh(mesh);
+
+    std::cout << "QQ/FromPolygonSoup/4: " << mesh << std::endl;
   } catch (const std::exception& e) {
     std::cout << "FromPolygonSoup: " << e.what() << std::endl;
     throw;

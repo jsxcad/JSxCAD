@@ -1,5 +1,4 @@
 #include <CGAL/Polygon_mesh_processing/clip.h>
-#include <CGAL/Polygon_mesh_processing/corefinement.h>
 
 #include "boolean_util.h"
 #include "segment_util.h"

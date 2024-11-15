@@ -1,5 +1,4 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_mesh_processing/corefinement.h>
 
 #include "Geometry.h"
 #include "boolean_util.h"

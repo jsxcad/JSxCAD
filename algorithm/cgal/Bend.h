@@ -2,9 +2,10 @@
 
 #include "demesh_util.h"
 #include "point_util.h"
+#include "repair_util.h"
+#include "surface_mesh_util.h"
 
-static int Bend(Geometry* geometry, double reference_radius,
-                double edge_length) {
+static int Bend(Geometry* geometry, double reference_radius, double edge_length) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputPointsToOutputPoints();
@@ -51,18 +52,20 @@ static int Bend(Geometry* geometry, double reference_radius,
   for (int nth = 0; nth < size; nth++) {
     switch (geometry->type(nth)) {
       case GEOMETRY_MESH: {
-        auto& mesh = geometry->mesh(nth);
-        CGAL::Polygon_mesh_processing::split_long_edges(mesh.edges(),
-                                                        edge_length, mesh);
-        CGAL::Polygon_mesh_processing::split_long_edges(mesh.edges(),
-                                                        edge_length, mesh);
-        // This does not look very efficient.
-        // CHECK: Figure out deformations.
+        typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
+        Surface_mesh& mesh = geometry->mesh(nth);
+        std::vector<const Surface_mesh *> selections;
+        remesh<EK>(mesh, selections, 1, 1, edge_length);
         for (const auto& vertex : mesh.vertices()) {
           if (mesh.is_removed(vertex)) {
             continue;
           }
           bend(mesh.point(vertex));
+        }
+        repair_degeneracies<EK>(mesh);
+        if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
+          std::cout << "QQ/Bend: repair self-intersection" << std::endl;
+          repair_self_intersection_by_autorefine<EK>(mesh);
         }
         // Ensure that it is still a positive volume.
         if (CGAL::Polygon_mesh_processing::volume(

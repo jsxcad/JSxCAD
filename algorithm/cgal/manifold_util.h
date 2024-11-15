@@ -110,8 +110,8 @@ void buildSurfaceMeshFromManifold(
           "buildSurfaceMeshFromManifold: face index misaligned");
     }
   }
-  assert(CGAL::Polygon_mesh_processing::remove_degenerate_edges(surface_mesh));
-  assert(CGAL::Polygon_mesh_processing::remove_degenerate_faces(surface_mesh));
+  CGAL::Polygon_mesh_processing::remove_degenerate_edges(surface_mesh);
+  CGAL::Polygon_mesh_processing::remove_degenerate_faces(surface_mesh);
 }
 
 // Let's see if we can validate a mesh by attempting to eliminate it via manifold.

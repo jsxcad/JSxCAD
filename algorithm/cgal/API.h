@@ -1,3 +1,5 @@
+#define CGAL_COREFINEMENT_DEBUG
+
 #include "Approximate.h"
 #include "Bend.h"
 #include "Cast.h"
