@@ -33,14 +33,10 @@ await Arc(10).svg('fileName');
 ### Importing .stl
 Imports a .stl file which can then be used as geometry. A best effort is made to handle bad geometry in the .stl file.
 
-```JavaScript
-const importedStl = await LoadStl('https://jsxcad.js.org/stl/teapot.stl', 5000, 'auto');
-```
-
-![Image](file_import_and_export.md.$8_teapot.png)
+![Image](file_import_and_export.md.importedStl_teapot.png)
 
 ```JavaScript
-importedStl.view('teapot');
+const importedStl = LoadStl('https://jsxcad.js.org/stl/teapot.stl', 'wrap').view('teapot');
 ```
 
 ---

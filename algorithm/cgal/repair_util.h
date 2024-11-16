@@ -136,6 +136,7 @@ static bool repair_self_intersections(CGAL::Surface_mesh<typename K::Point_3>& m
                     << std::endl;
           mesh.clear();
           wrap_epick(points, faces, alpha, offset, mesh);
+          return true;
         } catch (const std::exception& e) {
           std::cout << "repair_self_intersections: wrap error: " << e.what()
                     << std::endl;
@@ -160,6 +161,7 @@ static bool repair_self_intersections(CGAL::Surface_mesh<typename K::Point_3>& m
             CGAL::Polygon_mesh_processing::triangulate_hole(mesh, hole);
           }
           std::cout << "repair_self_intersections: close done" << std::endl;
+          return true;
         } catch (const std::exception& e) {
           std::cout << "repair_self_intersections: wrap error: " << e.what()
                     << std::endl;

@@ -7,6 +7,6 @@ path||The path or url to load
 'binary'||Read from a binary representation.
 `;
   
-LoadStl('https://jsxcad.js.org/stl/bear.stl', 'auto')
+LoadStl('https://jsxcad.js.org/stl/bear.stl', 'patch')
   .view()
-  .note(`await LoadStl('https://jsxcad.js.org/stl/bear.stl')`);
+  .note(`LoadStl('https://jsxcad.js.org/stl/bear.stl')`);
