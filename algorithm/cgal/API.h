@@ -1,4 +1,6 @@
-#define CGAL_COREFINEMENT_DEBUG
+// #define CGAL_COREFINEMENT_DEBUG
+// #define CGAL_PMP_DEBUG_SMALL_CC_REMOVAL
+// #define CGAL_PMP_REMOVE_SELF_INTERSECTION_DEBUG
 
 #include "Approximate.h"
 #include "Bend.h"

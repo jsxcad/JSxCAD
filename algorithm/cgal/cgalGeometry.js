@@ -152,7 +152,7 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const g = getCgal();
-  if (g.Validate(geometry, [0, /* 1, */ 2, 3], false, true) !== STATUS_OK) {
+  if (true && g.Validate(geometry, [0, /* 1, */ 2, 3], false, true) !== STATUS_OK) {
     throw Error('fromCgalGeometry: invalid geometry');
   }
   let results = [];

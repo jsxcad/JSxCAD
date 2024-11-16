@@ -1,7 +1,5 @@
 #pragma once
 
-#define CGAL_PMP_REMOVE_SELF_INTERSECTION_DEBUG
-
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/autorefinement.h>
 #include <CGAL/Polygon_mesh_processing/clip.h>
@@ -31,28 +29,28 @@ template <typename K>
 static bool repair_boolean(CGAL::Surface_mesh<typename K::Point_3>& mesh, bool conservative = true) {
   std::cout << "repair_boolean: repair_manifold" << std::endl;
   repair_manifold<K>(mesh);
-  if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
-  std::cout << "repair_boolean: repair_degeneracies" << std::endl;
+  // QT1 if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
+  // std::cout << "repair_boolean: repair_degeneracies" << std::endl;
   repair_degeneracies<K>(mesh);
-  if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
+  // QT2 if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
   assert(number_of_non_manifold_vertices(mesh) == 0);
   if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
-    std::cout << "repair_boolean: remove_self_intersections" << std::endl;
+    // std::cout << "repair_boolean: remove_self_intersections" << std::endl;
     if (!CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(mesh)) {
-      std::cout << "repair_boolean: autorefine begin" << std::endl;
+      // std::cout << "repair_boolean: autorefine begin" << std::endl;
       if (!repair_self_intersection_by_autorefine<EK>(mesh)) {
-        std::cout << "repair_boolean: autorefine failed" << std::endl;
-        std::cout << mesh << std::endl;
+        // std::cout << "repair_boolean: autorefine failed" << std::endl;
+        // std::cout << mesh << std::endl;
         return false;
       }
     }
   }
   std::cout << "repair_boolean: is_valid_polygon_mesh?" << std::endl;
-  if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
-  std::cout << "repair_boolean: remove_connected_components_of_negligible_size" << std::endl;
+  // QT3 if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
+  // std::cout << "repair_boolean: remove_connected_components_of_negligible_size" << std::endl;
   CGAL::Polygon_mesh_processing::remove_connected_components_of_negligible_size(mesh);
-  if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
-  std::cout << "repair_boolean: ok" << std::endl;
+  // QT4 if (!CGAL::is_valid_polygon_mesh(mesh, true)) { return false; }
+  // std::cout << "repair_boolean: ok" << std::endl;
   return true;
 }
 

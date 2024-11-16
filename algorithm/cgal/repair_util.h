@@ -1,7 +1,5 @@
 #pragma once
 
-#define CGAL_PMP_DEBUG_SMALL_CC_REMOVAL
-
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/bbox.h>
@@ -47,7 +45,7 @@ static bool repair_self_intersection_by_autorefine(CGAL::Surface_mesh<typename K
     if (CGAL::Polygon_mesh_processing::experimental::
             autorefine_and_remove_self_intersections(working_mesh)) {
       CGAL::Polygon_mesh_processing::remove_isolated_vertices(working_mesh);
-      if (CGAL::is_valid_polygon_mesh(working_mesh, true)) {
+      if (CGAL::is_valid_polygon_mesh(working_mesh)) {
         std::cout << "repair_self_intersections: autorefine succeeded"
                   << std::endl;
         mesh = std::move(working_mesh);
