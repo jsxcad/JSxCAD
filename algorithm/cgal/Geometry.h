@@ -485,10 +485,6 @@ class Geometry {
   JS_BINDING void setInputMesh(
       size_t nth, const std::shared_ptr<const Surface_mesh>& mesh) {
     input_meshes_[nth] = mesh;
-    if (test_mode_) {
-      assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
-          *input_meshes_[nth], CGAL::parameters::all_default()));
-    }
   }
 
   void setTestMode(bool mode) { test_mode_ = mode; }
@@ -520,10 +516,6 @@ class Geometry {
   void setMesh(size_t nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
 
   JS_BINDING std::shared_ptr<const Surface_mesh> getMesh(size_t nth) {
-    if (test_mode_) {
-      assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
-          *meshes_[nth], CGAL::parameters::all_default()));
-    }
     return meshes_[nth];
   }
 

@@ -11,44 +11,44 @@
 #include "manifold.h"
 
 void print_manifold_status(manifold::Manifold::Error status) {
-  switch (status)) {
-      case manifold::Manifold::Error::NoError:
-        std::cout << "NoError" << std::endl;
-        break;
-      case manifold::Manifold::Error::NonFiniteVertex:
-        std::cout << "NonFiniteVertex" << std::endl;
-        break;
-      case manifold::Manifold::Error::NotManifold:
-        std::cout << "NotManifold" << std::endl;
-        break;
-      case manifold::Manifold::Error::VertexOutOfBounds:
-        std::cout << "VertexOutOfBounds" << std::endl;
-        break;
-      case manifold::Manifold::Error::PropertiesWrongLength:
-        std::cout << "PropertiesWrongLength" << std::endl;
-        break;
-      case manifold::Manifold::Error::MissingPositionProperties:
-        std::cout << "MissingPositionProperties" << std::endl;
-        break;
-      case manifold::Manifold::Error::MergeVectorsDifferentLengths:
-        std::cout << "MergeVectorsDifferentLengths" << std::endl;
-        break;
-      case manifold::Manifold::Error::MergeIndexOutOfBounds:
-        std::cout << "MergeIndexOutOfBounds" << std::endl;
-        break;
-      case manifold::Manifold::Error::TransformWrongLength:
-        std::cout << "TransformWrongLength" << std::endl;
-        break;
-      case manifold::Manifold::Error::RunIndexWrongLength:
-        std::cout << "RunIndexWrongLength" << std::endl;
-        break;
-      case manifold::Manifold::Error::FaceIDWrongLength:
-        std::cout << "FaceIDWrongLength" << std::endl;
-        break;
-      case manifold::Manifold::Error::InvalidConstruction:
-        std::cout << "InvalidConstruction" << std::endl;
-        break;
-    }
+  switch (status) {
+    case manifold::Manifold::Error::NoError:
+      std::cout << "NoError" << std::endl;
+      break;
+    case manifold::Manifold::Error::NonFiniteVertex:
+      std::cout << "NonFiniteVertex" << std::endl;
+      break;
+    case manifold::Manifold::Error::NotManifold:
+      std::cout << "NotManifold" << std::endl;
+      break;
+    case manifold::Manifold::Error::VertexOutOfBounds:
+      std::cout << "VertexOutOfBounds" << std::endl;
+      break;
+    case manifold::Manifold::Error::PropertiesWrongLength:
+      std::cout << "PropertiesWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::MissingPositionProperties:
+      std::cout << "MissingPositionProperties" << std::endl;
+      break;
+    case manifold::Manifold::Error::MergeVectorsDifferentLengths:
+      std::cout << "MergeVectorsDifferentLengths" << std::endl;
+      break;
+    case manifold::Manifold::Error::MergeIndexOutOfBounds:
+      std::cout << "MergeIndexOutOfBounds" << std::endl;
+      break;
+    case manifold::Manifold::Error::TransformWrongLength:
+      std::cout << "TransformWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::RunIndexWrongLength:
+      std::cout << "RunIndexWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::FaceIDWrongLength:
+      std::cout << "FaceIDWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::InvalidConstruction:
+      std::cout << "InvalidConstruction" << std::endl;
+      break;
+  }
 }
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel EK;

@@ -1,5 +1,4 @@
 #include "Geometry.h"
-#include "manifold_util.h"
 
 static int Fuse(Geometry* geometry, bool exact) {
   try {
