@@ -2,7 +2,6 @@
 #include "manifold_util.h"
 
 static int Fuse(Geometry* geometry, bool exact) {
-  // std::cout << "Fuse/1" << std::endl;
   try {
     size_t size = geometry->size();
 
@@ -15,32 +14,26 @@ static int Fuse(Geometry* geometry, bool exact) {
 
     // Handle meshes
     {
-      // std::cout << "Fuse/2" << std::endl;
       int target = -1;
       for (size_t nth = 0; nth < size; nth++) {
-        // std::cout << "Fuse/3" << std::endl;
         if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
           continue;
         }
         if (target == -1) {
-          // std::cout << "Fuse/4" << std::endl;
           target = geometry->add(GEOMETRY_MESH);
           geometry->setMesh(target, new Surface_mesh());
           geometry->setIdentityTransform(target);
         }
         if (geometry->noOverlap3(target, nth)) {
-          // std::cout << "Fuse/5: target=" << geometry->bbox3(target) << " nth=" << geometry->bbox3(nth) << std::endl;
           geometry->mesh(target).join(geometry->mesh(nth));
         } else {
-          // std::cout << "Fuse/6" << std::endl;
-          assert(join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth), exact));
+          assert(join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth),
+                                   exact));
         }
-        // std::cout << "Fuse/7" << std::endl;
         geometry->updateBounds3(target);
         geometry->setType(nth, GEOMETRY_EMPTY);
       }
       if (target != -1) {
-        // std::cout << "Fuse/8" << std::endl;
         demesh(geometry->mesh(target));
       }
     }
@@ -102,7 +95,6 @@ static int Fuse(Geometry* geometry, bool exact) {
     geometry->copyGeneralPolygonSetsToPolygonsWithHoles();
     geometry->transformToLocalFrame();
 
-    // std::cout << "Fuse/9" << std::endl;
     return STATUS_OK;
   } catch (const std::exception& e) {
     std::cout << "Fuse exception: " << std::endl;

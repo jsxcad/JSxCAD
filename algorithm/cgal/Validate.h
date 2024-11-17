@@ -3,7 +3,8 @@
 #include "Geometry.h"
 #include "validate_util.h"
 
-static int Validate(Geometry* geometry, const std::vector<int>& strategies, bool input_geometry, bool output_geometry) {
+static int Validate(Geometry* geometry, const std::vector<int>& strategies,
+                    bool input_geometry, bool output_geometry) {
   try {
     size_t size = geometry->getSize();
 
@@ -21,7 +22,8 @@ static int Validate(Geometry* geometry, const std::vector<int>& strategies, bool
           }
           if (output_geometry && geometry->has_mesh(nth)) {
             if (!validate(geometry->mesh(nth), strategies)) {
-              std::cout << "Validate: output " << nth << " failed." << std::endl;
+              std::cout << "Validate: output " << nth << " failed."
+                        << std::endl;
               std::cout << geometry->mesh(nth) << std::endl;
               isValid = false;
             }
@@ -38,7 +40,7 @@ static int Validate(Geometry* geometry, const std::vector<int>& strategies, bool
           break;
       }
     }
-  
+
     if (isValid) {
       return STATUS_OK;
     } else {

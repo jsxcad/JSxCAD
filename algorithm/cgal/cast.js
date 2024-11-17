@@ -3,9 +3,8 @@ import { fromCgalGeometry, withCgalGeometry } from './cgalGeometry.js';
 
 import { ErrorZeroThickness } from './error.js';
 
-export const cast = (inputs) => {
-  console.log(`QQ/cast: inputs=${JSON.stringify(inputs)}`);
-  return withCgalGeometry('cast', inputs, (cgalGeometry, g) => {
+export const cast = (inputs) =>
+  withCgalGeometry('cast', inputs, (cgalGeometry, g) => {
     const status = g.Cast(cgalGeometry);
     switch (status) {
       case STATUS_ZERO_THICKNESS:
@@ -16,4 +15,3 @@ export const cast = (inputs) => {
         throw new Error(`Unexpected status ${status} in cast`);
     }
   });
-};

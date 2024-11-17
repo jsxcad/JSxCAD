@@ -10,8 +10,10 @@
 #include "simplify_util.h"
 
 template <typename K>
-static bool repair_simplify(CGAL::Surface_mesh<typename K::Point_3>& mesh, bool conservative = true) {
-  CGAL::Polygon_mesh_processing::remove_connected_components_of_negligible_size(mesh);
+static bool repair_simplify(CGAL::Surface_mesh<typename K::Point_3>& mesh,
+                            bool conservative = true) {
+  CGAL::Polygon_mesh_processing::remove_connected_components_of_negligible_size(
+      mesh);
   repair_degeneracies<K>(mesh);
   repair_manifold<K>(mesh);
   assert(number_of_non_manifold_vertices(mesh) == 0);

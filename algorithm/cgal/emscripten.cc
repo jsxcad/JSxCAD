@@ -398,7 +398,8 @@ static int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit) {
   return STATUS_OK;
 }
 
-static int Validate(Geometry* geometry, emscripten::val js_strategies, emscripten::val input, emscripten::val output) {
+static int Validate(Geometry* geometry, emscripten::val js_strategies,
+                    emscripten::val input, emscripten::val output) {
   std::vector<int> strategies;
   size_t length = js_strategies["length"].as<int>();
   for (size_t nth = 0; nth < length; nth++) {

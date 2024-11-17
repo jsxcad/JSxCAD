@@ -40,7 +40,8 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
               geometry->setType(target, GEOMETRY_EMPTY);
               break;
             }
-            assert(clip_mesh_by_mesh(geometry->mesh(target), geometry->mesh(nth), open, exact));
+            assert(clip_mesh_by_mesh(geometry->mesh(target),
+                                     geometry->mesh(nth), open, exact));
             geometry->updateBounds3(target);
           }
           demesh(geometry->mesh(target));

@@ -183,7 +183,7 @@ enum GeometryType {
 
 class DN {
  public:
-  DN(int key) : key_(key){};
+  DN(int key) : key_(key) {};
   ~DN() {}
   int key_;
 };
@@ -619,8 +619,7 @@ class Geometry {
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_polygons(nth)) {
         // Convert to planar mesh.
-        std::map<EK::Point_3, Surface_mesh::Vertex_index>
-            vertex_map;
+        std::map<EK::Point_3, Surface_mesh::Vertex_index> vertex_map;
         Surface_mesh& mesh = this->mesh(nth);
         // There might be junk in the mesh.
         mesh.clear();
@@ -631,8 +630,8 @@ class Geometry {
           std::cout << "convertPolygonsToPlanarMeshes failed";
           return;
         }
-	repair_degeneracies<EK>(mesh);
-	repair_manifold<EK>(mesh);
+        repair_degeneracies<EK>(mesh);
+        repair_manifold<EK>(mesh);
         setType(nth, GEOMETRY_MESH);
       }
     }

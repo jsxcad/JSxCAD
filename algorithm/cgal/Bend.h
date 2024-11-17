@@ -5,7 +5,8 @@
 #include "repair_util.h"
 #include "surface_mesh_util.h"
 
-static int Bend(Geometry* geometry, double reference_radius, double edge_length) {
+static int Bend(Geometry* geometry, double reference_radius,
+                double edge_length) {
   int size = geometry->size();
   geometry->copyInputMeshesToOutputMeshes();
   geometry->copyInputPointsToOutputPoints();
@@ -54,7 +55,7 @@ static int Bend(Geometry* geometry, double reference_radius, double edge_length)
       case GEOMETRY_MESH: {
         typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
         Surface_mesh& mesh = geometry->mesh(nth);
-        std::vector<const Surface_mesh *> selections;
+        std::vector<const Surface_mesh*> selections;
         remesh<EK>(mesh, selections, 1, 1, edge_length);
         for (const auto& vertex : mesh.vertices()) {
           if (mesh.is_removed(vertex)) {

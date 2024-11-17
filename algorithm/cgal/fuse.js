@@ -10,14 +10,12 @@ export const fuse = (inputs, exact = false) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by fuse');
       case STATUS_OK:
-        const result = fromCgalGeometry(
+        return fromCgalGeometry(
           cgalGeometry,
           inputs,
           cgalGeometry.getSize(),
           inputs.length
         );
-        // console.log(`QQ/fuse: result=${JSON.stringify(result)}`);
-        return result;
       default:
         throw new Error(`Unexpected status ${status} in fuse`);
     }

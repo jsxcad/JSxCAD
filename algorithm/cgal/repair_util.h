@@ -36,7 +36,8 @@ static int number_of_non_manifold_vertices(const Surface_mesh& mesh) {
 }
 
 template <typename K>
-static bool repair_self_intersection_by_autorefine(CGAL::Surface_mesh<typename K::Point_3>& mesh) {
+static bool repair_self_intersection_by_autorefine(
+    CGAL::Surface_mesh<typename K::Point_3>& mesh) {
   CGAL::Surface_mesh<typename K::Point_3> working_mesh(mesh);
   // Should be precise.
   try {
@@ -53,8 +54,8 @@ static bool repair_self_intersection_by_autorefine(CGAL::Surface_mesh<typename K
       }
     }
   } catch (const std::exception& e) {
-    std::cout << "repair_self_intersections: autorefine failed: "
-              << e.what() << std::endl;
+    std::cout << "repair_self_intersections: autorefine failed: " << e.what()
+              << std::endl;
   }
 
   std::cout << "repair_self_intersections: count="
@@ -71,8 +72,9 @@ enum RepairStrategy {
 };
 
 template <typename K>
-static bool repair_self_intersections(CGAL::Surface_mesh<typename K::Point_3>& mesh,
-                                      const std::vector<int>& strategies) {
+static bool repair_self_intersections(
+    CGAL::Surface_mesh<typename K::Point_3>& mesh,
+    const std::vector<int>& strategies) {
   typedef CGAL::Surface_mesh<typename K::Point_3> Surface_mesh;
   std::cout << "repair_self_intersections: strategies=" << strategies.size()
             << std::endl;
@@ -182,7 +184,8 @@ static bool repair_self_intersections(Surface_mesh& mesh) {
 
 template <typename K>
 static bool repair_degeneracies(CGAL::Surface_mesh<typename K::Point_3>& mesh) {
-  return CGAL::Polygon_mesh_processing::remove_degenerate_edges(mesh) && CGAL::Polygon_mesh_processing::remove_degenerate_faces(mesh);
+  return CGAL::Polygon_mesh_processing::remove_degenerate_edges(mesh) &&
+         CGAL::Polygon_mesh_processing::remove_degenerate_faces(mesh);
 }
 
 template <typename K>
@@ -190,79 +193,86 @@ static bool repair_manifold(CGAL::Surface_mesh<typename K::Point_3>& mesh) {
   typedef CGAL::Surface_mesh<typename K::Point_3> Surface_mesh;
   // This repairs cases where we have two corners that touch at one coordinate.
 
-  // Duplicating the vertices fixes the topological problem, but not the geometric problem.
-  // The duplicate vertices need to be moved so that they have distinct coordinates.
-  // If we move the vertices we'll also move their edges.
-  // Instead we split the edges near the vertex to be moved.
+  // Duplicating the vertices fixes the topological problem, but not the
+  // geometric problem. The duplicate vertices need to be moved so that they
+  // have distinct coordinates. If we move the vertices we'll also move their
+  // edges. Instead we split the edges near the vertex to be moved.
 
   // Note: this handles zero area point touches, but not edge touches.
   std::cout << "Fixing non-manifold vertices" << std::endl;
   std::vector<std::vector<typename Surface_mesh::Vertex_index>> vertex_groups;
-  CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(mesh, CGAL::parameters::output_iterator(std::back_inserter(vertex_groups)));
+  CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(
+      mesh,
+      CGAL::parameters::output_iterator(std::back_inserter(vertex_groups)));
   for (auto& vertex_group : vertex_groups) {
     for (auto& duplicated_vertex : vertex_group) {
       // Split each outgoing edge close to the duplicated vertex.
       std::vector<typename Surface_mesh::Halfedge_index> edges_to_split;
-      // mesh.halfedge(vertex) produces an incoming edge, but we need an outgoing edge.
+      // mesh.halfedge(vertex) produces an incoming edge, but we need an
+      // outgoing edge.
       auto start = mesh.opposite(mesh.halfedge(duplicated_vertex));
       auto edge = start;
 
       const double kIota = 0.0001;
       double step_length = kIota * 2;
 
-            // Walk around the vertex collecting edges.
-            do {
-              edges_to_split.push_back(edge);
-        step_length = std::min(step_length, CGAL::to_double(CGAL::Polygon_mesh_processing::edge_length(edge, mesh)));
-              edge = mesh.next_around_source(edge);
-            } while (edge != start);
+      // Walk around the vertex collecting edges.
+      do {
+        edges_to_split.push_back(edge);
+        step_length =
+            std::min(step_length,
+                     CGAL::to_double(CGAL::Polygon_mesh_processing::edge_length(
+                         edge, mesh)));
+        edge = mesh.next_around_source(edge);
+      } while (edge != start);
 
       // Bring it down to kIota or half edge length, whichever is smaller.
       step_length /= 2;
 
-            // Split the edges, set positions, and accumulate average offset.
-            EK::Vector_3 sum(0, 0, 0);
-            const EK::Point_3 zero(0, 0, 0);
-            for (const auto edge : edges_to_split) {
-              auto source_point = mesh.point(mesh.source(edge));
-              auto target_point = mesh.point(mesh.target(edge));
+      // Split the edges, set positions, and accumulate average offset.
+      EK::Vector_3 sum(0, 0, 0);
+      const EK::Point_3 zero(0, 0, 0);
+      for (const auto edge : edges_to_split) {
+        auto source_point = mesh.point(mesh.source(edge));
+        auto target_point = mesh.point(mesh.target(edge));
         // Split the edge.
-              auto split = CGAL::Euler::split_edge(edge, mesh);
-              auto vector = target_point - source_point;
-              auto direction = unitVector(vector);
-              auto offset = direction * step_length;
+        auto split = CGAL::Euler::split_edge(edge, mesh);
+        auto vector = target_point - source_point;
+        auto direction = unitVector(vector);
+        auto offset = direction * step_length;
         // Place the split one step along the edge.
-              auto position = source_point + offset;
-              mesh.point(mesh.source(edge)) = position;
+        auto position = source_point + offset;
+        mesh.point(mesh.source(edge)) = position;
         // Accumulate the split offsets for averaging.
         sum += offset;
-            }
+      }
 
-            // Split faces between the edge split positions.
-            for (size_t nth_edge = 0; nth_edge < edges_to_split.size(); nth_edge++) {
-              auto edge = edges_to_split[nth_edge];
-              if (mesh.face(mesh.opposite(edge)) == Surface_mesh::null_face()) {
-                // This edge is on a border: we cannot split it.
-                continue;
-              }
-              auto next = edges_to_split[(nth_edge + 1) % edges_to_split.size()];
-              CGAL::Euler::split_face(mesh.opposite(edge), next, mesh);
-            }
-
-            // Move the vertex by half the average split offset.
-            double size = edges_to_split.size();
-            EK::FT count(edges_to_split.size());
-            EK::Vector_3 average = sum / count;
-            mesh.point(duplicated_vertex) += average / 2;
-          }
+      // Split faces between the edge split positions.
+      for (size_t nth_edge = 0; nth_edge < edges_to_split.size(); nth_edge++) {
+        auto edge = edges_to_split[nth_edge];
+        if (mesh.face(mesh.opposite(edge)) == Surface_mesh::null_face()) {
+          // This edge is on a border: we cannot split it.
+          continue;
         }
-        CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
+        auto next = edges_to_split[(nth_edge + 1) % edges_to_split.size()];
+        CGAL::Euler::split_face(mesh.opposite(edge), next, mesh);
+      }
+
+      // Move the vertex by half the average split offset.
+      double size = edges_to_split.size();
+      EK::FT count(edges_to_split.size());
+      EK::Vector_3 average = sum / count;
+      mesh.point(duplicated_vertex) += average / 2;
+    }
+  }
+  CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
   return true;
 }
 
 template <typename K>
 static bool repair_zero_volume(CGAL::Surface_mesh<typename K::Point_3>& mesh) {
-  CGAL::Polygon_mesh_processing::remove_connected_components_of_negligible_size(mesh, CGAL::parameters::volume_threshold(0.01).area_threshold(0));
+  CGAL::Polygon_mesh_processing::remove_connected_components_of_negligible_size(
+      mesh, CGAL::parameters::volume_threshold(0.01).area_threshold(0));
   std::cout << "repair_zero_volume/done" << std::endl;
   // std::cout << mesh << std::endl;
 }

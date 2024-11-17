@@ -83,7 +83,8 @@ static void wrap_add_points_epick(CGAL::Cartesian_converter<EK, IK>& to_epick,
 
 static void wrap_epick(const std::vector<IK::Point_3>& points,
                        const std::vector<std::vector<size_t>>& faces,
-                       double alpha, double offset, CGAL::Surface_mesh<EK::Point_3>& output_mesh) {
+                       double alpha, double offset,
+                       CGAL::Surface_mesh<EK::Point_3>& output_mesh) {
   CGAL::Surface_mesh<IK::Point_3> epick_mesh;
   if (faces.empty()) {
     alpha_wrap_3(points, alpha, offset, epick_mesh);

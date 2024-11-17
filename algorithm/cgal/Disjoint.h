@@ -35,7 +35,8 @@ static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-              if (!cut_mesh_by_mesh(geometry->mesh(start), geometry->mesh(nth), /*open=*/ false, exact)) {
+              if (!cut_mesh_by_mesh(geometry->mesh(start), geometry->mesh(nth),
+                                    /*open=*/false, exact)) {
                 return STATUS_INVALID_INPUT;
               }
               geometry->updateBounds3(start);

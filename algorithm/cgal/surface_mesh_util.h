@@ -86,7 +86,8 @@ static Vector NormalOfSurfaceMeshFacet(
 
 template <typename K>
 static typename K::Vector_3 NormalOfSurfaceMeshFacet(
-    const CGAL::Surface_mesh<typename K::Point_3>& mesh, typename CGAL::Surface_mesh<typename K::Point_3>::Face_index facet) {
+    const CGAL::Surface_mesh<typename K::Point_3>& mesh,
+    typename CGAL::Surface_mesh<typename K::Point_3>::Face_index facet) {
   const auto h = mesh.halfedge(facet);
   return CGAL::normal(mesh.point(mesh.source(h)),
                       mesh.point(mesh.source(mesh.next(h))),
@@ -127,10 +128,14 @@ static void computeNormalOfSurfaceMesh(
 
 template <typename K>
 static void prepare_selection(
-    CGAL::Surface_mesh<typename K::Point_3>& mesh, std::vector<const CGAL::Surface_mesh<typename K::Point_3>*>& selections,
-    std::set<typename CGAL::Surface_mesh<typename K::Point_3>::Face_index>& unconstrained_faces,
-    std::set<typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>& constrained_vertices,
-    std::set<typename CGAL::Surface_mesh<typename K::Point_3>::Edge_index>& constrained_edges) {
+    CGAL::Surface_mesh<typename K::Point_3>& mesh,
+    std::vector<const CGAL::Surface_mesh<typename K::Point_3>*>& selections,
+    std::set<typename CGAL::Surface_mesh<typename K::Point_3>::Face_index>&
+        unconstrained_faces,
+    std::set<typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>&
+        constrained_vertices,
+    std::set<typename CGAL::Surface_mesh<typename K::Point_3>::Edge_index>&
+        constrained_edges) {
   typedef CGAL::Surface_mesh<typename K::Point_3> Surface_mesh;
   // Could these be unordered_set?
   std::set<typename Surface_mesh::Vertex_index> unconstrained_vertices;
@@ -189,16 +194,16 @@ static void prepare_selection(
 }
 
 template <typename K>
-static void remesh(CGAL::Surface_mesh<typename K::Point_3>& mesh,
-                   std::vector<const CGAL::Surface_mesh<typename K::Point_3>*>& selections, int iterations,
-                   int relaxation_steps, double target_edge_length) {
+static void remesh(
+    CGAL::Surface_mesh<typename K::Point_3>& mesh,
+    std::vector<const CGAL::Surface_mesh<typename K::Point_3>*>& selections,
+    int iterations, int relaxation_steps, double target_edge_length) {
   typedef CGAL::Surface_mesh<typename K::Point_3> Surface_mesh;
   std::set<typename Surface_mesh::Face_index> unconstrained_faces;
   std::set<typename Surface_mesh::Vertex_index> constrained_vertices;
   std::set<typename Surface_mesh::Edge_index> constrained_edges;
   prepare_selection<K>(mesh, selections, unconstrained_faces,
-                                          constrained_vertices,
-                                          constrained_edges);
+                       constrained_vertices, constrained_edges);
   CGAL::Boolean_property_map<std::set<typename Surface_mesh::Vertex_index>>
       constrained_vertex_map(constrained_vertices);
   CGAL::Boolean_property_map<std::set<typename Surface_mesh::Edge_index>>
@@ -216,7 +221,8 @@ static void remesh(CGAL::Surface_mesh<typename K::Point_3>& mesh,
 template <typename K>
 static CGAL::Surface_mesh<typename K::Point_3>::Vertex_index ensure_vertex(
     CGAL::Surface_mesh<typename K::Point_3>& mesh,
-    std::map<typename K::Point_3, typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>&
+    std::map<typename K::Point_3,
+             typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>&
         vertices,
     const typename K::Point_3& point) {
   auto it = vertices.find(point);
@@ -229,9 +235,11 @@ static CGAL::Surface_mesh<typename K::Point_3>::Vertex_index ensure_vertex(
 }
 
 template <typename K>
-static typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index ensureVertex(
+static typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index
+ensureVertex(
     CGAL::Surface_mesh<typename K::Point_3>& mesh,
-    std::map<typename K::Point_3, typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>&
+    std::map<typename K::Point_3,
+             typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>&
         vertices,
     const typename K::Point_3& point) {
   return ensure_vertex<K>(mesh, vertices, point);
