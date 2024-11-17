@@ -1,7 +1,5 @@
 #include <napi.h>
 
-#define JOT_MANIFOLD_ENABLED
-
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 #include "API.h"

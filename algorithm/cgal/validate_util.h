@@ -40,10 +40,12 @@ static bool validate(const Surface_mesh& mesh, std::vector<int> strategies) {
       case VALIDATE_IS_MANIFOLD: {
         if (CGAL::is_closed(mesh)) {
           // std::cout << "validate: running is manifold check." << std::endl;
+#ifdef JOT_MANIFOLD_ENABLE
           if (!validate_with_manifold(mesh)) {
             std::cout << "validate: failed validate_with_manifold test." << std::endl;
             valid = false;
           }
+#endif JOT_MANIFOLD_ENABLE
         }
         std::vector<typename Surface_mesh::Halfedge_index> non_manifold;
         CGAL::Polygon_mesh_processing::non_manifold_vertices(

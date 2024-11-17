@@ -1,5 +1,3 @@
-#define JOT_MANIFOLD_ENABLE
-
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <emscripten/bind.h>
 
