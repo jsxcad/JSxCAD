@@ -35,7 +35,7 @@ export const validate = (inputs, strategies = []) => {
     strategyCodes.push(0, 1, 2, 3);
   }
   return withCgalGeometry('validate', inputs, (cgalGeometry, g) => {
-    const status = g.Validate(cgalGeometry, strategyCodes);
+    const status = g.Validate(cgalGeometry, strategyCodes, true, false);
     switch (status) {
       case STATUS_OK:
         return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());

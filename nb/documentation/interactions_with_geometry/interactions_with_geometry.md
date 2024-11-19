@@ -142,14 +142,7 @@ Arc(10, 10, 5).grow(Orb(1)).view();
 ![Image](interactions_with_geometry.md.$19.png)
 
 ```JavaScript
-Box(10)
-  // .cut(Box(5))
-  .seq(
-    { from: 1 / 128, by: 1 / 8 },
-    (a) => scale(Math.pow(a, 3)).z(a * 10),
-    Loft
-  )
-  .view();
+Box(10).view();
 ```
 
 ---
@@ -158,15 +151,6 @@ Box(10)
 TODO: In the future (a) => rz(a) can be replaced with rz.
 
 ![Image](interactions_with_geometry.md.$21.png)
-
-```JavaScript
-Arc(6)
-  // .cut(Arc(3))
-  .rx(0.25)
-  .x(10)
-  .seq({ by: 1 / 16 }, rz, Loft)
-  .view();
-```
 
 ---
 ### Move

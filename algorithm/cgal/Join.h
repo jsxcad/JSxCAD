@@ -1,5 +1,4 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_mesh_processing/corefinement.h>
 
 #include "Geometry.h"
 #include "boolean_util.h"
@@ -28,13 +27,11 @@ static int Join(Geometry* geometry, size_t targets, bool exact) {
           if (!geometry->is_mesh(nth)) {
             continue;
           }
-          if (!geometry->is_mesh(target)) {
-            continue;
-          }
           if (geometry->noOverlap3(target, nth)) {
             geometry->mesh(target).join(geometry->mesh(nth));
           } else {
-            assert(join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth), exact));
+            assert(join_mesh_to_mesh(geometry->mesh(target),
+                                     geometry->mesh(nth), exact));
           }
           geometry->updateBounds3(target);
         }

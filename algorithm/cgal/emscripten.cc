@@ -1,5 +1,3 @@
-#define JOT_MANIFOLD_ENABLE
-
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <emscripten/bind.h>
 
@@ -400,13 +398,14 @@ static int Unfold(Geometry* geometry, bool enable_tabs, emscripten::val emit) {
   return STATUS_OK;
 }
 
-static int Validate(Geometry* geometry, emscripten::val js_strategies) {
+static int Validate(Geometry* geometry, emscripten::val js_strategies,
+                    emscripten::val input, emscripten::val output) {
   std::vector<int> strategies;
   size_t length = js_strategies["length"].as<int>();
   for (size_t nth = 0; nth < length; nth++) {
     strategies.push_back(js_strategies[nth].as<int>());
   }
-  return ::Validate(geometry, strategies);
+  return ::Validate(geometry, strategies, input.as<bool>(), output.as<bool>());
 }
 }  // namespace wrapped
 

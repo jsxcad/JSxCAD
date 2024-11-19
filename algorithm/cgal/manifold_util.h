@@ -4,10 +4,52 @@
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
 
 #include <stdexcept>
 
 #include "manifold.h"
+
+void print_manifold_status(manifold::Manifold::Error status) {
+  switch (status) {
+    case manifold::Manifold::Error::NoError:
+      std::cout << "NoError" << std::endl;
+      break;
+    case manifold::Manifold::Error::NonFiniteVertex:
+      std::cout << "NonFiniteVertex" << std::endl;
+      break;
+    case manifold::Manifold::Error::NotManifold:
+      std::cout << "NotManifold" << std::endl;
+      break;
+    case manifold::Manifold::Error::VertexOutOfBounds:
+      std::cout << "VertexOutOfBounds" << std::endl;
+      break;
+    case manifold::Manifold::Error::PropertiesWrongLength:
+      std::cout << "PropertiesWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::MissingPositionProperties:
+      std::cout << "MissingPositionProperties" << std::endl;
+      break;
+    case manifold::Manifold::Error::MergeVectorsDifferentLengths:
+      std::cout << "MergeVectorsDifferentLengths" << std::endl;
+      break;
+    case manifold::Manifold::Error::MergeIndexOutOfBounds:
+      std::cout << "MergeIndexOutOfBounds" << std::endl;
+      break;
+    case manifold::Manifold::Error::TransformWrongLength:
+      std::cout << "TransformWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::RunIndexWrongLength:
+      std::cout << "RunIndexWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::FaceIDWrongLength:
+      std::cout << "FaceIDWrongLength" << std::endl;
+      break;
+    case manifold::Manifold::Error::InvalidConstruction:
+      std::cout << "InvalidConstruction" << std::endl;
+      break;
+  }
+}
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
@@ -50,6 +92,14 @@ static void buildManifoldFromSurfaceMesh(
   manifold = manifold::Manifold(manifold_mesh);
 }
 
+static void buildManifoldFromSurfaceMesh(
+    const CGAL::Surface_mesh<EK::Point_3>& surface_mesh,
+    manifold::Manifold& manifold) {
+  // FIX: This is not efficient.
+  CGAL::Surface_mesh<EK::Point_3> copy(surface_mesh);
+  buildManifoldFromSurfaceMesh(copy, manifold);
+}
+
 void buildSurfaceMeshFromManifold(
     const manifold::Manifold& manifold,
     CGAL::Surface_mesh<EK::Point_3>& surface_mesh) {
@@ -88,8 +138,9 @@ void buildSurfaceMeshFromManifold(
   size_t tri_count = mesh.NumTri();
   for (std::size_t nth = 0; nth < tri_count; nth++) {
     const auto& t = mesh.GetTriVerts(nth);
-    auto face_index = surface_mesh.add_face(
-        vertex_map[resolve_vertex(t[0])], vertex_map[resolve_vertex(t[1])], vertex_map[resolve_vertex(t[2])]);
+    auto face_index = surface_mesh.add_face(vertex_map[resolve_vertex(t[0])],
+                                            vertex_map[resolve_vertex(t[1])],
+                                            vertex_map[resolve_vertex(t[2])]);
     if (face_index == Surface_mesh::null_face()) {
       std::cout << "buildSurfaceMeshFromManifold: add_face failed" << std::endl;
       throw std::runtime_error("buildSurfaceMeshFromManifold: add_face failed");
@@ -101,6 +152,18 @@ void buildSurfaceMeshFromManifold(
           "buildSurfaceMeshFromManifold: face index misaligned");
     }
   }
+  CGAL::Polygon_mesh_processing::remove_degenerate_edges(surface_mesh);
+  CGAL::Polygon_mesh_processing::remove_degenerate_faces(surface_mesh);
+}
+
+// Let's see if we can validate a mesh by attempting to eliminate it via
+// manifold.
+bool validate_with_manifold(const Surface_mesh& mesh) {
+  manifold::Manifold manifold;
+  buildManifoldFromSurfaceMesh(mesh, manifold);
+  // I wonder if this will work?
+  manifold -= manifold;
+  return manifold.Status() == manifold::Manifold::Error::NoError;
 }
 
 #endif

@@ -9,6 +9,29 @@
 #include "Geometry.h"
 #include "simplify_util.h"
 
+template <typename K>
+static bool repair_simplify(CGAL::Surface_mesh<typename K::Point_3>& mesh,
+                            bool conservative = true) {
+  CGAL::Polygon_mesh_processing::remove_connected_components_of_negligible_size(
+      mesh);
+  repair_degeneracies<K>(mesh);
+  repair_manifold<K>(mesh);
+  assert(number_of_non_manifold_vertices(mesh) == 0);
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
+    std::cout << "repair_boolean: autorefine" << std::endl;
+    CGAL::Polygon_mesh_processing::autorefine(mesh);
+    if (CGAL::Polygon_mesh_processing::does_self_intersect(mesh)) {
+      return false;
+    }
+#if 0
+    if (!CGAL::Polygon_mesh_processing::experimental::remove_self_intersections(mesh)) {
+      return false;
+    }
+#endif
+  }
+  return true;
+}
+
 static int Simplify(Geometry* geometry, double face_count, bool simplify_points,
                     double sharp_edge_threshold,
                     bool use_bounded_normal_change_filter = false) {
@@ -22,6 +45,7 @@ static int Simplify(Geometry* geometry, double face_count, bool simplify_points,
       case GEOMETRY_MESH: {
         auto& mesh = geometry->mesh(nth);
         simplify(face_count, sharp_edge_threshold, mesh);
+        repair_simplify<EK>(mesh);
         demesh(mesh);
         break;
       }

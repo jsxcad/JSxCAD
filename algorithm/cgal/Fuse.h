@@ -1,5 +1,4 @@
 #include "Geometry.h"
-#include "manifold_util.h"
 
 static int Fuse(Geometry* geometry, bool exact) {
   try {
@@ -12,6 +11,7 @@ static int Fuse(Geometry* geometry, bool exact) {
     geometry->copyPolygonsWithHolesToGeneralPolygonSets();
     geometry->computeBounds();
 
+    // Handle meshes
     {
       int target = -1;
       for (size_t nth = 0; nth < size; nth++) {
@@ -25,35 +25,19 @@ static int Fuse(Geometry* geometry, bool exact) {
         }
         if (geometry->noOverlap3(target, nth)) {
           geometry->mesh(target).join(geometry->mesh(nth));
-#ifdef JOT_MANIFOLD_ENABLED
-        } else if (!exact) {
-          // TODO: Optimize out unnecessary conversions.
-          manifold::Manifold target_manifold;
-          buildManifoldFromSurfaceMesh(geometry->mesh(target), target_manifold);
-          manifold::Manifold nth_manifold;
-          buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
-          target_manifold += nth_manifold;
-          geometry->mesh(target).clear();
-          geometry->mesh(target).collect_garbage();
-          buildSurfaceMeshFromManifold(target_manifold, geometry->mesh(target));
-#endif
         } else {
-          Surface_mesh cutMeshCopy(geometry->mesh(nth));
-          if (!CGAL::Polygon_mesh_processing::corefine_and_compute_union(
-                  geometry->mesh(target), cutMeshCopy, geometry->mesh(target),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default(),
-                  CGAL::parameters::all_default())) {
-            return STATUS_ZERO_THICKNESS;
-          }
+          assert(join_mesh_to_mesh(geometry->mesh(target), geometry->mesh(nth),
+                                   exact));
         }
         geometry->updateBounds3(target);
+        geometry->setType(nth, GEOMETRY_EMPTY);
       }
       if (target != -1) {
         demesh(geometry->mesh(target));
       }
     }
 
+    // Handle polygons
     int first_gps = geometry->size();
     for (size_t nth = 0; nth < size; nth++) {
       if (!geometry->is_polygons(nth)) {
@@ -74,8 +58,10 @@ static int Fuse(Geometry* geometry, bool exact) {
       }
       geometry->gps(target).join(geometry->gps(nth));
       geometry->updateBounds2(target);
+      geometry->setType(nth, GEOMETRY_EMPTY);
     }
 
+    // Handle segments
     for (size_t target = -1U, nth = 0; nth < size; nth++) {
       if (!geometry->has_segments(nth)) {
         continue;
@@ -87,8 +73,10 @@ static int Fuse(Geometry* geometry, bool exact) {
       for (const Segment& segment : geometry->segments(nth)) {
         geometry->addSegment(target, segment);
       }
+      geometry->setType(nth, GEOMETRY_EMPTY);
     }
 
+    // Handle points
     for (size_t target = -1U, nth = 0; nth < size; nth++) {
       if (!geometry->has_points(nth)) {
         continue;
@@ -100,6 +88,7 @@ static int Fuse(Geometry* geometry, bool exact) {
       for (const auto& point : geometry->input_points(nth)) {
         geometry->addPoint(target, point);
       }
+      geometry->setType(nth, GEOMETRY_EMPTY);
     }
 
     geometry->copyGeneralPolygonSetsToPolygonsWithHoles();

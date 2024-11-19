@@ -35,17 +35,3 @@ Box(2, 2, 15)
   .view(clean())
   .note(`Box(2, 2, 15).join(rx(1 / 4), ry(1 / 4), 'exact').And(material('glass'), smooth(10, Box(10, 10, 10)))`);
 ```
-
-![Image](smooth.md.$4.png)
-
-Icosahedron(10, 10, 10).outline().route(Box(1, 1, 1)).fuse().smooth()
-
-```JavaScript
-Icosahedron(10, 10, 10)
-  .outline()
-  .route(Box(1, 1, 1))
-  .fuse()
-  .smooth()
-  .view('wireframe', clean())
-  .note('Icosahedron(10, 10, 10).outline().route(Box(1, 1, 1)).fuse().smooth()');
-```

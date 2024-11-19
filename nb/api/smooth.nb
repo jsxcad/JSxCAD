@@ -26,6 +26,8 @@ Box(2, 2, 15)
   .view(clean())
   .note(`Box(2, 2, 15).join(rx(1 / 4), ry(1 / 4), 'exact').And(material('glass'), smooth(10, Box(10, 10, 10)))`);
 
+/*
+// Find a simpler failure case.
 Icosahedron(10, 10, 10)
   .outline()
   .route(Box(1, 1, 1))
@@ -33,3 +35,4 @@ Icosahedron(10, 10, 10)
   .smooth()
   .view('wireframe', clean())
   .note('Icosahedron(10, 10, 10).outline().route(Box(1, 1, 1)).fuse().smooth()');
+*/

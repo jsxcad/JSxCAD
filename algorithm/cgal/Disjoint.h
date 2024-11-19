@@ -35,31 +35,9 @@ static int Disjoint(Geometry* geometry, const std::vector<bool>& is_masked,
                   geometry->noOverlap3(start, nth)) {
                 continue;
               }
-#ifdef JOT_MANIFOLD_ENABLED
-              if (!exact) {
-                // TODO: Optimize out unnecessary conversions.
-                manifold::Manifold target_manifold;
-                buildManifoldFromSurfaceMesh(geometry->mesh(start),
-                                             target_manifold);
-                manifold::Manifold nth_manifold;
-                buildManifoldFromSurfaceMesh(geometry->mesh(nth), nth_manifold);
-                target_manifold -= nth_manifold;
-                geometry->mesh(start).clear();
-                buildSurfaceMeshFromManifold(target_manifold,
-                                             geometry->mesh(start));
-              } else
-#endif
-              {
-                Surface_mesh cutMeshCopy(geometry->mesh(nth));
-                if (!CGAL::Polygon_mesh_processing::
-                        corefine_and_compute_difference(
-                            geometry->mesh(start), cutMeshCopy,
-                            geometry->mesh(start),
-                            CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default(),
-                            CGAL::parameters::all_default())) {
-                  return STATUS_ZERO_THICKNESS;
-                }
+              if (!cut_mesh_by_mesh(geometry->mesh(start), geometry->mesh(nth),
+                                    /*open=*/false, exact)) {
+                return STATUS_INVALID_INPUT;
               }
               geometry->updateBounds3(start);
               break;

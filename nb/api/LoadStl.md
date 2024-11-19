@@ -7,8 +7,10 @@ path||The path or url to load
 
 ![Image](LoadStl.md.$2.png)
 
-await LoadStl('https://jsxcad.js.org/stl/bear.stl')
+LoadStl('https://jsxcad.js.org/stl/bear.stl')
 
 ```JavaScript
-await LoadStl('https://jsxcad.js.org/stl/bear.stl').view().note(`await LoadStl('https://jsxcad.js.org/stl/bear.stl')`);
+LoadStl('https://jsxcad.js.org/stl/bear.stl', 'patch')
+  .view()
+  .note(`LoadStl('https://jsxcad.js.org/stl/bear.stl')`);
 ```

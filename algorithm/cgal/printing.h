@@ -37,6 +37,7 @@ static std::ostream& operator<<(
   return os;
 }
 
+#if 0
 static std::ostream& operator<<(std::ostream& os,
                                 const std::vector<EK::Point_2>& points) {
   for (const auto& point : points) {
@@ -44,6 +45,7 @@ static std::ostream& operator<<(std::ostream& os,
   }
   return os;
 }
+#endif
 
 template <class Kernel, class Container>
 static void print_polygon(const CGAL::Polygon_2<Kernel, Container>& P) {

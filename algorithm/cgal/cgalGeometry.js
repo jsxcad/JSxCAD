@@ -1,5 +1,6 @@
 /* globals WeakRef */
 
+import { STATUS_OK } from './status.js';
 import { computeHash } from '@jsxcad/sys';
 import { getCgal } from './getCgal.js';
 import { identityMatrix } from './transform.js';
@@ -151,6 +152,9 @@ export const toCgalGeometry = (inputs, g = getCgal()) => {
 
 export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start = 0, copyOriginal = false) => {
   const g = getCgal();
+  if (testMode && g.Validate(geometry, [0, /* 1, */ 2, 3], false, true) !== STATUS_OK) {
+    throw Error('fromCgalGeometry: invalid geometry');
+  }
   let results = [];
   for (let nth = start; nth < length; nth++) {
     const origin = copyOriginal ? geometry.getOrigin(nth) : nth;

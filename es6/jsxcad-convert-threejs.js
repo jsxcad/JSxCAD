@@ -110,7 +110,10 @@ const fromThreejsToGeometry = async (threejs) => {
         triangles.push({ points });
       }
     }
-    return fromPolygonSoup(triangles, { tags });
+    return fromPolygonSoup(triangles, {
+      tags,
+      strategies: ['auto', 'patch', 'close'],
+    });
   }
 };
 

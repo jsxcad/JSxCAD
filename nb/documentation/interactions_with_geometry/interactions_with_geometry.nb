@@ -104,14 +104,16 @@ md`
 
 `;
 
+/*
 Box(10)
-  // .cut(Box(5))
   .seq(
     { from: 1 / 128, by: 1 / 8 },
     (a) => scale(Math.pow(a, 3)).z(a * 10),
     Loft
   )
   .view();
+*/
+Box(10).view();
 
 md`
 ---
@@ -120,12 +122,14 @@ md`
 TODO: In the future (a) => rz(a) can be replaced with rz.
 `;
 
+/*
 Arc(6)
-  // .cut(Arc(3))
   .rx(0.25)
   .x(10)
   .seq({ by: 1 / 16 }, rz, Loft)
   .view();
+*/
+Box(10).view();
 
 md`
 ---

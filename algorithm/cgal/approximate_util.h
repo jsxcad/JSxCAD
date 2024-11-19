@@ -17,8 +17,8 @@ static bool approximate_mesh(Surface_mesh& mesh, int face_count,
   std::vector<std::array<std::size_t, 3>> triangles;
   MakeDeterministic();
   std::cout << "approximate_mesh: face_count=" << face_count
-            << " min_error_drop=" << min_error_drop << 
-            " number_of_faces=" << mesh.number_of_faces() << std::endl;
+            << " min_error_drop=" << min_error_drop
+            << " number_of_faces=" << mesh.number_of_faces() << std::endl;
   if (!CGAL::Surface_mesh_approximation::approximate_triangle_mesh(
           epick_mesh,
           CGAL::parameters::anchors(std::back_inserter(epick_anchors))

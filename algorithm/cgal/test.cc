@@ -1,4 +1,3 @@
 #include "Raycast.h"
 
-int main() {
-}
+int main() {}

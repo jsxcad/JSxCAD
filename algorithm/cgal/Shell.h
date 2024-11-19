@@ -185,9 +185,7 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
         }
         {
           const auto& facet = mesh.face(e);
-          auto normal = unitVector(
-              NormalOfSurfaceMeshFacet<IK>(
-                  mesh, facet));
+          auto normal = unitVector(NormalOfSurfaceMeshFacet<IK>(mesh, facet));
           add_polyline(mesh.point(mesh.source(e)) + normal * outer_offset,
                        mesh.point(mesh.target(e)) + normal * outer_offset);
           if (maybe_hollow) {
@@ -197,9 +195,7 @@ static int Shell(Geometry* geometry, double inner_offset, double outer_offset,
         }
         {
           const auto& facet = mesh.face(opposite(e, m));
-          auto normal = unitVector(
-              NormalOfSurfaceMeshFacet<IK>(
-                  mesh, facet));
+          auto normal = unitVector(NormalOfSurfaceMeshFacet<IK>(mesh, facet));
           add_polyline(mesh.point(mesh.source(e)) + normal * outer_offset,
                        mesh.point(mesh.target(e)) + normal * outer_offset);
           if (maybe_hollow) {

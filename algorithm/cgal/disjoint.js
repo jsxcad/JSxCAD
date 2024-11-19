@@ -1,4 +1,5 @@
 import {
+  STATUS_INVALID_INPUT,
   STATUS_OK,
   STATUS_UNCHANGED,
   STATUS_ZERO_THICKNESS,
@@ -21,6 +22,12 @@ export const disjoint = (inputs, exact = false) =>
         return fromCgalGeometry(geometry, inputs);
       case STATUS_UNCHANGED:
         return inputs;
+      case STATUS_INVALID_INPUT:
+        if (!exact) {
+          // Retry with exact geometry.
+          return disjoint(inputs, true);
+        }
+        throw new Error(`Disjoint failed due to bad geometry`);
       default:
         throw new Error(`Unexpected status ${status} in disjoint`);
     }

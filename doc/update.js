@@ -44,9 +44,9 @@ const build = async (...args) => {
     ? undefined
     : await puppeteer.launch({
         headless: 'new',
-        // dumpio: true,
-        // pipe: true,
         args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
           '--disable-features=BlockInsecurePrivateNetworkRequests',
           '--disable-web-security',
           '--disable-features=IsolateOrigins',
@@ -155,7 +155,9 @@ const build = async (...args) => {
     console.log(error.stack);
     exitCode = 1;
   }
-  await browser.close();
+  if (browser) {
+    await browser.close();
+  }
   process.stderr.write('', () =>
     process.stdout.write('', () => process.exit(exitCode))
   );

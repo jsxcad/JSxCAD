@@ -4,6 +4,7 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_triangulation_decomposition_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
+#include <CGAL/Surface_mesh.h>
 #include <CGAL/alpha_wrap_3.h>
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
@@ -21,9 +22,10 @@ static void wrap_compute_alpha_and_offset(const CGAL::Bbox_3& bbox,
 }
 
 static void wrap_add_mesh_epick(CGAL::Cartesian_converter<EK, IK>& to_epick,
-                                const Surface_mesh& mesh,
+                                const CGAL::Surface_mesh<EK::Point_3>& mesh,
                                 std::vector<IK::Point_3>& points,
                                 std::vector<std::vector<size_t>>& faces) {
+  typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
   for (const Surface_mesh::Face_index face : mesh.faces()) {
     Surface_mesh::Halfedge_index a = mesh.halfedge(face);
     Surface_mesh::Halfedge_index b = mesh.next(a);
@@ -39,7 +41,7 @@ static void wrap_add_mesh_epick(CGAL::Cartesian_converter<EK, IK>& to_epick,
 static void wrap_add_polygons_with_holes_2_epick(
     CGAL::Cartesian_converter<EK, IK>& to_epick,
     const std::vector<CGAL::Polygon_with_holes_2<EK>>& polygons,
-    const Plane& plane, std::vector<IK::Point_3>& points,
+    const EK::Plane_3& plane, std::vector<IK::Point_3>& points,
     std::vector<std::vector<size_t>>& faces) {
   CGAL::Polygon_triangulation_decomposition_2<EK> triangulator;
   for (const auto& polygon : polygons) {
@@ -60,7 +62,7 @@ static void wrap_add_segments_epick(CGAL::Cartesian_converter<EK, IK>& to_epick,
                                     std::vector<IK::Point_3>& points,
                                     std::vector<std::vector<size_t>>& faces) {
   const double kIota = 0.0001;
-  for (Segment s3 : segments) {
+  for (EK::Segment_3 s3 : segments) {
     size_t index = points.size();
     const IK::Point_3& s = to_epick(s3.source());
     const IK::Point_3& t = to_epick(s3.target());
@@ -74,14 +76,15 @@ static void wrap_add_segments_epick(CGAL::Cartesian_converter<EK, IK>& to_epick,
 static void wrap_add_points_epick(CGAL::Cartesian_converter<EK, IK>& to_epick,
                                   const std::vector<EK::Point_3>& input_points,
                                   std::vector<IK::Point_3>& output_points) {
-  for (Point p3 : input_points) {
+  for (EK::Point_3 p3 : input_points) {
     output_points.push_back(to_epick(p3));
   }
 }
 
 static void wrap_epick(const std::vector<IK::Point_3>& points,
                        const std::vector<std::vector<size_t>>& faces,
-                       double alpha, double offset, Surface_mesh& output_mesh) {
+                       double alpha, double offset,
+                       CGAL::Surface_mesh<EK::Point_3>& output_mesh) {
   CGAL::Surface_mesh<IK::Point_3> epick_mesh;
   if (faces.empty()) {
     alpha_wrap_3(points, alpha, offset, epick_mesh);

@@ -299,6 +299,10 @@ static int Loft(Geometry* geometry, bool close) {
     positive_mesh.join(negative_mesh);
   }
 
+  if (CGAL::Polygon_mesh_processing::does_self_intersect(positive_mesh)) {
+    repair_self_intersection_by_autorefine<EK>(positive_mesh);
+  }
+
   int target = geometry->add(GEOMETRY_MESH);
   geometry->setIdentityTransform(target);
   demesh(positive_mesh);

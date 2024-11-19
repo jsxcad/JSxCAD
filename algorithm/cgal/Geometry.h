@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 
+#include "repair_util.h"
 #include "surface_mesh_util.h"
 #include "transform_util.h"
 #include "unit_util.h"
@@ -144,7 +145,7 @@ static bool PolygonsWithHolesToSurfaceMesh(
       std::vector<CGAL::Surface_mesh<EK::Point_3>::Vertex_index> vertices;
       for (const auto& point : facet) {
         vertices.push_back(
-            ensureVertex(result, vertex_map, plane.to_3d(point)));
+            ensureVertex<EK>(result, vertex_map, plane.to_3d(point)));
       }
       if (flip) {
         std::reverse(vertices.begin(), vertices.end());
@@ -182,7 +183,7 @@ enum GeometryType {
 
 class DN {
  public:
-  DN(int key) : key_(key){};
+  DN(int key) : key_(key) {};
   ~DN() {}
   int key_;
 };
@@ -484,10 +485,6 @@ class Geometry {
   JS_BINDING void setInputMesh(
       size_t nth, const std::shared_ptr<const Surface_mesh>& mesh) {
     input_meshes_[nth] = mesh;
-    if (test_mode_) {
-      assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
-          *input_meshes_[nth], CGAL::parameters::all_default()));
-    }
   }
 
   void setTestMode(bool mode) { test_mode_ = mode; }
@@ -519,10 +516,6 @@ class Geometry {
   void setMesh(size_t nth, Surface_mesh* mesh) { meshes_[nth].reset(mesh); }
 
   JS_BINDING std::shared_ptr<const Surface_mesh> getMesh(size_t nth) {
-    if (test_mode_) {
-      assert(!CGAL::Polygon_mesh_processing::does_self_intersect(
-          *meshes_[nth], CGAL::parameters::all_default()));
-    }
     return meshes_[nth];
   }
 
@@ -613,21 +606,24 @@ class Geometry {
   }
 
   void convertPolygonsToPlanarMeshes() {
+    typedef CGAL::Surface_mesh<EK::Point_3> Surface_mesh;
     assert(is_absolute_frame());
     for (size_t nth = 0; nth < size_; nth++) {
       if (is_polygons(nth)) {
         // Convert to planar mesh.
-        std::map<EK::Point_3, CGAL::Surface_mesh<EK::Point_3>::Vertex_index>
-            vertex_map;
-        setMesh(nth, new Surface_mesh);
+        std::map<EK::Point_3, Surface_mesh::Vertex_index> vertex_map;
+        Surface_mesh& mesh = this->mesh(nth);
+        // There might be junk in the mesh.
+        mesh.clear();
         // Note: a set of polygons might not be convertible to a single mesh
         // due to zero width junctions.
-        if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh(nth),
+        if (!PolygonsWithHolesToSurfaceMesh(plane(nth), pwh(nth), mesh,
                                             vertex_map)) {
           std::cout << "convertPolygonsToPlanarMeshes failed";
           return;
         }
-        CGAL::Polygon_mesh_processing::triangulate_faces(mesh(nth));
+        repair_degeneracies<EK>(mesh);
+        repair_manifold<EK>(mesh);
         setType(nth, GEOMETRY_MESH);
       }
     }
