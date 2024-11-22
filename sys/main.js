@@ -50,10 +50,12 @@ export { listFiles } from './listFiles.js';
 export { log, logError, logInfo, unwatchLog, watchLog } from './log.js';
 export {
   unwatchFile,
+  unwatchFileChange,
   unwatchFileCreation,
   unwatchFileDeletion,
   unwatchFileRead,
   watchFile,
+  watchFileChange,
   watchFileCreation,
   watchFileDeletion,
   watchFileRead,
