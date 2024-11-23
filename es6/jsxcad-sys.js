@@ -1423,6 +1423,11 @@ const unwatchFile = async (path, workspace, thunk) => {
   }
 };
 
+const unwatchFileChange = async (thunk) => {
+  fileChangeWatchers.delete(thunk);
+  return thunk;
+};
+
 const unwatchFileCreation = async (thunk) => {
   fileCreationWatchers.delete(thunk);
   return thunk;
@@ -1435,6 +1440,11 @@ const unwatchFileDeletion = async (thunk) => {
 
 const unwatchFileRead = async (thunk) => {
   fileReadWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFileChange = async (thunk) => {
+  fileChangeWatchers.add(thunk);
   return thunk;
 };
 
@@ -3259,4 +3269,4 @@ let nanoid = (size = 21) => {
 
 const generateUniqueId = () => nanoid();
 
-export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getLocalFilesystems, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, newWorker, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setLocalFilesystem, setLocalFilesystems, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };
+export { ErrorWouldBlock, addOnEmitHandler, addPending, ask, askService, askServices, beginEmitGroup, boot, clearCacheDb, clearEmitted, clearFileCache, clearTimes, computeHash, createConversation, createService, decode, decodeFiles, elapsed, emit, encode, encodeFiles, endTime, finishEmitGroup, flushEmitGroup, generateUniqueId, getActiveServices, getConfig, getControlValue, getFilesystem, getLocalFilesystems, getPendingErrorHandler, getServicePoolInfo, getSourceLocation, getTimes, getWorkspace, isBrowser, isNode, isWebWorker, listFiles, log, logError, logInfo, newWorker, onBoot, qualifyPath, read, readNonblocking, readOrWatch, remove, removeOnEmitHandler, reportTimes, resolvePending, restoreEmitGroup, saveEmitGroup, setConfig, setControlValue, setHandleAskUser, setLocalFilesystem, setLocalFilesystems, setNotifyFileReadEnabled, setPendingErrorHandler, setupFilesystem, setupWorkspace, sleep, startTime$1 as startTime, tellServices, terminateActiveServices, unwatchFile, unwatchFileChange, unwatchFileCreation, unwatchFileDeletion, unwatchFileRead, unwatchLog, unwatchServices, waitServices, watchFile, watchFileChange, watchFileCreation, watchFileDeletion, watchFileRead, watchLog, watchServices, write, writeNonblocking };

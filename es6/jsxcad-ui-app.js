@@ -1,5 +1,5 @@
 import api, { execute } from './jsxcad-api.js';
-import { readOrWatch, read, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystems, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchFileDeletion, watchLog, watchServices } from './jsxcad-sys.js';
+import { unwatchFileChange, unwatchFileDeletion, watchFileChange, read, watchFileDeletion, readOrWatch, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystems, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchLog, watchServices } from './jsxcad-sys.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
@@ -1048,6 +1048,243 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
 }
 
 var PropTypes$3 = propTypes$2.exports;
+
+/* global google */
+const isSourcePath = path => path.startsWith('source/');
+const utf8Decoder = new TextDecoder('utf8');
+class SheetStorage {
+  constructor(id) {
+    const [spreadsheetId, sheetName] = id.split(':');
+    this.accessToken = null;
+    this.clientId = '532457183798-jsvfmkqg8bo4p6evpus34mnij9ac3v9i.apps.googleusercontent.com';
+    this.fileChangeWatcher = null;
+    this.filedDeletionWatcher = null;
+    this.index = null;
+    this.scope = 'https://www.googleapis.com/auth/spreadsheets';
+    this.spreadsheetId = spreadsheetId;
+    this.sheetName = sheetName;
+    this.tokenClient = null;
+    this.setupWatchers();
+  }
+  destroy() {
+    if (this.fileChangeWatcher) {
+      unwatchFileChange(this.fileChangeWatcher);
+      this.fileChangeWatcher = null;
+    }
+    if (this.fileDeletionWatcher) {
+      unwatchFileDeletion(this.fileDeletionWatcher);
+      this.filedDeletionWatcher = null;
+    }
+  }
+  async setupWatchers() {
+    this.fileChangeWatcher = await watchFileChange(async (path, workspace) => {
+      if (!isSourcePath(path)) {
+        return;
+      }
+      const data = await read(path, {
+        workspace
+      });
+      return this.setPath(path, utf8Decoder.decode(data));
+    });
+    this.fileDeletionWatcher = await watchFileDeletion(async (path, workspace) => {
+      if (!isSourcePath(path)) {
+        return;
+      }
+      return this.deletePath(path);
+    });
+  }
+  getTokenClient() {
+    if (!this.tokenClient) {
+      this.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: this.clientId,
+        scope: this.scope
+      });
+    }
+    return this.tokenClient;
+  }
+  noteAccessTokenExpiry() {
+    this.accessToken = null;
+  }
+  getAccessToken() {
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+    return new Promise((resolve, reject) => {
+      const client = this.getTokenClient();
+      client.callback = response => {
+        if (response.access_token) {
+          this.accessToken = response.access_token;
+          resolve(this.accessToken);
+        } else {
+          reject(new Error(`getAccessToken: failed`));
+        }
+      };
+      client.requestAccessToken();
+    });
+  }
+  toValueRangeFromRow(row) {
+    return `${this.sheetName}!B${row}:B${row}`;
+  }
+  toKeyValueRangeFromRow(row) {
+    return `${this.sheetName}!A${row}:B${row}`;
+  }
+  async toRowFromPath(path) {
+    return (await this.getIndex()).get(path);
+  }
+  async toRangeFromPath(path) {
+    return this.toValueRangeFromRow(await this.toRowFromPath(path));
+  }
+  async getIndex() {
+    if (!this.index) {
+      const {
+        values
+      } = await this.getRange(`${this.sheetName}!A:A`);
+      this.index = new Map();
+      for (let nth = 0; nth < values.length; nth++) {
+        if (values[nth][0].length === 0) {
+          // Deleted entries have an empty path.
+          continue;
+        }
+        // Note that sheets are 1 based.
+        this.index.set(values[nth][0], nth + 1);
+      }
+    }
+    return this.index;
+  }
+  async addIndexValue(path, value) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${this.sheetName}A:B:append?valueInputOption=RAW`;
+    const values = [[path, value]];
+    const body = JSON.stringify({
+      values
+    });
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${await this.getAccessToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body
+      });
+      if (response.ok) {
+        const {
+          updates
+        } = await response.json();
+        const {
+          updatedRange
+        } = updates;
+        // Extract the last number from updatedRange.
+        const regex = /\d+$/;
+        const match = updatedRange.match(regex);
+        const row = match ? parseInt(match[0], 10) : null;
+        // Update the index.
+        this.index.set(path, row);
+        // And we are done.
+        return value;
+      }
+      if (response.status === 401) {
+        this.noteAccessTokenExpiry();
+        continue;
+      }
+      throw new Error(`getRange: ${response.statusText}`);
+    }
+    throw new Error(`getRange: too many attempts`);
+  }
+  async getRange(range) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}`;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${await this.getAccessToken()}`
+        }
+      });
+      if (response.ok) {
+        return response.json();
+      }
+      if (response.status === 401) {
+        this.noteAccessTokenExpiry();
+        continue;
+      }
+      throw new Error(`getRange: ${response.statusText}`);
+    }
+    throw new Error(`getRange: too many attempts`);
+  }
+  async getPath(path) {
+    return this.getRange(await this.toRangeFromPath(path));
+  }
+  getRow(row) {
+    return this.getRange(this.toValueRangeFromRow(row));
+  }
+  async setRange(range, values) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?valueInputOption=RAW`;
+    const body = JSON.stringify({
+      range,
+      values
+    });
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${await this.getAccessToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body
+      });
+      if (response.ok) {
+        return response.json();
+      }
+      if (response.status === 401) {
+        this.noteAccessTokenExpiry();
+        continue;
+      }
+      throw new Error(`setRow: ${response.statusText}`);
+    }
+    throw new Error(`setRow: too many attempts`);
+  }
+  async setRow(row, values) {
+    return this.setRange(this.toValueRangeFromRow(row), [values]);
+  }
+  async setPath(path, value) {
+    const row = await this.toRowFromPath(path);
+    if (row) {
+      return this.setRange(this.toValueRangeFromRow(row), [[value]]);
+    } else {
+      // The path isn't in the index -- we'll need to append it.
+      return this.addIndexValue(path, value);
+    }
+  }
+  async deletePath(path, value) {
+    const row = await this.toRowFromPath(path);
+    if (row) {
+      this.index.delete(path);
+      return this.setRange(this.toKeyValueRangeFromRow(row), [['', '']]);
+    }
+  }
+}
+const sheetStorageRegistry = new Map();
+const getSheetStorage = spreadsheetId => {
+  if (!spreadsheetId || spreadsheetId === '') {
+    return;
+  }
+  if (!sheetStorageRegistry.has(spreadsheetId)) {
+    sheetStorageRegistry.set(spreadsheetId, new SheetStorage(spreadsheetId));
+  }
+  return sheetStorageRegistry.get(spreadsheetId);
+};
+const removeSheetStorage = async spreadsheetId => {
+  if (!spreadsheetId || spreadsheetId === '') {
+    return;
+  }
+  await getSheetStorage(spreadsheetId).destroy();
+  sheetStorageRegistry.delete(spreadsheetId);
+};
+const updateSheetStorage = async (oldId, newId) => {
+  if (oldId === newId) {
+    return;
+  }
+  removeSheetStorage(oldId);
+  return getSheetStorage(newId);
+};
 
 var classnames = {exports: {}};
 
@@ -49744,6 +49981,16 @@ class App extends ReactDOM$3.Component {
       });
       await this.Workspace.store();
     };
+    this.Workspace.setSheetStorageId = async newId => {
+      const {
+        SheetStorageId
+      } = this.state;
+      await this.updateState({
+        SheetStorageId: newId
+      });
+      await updateSheetStorage(SheetStorageId, newId);
+      await this.Workspace.store();
+    };
     this.Workspace.openWorkingFile = async file => {
       const path = file.substring('source/'.length);
       await this.Notebook.clickLink(path);
@@ -49769,12 +50016,14 @@ class App extends ReactDOM$3.Component {
         } = this.props;
         const {
           LocalFilesystemHandles,
+          SheetStorageId,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix
         } = this.state;
         const config = {
           LocalFilesystemHandles,
+          SheetStorageId,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix
@@ -49802,6 +50051,7 @@ class App extends ReactDOM$3.Component {
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
         LocalFilesystemHandles = new Map(),
+        SheetStorageId,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/'
       } = await read('config/Workspace', {
@@ -49815,10 +50065,12 @@ class App extends ReactDOM$3.Component {
       }
       await this.updateState({
         LocalFilesystemHandles,
+        SheetStorageId,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix
       });
       setLocalFilesystems(LocalFilesystemHandles);
+      await getSheetStorage(SheetStorageId);
     };
     this.Workspace.export = async prefix => {
       const {
@@ -49905,6 +50157,7 @@ class App extends ReactDOM$3.Component {
         case 'Workspace':
           {
             const {
+              SheetStorageId,
               WorkspaceFiles = [],
               WorkspaceOpenPaths = [],
               WorkspaceLoadPath = '',
@@ -50017,7 +50270,20 @@ class App extends ReactDOM$3.Component {
                 const handle = await showDirectoryPicker();
                 this.Workspace.setLocalFilesystem(document.getElementById('AddLocalFilesystemPrefix').value, handle);
               }
-            }, "Add Local Filesystem"), localFilesystemEntries)))));
+            }, "Add Local Filesystem"), localFilesystemEntries)))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Sheet Filesystem"), v$1(Card$1.Text, null, "Select a google sheets spreadsheet to backup and share source data. e.g., to access a sheet named \"Jot\" in \"https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0\". use \"0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot\""), v$1(Form$1, null, v$1(Row, null, v$1(Col, null, v$1(Form$1.Group, {
+              controlId: "SheetStorageId"
+            }, v$1(Form$1.Control, {
+              placeholder: "Google-Spreadsheet-Id:SheetName",
+              value: SheetStorageId
+            }))), v$1(Col, null, v$1(Button, {
+              variant: "primary",
+              onClick: () => {
+                const {
+                  value
+                } = document.getElementById('SheetStorageId');
+                this.Workspace.setSheetStorageId(value);
+              }
+            }, "Update Sheet Storage")))))));
           }
         case 'Make':
           {
@@ -50362,6 +50628,14 @@ class App extends ReactDOM$3.Component {
     await this.Model.restore();
     this.Notebook.clickLink(this.props.path);
     window.addEventListener('keydown', e => this.onKeyDown(e));
+    {
+      const {
+        WorkspaceFiles = []
+      } = this.state;
+      for (const file of WorkspaceFiles) {
+        console.log(`QQ/file: ${file}`);
+      }
+    }
   }
   updateHash() {
     const path = this.Notebook.getSelectedPath();
@@ -50464,6 +50738,16 @@ const installUi = async ({
   const isPersistent = await navigator.storage.persist();
   console.log(`QQ/isPersistent: ${isPersistent}`);
   await boot();
+  /*
+  const decoder = new TextDecoder('utf8');
+  for (const file of await listFiles({ workspace })) {
+    if (file.startsWith('source/')) {
+      const data = await read(file, { workspace });
+      await setSheetPathValue(file, decoder.decode(data));
+    }
+    console.log(`QQ/file: ${file}`);
+  }
+  */
   ReactDOM$3.render(v$1(App, {
     sha: 'master',
     workspace: 'JSxCAD',
