@@ -1,12 +1,22 @@
 /* global google */
 
 import {
+  onBoot,
   read,
   unwatchFileChange,
   unwatchFileDeletion,
   watchFileChange,
   watchFileDeletion,
+  write,
 } from '@jsxcad/sys';
+
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import React from 'react';
+import Row from 'react-bootstrap/Row';
+import { signal } from '@preact/signals';
 
 const isSourcePath = (path) => path.startsWith('source/');
 const utf8Decoder = new TextDecoder('utf8');
@@ -123,7 +133,7 @@ export class SheetStorage {
   }
 
   async addIndexValue(path, value) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${this.sheetName}A:B:append?valueInputOption=RAW`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${this.sheetName}!A:B:append?valueInputOption=RAW`;
     const values = [[path, value]];
     const body = JSON.stringify({ values });
     for (let attempt = 0; attempt < 10; attempt++) {
@@ -233,6 +243,32 @@ export class SheetStorage {
   }
 }
 
+class Config {
+  constructor(path, defaultValue = '') {
+    this.defaultValue = defaultValue;
+    this.path = path;
+    this.signal = signal(defaultValue);
+    if (this.path) {
+      onBoot(async () => {
+        this.signal.value = await read(this.path);
+      });
+    }
+  }
+
+  get() {
+    return this.signal.value;
+  }
+
+  set(value) {
+    if (this.path) {
+      write(this.path, value);
+    }
+    this.signal.value = value;
+  }
+}
+
+const id = new Config('config/SheetStorage:id', '');
+
 const sheetStorageRegistry = new Map();
 
 export const getSheetStorage = (spreadsheetId) => {
@@ -253,10 +289,49 @@ export const removeSheetStorage = async (spreadsheetId) => {
   sheetStorageRegistry.delete(spreadsheetId);
 };
 
-export const updateSheetStorage = async (oldId, newId) => {
+export const updateSheetStorage = async (newId) => {
+  const oldId = await id.get();
   if (oldId === newId) {
     return;
   }
   removeSheetStorage(oldId);
+  id.set(newId);
   return getSheetStorage(newId);
 };
+
+export const render = () => (
+  <Card>
+    <Card.Body>
+      <Card.Title>Sheet Filesystem</Card.Title>
+      <Card.Text>
+        Select a google sheets spreadsheet to backup and share source data.
+        e.g., to access a sheet named &quot;Jot&quot; in
+        &quot;https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0&quot;.
+        use &quot;0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot&quot;
+      </Card.Text>
+      <Form>
+        <Row>
+          <Col>
+            <Form.Group controlId="SheetStorageId">
+              <Form.Control
+                placeholder="Google-Spreadsheet-Id:SheetName"
+                value={id.get()}
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Button
+              variant="primary"
+              onClick={() => {
+                const { value } = document.getElementById('SheetStorageId');
+                updateSheetStorage(value);
+              }}
+            >
+              Update Sheet Storage
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    </Card.Body>
+  </Card>
+);

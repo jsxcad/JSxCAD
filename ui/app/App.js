@@ -24,6 +24,7 @@ import {
   resolvePending,
   setConfig,
   setLocalFilesystems,
+  setupWorkspace,
   terminateActiveServices,
   watchFileCreation,
   watchFileDeletion,
@@ -31,8 +32,6 @@ import {
   watchServices,
   write,
 } from '@jsxcad/sys';
-
-import { getSheetStorage, updateSheetStorage } from './SheetStorage.js';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -58,6 +57,7 @@ import TableOfContents from './TableOfContents.js';
 import { animationFrame } from './schedule.js';
 import { getCnc } from './Cnc.js';
 import { getNotebookControlData } from '@jsxcad/ui-notebook';
+import { render as renderSheetStorageCard } from './SheetStorage.js';
 import { toEcmascript } from '@jsxcad/compiler';
 
 const { SplitPane } = SplitPaneModule;
@@ -1220,13 +1220,6 @@ class App extends React.Component {
       await this.Workspace.store();
     };
 
-    this.Workspace.setSheetStorageId = async (newId) => {
-      const { SheetStorageId } = this.state;
-      await this.updateState({ SheetStorageId: newId });
-      await updateSheetStorage(SheetStorageId, newId);
-      await this.Workspace.store();
-    };
-
     this.Workspace.openWorkingFile = async (file) => {
       const path = file.substring('source/'.length);
       await this.Notebook.clickLink(path);
@@ -1251,14 +1244,12 @@ class App extends React.Component {
         const { workspace } = this.props;
         const {
           LocalFilesystemHandles,
-          SheetStorageId,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix,
         } = this.state;
         const config = {
           LocalFilesystemHandles,
-          SheetStorageId,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix,
@@ -1280,7 +1271,6 @@ class App extends React.Component {
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
         LocalFilesystemHandles = new Map(),
-        SheetStorageId,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/',
       } = await read('config/Workspace', { workspace, otherwise: {} });
@@ -1291,12 +1281,10 @@ class App extends React.Component {
       }
       await this.updateState({
         LocalFilesystemHandles,
-        SheetStorageId,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix,
       });
       setLocalFilesystems(LocalFilesystemHandles);
-      await getSheetStorage(SheetStorageId);
     };
 
     this.Workspace.export = async (prefix) => {
@@ -1365,7 +1353,6 @@ class App extends React.Component {
       switch (node.getComponent()) {
         case 'Workspace': {
           const {
-            SheetStorageId,
             WorkspaceFiles = [],
             WorkspaceOpenPaths = [],
             WorkspaceLoadPath = '',
@@ -1588,43 +1575,7 @@ class App extends React.Component {
                   </Card.Text>
                 </Card.Body>
               </Card>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Sheet Filesystem</Card.Title>
-                  <Card.Text>
-                    Select a google sheets spreadsheet to backup and share
-                    source data. e.g., to access a sheet named &quot;Jot&quot;
-                    in
-                    &quot;https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0&quot;.
-                    use
-                    &quot;0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot&quot;
-                  </Card.Text>
-                  <Form>
-                    <Row>
-                      <Col>
-                        <Form.Group controlId="SheetStorageId">
-                          <Form.Control
-                            placeholder="Google-Spreadsheet-Id:SheetName"
-                            value={SheetStorageId}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col>
-                        <Button
-                          variant="primary"
-                          onClick={() => {
-                            const { value } =
-                              document.getElementById('SheetStorageId');
-                            this.Workspace.setSheetStorageId(value);
-                          }}
-                        >
-                          Update Sheet Storage
-                        </Button>
-                      </Col>
-                    </Row>
-                  </Form>
-                </Card.Body>
-              </Card>
+              {renderSheetStorageCard()}
             </div>
           );
         }
@@ -1643,7 +1594,6 @@ class App extends React.Component {
                     config: { model: node.getExtraData().model.toJson() },
                   })
                 );
-                //  node.getConfig().model = node.getExtraData().model.toJson();
               });
             }
             return (
@@ -2176,19 +2126,8 @@ class App extends React.Component {
 }
 
 export const installUi = async ({ document, workspace, sha, path }) => {
-  const isPersistent = await navigator.storage.persist();
-  console.log(`QQ/isPersistent: ${isPersistent}`);
+  setupWorkspace('JSxCAD');
   await boot();
-  /*
-  const decoder = new TextDecoder('utf8');
-  for (const file of await listFiles({ workspace })) {
-    if (file.startsWith('source/')) {
-      const data = await read(file, { workspace });
-      await setSheetPathValue(file, decoder.decode(data));
-    }
-    console.log(`QQ/file: ${file}`);
-  }
-  */
   ReactDOM.render(
     <App sha={'master'} workspace={'JSxCAD'} path={path} />,
     document.getElementById('container')
