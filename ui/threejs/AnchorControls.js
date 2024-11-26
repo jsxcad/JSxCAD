@@ -11,7 +11,7 @@ import {
   MeshBasicMaterial,
   Vector3,
 } from '@jsxcad/algorithm-threejs';
-import { SKETCH_LAYER } from './layers.js';
+import { SKETCH_LAYER } from '@jsxcad/convert-threejs';
 import { raycast } from './raycast.js';
 
 class AnchorControls extends EventDispatcher {

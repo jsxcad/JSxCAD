@@ -10,19 +10,37 @@ import { moveToFit } from './moveToFit.js';
 let locked = false;
 const pending = [];
 
+const acquire = async () => {
+  if (locked) {
+    return new Promise((resolve, reject) => pending.push(resolve));
+  } else {
+    locked = true;
+  }
+};
+
+const release = async () => {
+  if (pending.length > 0) {
+    const resolve = pending.pop();
+    resolve(true);
+  } else {
+    locked = false;
+  }
+};
+
 export const staticDisplay = async (
   {
     view = {},
     canvas,
-    context,
     geometry,
     withAxes = false,
     withGrid = false,
     definitions,
-    renderer,
   } = {},
   page
 ) => {
+  if (locked === true) await acquire();
+  locked = true;
+
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -38,13 +56,12 @@ export const staticDisplay = async (
   planLayers.set(SKETCH_LAYER);
 
   const {
-    camera: displayCamera,
+    camera,
     canvas: displayCanvas,
-    renderer: displayRenderer,
+    renderer,
     scene,
   } = buildScene({
     canvas,
-    context,
     width,
     height,
     view,
@@ -52,16 +69,17 @@ export const staticDisplay = async (
     planLayers,
     withAxes,
     preserveDrawingBuffer: true,
-    renderer,
   });
 
   const render = () => {
-    displayRenderer.clear();
-    displayCamera.layers.set(GEOMETRY_LAYER);
-    displayRenderer.render(scene, displayCamera);
-    displayRenderer.clearDepth();
-    displayCamera.layers.set(SKETCH_LAYER);
-    displayRenderer.render(scene, displayCamera);
+    renderer.clear();
+    camera.layers.set(GEOMETRY_LAYER);
+    renderer.render(scene, camera);
+
+    renderer.clearDepth();
+
+    camera.layers.set(SKETCH_LAYER);
+    renderer.render(scene, camera);
   };
 
   const pageSize = [];
@@ -73,11 +91,13 @@ export const staticDisplay = async (
     throw e;
   }
 
-  moveToFit({ datasets, view, camera: displayCamera, scene, withGrid, pageSize });
+  moveToFit({ datasets, view, camera, scene, withGrid, pageSize });
 
   render();
 
-  return { canvas: displayCanvas, renderer: displayRenderer };
+  await release();
+
+  return { canvas: displayCanvas, renderer };
 };
 
 export default staticDisplay;

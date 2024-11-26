@@ -1,12 +1,16 @@
 /* global ResizeObserver, requestAnimationFrame */
 
-import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
+import {
+  GEOMETRY_LAYER,
+  SKETCH_LAYER,
+  buildMeshes,
+  buildScene,
+  moveToFit,
+} from '@jsxcad/convert-threejs';
 import { Layers, TrackballControls } from '@jsxcad/algorithm-threejs';
-import { buildScene, createResizer } from './scene.js';
 
 import { AnchorControls } from './AnchorControls.js';
-import { buildMeshes } from './mesh.js';
-import { moveToFit } from './moveToFit.js';
+import { createResizer } from './resizer.js';
 
 const buildTrackballControls = ({
   camera,

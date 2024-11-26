@@ -3,7 +3,7 @@
 import FileReaderForNode from 'filereader-ponyfill';
 import { isNode } from '@jsxcad/sys';
 import { orbitDisplay } from './orbitDisplay.js';
-import { staticDisplay } from './staticDisplay.js';
+import { staticDisplay } from '@jsxcad/convert-threejs';
 
 const UP = [0, 0.0001, 1];
 
