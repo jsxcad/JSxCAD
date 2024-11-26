@@ -51,34 +51,38 @@ static void fill_strategies(const Napi::Array& js_strategies, std::vector<int>& 
 
 static CGAL::Aff_transformation_3<EK> to_transform(const Napi::Value& v) {
   Napi::Array js = v.As<Napi::Array>();
-  if (js.Has(16)) {
-    return ::to_transform(js.Get(uint32_t(16)).As<Napi::String>().Utf8Value());
-  } else {
-    return ::to_transform(js.Get(uint32_t(0)).As<Napi::Number>().DoubleValue(),   // M00
-                          js.Get(uint32_t(4)).As<Napi::Number>().DoubleValue(),   // M01
-                          js.Get(uint32_t(8)).As<Napi::Number>().DoubleValue(),   // M02
-                          js.Get(uint32_t(12)).As<Napi::Number>().DoubleValue(),  // M03
+  size_t size = js.Length();
+  switch (js.Get(uint32_t(0)).As<Napi::Number>().Uint32Value()) {
+    case TRANSFORM_COMPOSE:
+      return to_transform(js.Get(uint32_t(1))) * to_transform(js.Get(uint32_t(2)));
+    case TRANSFORM_EXACT:
+      return ::to_transform(js.Get(uint32_t(1)).As<Napi::String>().Utf8Value());
+    case TRANSFORM_APPROXIMATE:
+      return ::to_transform(js.Get(uint32_t(0 + 1)).As<Napi::Number>().DoubleValue(),   // M00
+                            js.Get(uint32_t(4 + 1)).As<Napi::Number>().DoubleValue(),   // M01
+                            js.Get(uint32_t(8 + 1)).As<Napi::Number>().DoubleValue(),   // M02
+                            js.Get(uint32_t(12 + 1)).As<Napi::Number>().DoubleValue(),  // M03
 
-                          js.Get(uint32_t(1)).As<Napi::Number>().DoubleValue(),   // M10
-                          js.Get(uint32_t(5)).As<Napi::Number>().DoubleValue(),   // M11
-                          js.Get(uint32_t(9)).As<Napi::Number>().DoubleValue(),   // M12
-                          js.Get(uint32_t(13)).As<Napi::Number>().DoubleValue(),  // M13
+                            js.Get(uint32_t(1 + 1)).As<Napi::Number>().DoubleValue(),   // M10
+                            js.Get(uint32_t(5 + 1)).As<Napi::Number>().DoubleValue(),   // M11
+                            js.Get(uint32_t(9 + 1)).As<Napi::Number>().DoubleValue(),   // M12
+                            js.Get(uint32_t(13 + 1)).As<Napi::Number>().DoubleValue(),  // M13
 
-                          js.Get(uint32_t(2)).As<Napi::Number>().DoubleValue(),    // M20
-                          js.Get(uint32_t(6)).As<Napi::Number>().DoubleValue(),    // M21
-                          js.Get(uint32_t(10)).As<Napi::Number>().DoubleValue(),   // M21
-                          js.Get(uint32_t(14)).As<Napi::Number>().DoubleValue(),   // M21
-                          js.Get(uint32_t(15)).As<Napi::Number>().DoubleValue());  // HW
+                            js.Get(uint32_t(2 + 1)).As<Napi::Number>().DoubleValue(),    // M20
+                            js.Get(uint32_t(6 + 1)).As<Napi::Number>().DoubleValue(),    // M21
+                            js.Get(uint32_t(10 + 1)).As<Napi::Number>().DoubleValue(),   // M21
+                            js.Get(uint32_t(14 + 1)).As<Napi::Number>().DoubleValue(),   // M21
+                            js.Get(uint32_t(15 + 1)).As<Napi::Number>().DoubleValue());  // HW
   }
 }
 
 static void to_js(const CGAL::Aff_transformation_3<EK>& transform, Napi::Array& o) {
-  double doubles[16];
-  to_doubles(transform, doubles);
-  for (uint32_t nth = 0; nth < 16; nth++) {
-    o.Set(nth, doubles[nth]);
+  o.Set(uint32_t(0), uint32_t(TRANSFORM_EXACT));
+  o.Set(uint32_t(1), to_exact(transform));
+  if (o.Length() > 2) {
+    // Ideally we'd shrink the array, but that doesn't seem to be an option.
+    o.Set(uint32_t(2), Napi::Undefined());
   }
-  o.Set(uint32_t(16), to_exact(transform));
 }
 
 static Napi::FunctionReference *Surface_mesh_constructor = nullptr;
@@ -1214,6 +1218,11 @@ static Napi::Value SetTransform(const Napi::CallbackInfo& info) {
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
   Napi::Array js = info[2].As<Napi::Array>();
   geometry->setTransform(nth, to_transform(js));
+  if (js.Get(uint32_t(0)).As<Napi::Number>().Uint32Value() != TRANSFORM_EXACT) {
+    // Destructively modify the input matrix to its resolved value.
+    // This should simplify the input geometry.
+    to_js(geometry->transform(nth), js);
+  }
   return Napi::Number::New(info.Env(), STATUS_OK);
 }
 

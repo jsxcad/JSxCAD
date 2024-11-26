@@ -179,6 +179,12 @@ enum GeometryType {
   GEOMETRY_GROUP = 8,
 };
 
+enum TransformType {
+  TRANSFORM_COMPOSE = 0,
+  TRANSFORM_EXACT = 1,
+  TRANSFORM_APPROXIMATE = 2,
+};
+
 #include "Edge.h"
 
 class DN {

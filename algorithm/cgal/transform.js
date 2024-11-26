@@ -20,11 +20,16 @@ export const identityMatrix = [
   '1 0 0 0 0 1 0 0 0 0 1 0 1',
 ];
 
+const TRANSFORM_COMPOSE = 0;
+const TRANSFORM_EXACT = 1;
+const TRANSFORM_APPROXIMATE = 2;
+
 export const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
   try {
     const transform = [];
-    getCgal().ComposeTransforms(a, b, transform);
-    return transform;
+    // getCgal().ComposeTransforms(a, b, transform);
+    // return transform;
+    return [TRANSFORM_COMPOSE, a, b];
   } catch (error) {
     throw Error(error);
   }
