@@ -56,6 +56,7 @@ static std::shared_ptr<CGAL::Surface_mesh<EK::Point_3>> DeserializeMesh(
 
 static std::string serializeMesh(const CGAL::Surface_mesh<EK::Point_3>& mesh) {
   std::ostringstream s;
+  s << std::setiosflags(std::ios_base::fixed) << std::setprecision(0);
   size_t number_of_vertices = mesh.number_of_vertices();
   s << number_of_vertices << "\n";
   std::unordered_map<CGAL::Surface_mesh<EK::Point_3>::Vertex_index, size_t>

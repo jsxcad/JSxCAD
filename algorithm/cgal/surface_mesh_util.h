@@ -219,7 +219,8 @@ static void remesh(
 }
 
 template <typename K>
-static typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index ensure_vertex(
+static typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index
+ensure_vertex(
     CGAL::Surface_mesh<typename K::Point_3>& mesh,
     std::map<typename K::Point_3,
              typename CGAL::Surface_mesh<typename K::Point_3>::Vertex_index>&

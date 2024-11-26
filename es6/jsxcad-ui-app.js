@@ -1,12 +1,12 @@
 import api, { execute } from './jsxcad-api.js';
-import { unwatchFileChange, unwatchFileDeletion, watchFileChange, read, watchFileDeletion, readOrWatch, watchFile, unwatchFile, boot, log, remove, ask, askService, setConfig, write, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystems, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchLog, watchServices } from './jsxcad-sys.js';
+import { readOrWatch, read, watchFile, unwatchFile, onBoot, write, unwatchFileChange, unwatchFileDeletion, watchFileChange, watchFileDeletion, setupWorkspace, boot, log, remove, ask, askService, setConfig, clearCacheDb, logInfo, terminateActiveServices, clearEmitted, resolvePending, setLocalFilesystems, getLocalFilesystems, listFiles, getActiveServices, watchFileCreation, watchLog, watchServices } from './jsxcad-sys.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
 import Prettier from 'https://unpkg.com/prettier@2.3.2/esm/standalone.mjs';
 import PrettierParserBabel from 'https://unpkg.com/prettier@2.3.2/esm/parser-babel.mjs';
 import { getNotebookControlData } from './jsxcad-ui-notebook.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
-var n,l$1,u$1,t$1,o$2,r$1,f$2,e$2={},c$1=[],s$1=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function a$1(n,l){for(var u in l)n[u]=l[u];return n}function h$1(n){var l=n.parentNode;l&&l.removeChild(n);}function v$1(l,u,i){var t,o,r,f={};for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return y$1(l,f,t,o,null)}function y$1(n,i,t,o,r){var f={type:n,props:i,key:t,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==r?++u$1:r};return null!=l$1.vnode&&l$1.vnode(f),f}function p$1(){return {current:null}}function d$1(n){return n.children}function _$1(n,l){this.props=n,this.context=l;}function k$2(n,l){if(null==l)return n.__?k$2(n.__,n.__.__k.indexOf(n)+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?k$2(n):null}function b$1(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return b$1(n)}}function m$1(n){(!n.__d&&(n.__d=!0)&&t$1.push(n)&&!g$2.__r++||r$1!==l$1.debounceRendering)&&((r$1=l$1.debounceRendering)||o$2)(g$2);}function g$2(){for(var n;g$2.__r=t$1.length;)n=t$1.sort(function(n,l){return n.__v.__b-l.__v.__b}),t$1=[],n.some(function(n){var l,u,i,t,o,r;n.__d&&(o=(t=(l=n).__v).__e,(r=l.__P)&&(u=[],(i=a$1({},t)).__v=t.__v+1,j$2(r,t,i,l.__n,void 0!==r.ownerSVGElement,null!=t.__h?[o]:null,u,null==o?k$2(t):o,t.__h),z$1(u,t),t.__e!=o&&b$1(t)));});}function w$2(n,l,u,i,t,o,r,f,s,a){var h,v,p,_,b,m,g,w=i&&i.__k||c$1,A=w.length;for(u.__k=[],h=0;h<l.length;h++)if(null!=(_=u.__k[h]=null==(_=l[h])||"boolean"==typeof _?null:"string"==typeof _||"number"==typeof _||"bigint"==typeof _?y$1(null,_,null,null,_):Array.isArray(_)?y$1(d$1,{children:_},null,null,null):_.__b>0?y$1(_.type,_.props,_.key,null,_.__v):_)){if(_.__=u,_.__b=u.__b+1,null===(p=w[h])||p&&_.key==p.key&&_.type===p.type)w[h]=void 0;else for(v=0;v<A;v++){if((p=w[v])&&_.key==p.key&&_.type===p.type){w[v]=void 0;break}p=null;}j$2(n,_,p=p||e$2,t,o,r,f,s,a),b=_.__e,(v=_.ref)&&p.ref!=v&&(g||(g=[]),p.ref&&g.push(p.ref,null,_),g.push(v,_.__c||b,_)),null!=b?(null==m&&(m=b),"function"==typeof _.type&&null!=_.__k&&_.__k===p.__k?_.__d=s=x$2(_,s,n):s=P$1(n,_,p,w,b,s),a||"option"!==u.type?"function"==typeof u.type&&(u.__d=s):n.value=""):s&&p.__e==s&&s.parentNode!=n&&(s=k$2(p));}for(u.__e=m,h=A;h--;)null!=w[h]&&("function"==typeof u.type&&null!=w[h].__e&&w[h].__e==u.__d&&(u.__d=k$2(i,h+1)),N$1(w[h],w[h]));if(g)for(h=0;h<g.length;h++)M$1(g[h],g[++h],g[++h]);}function x$2(n,l,u){var i,t;for(i=0;i<n.__k.length;i++)(t=n.__k[i])&&(t.__=n,l="function"==typeof t.type?x$2(t,l,u):P$1(u,t,t,n.__k,t.__e,l));return l}function A$2(n,l){return l=l||[],null==n||"boolean"==typeof n||(Array.isArray(n)?n.some(function(n){A$2(n,l);}):l.push(n)),l}function P$1(n,l,u,i,t,o){var r,f,e;if(void 0!==l.__d)r=l.__d,l.__d=void 0;else if(null==u||t!=o||null==t.parentNode)n:if(null==o||o.parentNode!==n)n.appendChild(t),r=null;else {for(f=o,e=0;(f=f.nextSibling)&&e<i.length;e+=2)if(f==t)break n;n.insertBefore(t,o),r=o;}return void 0!==r?r:t.nextSibling}function C$1(n,l,u,i,t){var o;for(o in u)"children"===o||"key"===o||o in l||H$1(n,o,null,u[o],i);for(o in l)t&&"function"!=typeof l[o]||"children"===o||"key"===o||"value"===o||"checked"===o||u[o]===l[o]||H$1(n,o,l[o],u[o],i);}function $$1(n,l,u){"-"===l[0]?n.setProperty(l,u):n[l]=null==u?"":"number"!=typeof u||s$1.test(l)?u:u+"px";}function H$1(n,l,u,i,t){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof i&&(n.style.cssText=i=""),i)for(l in i)u&&l in u||$$1(n.style,l,"");if(u)for(l in u)i&&u[l]===i[l]||$$1(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/Capture$/,"")),l=l.toLowerCase()in n?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?i||n.addEventListener(l,o?T$2:I$1,o):n.removeEventListener(l,o?T$2:I$1,o);else if("dangerouslySetInnerHTML"!==l){if(t)l=l.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==l&&"list"!==l&&"form"!==l&&"tabIndex"!==l&&"download"!==l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null!=u&&(!1!==u||"a"===l[0]&&"r"===l[1])?n.setAttribute(l,u):n.removeAttribute(l));}}function I$1(n){this.l[n.type+!1](l$1.event?l$1.event(n):n);}function T$2(n){this.l[n.type+!0](l$1.event?l$1.event(n):n);}function j$2(n,u,i,t,o,r,f,e,c){var s,h,v,y,p,k,b,m,g,x,A,P=u.type;if(void 0!==u.constructor)return null;null!=i.__h&&(c=i.__h,e=u.__e=i.__e,u.__h=null,r=[e]),(s=l$1.__b)&&s(u);try{n:if("function"==typeof P){if(m=u.props,g=(s=P.contextType)&&t[s.__c],x=s?g?g.props.value:s.__:t,i.__c?b=(h=u.__c=i.__c).__=h.__E:("prototype"in P&&P.prototype.render?u.__c=h=new P(m,x):(u.__c=h=new _$1(m,x),h.constructor=P,h.render=O$1),g&&g.sub(h),h.props=m,h.state||(h.state={}),h.context=x,h.__n=t,v=h.__d=!0,h.__h=[]),null==h.__s&&(h.__s=h.state),null!=P.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=a$1({},h.__s)),a$1(h.__s,P.getDerivedStateFromProps(m,h.__s))),y=h.props,p=h.state,v)null==P.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(null==P.getDerivedStateFromProps&&m!==y&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,x),!h.__e&&null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,x)||u.__v===i.__v){h.props=m,h.state=h.__s,u.__v!==i.__v&&(h.__d=!1),h.__v=u,u.__e=i.__e,u.__k=i.__k,u.__k.forEach(function(n){n&&(n.__=u);}),h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,x),null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(y,p,k);});}h.context=x,h.props=m,h.state=h.__s,(s=l$1.__r)&&s(u),h.__d=!1,h.__v=u,h.__P=n,s=h.render(h.props,h.state,h.context),h.state=h.__s,null!=h.getChildContext&&(t=a$1(a$1({},t),h.getChildContext())),v||null==h.getSnapshotBeforeUpdate||(k=h.getSnapshotBeforeUpdate(y,p)),A=null!=s&&s.type===d$1&&null==s.key?s.props.children:s,w$2(n,Array.isArray(A)?A:[A],u,i,t,o,r,f,e,c),h.base=u.__e,u.__h=null,h.__h.length&&f.push(h),b&&(h.__E=h.__=null),h.__e=!1;}else null==r&&u.__v===i.__v?(u.__k=i.__k,u.__e=i.__e):u.__e=L$1(i.__e,u,i,t,o,r,f,c);(s=l$1.diffed)&&s(u);}catch(n){u.__v=null,(c||null!=r)&&(u.__e=e,u.__h=!!c,r[r.indexOf(e)]=null),l$1.__e(n,u,i);}}function z$1(n,u){l$1.__c&&l$1.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$1.__e(n,u.__v);}});}function L$1(l,u,i,t,o,r,f,c){var s,a,v,y=i.props,p=u.props,d=u.type,_=0;if("svg"===d&&(o=!0),null!=r)for(;_<r.length;_++)if((s=r[_])&&(s===l||(d?s.localName==d:3==s.nodeType))){l=s,r[_]=null;break}if(null==l){if(null===d)return document.createTextNode(p);l=o?document.createElementNS("http://www.w3.org/2000/svg",d):document.createElement(d,p.is&&p),r=null,c=!1;}if(null===d)y===p||c&&l.data===p||(l.data=p);else {if(r=r&&n.call(l.childNodes),a=(y=i.props||e$2).dangerouslySetInnerHTML,v=p.dangerouslySetInnerHTML,!c){if(null!=r)for(y={},_=0;_<l.attributes.length;_++)y[l.attributes[_].name]=l.attributes[_].value;(v||a)&&(v&&(a&&v.__html==a.__html||v.__html===l.innerHTML)||(l.innerHTML=v&&v.__html||""));}if(C$1(l,p,y,o,c),v)u.__k=[];else if(_=u.props.children,w$2(l,Array.isArray(_)?_:[_],u,i,t,o&&"foreignObject"!==d,r,f,r?r[0]:i.__k&&k$2(i,0),c),null!=r)for(_=r.length;_--;)null!=r[_]&&h$1(r[_]);c||("value"in p&&void 0!==(_=p.value)&&(_!==l.value||"progress"===d&&!_)&&H$1(l,"value",_,y.value,!1),"checked"in p&&void 0!==(_=p.checked)&&_!==l.checked&&H$1(l,"checked",_,y.checked,!1));}return l}function M$1(n,u,i){try{"function"==typeof n?n(u):n.current=u;}catch(n){l$1.__e(n,i);}}function N$1(n,u,i){var t,o;if(l$1.unmount&&l$1.unmount(n),(t=n.ref)&&(t.current&&t.current!==n.__e||M$1(t,null,u)),null!=(t=n.__c)){if(t.componentWillUnmount)try{t.componentWillUnmount();}catch(n){l$1.__e(n,u);}t.base=t.__P=null;}if(t=n.__k)for(o=0;o<t.length;o++)t[o]&&N$1(t[o],u,"function"!=typeof n.type);i||null==n.__e||h$1(n.__e),n.__e=n.__d=void 0;}function O$1(n,l,u){return this.constructor(n,u)}function S$1(u,i,t){var o,r,f;l$1.__&&l$1.__(u,i),r=(o="function"==typeof t)?null:t&&t.__k||i.__k,f=[],j$2(i,u=(!o&&t||i).__k=v$1(d$1,null,[u]),r||e$2,e$2,void 0!==i.ownerSVGElement,!o&&t?[t]:r?null:i.firstChild?n.call(i.childNodes):null,f,!o&&t?t:r?r.__e:i.firstChild,o),z$1(f,u);}function q$2(n,l){S$1(n,l,q$2);}function B$1(l,u,i){var t,o,r,f=a$1({},l.props);for(r in u)"key"==r?t=u[r]:"ref"==r?o=u[r]:f[r]=u[r];return arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):i),y$1(l.type,f,t||l.key,o||l.ref,null)}function D$1(n,l){var u={__c:l="__cC"+f$2++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,i;return this.getChildContext||(u=[],(i={})[l]=this,this.getChildContext=function(){return i},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.some(m$1);},this.sub=function(n){u.push(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u.splice(u.indexOf(n),1),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=c$1.slice,l$1={__e:function(n,l){for(var u,i,t;l=l.__;)if((u=l.__c)&&!u.__)try{if((i=u.constructor)&&null!=i.getDerivedStateFromError&&(u.setState(i.getDerivedStateFromError(n)),t=u.__d),null!=u.componentDidCatch&&(u.componentDidCatch(n),t=u.__d),t)return u.__E=u}catch(l){n=l;}throw n}},u$1=0,_$1.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=a$1({},this.state),"function"==typeof n&&(n=n(a$1({},u),this.props)),n&&a$1(u,n),null!=n&&this.__v&&(l&&this.__h.push(l),m$1(this));},_$1.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),m$1(this));},_$1.prototype.render=d$1,t$1=[],o$2="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,g$2.__r=0,f$2=0;
+var n,l$3,u$3,t$2,i$4,o$2,r$1,f$4,e$2,c$2,s$3,a$2,h$2={},v$2=[],p$3=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i,y$2=Array.isArray;function d$3(n,l){for(var u in l)n[u]=l[u];return n}function w$3(n){n&&n.parentNode&&n.parentNode.removeChild(n);}function _$3(l,u,t){var i,o,r,f={};for(r in u)"key"==r?i=u[r]:"ref"==r?o=u[r]:f[r]=u[r];if(arguments.length>2&&(f.children=arguments.length>3?n.call(arguments,2):t),"function"==typeof l&&null!=l.defaultProps)for(r in l.defaultProps)void 0===f[r]&&(f[r]=l.defaultProps[r]);return g$3(l,f,i,o,null)}function g$3(n,t,i,o,r){var f={type:n,props:t,key:i,ref:o,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,constructor:void 0,__v:null==r?++u$3:r,__i:-1,__u:0};return null==r&&null!=l$3.vnode&&l$3.vnode(f),f}function m$1(){return {current:null}}function b$2(n){return n.children}function k$2(n,l){this.props=n,this.context=l;}function x$2(n,l){if(null==l)return n.__?x$2(n.__,n.__i+1):null;for(var u;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e)return u.__e;return "function"==typeof n.type?x$2(n):null}function C$2(n){var l,u;if(null!=(n=n.__)&&null!=n.__c){for(n.__e=n.__c.base=null,l=0;l<n.__k.length;l++)if(null!=(u=n.__k[l])&&null!=u.__e){n.__e=n.__c.base=u.__e;break}return C$2(n)}}function S(n){(!n.__d&&(n.__d=!0)&&i$4.push(n)&&!M$1.__r++||o$2!==l$3.debounceRendering)&&((o$2=l$3.debounceRendering)||r$1)(M$1);}function M$1(){var n,u,t,o,r,e,c,s;for(i$4.sort(f$4);n=i$4.shift();)n.__d&&(u=i$4.length,o=void 0,e=(r=(t=n).__v).__e,c=[],s=[],t.__P&&((o=d$3({},r)).__v=r.__v+1,l$3.vnode&&l$3.vnode(o),O$1(t.__P,o,r,t.__n,t.__P.namespaceURI,32&r.__u?[e]:null,c,null==e?x$2(r):e,!!(32&r.__u),s),o.__v=r.__v,o.__.__k[o.__i]=o,j$2(c,o,s),o.__e!=e&&C$2(o)),i$4.length>u&&i$4.sort(f$4));M$1.__r=0;}function P$2(n,l,u,t,i,o,r,f,e,c,s){var a,p,y,d,w,_=t&&t.__k||v$2,g=l.length;for(u.__d=e,$$1(u,l,_),e=u.__d,a=0;a<g;a++)null!=(y=u.__k[a])&&(p=-1===y.__i?h$2:_[y.__i]||h$2,y.__i=a,O$1(n,y,p,i,o,r,f,e,c,s),d=y.__e,y.ref&&p.ref!=y.ref&&(p.ref&&E$2(p.ref,null,y),s.push(y.ref,y.__c||d,y)),null==w&&null!=d&&(w=d),65536&y.__u||p.__k===y.__k?e=I$1(y,e,n):"function"==typeof y.type&&void 0!==y.__d?e=y.__d:d&&(e=d.nextSibling),y.__d=void 0,y.__u&=-196609);u.__d=e,u.__e=w;}function $$1(n,l,u){var t,i,o,r,f,e=l.length,c=u.length,s=c,a=0;for(n.__k=[],t=0;t<e;t++)null!=(i=l[t])&&"boolean"!=typeof i&&"function"!=typeof i?(r=t+a,(i=n.__k[t]="string"==typeof i||"number"==typeof i||"bigint"==typeof i||i.constructor==String?g$3(null,i,null,null,null):y$2(i)?g$3(b$2,{children:i},null,null,null):void 0===i.constructor&&i.__b>0?g$3(i.type,i.props,i.key,i.ref?i.ref:null,i.__v):i).__=n,i.__b=n.__b+1,o=null,-1!==(f=i.__i=L$1(i,u,r,s))&&(s--,(o=u[f])&&(o.__u|=131072)),null==o||null===o.__v?(-1==f&&a--,"function"!=typeof i.type&&(i.__u|=65536)):f!==r&&(f==r-1?a--:f==r+1?a++:(f>r?a--:a++,i.__u|=65536))):i=n.__k[t]=null;if(s)for(t=0;t<c;t++)null!=(o=u[t])&&0==(131072&o.__u)&&(o.__e==n.__d&&(n.__d=x$2(o)),N$1(o,o));}function I$1(n,l,u){var t,i;if("function"==typeof n.type){for(t=n.__k,i=0;t&&i<t.length;i++)t[i]&&(t[i].__=n,l=I$1(t[i],l,u));return l}n.__e!=l&&(l&&n.type&&!u.contains(l)&&(l=x$2(n)),u.insertBefore(n.__e,l||null),l=n.__e);do{l=l&&l.nextSibling;}while(null!=l&&8===l.nodeType);return l}function H$1(n,l){return l=l||[],null==n||"boolean"==typeof n||(y$2(n)?n.some(function(n){H$1(n,l);}):l.push(n)),l}function L$1(n,l,u,t){var i=n.key,o=n.type,r=u-1,f=u+1,e=l[u];if(null===e||e&&i==e.key&&o===e.type&&0==(131072&e.__u))return u;if(("function"!=typeof o||o===b$2||i)&&t>(null!=e&&0==(131072&e.__u)?1:0))for(;r>=0||f<l.length;){if(r>=0){if((e=l[r])&&0==(131072&e.__u)&&i==e.key&&o===e.type)return r;r--;}if(f<l.length){if((e=l[f])&&0==(131072&e.__u)&&i==e.key&&o===e.type)return f;f++;}}return -1}function T$2(n,l,u){"-"===l[0]?n.setProperty(l,null==u?"":u):n[l]=null==u?"":"number"!=typeof u||p$3.test(l)?u:u+"px";}function A$2(n,l,u,t,i){var o;n:if("style"===l)if("string"==typeof u)n.style.cssText=u;else {if("string"==typeof t&&(n.style.cssText=t=""),t)for(l in t)u&&l in u||T$2(n.style,l,"");if(u)for(l in u)t&&u[l]===t[l]||T$2(n.style,l,u[l]);}else if("o"===l[0]&&"n"===l[1])o=l!==(l=l.replace(/(PointerCapture)$|Capture$/i,"$1")),l=l.toLowerCase()in n||"onFocusOut"===l||"onFocusIn"===l?l.toLowerCase().slice(2):l.slice(2),n.l||(n.l={}),n.l[l+o]=u,u?t?u.u=t.u:(u.u=e$2,n.addEventListener(l,o?s$3:c$2,o)):n.removeEventListener(l,o?s$3:c$2,o);else {if("http://www.w3.org/2000/svg"==i)l=l.replace(/xlink(H|:h)/,"h").replace(/sName$/,"s");else if("width"!=l&&"height"!=l&&"href"!=l&&"list"!=l&&"form"!=l&&"tabIndex"!=l&&"download"!=l&&"rowSpan"!=l&&"colSpan"!=l&&"role"!=l&&"popover"!=l&&l in n)try{n[l]=null==u?"":u;break n}catch(n){}"function"==typeof u||(null==u||!1===u&&"-"!==l[4]?n.removeAttribute(l):n.setAttribute(l,"popover"==l&&1==u?"":u));}}function F$2(n){return function(u){if(this.l){var t=this.l[u.type+n];if(null==u.t)u.t=e$2++;else if(u.t<t.u)return;return l$3.event&&(u=l$3.event(u)),"handleEvent"in t?t.handleEvent(u):t(u)}}}function O$1(n,u,t,i,o,r,f,e,c,s){var a,h,v,p,w,_,g,m,x,C,S,M,$,I,H,L,T=u.type;if(void 0!==u.constructor)return null;128&t.__u&&(c=!!(32&t.__u),r=[e=u.__e=t.__e]),(a=l$3.__b)&&a(u);n:if("function"==typeof T)try{if(m=u.props,x="prototype"in T&&T.prototype.render,C=(a=T.contextType)&&i[a.__c],S=a?C?C.props.value:a.__:i,t.__c?g=(h=u.__c=t.__c).__=h.__E:(x?u.__c=h=new T(m,S):(u.__c=h=new k$2(m,S),h.constructor=T,h.render=V$1),C&&C.sub(h),h.props=m,h.state||(h.state={}),h.context=S,h.__n=i,v=h.__d=!0,h.__h=[],h._sb=[]),x&&null==h.__s&&(h.__s=h.state),x&&null!=T.getDerivedStateFromProps&&(h.__s==h.state&&(h.__s=d$3({},h.__s)),d$3(h.__s,T.getDerivedStateFromProps(m,h.__s))),p=h.props,w=h.state,h.__v=u,v)x&&null==T.getDerivedStateFromProps&&null!=h.componentWillMount&&h.componentWillMount(),x&&null!=h.componentDidMount&&h.__h.push(h.componentDidMount);else {if(x&&null==T.getDerivedStateFromProps&&m!==p&&null!=h.componentWillReceiveProps&&h.componentWillReceiveProps(m,S),!h.__e&&(null!=h.shouldComponentUpdate&&!1===h.shouldComponentUpdate(m,h.__s,S)||u.__v===t.__v)){for(u.__v!==t.__v&&(h.props=m,h.state=h.__s,h.__d=!1),u.__e=t.__e,u.__k=t.__k,u.__k.some(function(n){n&&(n.__=u);}),M=0;M<h._sb.length;M++)h.__h.push(h._sb[M]);h._sb=[],h.__h.length&&f.push(h);break n}null!=h.componentWillUpdate&&h.componentWillUpdate(m,h.__s,S),x&&null!=h.componentDidUpdate&&h.__h.push(function(){h.componentDidUpdate(p,w,_);});}if(h.context=S,h.props=m,h.__P=n,h.__e=!1,$=l$3.__r,I=0,x){for(h.state=h.__s,h.__d=!1,$&&$(u),a=h.render(h.props,h.state,h.context),H=0;H<h._sb.length;H++)h.__h.push(h._sb[H]);h._sb=[];}else do{h.__d=!1,$&&$(u),a=h.render(h.props,h.state,h.context),h.state=h.__s;}while(h.__d&&++I<25);h.state=h.__s,null!=h.getChildContext&&(i=d$3(d$3({},i),h.getChildContext())),x&&!v&&null!=h.getSnapshotBeforeUpdate&&(_=h.getSnapshotBeforeUpdate(p,w)),P$2(n,y$2(L=null!=a&&a.type===b$2&&null==a.key?a.props.children:a)?L:[L],u,t,i,o,r,f,e,c,s),h.base=u.__e,u.__u&=-161,h.__h.length&&f.push(h),g&&(h.__E=h.__=null);}catch(n){if(u.__v=null,c||null!=r){for(u.__u|=c?160:128;e&&8===e.nodeType&&e.nextSibling;)e=e.nextSibling;r[r.indexOf(e)]=null,u.__e=e;}else u.__e=t.__e,u.__k=t.__k;l$3.__e(n,u,t);}else null==r&&u.__v===t.__v?(u.__k=t.__k,u.__e=t.__e):u.__e=z$2(t.__e,u,t,i,o,r,f,c,s);(a=l$3.diffed)&&a(u);}function j$2(n,u,t){u.__d=void 0;for(var i=0;i<t.length;i++)E$2(t[i],t[++i],t[++i]);l$3.__c&&l$3.__c(u,n),n.some(function(u){try{n=u.__h,u.__h=[],n.some(function(n){n.call(u);});}catch(n){l$3.__e(n,u.__v);}});}function z$2(u,t,i,o,r,f,e,c,s){var a,v,p,d,_,g,m,b=i.props,k=t.props,C=t.type;if("svg"===C?r="http://www.w3.org/2000/svg":"math"===C?r="http://www.w3.org/1998/Math/MathML":r||(r="http://www.w3.org/1999/xhtml"),null!=f)for(a=0;a<f.length;a++)if((_=f[a])&&"setAttribute"in _==!!C&&(C?_.localName===C:3===_.nodeType)){u=_,f[a]=null;break}if(null==u){if(null===C)return document.createTextNode(k);u=document.createElementNS(r,C,k.is&&k),c&&(l$3.__m&&l$3.__m(t,f),c=!1),f=null;}if(null===C)b===k||c&&u.data===k||(u.data=k);else {if(f=f&&n.call(u.childNodes),b=i.props||h$2,!c&&null!=f)for(b={},a=0;a<u.attributes.length;a++)b[(_=u.attributes[a]).name]=_.value;for(a in b)if(_=b[a],"children"==a);else if("dangerouslySetInnerHTML"==a)p=_;else if(!(a in k)){if("value"==a&&"defaultValue"in k||"checked"==a&&"defaultChecked"in k)continue;A$2(u,a,null,_,r);}for(a in k)_=k[a],"children"==a?d=_:"dangerouslySetInnerHTML"==a?v=_:"value"==a?g=_:"checked"==a?m=_:c&&"function"!=typeof _||b[a]===_||A$2(u,a,_,b[a],r);if(v)c||p&&(v.__html===p.__html||v.__html===u.innerHTML)||(u.innerHTML=v.__html),t.__k=[];else if(p&&(u.innerHTML=""),P$2(u,y$2(d)?d:[d],t,i,o,"foreignObject"===C?"http://www.w3.org/1999/xhtml":r,f,e,f?f[0]:i.__k&&x$2(i,0),c,s),null!=f)for(a=f.length;a--;)w$3(f[a]);c||(a="value","progress"===C&&null==g?u.removeAttribute("value"):void 0!==g&&(g!==u[a]||"progress"===C&&!g||"option"===C&&g!==b[a])&&A$2(u,a,g,b[a],r),a="checked",void 0!==m&&m!==u[a]&&A$2(u,a,m,b[a],r));}return u}function E$2(n,u,t){try{if("function"==typeof n){var i="function"==typeof n.__u;i&&n.__u(),i&&null==u||(n.__u=n(u));}else n.current=u;}catch(n){l$3.__e(n,t);}}function N$1(n,u,t){var i,o;if(l$3.unmount&&l$3.unmount(n),(i=n.ref)&&(i.current&&i.current!==n.__e||E$2(i,null,u)),null!=(i=n.__c)){if(i.componentWillUnmount)try{i.componentWillUnmount();}catch(n){l$3.__e(n,u);}i.base=i.__P=null;}if(i=n.__k)for(o=0;o<i.length;o++)i[o]&&N$1(i[o],u,t||"function"!=typeof n.type);t||w$3(n.__e),n.__c=n.__=n.__e=n.__d=void 0;}function V$1(n,l,u){return this.constructor(n,u)}function q$2(u,t,i){var o,r,f,e;l$3.__&&l$3.__(u,t),r=(o="function"==typeof i)?null:i&&i.__k||t.__k,f=[],e=[],O$1(t,u=(!o&&i||t).__k=_$3(b$2,null,[u]),r||h$2,h$2,t.namespaceURI,!o&&i?[i]:r?null:t.firstChild?n.call(t.childNodes):null,f,!o&&i?i:r?r.__e:t.firstChild,o,e),j$2(f,u,e);}function B$2(n,l){q$2(n,l,B$2);}function D$2(l,u,t){var i,o,r,f,e=d$3({},l.props);for(r in l.type&&l.type.defaultProps&&(f=l.type.defaultProps),u)"key"==r?i=u[r]:"ref"==r?o=u[r]:e[r]=void 0===u[r]&&void 0!==f?f[r]:u[r];return arguments.length>2&&(e.children=arguments.length>3?n.call(arguments,2):t),g$3(l.type,e,i||l.key,o||l.ref,null)}function G$1(n,l){var u={__c:l="__cC"+a$2++,__:n,Consumer:function(n,l){return n.children(l)},Provider:function(n){var u,t;return this.getChildContext||(u=new Set,(t={})[l]=this,this.getChildContext=function(){return t},this.componentWillUnmount=function(){u=null;},this.shouldComponentUpdate=function(n){this.props.value!==n.value&&u.forEach(function(n){n.__e=!0,S(n);});},this.sub=function(n){u.add(n);var l=n.componentWillUnmount;n.componentWillUnmount=function(){u&&u.delete(n),l&&l.call(n);};}),n.children}};return u.Provider.__=u.Consumer.contextType=u}n=v$2.slice,l$3={__e:function(n,l,u,t){for(var i,o,r;l=l.__;)if((i=l.__c)&&!i.__)try{if((o=i.constructor)&&null!=o.getDerivedStateFromError&&(i.setState(o.getDerivedStateFromError(n)),r=i.__d),null!=i.componentDidCatch&&(i.componentDidCatch(n,t||{}),r=i.__d),r)return i.__E=i}catch(l){n=l;}throw n}},u$3=0,t$2=function(n){return null!=n&&null==n.constructor},k$2.prototype.setState=function(n,l){var u;u=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=d$3({},this.state),"function"==typeof n&&(n=n(d$3({},u),this.props)),n&&d$3(u,n),null!=n&&this.__v&&(l&&this._sb.push(l),S(this));},k$2.prototype.forceUpdate=function(n){this.__v&&(this.__e=!0,n&&this.__h.push(n),S(this));},k$2.prototype.render=b$2,i$4=[],r$1="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,f$4=function(n,l){return n.__v.__b-l.__v.__b},M$1.__r=0,e$2=0,c$2=F$2(!1),s$3=F$2(!0),a$2=0;
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1049,243 +1049,6 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
 
 var PropTypes$3 = propTypes$2.exports;
 
-/* global google */
-const isSourcePath = path => path.startsWith('source/');
-const utf8Decoder = new TextDecoder('utf8');
-class SheetStorage {
-  constructor(id) {
-    const [spreadsheetId, sheetName] = id.split(':');
-    this.accessToken = null;
-    this.clientId = '532457183798-jsvfmkqg8bo4p6evpus34mnij9ac3v9i.apps.googleusercontent.com';
-    this.fileChangeWatcher = null;
-    this.filedDeletionWatcher = null;
-    this.index = null;
-    this.scope = 'https://www.googleapis.com/auth/spreadsheets';
-    this.spreadsheetId = spreadsheetId;
-    this.sheetName = sheetName;
-    this.tokenClient = null;
-    this.setupWatchers();
-  }
-  destroy() {
-    if (this.fileChangeWatcher) {
-      unwatchFileChange(this.fileChangeWatcher);
-      this.fileChangeWatcher = null;
-    }
-    if (this.fileDeletionWatcher) {
-      unwatchFileDeletion(this.fileDeletionWatcher);
-      this.filedDeletionWatcher = null;
-    }
-  }
-  async setupWatchers() {
-    this.fileChangeWatcher = await watchFileChange(async (path, workspace) => {
-      if (!isSourcePath(path)) {
-        return;
-      }
-      const data = await read(path, {
-        workspace
-      });
-      return this.setPath(path, utf8Decoder.decode(data));
-    });
-    this.fileDeletionWatcher = await watchFileDeletion(async (path, workspace) => {
-      if (!isSourcePath(path)) {
-        return;
-      }
-      return this.deletePath(path);
-    });
-  }
-  getTokenClient() {
-    if (!this.tokenClient) {
-      this.tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: this.clientId,
-        scope: this.scope
-      });
-    }
-    return this.tokenClient;
-  }
-  noteAccessTokenExpiry() {
-    this.accessToken = null;
-  }
-  getAccessToken() {
-    if (this.accessToken) {
-      return this.accessToken;
-    }
-    return new Promise((resolve, reject) => {
-      const client = this.getTokenClient();
-      client.callback = response => {
-        if (response.access_token) {
-          this.accessToken = response.access_token;
-          resolve(this.accessToken);
-        } else {
-          reject(new Error(`getAccessToken: failed`));
-        }
-      };
-      client.requestAccessToken();
-    });
-  }
-  toValueRangeFromRow(row) {
-    return `${this.sheetName}!B${row}:B${row}`;
-  }
-  toKeyValueRangeFromRow(row) {
-    return `${this.sheetName}!A${row}:B${row}`;
-  }
-  async toRowFromPath(path) {
-    return (await this.getIndex()).get(path);
-  }
-  async toRangeFromPath(path) {
-    return this.toValueRangeFromRow(await this.toRowFromPath(path));
-  }
-  async getIndex() {
-    if (!this.index) {
-      const {
-        values
-      } = await this.getRange(`${this.sheetName}!A:A`);
-      this.index = new Map();
-      for (let nth = 0; nth < values.length; nth++) {
-        if (values[nth][0].length === 0) {
-          // Deleted entries have an empty path.
-          continue;
-        }
-        // Note that sheets are 1 based.
-        this.index.set(values[nth][0], nth + 1);
-      }
-    }
-    return this.index;
-  }
-  async addIndexValue(path, value) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${this.sheetName}A:B:append?valueInputOption=RAW`;
-    const values = [[path, value]];
-    const body = JSON.stringify({
-      values
-    });
-    for (let attempt = 0; attempt < 10; attempt++) {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body
-      });
-      if (response.ok) {
-        const {
-          updates
-        } = await response.json();
-        const {
-          updatedRange
-        } = updates;
-        // Extract the last number from updatedRange.
-        const regex = /\d+$/;
-        const match = updatedRange.match(regex);
-        const row = match ? parseInt(match[0], 10) : null;
-        // Update the index.
-        this.index.set(path, row);
-        // And we are done.
-        return value;
-      }
-      if (response.status === 401) {
-        this.noteAccessTokenExpiry();
-        continue;
-      }
-      throw new Error(`getRange: ${response.statusText}`);
-    }
-    throw new Error(`getRange: too many attempts`);
-  }
-  async getRange(range) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}`;
-    for (let attempt = 0; attempt < 10; attempt++) {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`
-        }
-      });
-      if (response.ok) {
-        return response.json();
-      }
-      if (response.status === 401) {
-        this.noteAccessTokenExpiry();
-        continue;
-      }
-      throw new Error(`getRange: ${response.statusText}`);
-    }
-    throw new Error(`getRange: too many attempts`);
-  }
-  async getPath(path) {
-    return this.getRange(await this.toRangeFromPath(path));
-  }
-  getRow(row) {
-    return this.getRange(this.toValueRangeFromRow(row));
-  }
-  async setRange(range, values) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?valueInputOption=RAW`;
-    const body = JSON.stringify({
-      range,
-      values
-    });
-    for (let attempt = 0; attempt < 10; attempt++) {
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body
-      });
-      if (response.ok) {
-        return response.json();
-      }
-      if (response.status === 401) {
-        this.noteAccessTokenExpiry();
-        continue;
-      }
-      throw new Error(`setRow: ${response.statusText}`);
-    }
-    throw new Error(`setRow: too many attempts`);
-  }
-  async setRow(row, values) {
-    return this.setRange(this.toValueRangeFromRow(row), [values]);
-  }
-  async setPath(path, value) {
-    const row = await this.toRowFromPath(path);
-    if (row) {
-      return this.setRange(this.toValueRangeFromRow(row), [[value]]);
-    } else {
-      // The path isn't in the index -- we'll need to append it.
-      return this.addIndexValue(path, value);
-    }
-  }
-  async deletePath(path, value) {
-    const row = await this.toRowFromPath(path);
-    if (row) {
-      this.index.delete(path);
-      return this.setRange(this.toKeyValueRangeFromRow(row), [['', '']]);
-    }
-  }
-}
-const sheetStorageRegistry = new Map();
-const getSheetStorage = spreadsheetId => {
-  if (!spreadsheetId || spreadsheetId === '') {
-    return;
-  }
-  if (!sheetStorageRegistry.has(spreadsheetId)) {
-    sheetStorageRegistry.set(spreadsheetId, new SheetStorage(spreadsheetId));
-  }
-  return sheetStorageRegistry.get(spreadsheetId);
-};
-const removeSheetStorage = async spreadsheetId => {
-  if (!spreadsheetId || spreadsheetId === '') {
-    return;
-  }
-  await getSheetStorage(spreadsheetId).destroy();
-  sheetStorageRegistry.delete(spreadsheetId);
-};
-const updateSheetStorage = async (oldId, newId) => {
-  if (oldId === newId) {
-    return;
-  }
-  removeSheetStorage(oldId);
-  return getSheetStorage(newId);
-};
-
 var classnames = {exports: {}};
 
 /*!
@@ -1365,52 +1128,61 @@ var classnames = {exports: {}};
 
 var classNames = classnames.exports;
 
-var t,u,r,o$1=0,i$2=[],c=l$1.__b,f$1=l$1.__r,e$1=l$1.diffed,a=l$1.__c,v=l$1.unmount;function m(t,r){l$1.__h&&l$1.__h(u,t,o$1||r),o$1=0;var i=u.__H||(u.__H={__:[],__h:[]});return t>=i.__.length&&i.__.push({}),i.__[t]}function l(n){return o$1=1,p(w$1,n)}function p(n,r,o){var i=m(t++,2);return i.t=n,i.__c||(i.__=[o?o(r):w$1(void 0,r),function(n){var t=i.t(i.__[0],n);i.__[0]!==t&&(i.__=[t,i.__[1]],i.__c.setState({}));}],i.__c=u),i.__}function y(r,o){var i=m(t++,3);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__H.__h.push(i));}function h(r,o){var i=m(t++,4);!l$1.__s&&k$1(i.__H,o)&&(i.__=r,i.__H=o,u.__h.push(i));}function s(n){return o$1=5,d(function(){return {current:n}},[])}function _(n,t,u){o$1=6,h(function(){"function"==typeof n?n(t()):n&&(n.current=t());},null==u?u:u.concat(n));}function d(n,u){var r=m(t++,7);return k$1(r.__H,u)&&(r.__=n(),r.__H=u,r.__h=n),r.__}function A$1(n,t){return o$1=8,d(function(){return n},t)}function F$1(n){var r=u.context[n.__c],o=m(t++,9);return o.c=n,r?(null==o.__&&(o.__=!0,r.sub(u)),r.props.value):n.__}function T$1(t,u){l$1.useDebugValue&&l$1.useDebugValue(u?u(t):t);}function q$1(n){var r=m(t++,10),o=l();return r.__=n,u.componentDidCatch||(u.componentDidCatch=function(n){r.__&&r.__(n),o[1](n);}),[o[0],function(){o[1](void 0);}]}function x$1(){i$2.forEach(function(t){if(t.__P)try{t.__H.__h.forEach(g$1),t.__H.__h.forEach(j$1),t.__H.__h=[];}catch(u){t.__H.__h=[],l$1.__e(u,t.__v);}}),i$2=[];}l$1.__b=function(n){u=null,c&&c(n);},l$1.__r=function(n){f$1&&f$1(n),t=0;var r=(u=n.__c).__H;r&&(r.__h.forEach(g$1),r.__h.forEach(j$1),r.__h=[]);},l$1.diffed=function(t){e$1&&e$1(t);var o=t.__c;o&&o.__H&&o.__H.__h.length&&(1!==i$2.push(o)&&r===l$1.requestAnimationFrame||((r=l$1.requestAnimationFrame)||function(n){var t,u=function(){clearTimeout(r),b&&cancelAnimationFrame(t),setTimeout(n);},r=setTimeout(u,100);b&&(t=requestAnimationFrame(u));})(x$1)),u=void 0;},l$1.__c=function(t,u){u.some(function(t){try{t.__h.forEach(g$1),t.__h=t.__h.filter(function(n){return !n.__||j$1(n)});}catch(r){u.some(function(n){n.__h&&(n.__h=[]);}),u=[],l$1.__e(r,t.__v);}}),a&&a(t,u);},l$1.unmount=function(t){v&&v(t);var u=t.__c;if(u&&u.__H)try{u.__H.__.forEach(g$1);}catch(t){l$1.__e(t,u.__v);}};var b="function"==typeof requestAnimationFrame;function g$1(n){var t=u;"function"==typeof n.__c&&n.__c(),u=t;}function j$1(n){var t=u;n.__c=n.__(),u=t;}function k$1(n,t){return !n||n.length!==t.length||t.some(function(t,u){return t!==n[u]})}function w$1(n,t){return "function"==typeof t?t(n):t}
+var t$1,r,u$2,i$3,o$1=0,f$3=[],c$1=l$3,e$1=c$1.__b,a$1=c$1.__r,v$1=c$1.diffed,l$2=c$1.__c,m=c$1.unmount,s$2=c$1.__;function d$2(n,t){c$1.__h&&c$1.__h(r,n,o$1||t),o$1=0;var u=r.__H||(r.__H={__:[],__h:[]});return n>=u.__.length&&u.__.push({}),u.__[n]}function h$1(n){return o$1=1,p$2(D$1,n)}function p$2(n,u,i){var o=d$2(t$1++,2);if(o.t=n,!o.__c&&(o.__=[i?i(u):D$1(void 0,u),function(n){var t=o.__N?o.__N[0]:o.__[0],r=o.t(t,n);t!==r&&(o.__N=[r,o.__[1]],o.__c.setState({}));}],o.__c=r,!r.u)){var f=function(n,t,r){if(!o.__c.__H)return !0;var u=o.__c.__H.__.filter(function(n){return !!n.__c});if(u.every(function(n){return !n.__N}))return !c||c.call(this,n,t,r);var i=o.__c.props!==n;return u.forEach(function(n){if(n.__N){var t=n.__[0];n.__=n.__N,n.__N=void 0,t!==n.__[0]&&(i=!0);}}),c&&c.call(this,n,t,r)||i};r.u=!0;var c=r.shouldComponentUpdate,e=r.componentWillUpdate;r.componentWillUpdate=function(n,t,r){if(this.__e){var u=c;c=void 0,f(n,t,r),c=u;}e&&e.call(this,n,t,r);},r.shouldComponentUpdate=f;}return o.__N||o.__}function y$1(n,u){var i=d$2(t$1++,3);!c$1.__s&&C$1(i.__H,u)&&(i.__=n,i.i=u,r.__H.__h.push(i));}function _$2(n,u){var i=d$2(t$1++,4);!c$1.__s&&C$1(i.__H,u)&&(i.__=n,i.i=u,r.__h.push(i));}function A$1(n){return o$1=5,T$1(function(){return {current:n}},[])}function F$1(n,t,r){o$1=6,_$2(function(){return "function"==typeof n?(n(t()),function(){return n(null)}):n?(n.current=t(),function(){return n.current=null}):void 0},null==r?r:r.concat(n));}function T$1(n,r){var u=d$2(t$1++,7);return C$1(u.__H,r)&&(u.__=n(),u.__H=r,u.__h=n),u.__}function q$1(n,t){return o$1=8,T$1(function(){return n},t)}function x$1(n){var u=r.context[n.__c],i=d$2(t$1++,9);return i.c=n,u?(null==i.__&&(i.__=!0,u.sub(r)),u.props.value):n.__}function P$1(n,t){c$1.useDebugValue&&c$1.useDebugValue(t?t(n):n);}function b$1(n){var u=d$2(t$1++,10),i=h$1();return u.__=n,r.componentDidCatch||(r.componentDidCatch=function(n,t){u.__&&u.__(n,t),i[1](n);}),[i[0],function(){i[1](void 0);}]}function g$2(){var n=d$2(t$1++,11);if(!n.__){for(var u=r.__v;null!==u&&!u.__m&&null!==u.__;)u=u.__;var i=u.__m||(u.__m=[0,0]);n.__="P"+i[0]+"-"+i[1]++;}return n.__}function j$1(){for(var n;n=f$3.shift();)if(n.__P&&n.__H)try{n.__H.__h.forEach(z$1),n.__H.__h.forEach(B$1),n.__H.__h=[];}catch(t){n.__H.__h=[],c$1.__e(t,n.__v);}}c$1.__b=function(n){r=null,e$1&&e$1(n);},c$1.__=function(n,t){n&&t.__k&&t.__k.__m&&(n.__m=t.__k.__m),s$2&&s$2(n,t);},c$1.__r=function(n){a$1&&a$1(n),t$1=0;var i=(r=n.__c).__H;i&&(u$2===r?(i.__h=[],r.__h=[],i.__.forEach(function(n){n.__N&&(n.__=n.__N),n.i=n.__N=void 0;})):(i.__h.forEach(z$1),i.__h.forEach(B$1),i.__h=[],t$1=0)),u$2=r;},c$1.diffed=function(n){v$1&&v$1(n);var t=n.__c;t&&t.__H&&(t.__H.__h.length&&(1!==f$3.push(t)&&i$3===c$1.requestAnimationFrame||((i$3=c$1.requestAnimationFrame)||w$2)(j$1)),t.__H.__.forEach(function(n){n.i&&(n.__H=n.i),n.i=void 0;})),u$2=r=null;},c$1.__c=function(n,t){t.some(function(n){try{n.__h.forEach(z$1),n.__h=n.__h.filter(function(n){return !n.__||B$1(n)});}catch(r){t.some(function(n){n.__h&&(n.__h=[]);}),t=[],c$1.__e(r,n.__v);}}),l$2&&l$2(n,t);},c$1.unmount=function(n){m&&m(n);var t,r=n.__c;r&&r.__H&&(r.__H.__.forEach(function(n){try{z$1(n);}catch(n){t=n;}}),r.__H=void 0,t&&c$1.__e(t,r.__v));};var k$1="function"==typeof requestAnimationFrame;function w$2(n){var t,r=function(){clearTimeout(u),k$1&&cancelAnimationFrame(t),setTimeout(n);},u=setTimeout(r,100);k$1&&(t=requestAnimationFrame(r));}function z$1(n){var t=r,u=n.__c;"function"==typeof u&&(n.__c=void 0,u()),r=t;}function B$1(n){var t=r;n.__c=n.__(),r=t;}function C$1(n,t){return !n||n.length!==t.length||t.some(function(t,r){return t!==n[r]})}function D$1(n,t){return "function"==typeof t?t(n):t}
 
-function S(n,t){for(var e in t)n[e]=t[e];return n}function C(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E(n){this.props=n;}function g(n,t){function e(n){var e=this.props.ref,r=e==n.ref;return !r&&e&&(e.call?e(null):e.current=null),t?!t(this.props,n)||!r:C(this.props,n)}function r(t){return this.shouldComponentUpdate=e,v$1(n,t)}return r.displayName="Memo("+(n.displayName||n.name)+")",r.prototype.isReactComponent=!0,r.__f=!0,r}(E.prototype=new _$1).isPureReactComponent=!0,E.prototype.shouldComponentUpdate=function(n,t){return C(this.props,n)||C(this.state,t)};var w=l$1.__b;l$1.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),w&&w(n);};var R="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function x(n){function t(t,e){var r=S({},t);return delete r.ref,n(r,(e=t.ref||e)&&("object"!=typeof e||"current"in e)?e:null)}return t.$$typeof=R,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var N=function(n,t){return null==n?null:A$2(A$2(n).map(t))},k={map:N,forEach:N,count:function(n){return n?A$2(n).length:0},only:function(n){var t=A$2(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:A$2},A=l$1.__e;l$1.__e=function(n,t,e){if(n.then)for(var r,u=t;u=u.__;)if((r=u.__c)&&r.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),r.__c(n,t);A(n,t,e);};var O=l$1.unmount;function L(){this.__u=0,this.t=null,this.__b=null;}function U(n){var t=n.__.__c;return t&&t.__e&&t.__e(n)}function F(n){var t,e,r;function u(u){if(t||(t=n()).then(function(n){e=n.default||n;},function(n){r=n;}),r)throw r;if(!e)throw t;return v$1(e,u)}return u.displayName="Lazy",u.__f=!0,u}function M(){this.u=null,this.o=null;}l$1.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&!0===n.__h&&(n.type=null),O&&O(n);},(L.prototype=new _$1).__c=function(n,t){var e=t.__c,r=this;null==r.t&&(r.t=[]),r.t.push(e);var u=U(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(l):l());};e.__R=i;var l=function(){if(!--r.__u){if(r.state.__e){var n=r.state.__e;r.__v.__k[0]=function n(t,e,r){return t&&(t.__v=null,t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)}),t.__c&&t.__c.__P===e&&(t.__e&&r.insertBefore(t.__e,t.__d),t.__c.__e=!0,t.__c.__P=r)),t}(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__e:r.__b=null});t=r.t.pop();)t.forceUpdate();}},f=!0===t.__h;r.__u++||f||r.setState({__e:r.__b=r.__v.__k[0]}),n.then(i,i);},L.prototype.componentWillUnmount=function(){this.t=[];},L.prototype.render=function(n,t){if(this.__b){if(this.__v.__k){var e=document.createElement("div"),r=this.__v.__k[0].__c;this.__v.__k[0]=function n(t,e,r){return t&&(t.__c&&t.__c.__H&&(t.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),t.__c.__H=null),null!=(t=S({},t)).__c&&(t.__c.__P===r&&(t.__c.__P=e),t.__c=null),t.__k=t.__k&&t.__k.map(function(t){return n(t,e,r)})),t}(this.__b,e,r.__O=r.__P);}this.__b=null;}var u=t.__e&&v$1(d$1,null,n.fallback);return u&&(u.__h=null),[v$1(d$1,null,t.__e?null:n.children),u]};var T=function(n,t,e){if(++e[1]===e[0]&&n.o.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.o.size))for(e=n.u;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.u=e=e[2];}};function D(n){return this.getChildContext=function(){return n.context},n.children}function I(n){var t=this,e=n.i;t.componentWillUnmount=function(){S$1(null,t.l),t.l=null,t.i=null;},t.i&&t.i!==e&&t.componentWillUnmount(),n.__v?(t.l||(t.i=e,t.l={nodeType:1,parentNode:e,childNodes:[],appendChild:function(n){this.childNodes.push(n),t.i.appendChild(n);},insertBefore:function(n,e){this.childNodes.push(n),t.i.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),t.i.removeChild(n);}}),S$1(v$1(D,{context:t.context},n.__v),t.l)):t.l&&t.componentWillUnmount();}function W(n,t){return v$1(I,{__v:n,i:t})}(M.prototype=new _$1).__e=function(n){var t=this,e=U(t.__v),r=t.o.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),T(t,n,r)):u();};e?e(o):o();}},M.prototype.render=function(n){this.u=null,this.o=new Map;var t=A$2(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.o.set(t[e],this.u=[1,0,this.u]);return n.children},M.prototype.componentDidUpdate=M.prototype.componentDidMount=function(){var n=this;this.o.forEach(function(t,e){T(n,e,t);});};var j="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,P=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,V=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/i:/fil|che|ra/i).test(n)};function z(n,t,e){return null==t.__k&&(t.textContent=""),S$1(n,t),"function"==typeof e&&e(),n?n.__c:null}function B(n,t,e){return q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}_$1.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(n){Object.defineProperty(_$1.prototype,n,{configurable:!0,get:function(){return this["UNSAFE_"+n]},set:function(t){Object.defineProperty(this,n,{configurable:!0,writable:!0,value:t});}});});var H=l$1.event;function Z(){}function Y(){return this.cancelBubble}function $(){return this.defaultPrevented}l$1.event=function(n){return H&&(n=H(n)),n.persist=Z,n.isPropagationStopped=Y,n.isDefaultPrevented=$,n.nativeEvent=n};var q,G={configurable:!0,get:function(){return this.class}},J=l$1.vnode;l$1.vnode=function(n){var t=n.type,e=n.props,r=e;if("string"==typeof t){for(var u in r={},e){var o=e[u];"value"===u&&"defaultValue"in e&&null==o||("defaultValue"===u&&"value"in e&&null==e.value?u="value":"download"===u&&!0===o?o="":/ondoubleclick/i.test(u)?u="ondblclick":/^onchange(textarea|input)/i.test(u+t)&&!V(e.type)?u="oninput":/^on(Ani|Tra|Tou|BeforeInp)/.test(u)?u=u.toLowerCase():P.test(u)?u=u.replace(/[A-Z0-9]/,"-$&").toLowerCase():null===o&&(o=void 0),r[u]=o);}"select"==t&&r.multiple&&Array.isArray(r.value)&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=-1!=r.value.indexOf(n.props.value);})),"select"==t&&null!=r.defaultValue&&(r.value=A$2(e.children).forEach(function(n){n.props.selected=r.multiple?-1!=r.defaultValue.indexOf(n.props.value):r.defaultValue==n.props.value;})),n.props=r;}t&&e.class!=e.className&&(G.enumerable="className"in e,null!=e.className&&(r.class=e.className),Object.defineProperty(r,"className",G)),n.$$typeof=j,J&&J(n);};var K=l$1.__r;l$1.__r=function(n){K&&K(n),q=n.__c;};var Q={ReactCurrentDispatcher:{current:{readContext:function(n){return q.__n[n.__c].props.value}}}},X="17.0.2";function nn(n){return v$1.bind(null,n)}function tn(n){return !!n&&n.$$typeof===j}function en(n){return tn(n)?B$1.apply(null,arguments):n}function rn(n){return !!n.__k&&(S$1(null,n),!0)}function un(n){return n&&(n.base||1===n.nodeType&&n)||null}var on=function(n,t){return n(t)},ln=function(n,t){return n(t)},fn=d$1;var ReactDOM$3 = {useState:l,useReducer:p,useEffect:y,useLayoutEffect:h,useRef:s,useImperativeHandle:_,useMemo:d,useCallback:A$1,useContext:F$1,useDebugValue:T$1,version:"17.0.2",Children:k,render:z,hydrate:B,unmountComponentAtNode:rn,createPortal:W,createElement:v$1,createContext:D$1,createFactory:nn,cloneElement:en,createRef:p$1,Fragment:d$1,isValidElement:tn,findDOMNode:un,Component:_$1,PureComponent:E,memo:g,forwardRef:x,flushSync:ln,unstable_batchedUpdates:on,StrictMode:d$1,Suspense:L,SuspenseList:M,lazy:F,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:Q};
+function g$1(n,t){for(var e in n)if("__source"!==e&&!(e in t))return !0;for(var r in t)if("__source"!==r&&n[r]!==t[r])return !0;return !1}function E$1(n,t){var e=t(),r=h$1({t:{__:e,u:t}}),u=r[0].t,o=r[1];return _$2(function(){u.__=e,u.u=t,C(u)&&o({t:u});},[n,e,t]),y$1(function(){return C(u)&&o({t:u}),n(function(){C(u)&&o({t:u});})},[n]),e}function C(n){var t,e,r=n.u,u=n.__;try{var o=r();return !((t=u)===(e=o)&&(0!==t||1/t==1/e)||t!=t&&e!=e)}catch(n){return !0}}function x(n){n();}function R(n){return n}function w$1(){return [!1,x]}var k=_$2;function I(n,t){this.props=n,this.context=t;}function N(n,e){function r(n){var t=this.props.ref,r=t==n.ref;return !r&&t&&(t.call?t(null):t.current=null),e?!e(this.props,n)||!r:g$1(this.props,n)}function u(e){return this.shouldComponentUpdate=r,_$3(n,e)}return u.displayName="Memo("+(n.displayName||n.name)+")",u.prototype.isReactComponent=!0,u.__f=!0,u}(I.prototype=new k$2).isPureReactComponent=!0,I.prototype.shouldComponentUpdate=function(n,t){return g$1(this.props,n)||g$1(this.state,t)};var M=l$3.__b;l$3.__b=function(n){n.type&&n.type.__f&&n.ref&&(n.props.ref=n.ref,n.ref=null),M&&M(n);};var T="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.forward_ref")||3911;function A(n){function t(t){if(!("ref"in t))return n(t,null);var e=t.ref;delete t.ref;var r=n(t,e);return t.ref=e,r}return t.$$typeof=T,t.render=t,t.prototype.isReactComponent=t.__f=!0,t.displayName="ForwardRef("+(n.displayName||n.name)+")",t}var D=function(n,t){return null==n?null:H$1(H$1(n).map(t))},L={map:D,forEach:D,count:function(n){return n?H$1(n).length:0},only:function(n){var t=H$1(n);if(1!==t.length)throw "Children.only";return t[0]},toArray:H$1},O=l$3.__e;l$3.__e=function(n,t,e,r){if(n.then)for(var u,o=t;o=o.__;)if((u=o.__c)&&u.__c)return null==t.__e&&(t.__e=e.__e,t.__k=e.__k),u.__c(n,t);O(n,t,e,r);};var F=l$3.unmount;function U(n,t,e){return n&&(n.__c&&n.__c.__H&&(n.__c.__H.__.forEach(function(n){"function"==typeof n.__c&&n.__c();}),n.__c.__H=null),null!=(n=function(n,t){for(var e in t)n[e]=t[e];return n}({},n)).__c&&(n.__c.__P===e&&(n.__c.__P=t),n.__c=null),n.__k=n.__k&&n.__k.map(function(n){return U(n,t,e)})),n}function V(n,t,e){return n&&e&&(n.__v=null,n.__k=n.__k&&n.__k.map(function(n){return V(n,t,e)}),n.__c&&n.__c.__P===t&&(n.__e&&e.appendChild(n.__e),n.__c.__e=!0,n.__c.__P=e)),n}function W(){this.__u=0,this.o=null,this.__b=null;}function P(n){var t=n.__.__c;return t&&t.__a&&t.__a(n)}function j(n){var e,r,u;function o(o){if(e||(e=n()).then(function(n){r=n.default||n;},function(n){u=n;}),u)throw u;if(!r)throw e;return _$3(r,o)}return o.displayName="Lazy",o.__f=!0,o}function z(){this.i=null,this.l=null;}l$3.unmount=function(n){var t=n.__c;t&&t.__R&&t.__R(),t&&32&n.__u&&(n.type=null),F&&F(n);},(W.prototype=new k$2).__c=function(n,t){var e=t.__c,r=this;null==r.o&&(r.o=[]),r.o.push(e);var u=P(r.__v),o=!1,i=function(){o||(o=!0,e.__R=null,u?u(c):c());};e.__R=i;var c=function(){if(!--r.__u){if(r.state.__a){var n=r.state.__a;r.__v.__k[0]=V(n,n.__c.__P,n.__c.__O);}var t;for(r.setState({__a:r.__b=null});t=r.o.pop();)t.forceUpdate();}};r.__u++||32&t.__u||r.setState({__a:r.__b=r.__v.__k[0]}),n.then(i,i);},W.prototype.componentWillUnmount=function(){this.o=[];},W.prototype.render=function(n,e){if(this.__b){if(this.__v.__k){var r=document.createElement("div"),o=this.__v.__k[0].__c;this.__v.__k[0]=U(this.__b,r,o.__O=o.__P);}this.__b=null;}var i=e.__a&&_$3(b$2,null,n.fallback);return i&&(i.__u&=-33),[_$3(b$2,null,e.__a?null:n.children),i]};var B=function(n,t,e){if(++e[1]===e[0]&&n.l.delete(t),n.props.revealOrder&&("t"!==n.props.revealOrder[0]||!n.l.size))for(e=n.i;e;){for(;e.length>3;)e.pop()();if(e[1]<e[0])break;n.i=e=e[2];}};function H(n){return this.getChildContext=function(){return n.context},n.children}function Z(n){var e=this,r=n.h;e.componentWillUnmount=function(){q$2(null,e.v),e.v=null,e.h=null;},e.h&&e.h!==r&&e.componentWillUnmount(),e.v||(e.h=r,e.v={nodeType:1,parentNode:r,childNodes:[],contains:function(){return !0},appendChild:function(n){this.childNodes.push(n),e.h.appendChild(n);},insertBefore:function(n,t){this.childNodes.push(n),e.h.appendChild(n);},removeChild:function(n){this.childNodes.splice(this.childNodes.indexOf(n)>>>1,1),e.h.removeChild(n);}}),q$2(_$3(H,{context:e.context},n.__v),e.v);}function Y(n,e){var r=_$3(Z,{__v:n,h:e});return r.containerInfo=e,r}(z.prototype=new k$2).__a=function(n){var t=this,e=P(t.__v),r=t.l.get(n);return r[0]++,function(u){var o=function(){t.props.revealOrder?(r.push(u),B(t,n,r)):u();};e?e(o):o();}},z.prototype.render=function(n){this.i=null,this.l=new Map;var t=H$1(n.children);n.revealOrder&&"b"===n.revealOrder[0]&&t.reverse();for(var e=t.length;e--;)this.l.set(t[e],this.i=[1,0,this.i]);return n.children},z.prototype.componentDidUpdate=z.prototype.componentDidMount=function(){var n=this;this.l.forEach(function(t,e){B(n,e,t);});};var $="undefined"!=typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103,q=/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,G=/^on(Ani|Tra|Tou|BeforeInp|Compo)/,J=/[A-Z0-9]/g,K="undefined"!=typeof document,Q=function(n){return ("undefined"!=typeof Symbol&&"symbol"==typeof Symbol()?/fil|che|rad/:/fil|che|ra/).test(n)};function X(n,t,e){return null==t.__k&&(t.textContent=""),q$2(n,t),"function"==typeof e&&e(),n?n.__c:null}function nn(n,t,e){return B$2(n,t),"function"==typeof e&&e(),n?n.__c:null}k$2.prototype.isReactComponent={},["componentWillMount","componentWillReceiveProps","componentWillUpdate"].forEach(function(t){Object.defineProperty(k$2.prototype,t,{configurable:!0,get:function(){return this["UNSAFE_"+t]},set:function(n){Object.defineProperty(this,t,{configurable:!0,writable:!0,value:n});}});});var tn=l$3.event;function en(){}function rn(){return this.cancelBubble}function un(){return this.defaultPrevented}l$3.event=function(n){return tn&&(n=tn(n)),n.persist=en,n.isPropagationStopped=rn,n.isDefaultPrevented=un,n.nativeEvent=n};var on,cn={enumerable:!1,configurable:!0,get:function(){return this.class}},fn=l$3.vnode;l$3.vnode=function(n){"string"==typeof n.type&&function(n){var t=n.props,e=n.type,u={},o=-1===e.indexOf("-");for(var i in t){var c=t[i];if(!("value"===i&&"defaultValue"in t&&null==c||K&&"children"===i&&"noscript"===e||"class"===i||"className"===i)){var f=i.toLowerCase();"defaultValue"===i&&"value"in t&&null==t.value?i="value":"download"===i&&!0===c?c="":"translate"===f&&"no"===c?c=!1:"o"===f[0]&&"n"===f[1]?"ondoubleclick"===f?i="ondblclick":"onchange"!==f||"input"!==e&&"textarea"!==e||Q(t.type)?"onfocus"===f?i="onfocusin":"onblur"===f?i="onfocusout":G.test(i)&&(i=f):f=i="oninput":o&&q.test(i)?i=i.replace(J,"-$&").toLowerCase():null===c&&(c=void 0),"oninput"===f&&u[i=f]&&(i="oninputCapture"),u[i]=c;}}"select"==e&&u.multiple&&Array.isArray(u.value)&&(u.value=H$1(t.children).forEach(function(n){n.props.selected=-1!=u.value.indexOf(n.props.value);})),"select"==e&&null!=u.defaultValue&&(u.value=H$1(t.children).forEach(function(n){n.props.selected=u.multiple?-1!=u.defaultValue.indexOf(n.props.value):u.defaultValue==n.props.value;})),t.class&&!t.className?(u.class=t.class,Object.defineProperty(u,"className",cn)):(t.className&&!t.class||t.class&&t.className)&&(u.class=u.className=t.className),n.props=u;}(n),n.$$typeof=$,fn&&fn(n);};var ln=l$3.__r;l$3.__r=function(n){ln&&ln(n),on=n.__c;};var an=l$3.diffed;l$3.diffed=function(n){an&&an(n);var t=n.props,e=n.__e;null!=e&&"textarea"===n.type&&"value"in t&&t.value!==e.value&&(e.value=null==t.value?"":t.value),on=null;};var sn={ReactCurrentDispatcher:{current:{readContext:function(n){return on.__n[n.__c].props.value},useCallback:q$1,useContext:x$1,useDebugValue:P$1,useDeferredValue:R,useEffect:y$1,useId:g$2,useImperativeHandle:F$1,useInsertionEffect:k,useLayoutEffect:_$2,useMemo:T$1,useReducer:p$2,useRef:A$1,useState:h$1,useSyncExternalStore:E$1,useTransition:w$1}}},hn="18.3.1";function vn(n){return _$3.bind(null,n)}function dn(n){return !!n&&n.$$typeof===$}function pn(n){return dn(n)&&n.type===b$2}function mn(n){return !!n&&!!n.displayName&&("string"==typeof n.displayName||n.displayName instanceof String)&&n.displayName.startsWith("Memo(")}function yn(n){return dn(n)?D$2.apply(null,arguments):n}function _n(n){return !!n.__k&&(q$2(null,n),!0)}function bn(n){return n&&(n.base||1===n.nodeType&&n)||null}var Sn=function(n,t){return n(t)},gn=function(n,t){return n(t)},En=b$2,Cn=dn,xn={useState:h$1,useId:g$2,useReducer:p$2,useEffect:y$1,useLayoutEffect:_$2,useInsertionEffect:k,useTransition:w$1,useDeferredValue:R,useSyncExternalStore:E$1,startTransition:x,useRef:A$1,useImperativeHandle:F$1,useMemo:T$1,useCallback:q$1,useContext:x$1,useDebugValue:P$1,version:"18.3.1",Children:L,render:X,hydrate:nn,unmountComponentAtNode:_n,createPortal:Y,createElement:_$3,createContext:G$1,createFactory:vn,cloneElement:yn,createRef:m$1,Fragment:b$2,isValidElement:dn,isElement:Cn,isFragment:pn,isMemo:mn,findDOMNode:bn,Component:k$2,PureComponent:I,memo:N,forwardRef:A,flushSync:gn,unstable_batchedUpdates:Sn,StrictMode:En,Suspense:W,SuspenseList:z,lazy:j,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:sn};
 
 var compat_module = /*#__PURE__*/Object.freeze({
 	__proto__: null,
-	'default': ReactDOM$3,
-	version: X,
-	Children: k,
-	render: z,
-	hydrate: B,
-	unmountComponentAtNode: rn,
-	createPortal: W,
-	createFactory: nn,
-	cloneElement: en,
-	isValidElement: tn,
-	findDOMNode: un,
-	PureComponent: E,
-	memo: g,
-	forwardRef: x,
-	flushSync: ln,
-	unstable_batchedUpdates: on,
-	StrictMode: fn,
-	Suspense: L,
-	SuspenseList: M,
-	lazy: F,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: Q,
-	createElement: v$1,
-	createContext: D$1,
-	createRef: p$1,
-	Fragment: d$1,
-	Component: _$1,
-	useState: l,
-	useReducer: p,
-	useEffect: y,
-	useLayoutEffect: h,
-	useRef: s,
-	useImperativeHandle: _,
-	useMemo: d,
-	useCallback: A$1,
-	useContext: F$1,
-	useDebugValue: T$1,
-	useErrorBoundary: q$1
+	Children: L,
+	PureComponent: I,
+	StrictMode: En,
+	Suspense: W,
+	SuspenseList: z,
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: sn,
+	cloneElement: yn,
+	createFactory: vn,
+	createPortal: Y,
+	'default': xn,
+	findDOMNode: bn,
+	flushSync: gn,
+	forwardRef: A,
+	hydrate: nn,
+	isElement: Cn,
+	isFragment: pn,
+	isMemo: mn,
+	isValidElement: dn,
+	lazy: j,
+	memo: N,
+	render: X,
+	startTransition: x,
+	unmountComponentAtNode: _n,
+	unstable_batchedUpdates: Sn,
+	useDeferredValue: R,
+	useInsertionEffect: k,
+	useSyncExternalStore: E$1,
+	useTransition: w$1,
+	version: hn,
+	Component: k$2,
+	Fragment: b$2,
+	createContext: G$1,
+	createElement: _$3,
+	createRef: m$1,
+	useCallback: q$1,
+	useContext: x$1,
+	useDebugValue: P$1,
+	useEffect: y$1,
+	useErrorBoundary: b$1,
+	useId: g$2,
+	useImperativeHandle: F$1,
+	useLayoutEffect: _$2,
+	useMemo: T$1,
+	useReducer: p$2,
+	useRef: A$1,
+	useState: h$1
 });
 
-var o=0;function e(_,e,n,t,f){var l,s,u={};for(s in e)"ref"==s?l=e[s]:u[s]=e[s];var a={type:_,props:u,key:n,ref:l,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:--o,__source:t,__self:f};if("function"==typeof _&&(l=_.defaultProps))for(s in l)void 0===u[s]&&(u[s]=l[s]);return l$1.vnode&&l$1.vnode(a),a}
+var f$2=0;function u$1(e,t,n,o,i,u){t||(t={});var a,c,l=t;"ref"in t&&(a=t.ref,delete t.ref);var p={type:e,props:l,key:n,ref:a,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,constructor:void 0,__v:--f$2,__i:-1,__u:0,__source:i,__self:u};if("function"==typeof e&&(a=e.defaultProps))for(c in a)void 0===l[c]&&(l[c]=a[c]);return l$3.vnode&&l$3.vnode(p),p}
 
 const _excluded$2 = ["as", "disabled"];
 function _objectWithoutPropertiesLoose$3(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (e.indexOf(n) >= 0) continue; t[n] = r[n]; } return t; }
@@ -1481,7 +1253,7 @@ function useButtonProps({
     onKeyDown: handleKeyDown
   }, meta];
 }
-const Button$1 = /*#__PURE__*/x((_ref, ref) => {
+const Button$1 = /*#__PURE__*/A((_ref, ref) => {
   let {
       as: asProp,
       disabled
@@ -1493,7 +1265,7 @@ const Button$1 = /*#__PURE__*/x((_ref, ref) => {
     tagName: asProp,
     disabled
   }, props));
-  return /*#__PURE__*/e(Component, Object.assign({}, props, buttonProps, {
+  return /*#__PURE__*/u$1(Component, Object.assign({}, props, buttonProps, {
     ref: ref
   }));
 });
@@ -1501,7 +1273,7 @@ Button$1.displayName = 'Button';
 
 const DEFAULT_BREAKPOINTS = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
 const DEFAULT_MIN_BREAKPOINT = 'xs';
-const ThemeContext = /*#__PURE__*/D$1({
+const ThemeContext = /*#__PURE__*/G$1({
   prefixes: {},
   breakpoints: DEFAULT_BREAKPOINTS,
   minBreakpoint: DEFAULT_MIN_BREAKPOINT
@@ -1509,23 +1281,23 @@ const ThemeContext = /*#__PURE__*/D$1({
 function useBootstrapPrefix(prefix, defaultPrefix) {
   const {
     prefixes
-  } = F$1(ThemeContext);
+  } = x$1(ThemeContext);
   return prefix || prefixes[defaultPrefix] || defaultPrefix;
 }
 function useBootstrapBreakpoints() {
   const {
     breakpoints
-  } = F$1(ThemeContext);
+  } = x$1(ThemeContext);
   return breakpoints;
 }
 function useBootstrapMinBreakpoint() {
   const {
     minBreakpoint
-  } = F$1(ThemeContext);
+  } = x$1(ThemeContext);
   return minBreakpoint;
 }
 
-const Button = /*#__PURE__*/x(({
+const Button = /*#__PURE__*/A(({
   as,
   bsPrefix,
   variant = 'primary',
@@ -1544,7 +1316,7 @@ const Button = /*#__PURE__*/x(({
     ...props
   });
   const Component = tagName;
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ...buttonProps,
     ...props,
     ref: ref,
@@ -1554,7 +1326,7 @@ const Button = /*#__PURE__*/x(({
 });
 Button.displayName = 'Button';
 
-const ButtonGroup = /*#__PURE__*/x(({
+const ButtonGroup = /*#__PURE__*/A(({
   bsPrefix,
   size,
   vertical = false,
@@ -1567,7 +1339,7 @@ const ButtonGroup = /*#__PURE__*/x(({
   const prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
   let baseClass = prefix;
   if (vertical) baseClass = `${prefix}-vertical`;
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ...rest,
     ref: ref,
     role: role,
@@ -1576,14 +1348,14 @@ const ButtonGroup = /*#__PURE__*/x(({
 });
 ButtonGroup.displayName = 'ButtonGroup';
 
-const CardBody = /*#__PURE__*/x(({
+const CardBody = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'div',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-body');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1592,14 +1364,14 @@ const CardBody = /*#__PURE__*/x(({
 CardBody.displayName = 'CardBody';
 var CardBody$1 = CardBody;
 
-const CardFooter = /*#__PURE__*/x(({
+const CardFooter = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'div',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-footer');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1608,11 +1380,11 @@ const CardFooter = /*#__PURE__*/x(({
 CardFooter.displayName = 'CardFooter';
 var CardFooter$1 = CardFooter;
 
-const context$3 = /*#__PURE__*/D$1(null);
+const context$3 = /*#__PURE__*/G$1(null);
 context$3.displayName = 'CardHeaderContext';
 var CardHeaderContext = context$3;
 
-const CardHeader = /*#__PURE__*/x(({
+const CardHeader = /*#__PURE__*/A(({
   bsPrefix,
   className,
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
@@ -1620,12 +1392,12 @@ const CardHeader = /*#__PURE__*/x(({
   ...props
 }, ref) => {
   const prefix = useBootstrapPrefix(bsPrefix, 'card-header');
-  const contextValue = d(() => ({
+  const contextValue = T$1(() => ({
     cardHeaderBsPrefix: prefix
   }), [prefix]);
-  return /*#__PURE__*/e(CardHeaderContext.Provider, {
+  return /*#__PURE__*/u$1(CardHeaderContext.Provider, {
     value: contextValue,
-    children: /*#__PURE__*/e(Component, {
+    children: /*#__PURE__*/u$1(Component, {
       ref: ref,
       ...props,
       className: classNames(className, prefix)
@@ -1635,7 +1407,7 @@ const CardHeader = /*#__PURE__*/x(({
 CardHeader.displayName = 'CardHeader';
 var CardHeader$1 = CardHeader;
 
-const CardImg = /*#__PURE__*/x(
+const CardImg = /*#__PURE__*/A(
 // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 ({
   bsPrefix,
@@ -1645,7 +1417,7 @@ const CardImg = /*#__PURE__*/x(
   ...props
 }, ref) => {
   const prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(variant ? `${prefix}-${variant}` : prefix, className),
     ...props
@@ -1654,14 +1426,14 @@ const CardImg = /*#__PURE__*/x(
 CardImg.displayName = 'CardImg';
 var CardImg$1 = CardImg;
 
-const CardImgOverlay = /*#__PURE__*/x(({
+const CardImgOverlay = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'div',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-img-overlay');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1670,14 +1442,14 @@ const CardImgOverlay = /*#__PURE__*/x(({
 CardImgOverlay.displayName = 'CardImgOverlay';
 var CardImgOverlay$1 = CardImgOverlay;
 
-const CardLink = /*#__PURE__*/x(({
+const CardLink = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'a',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-link');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1686,21 +1458,21 @@ const CardLink = /*#__PURE__*/x(({
 CardLink.displayName = 'CardLink';
 var CardLink$1 = CardLink;
 
-var divWithClassName = (className => /*#__PURE__*/x((p, ref) => /*#__PURE__*/e("div", {
+var divWithClassName = (className => /*#__PURE__*/A((p, ref) => /*#__PURE__*/u$1("div", {
   ...p,
   ref: ref,
   className: classNames(p.className, className)
 })));
 
 const DivStyledAsH6 = divWithClassName('h6');
-const CardSubtitle = /*#__PURE__*/x(({
+const CardSubtitle = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = DivStyledAsH6,
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-subtitle');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1709,14 +1481,14 @@ const CardSubtitle = /*#__PURE__*/x(({
 CardSubtitle.displayName = 'CardSubtitle';
 var CardSubtitle$1 = CardSubtitle;
 
-const CardText = /*#__PURE__*/x(({
+const CardText = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'p',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-text');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1726,14 +1498,14 @@ CardText.displayName = 'CardText';
 var CardText$1 = CardText;
 
 const DivStyledAsH5 = divWithClassName('h5');
-const CardTitle = /*#__PURE__*/x(({
+const CardTitle = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = DivStyledAsH5,
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'card-title');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -1742,7 +1514,7 @@ const CardTitle = /*#__PURE__*/x(({
 CardTitle.displayName = 'CardTitle';
 var CardTitle$1 = CardTitle;
 
-const Card = /*#__PURE__*/x(({
+const Card = /*#__PURE__*/A(({
   bsPrefix,
   className,
   bg,
@@ -1755,11 +1527,11 @@ const Card = /*#__PURE__*/x(({
   ...props
 }, ref) => {
   const prefix = useBootstrapPrefix(bsPrefix, 'card');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     ...props,
     className: classNames(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
-    children: body ? /*#__PURE__*/e(CardBody$1, {
+    children: body ? /*#__PURE__*/u$1(CardBody$1, {
       children: children
     }) : children
   });
@@ -1817,7 +1589,7 @@ function useCol({
     spans
   }];
 }
-const Col = /*#__PURE__*/x(
+const Col = /*#__PURE__*/A(
 // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 (props, ref) => {
   const [{
@@ -1828,7 +1600,7 @@ const Col = /*#__PURE__*/x(
     bsPrefix,
     spans
   }] = useCol(props);
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ...colProps,
     ref: ref,
     className: classNames(className, !spans.length && bsPrefix)
@@ -1836,7 +1608,7 @@ const Col = /*#__PURE__*/x(
 });
 Col.displayName = 'Col';
 
-class DynamicView extends ReactDOM$3.PureComponent {
+class DynamicView extends xn.PureComponent {
   static get propTypes() {
     return {
       onIndicatePoint: propTypes$2.exports.func,
@@ -1896,7 +1668,7 @@ class DynamicView extends ReactDOM$3.PureComponent {
     return false;
   }
   render() {
-    return v$1("div", {
+    return _$3("div", {
       classList: "note orbitView",
       ref: async container => {
         if (container) {
@@ -1907,7 +1679,7 @@ class DynamicView extends ReactDOM$3.PureComponent {
   }
 }
 
-class EditNote extends ReactDOM$3.Component {
+class EditNote extends xn.Component {
   static get propTypes() {
     return {
       source: propTypes$2.exports.string,
@@ -1939,7 +1711,7 @@ class EditNote extends ReactDOM$3.Component {
       source,
       onKeyDown
     } = this.props;
-    return v$1(Card$1, null, v$1("pre", {
+    return _$3(Card$1, null, _$3("pre", {
       style: {
         padding: '1em',
         outline: 'none'
@@ -5090,8 +4862,8 @@ function validate(uuid) {
 
 var byteToHex = [];
 
-for (var i$1 = 0; i$1 < 256; ++i$1) {
-  byteToHex.push((i$1 + 0x100).toString(16).substr(1));
+for (var i$2 = 0; i$2 < 256; ++i$2) {
+  byteToHex.push((i$2 + 0x100).toString(16).substr(1));
 }
 
 function stringify(arr) {
@@ -5536,7 +5308,7 @@ function v4(options, buf, offset) {
 
 // Adapted from Chris Veness' SHA1 code at
 // http://www.movable-type.co.uk/scripts/sha1.html
-function f(s, x, y, z) {
+function f$1(s, x, y, z) {
   switch (s) {
     case 0:
       return x & y ^ ~x & z;
@@ -5611,7 +5383,7 @@ function sha1(bytes) {
 
     for (var _t2 = 0; _t2 < 80; ++_t2) {
       var s = Math.floor(_t2 / 20);
-      var T = ROTL(a, 5) + f(s, b, c, d) + e + K[s] + W[_t2] >>> 0;
+      var T = ROTL(a, 5) + f$1(s, b, c, d) + e + K[s] + W[_t2] >>> 0;
       e = d;
       d = c;
       c = ROTL(b, 30) >>> 0;
@@ -8341,7 +8113,7 @@ const propTypes$1 = {
   tooltip: PropTypes$3.bool,
   as: PropTypes$3.elementType
 };
-const Feedback = /*#__PURE__*/x(
+const Feedback = /*#__PURE__*/A(
 // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 ({
   as: Component = 'div',
@@ -8349,7 +8121,7 @@ const Feedback = /*#__PURE__*/x(
   type = 'valid',
   tooltip = false,
   ...props
-}, ref) => /*#__PURE__*/e(Component, {
+}, ref) => /*#__PURE__*/u$1(Component, {
   ...props,
   ref: ref,
   className: classNames(className, `${type}-${tooltip ? 'tooltip' : 'feedback'}`)
@@ -8360,10 +8132,10 @@ var Feedback$1 = Feedback;
 
 // TODO
 
-const FormContext = /*#__PURE__*/D$1({});
+const FormContext = /*#__PURE__*/G$1({});
 var FormContext$1 = FormContext;
 
-const FormCheckInput = /*#__PURE__*/x(({
+const FormCheckInput = /*#__PURE__*/A(({
   id,
   bsPrefix,
   className,
@@ -8376,9 +8148,9 @@ const FormCheckInput = /*#__PURE__*/x(({
 }, ref) => {
   const {
     controlId
-  } = F$1(FormContext$1);
+  } = x$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-input');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ...props,
     ref: ref,
     type: type,
@@ -8389,7 +8161,7 @@ const FormCheckInput = /*#__PURE__*/x(({
 FormCheckInput.displayName = 'FormCheckInput';
 var FormCheckInput$1 = FormCheckInput;
 
-const FormCheckLabel = /*#__PURE__*/x(({
+const FormCheckLabel = /*#__PURE__*/A(({
   bsPrefix,
   className,
   htmlFor,
@@ -8397,9 +8169,9 @@ const FormCheckLabel = /*#__PURE__*/x(({
 }, ref) => {
   const {
     controlId
-  } = F$1(FormContext$1);
+  } = x$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-check-label');
-  return /*#__PURE__*/e("label", {
+  return /*#__PURE__*/u$1("label", {
     ...props,
     ref: ref,
     htmlFor: htmlFor || controlId,
@@ -8414,10 +8186,10 @@ var FormCheckLabel$1 = FormCheckLabel;
  * specified type.
  */
 function hasChildOfType(children, type) {
-  return k.toArray(children).some(child => /*#__PURE__*/tn(child) && child.type === type);
+  return L.toArray(children).some(child => /*#__PURE__*/dn(child) && child.type === type);
 }
 
-const FormCheck = /*#__PURE__*/x(({
+const FormCheck = /*#__PURE__*/A(({
   id,
   bsPrefix,
   bsSwitchPrefix,
@@ -8443,12 +8215,12 @@ const FormCheck = /*#__PURE__*/x(({
   bsSwitchPrefix = useBootstrapPrefix(bsSwitchPrefix, 'form-switch');
   const {
     controlId
-  } = F$1(FormContext$1);
-  const innerFormContext = d(() => ({
+  } = x$1(FormContext$1);
+  const innerFormContext = T$1(() => ({
     controlId: id || controlId
   }), [controlId, id]);
   const hasLabel = !children && label != null && label !== false || hasChildOfType(children, FormCheckLabel$1);
-  const input = /*#__PURE__*/e(FormCheckInput$1, {
+  const input = /*#__PURE__*/u$1(FormCheckInput$1, {
     ...props,
     type: type === 'switch' ? 'checkbox' : type,
     ref: ref,
@@ -8457,16 +8229,16 @@ const FormCheck = /*#__PURE__*/x(({
     disabled: disabled,
     as: as
   });
-  return /*#__PURE__*/e(FormContext$1.Provider, {
+  return /*#__PURE__*/u$1(FormContext$1.Provider, {
     value: innerFormContext,
-    children: /*#__PURE__*/e("div", {
+    children: /*#__PURE__*/u$1("div", {
       style: style,
       className: classNames(className, hasLabel && bsPrefix, inline && `${bsPrefix}-inline`, reverse && `${bsPrefix}-reverse`, type === 'switch' && bsSwitchPrefix),
-      children: children || /*#__PURE__*/e(d$1, {
-        children: [input, hasLabel && /*#__PURE__*/e(FormCheckLabel$1, {
+      children: children || /*#__PURE__*/u$1(b$2, {
+        children: [input, hasLabel && /*#__PURE__*/u$1(FormCheckLabel$1, {
           title: title,
           children: label
-        }), feedback && /*#__PURE__*/e(Feedback$1, {
+        }), feedback && /*#__PURE__*/u$1(Feedback$1, {
           type: feedbackType,
           tooltip: feedbackTooltip,
           children: feedback
@@ -8533,7 +8305,7 @@ var warning = function() {};
 
 var warning_1 = warning;
 
-const FormControl = /*#__PURE__*/x(({
+const FormControl = /*#__PURE__*/A(({
   bsPrefix,
   type,
   size,
@@ -8550,10 +8322,10 @@ const FormControl = /*#__PURE__*/x(({
 }, ref) => {
   const {
     controlId
-  } = F$1(FormContext$1);
+  } = x$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
   warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ...props,
     type: type,
     size: htmlSize,
@@ -8568,14 +8340,14 @@ var FormControl$1 = Object.assign(FormControl, {
   Feedback: Feedback$1
 });
 
-const FormFloating = /*#__PURE__*/x(({
+const FormFloating = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'div',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -8584,18 +8356,18 @@ const FormFloating = /*#__PURE__*/x(({
 FormFloating.displayName = 'FormFloating';
 var FormFloating$1 = FormFloating;
 
-const FormGroup = /*#__PURE__*/x(({
+const FormGroup = /*#__PURE__*/A(({
   controlId,
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'div',
   ...props
 }, ref) => {
-  const context = d(() => ({
+  const context = T$1(() => ({
     controlId
   }), [controlId]);
-  return /*#__PURE__*/e(FormContext$1.Provider, {
+  return /*#__PURE__*/u$1(FormContext$1.Provider, {
     value: context,
-    children: /*#__PURE__*/e(Component, {
+    children: /*#__PURE__*/u$1(Component, {
       ...props,
       ref: ref
     })
@@ -8604,7 +8376,7 @@ const FormGroup = /*#__PURE__*/x(({
 FormGroup.displayName = 'FormGroup';
 var FormGroup$1 = FormGroup;
 
-const FormLabel = /*#__PURE__*/x(({
+const FormLabel = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'label',
   bsPrefix,
@@ -8616,14 +8388,14 @@ const FormLabel = /*#__PURE__*/x(({
 }, ref) => {
   const {
     controlId
-  } = F$1(FormContext$1);
+  } = x$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
   let columnClass = 'col-form-label';
   if (typeof column === 'string') columnClass = `${columnClass} ${columnClass}-${column}`;
   const classes = classNames(className, bsPrefix, visuallyHidden && 'visually-hidden', column && columnClass);
   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
   htmlFor = htmlFor || controlId;
-  if (column) return /*#__PURE__*/e(Col, {
+  if (column) return /*#__PURE__*/u$1(Col, {
     ref: ref,
     as: "label",
     className: classes,
@@ -8633,7 +8405,7 @@ const FormLabel = /*#__PURE__*/x(({
   return (
     /*#__PURE__*/
     // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    e(Component, {
+    u$1(Component, {
       ref: ref,
       className: classes,
       htmlFor: htmlFor,
@@ -8644,7 +8416,7 @@ const FormLabel = /*#__PURE__*/x(({
 FormLabel.displayName = 'FormLabel';
 var FormLabel$1 = FormLabel;
 
-const FormRange = /*#__PURE__*/x(({
+const FormRange = /*#__PURE__*/A(({
   bsPrefix,
   className,
   id,
@@ -8652,9 +8424,9 @@ const FormRange = /*#__PURE__*/x(({
 }, ref) => {
   const {
     controlId
-  } = F$1(FormContext$1);
+  } = x$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-range');
-  return /*#__PURE__*/e("input", {
+  return /*#__PURE__*/u$1("input", {
     ...props,
     type: "range",
     ref: ref,
@@ -8665,7 +8437,7 @@ const FormRange = /*#__PURE__*/x(({
 FormRange.displayName = 'FormRange';
 var FormRange$1 = FormRange;
 
-const FormSelect = /*#__PURE__*/x(({
+const FormSelect = /*#__PURE__*/A(({
   bsPrefix,
   size,
   htmlSize,
@@ -8677,9 +8449,9 @@ const FormSelect = /*#__PURE__*/x(({
 }, ref) => {
   const {
     controlId
-  } = F$1(FormContext$1);
+  } = x$1(FormContext$1);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-select');
-  return /*#__PURE__*/e("select", {
+  return /*#__PURE__*/u$1("select", {
     ...props,
     size: htmlSize,
     ref: ref,
@@ -8690,7 +8462,7 @@ const FormSelect = /*#__PURE__*/x(({
 FormSelect.displayName = 'FormSelect';
 var FormSelect$1 = FormSelect;
 
-const FormText = /*#__PURE__*/x(
+const FormText = /*#__PURE__*/A(
 // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 ({
   bsPrefix,
@@ -8700,7 +8472,7 @@ const FormText = /*#__PURE__*/x(
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ...props,
     ref: ref,
     className: classNames(className, bsPrefix, muted && 'text-muted')
@@ -8709,7 +8481,7 @@ const FormText = /*#__PURE__*/x(
 FormText.displayName = 'FormText';
 var FormText$1 = FormText;
 
-const Switch = /*#__PURE__*/x((props, ref) => /*#__PURE__*/e(FormCheck$1, {
+const Switch = /*#__PURE__*/A((props, ref) => /*#__PURE__*/u$1(FormCheck$1, {
   ...props,
   ref: ref,
   type: "switch"
@@ -8720,7 +8492,7 @@ var Switch$1 = Object.assign(Switch, {
   Label: FormCheck$1.Label
 });
 
-const FloatingLabel = /*#__PURE__*/x(({
+const FloatingLabel = /*#__PURE__*/A(({
   bsPrefix,
   className,
   children,
@@ -8729,12 +8501,12 @@ const FloatingLabel = /*#__PURE__*/x(({
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-floating');
-  return /*#__PURE__*/e(FormGroup$1, {
+  return /*#__PURE__*/u$1(FormGroup$1, {
     ref: ref,
     className: classNames(className, bsPrefix),
     controlId: controlId,
     ...props,
-    children: [children, /*#__PURE__*/e("label", {
+    children: [children, /*#__PURE__*/u$1("label", {
       htmlFor: controlId,
       children: label
     })]
@@ -8760,13 +8532,13 @@ const propTypes = {
   validated: PropTypes$3.bool,
   as: PropTypes$3.elementType
 };
-const Form = /*#__PURE__*/x(({
+const Form = /*#__PURE__*/A(({
   className,
   validated,
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'form',
   ...props
-}, ref) => /*#__PURE__*/e(Component, {
+}, ref) => /*#__PURE__*/u$1(Component, {
   ...props,
   ref: ref,
   className: classNames(className, validated && 'was-validated')
@@ -8786,18 +8558,18 @@ var Form$1 = Object.assign(Form, {
   FloatingLabel: FloatingLabel$1
 });
 
-const context$2 = /*#__PURE__*/D$1(null);
+const context$2 = /*#__PURE__*/G$1(null);
 context$2.displayName = 'InputGroupContext';
 var InputGroupContext = context$2;
 
-const InputGroupText = /*#__PURE__*/x(({
+const InputGroupText = /*#__PURE__*/A(({
   className,
   bsPrefix,
   as: Component = 'span',
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group-text');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     className: classNames(className, bsPrefix),
     ...props
@@ -8806,19 +8578,19 @@ const InputGroupText = /*#__PURE__*/x(({
 InputGroupText.displayName = 'InputGroupText';
 var InputGroupText$1 = InputGroupText;
 
-const InputGroupCheckbox = props => /*#__PURE__*/e(InputGroupText$1, {
-  children: /*#__PURE__*/e(FormCheckInput$1, {
+const InputGroupCheckbox = props => /*#__PURE__*/u$1(InputGroupText$1, {
+  children: /*#__PURE__*/u$1(FormCheckInput$1, {
     type: "checkbox",
     ...props
   })
 });
-const InputGroupRadio = props => /*#__PURE__*/e(InputGroupText$1, {
-  children: /*#__PURE__*/e(FormCheckInput$1, {
+const InputGroupRadio = props => /*#__PURE__*/u$1(InputGroupText$1, {
+  children: /*#__PURE__*/u$1(FormCheckInput$1, {
     type: "radio",
     ...props
   })
 });
-const InputGroup = /*#__PURE__*/x(({
+const InputGroup = /*#__PURE__*/A(({
   bsPrefix,
   size,
   hasValidation,
@@ -8831,10 +8603,10 @@ const InputGroup = /*#__PURE__*/x(({
 
   // Intentionally an empty object. Used in detecting if a dropdown
   // exists under an input group.
-  const contextValue = d(() => ({}), []);
-  return /*#__PURE__*/e(InputGroupContext.Provider, {
+  const contextValue = T$1(() => ({}), []);
+  return /*#__PURE__*/u$1(InputGroupContext.Provider, {
     value: contextValue,
-    children: /*#__PURE__*/e(Component, {
+    children: /*#__PURE__*/u$1(Component, {
       ref: ref,
       ...props,
       className: classNames(className, bsPrefix, size && `${bsPrefix}-${size}`, hasValidation && 'has-validation')
@@ -10167,7 +9939,7 @@ var reportErrorIfPathIsNotConfigured = function () {
         reportErrorIfPathIsNotConfigured = function () { };
     }
 };
-exports.version = "1.36.4";
+exports.version = "1.36.5";
 
 });
 
@@ -16013,6 +15785,343 @@ exports.Mode = Mode;
 
 });
 
+ace.define("ace/line_widgets",["require","exports","module","ace/lib/dom"], function(require, exports, module){var dom = require("./lib/dom");
+var LineWidgets = /** @class */ (function () {
+    function LineWidgets(session) {
+        this.session = session;
+        this.session.widgetManager = this;
+        this.session.getRowLength = this.getRowLength;
+        this.session.$getWidgetScreenLength = this.$getWidgetScreenLength;
+        this.updateOnChange = this.updateOnChange.bind(this);
+        this.renderWidgets = this.renderWidgets.bind(this);
+        this.measureWidgets = this.measureWidgets.bind(this);
+        this.session._changedWidgets = [];
+        this.$onChangeEditor = this.$onChangeEditor.bind(this);
+        this.session.on("change", this.updateOnChange);
+        this.session.on("changeFold", this.updateOnFold);
+        this.session.on("changeEditor", this.$onChangeEditor);
+    }
+    LineWidgets.prototype.getRowLength = function (row) {
+        var h;
+        if (this.lineWidgets)
+            h = this.lineWidgets[row] && this.lineWidgets[row].rowCount || 0;
+        else
+            h = 0;
+        if (!this["$useWrapMode"] || !this["$wrapData"][row]) {
+            return 1 + h;
+        }
+        else {
+            return this["$wrapData"][row].length + 1 + h;
+        }
+    };
+    LineWidgets.prototype.$getWidgetScreenLength = function () {
+        var screenRows = 0;
+        this.lineWidgets.forEach(function (w) {
+            if (w && w.rowCount && !w.hidden)
+                screenRows += w.rowCount;
+        });
+        return screenRows;
+    };
+    LineWidgets.prototype.$onChangeEditor = function (e) {
+        this.attach(e.editor);
+    };
+    LineWidgets.prototype.attach = function (editor) {
+        if (editor && editor.widgetManager && editor.widgetManager != this)
+            editor.widgetManager.detach();
+        if (this.editor == editor)
+            return;
+        this.detach();
+        this.editor = editor;
+        if (editor) {
+            editor.widgetManager = this;
+            editor.renderer.on("beforeRender", this.measureWidgets);
+            editor.renderer.on("afterRender", this.renderWidgets);
+        }
+    };
+    LineWidgets.prototype.detach = function (e) {
+        var editor = this.editor;
+        if (!editor)
+            return;
+        this.editor = null;
+        editor.widgetManager = null;
+        editor.renderer.off("beforeRender", this.measureWidgets);
+        editor.renderer.off("afterRender", this.renderWidgets);
+        var lineWidgets = this.session.lineWidgets;
+        lineWidgets && lineWidgets.forEach(function (w) {
+            if (w && w.el && w.el.parentNode) {
+                w._inDocument = false;
+                w.el.parentNode.removeChild(w.el);
+            }
+        });
+    };
+    LineWidgets.prototype.updateOnFold = function (e, session) {
+        var lineWidgets = session.lineWidgets;
+        if (!lineWidgets || !e.action)
+            return;
+        var fold = e.data;
+        var start = fold.start.row;
+        var end = fold.end.row;
+        var hide = e.action == "add";
+        for (var i = start + 1; i < end; i++) {
+            if (lineWidgets[i])
+                lineWidgets[i].hidden = hide;
+        }
+        if (lineWidgets[end]) {
+            if (hide) {
+                if (!lineWidgets[start])
+                    lineWidgets[start] = lineWidgets[end];
+                else
+                    lineWidgets[end].hidden = hide;
+            }
+            else {
+                if (lineWidgets[start] == lineWidgets[end])
+                    lineWidgets[start] = undefined;
+                lineWidgets[end].hidden = hide;
+            }
+        }
+    };
+    LineWidgets.prototype.updateOnChange = function (delta) {
+        var lineWidgets = this.session.lineWidgets;
+        if (!lineWidgets)
+            return;
+        var startRow = delta.start.row;
+        var len = delta.end.row - startRow;
+        if (len === 0) ;
+        else if (delta.action == "remove") {
+            var removed = lineWidgets.splice(startRow + 1, len);
+            if (!lineWidgets[startRow] && removed[removed.length - 1]) {
+                lineWidgets[startRow] = removed.pop();
+            }
+            removed.forEach(function (w) {
+                w && this.removeLineWidget(w);
+            }, this);
+            this.$updateRows();
+        }
+        else {
+            var args = new Array(len);
+            if (lineWidgets[startRow] && lineWidgets[startRow].column != null) {
+                if (delta.start.column > lineWidgets[startRow].column)
+                    startRow++;
+            }
+            args.unshift(startRow, 0);
+            lineWidgets.splice.apply(lineWidgets, args);
+            this.$updateRows();
+        }
+    };
+    LineWidgets.prototype.$updateRows = function () {
+        var lineWidgets = this.session.lineWidgets;
+        if (!lineWidgets)
+            return;
+        var noWidgets = true;
+        lineWidgets.forEach(function (w, i) {
+            if (w) {
+                noWidgets = false;
+                w.row = i;
+                while (w.$oldWidget) {
+                    w.$oldWidget.row = i;
+                    w = w.$oldWidget;
+                }
+            }
+        });
+        if (noWidgets)
+            this.session.lineWidgets = null;
+    };
+    LineWidgets.prototype.$registerLineWidget = function (w) {
+        if (!this.session.lineWidgets)
+            this.session.lineWidgets = new Array(this.session.getLength());
+        var old = this.session.lineWidgets[w.row];
+        if (old) {
+            w.$oldWidget = old;
+            if (old.el && old.el.parentNode) {
+                old.el.parentNode.removeChild(old.el);
+                old._inDocument = false;
+            }
+        }
+        this.session.lineWidgets[w.row] = w;
+        return w;
+    };
+    LineWidgets.prototype.addLineWidget = function (w) {
+        this.$registerLineWidget(w);
+        w.session = this.session;
+        if (!this.editor)
+            return w;
+        var renderer = this.editor.renderer;
+        if (w.html && !w.el) {
+            w.el = dom.createElement("div");
+            w.el.innerHTML = w.html;
+        }
+        if (w.text && !w.el) {
+            w.el = dom.createElement("div");
+            w.el.textContent = w.text;
+        }
+        if (w.el) {
+            dom.addCssClass(w.el, "ace_lineWidgetContainer");
+            if (w.className) {
+                dom.addCssClass(w.el, w.className);
+            }
+            w.el.style.position = "absolute";
+            w.el.style.zIndex = "5";
+            renderer.container.appendChild(w.el);
+            w._inDocument = true;
+            if (!w.coverGutter) {
+                w.el.style.zIndex = "3";
+            }
+            if (w.pixelHeight == null) {
+                w.pixelHeight = w.el.offsetHeight;
+            }
+        }
+        if (w.rowCount == null) {
+            w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight);
+        }
+        var fold = this.session.getFoldAt(w.row, 0);
+        w.$fold = fold;
+        if (fold) {
+            var lineWidgets = this.session.lineWidgets;
+            if (w.row == fold.end.row && !lineWidgets[fold.start.row])
+                lineWidgets[fold.start.row] = w;
+            else
+                w.hidden = true;
+        }
+        this.session._emit("changeFold", { data: { start: { row: w.row } } });
+        this.$updateRows();
+        this.renderWidgets(null, renderer);
+        this.onWidgetChanged(w);
+        return w;
+    };
+    LineWidgets.prototype.removeLineWidget = function (w) {
+        w._inDocument = false;
+        w.session = null;
+        if (w.el && w.el.parentNode)
+            w.el.parentNode.removeChild(w.el);
+        if (w.editor && w.editor.destroy)
+            try {
+                w.editor.destroy();
+            }
+            catch (e) { }
+        if (this.session.lineWidgets) {
+            var w1 = this.session.lineWidgets[w.row];
+            if (w1 == w) {
+                this.session.lineWidgets[w.row] = w.$oldWidget;
+                if (w.$oldWidget)
+                    this.onWidgetChanged(w.$oldWidget);
+            }
+            else {
+                while (w1) {
+                    if (w1.$oldWidget == w) {
+                        w1.$oldWidget = w.$oldWidget;
+                        break;
+                    }
+                    w1 = w1.$oldWidget;
+                }
+            }
+        }
+        this.session._emit("changeFold", { data: { start: { row: w.row } } });
+        this.$updateRows();
+    };
+    LineWidgets.prototype.getWidgetsAtRow = function (row) {
+        var lineWidgets = this.session.lineWidgets;
+        var w = lineWidgets && lineWidgets[row];
+        var list = [];
+        while (w) {
+            list.push(w);
+            w = w.$oldWidget;
+        }
+        return list;
+    };
+    LineWidgets.prototype.onWidgetChanged = function (w) {
+        this.session._changedWidgets.push(w);
+        this.editor && this.editor.renderer.updateFull();
+    };
+    LineWidgets.prototype.measureWidgets = function (e, renderer) {
+        var changedWidgets = this.session._changedWidgets;
+        var config = renderer.layerConfig;
+        if (!changedWidgets || !changedWidgets.length)
+            return;
+        var min = Infinity;
+        for (var i = 0; i < changedWidgets.length; i++) {
+            var w = changedWidgets[i];
+            if (!w || !w.el)
+                continue;
+            if (w.session != this.session)
+                continue;
+            if (!w._inDocument) {
+                if (this.session.lineWidgets[w.row] != w)
+                    continue;
+                w._inDocument = true;
+                renderer.container.appendChild(w.el);
+            }
+            w.h = w.el.offsetHeight;
+            if (!w.fixedWidth) {
+                w.w = w.el.offsetWidth;
+                w.screenWidth = Math.ceil(w.w / config.characterWidth);
+            }
+            var rowCount = Math.ceil(w.h / config.lineHeight);
+            if (w.coverLine) {
+                rowCount -= this.session.getRowLineCount(w.row);
+                if (rowCount < 0)
+                    rowCount = 0;
+            }
+            if (w.rowCount != rowCount) {
+                w.rowCount = rowCount;
+                if (w.row < min)
+                    min = w.row;
+            }
+        }
+        if (min != Infinity) {
+            this.session._emit("changeFold", { data: { start: { row: min } } });
+            this.session.lineWidgetWidth = null;
+        }
+        this.session._changedWidgets = [];
+    };
+    LineWidgets.prototype.renderWidgets = function (e, renderer) {
+        var config = renderer.layerConfig;
+        var lineWidgets = this.session.lineWidgets;
+        if (!lineWidgets)
+            return;
+        var first = Math.min(this.firstRow, config.firstRow, 0);
+        var last = Math.max(this.lastRow, config.lastRow, lineWidgets.length);
+        while (first > 0 && !lineWidgets[first])
+            first--;
+        this.firstRow = config.firstRow;
+        this.lastRow = config.lastRow;
+        renderer.$cursorLayer.config = config;
+        for (var i = first; i <= last; i++) {
+            var w = lineWidgets[i];
+            if (!w || !w.el)
+                continue;
+            if (w.hidden) {
+                w.el.style.top = -100 - (w.pixelHeight || 0) + "px";
+                continue;
+            }
+            if (!w._inDocument) {
+                w._inDocument = true;
+                renderer.container.appendChild(w.el);
+            }
+            var top = renderer.$cursorLayer.getPixelPosition({ row: i, column: 0 }, true).top;
+            if (!w.coverLine)
+                top += config.lineHeight * this.session.getRowLineCount(w.row);
+            w.el.style.top = top - config.offset + "px";
+            var left = w.coverGutter ? 0 : renderer.gutterWidth;
+            if (!w.fixedWidth)
+                left -= renderer.scrollLeft;
+            w.el.style.left = left + "px";
+            if (w.fullWidth && w.screenWidth) {
+                w.el.style.minWidth = config.width + 2 * config.padding + "px";
+            }
+            if (w.fixedWidth) {
+                w.el.style.right = renderer.scrollBar.getWidth() + "px";
+            }
+            else {
+                w.el.style.right = "";
+            }
+        }
+    };
+    return LineWidgets;
+}());
+exports.LineWidgets = LineWidgets;
+
+});
+
 ace.define("ace/apply_delta",["require","exports","module"], function(require, exports, module){exports.applyDelta = function (docLines, delta, doNotValidate) {
     var row = delta.start.row;
     var startColumn = delta.start.column;
@@ -18704,7 +18813,7 @@ exports.BracketMatch = BracketMatch;
 
 });
 
-ace.define("ace/edit_session",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/bidihandler","ace/config","ace/lib/event_emitter","ace/selection","ace/mode/text","ace/range","ace/document","ace/background_tokenizer","ace/search_highlight","ace/undomanager","ace/edit_session/folding","ace/edit_session/bracket_match"], function(require, exports, module){var oop = require("./lib/oop");
+ace.define("ace/edit_session",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/bidihandler","ace/config","ace/lib/event_emitter","ace/selection","ace/mode/text","ace/range","ace/line_widgets","ace/document","ace/background_tokenizer","ace/search_highlight","ace/undomanager","ace/edit_session/folding","ace/edit_session/bracket_match"], function(require, exports, module){var oop = require("./lib/oop");
 var lang = require("./lib/lang");
 var BidiHandler = require("./bidihandler").BidiHandler;
 var config = require("./config");
@@ -18712,6 +18821,7 @@ var EventEmitter = require("./lib/event_emitter").EventEmitter;
 var Selection = require("./selection").Selection;
 var TextMode = require("./mode/text").Mode;
 var Range = require("./range").Range;
+var LineWidgets = require("./line_widgets").LineWidgets;
 var Document = require("./document").Document;
 var BackgroundTokenizer = require("./background_tokenizer").BackgroundTokenizer;
 var SearchHighlight = require("./search_highlight").SearchHighlight;
@@ -18724,6 +18834,7 @@ var EditSession = /** @class */ (function () {
         this.$backMarkers = {};
         this.$markerId = 1;
         this.$undoSelect = true;
+        this.$editor = null;
         this.prevOp = {};
         this.$foldData = [];
         this.id = "session" + (++EditSession.$uid);
@@ -18819,6 +18930,25 @@ var EditSession = /** @class */ (function () {
     EditSession.prototype.getDocument = function () {
         return this.doc;
     };
+    Object.defineProperty(EditSession.prototype, "widgetManager", {
+        get: function () {
+            var widgetManager = new LineWidgets(this);
+            this.widgetManager = widgetManager;
+            if (this.$editor)
+                widgetManager.attach(this.$editor);
+            return widgetManager;
+        },
+        set: function (value) {
+            Object.defineProperty(this, "widgetManager", {
+                writable: true,
+                enumerable: true,
+                configurable: true,
+                value: value,
+            });
+        },
+        enumerable: false,
+        configurable: true
+    });
     EditSession.prototype.$resetRowCache = function (docRow) {
         if (!docRow) {
             this.$docRowCache = [];
@@ -21913,343 +22043,6 @@ for (var i = 1; i < 9; i++) {
 
 });
 
-ace.define("ace/line_widgets",["require","exports","module","ace/lib/dom"], function(require, exports, module){var dom = require("./lib/dom");
-var LineWidgets = /** @class */ (function () {
-    function LineWidgets(session) {
-        this.session = session;
-        this.session.widgetManager = this;
-        this.session.getRowLength = this.getRowLength;
-        this.session.$getWidgetScreenLength = this.$getWidgetScreenLength;
-        this.updateOnChange = this.updateOnChange.bind(this);
-        this.renderWidgets = this.renderWidgets.bind(this);
-        this.measureWidgets = this.measureWidgets.bind(this);
-        this.session._changedWidgets = [];
-        this.$onChangeEditor = this.$onChangeEditor.bind(this);
-        this.session.on("change", this.updateOnChange);
-        this.session.on("changeFold", this.updateOnFold);
-        this.session.on("changeEditor", this.$onChangeEditor);
-    }
-    LineWidgets.prototype.getRowLength = function (row) {
-        var h;
-        if (this.lineWidgets)
-            h = this.lineWidgets[row] && this.lineWidgets[row].rowCount || 0;
-        else
-            h = 0;
-        if (!this["$useWrapMode"] || !this["$wrapData"][row]) {
-            return 1 + h;
-        }
-        else {
-            return this["$wrapData"][row].length + 1 + h;
-        }
-    };
-    LineWidgets.prototype.$getWidgetScreenLength = function () {
-        var screenRows = 0;
-        this.lineWidgets.forEach(function (w) {
-            if (w && w.rowCount && !w.hidden)
-                screenRows += w.rowCount;
-        });
-        return screenRows;
-    };
-    LineWidgets.prototype.$onChangeEditor = function (e) {
-        this.attach(e.editor);
-    };
-    LineWidgets.prototype.attach = function (editor) {
-        if (editor && editor.widgetManager && editor.widgetManager != this)
-            editor.widgetManager.detach();
-        if (this.editor == editor)
-            return;
-        this.detach();
-        this.editor = editor;
-        if (editor) {
-            editor.widgetManager = this;
-            editor.renderer.on("beforeRender", this.measureWidgets);
-            editor.renderer.on("afterRender", this.renderWidgets);
-        }
-    };
-    LineWidgets.prototype.detach = function (e) {
-        var editor = this.editor;
-        if (!editor)
-            return;
-        this.editor = null;
-        editor.widgetManager = null;
-        editor.renderer.off("beforeRender", this.measureWidgets);
-        editor.renderer.off("afterRender", this.renderWidgets);
-        var lineWidgets = this.session.lineWidgets;
-        lineWidgets && lineWidgets.forEach(function (w) {
-            if (w && w.el && w.el.parentNode) {
-                w._inDocument = false;
-                w.el.parentNode.removeChild(w.el);
-            }
-        });
-    };
-    LineWidgets.prototype.updateOnFold = function (e, session) {
-        var lineWidgets = session.lineWidgets;
-        if (!lineWidgets || !e.action)
-            return;
-        var fold = e.data;
-        var start = fold.start.row;
-        var end = fold.end.row;
-        var hide = e.action == "add";
-        for (var i = start + 1; i < end; i++) {
-            if (lineWidgets[i])
-                lineWidgets[i].hidden = hide;
-        }
-        if (lineWidgets[end]) {
-            if (hide) {
-                if (!lineWidgets[start])
-                    lineWidgets[start] = lineWidgets[end];
-                else
-                    lineWidgets[end].hidden = hide;
-            }
-            else {
-                if (lineWidgets[start] == lineWidgets[end])
-                    lineWidgets[start] = undefined;
-                lineWidgets[end].hidden = hide;
-            }
-        }
-    };
-    LineWidgets.prototype.updateOnChange = function (delta) {
-        var lineWidgets = this.session.lineWidgets;
-        if (!lineWidgets)
-            return;
-        var startRow = delta.start.row;
-        var len = delta.end.row - startRow;
-        if (len === 0) ;
-        else if (delta.action == "remove") {
-            var removed = lineWidgets.splice(startRow + 1, len);
-            if (!lineWidgets[startRow] && removed[removed.length - 1]) {
-                lineWidgets[startRow] = removed.pop();
-            }
-            removed.forEach(function (w) {
-                w && this.removeLineWidget(w);
-            }, this);
-            this.$updateRows();
-        }
-        else {
-            var args = new Array(len);
-            if (lineWidgets[startRow] && lineWidgets[startRow].column != null) {
-                if (delta.start.column > lineWidgets[startRow].column)
-                    startRow++;
-            }
-            args.unshift(startRow, 0);
-            lineWidgets.splice.apply(lineWidgets, args);
-            this.$updateRows();
-        }
-    };
-    LineWidgets.prototype.$updateRows = function () {
-        var lineWidgets = this.session.lineWidgets;
-        if (!lineWidgets)
-            return;
-        var noWidgets = true;
-        lineWidgets.forEach(function (w, i) {
-            if (w) {
-                noWidgets = false;
-                w.row = i;
-                while (w.$oldWidget) {
-                    w.$oldWidget.row = i;
-                    w = w.$oldWidget;
-                }
-            }
-        });
-        if (noWidgets)
-            this.session.lineWidgets = null;
-    };
-    LineWidgets.prototype.$registerLineWidget = function (w) {
-        if (!this.session.lineWidgets)
-            this.session.lineWidgets = new Array(this.session.getLength());
-        var old = this.session.lineWidgets[w.row];
-        if (old) {
-            w.$oldWidget = old;
-            if (old.el && old.el.parentNode) {
-                old.el.parentNode.removeChild(old.el);
-                old._inDocument = false;
-            }
-        }
-        this.session.lineWidgets[w.row] = w;
-        return w;
-    };
-    LineWidgets.prototype.addLineWidget = function (w) {
-        this.$registerLineWidget(w);
-        w.session = this.session;
-        if (!this.editor)
-            return w;
-        var renderer = this.editor.renderer;
-        if (w.html && !w.el) {
-            w.el = dom.createElement("div");
-            w.el.innerHTML = w.html;
-        }
-        if (w.text && !w.el) {
-            w.el = dom.createElement("div");
-            w.el.textContent = w.text;
-        }
-        if (w.el) {
-            dom.addCssClass(w.el, "ace_lineWidgetContainer");
-            if (w.className) {
-                dom.addCssClass(w.el, w.className);
-            }
-            w.el.style.position = "absolute";
-            w.el.style.zIndex = "5";
-            renderer.container.appendChild(w.el);
-            w._inDocument = true;
-            if (!w.coverGutter) {
-                w.el.style.zIndex = "3";
-            }
-            if (w.pixelHeight == null) {
-                w.pixelHeight = w.el.offsetHeight;
-            }
-        }
-        if (w.rowCount == null) {
-            w.rowCount = Math.ceil(w.pixelHeight / renderer.layerConfig.lineHeight);
-        }
-        var fold = this.session.getFoldAt(w.row, 0);
-        w.$fold = fold;
-        if (fold) {
-            var lineWidgets = this.session.lineWidgets;
-            if (w.row == fold.end.row && !lineWidgets[fold.start.row])
-                lineWidgets[fold.start.row] = w;
-            else
-                w.hidden = true;
-        }
-        this.session._emit("changeFold", { data: { start: { row: w.row } } });
-        this.$updateRows();
-        this.renderWidgets(null, renderer);
-        this.onWidgetChanged(w);
-        return w;
-    };
-    LineWidgets.prototype.removeLineWidget = function (w) {
-        w._inDocument = false;
-        w.session = null;
-        if (w.el && w.el.parentNode)
-            w.el.parentNode.removeChild(w.el);
-        if (w.editor && w.editor.destroy)
-            try {
-                w.editor.destroy();
-            }
-            catch (e) { }
-        if (this.session.lineWidgets) {
-            var w1 = this.session.lineWidgets[w.row];
-            if (w1 == w) {
-                this.session.lineWidgets[w.row] = w.$oldWidget;
-                if (w.$oldWidget)
-                    this.onWidgetChanged(w.$oldWidget);
-            }
-            else {
-                while (w1) {
-                    if (w1.$oldWidget == w) {
-                        w1.$oldWidget = w.$oldWidget;
-                        break;
-                    }
-                    w1 = w1.$oldWidget;
-                }
-            }
-        }
-        this.session._emit("changeFold", { data: { start: { row: w.row } } });
-        this.$updateRows();
-    };
-    LineWidgets.prototype.getWidgetsAtRow = function (row) {
-        var lineWidgets = this.session.lineWidgets;
-        var w = lineWidgets && lineWidgets[row];
-        var list = [];
-        while (w) {
-            list.push(w);
-            w = w.$oldWidget;
-        }
-        return list;
-    };
-    LineWidgets.prototype.onWidgetChanged = function (w) {
-        this.session._changedWidgets.push(w);
-        this.editor && this.editor.renderer.updateFull();
-    };
-    LineWidgets.prototype.measureWidgets = function (e, renderer) {
-        var changedWidgets = this.session._changedWidgets;
-        var config = renderer.layerConfig;
-        if (!changedWidgets || !changedWidgets.length)
-            return;
-        var min = Infinity;
-        for (var i = 0; i < changedWidgets.length; i++) {
-            var w = changedWidgets[i];
-            if (!w || !w.el)
-                continue;
-            if (w.session != this.session)
-                continue;
-            if (!w._inDocument) {
-                if (this.session.lineWidgets[w.row] != w)
-                    continue;
-                w._inDocument = true;
-                renderer.container.appendChild(w.el);
-            }
-            w.h = w.el.offsetHeight;
-            if (!w.fixedWidth) {
-                w.w = w.el.offsetWidth;
-                w.screenWidth = Math.ceil(w.w / config.characterWidth);
-            }
-            var rowCount = Math.ceil(w.h / config.lineHeight);
-            if (w.coverLine) {
-                rowCount -= this.session.getRowLineCount(w.row);
-                if (rowCount < 0)
-                    rowCount = 0;
-            }
-            if (w.rowCount != rowCount) {
-                w.rowCount = rowCount;
-                if (w.row < min)
-                    min = w.row;
-            }
-        }
-        if (min != Infinity) {
-            this.session._emit("changeFold", { data: { start: { row: min } } });
-            this.session.lineWidgetWidth = null;
-        }
-        this.session._changedWidgets = [];
-    };
-    LineWidgets.prototype.renderWidgets = function (e, renderer) {
-        var config = renderer.layerConfig;
-        var lineWidgets = this.session.lineWidgets;
-        if (!lineWidgets)
-            return;
-        var first = Math.min(this.firstRow, config.firstRow, 0);
-        var last = Math.max(this.lastRow, config.lastRow, lineWidgets.length);
-        while (first > 0 && !lineWidgets[first])
-            first--;
-        this.firstRow = config.firstRow;
-        this.lastRow = config.lastRow;
-        renderer.$cursorLayer.config = config;
-        for (var i = first; i <= last; i++) {
-            var w = lineWidgets[i];
-            if (!w || !w.el)
-                continue;
-            if (w.hidden) {
-                w.el.style.top = -100 - (w.pixelHeight || 0) + "px";
-                continue;
-            }
-            if (!w._inDocument) {
-                w._inDocument = true;
-                renderer.container.appendChild(w.el);
-            }
-            var top = renderer.$cursorLayer.getPixelPosition({ row: i, column: 0 }, true).top;
-            if (!w.coverLine)
-                top += config.lineHeight * this.session.getRowLineCount(w.row);
-            w.el.style.top = top - config.offset + "px";
-            var left = w.coverGutter ? 0 : renderer.gutterWidth;
-            if (!w.fixedWidth)
-                left -= renderer.scrollLeft;
-            w.el.style.left = left + "px";
-            if (w.fullWidth && w.screenWidth) {
-                w.el.style.minWidth = config.width + 2 * config.padding + "px";
-            }
-            if (w.fixedWidth) {
-                w.el.style.right = renderer.scrollBar.getWidth() + "px";
-            }
-            else {
-                w.el.style.right = "";
-            }
-        }
-    };
-    return LineWidgets;
-}());
-exports.LineWidgets = LineWidgets;
-
-});
-
 ace.define("ace/keyboard/gutter_handler",["require","exports","module","ace/lib/keys","ace/mouse/default_gutter_handler"], function(require, exports, module){var keys = require('../lib/keys');
 var GutterTooltip = require("../mouse/default_gutter_handler").GutterTooltip;
 var GutterKeyboardHandler = /** @class */ (function () {
@@ -22613,7 +22406,7 @@ exports.GutterKeyboardEvent = GutterKeyboardEvent;
 
 });
 
-ace.define("ace/editor",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/lib/useragent","ace/keyboard/textinput","ace/mouse/mouse_handler","ace/mouse/fold_handler","ace/keyboard/keybinding","ace/edit_session","ace/search","ace/range","ace/lib/event_emitter","ace/commands/command_manager","ace/commands/default_commands","ace/config","ace/token_iterator","ace/line_widgets","ace/keyboard/gutter_handler","ace/config","ace/clipboard","ace/lib/keys"], function(require, exports, module){var __values = (this && this.__values) || function(o) {
+ace.define("ace/editor",["require","exports","module","ace/lib/oop","ace/lib/dom","ace/lib/lang","ace/lib/useragent","ace/keyboard/textinput","ace/mouse/mouse_handler","ace/mouse/fold_handler","ace/keyboard/keybinding","ace/edit_session","ace/search","ace/range","ace/lib/event_emitter","ace/commands/command_manager","ace/commands/default_commands","ace/config","ace/token_iterator","ace/keyboard/gutter_handler","ace/config","ace/clipboard","ace/lib/keys"], function(require, exports, module){var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -22640,7 +22433,6 @@ var CommandManager = require("./commands/command_manager").CommandManager;
 var defaultCommands = require("./commands/default_commands").commands;
 var config = require("./config");
 var TokenIterator = require("./token_iterator").TokenIterator;
-var LineWidgets = require("./line_widgets").LineWidgets;
 var GutterKeyboardHandler = require("./keyboard/gutter_handler").GutterKeyboardHandler;
 var nls = require("./config").nls;
 var clipboard = require("./clipboard");
@@ -22872,7 +22664,11 @@ var Editor = /** @class */ (function () {
         });
         this.curOp = null;
         oldSession && oldSession._signal("changeEditor", { oldEditor: this });
+        if (oldSession)
+            oldSession.$editor = null;
         session && session._signal("changeEditor", { editor: this });
+        if (session)
+            session.$editor = this;
         if (session && !session.destroyed)
             session.bgTokenizer.scheduleStart();
     };
@@ -23498,15 +23294,9 @@ var Editor = /** @class */ (function () {
         this.moveCursorToPosition(cursor);
     };
     Editor.prototype.setGhostText = function (text, position) {
-        if (!this.session.widgetManager) {
-            this.session.widgetManager = new LineWidgets(this.session);
-            this.session.widgetManager.attach(this);
-        }
         this.renderer.setGhostText(text, position);
     };
     Editor.prototype.removeGhostText = function () {
-        if (!this.session.widgetManager)
-            return;
         this.renderer.removeGhostText();
     };
     Editor.prototype.transposeLetters = function () {
@@ -29924,8 +29714,7 @@ var FoldMode = exports.FoldMode = function () { };
 
 });
 
-ace.define("ace/ext/error_marker",["require","exports","module","ace/line_widgets","ace/lib/dom","ace/range","ace/config"], function(require, exports, module){var LineWidgets = require("../line_widgets").LineWidgets;
-var dom = require("../lib/dom");
+ace.define("ace/ext/error_marker",["require","exports","module","ace/lib/dom","ace/range","ace/config"], function(require, exports, module){var dom = require("../lib/dom");
 var Range = require("../range").Range;
 var nls = require("../config").nls;
 function binarySearch(array, needle, comparator) {
@@ -29974,10 +29763,6 @@ function findAnnotations(session, row, dir) {
 }
 exports.showErrorMarker = function (editor, dir) {
     var session = editor.session;
-    if (!session.widgetManager) {
-        session.widgetManager = new LineWidgets(session);
-        session.widgetManager.attach(editor);
-    }
     var pos = editor.getCursorPosition();
     var row = pos.row;
     var oldWidget = session.widgetManager.getWidgetsAtRow(row).filter(function (w) {
@@ -42293,7 +42078,7 @@ const snippetCompleter = {
   }
 };
 aceEditorCompleter.setCompleters([snippetCompleter]);
-class JsEditorUi extends ReactDOM$3.PureComponent {
+class JsEditorUi extends xn.PureComponent {
   static get propTypes() {
     return {
       path: propTypes$2.exports.string,
@@ -42492,7 +42277,7 @@ class JsEditorUi extends ReactDOM$3.PureComponent {
       const {
         data = ''
       } = this.props;
-      return v$1(_default, {
+      return _$3(_default, {
         ref: ref => {
           this.aceEditor = ref;
         },
@@ -42559,9 +42344,9 @@ function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typ
 function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
 function useUncontrolledProp(propValue, defaultValue, handler) {
-  var wasPropRef = s(propValue !== undefined);
+  var wasPropRef = A$1(propValue !== undefined);
 
-  var _useState = l(defaultValue),
+  var _useState = h$1(defaultValue),
       stateValue = _useState[0],
       setState = _useState[1];
 
@@ -42577,7 +42362,7 @@ function useUncontrolledProp(propValue, defaultValue, handler) {
     setState(defaultValue);
   }
 
-  return [isProp ? propValue : stateValue, A$1(function (value) {
+  return [isProp ? propValue : stateValue, q$1(function (value) {
     for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
     }
@@ -42650,7 +42435,7 @@ function qsa(element, selector) {
 function useForceUpdate() {
   // The toggling state value is designed to defeat React optimizations for skipping
   // updates when they are strictly equal to the last state value
-  const [, dispatch] = p(state => !state, false);
+  const [, dispatch] = p$2(state => !state, false);
   return dispatch;
 }
 
@@ -42683,20 +42468,20 @@ function mergeRefs(refA, refB) {
  * @category refs
  */
 function useMergedRefs(refA, refB) {
-  return d(() => mergeRefs(refA, refB), [refA, refB]);
+  return T$1(() => mergeRefs(refA, refB), [refA, refB]);
 }
 
-const NavContext = /*#__PURE__*/D$1(null);
+const NavContext = /*#__PURE__*/G$1(null);
 NavContext.displayName = 'NavContext';
 var NavContext$1 = NavContext;
 
-const SelectableContext = /*#__PURE__*/D$1(null);
+const SelectableContext = /*#__PURE__*/G$1(null);
 const makeEventKey = (eventKey, href = null) => {
   if (eventKey != null) return String(eventKey);
   return href || null;
 };
 
-const TabContext = /*#__PURE__*/D$1(null);
+const TabContext = /*#__PURE__*/G$1(null);
 var TabContext$1 = TabContext;
 
 const ATTRIBUTE_PREFIX = `data-rr-ui-`;
@@ -42718,8 +42503,8 @@ function dataProp(property) {
  * @param value The `Ref` value
  */
 function useCommittedRef(value) {
-  const ref = s(value);
-  y(() => {
+  const ref = A$1(value);
+  y$1(() => {
     ref.current = value;
   }, [value]);
   return ref;
@@ -42727,7 +42512,7 @@ function useCommittedRef(value) {
 
 function useEventCallback(fn) {
   const ref = useCommittedRef(fn);
-  return A$1(function (...args) {
+  return q$1(function (...args) {
     return ref.current && ref.current(...args);
   }, [ref]);
 }
@@ -42742,9 +42527,9 @@ function useNavItem({
   role,
   disabled
 }) {
-  const parentOnSelect = F$1(SelectableContext);
-  const navContext = F$1(NavContext$1);
-  const tabContext = F$1(TabContext$1);
+  const parentOnSelect = x$1(SelectableContext);
+  const navContext = x$1(NavContext$1);
+  const tabContext = x$1(TabContext$1);
   let isActive = active;
   const props = {
     role
@@ -42794,7 +42579,7 @@ function useNavItem({
     isActive
   }];
 }
-const NavItem = /*#__PURE__*/x((_ref, ref) => {
+const NavItem = /*#__PURE__*/A((_ref, ref) => {
   let {
       as: Component = Button$1,
       active,
@@ -42808,7 +42593,7 @@ const NavItem = /*#__PURE__*/x((_ref, ref) => {
 
   // @ts-ignore
   props[dataAttr('active')] = meta.isActive;
-  return /*#__PURE__*/e(Component, Object.assign({}, options, props, {
+  return /*#__PURE__*/u$1(Component, Object.assign({}, options, props, {
     ref: ref
   }));
 });
@@ -42820,7 +42605,7 @@ function _objectWithoutPropertiesLoose(r, e) { if (null == r) return {}; var t =
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop$1 = () => {};
 const EVENT_KEY_ATTR = dataAttr('event-key');
-const Nav = /*#__PURE__*/x((_ref, ref) => {
+const Nav = /*#__PURE__*/A((_ref, ref) => {
   let {
       // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
       as: Component = 'div',
@@ -42833,9 +42618,9 @@ const Nav = /*#__PURE__*/x((_ref, ref) => {
   // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
   // and don't want to reset the set in the effect
   const forceUpdate = useForceUpdate();
-  const needsRefocusRef = s(false);
-  const parentOnSelect = F$1(SelectableContext);
-  const tabContext = F$1(TabContext$1);
+  const needsRefocusRef = A$1(false);
+  const parentOnSelect = x$1(SelectableContext);
+  const tabContext = x$1(TabContext$1);
   let getControlledId, getControllerId;
   if (tabContext) {
     role = role || 'tablist';
@@ -42844,7 +42629,7 @@ const Nav = /*#__PURE__*/x((_ref, ref) => {
     getControlledId = tabContext.getControlledId;
     getControllerId = tabContext.getControllerId;
   }
-  const listNode = s(null);
+  const listNode = A$1(null);
   const getNextActiveTab = offset => {
     const currentListNode = listNode.current;
     if (!currentListNode) return null;
@@ -42887,7 +42672,7 @@ const Nav = /*#__PURE__*/x((_ref, ref) => {
     needsRefocusRef.current = true;
     forceUpdate();
   };
-  y(() => {
+  y$1(() => {
     if (listNode.current && needsRefocusRef.current) {
       const activeChild = listNode.current.querySelector(`[${EVENT_KEY_ATTR}][aria-selected=true]`);
       activeChild == null ? void 0 : activeChild.focus();
@@ -42895,9 +42680,9 @@ const Nav = /*#__PURE__*/x((_ref, ref) => {
     needsRefocusRef.current = false;
   });
   const mergedRef = useMergedRefs(ref, listNode);
-  return /*#__PURE__*/e(SelectableContext.Provider, {
+  return /*#__PURE__*/u$1(SelectableContext.Provider, {
     value: handleSelect,
-    children: /*#__PURE__*/e(NavContext$1.Provider, {
+    children: /*#__PURE__*/u$1(NavContext$1.Provider, {
       value: {
         role,
         // used by NavLink to determine it's role
@@ -42905,7 +42690,7 @@ const Nav = /*#__PURE__*/x((_ref, ref) => {
         getControlledId: getControlledId || noop$1,
         getControllerId: getControllerId || noop$1
       },
-      children: /*#__PURE__*/e(Component, Object.assign({}, props, {
+      children: /*#__PURE__*/u$1(Component, Object.assign({}, props, {
         onKeyDown: handleKeyDown,
         ref: mergedRef,
         role: role
@@ -42918,7 +42703,7 @@ var BaseNav = Object.assign(Nav, {
   Item: NavItem$1
 });
 
-const ListGroupItem = /*#__PURE__*/x(({
+const ListGroupItem = /*#__PURE__*/A(({
   bsPrefix,
   active,
   disabled,
@@ -42951,7 +42736,7 @@ const ListGroupItem = /*#__PURE__*/x(({
   // eslint-disable-next-line no-nested-ternary
   const Component = as || (action ? props.href ? 'a' : 'button' : 'div');
   warning_1(as || !(!action && props.href), '`action=false` and `href` should not be used together.') ;
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     ...props,
     ...navItemProps,
@@ -42962,7 +42747,7 @@ const ListGroupItem = /*#__PURE__*/x(({
 ListGroupItem.displayName = 'ListGroupItem';
 var ListGroupItem$1 = ListGroupItem;
 
-const ListGroup = /*#__PURE__*/x((props, ref) => {
+const ListGroup = /*#__PURE__*/A((props, ref) => {
   const {
     className,
     bsPrefix: initialBsPrefix,
@@ -42981,7 +42766,7 @@ const ListGroup = /*#__PURE__*/x((props, ref) => {
     horizontalVariant = horizontal === true ? 'horizontal' : `horizontal-${horizontal}`;
   }
   warning_1(!(horizontal && variant === 'flush'), '`variant="flush"` and `horizontal` should not be used together.') ;
-  return /*#__PURE__*/e(BaseNav, {
+  return /*#__PURE__*/u$1(BaseNav, {
     ref: ref,
     ...controlledProps,
     as: as,
@@ -43352,7 +43137,7 @@ const getCnc = config => {
   }
 };
 
-class MakeEspWebUi extends ReactDOM$3.PureComponent {
+class MakeEspWebUi extends xn.PureComponent {
   static get propTypes() {
     return {
       ip: propTypes$2.exports.string,
@@ -43363,12 +43148,12 @@ class MakeEspWebUi extends ReactDOM$3.PureComponent {
   constructor(props) {
     super();
     this.cpos = [0, 0, undefined];
-    this.cposRef = /*#__PURE__*/p$1();
-    this.cursorRef = /*#__PURE__*/p$1();
-    this.mposRef = /*#__PURE__*/p$1();
-    this.statusRef = /*#__PURE__*/p$1();
-    this.toolRef = /*#__PURE__*/p$1();
-    this.wposRef = /*#__PURE__*/p$1();
+    this.cposRef = /*#__PURE__*/m$1();
+    this.cursorRef = /*#__PURE__*/m$1();
+    this.mposRef = /*#__PURE__*/m$1();
+    this.statusRef = /*#__PURE__*/m$1();
+    this.toolRef = /*#__PURE__*/m$1();
+    this.wposRef = /*#__PURE__*/m$1();
     this.cnc = getCnc({
       type: 'EspWebUi',
       ip: props.ip
@@ -43459,19 +43244,19 @@ class MakeEspWebUi extends ReactDOM$3.PureComponent {
           break;
       }
     };
-    const result = v$1("div", null, "IP Address", v$1("div", null, ip), "Machine position", v$1("div", {
+    const result = _$3("div", null, "IP Address", _$3("div", null, ip), "Machine position", _$3("div", {
       id: "make/mpos",
       ref: this.mposRef
-    }, "0 0 0"), "Work position", v$1("div", {
+    }, "0 0 0"), "Work position", _$3("div", {
       id: "make/wpos",
       ref: this.wposRef
-    }, "0 0 0"), "Cursor position", v$1("div", null, v$1("span", {
+    }, "0 0 0"), "Cursor position", _$3("div", null, _$3("span", {
       id: "make/cpos",
       ref: this.cposRef
-    }, JSON.stringify(this.cpos)), v$1("span", null, v$1("input", {
+    }, JSON.stringify(this.cpos)), _$3("span", null, _$3("input", {
       id: "make/cpos/set",
       onKeyDown: setCpos
-    }))), v$1("svg", {
+    }))), _$3("svg", {
       id: "make/svg",
       width: "300",
       height: "300",
@@ -43480,75 +43265,75 @@ class MakeEspWebUi extends ReactDOM$3.PureComponent {
         offsetX,
         offsetY
       }) => this.setCpos(offsetX, 300 - offsetY)
-    }, v$1("g", {
+    }, _$3("g", {
       transform: "translate(0,300)"
-    }, v$1("g", {
+    }, _$3("g", {
       transform: "scale(1,-1)"
-    }, v$1("circle", {
+    }, _$3("circle", {
       id: "make/svg/tool",
       cx: "0",
       cy: "0",
       r: "6",
       ref: this.toolRef
-    }), v$1("g", {
+    }), _$3("g", {
       ref: this.cursorRef
-    }, v$1("path", {
+    }, _$3("path", {
       stroke: "green",
       id: "make/svg/cursor",
       d: "M -5 0 L 5 0 M 0 -5 L 0 5"
-    }))))), v$1("br", null), v$1(ButtonGroup, null, v$1(Button, {
+    }))))), _$3("br", null), _$3(ButtonGroup, null, _$3(Button, {
       onClick: event => this.cnc.home()
-    }, v$1("svg", {
+    }, _$3("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
       height: "16",
       fill: "currentColor",
       class: "bi bi-house",
       viewBox: "0 0 16 16"
-    }, v$1("path", {
+    }, _$3("path", {
       d: "M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
-    }))), v$1(Button, {
+    }))), _$3(Button, {
       onClick: event => this.cnc.pause()
-    }, v$1("svg", {
+    }, _$3("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
       height: "16",
       fill: "currentColor",
       class: "bi bi-pause",
       viewBox: "0 0 16 16"
-    }, v$1("path", {
+    }, _$3("path", {
       d: "M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"
-    }))), v$1(Button, {
+    }))), _$3(Button, {
       onClick: event => this.cnc.resume()
-    }, v$1("svg", {
+    }, _$3("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
       height: "16",
       fill: "currentColor",
       class: "bi bi-caret-right",
       viewBox: "0 0 16 16"
-    }, v$1("path", {
+    }, _$3("path", {
       d: "M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"
-    }))), v$1(Button, {
+    }))), _$3(Button, {
       onClick: event => this.cnc.reset()
-    }, v$1("svg", {
+    }, _$3("svg", {
       xmlns: "http://www.w3.org/2000/svg",
       width: "16",
       height: "16",
       fill: "currentColor",
       class: "bi bi-bootstrap-reboot",
       viewBox: "0 0 16 16"
-    }, v$1("path", {
+    }, _$3("path", {
       d: "M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 1 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.8 6.8 0 0 0 1.16 8z"
-    }), v$1("path", {
+    }), _$3("path", {
       d: "M6.641 11.671V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352zm0-3.75V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324z"
-    }))), v$1(Button, {
+    }))), _$3(Button, {
       onClick: () => this.jogToCursor()
-    }, "jog"), v$1(Button, {
+    }, "jog"), _$3(Button, {
       onClick: () => this.cnc.run('$Jog=G91X-10F5000')
-    }, "l"), v$1(Button, {
+    }, "l"), _$3(Button, {
       onClick: () => this.cnc.run('$Jog=G91X10F5000')
-    }, "r")), v$1("div", {
+    }, "r")), _$3("div", {
       ref: this.statusRef
     }));
     return result;
@@ -43655,7 +43440,7 @@ PropTypes$3.oneOfType([PropTypes$3.string, PropTypes$3.shape({
   exitActive: PropTypes$3.string
 })]) ;
 
-var TransitionGroupContext = ReactDOM$3.createContext(null);
+var TransitionGroupContext = xn.createContext(null);
 
 var forceReflow = function forceReflow(node) {
   return node.scrollTop;
@@ -43881,7 +43666,7 @@ var Transition = /*#__PURE__*/function (_React$Component) {
 
       if (nextStatus === ENTERING) {
         if (this.props.unmountOnExit || this.props.mountOnEnter) {
-          var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this); // https://github.com/reactjs/react-transition-group/pull/749
+          var node = this.props.nodeRef ? this.props.nodeRef.current : xn.findDOMNode(this); // https://github.com/reactjs/react-transition-group/pull/749
           // With unmountOnExit or mountOnEnter, the enter animation should happen at the transition between `exited` and `entering`.
           // To make the animation happen,  we have to separate each rendering and avoid being processed as batched.
 
@@ -43905,7 +43690,7 @@ var Transition = /*#__PURE__*/function (_React$Component) {
     var enter = this.props.enter;
     var appearing = this.context ? this.context.isMounting : mounting;
 
-    var _ref2 = this.props.nodeRef ? [appearing] : [ReactDOM$3.findDOMNode(this), appearing],
+    var _ref2 = this.props.nodeRef ? [appearing] : [xn.findDOMNode(this), appearing],
         maybeNode = _ref2[0],
         maybeAppearing = _ref2[1];
 
@@ -43943,7 +43728,7 @@ var Transition = /*#__PURE__*/function (_React$Component) {
 
     var exit = this.props.exit;
     var timeouts = this.getTimeouts();
-    var maybeNode = this.props.nodeRef ? undefined : ReactDOM$3.findDOMNode(this); // no exit animation skip right to EXITED
+    var maybeNode = this.props.nodeRef ? undefined : xn.findDOMNode(this); // no exit animation skip right to EXITED
 
     if (!exit || config.disabled) {
       this.safeSetState({
@@ -44007,7 +43792,7 @@ var Transition = /*#__PURE__*/function (_React$Component) {
 
   _proto.onTransitionEnd = function onTransitionEnd(timeout, handler) {
     this.setNextCallback(handler);
-    var node = this.props.nodeRef ? this.props.nodeRef.current : ReactDOM$3.findDOMNode(this);
+    var node = this.props.nodeRef ? this.props.nodeRef.current : xn.findDOMNode(this);
     var doesNotHaveTimeoutOrListener = timeout == null && !this.props.addEndListener;
 
     if (!node || doesNotHaveTimeoutOrListener) {
@@ -44057,14 +43842,14 @@ var Transition = /*#__PURE__*/function (_React$Component) {
     return (
       /*#__PURE__*/
       // allows for nested Transitions
-      ReactDOM$3.createElement(TransitionGroupContext.Provider, {
+      xn.createElement(TransitionGroupContext.Provider, {
         value: null
-      }, typeof children === 'function' ? children(status, childProps) : ReactDOM$3.cloneElement(ReactDOM$3.Children.only(children), childProps))
+      }, typeof children === 'function' ? children(status, childProps) : xn.cloneElement(xn.Children.only(children), childProps))
     );
   };
 
   return Transition;
-}(ReactDOM$3.Component);
+}(xn.Component);
 
 Transition.contextType = TransitionGroupContext;
 Transition.propTypes = {
@@ -44466,13 +44251,13 @@ function triggerBrowserReflow(node) {
 
 function safeFindDOMNode(componentOrElement) {
   if (componentOrElement && 'setState' in componentOrElement) {
-    return ReactDOM$3.findDOMNode(componentOrElement);
+    return xn.findDOMNode(componentOrElement);
   }
   return componentOrElement != null ? componentOrElement : null;
 }
 
 // Normalizes Transition callbacks when nodeRef is used.
-const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
+const TransitionWrapper = /*#__PURE__*/xn.forwardRef(({
   onEnter,
   onEntering,
   onEntered,
@@ -44484,7 +44269,7 @@ const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
   childRef,
   ...props
 }, ref) => {
-  const nodeRef = s(null);
+  const nodeRef = A$1(null);
   const mergedRef = useMergedRefs(nodeRef, childRef);
   const attachRef = r => {
     mergedRef(safeFindDOMNode(r));
@@ -44496,16 +44281,16 @@ const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
   };
 
   /* eslint-disable react-hooks/exhaustive-deps */
-  const handleEnter = A$1(normalize(onEnter), [onEnter]);
-  const handleEntering = A$1(normalize(onEntering), [onEntering]);
-  const handleEntered = A$1(normalize(onEntered), [onEntered]);
-  const handleExit = A$1(normalize(onExit), [onExit]);
-  const handleExiting = A$1(normalize(onExiting), [onExiting]);
-  const handleExited = A$1(normalize(onExited), [onExited]);
-  const handleAddEndListener = A$1(normalize(addEndListener), [addEndListener]);
+  const handleEnter = q$1(normalize(onEnter), [onEnter]);
+  const handleEntering = q$1(normalize(onEntering), [onEntering]);
+  const handleEntered = q$1(normalize(onEntered), [onEntered]);
+  const handleExit = q$1(normalize(onExit), [onExit]);
+  const handleExiting = q$1(normalize(onExiting), [onExiting]);
+  const handleExited = q$1(normalize(onExited), [onExited]);
+  const handleAddEndListener = q$1(normalize(addEndListener), [addEndListener]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  return /*#__PURE__*/e(Transition, {
+  return /*#__PURE__*/u$1(Transition, {
     ref: ref,
     ...props,
     onEnter: handleEnter,
@@ -44521,7 +44306,7 @@ const TransitionWrapper = /*#__PURE__*/ReactDOM$3.forwardRef(({
     children(status, {
       ...innerProps,
       ref: attachRef
-    }) : /*#__PURE__*/ReactDOM$3.cloneElement(children, {
+    }) : /*#__PURE__*/xn.cloneElement(children, {
       ref: attachRef
     })
   });
@@ -44548,7 +44333,7 @@ const collapseStyles = {
   [ENTERING]: 'collapsing',
   [ENTERED]: 'collapse show'
 };
-const Collapse = /*#__PURE__*/ReactDOM$3.forwardRef(({
+const Collapse = /*#__PURE__*/xn.forwardRef(({
   onEnter,
   onEntering,
   onEntered,
@@ -44569,26 +44354,26 @@ const Collapse = /*#__PURE__*/ReactDOM$3.forwardRef(({
   const computedDimension = typeof dimension === 'function' ? dimension() : dimension;
 
   /* -- Expanding -- */
-  const handleEnter = d(() => createChainedFunction(elem => {
+  const handleEnter = T$1(() => createChainedFunction(elem => {
     elem.style[computedDimension] = '0';
   }, onEnter), [computedDimension, onEnter]);
-  const handleEntering = d(() => createChainedFunction(elem => {
+  const handleEntering = T$1(() => createChainedFunction(elem => {
     const scroll = `scroll${computedDimension[0].toUpperCase()}${computedDimension.slice(1)}`;
     elem.style[computedDimension] = `${elem[scroll]}px`;
   }, onEntering), [computedDimension, onEntering]);
-  const handleEntered = d(() => createChainedFunction(elem => {
+  const handleEntered = T$1(() => createChainedFunction(elem => {
     elem.style[computedDimension] = null;
   }, onEntered), [computedDimension, onEntered]);
 
   /* -- Collapsing -- */
-  const handleExit = d(() => createChainedFunction(elem => {
+  const handleExit = T$1(() => createChainedFunction(elem => {
     elem.style[computedDimension] = `${getDimensionValue(computedDimension, elem)}px`;
     triggerBrowserReflow(elem);
   }, onExit), [onExit, getDimensionValue, computedDimension]);
-  const handleExiting = d(() => createChainedFunction(elem => {
+  const handleExiting = T$1(() => createChainedFunction(elem => {
     elem.style[computedDimension] = null;
   }, onExiting), [computedDimension, onExiting]);
-  return /*#__PURE__*/e(TransitionWrapper$1, {
+  return /*#__PURE__*/u$1(TransitionWrapper$1, {
     ref: ref,
     addEndListener: transitionEndListener,
     ...props,
@@ -44604,7 +44389,7 @@ const Collapse = /*#__PURE__*/ReactDOM$3.forwardRef(({
     mountOnEnter: mountOnEnter,
     unmountOnExit: unmountOnExit,
     appear: appear,
-    children: (state, innerProps) => /*#__PURE__*/ReactDOM$3.cloneElement(children, {
+    children: (state, innerProps) => /*#__PURE__*/xn.cloneElement(children, {
       ...innerProps,
       className: classNames(className, children.props.className, collapseStyles[state], computedDimension === 'width' && 'collapse-horizontal')
     })
@@ -44618,14 +44403,14 @@ var Collapse$1 = Collapse;
 function isAccordionItemSelected(activeEventKey, eventKey) {
   return Array.isArray(activeEventKey) ? activeEventKey.includes(eventKey) : activeEventKey === eventKey;
 }
-const context$1 = /*#__PURE__*/D$1({});
+const context$1 = /*#__PURE__*/G$1({});
 context$1.displayName = 'AccordionContext';
 var AccordionContext = context$1;
 
 /**
  * This component accepts all of [`Collapse`'s props](/docs/utilities/transitions#collapse-1).
  */
-const AccordionCollapse = /*#__PURE__*/x(({
+const AccordionCollapse = /*#__PURE__*/A(({
   as: Component = 'div',
   bsPrefix,
   className,
@@ -44635,28 +44420,28 @@ const AccordionCollapse = /*#__PURE__*/x(({
 }, ref) => {
   const {
     activeEventKey
-  } = F$1(AccordionContext);
+  } = x$1(AccordionContext);
   bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-collapse');
-  return /*#__PURE__*/e(Collapse$1, {
+  return /*#__PURE__*/u$1(Collapse$1, {
     ref: ref,
     in: isAccordionItemSelected(activeEventKey, eventKey),
     ...props,
     className: classNames(className, bsPrefix),
-    children: /*#__PURE__*/e(Component, {
-      children: k.only(children)
+    children: /*#__PURE__*/u$1(Component, {
+      children: L.only(children)
     })
   });
 });
 AccordionCollapse.displayName = 'AccordionCollapse';
 var AccordionCollapse$1 = AccordionCollapse;
 
-const context = /*#__PURE__*/D$1({
+const context = /*#__PURE__*/G$1({
   eventKey: ''
 });
 context.displayName = 'AccordionItemContext';
 var AccordionItemContext = context;
 
-const AccordionBody = /*#__PURE__*/x(({
+const AccordionBody = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'div',
   bsPrefix,
@@ -44672,8 +44457,8 @@ const AccordionBody = /*#__PURE__*/x(({
   bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-body');
   const {
     eventKey
-  } = F$1(AccordionItemContext);
-  return /*#__PURE__*/e(AccordionCollapse$1, {
+  } = x$1(AccordionItemContext);
+  return /*#__PURE__*/u$1(AccordionCollapse$1, {
     eventKey: eventKey,
     onEnter: onEnter,
     onEntering: onEntering,
@@ -44681,7 +44466,7 @@ const AccordionBody = /*#__PURE__*/x(({
     onExit: onExit,
     onExiting: onExiting,
     onExited: onExited,
-    children: /*#__PURE__*/e(Component, {
+    children: /*#__PURE__*/u$1(Component, {
       ref: ref,
       ...props,
       className: classNames(className, bsPrefix)
@@ -44696,7 +44481,7 @@ function useAccordionButton(eventKey, onClick) {
     activeEventKey,
     onSelect,
     alwaysOpen
-  } = F$1(AccordionContext);
+  } = x$1(AccordionContext);
   return e => {
     /*
       Compare the event key in context with the given event key.
@@ -44719,7 +44504,7 @@ function useAccordionButton(eventKey, onClick) {
     onClick == null || onClick(e);
   };
 }
-const AccordionButton = /*#__PURE__*/x(({
+const AccordionButton = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'button',
   bsPrefix,
@@ -44730,15 +44515,15 @@ const AccordionButton = /*#__PURE__*/x(({
   bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-button');
   const {
     eventKey
-  } = F$1(AccordionItemContext);
+  } = x$1(AccordionItemContext);
   const accordionOnClick = useAccordionButton(eventKey, onClick);
   const {
     activeEventKey
-  } = F$1(AccordionContext);
+  } = x$1(AccordionContext);
   if (Component === 'button') {
     props.type = 'button';
   }
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     onClick: accordionOnClick,
     ...props,
@@ -44749,7 +44534,7 @@ const AccordionButton = /*#__PURE__*/x(({
 AccordionButton.displayName = 'AccordionButton';
 var AccordionButton$1 = AccordionButton;
 
-const AccordionHeader = /*#__PURE__*/x(({
+const AccordionHeader = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'h2',
   bsPrefix,
@@ -44759,11 +44544,11 @@ const AccordionHeader = /*#__PURE__*/x(({
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-header');
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     ...props,
     className: classNames(className, bsPrefix),
-    children: /*#__PURE__*/e(AccordionButton$1, {
+    children: /*#__PURE__*/u$1(AccordionButton$1, {
       onClick: onClick,
       children: children
     })
@@ -44772,7 +44557,7 @@ const AccordionHeader = /*#__PURE__*/x(({
 AccordionHeader.displayName = 'AccordionHeader';
 var AccordionHeader$1 = AccordionHeader;
 
-const AccordionItem = /*#__PURE__*/x(({
+const AccordionItem = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'div',
   bsPrefix,
@@ -44781,12 +44566,12 @@ const AccordionItem = /*#__PURE__*/x(({
   ...props
 }, ref) => {
   bsPrefix = useBootstrapPrefix(bsPrefix, 'accordion-item');
-  const contextValue = d(() => ({
+  const contextValue = T$1(() => ({
     eventKey
   }), [eventKey]);
-  return /*#__PURE__*/e(AccordionItemContext.Provider, {
+  return /*#__PURE__*/u$1(AccordionItemContext.Provider, {
     value: contextValue,
-    children: /*#__PURE__*/e(Component, {
+    children: /*#__PURE__*/u$1(Component, {
       ref: ref,
       ...props,
       className: classNames(className, bsPrefix)
@@ -44796,7 +44581,7 @@ const AccordionItem = /*#__PURE__*/x(({
 AccordionItem.displayName = 'AccordionItem';
 var AccordionItem$1 = AccordionItem;
 
-const Accordion = /*#__PURE__*/x((props, ref) => {
+const Accordion = /*#__PURE__*/A((props, ref) => {
   const {
     // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
     as: Component = 'div',
@@ -44811,14 +44596,14 @@ const Accordion = /*#__PURE__*/x((props, ref) => {
     activeKey: 'onSelect'
   });
   const prefix = useBootstrapPrefix(bsPrefix, 'accordion');
-  const contextValue = d(() => ({
+  const contextValue = T$1(() => ({
     activeEventKey: activeKey,
     onSelect,
     alwaysOpen
   }), [activeKey, onSelect, alwaysOpen]);
-  return /*#__PURE__*/e(AccordionContext.Provider, {
+  return /*#__PURE__*/u$1(AccordionContext.Provider, {
     value: contextValue,
-    children: /*#__PURE__*/e(Component, {
+    children: /*#__PURE__*/u$1(Component, {
       ref: ref,
       ...controlledProps,
       className: classNames(className, prefix, flush && `${prefix}-flush`)
@@ -44834,7 +44619,7 @@ var Accordion$1 = Object.assign(Accordion, {
   Body: AccordionBody$1
 });
 
-class AceEditNote extends ReactDOM$3.PureComponent {
+class AceEditNote extends xn.PureComponent {
   static get propTypes() {
     return {
       notebookPath: propTypes$2.exports.string,
@@ -44884,7 +44669,7 @@ class AceEditNote extends ReactDOM$3.PureComponent {
       const {
         source = ''
       } = this.props;
-      return v$1(_default, {
+      return _$3(_default, {
         ref: ref => {
           this.aceEditor = ref;
         },
@@ -44917,7 +44702,7 @@ class AceEditNote extends ReactDOM$3.PureComponent {
   }
 }
 
-const Container = /*#__PURE__*/x(({
+const Container = /*#__PURE__*/A(({
   bsPrefix,
   fluid = false,
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
@@ -44927,7 +44712,7 @@ const Container = /*#__PURE__*/x(({
 }, ref) => {
   const prefix = useBootstrapPrefix(bsPrefix, 'container');
   const suffix = typeof fluid === 'string' ? `-${fluid}` : '-fluid';
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     ...props,
     className: classNames(className, fluid ? `${prefix}${suffix}` : prefix)
@@ -44935,7 +44720,7 @@ const Container = /*#__PURE__*/x(({
 });
 Container.displayName = 'Container';
 
-class ControlNote extends ReactDOM$3.PureComponent {
+class ControlNote extends xn.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$2.exports.object,
@@ -44957,21 +44742,21 @@ class ControlNote extends ReactDOM$3.PureComponent {
       type,
       value
     } = control;
-    const ref = selected && /*#__PURE__*/p$1();
+    const ref = selected && /*#__PURE__*/m$1();
     if (selected) {
-      y(() => ref.current.scrollIntoView(true));
+      y$1(() => ref.current.scrollIntoView(true));
     }
     const border = selected ? '1px dashed dodgerblue' : '0px';
     // TODO: Slider.
     switch (type) {
       case 'check':
-        return v$1(InputGroup$1, {
+        return _$3(InputGroup$1, {
           ref: ref,
           style: {
             border,
             opacity: blur ? 0.5 : 1
           }
-        }, v$1(Form$1.Check, {
+        }, _$3(Form$1.Check, {
           label: label,
           type: "checkbox",
           name: label,
@@ -44979,35 +44764,35 @@ class ControlNote extends ReactDOM$3.PureComponent {
           className: `note control check ${blur ? 'disabled' : 'enabled'}`
         }));
       case 'input':
-        return v$1(InputGroup$1, {
+        return _$3(InputGroup$1, {
           ref: ref,
           style: {
             border,
             opacity: blur ? 0.5 : 1
           }
-        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
+        }, _$3(InputGroup$1.Text, null, label), _$3(Form$1.Control, {
           className: `note control input ${blur ? 'disabled' : 'enabled'}`,
           value: value,
           name: label
         }));
       case 'select':
-        return v$1(InputGroup$1, {
+        return _$3(InputGroup$1, {
           ref: ref,
           style: {
             border,
             opacity: blur ? 0.5 : 1
           }
-        }, v$1(InputGroup$1.Text, null, label), v$1(Form$1.Control, {
+        }, _$3(InputGroup$1.Text, null, label), _$3(Form$1.Control, {
           as: "select",
           className: `note control select ${blur ? 'disabled' : 'enabled'}`,
           name: label
-        }, options.map((option, nth) => v$1("option", {
+        }, options.map((option, nth) => _$3("option", {
           key: nth,
           value: option,
           selected: option === value
         }, option))));
       default:
-        return v$1("div", {
+        return _$3("div", {
           ref: ref,
           style: {
             border,
@@ -45026,8 +44811,8 @@ class ControlNote extends ReactDOM$3.PureComponent {
 var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 // Use a lookup table to find the index.
 var lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
-for (var i = 0; i < chars.length; i++) {
-    lookup[chars.charCodeAt(i)] = i;
+for (var i$1 = 0; i$1 < chars.length; i$1++) {
+    lookup[chars.charCodeAt(i$1)] = i$1;
 }
 var decode = function (base64) {
     var bufferLength = base64.length * 0.75, len = base64.length, i, p = 0, encoded1, encoded2, encoded3, encoded4;
@@ -45077,7 +44862,7 @@ const downloadFile = async ({
   });
   saveAs(blob, filename);
 };
-class DownloadNote extends ReactDOM$3.PureComponent {
+class DownloadNote extends xn.PureComponent {
   static get propTypes() {
     return {
       download: propTypes$2.exports.object,
@@ -45106,7 +44891,7 @@ class DownloadNote extends ReactDOM$3.PureComponent {
       if (base64Data) {
         data = decode(base64Data);
       }
-      buttons.push(v$1(Button, {
+      buttons.push(_$3(Button, {
         onClick: event => downloadFile({
           event,
           filename,
@@ -45115,20 +44900,20 @@ class DownloadNote extends ReactDOM$3.PureComponent {
           type,
           workspace
         })
-      }, v$1("svg", {
+      }, _$3("svg", {
         xmlns: "http://www.w3.org/2000/svg",
         width: "16",
         height: "16",
         fill: "currentColor",
         class: "bi bi-download",
         viewBox: "0 0 16 16"
-      }, v$1("path", {
+      }, _$3("path", {
         d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
-      }), v$1("path", {
+      }), _$3("path", {
         d: "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
       })), ' ', filename));
       if (filename.endsWith('.gcode')) {
-        buttons.push(v$1(Button, {
+        buttons.push(_$3(Button, {
           onClick: e => runGcode({
             e,
             path,
@@ -45137,29 +44922,29 @@ class DownloadNote extends ReactDOM$3.PureComponent {
             type,
             workspace
           })
-        }, v$1("svg", {
+        }, _$3("svg", {
           xmlns: "http://www.w3.org/2000/svg",
           width: "16",
           height: "16",
           fill: "currentColor",
           class: "bi bi-upload",
           viewBox: "0 0 16 16"
-        }, v$1("path", {
+        }, _$3("path", {
           d: "M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
-        }), v$1("path", {
+        }), _$3("path", {
           d: "M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"
         }))));
       }
     }
-    const ref = selected && /*#__PURE__*/p$1();
-    return v$1(ButtonGroup, {
+    const ref = selected && /*#__PURE__*/m$1();
+    return _$3(ButtonGroup, {
       ref: ref,
       style: style
     }, buttons);
   }
 }
 
-class ErrorNote extends ReactDOM$3.Component {
+class ErrorNote extends xn.Component {
   static get propTypes() {
     return {
       note: propTypes$2.exports.string,
@@ -45182,9 +44967,9 @@ class ErrorNote extends ReactDOM$3.Component {
     const {
       text
     } = error;
-    return v$1("div", {
+    return _$3("div", {
       class: "note error"
-    }, v$1("p", null, text));
+    }, _$3("p", null, text));
   }
 }
 
@@ -48084,7 +47869,7 @@ marked.use({
     }
   }
 });
-class MdNote extends ReactDOM$3.PureComponent {
+class MdNote extends xn.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$2.exports.object,
@@ -48101,12 +47886,12 @@ class MdNote extends ReactDOM$3.PureComponent {
       md
     } = note;
     const html = marked(md);
-    const ref = selected && /*#__PURE__*/p$1();
+    const ref = selected && /*#__PURE__*/m$1();
     if (selected) {
-      y(() => ref.current.scrollIntoView(true));
+      y$1(() => ref.current.scrollIntoView(true));
     }
     const border = selected ? '1px dashed dodgerblue' : '0px';
-    return v$1("div", {
+    return _$3("div", {
       ref: ref,
       dangerouslySetInnerHTML: {
         __html: html
@@ -48119,7 +47904,7 @@ class MdNote extends ReactDOM$3.PureComponent {
   }
 }
 
-const Row = /*#__PURE__*/x(({
+const Row = /*#__PURE__*/A(({
   bsPrefix,
   className,
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
@@ -48145,7 +47930,7 @@ const Row = /*#__PURE__*/x(({
     const infix = brkPoint !== minBreakpoint ? `-${brkPoint}` : '';
     if (cols != null) classes.push(`${sizePrefix}${infix}-${cols}`);
   });
-  return /*#__PURE__*/e(Component, {
+  return /*#__PURE__*/u$1(Component, {
     ref: ref,
     ...props,
     className: classNames(className, decoratedBsPrefix, ...classes)
@@ -48153,7 +47938,7 @@ const Row = /*#__PURE__*/x(({
 });
 Row.displayName = 'Row';
 
-class ViewNote extends ReactDOM$3.PureComponent {
+class ViewNote extends xn.PureComponent {
   static get propTypes() {
     return {
       note: propTypes$2.exports.object,
@@ -48195,31 +47980,31 @@ class ViewNote extends ReactDOM$3.PureComponent {
       }
     };
     if (!note.url) {
-      return v$1("div", null);
+      return _$3("div", null);
     }
     let downloadNote;
     if (download) {
-      downloadNote = v$1(DownloadNote, {
+      downloadNote = _$3(DownloadNote, {
         key: note.hash,
         download: download,
         runGcode: runGcode,
         workspace: workspace
       });
     }
-    return v$1(Card$1, {
+    return _$3(Card$1, {
       border: "primary",
       onClick: onClick,
       style: {
         maxWidth: width
       }
-    }, v$1(Card$1.Header, null, name), v$1(Card$1.Body, null, v$1(Card$1.Img, {
+    }, _$3(Card$1.Header, null, name), _$3(Card$1.Body, null, _$3(Card$1.Img, {
       src: note.url,
       variant: "top"
-    }), v$1(Card$1.Text, null, downloadNote)));
+    }), _$3(Card$1.Text, null, downloadNote)));
   }
 }
 
-class Section extends ReactDOM$3.PureComponent {
+class Section extends xn.PureComponent {
   static get propTypes() {
     return {
       id: propTypes$2.exports.string,
@@ -48244,36 +48029,36 @@ class Section extends ReactDOM$3.PureComponent {
         section,
         workspace
       } = this.props;
-      const controls = section.controls.map(note => v$1(ControlNote, {
+      const controls = section.controls.map(note => _$3(ControlNote, {
         key: note.hash,
         note: note,
         workspace: workspace
       }));
-      const downloads = section.downloads.map(note => v$1(DownloadNote, {
+      const downloads = section.downloads.map(note => _$3(DownloadNote, {
         key: note.hash,
         download: note.download,
         runGcode: runGcode,
         workspace: workspace
       }));
-      const errors = section.errors.map((note, key) => v$1(Card$1.Body, {
+      const errors = section.errors.map((note, key) => _$3(Card$1.Body, {
         key: key,
         variant: "danger"
-      }, v$1(Card$1.Text, null, v$1(ErrorNote, {
+      }, _$3(Card$1.Text, null, _$3(ErrorNote, {
         key: note.hash,
         note: note
       }))));
-      const mds = section.mds.map(note => v$1(MdNote, {
+      const mds = section.mds.map(note => _$3(MdNote, {
         key: note.hash,
         note: note
       }));
-      const views = section.views.map(note => v$1(ViewNote, {
+      const views = section.views.map(note => _$3(ViewNote, {
         key: note.hash,
         note: note,
         onClickView: onClickView,
         runGcode: runGcode,
         workspace: workspace
       }));
-      const editor = v$1(AceEditNote, {
+      const editor = _$3(AceEditNote, {
         key: id,
         source: section.source,
         onChange: code => {
@@ -48284,18 +48069,18 @@ class Section extends ReactDOM$3.PureComponent {
         onKeyDown: onKeyDown,
         workspace: workspace
       });
-      return v$1(Card$1, {
+      return _$3(Card$1, {
         key: id,
         onKeyDown: onKeyDown
-      }, v$1(Card$1.Header, {
+      }, _$3(Card$1.Header, {
         id: `note-id-${id}`
-      }, id), errors, v$1(Container, null, v$1(Row, null, views.map((view, nth) => v$1(Col, {
+      }, id), errors, _$3(Container, null, _$3(Row, null, views.map((view, nth) => _$3(Col, {
         key: nth
-      }, view)), controls.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, controls)) : [], downloads.length > 0 ? v$1(Card$1, null, v$1(Card$1.Body, null, downloads)) : [])), v$1(Card$1.Body, null, mds, v$1(Accordion$1, {
+      }, view)), controls.length > 0 ? _$3(Card$1, null, _$3(Card$1.Body, null, controls)) : [], downloads.length > 0 ? _$3(Card$1, null, _$3(Card$1.Body, null, downloads)) : [])), _$3(Card$1.Body, null, mds, _$3(Accordion$1, {
         defaultActiveKey: "0"
-      }, v$1(Accordion$1.Item, {
+      }, _$3(Accordion$1.Item, {
         eventKey: "1"
-      }, v$1(Accordion$1.Header, null, "Code"), v$1(Accordion$1.Body, null, editor)))));
+      }, _$3(Accordion$1.Header, null, "Code"), _$3(Accordion$1.Body, null, editor)))));
     } catch (error) {
       console.log(error.stack);
       throw error;
@@ -48303,7 +48088,7 @@ class Section extends ReactDOM$3.PureComponent {
   }
 }
 
-class Notebook extends ReactDOM$3.PureComponent {
+class Notebook extends xn.PureComponent {
   static get propTypes() {
     return {
       sections: propTypes$2.exports.object,
@@ -48332,7 +48117,7 @@ class Notebook extends ReactDOM$3.PureComponent {
       const children = [];
       for (const id of [...sections.keys()].sort()) {
         const section = sections.get(id);
-        children.push(v$1(Section, {
+        children.push(_$3(Section, {
           id: id,
           path: notebookPath,
           onChange: onChange,
@@ -48343,7 +48128,7 @@ class Notebook extends ReactDOM$3.PureComponent {
           workspace: workspace
         }));
       }
-      return v$1("div", {
+      return _$3("div", {
         id: notebookPath,
         classList: "notebook notes",
         style: {
@@ -48658,7 +48443,7 @@ Object.defineProperty(exports, "SplitPane", { enumerable: true, get: function ()
 
 var SplitPaneModule = /*@__PURE__*/getDefaultExportFromCjs(dist);
 
-const Table = /*#__PURE__*/x(({
+const Table = /*#__PURE__*/A(({
   bsPrefix,
   className,
   striped,
@@ -48672,7 +48457,7 @@ const Table = /*#__PURE__*/x(({
 }, ref) => {
   const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'table');
   const classes = classNames(className, decoratedBsPrefix, variant && `${decoratedBsPrefix}-${variant}`, size && `${decoratedBsPrefix}-${size}`, striped && `${decoratedBsPrefix}-${typeof striped === 'string' ? `striped-${striped}` : 'striped'}`, bordered && `${decoratedBsPrefix}-bordered`, borderless && `${decoratedBsPrefix}-borderless`, hover && `${decoratedBsPrefix}-hover`);
-  const table = /*#__PURE__*/e("table", {
+  const table = /*#__PURE__*/u$1("table", {
     ...props,
     className: classes,
     ref: ref
@@ -48682,7 +48467,7 @@ const Table = /*#__PURE__*/x(({
     if (typeof responsive === 'string') {
       responsiveClass = `${responsiveClass}-${responsive}`;
     }
-    return /*#__PURE__*/e("div", {
+    return /*#__PURE__*/u$1("div", {
       className: responsiveClass,
       children: table
     });
@@ -48690,7 +48475,7 @@ const Table = /*#__PURE__*/x(({
   return table;
 });
 
-class TableOfContents extends ReactDOM$3.PureComponent {
+class TableOfContents extends xn.PureComponent {
   static get propTypes() {
     return {
       path: propTypes$2.exports.string,
@@ -48710,19 +48495,19 @@ class TableOfContents extends ReactDOM$3.PureComponent {
       for (const id of [...sections.keys()].sort()) {
         const color = state[`${path}/${id}`] === 'running' ? 'red' : 'black';
         const fontWeight = state[`${path}/${id}`] === 'running' ? 'bold' : undefined;
-        contents.push(v$1(Button, {
+        contents.push(_$3(Button, {
           variant: "light",
           onClick: () => document.querySelector(`#note-id-${CSS.escape(id)}`).scrollIntoView({
             behavior: 'smooth'
           })
-        }, v$1("span", {
+        }, _$3("span", {
           style: {
             color,
             fontWeight
           }
         }, " ", id, " ")));
       }
-      return v$1(ButtonGroup, {
+      return _$3(ButtonGroup, {
         vertical: true,
         style: {
           width: '100%',
@@ -48735,6 +48520,284 @@ class TableOfContents extends ReactDOM$3.PureComponent {
     }
   }
 }
+
+var i=Symbol.for("preact-signals");function t(){if(!(s$1>1)){var i,t=!1;while(void 0!==h){var r=h;h=void 0;f++;while(void 0!==r){var o=r.o;r.o=void 0;r.f&=-3;if(!(8&r.f)&&c(r))try{r.c();}catch(r){if(!t){i=r;t=!0;}}r=o;}}f=0;s$1--;if(t)throw i}else s$1--;}var o=void 0;var h=void 0,s$1=0,f=0,v=0;function e(i){if(void 0!==o){var t=i.n;if(void 0===t||t.t!==o){t={i:0,S:i,p:o.s,n:void 0,t:o,e:void 0,x:void 0,r:t};if(void 0!==o.s)o.s.n=t;o.s=t;i.n=t;if(32&o.f)i.S(t);return t}else if(-1===t.i){t.i=0;if(void 0!==t.n){t.n.p=t.p;if(void 0!==t.p)t.p.n=t.n;t.p=o.s;t.n=void 0;o.s.n=t;o.s=t;}return t}}}function u(i){this.v=i;this.i=0;this.n=void 0;this.t=void 0;}u.prototype.brand=i;u.prototype.h=function(){return !0};u.prototype.S=function(i){if(this.t!==i&&void 0===i.e){i.x=this.t;if(void 0!==this.t)this.t.e=i;this.t=i;}};u.prototype.U=function(i){if(void 0!==this.t){var t=i.e,r=i.x;if(void 0!==t){t.x=r;i.e=void 0;}if(void 0!==r){r.e=t;i.x=void 0;}if(i===this.t)this.t=r;}};u.prototype.subscribe=function(i){var t=this;return E(function(){var r=t.value,n=o;o=void 0;try{i(r);}finally{o=n;}})};u.prototype.valueOf=function(){return this.value};u.prototype.toString=function(){return this.value+""};u.prototype.toJSON=function(){return this.value};u.prototype.peek=function(){var i=o;o=void 0;try{return this.value}finally{o=i;}};Object.defineProperty(u.prototype,"value",{get:function(){var i=e(this);if(void 0!==i)i.i=this.i;return this.v},set:function(i){if(i!==this.v){if(f>100)throw new Error("Cycle detected");this.v=i;this.i++;v++;s$1++;try{for(var r=this.t;void 0!==r;r=r.x)r.t.N();}finally{t();}}}});function d$1(i){return new u(i)}function c(i){for(var t=i.s;void 0!==t;t=t.n)if(t.S.i!==t.i||!t.S.h()||t.S.i!==t.i)return !0;return !1}function a(i){for(var t=i.s;void 0!==t;t=t.n){var r=t.S.n;if(void 0!==r)t.r=r;t.S.n=t;t.i=-1;if(void 0===t.n){i.s=t;break}}}function l$1(i){var t=i.s,r=void 0;while(void 0!==t){var o=t.p;if(-1===t.i){t.S.U(t);if(void 0!==o)o.n=t.n;if(void 0!==t.n)t.n.p=o;}else r=t;t.S.n=t.r;if(void 0!==t.r)t.r=void 0;t=o;}i.s=r;}function y(i){u.call(this,void 0);this.x=i;this.s=void 0;this.g=v-1;this.f=4;}(y.prototype=new u).h=function(){this.f&=-3;if(1&this.f)return !1;if(32==(36&this.f))return !0;this.f&=-5;if(this.g===v)return !0;this.g=v;this.f|=1;if(this.i>0&&!c(this)){this.f&=-2;return !0}var i=o;try{a(this);o=this;var t=this.x();if(16&this.f||this.v!==t||0===this.i){this.v=t;this.f&=-17;this.i++;}}catch(i){this.v=i;this.f|=16;this.i++;}o=i;l$1(this);this.f&=-2;return !0};y.prototype.S=function(i){if(void 0===this.t){this.f|=36;for(var t=this.s;void 0!==t;t=t.n)t.S.S(t);}u.prototype.S.call(this,i);};y.prototype.U=function(i){if(void 0!==this.t){u.prototype.U.call(this,i);if(void 0===this.t){this.f&=-33;for(var t=this.s;void 0!==t;t=t.n)t.S.U(t);}}};y.prototype.N=function(){if(!(2&this.f)){this.f|=6;for(var i=this.t;void 0!==i;i=i.x)i.t.N();}};Object.defineProperty(y.prototype,"value",{get:function(){if(1&this.f)throw new Error("Cycle detected");var i=e(this);this.h();if(void 0!==i)i.i=this.i;if(16&this.f)throw this.v;return this.v}});function w(i){return new y(i)}function _$1(i){var r=i.u;i.u=void 0;if("function"==typeof r){s$1++;var n=o;o=void 0;try{r();}catch(t){i.f&=-2;i.f|=8;g(i);throw t}finally{o=n;t();}}}function g(i){for(var t=i.s;void 0!==t;t=t.n)t.S.U(t);i.x=void 0;i.s=void 0;_$1(i);}function p$1(i){if(o!==this)throw new Error("Out-of-order effect");l$1(this);o=i;this.f&=-2;if(8&this.f)g(this);t();}function b(i){this.x=i;this.u=void 0;this.s=void 0;this.o=void 0;this.f=32;}b.prototype.c=function(){var i=this.S();try{if(8&this.f)return;if(void 0===this.x)return;var t=this.x();if("function"==typeof t)this.u=t;}finally{i();}};b.prototype.S=function(){if(1&this.f)throw new Error("Cycle detected");this.f|=1;this.f&=-9;_$1(this);a(this);s$1++;var i=o;o=this;return p$1.bind(this,i)};b.prototype.N=function(){if(!(2&this.f)){this.f|=2;this.o=h;h=this;}};b.prototype.d=function(){this.f|=8;if(!(1&this.f))g(this);};function E(i){var t=new b(i);try{t.c();}catch(i){t.d();throw i}return t.d.bind(t)}
+
+var s;function l(n,i){l$3[n]=i.bind(null,l$3[n]||function(){});}function d(n){if(s)s();s=n&&n.S();}function p(n){var r=this,f=n.data,o=useSignal(f);o.value=f;var e=T$1(function(){var n=r.__v;while(n=n.__)if(n.__c){n.__c.__$f|=4;break}r.__$u.c=function(){var n;if(!t$2(e.peek())&&3===(null==(n=r.base)?void 0:n.nodeType))r.base.data=e.peek();else {r.__$f|=1;r.setState({});}};return w(function(){var n=o.value.value;return 0===n?0:!0===n?"":n||""})},[]);return e.value}p.displayName="_st";Object.defineProperties(u.prototype,{constructor:{configurable:!0,value:void 0},type:{configurable:!0,value:p},props:{configurable:!0,get:function(){return {data:this}}},__b:{configurable:!0,value:1}});l("__b",function(n,r){if("string"==typeof r.type){var i,t=r.props;for(var f in t)if("children"!==f){var o=t[f];if(o instanceof u){if(!i)r.__np=i={};i[f]=o;t[f]=o.peek();}}}n(r);});l("__r",function(n,r){d();var i,t=r.__c;if(t){t.__$f&=-2;if(void 0===(i=t.__$u))t.__$u=i=function(n){var r;E(function(){r=this;});r.c=function(){t.__$f|=1;t.setState({});};return r}();}d(i);n(r);});l("__e",function(n,r,i,t){d();n(r,i,t);});l("diffed",function(n,r){d();var i;if("string"==typeof r.type&&(i=r.__e)){var t=r.__np,f=r.props;if(t){var o=i.U;if(o)for(var e in o){var u=o[e];if(void 0!==u&&!(e in t)){u.d();o[e]=void 0;}}else i.U=o={};for(var a in t){var c=o[a],s=t[a];if(void 0===c){c=_(i,a,s,f);o[a]=c;}else c.o(s,f);}}}n(r);});function _(n,r,i,t){var f=r in n&&void 0===n.ownerSVGElement,o=d$1(i);return {o:function(n,r){o.value=n;t=r;},d:E(function(){var i=o.value.value;if(t[r]!==i){t[r]=i;if(f)n[r]=i;else if(i)n.setAttribute(r,i);else n.removeAttribute(r);}})}}l("unmount",function(n,r){if("string"==typeof r.type){var i=r.__e;if(i){var t=i.U;if(t){i.U=void 0;for(var f in t){var o=t[f];if(o)o.d();}}}}else {var e=r.__c;if(e){var u=e.__$u;if(u){e.__$u=void 0;u.d();}}}n(r);});l("__h",function(n,r,i,t){if(t<3||9===t)r.__$f|=2;n(r,i,t);});k$2.prototype.shouldComponentUpdate=function(n,r){var i=this.__$u;if(!(i&&void 0!==i.s||4&this.__$f))return !0;if(3&this.__$f)return !0;for(var t in r)return !0;for(var f in n)if("__source"!==f&&n[f]!==this.props[f])return !0;for(var o in this.props)if(!(o in n))return !0;return !1};function useSignal(n){return T$1(function(){return d$1(n)},[])}
+
+const isSourcePath = path => path.startsWith('source/');
+const utf8Decoder = new TextDecoder('utf8');
+class SheetStorage {
+  constructor(id) {
+    const [spreadsheetId, sheetName] = id.split(':');
+    this.accessToken = null;
+    this.clientId = '532457183798-jsvfmkqg8bo4p6evpus34mnij9ac3v9i.apps.googleusercontent.com';
+    this.fileChangeWatcher = null;
+    this.filedDeletionWatcher = null;
+    this.index = null;
+    this.scope = 'https://www.googleapis.com/auth/spreadsheets';
+    this.spreadsheetId = spreadsheetId;
+    this.sheetName = sheetName;
+    this.tokenClient = null;
+    this.setupWatchers();
+  }
+  destroy() {
+    if (this.fileChangeWatcher) {
+      unwatchFileChange(this.fileChangeWatcher);
+      this.fileChangeWatcher = null;
+    }
+    if (this.fileDeletionWatcher) {
+      unwatchFileDeletion(this.fileDeletionWatcher);
+      this.filedDeletionWatcher = null;
+    }
+  }
+  async setupWatchers() {
+    this.fileChangeWatcher = await watchFileChange(async (path, workspace) => {
+      if (!isSourcePath(path)) {
+        return;
+      }
+      const data = await read(path, {
+        workspace
+      });
+      return this.setPath(path, utf8Decoder.decode(data));
+    });
+    this.fileDeletionWatcher = await watchFileDeletion(async (path, workspace) => {
+      if (!isSourcePath(path)) {
+        return;
+      }
+      return this.deletePath(path);
+    });
+  }
+  getTokenClient() {
+    if (!this.tokenClient) {
+      this.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: this.clientId,
+        scope: this.scope
+      });
+    }
+    return this.tokenClient;
+  }
+  noteAccessTokenExpiry() {
+    this.accessToken = null;
+  }
+  getAccessToken() {
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+    return new Promise((resolve, reject) => {
+      const client = this.getTokenClient();
+      client.callback = response => {
+        if (response.access_token) {
+          this.accessToken = response.access_token;
+          resolve(this.accessToken);
+        } else {
+          reject(new Error(`getAccessToken: failed`));
+        }
+      };
+      client.requestAccessToken();
+    });
+  }
+  toValueRangeFromRow(row) {
+    return `${this.sheetName}!B${row}:B${row}`;
+  }
+  toKeyValueRangeFromRow(row) {
+    return `${this.sheetName}!A${row}:B${row}`;
+  }
+  async toRowFromPath(path) {
+    return (await this.getIndex()).get(path);
+  }
+  async toRangeFromPath(path) {
+    return this.toValueRangeFromRow(await this.toRowFromPath(path));
+  }
+  async getIndex() {
+    if (!this.index) {
+      const {
+        values
+      } = await this.getRange(`${this.sheetName}!A:A`);
+      this.index = new Map();
+      for (let nth = 0; nth < values.length; nth++) {
+        if (values[nth][0].length === 0) {
+          // Deleted entries have an empty path.
+          continue;
+        }
+        // Note that sheets are 1 based.
+        this.index.set(values[nth][0], nth + 1);
+      }
+    }
+    return this.index;
+  }
+  async addIndexValue(path, value) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${this.sheetName}!A:B:append?valueInputOption=RAW`;
+    const values = [[path, value]];
+    const body = JSON.stringify({
+      values
+    });
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${await this.getAccessToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body
+      });
+      if (response.ok) {
+        const {
+          updates
+        } = await response.json();
+        const {
+          updatedRange
+        } = updates;
+        // Extract the last number from updatedRange.
+        const regex = /\d+$/;
+        const match = updatedRange.match(regex);
+        const row = match ? parseInt(match[0], 10) : null;
+        // Update the index.
+        this.index.set(path, row);
+        // And we are done.
+        return value;
+      }
+      if (response.status === 401) {
+        this.noteAccessTokenExpiry();
+        continue;
+      }
+      throw new Error(`getRange: ${response.statusText}`);
+    }
+    throw new Error(`getRange: too many attempts`);
+  }
+  async getRange(range) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}`;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${await this.getAccessToken()}`
+        }
+      });
+      if (response.ok) {
+        return response.json();
+      }
+      if (response.status === 401) {
+        this.noteAccessTokenExpiry();
+        continue;
+      }
+      throw new Error(`getRange: ${response.statusText}`);
+    }
+    throw new Error(`getRange: too many attempts`);
+  }
+  async getPath(path) {
+    return this.getRange(await this.toRangeFromPath(path));
+  }
+  getRow(row) {
+    return this.getRange(this.toValueRangeFromRow(row));
+  }
+  async setRange(range, values) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?valueInputOption=RAW`;
+    const body = JSON.stringify({
+      range,
+      values
+    });
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${await this.getAccessToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body
+      });
+      if (response.ok) {
+        return response.json();
+      }
+      if (response.status === 401) {
+        this.noteAccessTokenExpiry();
+        continue;
+      }
+      throw new Error(`setRow: ${response.statusText}`);
+    }
+    throw new Error(`setRow: too many attempts`);
+  }
+  async setRow(row, values) {
+    return this.setRange(this.toValueRangeFromRow(row), [values]);
+  }
+  async setPath(path, value) {
+    const row = await this.toRowFromPath(path);
+    if (row) {
+      return this.setRange(this.toValueRangeFromRow(row), [[value]]);
+    } else {
+      // The path isn't in the index -- we'll need to append it.
+      return this.addIndexValue(path, value);
+    }
+  }
+  async deletePath(path, value) {
+    const row = await this.toRowFromPath(path);
+    if (row) {
+      this.index.delete(path);
+      return this.setRange(this.toKeyValueRangeFromRow(row), [['', '']]);
+    }
+  }
+}
+class Config {
+  constructor(path, defaultValue = '') {
+    this.defaultValue = defaultValue;
+    this.path = path;
+    this.signal = d$1(defaultValue);
+    if (this.path) {
+      onBoot(async () => {
+        this.signal.value = await read(this.path);
+      });
+    }
+  }
+  get() {
+    return this.signal.value;
+  }
+  set(value) {
+    if (this.path) {
+      write(this.path, value);
+    }
+    this.signal.value = value;
+  }
+}
+const id = new Config('config/SheetStorage:id', '');
+const sheetStorageRegistry = new Map();
+const getSheetStorage = spreadsheetId => {
+  if (!spreadsheetId || spreadsheetId === '') {
+    return;
+  }
+  if (!sheetStorageRegistry.has(spreadsheetId)) {
+    sheetStorageRegistry.set(spreadsheetId, new SheetStorage(spreadsheetId));
+  }
+  return sheetStorageRegistry.get(spreadsheetId);
+};
+const removeSheetStorage = async spreadsheetId => {
+  if (!spreadsheetId || spreadsheetId === '') {
+    return;
+  }
+  await getSheetStorage(spreadsheetId).destroy();
+  sheetStorageRegistry.delete(spreadsheetId);
+};
+const updateSheetStorage = async newId => {
+  const oldId = await id.get();
+  if (oldId === newId) {
+    return;
+  }
+  removeSheetStorage(oldId);
+  id.set(newId);
+  return getSheetStorage(newId);
+};
+const render = () => _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Sheet Filesystem"), _$3(Card$1.Text, null, "Select a google sheets spreadsheet to backup and share source data. e.g., to access a sheet named \"Jot\" in \"https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0\". use \"0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot\""), _$3(Form$1, null, _$3(Row, null, _$3(Col, null, _$3(Form$1.Group, {
+  controlId: "SheetStorageId"
+}, _$3(Form$1.Control, {
+  placeholder: "Google-Spreadsheet-Id:SheetName",
+  value: id.get()
+}))), _$3(Col, null, _$3(Button, {
+  variant: "primary",
+  onClick: () => {
+    const {
+      value
+    } = document.getElementById('SheetStorageId');
+    updateSheetStorage(value);
+  }
+}, "Update Sheet Storage"))))));
 
 const {
   SplitPane
@@ -48887,7 +48950,7 @@ const defaultModelConfig = {
     }]
   }
 };
-class App extends ReactDOM$3.Component {
+class App extends xn.Component {
   static get propTypes() {
     return {
       workspace: propTypes$2.exports.string,
@@ -48936,8 +48999,8 @@ class App extends ReactDOM$3.Component {
       workerType: 'module'
     };
     this.ask = async (question, context, transfer) => askService(this.serviceSpec, question, transfer, context).answer;
-    this.layoutRef = /*#__PURE__*/ReactDOM$3.createRef();
-    this.makeLayoutRef = /*#__PURE__*/ReactDOM$3.createRef();
+    this.layoutRef = /*#__PURE__*/xn.createRef();
+    this.makeLayoutRef = /*#__PURE__*/xn.createRef();
     this.Draft = {};
     this.Draft.append = data => {
       this.Draft.change(this.Draft.getCode() + data);
@@ -49070,7 +49133,7 @@ class App extends ReactDOM$3.Component {
       } = values;
       const id = tabNode.getId();
       if (id.startsWith('Notebook/')) {
-        buttons.push(v$1("span", {
+        buttons.push(_$3("span", {
           id: `Spinners/${id}`,
           dangerouslySetInnerHTML: this.Layout.buildSpinners(id.substring('Notebook/'.length))
         }));
@@ -49981,16 +50044,6 @@ class App extends ReactDOM$3.Component {
       });
       await this.Workspace.store();
     };
-    this.Workspace.setSheetStorageId = async newId => {
-      const {
-        SheetStorageId
-      } = this.state;
-      await this.updateState({
-        SheetStorageId: newId
-      });
-      await updateSheetStorage(SheetStorageId, newId);
-      await this.Workspace.store();
-    };
     this.Workspace.openWorkingFile = async file => {
       const path = file.substring('source/'.length);
       await this.Notebook.clickLink(path);
@@ -50016,14 +50069,12 @@ class App extends ReactDOM$3.Component {
         } = this.props;
         const {
           LocalFilesystemHandles,
-          SheetStorageId,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix
         } = this.state;
         const config = {
           LocalFilesystemHandles,
-          SheetStorageId,
           WorkspaceOpenPaths,
           WorkspaceLoadPath,
           WorkspaceLoadPrefix
@@ -50051,7 +50102,6 @@ class App extends ReactDOM$3.Component {
       // We restore WorkspaceOpenPaths via Model.restore.
       const {
         LocalFilesystemHandles = new Map(),
-        SheetStorageId,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix = 'https://raw.githubusercontent.com/jsxcad/JSxCAD/master/nb/'
       } = await read('config/Workspace', {
@@ -50065,12 +50115,10 @@ class App extends ReactDOM$3.Component {
       }
       await this.updateState({
         LocalFilesystemHandles,
-        SheetStorageId,
         WorkspaceLoadPath,
         WorkspaceLoadPrefix
       });
       setLocalFilesystems(LocalFilesystemHandles);
-      await getSheetStorage(SheetStorageId);
     };
     this.Workspace.export = async prefix => {
       const {
@@ -50157,7 +50205,6 @@ class App extends ReactDOM$3.Component {
         case 'Workspace':
           {
             const {
-              SheetStorageId,
               WorkspaceFiles = [],
               WorkspaceOpenPaths = [],
               WorkspaceLoadPath = '',
@@ -50171,28 +50218,28 @@ class App extends ReactDOM$3.Component {
               if (prefix === undefined) {
                 continue;
               }
-              localFilesystemEntries.push(v$1(Button, {
+              localFilesystemEntries.push(_$3(Button, {
                 onClick: () => this.Workspace.setLocalFilesystem(prefix)
               }, "Remove ", prefix));
             }
-            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Set Base Path"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
+            return _$3("div", null, _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Set Base Path"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(Form$1.Group, {
               controlId: "WorkspaceLoadPrefixId"
-            }, v$1(Form$1.Control, {
+            }, _$3(Form$1.Control, {
               placeholder: "Prefix",
               onChange: e => this.updateState({
                 WorkspaceLoadPrefix: e.target.value
               }),
               value: WorkspaceLoadPrefix
-            })))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Select Paths"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(ListGroup$1, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => v$1(ListGroup$1.Item, {
+            })))))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Select Paths"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(ListGroup$1, null, WorkspaceFiles.filter(file => file.startsWith(prefix)).map((file, index) => _$3(ListGroup$1.Item, {
               key: index
-            }, v$1(ButtonGroup, {
+            }, _$3(ButtonGroup, {
               variant: computeListItemVariant(file),
               key: index
-            }, v$1(InputGroup$1.Checkbox, {
+            }, _$3(InputGroup$1.Checkbox, {
               key: index,
               type: "checkbox",
               id: `WorkspaceSelect/${file}`
-            }), v$1(Button, {
+            }), _$3(Button, {
               variant: computeListItemVariant(file),
               key: index,
               action: true,
@@ -50205,7 +50252,7 @@ class App extends ReactDOM$3.Component {
                   this.Workspace.openWorkingFile(file);
                 }
               }
-            }, file.substring(prefix.length)))))))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Export Selected Paths to Folder"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Button, {
+            }, file.substring(prefix.length)))))))))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Export Selected Paths to Folder"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(Button, {
               onClick: () => {
                 const {
                   WorkspaceLoadPrefix
@@ -50213,21 +50260,21 @@ class App extends ReactDOM$3.Component {
                 this.Workspace.export(WorkspaceLoadPrefix);
               },
               disabled: !WorkspaceLoadPrefix
-            }, "Export"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Revert Selected Paths"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Button, {
+            }, "Export"))))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Revert Selected Paths"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(Button, {
               onClick: async event => {
                 for (const path of this.Workspace.getSelectedPaths()) {
                   this.Workspace.revertWorkingFile(path);
                 }
               }
-            }, "Revert"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Import"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, {
+            }, "Revert"))))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Import"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(Form$1.Group, {
               controlId: "WorkspaceLoadPathId"
-            }, v$1(Form$1.Control, {
+            }, _$3(Form$1.Control, {
               placeholder: "Path (extending Base Path)",
               onChange: e => this.updateState({
                 WorkspaceLoadPath: e.target.value
               }),
               value: WorkspaceLoadPath
-            }), v$1(Form$1.Text, null, "Path")), v$1(Button, {
+            }), _$3(Form$1.Text, null, "Path")), _$3(Button, {
               variant: "primary",
               onClick: () => {
                 const {
@@ -50237,7 +50284,7 @@ class App extends ReactDOM$3.Component {
                 this.Workspace.loadWorkingPath(`${WorkspaceLoadPrefix}${WorkspaceLoadPath}`);
               },
               disabled: !WorkspaceLoadPath
-            }, "Import or Open New"), v$1(Form$1.Control, {
+            }, "Import or Open New"), _$3(Form$1.Control, {
               as: "input",
               type: "file",
               id: "WorkspaceUploadControl",
@@ -50251,39 +50298,26 @@ class App extends ReactDOM$3.Component {
               style: {
                 display: 'none'
               }
-            }), "\xA0", v$1(Button, {
+            }), "\xA0", _$3(Button, {
               variant: "primary",
               onClick: () => {
                 document.getElementById('WorkspaceUploadControl').click();
               },
               disabled: !WorkspaceLoadPath
-            }, "Upload from Computer"))))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Workspace"), v$1(Card$1.Text, null, v$1(Button, {
+            }, "Upload from Computer"))))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Reset Workspace"), _$3(Card$1.Text, null, _$3(Button, {
               variant: "primary",
               onClick: this.Workspace.reset
-            }, "Reset")))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Local Filesystem"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Form$1.Group, null, v$1(Form$1.Control, {
+            }, "Reset")))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Local Filesystem"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(Form$1.Group, null, _$3(Form$1.Control, {
               id: "AddLocalFilesystemPrefix",
               placeholder: "Prefix",
               value: ""
-            })), v$1(Button, {
+            })), _$3(Button, {
               variant: "primary",
               onClick: async () => {
                 const handle = await showDirectoryPicker();
                 this.Workspace.setLocalFilesystem(document.getElementById('AddLocalFilesystemPrefix').value, handle);
               }
-            }, "Add Local Filesystem"), localFilesystemEntries)))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Sheet Filesystem"), v$1(Card$1.Text, null, "Select a google sheets spreadsheet to backup and share source data. e.g., to access a sheet named \"Jot\" in \"https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0\". use \"0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot\""), v$1(Form$1, null, v$1(Row, null, v$1(Col, null, v$1(Form$1.Group, {
-              controlId: "SheetStorageId"
-            }, v$1(Form$1.Control, {
-              placeholder: "Google-Spreadsheet-Id:SheetName",
-              value: SheetStorageId
-            }))), v$1(Col, null, v$1(Button, {
-              variant: "primary",
-              onClick: () => {
-                const {
-                  value
-                } = document.getElementById('SheetStorageId');
-                this.Workspace.setSheetStorageId(value);
-              }
-            }, "Update Sheet Storage")))))));
+            }, "Add Local Filesystem"), localFilesystemEntries)))), render());
           }
         case 'Make':
           {
@@ -50299,10 +50333,9 @@ class App extends ReactDOM$3.Component {
                       model: node.getExtraData().model.toJson()
                     }
                   }));
-                  //  node.getConfig().model = node.getExtraData().model.toJson();
                 });
               }
-              return v$1(FlexLayout.Layout, {
+              return _$3(FlexLayout.Layout, {
                 model: model,
                 factory: this.factory,
                 ref: this.makeLayoutRef,
@@ -50331,13 +50364,13 @@ class App extends ReactDOM$3.Component {
                 }
               });
             };
-            return v$1(Form$1, null, v$1(Form$1.Control, {
+            return _$3(Form$1, null, _$3(Form$1.Control, {
               id: "Make/Tabset/Tab/Name",
               placeholder: "name"
-            }), v$1(Form$1.Control, {
+            }), _$3(Form$1.Control, {
               id: "Make/Tabset/Tab/IP",
               placeholder: "IP Address"
-            }), v$1(Button, {
+            }), _$3(Button, {
               onClick: () => addMachine('EspWebUi')
             }, "Add ESP WebUI Machine"));
           }
@@ -50352,7 +50385,7 @@ class App extends ReactDOM$3.Component {
             const {
               ip
             } = node.getConfig();
-            return v$1(MakeEspWebUi, {
+            return _$3(MakeEspWebUi, {
               ip: ip,
               path: View.path,
               workspace: workspace
@@ -50372,7 +50405,7 @@ class App extends ReactDOM$3.Component {
             switch (NotebookMode) {
               case 'edit':
                 {
-                  return v$1(SplitPane, null, v$1(Notebook, {
+                  return _$3(SplitPane, null, _$3(Notebook, {
                     notebookPath: path,
                     notebookText: NotebookText,
                     onChange: onCodeChange,
@@ -50382,7 +50415,7 @@ class App extends ReactDOM$3.Component {
                     sections: NotebookSections,
                     version: NotebookVersion,
                     workspace: workspace
-                  }), v$1(JsEditorUi, {
+                  }), _$3(JsEditorUi, {
                     mode: NotebookMode,
                     onRun: () => this.Notebook.run(path),
                     onSave: () => this.Notebook.save(path),
@@ -50398,7 +50431,7 @@ class App extends ReactDOM$3.Component {
               default:
               case 'view':
                 {
-                  return v$1(Notebook, {
+                  return _$3(Notebook, {
                     notebookPath: path,
                     notebookText: NotebookText,
                     onClickView: this.Notebook.clickView,
@@ -50419,7 +50452,7 @@ class App extends ReactDOM$3.Component {
               [`NotebookSections/${path}`]: NotebookSections = {},
               WorkerState = {}
             } = this.state;
-            return v$1(TableOfContents, {
+            return _$3(TableOfContents, {
               path: path,
               sections: NotebookSections,
               state: WorkerState
@@ -50427,7 +50460,7 @@ class App extends ReactDOM$3.Component {
           }
         case 'Draft':
           {
-            return v$1(EditNote, {
+            return _$3(EditNote, {
               notebookPath: this.Notebook.getSelectedPath(),
               key: "$Draft",
               source: this.Draft.getCode(),
@@ -50444,7 +50477,7 @@ class App extends ReactDOM$3.Component {
             const {
               View = {}
             } = this.state;
-            return v$1(DynamicView, {
+            return _$3(DynamicView, {
               path: View.path,
               onIndicatePoint: ([x = 0, y = 0, z = 0, nx = 0, ny = 0, nz = 1]) => navigator.clipboard.writeText(`Ref(${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}, ${nx.toFixed(2)}, ${ny.toFixed(2)}, ${nz.toFixed(2)})`),
               view: View.view,
@@ -50453,13 +50486,13 @@ class App extends ReactDOM$3.Component {
           }
         case 'Help':
           {
-            return v$1("div", null, v$1("blockquote", null, "These links will open in a separate window.", v$1("ul", null, v$1("li", null, v$1("a", {
+            return _$3("div", null, _$3("blockquote", null, "These links will open in a separate window.", _$3("ul", null, _$3("li", null, _$3("a", {
               href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/start.md",
               target: "help"
-            }, "Getting Started")), v$1("li", null, v$1("a", {
+            }, "Getting Started")), _$3("li", null, _$3("a", {
               href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/api/index.md",
               target: "help"
-            }, "API Documentation")), v$1("li", null, v$1("a", {
+            }, "API Documentation")), _$3("li", null, _$3("a", {
               href: "https://github.com/jsxcad/JSxCAD/blob/master/nb/projects/index.md",
               target: "help"
             }, "Projects")))));
@@ -50469,18 +50502,18 @@ class App extends ReactDOM$3.Component {
             const {
               WorkspaceFiles = []
             } = this.state;
-            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "(Advanced Interface)"), v$1(Card$1.Text, null, "This provides lower level access to the internal filesystem."))), v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Clear Cached Files"), v$1(Card$1.Text, null, v$1(Button, {
+            return _$3("div", null, _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "(Advanced Interface)"), _$3(Card$1.Text, null, "This provides lower level access to the internal filesystem."))), _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Clear Cached Files"), _$3(Card$1.Text, null, _$3(Button, {
               variant: "primary",
               onClick: this.Files.deleteCachedFiles
-            }, "Delete Temporary Files"))), v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Source Files"), v$1(Card$1.Text, null, v$1(Table, {
+            }, "Delete Temporary Files"))), _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Source Files"), _$3(Card$1.Text, null, _$3(Table, {
               striped: true,
               border: true,
               hover: true
-            }, v$1("tbody", null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => v$1("tr", {
+            }, _$3("tbody", null, WorkspaceFiles.filter(file => !isRegenerable(file)).map((file, index) => _$3("tr", {
               key: index
-            }, v$1("td", null, v$1(Button, {
+            }, _$3("td", null, _$3(Button, {
               onClick: () => this.Files.deleteSourceFile(file)
-            }, "Delete")), v$1("td", null, file))))))), v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Reset Layout"), v$1(Card$1.Text, null, v$1(Button, {
+            }, "Delete")), _$3("td", null, file))))))), _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Reset Layout"), _$3(Card$1.Text, null, _$3(Button, {
               variant: "primary",
               onClick: this.Model.reset
             }, "Reset")))));
@@ -50491,12 +50524,12 @@ class App extends ReactDOM$3.Component {
               LogMessages = [],
               LogFilter = ''
             } = this.state;
-            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Log Messages"), v$1(Card$1.Text, null, v$1(Form$1, null, v$1(Row, null, v$1(Col, null, v$1(Form$1.Group, {
+            return _$3("div", null, _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Log Messages"), _$3(Card$1.Text, null, _$3(Form$1, null, _$3(Row, null, _$3(Col, null, _$3(Form$1.Group, {
               controlId: "LogFilterId"
-            }, v$1(Form$1.Control, {
+            }, _$3(Form$1.Control, {
               placeholder: "Filter source by regex",
               value: LogFilter
-            }))), v$1(Col, null, v$1(Button, {
+            }))), _$3(Col, null, _$3(Button, {
               variant: "primary",
               onClick: () => {
                 const {
@@ -50504,34 +50537,34 @@ class App extends ReactDOM$3.Component {
                 } = document.getElementById('LogFilterId');
                 this.Log.updateFilter(value);
               }
-            }, "Update Filter")))), v$1(Button, {
+            }, "Update Filter")))), _$3(Button, {
               variant: "primary",
               onClick: this.Log.clear
-            }, "Clear"), v$1(Table, {
+            }, "Clear"), _$3(Table, {
               striped: true,
               border: true,
               hover: true
-            }, v$1("thead", null, v$1("tr", null, v$1("td", null, "ID"), v$1("td", null, "Type"), v$1("td", null, "Source"), v$1("td", null, "Message"))), v$1("tbody", null, LogMessages.filter(({
+            }, _$3("thead", null, _$3("tr", null, _$3("td", null, "ID"), _$3("td", null, "Type"), _$3("td", null, "Source"), _$3("td", null, "Message"))), _$3("tbody", null, LogMessages.filter(({
               source
             }) => !source || !LogFilter || source.match(LogFilter)).map(({
               type,
               source,
               text,
               id
-            }, index) => v$1("tr", {
+            }, index) => _$3("tr", {
               key: index
-            }, v$1("td", null, id), v$1("td", null, type), v$1("td", null, source), v$1("td", null, text)))))))));
+            }, _$3("td", null, id), _$3("td", null, type), _$3("td", null, source), _$3("td", null, text)))))))));
           }
         case 'Config':
           {
-            return v$1("div", null, v$1(Card$1, null, v$1(Card$1.Body, null, v$1(Card$1.Title, null, "Configuration"), v$1(Card$1.Text, null, v$1(Form$1, {
+            return _$3("div", null, _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Configuration"), _$3(Card$1.Text, null, _$3(Form$1, {
               id: "form/Config"
-            }, v$1(Button, {
+            }, _$3(Button, {
               variant: "primary",
               onClick: this.Config.update
-            }, "Update"), v$1(Form$1.Group, {
+            }, "Update"), _$3(Form$1.Group, {
               controlId: "Config/api/shape/endTimer/md"
-            }, v$1(Form$1.Check, {
+            }, _$3(Form$1.Check, {
               type: "checkbox",
               label: "Emit md from endTimer",
               checked: this.Config.path('Config/api/shape/endTimer').md
@@ -50719,7 +50752,7 @@ class App extends ReactDOM$3.Component {
     if (!model) {
       return;
     }
-    return v$1(FlexLayout.Layout, {
+    return _$3(FlexLayout.Layout, {
       ref: this.layoutRef,
       model: model,
       factory: this.factory,
@@ -50735,20 +50768,9 @@ const installUi = async ({
   sha,
   path
 }) => {
-  const isPersistent = await navigator.storage.persist();
-  console.log(`QQ/isPersistent: ${isPersistent}`);
+  setupWorkspace('JSxCAD');
   await boot();
-  /*
-  const decoder = new TextDecoder('utf8');
-  for (const file of await listFiles({ workspace })) {
-    if (file.startsWith('source/')) {
-      const data = await read(file, { workspace });
-      await setSheetPathValue(file, decoder.decode(data));
-    }
-    console.log(`QQ/file: ${file}`);
-  }
-  */
-  ReactDOM$3.render(v$1(App, {
+  xn.render(_$3(App, {
     sha: 'master',
     workspace: 'JSxCAD',
     path: path
