@@ -42435,16 +42435,16 @@ function qsa(element, selector) {
 function useForceUpdate() {
   // The toggling state value is designed to defeat React optimizations for skipping
   // updates when they are strictly equal to the last state value
-  const [, dispatch] = p$2(state => !state, false);
+  const [, dispatch] = p$2(revision => revision + 1, 0);
   return dispatch;
 }
 
-const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
+const toFnRef$1 = ref => !ref || typeof ref === 'function' ? ref : value => {
   ref.current = value;
 };
-function mergeRefs(refA, refB) {
-  const a = toFnRef(refA);
-  const b = toFnRef(refB);
+function mergeRefs$1(refA, refB) {
+  const a = toFnRef$1(refA);
+  const b = toFnRef$1(refB);
   return value => {
     if (a) a(value);
     if (b) b(value);
@@ -42467,8 +42467,8 @@ function mergeRefs(refA, refB) {
  * @param refB A Callback or mutable Ref
  * @category refs
  */
-function useMergedRefs(refA, refB) {
-  return T$1(() => mergeRefs(refA, refB), [refA, refB]);
+function useMergedRefs$1(refA, refB) {
+  return T$1(() => mergeRefs$1(refA, refB), [refA, refB]);
 }
 
 const NavContext = /*#__PURE__*/G$1(null);
@@ -42502,7 +42502,7 @@ function dataProp(property) {
  *
  * @param value The `Ref` value
  */
-function useCommittedRef(value) {
+function useCommittedRef$1(value) {
   const ref = A$1(value);
   y$1(() => {
     ref.current = value;
@@ -42510,8 +42510,8 @@ function useCommittedRef(value) {
   return ref;
 }
 
-function useEventCallback(fn) {
-  const ref = useCommittedRef(fn);
+function useEventCallback$1(fn) {
+  const ref = useCommittedRef$1(fn);
   return q$1(function (...args) {
     return ref.current && ref.current(...args);
   }, [ref]);
@@ -42565,7 +42565,7 @@ function useNavItem({
       props['aria-disabled'] = true;
     }
   }
-  props.onClick = useEventCallback(e => {
+  props.onClick = useEventCallback$1(e => {
     if (disabled) return;
     onClick == null ? void 0 : onClick(e);
     if (key == null) {
@@ -42679,7 +42679,7 @@ const Nav = /*#__PURE__*/A((_ref, ref) => {
     }
     needsRefocusRef.current = false;
   });
-  const mergedRef = useMergedRefs(ref, listNode);
+  const mergedRef = useMergedRefs$1(ref, listNode);
   return /*#__PURE__*/u$1(SelectableContext.Provider, {
     value: handleSelect,
     children: /*#__PURE__*/u$1(NavContext$1.Provider, {
@@ -42702,6 +42702,30 @@ Nav.displayName = 'Nav';
 var BaseNav = Object.assign(Nav, {
   Item: NavItem$1
 });
+
+/**
+ * Creates a `Ref` whose value is updated in an effect, ensuring the most recent
+ * value is the one rendered with. Generally only required for Concurrent mode usage
+ * where previous work in `render()` may be discarded before being used.
+ *
+ * This is safe to access in an event handler.
+ *
+ * @param value The `Ref` value
+ */
+function useCommittedRef(value) {
+  const ref = A$1(value);
+  y$1(() => {
+    ref.current = value;
+  }, [value]);
+  return ref;
+}
+
+function useEventCallback(fn) {
+  const ref = useCommittedRef(fn);
+  return q$1(function (...args) {
+    return ref.current && ref.current(...args);
+  }, [ref]);
+}
 
 const ListGroupItem = /*#__PURE__*/A(({
   bsPrefix,
@@ -44062,6 +44086,25 @@ Transition.ENTERING = ENTERING;
 Transition.ENTERED = ENTERED;
 Transition.EXITING = EXITING;
 
+function getReactVersion() {
+  const parts = hn.split('.');
+  return {
+    major: +parts[0],
+    minor: +parts[1],
+    patch: +parts[2]
+  };
+}
+function getChildRef(element) {
+  if (!element || typeof element === 'function') {
+    return null;
+  }
+  const {
+    major
+  } = getReactVersion();
+  const childRef = major >= 19 ? element.props.ref : element.ref;
+  return childRef;
+}
+
 var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /* eslint-disable no-return-assign */
@@ -44249,6 +44292,38 @@ function triggerBrowserReflow(node) {
   node.offsetHeight;
 }
 
+const toFnRef = ref => !ref || typeof ref === 'function' ? ref : value => {
+  ref.current = value;
+};
+function mergeRefs(refA, refB) {
+  const a = toFnRef(refA);
+  const b = toFnRef(refB);
+  return value => {
+    if (a) a(value);
+    if (b) b(value);
+  };
+}
+
+/**
+ * Create and returns a single callback ref composed from two other Refs.
+ *
+ * ```tsx
+ * const Button = React.forwardRef((props, ref) => {
+ *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
+ *   const mergedRef = useMergedRefs(ref, attachRef);
+ *
+ *   return <button ref={mergedRef} {...props}/>
+ * })
+ * ```
+ *
+ * @param refA A Callback or mutable Ref
+ * @param refB A Callback or mutable Ref
+ * @category refs
+ */
+function useMergedRefs(refA, refB) {
+  return T$1(() => mergeRefs(refA, refB), [refA, refB]);
+}
+
 function safeFindDOMNode(componentOrElement) {
   if (componentOrElement && 'setState' in componentOrElement) {
     return xn.findDOMNode(componentOrElement);
@@ -44383,7 +44458,7 @@ const Collapse = /*#__PURE__*/xn.forwardRef(({
     onEntered: handleEntered,
     onExit: handleExit,
     onExiting: handleExiting,
-    childRef: children.ref,
+    childRef: getChildRef(children),
     in: inProp,
     timeout: timeout,
     mountOnEnter: mountOnEnter,
@@ -44537,6 +44612,7 @@ var AccordionButton$1 = AccordionButton;
 const AccordionHeader = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'h2',
+  'aria-controls': ariaControls,
   bsPrefix,
   className,
   children,
@@ -44550,6 +44626,7 @@ const AccordionHeader = /*#__PURE__*/A(({
     className: classNames(className, bsPrefix),
     children: /*#__PURE__*/u$1(AccordionButton$1, {
       onClick: onClick,
+      "aria-controls": ariaControls,
       children: children
     })
   });
