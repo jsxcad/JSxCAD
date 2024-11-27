@@ -241,17 +241,10 @@ export const updateNotebook = async (
         throw new Error(note.error.text);
       }
     }
-    // if (!browser) { console.log('no browser'); return; }
     const { encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',
     });
-    /*
-    const { imageUrlList } = await screenshot(
-      new TextDecoder('utf8').decode(html),
-      { browser }
-    );
-    */
     {
       // Build a version for jsxcad.js.org/nb/
       const { html } = await toStandaloneFromScript({
@@ -264,10 +257,10 @@ export const updateNotebook = async (
       writeFileSync(`${target}.html`, html);
     }
     const imageUrlList = [];
-    let nth = 0;
-    for (const { path, view, viewId = String(nth) } of notebook) {
+    for (const note of notebook) {
+      const { path, view } = note;
       if (view) {
-        nth += 1;
+        const { viewId } = view;
         const geometry = await read(path, { workspace });
         const png = await renderPng({ geometry, view }, { offsetWidth: view.width, offsetHeight: view.height });
         const pathViewId = viewId.replace(/[/]/g, '_');
@@ -333,66 +326,6 @@ export const updateNotebook = async (
       failedExpectations,
       workspace
     );
-/*
-    for (let nth = 0; nth < imageUrlList.length; nth++) {
-      const { imageUrl, viewId = nth } = imageUrlList[nth];
-      const pathViewId = viewId.replace(/[/]/g, '_');
-      const observedPath = `${target}.md.${pathViewId}.observed.png`;
-      const expectedPath = `${target}.md.${pathViewId}.png`;
-      const { dataBuffer } = imageDataUri.decode(imageUrl);
-      writeFileSync(observedPath, dataBuffer);
-      const observedPng = pngjs.PNG.sync.read(dataBuffer);
-      let expectedPng;
-      try {
-        expectedPng = pngjs.PNG.sync.read(readFileSync(expectedPath));
-      } catch (error) {
-        console.log(`EE/1: ${JSON.stringify(error)}`);
-        if (error.code === 'ENOENT') {
-          // We couldn't find a matching expectation.
-          failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
-          failedExpectations.push(`git add '${expectedPath}'`);
-          continue;
-        } else {
-          throw error;
-        }
-      }
-      const { width, height } = expectedPng;
-      if (width !== observedPng.width || height !== observedPng.height) {
-        // Can't diff when the dimensions don't match.
-        failedExpectations.push('# dimensions differ');
-        failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
-        continue;
-      }
-      const differencePng = new pngjs.PNG({ width, height });
-      const numFailedPixels = pixelmatch(
-        expectedPng.data,
-        observedPng.data,
-        differencePng.data,
-        width,
-        height,
-        {
-          threshold: 0.01,
-          alpha: 0.2,
-          diffMask: process.env.FORCE_COLOR === '0',
-          diffColor:
-            process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
-        }
-      );
-      if (
-        numFailedPixels > PIXEL_THRESHOLD &&
-        !IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS.has(observedPath)
-      ) {
-        const differencePath = `${target}.md.${pathViewId}.difference.png`;
-        writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
-        // Note failures.
-        failedExpectations.push(
-          `# numFailedPixels ${numFailedPixels} > PIXEL_THRESHOLD ${PIXEL_THRESHOLD}`
-        );
-        failedExpectations.push(`display '${differencePath}'`);
-        failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
-      }
-    }
-*/
   } catch (error) {
     console.log(`EE/2: ${JSON.stringify(error)}`);
     console.log(error.stack);
