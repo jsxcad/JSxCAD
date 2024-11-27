@@ -1,6 +1,5 @@
 import {
-  CanvasTexture,
-  ImageBitmapLoader,
+  DataTexture,
   MeshNormalMaterial,
   MeshPhongMaterial,
   MeshPhysicalMaterial,
@@ -10,6 +9,15 @@ import {
 
 import { setColor } from './color.js';
 import { toThreejsMaterialFromTags } from '@jsxcad/algorithm-material';
+import { fromPng } from '@jsxcad/convert-png';
+
+const toDataTextureFromPngUrl = async (url) => {
+  const result = await fetch(url);
+  const { width, height, pixels } = await fromPng(await result.arrayBuffer())
+  const texture = new DataTexture(pixels, width, height);
+  texture.needsUpdate = true;
+  return texture;
+};
 
 // Map of url to texture promises;
 const textureCache = new Map();
@@ -18,23 +26,7 @@ const loadTexture = (url) => {
   if (!textureCache.has(url)) {
     textureCache.set(
       url,
-      new Promise((resolve, reject) => {
-        const loader = new ImageBitmapLoader();
-        loader.setOptions({ imageOrientation: 'flipY' });
-        loader.load(
-          url,
-          (imageBitmap) => {
-            const texture = new CanvasTexture(imageBitmap);
-            texture.wrapS = texture.wrapT = RepeatWrapping;
-            texture.offset.set(0, 0);
-            texture.repeat.set(1, 1);
-            texture.colorSpace = SRGBColorSpace;
-            resolve(texture);
-          },
-          (progress) => console.log(`Loading: ${url}`),
-          reject
-        );
-      })
+      toDataTextureFromPngUrl(url)
     );
   }
   return textureCache.get(url);

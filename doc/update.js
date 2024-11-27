@@ -11,7 +11,7 @@ import { clearMeshCache } from '@jsxcad/algorithm-cgal';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import puppeteer from 'puppeteer';
+// import puppeteer from 'puppeteer';
 import { updateNotebook } from './updateNotebook.js';
 
 Error.stackTraceLimit = Infinity;
@@ -29,17 +29,18 @@ server.listen(5001);
 const makePosixPath = (string) => string.split(path.sep).join(path.posix.sep);
 
 const processArgs = (args) => {
-  const isNoHtml = args.includes('--nohtml');
+  // const isNoHtml = args.includes('--nohtml');
   const isQuiet = args.includes('--quiet');
   const last = args[args.length - 1];
   const baseDirectory = last && !last.startsWith('--') ? last : '.';
-  return { isQuiet, baseDirectory, isNoHtml };
+  return { isQuiet, baseDirectory };
 };
 
 const build = async (...args) => {
-  const { isNoHtml, isQuiet, baseDirectory } = processArgs(
+  const { isQuiet, baseDirectory } = processArgs(
     args.filter((arg) => arg)
   );
+  /*
   const browser = isNoHtml
     ? undefined
     : await puppeteer.launch({
@@ -54,6 +55,7 @@ const build = async (...args) => {
           '--js-flags="--experimental-wasm-eh"',
         ],
       });
+  */
   const notebookDurations = [];
   const startTime = new Date();
   setLocalFilesystem(
@@ -99,7 +101,7 @@ const build = async (...args) => {
       console.log(`Processing notebook: ${cwd}/${notebook}.nb`);
       await updateNotebook(notebook, {
         failedExpectations,
-        browser,
+        // browser,
         baseDirectory,
         workspace: notebook.replace(/[/]/g, '_'),
       });
@@ -155,9 +157,7 @@ const build = async (...args) => {
     console.log(error.stack);
     exitCode = 1;
   }
-  if (browser) {
-    await browser.close();
-  }
+  // if (browser) { await browser.close(); }
   process.stderr.write('', () =>
     process.stdout.write('', () => process.exit(exitCode))
   );

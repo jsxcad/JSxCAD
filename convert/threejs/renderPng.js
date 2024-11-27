@@ -36,14 +36,15 @@ export const renderPng = async (
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
+  const context = gl(width, height, { preserveDrawingBuffer: true });
   const canvas = {
     width,
     height,
     addEventListener: (event) => {},
     removeEventListener: (event) => {},
+    getContext: () => context,
   };
-  const context = gl(width, height, { preserveDrawingBuffer: true });
   const { renderer } = await staticDisplay({ canvas, geometry, context }, page);
   const { pixels } = extractPixels(renderer.getContext());
-  return new Uint8Array(UPNG.encode([pixels], width, height, 256));
+  return UPNG.encode([pixels], width, height, 256);
 };

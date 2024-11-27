@@ -18,11 +18,12 @@ import {
 
 import Base64ArrayBuffer from 'base64-arraybuffer';
 import api from '@jsxcad/api';
-import imageDataUri from 'image-data-uri';
+// import imageDataUri from 'image-data-uri';
 import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
-import { screenshot } from './screenshot.js';
+import { renderPng } from '@jsxcad/convert-threejs';
+// import { screenshot } from './screenshot.js';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/api/Orb.md.$5_2.observed.png',
@@ -53,8 +54,6 @@ const writeMarkdown = async (
   workspace
 ) => {
   const output = [];
-  let imageCount = 0;
-  let viewCount = 0;
   for (let nth = 0; nth < notebook.length; nth++) {
     const note = notebook[nth];
     const { md, sourceText, view } = note;
@@ -70,13 +69,10 @@ const writeMarkdown = async (
       }
     }
     if (view) {
-      const { imageUrl, viewId = imageCount++ } = imageUrlList[viewCount++];
-      const pathViewId = viewId.replace(/[/]/g, '_');
-      if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
+        const pathViewId = view.viewId.replace(/[/]/g, '_');
         const imagePath = `${modulePath}.md.${pathViewId}.png`;
         output.push(`![Image](${pathModule.basename(imagePath)})`);
         output.push('');
-      }
       const { download } = view;
       if (download) {
         const { entries } = download;
@@ -245,18 +241,17 @@ export const updateNotebook = async (
         throw new Error(note.error.text);
       }
     }
-    if (!browser) {
-      console.log('no browser');
-      return;
-    }
-    const { html, encodedNotebook } = await toHtmlFromNotebook(notebook, {
+    // if (!browser) { console.log('no browser'); return; }
+    const { encodedNotebook } = await toHtmlFromNotebook(notebook, {
       module,
       modulePath: 'http://127.0.0.1:5001',
     });
+    /*
     const { imageUrlList } = await screenshot(
       new TextDecoder('utf8').decode(html),
       { browser }
     );
+    */
     {
       // Build a version for jsxcad.js.org/nb/
       const { html } = await toStandaloneFromScript({
@@ -268,6 +263,69 @@ export const updateNotebook = async (
       });
       writeFileSync(`${target}.html`, html);
     }
+    const imageUrlList = [];
+    let nth = 0;
+    for (const { path, view, viewId = String(nth) } of notebook) {
+      if (view) {
+        nth += 1;
+        const geometry = await read(path, { workspace });
+        const png = await renderPng({ geometry, view }, { offsetWidth: view.width, offsetHeight: view.height });
+        const pathViewId = viewId.replace(/[/]/g, '_');
+        const observedPath = `${target}.md.${pathViewId}.observed.png`;
+        const expectedPath = `${target}.md.${pathViewId}.png`;
+        writeFileSync(observedPath, new Uint8Array(png));
+        const observedPng = pngjs.PNG.sync.read(Buffer.from(png));
+        let expectedPng;
+        try {
+          expectedPng = pngjs.PNG.sync.read(readFileSync(expectedPath));
+        } catch (error) {
+          console.log(`EE/1: ${JSON.stringify(error)}`);
+          if (error.code === 'ENOENT') {
+            // We couldn't find a matching expectation.
+            failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
+            failedExpectations.push(`git add '${expectedPath}'`);
+            continue;
+          } else {
+            throw error;
+          }
+        }
+        const { width, height } = expectedPng;
+        if (width !== observedPng.width || height !== observedPng.height) {
+          // Can't diff when the dimensions don't match.
+          failedExpectations.push('# dimensions differ');
+          failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
+          continue;
+        }
+        const differencePng = new pngjs.PNG({ width, height });
+        const numFailedPixels = pixelmatch(
+          expectedPng.data,
+          observedPng.data,
+          differencePng.data,
+          width,
+          height,
+          {
+            threshold: 0.01,
+            alpha: 0.2,
+            diffMask: process.env.FORCE_COLOR === '0',
+            diffColor:
+              process.env.FORCE_COLOR === '0' ? [255, 255, 255] : [255, 0, 0],
+          }
+        );
+        if (
+          numFailedPixels > PIXEL_THRESHOLD &&
+          !IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS.has(observedPath)
+        ) {
+          const differencePath = `${target}.md.${pathViewId}.difference.png`;
+          writeFileSync(differencePath, pngjs.PNG.sync.write(differencePng));
+          // Note failures.
+          failedExpectations.push(
+            `# numFailedPixels ${numFailedPixels} > PIXEL_THRESHOLD ${PIXEL_THRESHOLD}`
+          );
+          failedExpectations.push(`display '${differencePath}'`);
+          failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
+        }
+      }
+    }
     await writeMarkdown(
       target,
       encodedNotebook,
@@ -275,6 +333,7 @@ export const updateNotebook = async (
       failedExpectations,
       workspace
     );
+/*
     for (let nth = 0; nth < imageUrlList.length; nth++) {
       const { imageUrl, viewId = nth } = imageUrlList[nth];
       const pathViewId = viewId.replace(/[/]/g, '_');
@@ -333,6 +392,7 @@ export const updateNotebook = async (
         failedExpectations.push(`cp '${observedPath}' '${expectedPath}'`);
       }
     }
+*/
   } catch (error) {
     console.log(`EE/2: ${JSON.stringify(error)}`);
     console.log(error.stack);
