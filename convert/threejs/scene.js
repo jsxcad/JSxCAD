@@ -59,8 +59,8 @@ export const buildScene = ({
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
-    spotLight.shadow.camera.near = 0.5;
-    spotLight.shadow.camera.far = 1000;
+    spotLight.shadow.camera.near = 1;
+    spotLight.shadow.camera.far = 100000;
     spotLight.shadow.focus = 1;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
@@ -73,6 +73,7 @@ export const buildScene = ({
   if (renderer === undefined) {
     renderer = new WebGLRenderer({
       antialias: true,
+      logarithmicDepthBuffer: true,
       canvas,
       context,
       preserveDrawingBuffer,
@@ -80,10 +81,10 @@ export const buildScene = ({
     renderer.autoClear = false;
     renderer.setSize(width, height, /* updateStyle= */ false);
     renderer.setClearColor(0xeeeeee);
-    renderer.antiAlias = false;
+    renderer.antiAlias = true;
     renderer.inputGamma = true;
     renderer.outputGamma = true;
-    // renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
 

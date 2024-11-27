@@ -159,8 +159,8 @@ export const moveToFit = ({
 
     camera.position.copy(target).sub(direction);
 
-    camera.near = 1; // 0.1mm
-    camera.far = 100 * 1000; // 100m
+    camera.near = 1; // 1mm
+    camera.far = 100000; // 100m
 
     camera.updateMatrix();
     camera.updateMatrixWorld();
