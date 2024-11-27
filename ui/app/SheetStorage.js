@@ -299,39 +299,43 @@ export const updateSheetStorage = async (newId) => {
   return getSheetStorage(newId);
 };
 
-export const render = () => (
-  <Card>
-    <Card.Body>
-      <Card.Title>Sheet Filesystem</Card.Title>
-      <Card.Text>
-        Select a google sheets spreadsheet to backup and share source data.
-        e.g., to access a sheet named &quot;Jot&quot; in
-        &quot;https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0&quot;.
-        use &quot;0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot&quot;
-      </Card.Text>
-      <Form>
-        <Row>
-          <Col>
-            <Form.Group controlId="SheetStorageId">
-              <Form.Control
-                placeholder="Google-Spreadsheet-Id:SheetName"
-                value={id.get()}
-              />
-            </Form.Group>
-          </Col>
-          <Col>
-            <Button
-              variant="primary"
-              onClick={() => {
-                const { value } = document.getElementById('SheetStorageId');
-                updateSheetStorage(value);
-              }}
-            >
-              Update Sheet Storage
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    </Card.Body>
-  </Card>
-);
+export const render = () => {
+  // Induce the storage.
+  getSheetStorage(id.get());
+  return (
+    <Card>
+      <Card.Body>
+        <Card.Title>Sheet Filesystem</Card.Title>
+        <Card.Text>
+          Select a google sheets spreadsheet to backup and share source data.
+          e.g., to access a sheet named &quot;Jot&quot; in
+          &quot;https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0&quot;.
+          use &quot;0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot&quot;
+        </Card.Text>
+        <Form>
+          <Row>
+            <Col>
+              <Form.Group controlId="SheetStorageId">
+                <Form.Control
+                  placeholder="Google-Spreadsheet-Id:SheetName"
+                  value={id.get()}
+                />
+              </Form.Group>
+            </Col>
+            <Col>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const { value } = document.getElementById('SheetStorageId');
+                  updateSheetStorage(value);
+                }}
+              >
+                Update Sheet Storage
+              </Button>
+            </Col>
+          </Row>
+        </Form>
+      </Card.Body>
+    </Card>
+  );
+};

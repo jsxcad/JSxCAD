@@ -69,10 +69,10 @@ const writeMarkdown = async (
       }
     }
     if (view) {
-        const pathViewId = view.viewId.replace(/[/]/g, '_');
-        const imagePath = `${modulePath}.md.${pathViewId}.png`;
-        output.push(`![Image](${pathModule.basename(imagePath)})`);
-        output.push('');
+      const pathViewId = view.viewId.replace(/[/]/g, '_');
+      const imagePath = `${modulePath}.md.${pathViewId}.png`;
+      output.push(`![Image](${pathModule.basename(imagePath)})`);
+      output.push('');
       const { download } = view;
       if (download) {
         const { entries } = download;
@@ -262,7 +262,10 @@ export const updateNotebook = async (
       if (view) {
         const { viewId } = view;
         const geometry = await read(path, { workspace });
-        const png = await renderPng({ geometry, view }, { offsetWidth: view.width, offsetHeight: view.height });
+        const png = await renderPng(
+          { geometry, view },
+          { offsetWidth: view.width, offsetHeight: view.height }
+        );
         const pathViewId = viewId.replace(/[/]/g, '_');
         const observedPath = `${target}.md.${pathViewId}.observed.png`;
         const expectedPath = `${target}.md.${pathViewId}.png`;

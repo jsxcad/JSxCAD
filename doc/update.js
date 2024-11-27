@@ -37,9 +37,7 @@ const processArgs = (args) => {
 };
 
 const build = async (...args) => {
-  const { isQuiet, baseDirectory } = processArgs(
-    args.filter((arg) => arg)
-  );
+  const { isQuiet, baseDirectory } = processArgs(args.filter((arg) => arg));
   /*
   const browser = isNoHtml
     ? undefined

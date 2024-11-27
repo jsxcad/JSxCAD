@@ -1071,8 +1071,6 @@ const dataUrl = async (shape, options) => {
     );
     fileReader.readAsDataURL(blob);
   });
-  // const dataUrl = getFileReaderSync().readAsDataURL(blob);
-  // const dataUrl = (await staticView(shape, options)).toDataURL('png');
   return dataUrl;
 };
 

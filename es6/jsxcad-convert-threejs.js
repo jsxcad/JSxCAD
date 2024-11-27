@@ -1,4 +1,5 @@
-import { MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, ImageBitmapLoader, CanvasTexture, RepeatWrapping, SRGBColorSpace, Matrix4, Vector3, Plane, Group, Shape, Path, ShapeGeometry, Mesh, EdgesGeometry, LineBasicMaterial, LineSegments, WireframeGeometry, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, Color, Box3, Vector2, Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, PCFShadowMap, ColladaLoader, SVGLoader, MeshBasicMaterial, DoubleSide, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers } from './jsxcad-algorithm-threejs.js';
+import { MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, DataTexture, Matrix4, Vector3, Plane, Group, Shape, Path, ShapeGeometry, Mesh, EdgesGeometry, LineBasicMaterial, LineSegments, WireframeGeometry, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, Color, Box3, Vector2, Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, PCFShadowMap, ColladaLoader, SVGLoader, MeshBasicMaterial, DoubleSide, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers } from './jsxcad-algorithm-threejs.js';
+import { fromPng } from './jsxcad-convert-png.js';
 import { toRgbFromTags, toTagFromRgb } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 import { taggedGroup, fromPolygonSoup, toConcreteGeometry } from './jsxcad-geometry.js';
@@ -25,31 +26,20 @@ const setColor = (
   return parameters;
 };
 
+const toDataTextureFromPngUrl = async (url) => {
+  const result = await fetch(url);
+  const { width, height, pixels } = await fromPng(await result.arrayBuffer());
+  const texture = new DataTexture(pixels, width, height);
+  texture.needsUpdate = true;
+  return texture;
+};
+
 // Map of url to texture promises;
 const textureCache = new Map();
 
 const loadTexture = (url) => {
   if (!textureCache.has(url)) {
-    textureCache.set(
-      url,
-      new Promise((resolve, reject) => {
-        const loader = new ImageBitmapLoader();
-        loader.setOptions({ imageOrientation: 'flipY' });
-        loader.load(
-          url,
-          (imageBitmap) => {
-            const texture = new CanvasTexture(imageBitmap);
-            texture.wrapS = texture.wrapT = RepeatWrapping;
-            texture.offset.set(0, 0);
-            texture.repeat.set(1, 1);
-            texture.colorSpace = SRGBColorSpace;
-            resolve(texture);
-          },
-          (progress) => console.log(`Loading: ${url}`),
-          reject
-        );
-      })
-    );
+    textureCache.set(url, toDataTextureFromPngUrl(url));
   }
   return textureCache.get(url);
 };
@@ -8811,17 +8801,20 @@ const renderPng = async (
 ) => {
   const width = page.offsetWidth;
   const height = page.offsetHeight;
-
+  const context = dummy(width, height, { preserveDrawingBuffer: true });
   const canvas = {
     width,
     height,
     addEventListener: (event) => {},
     removeEventListener: (event) => {},
+    getContext: () => context,
   };
-  const context = dummy(width, height, { preserveDrawingBuffer: true });
-  const { renderer } = await staticDisplay({ canvas, geometry, context }, page);
+  const { renderer } = await staticDisplay(
+    { view, canvas, context, definitions, geometry, withAxes, withGrid },
+    page
+  );
   const { pixels } = extractPixels(renderer.getContext());
-  return new Uint8Array(UPNG.encode([pixels], width, height, 256));
+  return UPNG.encode([pixels], width, height, 256);
 };
 
 export { GEOMETRY_LAYER, SKETCH_LAYER, buildMeshes, buildScene, fromColladaToThreejs, fromSvgToThreejs, fromThreejsToGeometry, moveToFit, renderPng, staticDisplay, toThreejsGeometry, toThreejsPage };

@@ -22,10 +22,7 @@ const textureCache = new Map();
 
 const loadTexture = (url) => {
   if (!textureCache.has(url)) {
-    textureCache.set(
-      url,
-      toDataTextureFromPngUrl(url)
-    );
+    textureCache.set(url, toDataTextureFromPngUrl(url));
   }
   return textureCache.get(url);
 };
