@@ -9,6 +9,7 @@ import { toGcode } from './jsxcad-convert-gcode.js';
 import { toPdf } from './jsxcad-convert-pdf.js';
 import { toPng, fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
+import { renderPng } from './jsxcad-convert-threejs.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-tool.js';
@@ -1556,6 +1557,7 @@ const baseViewOp = async (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     inline,
     width,
@@ -1589,6 +1591,13 @@ const baseViewOp = async (
       thumbnailPath,
       download,
     };
+    if (downloadOp) {
+      view.download = await downloadOp(pageGeometry, {
+        view,
+        id,
+        path,
+      });
+    }
     emit({ hash, path: viewPath, view });
     await write(viewPath, pageGeometry);
     if (!isNode) {
@@ -1742,36 +1751,44 @@ Shape.registerMethod3(
   sideViewOp
 );
 
+const viewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  options,
+  viewId
+) => {
+  geometry = applyModes(geometry, options, modes);
+  if (modes.grid) {
+    options.style = 'grid';
+  }
+  if (modes.none) {
+    options.style = 'none';
+  }
+  if (modes.side) {
+    options.style = 'side';
+  }
+  if (modes.top) {
+    options.style = 'top';
+  }
+  switch (options.style) {
+    case 'grid':
+      return gridViewOp(geometry, modes, op, options, viewId);
+    case 'none':
+      return geometry;
+    case 'side':
+      return sideViewOp(geometry, modes, op, options, viewId);
+    case 'top':
+      return topViewOp(geometry, modes, op, options, viewId);
+    default:
+      return baseViewOp(geometry, viewId, op, options);
+  }
+};
+
 const view = Shape.registerMethod3(
   'view',
   ['inputGeometry', MODES, 'function', 'options', 'value'],
-  (geometry, modes, op = (_x) => (s) => s, options, viewId) => {
-    geometry = applyModes(geometry, options, modes);
-    if (modes.grid) {
-      options.style = 'grid';
-    }
-    if (modes.none) {
-      options.style = 'none';
-    }
-    if (modes.side) {
-      options.style = 'side';
-    }
-    if (modes.top) {
-      options.style = 'top';
-    }
-    switch (options.style) {
-      case 'grid':
-        return gridViewOp(geometry, modes, op, options, viewId);
-      case 'none':
-        return geometry;
-      case 'side':
-        return sideViewOp(geometry, modes, op, options, viewId);
-      case 'top':
-        return topViewOp(geometry, modes, op, options, viewId);
-      default:
-        return baseViewOp(geometry, viewId, op, options);
-    }
-  }
+  viewOp
 );
 
 const LoadDxf = Shape.registerMethod3(
@@ -2679,6 +2696,35 @@ const LoadPngAsRelief = Shape.registerMethod3(
 
 const png = Shape.registerMethod3(
   'png',
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  async (geometry, modes, op = (_x) => (s) => s, options, viewId) => {
+    const downloadOp = async (
+      geometry,
+      { view, path, id }
+    ) => {
+      const { name, height, viewId, width } = view;
+      const pngPath = `download/png/${path}/${id}/${viewId}`;
+      await write(
+        pngPath,
+        await renderPng(
+          { geometry, view },
+          { offsetWidth: width, offsetHeight: height }
+        )
+      );
+      const filename = `${name}.png`;
+      const record = {
+        path: pngPath,
+        filename,
+        type: 'image/png',
+      };
+      return { entries: [record] };
+    };
+    return viewOp(geometry, modes, op, { ...options, downloadOp }, viewId);
+  }
+);
+
+const raycastPng = Shape.registerMethod3(
+  'raycastPng',
   [
     'inputGeometry',
     'string',
@@ -2702,7 +2748,7 @@ const png = Shape.registerMethod3(
       width = implicitWidth,
       height = implicitHeight,
       resolution = implicitResolution,
-      view: view$1 = {},
+      view = {},
     } = {}
   ) => {
     const light = [0, 0, 1];
@@ -2756,7 +2802,7 @@ const png = Shape.registerMethod3(
         type: 'image/png',
       };
       // Produce a view of what will be downloaded.
-      await view(name, { ...view$1, download: { entries: [record] } })(
+      await viewOp(name, { ...view, download: { entries: [record] } })(
         Shape.fromGeometry(entry)
       );
     }
@@ -4146,4 +4192,4 @@ const Wave = Shape.registerMethod3(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Assembly, Box, Cached, ChainHull, Clip, Cloud, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Grow, Hershey, Hexagon, Hull, Icosahedron, Implicit, Iron, Join, LDraw, LDrawPart, Label, Line, LineX, LineY, LineZ, Link, List, LoadDxf, LoadLDraw, LoadPng, LoadPngAsRelief, LoadStl, LoadSvg, Loft, Loop, MaskedBy, Note, Octagon, Off, Orb, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Route, Segments, Seq, Shape, Skeleton, Spiral, Stl, SurfaceMesh, Svg, To, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, acos, addTo, align, alignment, and, approximate, area, as, asPart, at, base, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, cloud, color, commonVolume, copy, cos, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, dxf, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, exterior, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fair, fill, fit, fitTo, fix, flat, fuse, g, gap, gauge, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, holes, hull, image, inFn, input, inset, involute, iron, join, lerp, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, maskedBy, masking, material, max, md, min, minimizeOverhang, move, moveAlong, n, noGap, noHoles, noOp, noVoid, normal, note, nth, o, obb, offset, on, op, orient, origin, outline, overlay, pack, pdf, plus, png, points, put, random, reconstruct, ref, refine, remesh, repair, rotateX, rotateY, rotateZ, route, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, sin, size, skeleton, sketch, smooth, sort, split, sqrt, stl, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, trim, turnX, turnY, turnZ, twist, tx, ty, tz, unfold, untag, upperEnvelope, v, validate, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Assembly, Box, Cached, ChainHull, Clip, Cloud, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Grow, Hershey, Hexagon, Hull, Icosahedron, Implicit, Iron, Join, LDraw, LDrawPart, Label, Line, LineX, LineY, LineZ, Link, List, LoadDxf, LoadLDraw, LoadPng, LoadPngAsRelief, LoadStl, LoadSvg, Loft, Loop, MaskedBy, Note, Octagon, Off, Orb, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Route, Segments, Seq, Shape, Skeleton, Spiral, Stl, SurfaceMesh, Svg, To, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, acos, addTo, align, alignment, and, approximate, area, as, asPart, at, base, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, cloud, color, commonVolume, copy, cos, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, dxf, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, exterior, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fair, fill, fit, fitTo, fix, flat, fuse, g, gap, gauge, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, holes, hull, image, inFn, input, inset, involute, iron, join, lerp, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, maskedBy, masking, material, max, md, min, minimizeOverhang, move, moveAlong, n, noGap, noHoles, noOp, noVoid, normal, note, nth, o, obb, offset, on, op, orient, origin, outline, overlay, pack, pdf, plus, png, points, put, random, raycastPng, reconstruct, ref, refine, remesh, repair, rotateX, rotateY, rotateZ, route, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, sin, size, skeleton, sketch, smooth, sort, split, sqrt, stl, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, trim, turnX, turnY, turnZ, twist, tx, ty, tz, unfold, untag, upperEnvelope, v, validate, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

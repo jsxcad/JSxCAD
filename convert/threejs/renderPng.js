@@ -35,7 +35,8 @@ export const renderPng = async (
 ) => {
   const width = page.offsetWidth;
   const height = page.offsetHeight;
-  const context = gl(width, height, { preserveDrawingBuffer: true });
+
+  let context;
   const canvas = {
     width,
     height,
@@ -43,13 +44,23 @@ export const renderPng = async (
     removeEventListener: (event) => {},
     getContext: () => context,
   };
+  // But this is not available in a web-worker.
+  context = gl(width, height, { canvas, preserveDrawingBuffer: true });
 
   const target = [0, 0, 0];
   const position = [0, 0, 0];
   const up = [0, 0.0001, 1];
 
   const { renderer } = await staticDisplay(
-    { view: { target, position, up, ...view }, canvas, context, definitions, geometry, withAxes, withGrid },
+    {
+      view: { target, position, up, ...view },
+      canvas,
+      context,
+      definitions,
+      geometry,
+      withAxes,
+      withGrid,
+    },
     page
   );
   const { pixels } = extractPixels(renderer.getContext());

@@ -9,13 +9,4 @@ onBoot(() => {
   globalThis.window = dom.window;
   globalThis.window.devicePixelRatio = 1;
   globalThis.document = window.document;
-  globalThis.createImageBitmap = async function createImageBitmap(blob) {
-    const ab = await blob.arrayBuffer();
-    const img = new Image();
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.src = new Uint8Array(ab); // might have to do: Buffer.from(ab)
-    });
-    return img;
-  };
 });

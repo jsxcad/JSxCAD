@@ -632,8 +632,8 @@ const buildScene = ({
     spotLight.position.set(20, 20, 20);
     spotLight.castShadow = true;
     spotLight.receiveShadow = true;
-    spotLight.shadow.camera.near = 0.5;
-    spotLight.shadow.camera.far = 1000;
+    spotLight.shadow.camera.near = 1;
+    spotLight.shadow.camera.far = 100000;
     spotLight.shadow.focus = 1;
     spotLight.shadow.mapSize.width = 1024 * 2;
     spotLight.shadow.mapSize.height = 1024 * 2;
@@ -646,6 +646,7 @@ const buildScene = ({
   if (renderer === undefined) {
     renderer = new WebGLRenderer({
       antialias: true,
+      logarithmicDepthBuffer: true,
       canvas,
       context,
       preserveDrawingBuffer,
@@ -653,10 +654,10 @@ const buildScene = ({
     renderer.autoClear = false;
     renderer.setSize(width, height, /* updateStyle= */ false);
     renderer.setClearColor(0xeeeeee);
-    renderer.antiAlias = false;
+    renderer.antiAlias = true;
     renderer.inputGamma = true;
     renderer.outputGamma = true;
-    // renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
 
@@ -928,8 +929,8 @@ const moveToFit = ({
 
     camera.position.copy(target).sub(direction);
 
-    camera.near = 1; // 0.1mm
-    camera.far = 100 * 1000; // 100m
+    camera.near = 1; // 1mm
+    camera.far = 100000; // 100m
 
     camera.updateMatrix();
     camera.updateMatrixWorld();
@@ -8671,7 +8672,7 @@ UPNG.encode.alphaMul = function(img, roundA) {
 })();
 });
 
-const dummy = {};
+const gl = (width, height, parameters) => new WebGLRenderer(parameters);
 
 /* global OffscreenCanvas */
 
@@ -8801,7 +8802,8 @@ const renderPng = async (
 ) => {
   const width = page.offsetWidth;
   const height = page.offsetHeight;
-  const context = dummy(width, height, { preserveDrawingBuffer: true });
+
+  let context;
   const canvas = {
     width,
     height,
@@ -8809,8 +8811,22 @@ const renderPng = async (
     removeEventListener: (event) => {},
     getContext: () => context,
   };
+  context = gl(width, height, { canvas, preserveDrawingBuffer: true });
+
+  const target = [0, 0, 0];
+  const position = [0, 0, 0];
+  const up = [0, 0.0001, 1];
+
   const { renderer } = await staticDisplay(
-    { view, canvas, context, definitions, geometry, withAxes, withGrid },
+    {
+      view: { target, position, up, ...view },
+      canvas,
+      context,
+      definitions,
+      geometry,
+      withAxes,
+      withGrid,
+    },
     page
   );
   const { pixels } = extractPixels(renderer.getContext());

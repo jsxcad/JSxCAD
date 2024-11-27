@@ -33,9 +33,6 @@ export default {
     }),
     builtins(),
     commonjs({
-      namedExports: {
-        './../node_modules/adaptive-bezier-curve/index.js': ['bezier'],
-      },
     }),
     globals(),
     nodeResolve({ preferBuiltins: true }),
