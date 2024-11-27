@@ -18,12 +18,10 @@ import {
 
 import Base64ArrayBuffer from 'base64-arraybuffer';
 import api from '@jsxcad/api';
-// import imageDataUri from 'image-data-uri';
 import pathModule from 'path';
 import pixelmatch from 'pixelmatch';
 import pngjs from 'pngjs';
 import { renderPng } from '@jsxcad/convert-threejs';
-// import { screenshot } from './screenshot.js';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/api/Orb.md.$5_2.observed.png',

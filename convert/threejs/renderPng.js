@@ -43,6 +43,7 @@ export const renderPng = async (
     removeEventListener: (event) => {},
     getContext: () => context,
   };
+  console.log(`QQ/renderPng: view=${JSON.stringify(view)}`);
   const { renderer } = await staticDisplay(
     { view, canvas, context, definitions, geometry, withAxes, withGrid },
     page
