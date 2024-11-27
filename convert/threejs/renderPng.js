@@ -35,7 +35,6 @@ export const renderPng = async (
 ) => {
   const width = page.offsetWidth;
   const height = page.offsetHeight;
-
   const context = gl(width, height, { preserveDrawingBuffer: true });
   const canvas = {
     width,
@@ -44,7 +43,7 @@ export const renderPng = async (
     removeEventListener: (event) => {},
     getContext: () => context,
   };
-  const { renderer } = await staticDisplay({ canvas, geometry, context }, page);
+  const { renderer } = await staticDisplay({ view, canvas, context, definitions, geometry, withAxes, withGrid }, page);
   const { pixels } = extractPixels(renderer.getContext());
   return UPNG.encode([pixels], width, height, 256);
 };

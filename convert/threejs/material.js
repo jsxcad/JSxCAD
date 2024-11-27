@@ -3,17 +3,15 @@ import {
   MeshNormalMaterial,
   MeshPhongMaterial,
   MeshPhysicalMaterial,
-  RepeatWrapping,
-  SRGBColorSpace,
 } from '@jsxcad/algorithm-threejs';
 
+import { fromPng } from '@jsxcad/convert-png';
 import { setColor } from './color.js';
 import { toThreejsMaterialFromTags } from '@jsxcad/algorithm-material';
-import { fromPng } from '@jsxcad/convert-png';
 
 const toDataTextureFromPngUrl = async (url) => {
   const result = await fetch(url);
-  const { width, height, pixels } = await fromPng(await result.arrayBuffer())
+  const { width, height, pixels } = await fromPng(await result.arrayBuffer());
   const texture = new DataTexture(pixels, width, height);
   texture.needsUpdate = true;
   return texture;
