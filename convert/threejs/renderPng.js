@@ -49,7 +49,7 @@ export const renderPng = async (
   const up = [0, 0.0001, 1];
 
   const { renderer } = await staticDisplay(
-    { view: { target, position, up }, canvas, context, definitions, geometry, withAxes, withGrid },
+    { view: { target, position, up, ...view }, canvas, context, definitions, geometry, withAxes, withGrid },
     page
   );
   const { pixels } = extractPixels(renderer.getContext());
