@@ -32,8 +32,7 @@ export default {
       },
     }),
     builtins(),
-    commonjs({
-    }),
+    commonjs({}),
     globals(),
     nodeResolve({ preferBuiltins: true }),
     {

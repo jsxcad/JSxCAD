@@ -1,6 +1,6 @@
 /* global globalThis */
 
-import { Image } from 'canvas';
+// This is limited to node.
 import { JSDOM } from 'jsdom';
 import { onBoot } from './boot.js';
 

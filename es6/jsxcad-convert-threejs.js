@@ -3,6 +3,7 @@ import { fromPng } from './jsxcad-convert-png.js';
 import { toRgbFromTags, toTagFromRgb } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
 import { taggedGroup, fromPolygonSoup, toConcreteGeometry } from './jsxcad-geometry.js';
+import { isNode } from './jsxcad-sys.js';
 
 const GEOMETRY_LAYER = 0;
 const SKETCH_LAYER = 1;
@@ -8672,7 +8673,7 @@ UPNG.encode.alphaMul = function(img, roundA) {
 })();
 });
 
-const gl = (width, height, parameters) => new WebGLRenderer(parameters);
+const dummy = {};
 
 /* global OffscreenCanvas */
 
@@ -8804,14 +8805,19 @@ const renderPng = async (
   const height = page.offsetHeight;
 
   let context;
-  const canvas = {
-    width,
-    height,
-    addEventListener: (event) => {},
-    removeEventListener: (event) => {},
-    getContext: () => context,
-  };
-  context = gl(width, height, { canvas, preserveDrawingBuffer: true });
+  let canvas;
+
+  if (isNode) {
+    canvas = {
+      width,
+      height,
+      addEventListener: (event) => {},
+      removeEventListener: (event) => {},
+      getContext: () => context,
+    };
+    // But this is not available in a web-worker.
+    context = dummy(width, height, { canvas, preserveDrawingBuffer: true });
+  }
 
   const target = [0, 0, 0];
   const position = [0, 0, 0];

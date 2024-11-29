@@ -1,5 +1,6 @@
 import UPNG from 'upng-js';
 import gl from 'gl';
+import { isNode } from '@jsxcad/sys';
 import { staticDisplay } from './staticDisplay.js';
 
 const extractPixels = (context) => {
@@ -37,15 +38,19 @@ export const renderPng = async (
   const height = page.offsetHeight;
 
   let context;
-  const canvas = {
-    width,
-    height,
-    addEventListener: (event) => {},
-    removeEventListener: (event) => {},
-    getContext: () => context,
-  };
-  // But this is not available in a web-worker.
-  context = gl(width, height, { canvas, preserveDrawingBuffer: true });
+  let canvas;
+
+  if (isNode) {
+    canvas = {
+      width,
+      height,
+      addEventListener: (event) => {},
+      removeEventListener: (event) => {},
+      getContext: () => context,
+    };
+    // But this is not available in a web-worker.
+    context = gl(width, height, { canvas, preserveDrawingBuffer: true });
+  }
 
   const target = [0, 0, 0];
   const position = [0, 0, 0];

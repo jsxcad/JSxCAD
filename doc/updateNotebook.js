@@ -75,12 +75,11 @@ const writeMarkdown = async (
       if (download) {
         const { entries } = download;
         for (let { base64Data, filename, data, path } of entries) {
-          console.log(`QQ/download: filename=${filename} path=${path}`);
           if (!data && base64Data) {
             data = new Uint8Array(Base64ArrayBuffer.decode(base64Data));
           }
           if (!data) {
-            data = await read(path, { workspace });
+            data = new Uint8Array(await read(path, { workspace }));
           }
           const observedPath = `${modulePath}.observed.${filename}`;
           const expectedPath = `${modulePath}.${filename}`;

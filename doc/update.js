@@ -6,8 +6,9 @@ import {
   watchLog,
 } from '@jsxcad/sys';
 
+import { clearMeshCache, setTestMode } from '@jsxcad/algorithm-cgal';
+
 import { argv } from 'process';
-import { clearMeshCache } from '@jsxcad/algorithm-cgal';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -94,6 +95,7 @@ const build = async (...args) => {
     await walk(baseDirectory);
     const collectedFailedExpectations = [];
     for (const notebook of notebooks) {
+      setTestMode(true);
       const startTime = new Date();
       const failedExpectations = [];
       console.log(`Processing notebook: ${cwd}/${notebook}.nb`);
