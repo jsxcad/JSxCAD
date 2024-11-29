@@ -33,7 +33,7 @@ const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
   'nb/api/png.observed.icosahedron.png',
   'nb/api/route.md.path.observed.png',
   'nb/api/smooth.md.$4.observed.png',
-  'nb/api/trim.md.$2.difference.png',
+  'nb/api/trim.md.$2.observed.png',
   'nb/projects/pentacular/micro_gear_motor/examples.md.$1_motor_case.observed.png',
   'nb/regression/smooth/smooth.md.simplified_1.observed.png',
   'nb/regression/shape/shape.md.$50.observed.png',
