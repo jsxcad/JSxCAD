@@ -36,7 +36,7 @@ jobs:
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
-      - run: xvbf-run -s "-ac -screen 0 1280x1024x24" npm run doc -- --quiet
+      - run: xvfb-run -s "-ac -screen 0 1280x1024x24" npm run doc -- --quiet
         env:
           NODE_OPTIONS: --max_old_space_size=4096
       - name: Make wasm available
