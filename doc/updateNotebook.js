@@ -87,7 +87,7 @@ const writeMarkdown = async (
           }
           const observedPath = `${modulePath}.observed.${filename}`;
           const expectedPath = `${modulePath}.${filename}`;
-          if (!filename.endsWith('stl') && !filename.endsWith('pdf')) {
+          if (!filename.endsWith('stl') && !filename.endsWith('pdf') && !filename.endsWith('png')) {
             // STL output has become unstable; skip for now.
             try {
               const observed = new TextDecoder('utf8').decode(data);
