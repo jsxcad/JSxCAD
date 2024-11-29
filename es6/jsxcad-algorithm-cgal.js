@@ -590,9 +590,6 @@ const setTestMode = (mode) => { testMode = mode; };
 const fillCgalGeometry = (geometry, inputs) => {
   const g = getCgal();
   geometry.setSize(inputs.length);
-  if (testMode) {
-    geometry.setTestMode(testMode);
-  }
   for (let nth = 0; nth < inputs.length; nth++) {
     const { tags = [] } = inputs[nth];
     g.SetTransform(geometry, nth, inputs[nth].matrix || identityMatrix);
