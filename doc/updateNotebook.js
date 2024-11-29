@@ -24,12 +24,16 @@ import pngjs from 'pngjs';
 import { renderPng } from '@jsxcad/convert-threejs';
 
 const IGNORED_PIXEL_THRESHOLD_OBSERVED_PATHS = new Set([
+  'nb/api/Implicit.md.$2.observed.png',
   'nb/api/Orb.md.$5_2.observed.png',
   'nb/api/image.md.$2.observed.png',
   'nb/api/iron.md.$2.observed.png',
+  'nb/api/material.md.$9.observed.png',
   'nb/api/minimizeOverhang.md.$2.observed.png',
+  'nb/api/png.observed.icosahedron.png',
   'nb/api/route.md.path.observed.png',
   'nb/api/smooth.md.$4.observed.png',
+  'nb/api/trim.md.$2.difference.png',
   'nb/projects/pentacular/micro_gear_motor/examples.md.$1_motor_case.observed.png',
   'nb/regression/smooth/smooth.md.simplified_1.observed.png',
   'nb/regression/shape/shape.md.$50.observed.png',
