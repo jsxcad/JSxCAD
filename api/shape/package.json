@@ -32,6 +32,7 @@
     "@jsxcad/convert-off": "^0.0.79",
     "@jsxcad/convert-pdf": "^0.0.79",
     "@jsxcad/convert-png": "^0.0.79",
+    "@jsxcad/convert-threejs": "^0.0.79",
     "@jsxcad/convert-stl": "^0.0.79",
     "@jsxcad/convert-svg": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79",

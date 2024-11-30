@@ -11,15 +11,28 @@ resolution|number|The pixel size in mm.
 {width,height,resolution}|options|As options.
 Raycast geometry to generate a png using normal to determine color.
 
-![Image](png.md.$2_icosahedron.png)
+![Image](png.md.$2.png)
 
 [icosahedron.png](png.icosahedron.png)
 
-Icosahedron(3, 3, 3).rx(1/6).png('icosahedron', 10, 10, 10, 0.01)
+Icosahedron(3, 3, 3).rx(1/6).raycastPng('icosahedron', 10, 10, 10, 0.01)
 
 ```JavaScript
 Icosahedron(3, 3, 3)
   .rx(1/6)
-  .png('icosahedron', 10, 10, 10, 0.01)
-  .note(`Icosahedron(3, 3, 3).rx(1/6).png('icosahedron', 10, 10, 10, 0.01)`);
+  .raycastPng('icosahedron', 10, 10, 10, 0.01)
+  .note(`Icosahedron(3, 3, 3).rx(1/6).raycastPng('icosahedron', 10, 10, 10, 0.01)`);
+```
+
+![Image](png.md.$3_icosahedron.png)
+
+[icosahedron.png](png.icosahedron.png)
+
+Icosahedron(3, 3, 3).rx(1/6).png('icosahedron')
+
+```JavaScript
+Icosahedron(3, 3, 3)
+  .rx(1/6)
+  .png('icosahedron')
+  .note(`Icosahedron(3, 3, 3).rx(1/6).png('icosahedron')`);
 ```

@@ -2097,6 +2097,25 @@ Transition.ENTERING = ENTERING;
 Transition.ENTERED = ENTERED;
 Transition.EXITING = EXITING;
 
+function getReactVersion() {
+  const parts = hn.split('.');
+  return {
+    major: +parts[0],
+    minor: +parts[1],
+    patch: +parts[2]
+  };
+}
+function getChildRef(element) {
+  if (!element || typeof element === 'function') {
+    return null;
+  }
+  const {
+    major
+  } = getReactVersion();
+  const childRef = major >= 19 ? element.props.ref : element.ref;
+  return childRef;
+}
+
 var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /* eslint-disable no-return-assign */
@@ -2450,7 +2469,7 @@ const Collapse = /*#__PURE__*/xn.forwardRef(({
     onEntered: handleEntered,
     onExit: handleExit,
     onExiting: handleExiting,
-    childRef: children.ref,
+    childRef: getChildRef(children),
     in: inProp,
     timeout: timeout,
     mountOnEnter: mountOnEnter,
@@ -2604,6 +2623,7 @@ var AccordionButton$1 = AccordionButton;
 const AccordionHeader = /*#__PURE__*/A(({
   // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
   as: Component = 'h2',
+  'aria-controls': ariaControls,
   bsPrefix,
   className,
   children,
@@ -2617,6 +2637,7 @@ const AccordionHeader = /*#__PURE__*/A(({
     className: classNames(className, bsPrefix),
     children: /*#__PURE__*/u(AccordionButton$1, {
       onClick: onClick,
+      "aria-controls": ariaControls,
       children: children
     })
   });

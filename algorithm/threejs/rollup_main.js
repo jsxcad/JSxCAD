@@ -16,11 +16,7 @@ export default {
   },
   plugins: [
     builtins(),
-    commonjs({
-      namedExports: {
-        '../../node_modules/binpackingjs/dist/BinPacking.min.js': ['BP2D'],
-      },
-    }),
+    commonjs({}),
     globals(),
     nodeResolve({ preferBuiltins: true }),
     {

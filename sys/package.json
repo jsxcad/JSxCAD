@@ -25,9 +25,11 @@
   "dependencies": {
     "base64-arraybuffer": "^1.0.1",
     "broadcast-channel": "^5.1.0",
+    "canvas": "^2.11.2",
     "digest-js": "^0.3.0",
     "idb": "^7.0.0",
     "idb-keyval": "^6.0.3",
+    "jsdom": "^25.0.1",
     "node-fetch": "^3.3.1",
     "nanoid": "^3.1.16"
   },

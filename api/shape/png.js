@@ -4,12 +4,13 @@ import {
   ensurePages,
   render,
 } from '@jsxcad/geometry';
+import { MODES, viewOp } from './view.js';
 import { fromPng, toPng } from '@jsxcad/convert-png';
 import { generateUniqueId, getSourceLocation, read, write } from '@jsxcad/sys';
 
 import Shape from './Shape.js';
 import { fromRaster } from '@jsxcad/algorithm-contour';
-import { view as viewOp } from './view.js';
+import { renderPng } from '@jsxcad/convert-threejs';
 
 const computeDotProduct = ([x1, y1, z1], [x2, y2, z2]) =>
   x1 * x2 + y1 * y2 + z1 * z2;
@@ -122,6 +123,31 @@ export const LoadPngAsRelief = Shape.registerMethod3(
 
 export const png = Shape.registerMethod3(
   'png',
+  ['inputGeometry', MODES, 'function', 'options', 'value'],
+  async (geometry, modes, op = (_x) => (s) => s, options, viewId) => {
+    const downloadOp = async (geometry, { view, path, id }) => {
+      const { name, height, viewId, width } = view;
+      const pngPath = `download/png/${path}/${id}/${viewId}`;
+      const renderedPng = await renderPng(
+        { geometry, view },
+        { offsetWidth: width, offsetHeight: height }
+      );
+      const data = new Uint8Array(renderedPng);
+      await write(pngPath, data);
+      const filename = `${name}.png`;
+      const record = {
+        path: pngPath,
+        filename,
+        type: 'image/png',
+      };
+      return { entries: [record] };
+    };
+    return viewOp(geometry, modes, op, { ...options, downloadOp }, viewId);
+  }
+);
+
+export const raycastPng = Shape.registerMethod3(
+  'raycastPng',
   [
     'inputGeometry',
     'string',
@@ -189,7 +215,9 @@ export const png = Shape.registerMethod3(
       }
       await write(
         pngPath,
-        await toPng({ width: xSteps, height: ySteps, bytes: pixels })
+        (
+          await toPng({ width: xSteps, height: ySteps, bytes: pixels })
+        ).buffer
       );
       const suffix = index++ === 0 ? '' : `_${index}`;
       const filename = `${name}${suffix}.png`;
@@ -199,8 +227,12 @@ export const png = Shape.registerMethod3(
         type: 'image/png',
       };
       // Produce a view of what will be downloaded.
-      await viewOp(name, { ...view, download: { entries: [record] } })(
-        Shape.fromGeometry(entry)
+      viewOp(
+        entry,
+        [],
+        undefined,
+        { ...view, download: { entries: [record] } },
+        view.viewId
       );
     }
     return geometry;
