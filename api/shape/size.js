@@ -22,9 +22,17 @@ export const size = Shape.registerMethod3(
   [
     'inputGeometry',
     'function',
-    'strings:empty,max,min,right,left,front,back,top,bottom,length,width,height,center',
+    'strings:empty,max,min,maxX,maxY,maxZ,minX,minY,minZ,right,left,front,back,top,bottom,length,width,height,center',
+    'options',
   ],
-  async (geometry, _op, modes) => {
+  async (geometry, _op, modes, { resolution = 0.01 } = {}) => {
+    const round = (value) => {
+      if (resolution === 0) {
+        return value;
+      } else {
+        return Math.round(value / resolution) * resolution;
+      }
+    };
     const bounds = measureBoundingBox(geometry);
     const args = [];
     if (bounds === undefined) {
@@ -43,39 +51,48 @@ export const size = Shape.registerMethod3(
             args.push(false);
             break;
           case 'max':
-            args.push(max);
+            // CHECK: This is return a vector rather than a scalar.
+            args.push(round(max));
             break;
           case 'min':
-            args.push(min);
+            // CHECK: This is return a vector rather than a scalar.
+            args.push(round(min));
             break;
+          case 'maxX':
           case 'right':
-            args.push(max[X]);
+            args.push(round(max[X]));
             break;
+          case 'minX':
           case 'left':
-            args.push(min[X]);
+            args.push(round(min[X]));
             break;
+          case 'minY':
           case 'front':
-            args.push(min[Y]);
+            args.push(round(min[Y]));
             break;
+          case 'maxY':
           case 'back':
-            args.push(max[Y]);
+            args.push(round(max[Y]));
             break;
+          case 'maxZ':
           case 'top':
-            args.push(max[Z]);
+            args.push(round(max[Z]));
             break;
+          case 'minZ':
           case 'bottom':
-            args.push(min[Z]);
+            args.push(round(min[Z]));
             break;
           case 'length':
-            args.push(max[X] - min[X]);
+            args.push(round(max[X] - min[X]));
             break;
           case 'width':
-            args.push(max[Y] - min[Y]);
+            args.push(round(max[Y] - min[Y]));
             break;
           case 'height':
-            args.push(max[Z] - min[Z]);
+            args.push(round(max[Z] - min[Z]));
             break;
           case 'center':
+            // CHECK: This is return a vector rather than a scalar.
             args.push(scale(0.5, add(min, max)));
             break;
         }

@@ -1133,9 +1133,9 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-const X$2 = Shape.registerMethod3('X', ['numbers'], g$1.X);
-const Y$2 = Shape.registerMethod3('Y', ['numbers'], g$1.Y);
-const Z$2 = Shape.registerMethod3('Z', ['numbers'], g$1.Z);
+const X$1 = Shape.registerMethod3('X', ['numbers'], g$1.X);
+const Y$1 = Shape.registerMethod3('Y', ['numbers'], g$1.Y);
+const Z$1 = Shape.registerMethod3('Z', ['numbers'], g$1.Z);
 const XY = Shape.registerMethod3('XY', ['numbers'], g$1.XY);
 const YX = Shape.registerMethod3('YX', ['numbers'], g$1.YX);
 const XZ = Shape.registerMethod3('XZ', ['numbers'], g$1.XZ);
@@ -3317,18 +3317,26 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [
   z * amount,
 ];
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 const size = Shape.registerMethod3(
   'size',
   [
     'inputGeometry',
     'function',
-    'strings:empty,max,min,right,left,front,back,top,bottom,length,width,height,center',
+    'strings:empty,max,min,maxX,maxY,maxZ,minX,minY,minZ,right,left,front,back,top,bottom,length,width,height,center',
+    'options',
   ],
-  async (geometry, _op, modes) => {
+  async (geometry, _op, modes, { resolution = 0.01 } = {}) => {
+    const round = (value) => {
+      if (resolution === 0) {
+        return value;
+      } else {
+        return Math.round(value / resolution) * resolution;
+      }
+    };
     const bounds = measureBoundingBox(geometry);
     const args = [];
     if (bounds === undefined) {
@@ -3347,39 +3355,48 @@ const size = Shape.registerMethod3(
             args.push(false);
             break;
           case 'max':
-            args.push(max);
+            // CHECK: This is return a vector rather than a scalar.
+            args.push(round(max));
             break;
           case 'min':
-            args.push(min);
+            // CHECK: This is return a vector rather than a scalar.
+            args.push(round(min));
             break;
+          case 'maxX':
           case 'right':
-            args.push(max[X$1]);
+            args.push(round(max[X]));
             break;
+          case 'minX':
           case 'left':
-            args.push(min[X$1]);
+            args.push(round(min[X]));
             break;
+          case 'minY':
           case 'front':
-            args.push(min[Y$1]);
+            args.push(round(min[Y]));
             break;
+          case 'maxY':
           case 'back':
-            args.push(max[Y$1]);
+            args.push(round(max[Y]));
             break;
+          case 'maxZ':
           case 'top':
-            args.push(max[Z$1]);
+            args.push(round(max[Z]));
             break;
+          case 'minZ':
           case 'bottom':
-            args.push(min[Z$1]);
+            args.push(round(min[Z]));
             break;
           case 'length':
-            args.push(max[X$1] - min[X$1]);
+            args.push(round(max[X] - min[X]));
             break;
           case 'width':
-            args.push(max[Y$1] - min[Y$1]);
+            args.push(round(max[Y] - min[Y]));
             break;
           case 'height':
-            args.push(max[Z$1] - min[Z$1]);
+            args.push(round(max[Z] - min[Z]));
             break;
           case 'center':
+            // CHECK: This is return a vector rather than a scalar.
             args.push(scale(0.5, add(min, max)));
             break;
         }
@@ -3436,77 +3453,41 @@ const smooth = Shape.registerMethod3(
     )
 );
 
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const round = (values, resolution) =>
-  values.map((value) => Math.round(value / resolution) * resolution);
-
 const sort = Shape.registerMethod3(
   'sort',
-  ['inputGeometry', 'string', 'number'],
-  (geometry, spec = 'z<y<x<', resolution = 0.01) => {
-    let leafs = [];
+  ['inputGeometry', 'function', 'modes:min,max', 'numbers'],
+  async (geometry, rankOp = () => 0, mode, tiersToKeep) => {
+    let predicate = (a, b) => a - b;
+    if (mode.max) {
+      // Start from the max tier.
+      predicate = (a, b) => b - a;
+    }
+    const leafs = [];
     for (const leaf of getLeafs(geometry)) {
-      console.log(JSON.stringify(leaf));
-      const bounds = measureBoundingBox(leaf);
-      if (bounds === undefined) {
-        continue;
-      }
-      const [min, max] = bounds;
+      const rank = await rankOp(Shape.fromGeometry(leaf));
       leafs.push({
-        min: round(min, resolution),
-        max: round(max, resolution),
+        rank,
         leaf,
       });
     }
-    const ops = [];
-    while (spec) {
-      const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
-      if (found === null) {
-        throw Error(`Bad sort spec ${spec}`);
+    leafs.sort((a, b) => predicate(a.rank, b.rank));
+    let tier;
+    const tiers = [];
+    for (const thisLeaf of leafs) {
+      {
+        tier = [];
+        tiers.push(tier);
       }
-      const [, dimension, order, limit, rest] = found;
-      // We apply the sorting ops in reverse.
-      ops.unshift({ dimension, order, limit });
-      spec = rest;
+      tier.push(thisLeaf);
     }
-    for (const { dimension, order, limit } of ops) {
-      let axis;
-      switch (dimension) {
-        case 'x':
-          axis = X;
-          break;
-        case 'y':
-          axis = Y;
-          break;
-        case 'z':
-          axis = Z;
-          break;
+    // Structure the results by rank tiers.
+    const keptTiers = [];
+    for (let nth = 0; nth < tiers.length; nth++) {
+      if (tiersToKeep.includes(nth)) {
+        keptTiers.push(tiers[nth]);
       }
-      if (limit !== undefined) {
-        switch (order) {
-          case '>':
-            leafs = leafs.filter(({ min }) => min[axis] > limit);
-            break;
-          case '<':
-            leafs = leafs.filter(({ max }) => max[axis] < limit);
-            break;
-        }
-      }
-      let compare;
-      switch (order) {
-        case '>':
-          compare = (a, b) => b.min[axis] - a.min[axis];
-          break;
-        case '<':
-          compare = (a, b) => a.max[axis] - b.max[axis];
-          break;
-      }
-      leafs.sort(compare);
     }
-    return Group$1(leafs.map(({ leaf }) => leaf));
+    return Group$1(keptTiers.map((tier) => Group$1(tier.map(({ leaf }) => leaf))));
   }
 );
 
@@ -4194,4 +4175,4 @@ const Wave = Shape.registerMethod3(
   }
 );
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Assembly, Box, Cached, ChainHull, Clip, Cloud, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Grow, Hershey, Hexagon, Hull, Icosahedron, Implicit, Iron, Join, LDraw, LDrawPart, Label, Line, LineX, LineY, LineZ, Link, List, LoadDxf, LoadLDraw, LoadPng, LoadPngAsRelief, LoadStl, LoadSvg, Loft, Loop, MaskedBy, Note, Octagon, Off, Orb, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Route, Segments, Seq, Shape, Skeleton, Spiral, Stl, SurfaceMesh, Svg, To, Triangle, Voxels, Wave, Wrap, X$2 as X, XY, XZ, Y$2 as Y, YX, YZ, Z$2 as Z, ZX, ZY, absolute, abstract, acos, addTo, align, alignment, and, approximate, area, as, asPart, at, base, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, cloud, color, commonVolume, copy, cos, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, dxf, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, exterior, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fair, fill, fit, fitTo, fix, flat, fuse, g, gap, gauge, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, holes, hull, image, inFn, input, inset, involute, iron, join, lerp, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, maskedBy, masking, material, max, md, min, minimizeOverhang, move, moveAlong, n, noGap, noHoles, noOp, noVoid, normal, note, nth, o, obb, offset, on, op, orient, origin, outline, overlay, pack, pdf, plus, png, points, put, random, raycastPng, reconstruct, ref, refine, remesh, repair, rotateX, rotateY, rotateZ, route, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, sin, size, skeleton, sketch, smooth, sort, split, sqrt, stl, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, trim, turnX, turnY, turnZ, twist, tx, ty, tz, unfold, untag, upperEnvelope, v, validate, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Assembly, Box, Cached, ChainHull, Clip, Cloud, Curve, Cut, Edge, Empty, Face, Fuse, Geometry, GrblConstantLaser, GrblDynamicLaser, GrblPlotter, GrblSpindle, Group, Grow, Hershey, Hexagon, Hull, Icosahedron, Implicit, Iron, Join, LDraw, LDrawPart, Label, Line, LineX, LineY, LineZ, Link, List, LoadDxf, LoadLDraw, LoadPng, LoadPngAsRelief, LoadStl, LoadSvg, Loft, Loop, MaskedBy, Note, Octagon, Off, Orb, Pentagon, Point, Points, Polygon, Polyhedron, RX, RY, RZ, Ref, Route, Segments, Seq, Shape, Skeleton, Spiral, Stl, SurfaceMesh, Svg, To, Triangle, Voxels, Wave, Wrap, X$1 as X, XY, XZ, Y$1 as Y, YX, YZ, Z$1 as Z, ZX, ZY, absolute, abstract, acos, addTo, align, alignment, and, approximate, area, as, asPart, at, base, bb, bend, billOfMaterials, by, centroid, chainHull, clean, clip, clipFrom, cloud, color, commonVolume, copy, cos, curve, cut, cutFrom, cutOut, defRgbColor, defThreejsMaterial, defTool, define, deform, demesh, diameter, dilateXY, disjoint, drop, dxf, e, each, eachEdge, eachPoint, eachSegment, eagerTransform, edges, ex, exterior, extrudeAlong, extrudeX, extrudeY, extrudeZ, ey, ez, faces, fair, fill, fit, fitTo, fix, flat, fuse, g, gap, gauge, gcode, get, getAll, getNot, getTag, ghost, gn, gridView, grow, hold, holes, hull, image, inFn, input, inset, involute, iron, join, lerp, link, list, load, loadGeometry, loft, log, loop, lowerEnvelope, m, mark, maskedBy, masking, material, max, md, min, minimizeOverhang, move, moveAlong, n, noGap, noHoles, noOp, noVoid, normal, note, nth, o, obb, offset, on, op, orient, origin, outline, overlay, pack, pdf, plus, png, points, put, random, raycastPng, reconstruct, ref, refine, remesh, repair, rotateX, rotateY, rotateZ, route, runLength, rx, ry, rz, s, save, saveGeometry, scale$1 as scale, scaleToFit, scaleX, scaleY, scaleZ, seam, section, self, separate, seq, serialize, setTag, setTags, shadow, shell, simplify, sin, size, skeleton, sketch, smooth, sort, split, sqrt, stl, svg, sx, sy, sz, table, tag, tags, times, tint, to, toCoordinates, toDisplayGeometry, toGeometry, tool, toolpath, transform, trim, turnX, turnY, turnZ, twist, tx, ty, tz, unfold, untag, upperEnvelope, v, validate, version, view, voidFn, volume, voxels, wrap, x, xyz, y, z, zagSides, zagSteps };

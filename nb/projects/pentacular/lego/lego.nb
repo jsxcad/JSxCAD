@@ -61,8 +61,8 @@ const legoify = () => (shape) =>
   shape
     .and(
       faces().op(
-        sort('z>').n(0).put(Stud().x(-4, 4).y(-4, 4)),
-        sort('z<').n(0).put(Socket().x(-4, 4).y(-4, 4))
+        sort(size('top'), 'max', 1).put(Stud().x(-4, 4).y(-4, 4)),
+        sort(size('bottom'), 'min', 1).put(Socket().x(-4, 4).y(-4, 4))
       )
     )
     .disjoint()
