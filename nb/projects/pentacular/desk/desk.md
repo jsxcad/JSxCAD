@@ -85,6 +85,10 @@ const Desk = ({ width = 700, height = 660, depth = 400, shelves = [] } = {}) =>
 const Plywood = ({ width = 700, height = 10, depth = 400 } = {}) =>
   Box([width], [depth], [height])
     .material('wood')
+    .at(
+      align('xyz<').origin(),
+      and(Hershey(`${width}x${depth}`, 50).align('xyz>').z(1))
+    )
     .asPart('Plywood', `Plywood ${width}x${depth}x${height}`);
 ```
 
@@ -195,7 +199,9 @@ const desk700b = Assembly(
 const desk = Desk({ width: 700, shelves: [350, 450, 550] }).view();
 ```
 
-![Image](desk.md.parts.png)
+![Image](desk.md.parts_parts.png)
+
+[parts.png](desk.parts.png)
 
 ```JavaScript
 const parts = cornerDesign3
@@ -204,5 +210,5 @@ const parts = cornerDesign3
   .sort(area(), 'max')
   .pack(Box(2440, 1200).copy(10), 0, 1 / 4, { margin: 5 })
   .pack({ margin: 100 })
-  .view();
+  .png('parts', 'top', { size: 512 });
 ```

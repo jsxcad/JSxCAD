@@ -1617,6 +1617,7 @@ const topViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -1629,6 +1630,7 @@ const topViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -1652,6 +1654,7 @@ const gridViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -1664,6 +1667,7 @@ const gridViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -1687,6 +1691,7 @@ const frontViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -1699,6 +1704,7 @@ const frontViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -1722,6 +1728,7 @@ const sideViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -1734,6 +1741,7 @@ const sideViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -3456,7 +3464,7 @@ const smooth = Shape.registerMethod3(
 const sort = Shape.registerMethod3(
   'sort',
   ['inputGeometry', 'function', 'modes:min,max', 'numbers'],
-  async (geometry, rankOp = () => 0, mode, tiersToKeep) => {
+  async (geometry, rankOp = () => 0, mode, tiersToKeep = []) => {
     let predicate = (a, b) => a - b;
     if (mode.max) {
       // Start from the max tier.
@@ -3483,7 +3491,7 @@ const sort = Shape.registerMethod3(
     // Structure the results by rank tiers.
     const keptTiers = [];
     for (let nth = 0; nth < tiers.length; nth++) {
-      if (tiersToKeep.includes(nth)) {
+      if (tiersToKeep.length === 0 || tiersToKeep.includes(nth)) {
         keptTiers.push(tiers[nth]);
       }
     }
