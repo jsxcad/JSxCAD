@@ -33,7 +33,7 @@ export const sort = Shape.registerMethod3(
     // Structure the results by rank tiers.
     const keptTiers = [];
     for (let nth = 0; nth < tiers.length; nth++) {
-      if (tiersToKeep.length === 0 || tiersToKeep.includes(nth)) {
+      if (tiersToKeep.length === 0 || tiersToKeep.includes(nth + 1)) {
         keptTiers.push(tiers[nth]);
       }
     }
