@@ -45,7 +45,6 @@ test('Raycast box from box', (t) => {
     }
   );
   t.true(result);
-  console.log(JSON.stringify(points));
   // We expect 25 results in the form [elevation, normalX, normalY, normalZ, ...] iterating x then y.
 
   const light = [0, 0, 1];

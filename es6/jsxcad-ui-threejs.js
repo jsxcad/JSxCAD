@@ -63,18 +63,7 @@ const buildScene = ({
     light.layers.enable(SKETCH_LAYER);
     light.layers.enable(GEOMETRY_LAYER);
     camera.add(light);
-    // camera.add(new SpotLightHelper(light));
   }
-
-  /*
-  // FIX ambient lighting.
-  {
-    // Add ambient light
-    const ambient = new HemisphereLight( 0xffffff, 0x8d8d8d, 100 );
-    ambient.decay = 0.2;
-    scene.add(ambient);
-  }
-  */
 
   {
     // Add spot light for shadows.
@@ -95,7 +84,6 @@ const buildScene = ({
     spotLight.layers.enable(SKETCH_LAYER);
     spotLight.layers.enable(GEOMETRY_LAYER);
     scene.add(spotLight);
-    // scene.add(new SpotLightHelper(spotLight));
   }
 
   if (renderer === undefined) {
@@ -111,7 +99,6 @@ const buildScene = ({
     renderer.inputGamma = true;
     renderer.outputGamma = true;
     renderer.setPixelRatio(window.devicePixelRatio);
-    // renderer.useLegacyLights = true;
     renderer.domElement.style =
       'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
 
@@ -1596,8 +1583,8 @@ const moveToFit = ({
 
     camera.position.copy(target).sub(direction);
 
-    camera.near = 0.1; // 0.1mm
-    camera.far = 100 * 1000; // 1km
+    camera.near = 1; // 0.1mm
+    camera.far = 100 * 1000; // 100m
 
     camera.updateMatrix();
     camera.updateMatrixWorld();
