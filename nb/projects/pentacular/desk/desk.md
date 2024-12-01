@@ -92,6 +92,31 @@ const Plywood = ({ width = 700, height = 10, depth = 400 } = {}) =>
     .asPart('Plywood', `Plywood ${width}x${depth}x${height}`);
 ```
 
+![Image](desk.md.desk.png)
+
+```JavaScript
+const desk = Desk({ width: 700, shelves: [350, 450, 550] }).view();
+```
+
+![Image](desk.md.parts.png)
+
+![Image](desk.md.parts_parts.png)
+
+[parts.png](desk.parts.png)
+
+```JavaScript
+const parts = cornerDesign3
+  .get('part:Plywood')
+  .view()
+  .each(flat())
+  .sort(area(), 'max')
+  .pack(Box(2440, 1200).copy(10), 0, 1 / 4, { margin: 5 })
+  .pack({ margin: 100 })
+  .align('xy')
+  .png('parts', 'top', { size: 1024 })
+  .v(18);
+```
+
 ![Image](desk.md.room.png)
 
 ```JavaScript
@@ -99,6 +124,12 @@ const room = Box([870 + 1580], [3800])
   .cut(Arc(870 * 2).x(1580 + 875))
   .clean()
   .view();
+```
+
+![Image](desk.md.desk1400.png)
+
+```JavaScript
+const desk1400 = Desk({ width: 1400, shelves: [350, 450, 550] }).view();
 ```
 
 ![Image](desk.md.cornerDesign3.png)
@@ -175,7 +206,7 @@ const deskHalfBase = DeskHalfBase({
 const desk1400b = Assembly(
   DeskHalfBase({
     width: 1400,
-    shelves: [220, 320, 420, 520],
+    shelves: [/*120, */ 220, 320, 420, 520],
   }),
   DeskTop({ width: 1400, shelves: [420, 520] }).z(660)
 ).view();
@@ -191,24 +222,4 @@ const desk700b = Assembly(
   }),
   DeskTop({ width: 700, shelves: [220, 320, 420, 520] }).z(660)
 ).view();
-```
-
-![Image](desk.md.desk.png)
-
-```JavaScript
-const desk = Desk({ width: 700, shelves: [350, 450, 550] }).view();
-```
-
-![Image](desk.md.parts_parts.png)
-
-[parts.png](desk.parts.png)
-
-```JavaScript
-const parts = cornerDesign3
-  .get('part:Plywood')
-  .each(flat())
-  .sort(area(), 'max')
-  .pack(Box(2440, 1200).copy(10), 0, 1 / 4, { margin: 5 })
-  .pack({ margin: 100 })
-  .png('parts', 'top', { size: 512 });
 ```
