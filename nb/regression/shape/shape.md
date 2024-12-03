@@ -335,13 +335,13 @@ const b = Box(5)
 ![Image](shape.md.$47.png)
 
 ```JavaScript
-b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
+b.at(eachEdge().sort(size('maxZ'), 'max', 1).sort(size('minY'), 'min', 1).sort(size('minX'), 'min', 1).n(0).origin(), cut(Box(3, 3, 11))).view();
 ```
 
 ![Image](shape.md.$48.png)
 
 ```JavaScript
-b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
+b.by(eachEdge().sort(size('maxZ'), 'max', 1).sort(size('minY'), 'min', 1).sort(size('minX'), 'min', 1).n(0).origin()).cut(Box(3, 3, 11)).view();
 ```
 
 ![Image](shape.md.$49.png)
@@ -502,13 +502,13 @@ Triangle(4)
 ![Image](shape.md.$65.png)
 
 ```JavaScript
-Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort(size('left')).view();
 ```
 
 ![Image](shape.md.$66.png)
 
 ```JavaScript
-Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort(size('right')).view();
 ```
 
 ![Image](shape.md.$67.png)

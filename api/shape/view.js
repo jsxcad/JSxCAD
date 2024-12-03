@@ -115,6 +115,7 @@ const topViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -127,6 +128,7 @@ const topViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -150,6 +152,7 @@ const gridViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -162,6 +165,7 @@ const gridViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -185,6 +189,7 @@ const frontViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -197,6 +202,7 @@ const frontViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -220,6 +226,7 @@ const sideViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -232,6 +239,7 @@ const sideViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,

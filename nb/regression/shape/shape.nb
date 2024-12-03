@@ -39,7 +39,7 @@ Box(10).to(Point(1, 2, 3)).gridView();
 Box(10).move(1, 2, 3).to(centroid()).gridView();
 
 // I don't know what this example is supposed to do.
-// Box(10, 10, 10).move(faces().sort('z>').n(0)).view();
+// Box(10, 10, 10).move(faces().sort(size('top')).n(0)).view();
 // Let's simplify it for now.
 Box(10, 10, 10).view();
 
@@ -142,9 +142,11 @@ const b = Box(5)
   .material('glass')
   .y(10);
 
-b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
+// b.at(eachEdge().sort('x<y<z>').n(0).origin(), cut(Box(3, 3, 11))).view();
+b.at(eachEdge().sort(size('maxZ'), 'max', 1).sort(size('minY'), 'min', 1).sort(size('minX'), 'min', 1).n(0).origin(), cut(Box(3, 3, 11))).view();
 
-b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
+// b.by(eachEdge().sort('x<y<z>').n(0).origin()).cut(Box(3, 3, 11)).view();
+b.by(eachEdge().sort(size('maxZ'), 'max', 1).sort(size('minY'), 'min', 1).sort(size('minX'), 'min', 1).n(0).origin()).cut(Box(3, 3, 11)).view();
 
 Voxels([0, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1]).view();
 
@@ -225,9 +227,11 @@ Triangle(4)
   .at(origin(), rz(1 / 16))
   .view();
 
-Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+// Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x<3').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort(size('left')).view();
 
-Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
+// Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort('x>1').view();
+Group(Box(), Triangle(1).x(2), Hexagon(1).x(4)).sort(size('right')).view();
 
 Box(5, 5, 20)
   .rx(1 / 4, 1 / 32)

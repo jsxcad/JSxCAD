@@ -1,78 +1,43 @@
-import { Group, getLeafs, measureBoundingBox } from '@jsxcad/geometry';
+import { Group, getLeafs } from '@jsxcad/geometry';
 
 import Shape from './Shape.js';
 
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const round = (values, resolution) =>
-  values.map((value) => Math.round(value / resolution) * resolution);
-
 export const sort = Shape.registerMethod3(
   'sort',
-  ['inputGeometry', 'string', 'number'],
-  (geometry, spec = 'z<y<x<', resolution = 0.01) => {
-    let leafs = [];
+  ['inputGeometry', 'function', 'modes:min,max', 'numbers'],
+  async (geometry, rankOp = () => 0, mode, tiersToKeep = []) => {
+    let predicate = (a, b) => a - b;
+    if (mode.max) {
+      // Start from the max tier.
+      predicate = (a, b) => b - a;
+    }
+    const leafs = [];
     for (const leaf of getLeafs(geometry)) {
-      console.log(JSON.stringify(leaf));
-      const bounds = measureBoundingBox(leaf);
-      if (bounds === undefined) {
-        continue;
-      }
-      const [min, max] = bounds;
+      const rank = await rankOp(Shape.fromGeometry(leaf));
       leafs.push({
-        min: round(min, resolution),
-        max: round(max, resolution),
+        rank,
         leaf,
       });
     }
-    const ops = [];
-    while (spec) {
-      const found = spec.match(/([xyz])([<>])([0-9.])?(.*)/);
-      if (found === null) {
-        throw Error(`Bad sort spec ${spec}`);
+    leafs.sort((a, b) => predicate(a.rank, b.rank));
+    let lastLeaf;
+    let tier;
+    const tiers = [];
+    for (const thisLeaf of leafs) {
+      if (!lastLeaf || lastLeaf.rank !== thisLeaf.rank) {
+        tier = [];
+        tiers.push(tier);
       }
-      const [, dimension, order, limit, rest] = found;
-      // We apply the sorting ops in reverse.
-      ops.unshift({ dimension, order, limit });
-      spec = rest;
+      tier.push(thisLeaf);
     }
-    for (const { dimension, order, limit } of ops) {
-      let axis;
-      switch (dimension) {
-        case 'x':
-          axis = X;
-          break;
-        case 'y':
-          axis = Y;
-          break;
-        case 'z':
-          axis = Z;
-          break;
+    // Structure the results by rank tiers.
+    const keptTiers = [];
+    for (let nth = 0; nth < tiers.length; nth++) {
+      if (tiersToKeep.length === 0 || tiersToKeep.includes(nth + 1)) {
+        keptTiers.push(tiers[nth]);
       }
-      if (limit !== undefined) {
-        switch (order) {
-          case '>':
-            leafs = leafs.filter(({ min }) => min[axis] > limit);
-            break;
-          case '<':
-            leafs = leafs.filter(({ max }) => max[axis] < limit);
-            break;
-        }
-      }
-      let compare;
-      switch (order) {
-        case '>':
-          compare = (a, b) => b.min[axis] - a.min[axis];
-          break;
-        case '<':
-          compare = (a, b) => a.max[axis] - b.max[axis];
-          break;
-      }
-      leafs.sort(compare);
     }
-    return Group(leafs.map(({ leaf }) => leaf));
+    return Group(keptTiers.map((tier) => Group(tier.map(({ leaf }) => leaf))));
   }
 );
 

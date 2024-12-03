@@ -172,8 +172,7 @@ static int Pack(Geometry* geometry, size_t count,
 
     auto display_pwhs =
         [&](const std::vector<CGAL::Polygon_with_holes_2<EK>>& pwhs,
-            const std::string& tag) {
-        };
+            const std::string& tag) {};
 
     auto cut_part_from_sheet =
         [&](Sheet& sheet, const Part& part,
