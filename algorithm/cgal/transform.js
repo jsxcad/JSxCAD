@@ -36,10 +36,7 @@ export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
   if (typeof x !== 'number') throw Error('die/x');
   if (typeof y !== 'number') throw Error('die/y');
   if (typeof z !== 'number') throw Error('die/z');
-  return [
-  TRANSFORM_TRANSLATE,
-  [x, y, z],
-];
+  return [TRANSFORM_TRANSLATE, [x, y, z]];
 };
 
 export const fromScaleToTransform = (x = 1, y = 1, z = 1) => [

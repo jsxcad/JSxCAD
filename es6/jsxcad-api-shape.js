@@ -727,7 +727,7 @@ const destructure2 = async (names, input, originalArgs, ...specs) => {
         }
         output.push(out);
         if (specs.length > 0) {
-          out.push(...seq$1(...specs));
+          out.push(...seq$1(...specs).map(([value]) => value));
         }
         break;
       }

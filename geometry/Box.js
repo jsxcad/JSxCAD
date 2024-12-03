@@ -120,9 +120,7 @@ const makeBox = (corner1, corner2) => {
     }
   };
 
-  const result = makeAbsolute(build());
-  console.log(`QQ/Box: result=${JSON.stringify(result)}`);
-  return result;
+  return makeAbsolute(build());
 };
 
 export const Box = ([x, y, z], options = {}) => {

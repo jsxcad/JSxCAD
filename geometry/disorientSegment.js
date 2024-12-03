@@ -12,9 +12,6 @@ const SOURCE = 0;
 const TARGET = 1;
 
 export const disorientSegment = (segment, matrix, normal) => {
-  console.log(`QQ/disorientSegment: matrix=${JSON.stringify(matrix)}`);
-  console.log(`QQ/disorientSegment: segment=${JSON.stringify(segment)}`);
-  console.log(`QQ/disorientSegment: normal=${JSON.stringify(normal)}`);
   const absoluteSegment = [
     transformCoordinate(segment[SOURCE], matrix),
     transformCoordinate(segment[TARGET], matrix),
@@ -46,9 +43,6 @@ export const disorientSegment = (segment, matrix, normal) => {
   ];
   const inverseMatrix = invertTransform(inverse);
   const oppositeInverseMatrix = invertTransform(oppositeInverse);
-
-  console.log(`QQ/disorientSegment: baseSegment=${JSON.stringify(baseSegment)}`);
-  console.log(`QQ/disorientSegment: oppositeSegment=${JSON.stringify(oppositeSegment)}`);
 
   return [
     taggedSegments({ matrix: inverseMatrix }, [baseSegment]),

@@ -440,10 +440,12 @@ const fromRotateYToTransform = (turn) => [TRANSFORM_ROTATE_Y, turn];
 
 const fromRotateZToTransform = (turn) => [TRANSFORM_ROTATE_Z, turn];
 
-const fromTranslateToTransform = (x = 0, y = 0, z = 0) => [
-  TRANSFORM_TRANSLATE,
-  [x, y, z],
-];
+const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
+  if (typeof x !== 'number') throw Error('die/x');
+  if (typeof y !== 'number') throw Error('die/y');
+  if (typeof z !== 'number') throw Error('die/z');
+  return [TRANSFORM_TRANSLATE, [x, y, z]];
+};
 
 const fromScaleToTransform = (x = 1, y = 1, z = 1) => [
   TRANSFORM_SCALE,
@@ -474,9 +476,10 @@ const fromSegmentToInverseTransform = (
   }
 };
 
-const toApproximateMatrix = (matrix) => {
+const toApproximateMatrix = (matrix = identityMatrix) => {
   try {
     const transform = [];
+    console.log(`QQ/toApproximateMatrix: ${JSON.stringify(matrix)}`);
     getCgal().ApproximateMatrix(matrix, transform);
     return transform;
   } catch (error) {
@@ -537,7 +540,12 @@ const fillCgalGeometry = (geometry, inputs) => {
   geometry.setSize(inputs.length);
   for (let nth = 0; nth < inputs.length; nth++) {
     const { tags = [] } = inputs[nth];
-    g.SetTransform(geometry, nth, inputs[nth].matrix || identityMatrix);
+    try {
+      g.SetTransform(geometry, nth, inputs[nth].matrix || identityMatrix);
+    } catch (error) {
+      console.log(`geometry=${JSON.stringify(inputs[nth])}`);
+      throw error;
+    }
     if (tags.includes('type:reference')) {
       geometry.setType(nth, GEOMETRY_REFERENCE);
       continue;
