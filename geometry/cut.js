@@ -26,6 +26,8 @@ export const cut = (
   toClips,
   { open = false, exact, noVoid, noGhost }
 ) => {
+  console.log(`QQ/cut: toCut=${JSON.stringify(toCut)}`);
+  console.log(`QQ/cut: toClips=${JSON.stringify(toClips)}`);
   const inputs = linearize(toCut, filterTargets(noVoid));
   const count = inputs.length;
   for (const toClip of toClips) {

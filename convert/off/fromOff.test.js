@@ -1,5 +1,6 @@
 import { boot } from '@jsxcad/sys';
 import { fromOff } from './fromOff.js';
+import { identityMatrix } from '@jsxcad/algorithm-cgal';
 import { serialize } from '@jsxcad/geometry';
 import test from 'ava';
 
@@ -35,25 +36,7 @@ test('Exact', async (t) => {
   const geometry = await fromOff(new TextEncoder('utf8').encode(exact));
   t.deepEqual(JSON.parse(JSON.stringify(serialize(geometry))), {
     type: 'graph',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 1 0 0 0 0 1 0 1',
-    ],
+    matrix: identityMatrix,
     tags: [],
     graph: {
       serializedSurfaceMesh:
@@ -91,25 +74,7 @@ test('Approximate', async (t) => {
   const geometry = await fromOff(new TextEncoder('utf8').encode(approximate));
   t.deepEqual(JSON.parse(JSON.stringify(serialize(geometry))), {
     type: 'graph',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 1 0 0 0 0 1 0 1',
-    ],
+    matrix: identityMatrix,
     tags: [],
     graph: {
       serializedSurfaceMesh:

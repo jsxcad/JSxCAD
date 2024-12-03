@@ -1,6 +1,7 @@
+import { identityMatrix, serialize } from '@jsxcad/geometry';
+
 import { boot } from '@jsxcad/sys';
 import { fromObj } from './fromObj.js';
-import { serialize } from '@jsxcad/geometry';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -47,25 +48,7 @@ test('Cube', async (t) => {
   const geometry = await fromObj(new TextEncoder('utf8').encode(cube));
   t.deepEqual(JSON.parse(JSON.stringify(serialize(geometry))), {
     type: 'graph',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 1 0 0 0 0 1 0 1',
-    ],
+    matrix: identityMatrix,
     tags: [],
     graph: {
       serializedSurfaceMesh:
@@ -103,25 +86,7 @@ test('Diamond', async (t) => {
   const geometry = await fromObj(new TextEncoder('utf8').encode(diamond));
   t.deepEqual(JSON.parse(JSON.stringify(serialize(geometry))), {
     type: 'graph',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 1 0 0 0 0 1 0 1',
-    ],
+    matrix: identityMatrix,
     tags: [],
     graph: {
       serializedSurfaceMesh:

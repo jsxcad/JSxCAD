@@ -6,6 +6,7 @@ import {
   measureBoundingBox,
   scale,
   section,
+  toApproximateMatrix,
   transformCoordinate,
   transformingCoordinates,
   translate,
@@ -52,12 +53,13 @@ export const toSvg = async (
     (geometry) =>
       geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry)
   )) {
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     for (const polygonWithHoles of polygonsWithHoles) {
       const { points, holes } = polygonWithHoles;
       const color = toRgbColorFromTags(tags, definitions);
       const d = [];
       points.forEach(
-        transformingCoordinates(matrix, (point, index) =>
+        transformingCoordinates(approximateMatrix, (point, index) =>
           d.push(
             `${index === 0 ? 'M' : 'L'}${point[0].toFixed(
               5
@@ -68,7 +70,7 @@ export const toSvg = async (
       d.push('z');
       for (const { points } of holes) {
         points.forEach(
-          transformingCoordinates(matrix, (point, index) =>
+          transformingCoordinates(approximateMatrix, (point, index) =>
             d.push(
               `${index === 0 ? 'M' : 'L'}${point[0].toFixed(
                 5
@@ -91,13 +93,14 @@ export const toSvg = async (
     (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
   )) {
     const { matrix, tags, segments } = g;
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];
     let first;
     let last;
     for (let [start, end] of segments) {
-      const [startX, startY] = transformCoordinate(start, matrix);
-      const [endX, endY] = transformCoordinate(end, matrix);
+      const [startX, startY] = transformCoordinate(start, approximateMatrix);
+      const [endX, endY] = transformCoordinate(end, approximateMatrix);
       if (!equals(start, last)) {
         d.push(`M ${startX.toFixed(5)} ${startY.toFixed(5)}`);
       }

@@ -1,5 +1,6 @@
 import { disorientSegment } from './disorientSegment.js';
 import { distance } from './vector.js';
+import { toApproximateMatrix } from '@jsxcad/algorithm-cgal';
 import { toFaceEdgesList } from './eachFaceEdges.js';
 
 // TODO: Add an option to include a virtual segment at the target of the last
@@ -17,16 +18,18 @@ export const toOrientedFaceEdgesList = (
   { select = [geometry] } = {}
 ) => {
   const faces = [];
+  console.log(`QQ/toOrientedFaceEdgesList: geometry=${JSON.stringify(geometry)}`);
   const faceEdgesList = toFaceEdgesList(geometry, { select });
   for (const { face, edges } of faceEdgesList) {
     const edgeResults = [];
     const { matrix, segments, normals } = edges;
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     if (segments) {
       for (let nth = 0; nth < segments.length; nth++) {
         const baseSegment = segments[nth];
         const [forward, backward] = disorientSegment(
           baseSegment,
-          matrix,
+          approximateMatrix,
           normals ? normals[nth] : undefined
         );
         edgeResults.push({

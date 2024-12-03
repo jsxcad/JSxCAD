@@ -1,102 +1,51 @@
 import { getCgal } from './getCgal.js';
 
-export const identityMatrix = [
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  '1 0 0 0 0 1 0 0 0 0 1 0 1',
+export const TRANSFORM_COMPOSE = 0;
+export const TRANSFORM_EXACT = 1;
+export const TRANSFORM_APPROXIMATE = 2;
+export const TRANSFORM_INVERT = 3;
+export const TRANSFORM_ROTATE_X = 4;
+export const TRANSFORM_ROTATE_Y = 5;
+export const TRANSFORM_ROTATE_Z = 6;
+export const TRANSFORM_TRANSLATE = 7;
+export const TRANSFORM_SCALE = 8;
+export const TRANSFORM_IDENTITY = 9;
+
+export const identityMatrix = [TRANSFORM_IDENTITY];
+export const makeApproximateMatrix = (approximate) => [
+  TRANSFORM_APPROXIMATE,
+  approximate,
+];
+export const makeExactMatrix = (exact) => [TRANSFORM_EXACT, exact];
+
+export const composeTransforms = (a = identityMatrix, b = identityMatrix) => [
+  TRANSFORM_COMPOSE,
+  a,
+  b,
 ];
 
-const TRANSFORM_COMPOSE = 0;
-const TRANSFORM_EXACT = 1;
-const TRANSFORM_APPROXIMATE = 2;
+export const invertTransform = (a = identityMatrix) => [TRANSFORM_INVERT, a];
 
-export const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
-  try {
-    const transform = [];
-    // getCgal().ComposeTransforms(a, b, transform);
-    // return transform;
-    return [TRANSFORM_COMPOSE, a, b];
-  } catch (error) {
-    throw Error(error);
-  }
-};
+export const fromRotateXToTransform = (turn) => [TRANSFORM_ROTATE_X, turn];
 
-export const invertTransform = (a = identityMatrix) => {
-  try {
-    const inverted = [];
-    getCgal().InvertTransform(a, inverted);
-    return inverted;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+export const fromRotateYToTransform = (turn) => [TRANSFORM_ROTATE_Y, turn];
 
-export const fromRotateXToTransform = (turn) => {
-  try {
-    const transform = [];
-    getCgal().XTurnTransform(Number(turn), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-export const fromRotateYToTransform = (turn) => {
-  try {
-    const transform = [];
-    getCgal().YTurnTransform(Number(turn), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-export const fromRotateZToTransform = (turn) => {
-  try {
-    const transform = [];
-    getCgal().ZTurnTransform(Number(turn), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+export const fromRotateZToTransform = (turn) => [TRANSFORM_ROTATE_Z, turn];
 
 export const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
-  try {
-    if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
-      throw Error(`Non-finite ${[x, y, z]}`);
-    }
-    const transform = [];
-    getCgal().TranslateTransform(Number(x), Number(y), Number(z), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
+  if (typeof x !== 'number') throw Error('die/x');
+  if (typeof y !== 'number') throw Error('die/y');
+  if (typeof z !== 'number') throw Error('die/z');
+  return [
+  TRANSFORM_TRANSLATE,
+  [x, y, z],
+];
 };
 
-export const fromScaleToTransform = (x = 1, y = 1, z = 1) => {
-  try {
-    const transform = [];
-    getCgal().ScaleTransform(x, y, z, transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+export const fromScaleToTransform = (x = 1, y = 1, z = 1) => [
+  TRANSFORM_SCALE,
+  [x, y, z],
+];
 
 export const fromSegmentToInverseTransform = (
   [[startX = 0, startY = 0, startZ = 0], [endX = 0, endY = 0, endZ = 0]],
@@ -122,24 +71,21 @@ export const fromSegmentToInverseTransform = (
   }
 };
 
-// FIX: Why do we need to copy this?
-export const identity = () => [...identityMatrix];
+export const toApproximateMatrix = (matrix = identityMatrix) => {
+  try {
+    const transform = [];
+    console.log(`QQ/toApproximateMatrix: ${JSON.stringify(matrix)}`);
+    getCgal().ApproximateMatrix(matrix, transform);
+    return transform;
+  } catch (error) {
+    throw Error(error);
+  }
+};
 
-export const matrix6 = (a, b, c, d, tx, ty) => [
-  a,
-  b,
-  0,
-  0,
-  c,
-  d,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  tx,
-  ty,
-  0,
-  1,
-];
+// FIX: Why do we need to copy this?
+// export const identity = () => [...identityMatrix];
+
+export const identity = () => [TRANSFORM_IDENTITY];
+
+export const matrix6 = (a, b, c, d, tx, ty) =>
+  makeApproximateMatrix([a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);

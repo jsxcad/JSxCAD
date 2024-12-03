@@ -45,7 +45,12 @@ export const fillCgalGeometry = (geometry, inputs) => {
   }
   for (let nth = 0; nth < inputs.length; nth++) {
     const { tags = [] } = inputs[nth];
-    g.SetTransform(geometry, nth, inputs[nth].matrix || identityMatrix);
+    try {
+      g.SetTransform(geometry, nth, inputs[nth].matrix || identityMatrix);
+    } catch (error) {
+      console.log(`geometry=${JSON.stringify(inputs[nth])}`);
+      throw error;
+    }
     if (tags.includes('type:reference')) {
       geometry.setType(nth, GEOMETRY_REFERENCE);
       continue;

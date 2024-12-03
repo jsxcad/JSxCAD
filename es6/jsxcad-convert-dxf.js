@@ -1,4 +1,4 @@
-import { translate, scale, section, disjoint, linearize, isNotTypeGhost, transformCoordinate } from './jsxcad-geometry.js';
+import { translate, scale, section, disjoint, linearize, isNotTypeGhost, toApproximateMatrix, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
 
 /**
@@ -4077,9 +4077,10 @@ const toDxf = async (baseGeometry, options = {}) => {
     geometry,
     (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
   )) {
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     for (let [start, end] of segments) {
-      const [startX, startY] = transformCoordinate(start, matrix);
-      const [endX, endY] = transformCoordinate(end, matrix);
+      const [startX, startY] = transformCoordinate(start, approximateMatrix);
+      const [endX, endY] = transformCoordinate(end, approximateMatrix);
       drawing.drawLine(startX, startY, endX, endY);
     }
   }

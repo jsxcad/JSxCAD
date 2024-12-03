@@ -1,5 +1,5 @@
 import { identity, composeTransforms, matrix6, fromTranslateToTransform, fromRotateZToTransform, fromScaleToTransform } from './jsxcad-algorithm-cgal.js';
-import { scale, Segments, distance, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
+import { scale, Segments, distance, taggedGroup, fill, section, disjoint, measureBoundingBox, translate, makeAbsolute, linearize, isNotTypeGhost, toApproximateMatrix, transformingCoordinates, transformCoordinate } from './jsxcad-geometry.js';
 import { toTagsFromName, toRgbColorFromTags } from './jsxcad-algorithm-color.js';
 
 function unwrapExports (x) {
@@ -4198,12 +4198,13 @@ const toSvg = async (
     (geometry) =>
       geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry)
   )) {
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     for (const polygonWithHoles of polygonsWithHoles) {
       const { points, holes } = polygonWithHoles;
       const color = toRgbColorFromTags(tags, definitions);
       const d = [];
       points.forEach(
-        transformingCoordinates(matrix, (point, index) =>
+        transformingCoordinates(approximateMatrix, (point, index) =>
           d.push(
             `${index === 0 ? 'M' : 'L'}${point[0].toFixed(
               5
@@ -4214,7 +4215,7 @@ const toSvg = async (
       d.push('z');
       for (const { points } of holes) {
         points.forEach(
-          transformingCoordinates(matrix, (point, index) =>
+          transformingCoordinates(approximateMatrix, (point, index) =>
             d.push(
               `${index === 0 ? 'M' : 'L'}${point[0].toFixed(
                 5
@@ -4237,13 +4238,14 @@ const toSvg = async (
     (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
   )) {
     const { matrix, tags, segments } = g;
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     const color = toRgbColorFromTags(tags, definitions);
     let d = [];
     let first;
     let last;
     for (let [start, end] of segments) {
-      const [startX, startY] = transformCoordinate(start, matrix);
-      const [endX, endY] = transformCoordinate(end, matrix);
+      const [startX, startY] = transformCoordinate(start, approximateMatrix);
+      const [endX, endY] = transformCoordinate(end, approximateMatrix);
       if (!equals(start, last)) {
         d.push(`M ${startX.toFixed(5)} ${startY.toFixed(5)}`);
       }

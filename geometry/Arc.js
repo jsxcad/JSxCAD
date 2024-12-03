@@ -46,7 +46,7 @@ const makeArc =
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
-      }).map((t) => rotateZ(Point(0.5), t))
+      }).map(([t]) => rotateZ(Point(0.5), t))
     );
 
     if (

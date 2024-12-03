@@ -408,98 +408,47 @@ const getCgal = () => {
 
 onBoot(initCgal);
 
-const identityMatrix = [
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  '1 0 0 0 0 1 0 0 0 0 1 0 1',
+const TRANSFORM_COMPOSE = 0;
+const TRANSFORM_EXACT = 1;
+const TRANSFORM_APPROXIMATE = 2;
+const TRANSFORM_INVERT = 3;
+const TRANSFORM_ROTATE_X = 4;
+const TRANSFORM_ROTATE_Y = 5;
+const TRANSFORM_ROTATE_Z = 6;
+const TRANSFORM_TRANSLATE = 7;
+const TRANSFORM_SCALE = 8;
+const TRANSFORM_IDENTITY = 9;
+
+const identityMatrix = [TRANSFORM_IDENTITY];
+const makeApproximateMatrix = (approximate) => [
+  TRANSFORM_APPROXIMATE,
+  approximate,
+];
+const makeExactMatrix = (exact) => [TRANSFORM_EXACT, exact];
+
+const composeTransforms = (a = identityMatrix, b = identityMatrix) => [
+  TRANSFORM_COMPOSE,
+  a,
+  b,
 ];
 
-const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
-  try {
-    const transform = [];
-    getCgal().ComposeTransforms(a, b, transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+const invertTransform = (a = identityMatrix) => [TRANSFORM_INVERT, a];
 
-const invertTransform = (a = identityMatrix) => {
-  try {
-    const inverted = [];
-    getCgal().InvertTransform(a, inverted);
-    return inverted;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+const fromRotateXToTransform = (turn) => [TRANSFORM_ROTATE_X, turn];
 
-const fromRotateXToTransform = (turn) => {
-  try {
-    const transform = [];
-    getCgal().XTurnTransform(Number(turn), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+const fromRotateYToTransform = (turn) => [TRANSFORM_ROTATE_Y, turn];
 
-const fromRotateYToTransform = (turn) => {
-  try {
-    const transform = [];
-    getCgal().YTurnTransform(Number(turn), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+const fromRotateZToTransform = (turn) => [TRANSFORM_ROTATE_Z, turn];
 
-const fromRotateZToTransform = (turn) => {
-  try {
-    const transform = [];
-    getCgal().ZTurnTransform(Number(turn), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+const fromTranslateToTransform = (x = 0, y = 0, z = 0) => [
+  TRANSFORM_TRANSLATE,
+  [x, y, z],
+];
 
-const fromTranslateToTransform = (x = 0, y = 0, z = 0) => {
-  try {
-    if (!isFinite(x) || !isFinite(y) || !isFinite(z)) {
-      throw Error(`Non-finite ${[x, y, z]}`);
-    }
-    const transform = [];
-    getCgal().TranslateTransform(Number(x), Number(y), Number(z), transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
-
-const fromScaleToTransform = (x = 1, y = 1, z = 1) => {
-  try {
-    const transform = [];
-    getCgal().ScaleTransform(x, y, z, transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
-  }
-};
+const fromScaleToTransform = (x = 1, y = 1, z = 1) => [
+  TRANSFORM_SCALE,
+  [x, y, z],
+];
 
 const fromSegmentToInverseTransform = (
   [[startX = 0, startY = 0, startZ = 0], [endX = 0, endY = 0, endZ = 0]],
@@ -525,27 +474,23 @@ const fromSegmentToInverseTransform = (
   }
 };
 
-// FIX: Why do we need to copy this?
-const identity = () => [...identityMatrix];
+const toApproximateMatrix = (matrix) => {
+  try {
+    const transform = [];
+    getCgal().ApproximateMatrix(matrix, transform);
+    return transform;
+  } catch (error) {
+    throw Error(error);
+  }
+};
 
-const matrix6 = (a, b, c, d, tx, ty) => [
-  a,
-  b,
-  0,
-  0,
-  c,
-  d,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  tx,
-  ty,
-  0,
-  1,
-];
+// FIX: Why do we need to copy this?
+// export const identity = () => [...identityMatrix];
+
+const identity = () => [TRANSFORM_IDENTITY];
+
+const matrix6 = (a, b, c, d, tx, ty) =>
+  makeApproximateMatrix([a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
 
 const STATUS_OK = 0;
 const STATUS_EMPTY = 1;
@@ -2244,4 +2189,4 @@ const wrap = (
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pack, pushSurfaceMesh, raycast, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, trim, twist, unfold, validate, withIsExteriorPoint, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, identityMatrix, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeExactMatrix, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pack, pushSurfaceMesh, raycast, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, toApproximateMatrix, trim, twist, unfold, validate, withIsExteriorPoint, wrap };

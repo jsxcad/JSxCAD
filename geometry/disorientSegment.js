@@ -1,6 +1,7 @@
 import {
   fromSegmentToInverseTransform,
   invertTransform,
+  toApproximateMatrix,
 } from '@jsxcad/algorithm-cgal';
 
 import { subtract } from './vector.js';
@@ -11,6 +12,9 @@ const SOURCE = 0;
 const TARGET = 1;
 
 export const disorientSegment = (segment, matrix, normal) => {
+  console.log(`QQ/disorientSegment: matrix=${JSON.stringify(matrix)}`);
+  console.log(`QQ/disorientSegment: segment=${JSON.stringify(segment)}`);
+  console.log(`QQ/disorientSegment: normal=${JSON.stringify(normal)}`);
   const absoluteSegment = [
     transformCoordinate(segment[SOURCE], matrix),
     transformCoordinate(segment[TARGET], matrix),
@@ -26,20 +30,25 @@ export const disorientSegment = (segment, matrix, normal) => {
     absoluteSegment,
     absoluteNormal
   );
+  const approximateInverse = toApproximateMatrix(inverse)[1];
   const oppositeInverse = fromSegmentToInverseTransform(
     absoluteOppositeSegment,
     absoluteNormal
   );
+  const approximateOppositeInverse = toApproximateMatrix(inverse)[1];
   const baseSegment = [
-    transformCoordinate(absoluteSegment[SOURCE], inverse),
-    transformCoordinate(absoluteSegment[TARGET], inverse),
+    transformCoordinate(absoluteSegment[SOURCE], approximateInverse),
+    transformCoordinate(absoluteSegment[TARGET], approximateInverse),
   ];
   const oppositeSegment = [
-    transformCoordinate(absoluteSegment[TARGET], oppositeInverse),
-    transformCoordinate(absoluteSegment[SOURCE], oppositeInverse),
+    transformCoordinate(absoluteSegment[TARGET], approximateOppositeInverse),
+    transformCoordinate(absoluteSegment[SOURCE], approximateOppositeInverse),
   ];
   const inverseMatrix = invertTransform(inverse);
   const oppositeInverseMatrix = invertTransform(oppositeInverse);
+
+  console.log(`QQ/disorientSegment: baseSegment=${JSON.stringify(baseSegment)}`);
+  console.log(`QQ/disorientSegment: oppositeSegment=${JSON.stringify(oppositeSegment)}`);
 
   return [
     taggedSegments({ matrix: inverseMatrix }, [baseSegment]),

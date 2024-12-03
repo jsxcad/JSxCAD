@@ -5,6 +5,7 @@ import {
   linearize,
   measureBoundingBox,
   scaleLazy as scaleGeometry,
+  toApproximateMatrix,
   transformCoordinate,
   transformingCoordinates,
 } from '@jsxcad/geometry';
@@ -95,12 +96,13 @@ export const toPdf = async (
     (geometry) =>
       geometry.type === 'polygonsWithHoles' && isNotTypeGhost(geometry)
   )) {
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     for (const { points, holes } of polygonsWithHoles) {
       lines.push(toFillColor(toRgbFromTags(tags, definitions, black)));
       lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
       const drawLines = (points) => {
         points.forEach(
-          transformingCoordinates(matrix, ([x, y, z], nth) => {
+          transformingCoordinates(approximateMatrix, ([x, y, z], nth) => {
             if (nth === 0) {
               lines.push(`${x.toFixed(9)} ${y.toFixed(9)} m`); // move-to.
             } else {
@@ -123,11 +125,12 @@ export const toPdf = async (
     prepared,
     (geometry) => geometry.type === 'segments' && isNotTypeGhost(geometry)
   )) {
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     lines.push(toStrokeColor(toRgbFromTags(tags, definitions, black)));
     let last;
     for (let [start, end] of segments) {
-      start = transformCoordinate(start, matrix);
-      end = transformCoordinate(end, matrix);
+      start = transformCoordinate(start, approximateMatrix);
+      end = transformCoordinate(end, approximateMatrix);
       if (!last || start[X] !== last[X] || start[Y] !== last[Y]) {
         if (last) {
           lines.push(`S`); // stroke.

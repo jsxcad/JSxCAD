@@ -1,8 +1,7 @@
-import '@jsxcad/algorithm-cgal';
-
 import { createByteFetcher, fetchHeader, fromDst } from './fromDst.js';
 
 import { boot } from '@jsxcad/sys';
+import { identityMatrix } from '@jsxcad/algorithm-cgal';
 import { readFileSync } from 'fs';
 import test from 'ava';
 
@@ -33,25 +32,7 @@ test('Read dst to z0paths', async (t) => {
   const geometry = await fromDst(readFileSync('test.dst'));
   t.deepEqual(JSON.parse(JSON.stringify(geometry)), {
     type: 'segments',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 1 0 0 0 0 1 0 1',
-    ],
+    matrix: identityMatrix,
     tags: [],
     segments: [
       [[100, -200, 0], [100, -200, 0], '100 -200 0 100 -200 0'],

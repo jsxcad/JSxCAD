@@ -7,8 +7,11 @@ export {
   fromSegmentToInverseTransform,
   fromTranslateToTransform,
   identity,
+  identityMatrix,
   invertTransform,
+  makeExactMatrix,
   matrix6,
+  toApproximateMatrix,
 } from './transform.js';
 
 export { approximate } from './approximate.js';

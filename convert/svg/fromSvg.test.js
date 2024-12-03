@@ -1,5 +1,3 @@
-import '@jsxcad/algorithm-cgal';
-
 import { boot } from '@jsxcad/sys';
 import { fromSvg } from './fromSvg.js';
 import fs from 'fs';
@@ -302,25 +300,7 @@ test('Closed path open an iota', async (t) => {
       {
         type: 'segments',
         tags: ['color:#000000'],
-        matrix: [
-          6.666666666666667,
-          0,
-          0,
-          0,
-          0,
-          -6.666666666666667,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          '20/3 0 0 0 0 -20/3 0 0 0 0 1 0 1',
-        ],
+        matrix: [0, [8, [6.666666666666667, -6.666666666666666, 1]], [9]],
         segments: [
           [
             [537.27204, 735.26077, 0],

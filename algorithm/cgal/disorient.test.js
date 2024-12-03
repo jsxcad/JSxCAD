@@ -1,5 +1,9 @@
+import {
+  fromSegmentToInverseTransform,
+  toApproximateMatrix,
+} from './transform.js';
+
 import Prando from 'prando';
-import { fromSegmentToInverseTransform } from './transform.js';
 import { initCgal } from './getCgal.js';
 import test from 'ava';
 
@@ -34,10 +38,12 @@ test('fuzz', (t) => {
     const source = [g(), g(), g()];
     const target = [g(), g(), g()];
     const normal = [g(), g(), g()];
-    const matrix = fromSegmentToInverseTransform([source, target], normal);
-    const localSource = transformPoint(matrix, source);
-    const localTarget = transformPoint(matrix, target);
-    const localNormal = transformPoint(matrix, addPoints(normal, source));
+    const matrix = toApproximateMatrix(
+      fromSegmentToInverseTransform([source, target], normal)
+    );
+    const localSource = transformPoint(matrix[1], source);
+    const localTarget = transformPoint(matrix[1], target);
+    const localNormal = transformPoint(matrix[1], addPoints(normal, source));
     t.true(Math.abs(localSource[X]) < 0.1);
     t.true(Math.abs(localSource[Y]) < 0.1);
     t.true(Math.abs(localSource[Z]) < 0.1);

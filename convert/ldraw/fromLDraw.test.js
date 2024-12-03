@@ -43,25 +43,7 @@ test('Load a file', async (t) => {
   const graph = await fromLDrawPart('3024', { allowFetch: false });
   t.deepEqual(JSON.parse(JSON.stringify(serialize(graph))), {
     type: 'graph',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      -1,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 0 1 0 0 -1 0 0 1',
-    ],
+    matrix: [0, [4, -0.25], [9]],
     tags: ['ldraw:3024.dat'],
     graph: {
       serializedSurfaceMesh:

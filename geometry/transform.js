@@ -1,3 +1,4 @@
+export { toApproximateMatrix } from '@jsxcad/algorithm-cgal';
 export { transform } from './tagged/transform.js';
 
 export const transformCoordinate = ([x = 0, y = 0, z = 0], matrix) => {
