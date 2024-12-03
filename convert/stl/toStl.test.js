@@ -61,9 +61,7 @@ const box1Solid = [
 ];
 
 test('Correctly render a box', async (t) => {
-  console.log(`QQ/toStl/test/1`);
   const stl = await toStl(fromPolygonSoup(box1Solid));
-  console.log(`QQ/toStl/test/2`);
   writeFileSync('out.toStl.test.box.stl', stl, { encoding: 'utf8' });
   t.is(
     new TextDecoder('utf8').decode(stl),

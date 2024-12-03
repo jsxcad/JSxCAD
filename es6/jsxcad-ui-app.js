@@ -48861,20 +48861,24 @@ const updateSheetStorage = async newId => {
   id.set(newId);
   return getSheetStorage(newId);
 };
-const render = () => _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Sheet Filesystem"), _$3(Card$1.Text, null, "Select a google sheets spreadsheet to backup and share source data. e.g., to access a sheet named \"Jot\" in \"https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0\". use \"0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot\""), _$3(Form$1, null, _$3(Row, null, _$3(Col, null, _$3(Form$1.Group, {
-  controlId: "SheetStorageId"
-}, _$3(Form$1.Control, {
-  placeholder: "Google-Spreadsheet-Id:SheetName",
-  value: id.get()
-}))), _$3(Col, null, _$3(Button, {
-  variant: "primary",
-  onClick: () => {
-    const {
-      value
-    } = document.getElementById('SheetStorageId');
-    updateSheetStorage(value);
-  }
-}, "Update Sheet Storage"))))));
+const render = () => {
+  // Induce the storage.
+  getSheetStorage(id.get());
+  return _$3(Card$1, null, _$3(Card$1.Body, null, _$3(Card$1.Title, null, "Sheet Filesystem"), _$3(Card$1.Text, null, "Select a google sheets spreadsheet to backup and share source data. e.g., to access a sheet named \"Jot\" in \"https://docs.google.com/spreadsheets/d/10VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg/edit?gid=0\". use \"0VT5U3JR28We0WTtIIzccGnMdF4zIcdLqGZwEv2A5Hg:Jot\""), _$3(Form$1, null, _$3(Row, null, _$3(Col, null, _$3(Form$1.Group, {
+    controlId: "SheetStorageId"
+  }, _$3(Form$1.Control, {
+    placeholder: "Google-Spreadsheet-Id:SheetName",
+    value: id.get()
+  }))), _$3(Col, null, _$3(Button, {
+    variant: "primary",
+    onClick: () => {
+      const {
+        value
+      } = document.getElementById('SheetStorageId');
+      updateSheetStorage(value);
+    }
+  }, "Update Sheet Storage"))))));
+};
 
 const {
   SplitPane

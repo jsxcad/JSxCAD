@@ -2,45 +2,43 @@
 ### sort()
 Parameter|Default|Type
 ---|---|---
-spec|'z<y<x<'|String defining the sort predicate.
-resolution|0.01|Coordinates are rounded to this resolution for sorting.
+rank|() => 0|Maps each shape to a rank.
+'min'|true|Start with the minimum rank.
+'max'|false|Start with the maximum rank.
+keep|[]|Which ranks to keep, indexed from 1.
 
-This orders a group of shapes by their extremal bounding box corner.
+Seq({ to: 10 }, Arc).sort(area(), 'min').disjoint()
 
-e.g., if ordering by 'z>' the leaf with the greatest minimum z value is selected.
-
-![Image](sort.md.$2_1.png)
-
-Box(4, 4, 4).faces().n(0) selects an arbitrary face
-
-![Image](sort.md.$2_2.png)
-
-Box(4, 4, 4).faces().sort().n(0) selects the top-most face
+![Image](sort.md.$2.png)
 
 ```JavaScript
-Box(4, 4, 4)
-  .faces()
-  .op(
-    n(0).view(1).note('Box(4, 4, 4).faces().n(0) selects an arbitrary face'),
-    sort('z>')
-      .n(0)
-      .view(2)
-      .note('Box(4, 4, 4).faces().sort().n(0) selects the top-most face')
-  );
+Seq({ to: 10 }, Arc)
+  .sort(area(), 'min')
+  .disjoint()
+  .note(`Seq({ to: 10 }, Arc).sort(area(), 'min').disjoint()`)
+  .view();
 ```
+
+Seq({ to: 10 }, Arc).sort(area(), 'max').disjoint()
 
 ![Image](sort.md.$3.png)
 
-_Check this one_.
+```JavaScript
+Seq({ to: 10 }, Arc)
+  .sort(area(), 'max')
+  .disjoint()
+  .note(`Seq({ to: 10 }, Arc).sort(area(), 'max').disjoint()`)
+  .view();
+```
+
+Seq({ to: 10 }, Arc).sort(area(), 'max', 1, 3, 5).disjoint()
+
+![Image](sort.md.$4.png)
 
 ```JavaScript
-Box(4, 4, 4)
-  .cut(
-    eachEdge()
-      .sort('z>y<x>')
-      .n(0, 1)
-      .op((e) => Box(2, 2, [0, 4]).to(e))
-  )
-  .view()
-  .note('_Check this one_.');
+Seq({ to: 10 }, Arc)
+  .sort(area(), 'max', 1, 3, 5)
+  .disjoint()
+  .note(`Seq({ to: 10 }, Arc).sort(area(), 'max', 1, 3, 5).disjoint()`)
+  .view();
 ```

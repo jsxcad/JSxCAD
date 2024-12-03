@@ -5013,6 +5013,7 @@ const pack = (
   options = {},
   strategy = 'bb'
 ) => {
+  const { margin = 0 } = options;
   // Convert all of the geometry into silhouettes.
   const inputs = linearize(geometry, filterCast, [], { includeItems: false });
   const silhouettes = [];
@@ -5023,13 +5024,14 @@ const pack = (
         const silhouette = cast(
           undefined,
           undefined,
-          bb(input, 0, 0, 0, { flat: true })
+          bb(input, margin, margin, margin, { flat: true })
         );
         linearize(silhouette, filterSilhouettes, silhouettes);
       }
       break;
     case 'hull':
       // silhouettes are convex hulls.
+      // TODO: support margins
       for (const input of inputs) {
         const silhouette = cast(undefined, undefined, ConvexHull([input]));
         linearize(silhouette, filterSilhouettes, silhouettes);
@@ -5037,6 +5039,7 @@ const pack = (
       break;
     case 'outline':
       // silhouettes are the actual shape outlines.
+      // TODO: support margins
       for (const input of inputs) {
         const silhouette = cast(undefined, undefined, input);
         linearize(silhouette, filterSilhouettes, silhouettes);

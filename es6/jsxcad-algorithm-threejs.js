@@ -31117,20 +31117,6 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 
 }
 
-class CanvasTexture extends Texture {
-
-	constructor( canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy ) {
-
-		super( canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy );
-
-		this.isCanvasTexture = true;
-
-		this.needsUpdate = true;
-
-	}
-
-}
-
 /**
  * Extensible curve object.
  *
@@ -38945,101 +38931,6 @@ class LoaderUtils {
 
 		// Relative URL
 		return path + url;
-
-	}
-
-}
-
-class ImageBitmapLoader extends Loader {
-
-	constructor( manager ) {
-
-		super( manager );
-
-		this.isImageBitmapLoader = true;
-
-		if ( typeof createImageBitmap === 'undefined' ) {
-
-			console.warn( 'THREE.ImageBitmapLoader: createImageBitmap() not supported.' );
-
-		}
-
-		if ( typeof fetch === 'undefined' ) {
-
-			console.warn( 'THREE.ImageBitmapLoader: fetch() not supported.' );
-
-		}
-
-		this.options = { premultiplyAlpha: 'none' };
-
-	}
-
-	setOptions( options ) {
-
-		this.options = options;
-
-		return this;
-
-	}
-
-	load( url, onLoad, onProgress, onError ) {
-
-		if ( url === undefined ) url = '';
-
-		if ( this.path !== undefined ) url = this.path + url;
-
-		url = this.manager.resolveURL( url );
-
-		const scope = this;
-
-		const cached = Cache.get( url );
-
-		if ( cached !== undefined ) {
-
-			scope.manager.itemStart( url );
-
-			setTimeout( function () {
-
-				if ( onLoad ) onLoad( cached );
-
-				scope.manager.itemEnd( url );
-
-			}, 0 );
-
-			return cached;
-
-		}
-
-		const fetchOptions = {};
-		fetchOptions.credentials = ( this.crossOrigin === 'anonymous' ) ? 'same-origin' : 'include';
-		fetchOptions.headers = this.requestHeader;
-
-		fetch( url, fetchOptions ).then( function ( res ) {
-
-			return res.blob();
-
-		} ).then( function ( blob ) {
-
-			return createImageBitmap( blob, Object.assign( scope.options, { colorSpaceConversion: 'none' } ) );
-
-		} ).then( function ( imageBitmap ) {
-
-			Cache.add( url, imageBitmap );
-
-			if ( onLoad ) onLoad( imageBitmap );
-
-			scope.manager.itemEnd( url );
-
-		} ).catch( function ( e ) {
-
-			if ( onError ) onError( e );
-
-			scope.manager.itemError( url );
-			scope.manager.itemEnd( url );
-
-		} );
-
-		scope.manager.itemStart( url );
 
 	}
 
@@ -50177,4 +50068,4 @@ class TrackballControls extends EventDispatcher {
 
 }
 
-export { AmbientLight, ArrowHelper, AxesHelper, Box3, BoxGeometry, BufferGeometry, CanvasTexture, ColladaLoader, Color, CylinderGeometry, DoubleSide, EdgesGeometry, Euler, EventDispatcher, Float32BufferAttribute, Frustum, GridHelper, Group, HemisphereLight, ImageBitmapLoader, Layers, Line, LineBasicMaterial, LineSegments, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry, PCFShadowMap, Path, PerspectiveCamera, Plane, PlaneGeometry, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, SRGBColorSpace, SVGLoader, Scene, Shape, ShapeGeometry, SphereGeometry, SpotLight, SpotLightHelper, TorusGeometry, TrackballControls, Vector2, Vector3, WebGLRenderer, WireframeGeometry };
+export { ArrowHelper, AxesHelper, Box3, BoxGeometry, BufferGeometry, ColladaLoader, Color, CylinderGeometry, DataTexture, DoubleSide, EdgesGeometry, Euler, EventDispatcher, Float32BufferAttribute, Frustum, GridHelper, Group, HemisphereLight, Layers, Line, LineBasicMaterial, LineSegments, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry, PCFShadowMap, Path, PerspectiveCamera, Plane, PlaneGeometry, Points, PointsMaterial, Quaternion, RGBAFormat, Raycaster, RepeatWrapping, SRGBColorSpace, SVGLoader, Scene, Shape, ShapeGeometry, SphereGeometry, SpotLight, SpotLightHelper, TorusGeometry, TrackballControls, UnsignedByteType, Vector2, Vector3, WebGLRenderTarget, WebGLRenderer, WireframeGeometry };

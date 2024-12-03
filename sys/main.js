@@ -1,3 +1,5 @@
+import './document.js';
+
 export { ErrorWouldBlock } from './error.js';
 export {
   addPending,

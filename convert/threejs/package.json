@@ -25,9 +25,13 @@
   "dependencies": {
     "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
+    "@jsxcad/algorithm-material": "^0.0.79",
     "@jsxcad/algorithm-threejs": "^0.0.79",
+    "@jsxcad/convert-png": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/sys": "^0.0.79",
+    "gl": "^8.1.6",
+    "upng-js": "^2.1.0"
   },
   "devDependencies": {
     "ava": "^4.3.0",

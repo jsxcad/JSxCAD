@@ -148,6 +148,7 @@ export { png } from './png.js';
 export { points } from './points.js';
 export { put } from './put.js';
 export { random } from './random.js';
+export { raycastPng } from './png.js';
 export { ref } from './Ref.js';
 export { repair } from './repair.js';
 export { reconstruct } from './reconstruct.js';

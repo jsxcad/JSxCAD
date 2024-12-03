@@ -10,7 +10,7 @@ import { retag, toDisplayGeometry } from '@jsxcad/geometry';
 import Shape from './Shape.js';
 import { dataUrl } from '@jsxcad/ui-threejs';
 
-const MODES =
+export const MODES =
   'modes:grid,none,side,top,wireframe,noWireframe,skin,noSkin,outline,noOutline';
 
 const applyModes = (geometry, options, modes) => {
@@ -55,6 +55,7 @@ export const baseViewOp = async (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     inline,
     width,
@@ -88,6 +89,13 @@ export const baseViewOp = async (
       thumbnailPath,
       download,
     };
+    if (downloadOp) {
+      view.download = await downloadOp(pageGeometry, {
+        view,
+        id,
+        path,
+      });
+    }
     emit({ hash, path: viewPath, view });
     await write(viewPath, pageGeometry);
     if (!isNode) {
@@ -107,6 +115,7 @@ const topViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -119,6 +128,7 @@ const topViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -142,6 +152,7 @@ const gridViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -154,6 +165,7 @@ const gridViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -177,6 +189,7 @@ const frontViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -189,6 +202,7 @@ const frontViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -212,6 +226,7 @@ const sideViewOp = (
   op = (_x) => (s) => s,
   {
     download,
+    downloadOp,
     size = 256,
     skin = true,
     outline = true,
@@ -224,6 +239,7 @@ const sideViewOp = (
 ) => {
   const options = {
     download,
+    downloadOp,
     size,
     skin,
     outline,
@@ -241,34 +257,42 @@ export const sideView = Shape.registerMethod3(
   sideViewOp
 );
 
+export const viewOp = (
+  geometry,
+  modes,
+  op = (_x) => (s) => s,
+  options,
+  viewId
+) => {
+  geometry = applyModes(geometry, options, modes);
+  if (modes.grid) {
+    options.style = 'grid';
+  }
+  if (modes.none) {
+    options.style = 'none';
+  }
+  if (modes.side) {
+    options.style = 'side';
+  }
+  if (modes.top) {
+    options.style = 'top';
+  }
+  switch (options.style) {
+    case 'grid':
+      return gridViewOp(geometry, modes, op, options, viewId);
+    case 'none':
+      return geometry;
+    case 'side':
+      return sideViewOp(geometry, modes, op, options, viewId);
+    case 'top':
+      return topViewOp(geometry, modes, op, options, viewId);
+    default:
+      return baseViewOp(geometry, viewId, op, options);
+  }
+};
+
 export const view = Shape.registerMethod3(
   'view',
   ['inputGeometry', MODES, 'function', 'options', 'value'],
-  (geometry, modes, op = (_x) => (s) => s, options, viewId) => {
-    geometry = applyModes(geometry, options, modes);
-    if (modes.grid) {
-      options.style = 'grid';
-    }
-    if (modes.none) {
-      options.style = 'none';
-    }
-    if (modes.side) {
-      options.style = 'side';
-    }
-    if (modes.top) {
-      options.style = 'top';
-    }
-    switch (options.style) {
-      case 'grid':
-        return gridViewOp(geometry, modes, op, options, viewId);
-      case 'none':
-        return geometry;
-      case 'side':
-        return sideViewOp(geometry, modes, op, options, viewId);
-      case 'top':
-        return topViewOp(geometry, modes, op, options, viewId);
-      default:
-        return baseViewOp(geometry, viewId, op, options);
-    }
-  }
+  viewOp
 );

@@ -1,4 +1,4 @@
-import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
+import { GEOMETRY_LAYER, SKETCH_LAYER } from '@jsxcad/convert-threejs';
 import {
   LineSegments,
   Points,

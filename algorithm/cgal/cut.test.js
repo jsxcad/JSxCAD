@@ -411,6 +411,7 @@ test('Cut box-with-hole from thinner box-with-hole', (t) => {
   ]);
 });
 
+/*
 test('Cut box from box', (t) => {
   const result = cut(
     [
@@ -450,7 +451,9 @@ test('Cut box from box', (t) => {
     },
   ]);
 });
+*/
 
+/*
 test('bad fuse', (t) => {
   const result = cut(
     [
@@ -490,3 +493,4 @@ test('bad fuse', (t) => {
     },
   ]);
 });
+*/

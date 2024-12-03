@@ -3,7 +3,7 @@
 import FileReaderForNode from 'filereader-ponyfill';
 import { isNode } from '@jsxcad/sys';
 import { orbitDisplay } from './orbitDisplay.js';
-import { staticDisplay } from './staticDisplay.js';
+import { staticDisplay } from '@jsxcad/convert-threejs';
 
 const UP = [0, 0.0001, 1];
 
@@ -49,8 +49,6 @@ export const dataUrl = async (shape, options) => {
     );
     fileReader.readAsDataURL(blob);
   });
-  // const dataUrl = getFileReaderSync().readAsDataURL(blob);
-  // const dataUrl = (await staticView(shape, options)).toDataURL('png');
   return dataUrl;
 };
 

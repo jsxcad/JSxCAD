@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: (sudo apt-get install libboost-all-dev)
+      - run: (sudo apt-get install -y build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config xvfb)
       - run: npm ci
       - run: (cd algorithm/cgal; ./install_native.sh)
       - run: (cd algorithm/cgal; ./install_wasm.sh)
@@ -35,7 +36,7 @@ jobs:
       - run: npm run rollup
       - run: ./publish-es6.sh
       - run: ./publish-wasm.sh
-      - run: npm run doc -- --quiet
+      - run: xvfb-run -s "-ac -screen 0 1280x1024x24" npm run doc -- --quiet
         env:
           NODE_OPTIONS: --max_old_space_size=4096
       - name: Make wasm available
