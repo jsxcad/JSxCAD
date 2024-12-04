@@ -21,13 +21,11 @@ export const makeExactMatrix = (exact) => [TRANSFORM_EXACT, exact];
 
 export const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
   if (!Number.isInteger(a[0]) || !Number.isInteger(b[0])) {
-    throw Error(`composeTransforms: a=${JSON.stringify(a)} b=${JSON.stringify(b)}`);
+    throw Error(
+      `composeTransforms: a=${JSON.stringify(a)} b=${JSON.stringify(b)}`
+    );
   }
-  return [
-    TRANSFORM_COMPOSE,
-    a,
-    b,
-  ];
+  return [TRANSFORM_COMPOSE, a, b];
 };
 
 export const invertTransform = (a = identityMatrix) => [TRANSFORM_INVERT, a];
@@ -78,19 +76,12 @@ export const toApproximateMatrix = (matrix = identityMatrix) => {
   if (matrix[0] === TRANSFORM_APPROXIMATE) {
     return matrix;
   }
-  try {
-    const transform = [];
-    getCgal().ToApproximateMatrix(matrix, transform);
-    return transform;
-  } catch (error) {
-    console.log(`QQ/toApproximateMatrix: matrix=${JSON.stringify(matrix)}`);
-    throw error;
-  }
+  const transform = [];
+  getCgal().ToApproximateMatrix(matrix, transform);
+  return transform;
 };
 
-// FIX: Why do we need to copy this?
-// export const identity = () => [...identityMatrix];
-
+// TODO: Remove this.
 export const identity = () => [TRANSFORM_IDENTITY];
 
 export const matrix6 = (a, b, c, d, tx, ty) =>

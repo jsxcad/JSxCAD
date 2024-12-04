@@ -244,7 +244,11 @@ export const buildMeshes = async ({
         break;
       }
       default: {
-        throw new Error(`Unexpected matrix type: ${geometry.matrix[0]}. Geometry=${JSON.stringify(geometry)}`);
+        throw new Error(
+          `Unexpected matrix type: ${
+            geometry.matrix[0]
+          }. Geometry=${JSON.stringify(geometry)}`
+        );
       }
     }
   }
