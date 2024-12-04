@@ -1,4 +1,5 @@
 import { MeshPhysicalMaterial, MeshPhongMaterial, MeshNormalMaterial, DataTexture, Matrix4, Vector3, Plane, Group, Shape, Path, ShapeGeometry, Mesh, EdgesGeometry, LineBasicMaterial, LineSegments, WireframeGeometry, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, Color, Box3, Vector2, Object3D, PerspectiveCamera, Scene, AxesHelper, SpotLight, WebGLRenderer, PCFShadowMap, ColladaLoader, SVGLoader, MeshBasicMaterial, DoubleSide, GridHelper, PlaneGeometry, MeshStandardMaterial, Frustum, Layers } from './jsxcad-algorithm-threejs.js';
+import { TRANSFORM_IDENTITY, TRANSFORM_APPROXIMATE } from './jsxcad-algorithm-cgal.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { toRgbFromTags, toTagFromRgb } from './jsxcad-algorithm-color.js';
 import { toThreejsMaterialFromTags } from './jsxcad-algorithm-material.js';
@@ -287,8 +288,20 @@ const buildMeshes = async ({
   if (geometry.matrix) {
     matrix = new Matrix4();
     // Bypass matrix.set to use column-major ordering.
-    for (let nth = 0; nth < 16; nth++) {
-      matrix.elements[nth] = geometry.matrix[nth];
+    switch (geometry.matrix[0]) {
+      case TRANSFORM_APPROXIMATE: {
+        for (let nth = 0; nth < 16; nth++) {
+          matrix.elements[nth] = geometry.matrix[1][nth];
+        }
+        break;
+      }
+      case TRANSFORM_IDENTITY: {
+        // Identity matrix is the default.
+        break;
+      }
+      default: {
+        throw new Error(`Unexpected matrix type: ${geometry.matrix[0]}`);
+      }
     }
   }
 

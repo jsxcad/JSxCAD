@@ -405,21 +405,6 @@ static Napi::Value Approximate(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
-static Napi::Value ApproximateMatrix(const Napi::CallbackInfo& info) {
-  assertArgCount(info, 2);
-  Napi::Array out = info[1].As<Napi::Array>();
-  CGAL::Aff_transformation_3<EK> transform = to_transform(info[0]);
-  double doubles[16];
-  to_doubles(transform, doubles);
-  Napi::Array o = Napi::Array::New(out.Env());
-  for (uint32_t nth = 0; nth < 16; nth++) {
-    o.Set(nth, doubles[nth]);
-  }
-  out.Set(uint32_t(0), uint32_t(TRANSFORM_APPROXIMATE));
-  out.Set(uint32_t(1), o);
-  return Napi::Number::New(info.Env(), STATUS_OK);
-}
-
 static Napi::Value Bend(const Napi::CallbackInfo& info) {
   assertArgCount(info, 3);
   Napi::Object jsGeometry = info[0].As<Napi::Object>();
@@ -1311,6 +1296,21 @@ static Napi::Value Smooth(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), status);
 }
 
+static Napi::Value ToApproximateMatrix(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 2);
+  Napi::Array out = info[1].As<Napi::Array>();
+  CGAL::Aff_transformation_3<EK> transform = to_transform(info[0]);
+  double doubles[16];
+  to_doubles(transform, doubles);
+  Napi::Array o = Napi::Array::New(out.Env());
+  for (uint32_t nth = 0; nth < 16; nth++) {
+    o.Set(nth, doubles[nth]);
+  }
+  out.Set(uint32_t(0), uint32_t(TRANSFORM_APPROXIMATE));
+  out.Set(uint32_t(1), o);
+  return Napi::Number::New(info.Env(), STATUS_OK);
+}
+
 static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
   assertArgCount(info, 4);
   double x = info[0].As<Napi::Number>().DoubleValue();
@@ -1411,7 +1411,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
   // Functions
   exports.Set(Napi::String::New(env, "Approximate"), Napi::Function::New(env, Approximate));
-  exports.Set(Napi::String::New(env, "ApproximateMatrix"), Napi::Function::New(env, ApproximateMatrix));
   exports.Set(Napi::String::New(env, "Bend"), Napi::Function::New(env, Bend));
   exports.Set(Napi::String::New(env, "Cast"), Napi::Function::New(env, Cast));
   exports.Set(Napi::String::New(env, "Clip"), Napi::Function::New(env, Clip));
@@ -1482,6 +1481,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Shell"), Napi::Function::New(env, Shell));
   exports.Set(Napi::String::New(env, "Simplify"), Napi::Function::New(env, Simplify));
   exports.Set(Napi::String::New(env, "Smooth"), Napi::Function::New(env, Smooth));
+  exports.Set(Napi::String::New(env, "ToApproximateMatrix"), Napi::Function::New(env, ToApproximateMatrix));
   exports.Set(Napi::String::New(env, "TranslateTransform"), Napi::Function::New(env, TranslateTransform));
   exports.Set(Napi::String::New(env, "Trim"), Napi::Function::New(env, Trim));
   exports.Set(Napi::String::New(env, "Twist"), Napi::Function::New(env, Twist));

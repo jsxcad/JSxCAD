@@ -1,5 +1,4 @@
 import {
-  // fromSegmentToInverseTransform,
   invertTransform,
 } from '@jsxcad/algorithm-cgal';
 

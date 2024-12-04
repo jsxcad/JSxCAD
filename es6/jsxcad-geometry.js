@@ -5448,6 +5448,12 @@ const smooth = (
   return taggedGroup({}, replacer(inputs, outputs, count)(geometry), ...ghosts);
 };
 
+const toApproximateGeometry = (geometry) => {
+  const op = (geometry, descend) =>
+    descend({ matrix: toApproximateMatrix(geometry.matrix) });
+  return rewrite(geometry, op);
+};
+
 const soup = (geometry) => {
   const op = (geometry, descend) => {
     switch (geometry.type) {
@@ -5486,10 +5492,10 @@ const soup = (geometry) => {
     }
   };
 
-  return rewrite(
-    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
-    op
+  const processed = serialize(
+    convertPolygonsToMeshes(toApproximateGeometry(geometry))
   );
+  return rewrite(processed, op);
 };
 
 const taggedDisplayGeometry = (

@@ -477,14 +477,12 @@ const fromSegmentToInverseTransform = (
 };
 
 const toApproximateMatrix = (matrix = identityMatrix) => {
-  try {
-    const transform = [];
-    console.log(`QQ/toApproximateMatrix: ${JSON.stringify(matrix)}`);
-    getCgal().ApproximateMatrix(matrix, transform);
-    return transform;
-  } catch (error) {
-    throw Error(error);
+  if (matrix[0] === TRANSFORM_APPROXIMATE) {
+    return matrix;
   }
+  const transform = [];
+  getCgal().ToApproximateMatrix(matrix, transform);
+  return transform;
 };
 
 // FIX: Why do we need to copy this?
@@ -2194,4 +2192,4 @@ const wrap = (
     }
   });
 
-export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, identityMatrix, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeExactMatrix, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pack, pushSurfaceMesh, raycast, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, toApproximateMatrix, trim, twist, unfold, validate, withIsExteriorPoint, wrap };
+export { STATUS_EMPTY, STATUS_OK, STATUS_UNCHANGED, STATUS_ZERO_THICKNESS, TRANSFORM_APPROXIMATE, TRANSFORM_IDENTITY, approximate, bend, cast, clearMeshCache, clip, composeTransforms, computeArea, computeBoundingBox, computeCentroid, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, computeVolume, convertPolygonsToMeshes, convexHull, cut, deform, demesh, dilateXY, disjoint, eachPoint, eachTriangle, eagerTransform, extrude, faceEdges, fair, fill, fitPlaneToPoints, fix, fromPolygonSoup, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromSegmentToInverseTransform, fromTranslateToTransform, fuse, generateEnvelope, graphSymbol, grow, identity, identityMatrix, initCgal, inset, invertTransform, involute, iron, join, link, loft, makeAbsolute, makeExactMatrix, makeUnitSphere, matrix6, minimizeOverhang, offset, outline, pack, pushSurfaceMesh, raycast, reconstruct, refine, remesh, repair, route, seam, section, separate, serialize, setTestMode, shell, simplify, smooth, surfaceMeshSymbol, toApproximateMatrix, trim, twist, unfold, validate, withIsExteriorPoint, wrap };

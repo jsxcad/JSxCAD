@@ -12,17 +12,23 @@ export const TRANSFORM_SCALE = 8;
 export const TRANSFORM_IDENTITY = 9;
 
 export const identityMatrix = [TRANSFORM_IDENTITY];
+
 export const makeApproximateMatrix = (approximate) => [
   TRANSFORM_APPROXIMATE,
   approximate,
 ];
 export const makeExactMatrix = (exact) => [TRANSFORM_EXACT, exact];
 
-export const composeTransforms = (a = identityMatrix, b = identityMatrix) => [
-  TRANSFORM_COMPOSE,
-  a,
-  b,
-];
+export const composeTransforms = (a = identityMatrix, b = identityMatrix) => {
+  if (!Number.isInteger(a[0]) || !Number.isInteger(b[0])) {
+    throw Error(`composeTransforms: a=${JSON.stringify(a)} b=${JSON.stringify(b)}`);
+  }
+  return [
+    TRANSFORM_COMPOSE,
+    a,
+    b,
+  ];
+};
 
 export const invertTransform = (a = identityMatrix) => [TRANSFORM_INVERT, a];
 
@@ -69,13 +75,16 @@ export const fromSegmentToInverseTransform = (
 };
 
 export const toApproximateMatrix = (matrix = identityMatrix) => {
+  if (matrix[0] === TRANSFORM_APPROXIMATE) {
+    return matrix;
+  }
   try {
     const transform = [];
-    console.log(`QQ/toApproximateMatrix: ${JSON.stringify(matrix)}`);
-    getCgal().ApproximateMatrix(matrix, transform);
+    getCgal().ToApproximateMatrix(matrix, transform);
     return transform;
   } catch (error) {
-    throw Error(error);
+    console.log(`QQ/toApproximateMatrix: matrix=${JSON.stringify(matrix)}`);
+    throw error;
   }
 };
 

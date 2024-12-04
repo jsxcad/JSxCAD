@@ -2,9 +2,10 @@ import { convertPolygonsToMeshes } from '../convertPolygonsToMeshes.js';
 import { rewrite } from './visit.js';
 import { serialize } from '../serialize.js';
 import { taggedGroup } from './taggedGroup.js';
-import { toConcreteGeometry } from './toConcreteGeometry.js';
+import { toApproximateGeometry } from './toApproximateGeometry.js';
 
 export const soup = (geometry) => {
+  /*
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
@@ -41,9 +42,8 @@ export const soup = (geometry) => {
         throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
     }
   };
+  */
 
-  return rewrite(
-    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
-    op
-  );
+  // const processed = serialize(convertPolygonsToMeshes(geometry));
+  return toApproximateGeometry(convertPolygonsToMeshes(geometry));
 };

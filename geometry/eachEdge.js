@@ -18,9 +18,6 @@ export const toOrientedFaceEdgesList = (
   { select = [geometry] } = {}
 ) => {
   const faces = [];
-  console.log(
-    `QQ/toOrientedFaceEdgesList: geometry=${JSON.stringify(geometry)}`
-  );
   const faceEdgesList = toFaceEdgesList(geometry, { select });
   for (const { face, edges } of faceEdgesList) {
     const edgeResults = [];

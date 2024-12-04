@@ -1,4 +1,6 @@
 export {
+  TRANSFORM_APPROXIMATE,
+  TRANSFORM_IDENTITY,
   composeTransforms,
   fromRotateXToTransform,
   fromRotateYToTransform,
@@ -9,6 +11,7 @@ export {
   identity,
   identityMatrix,
   invertTransform,
+  makeApproximateMatrix,
   makeExactMatrix,
   matrix6,
   toApproximateMatrix,

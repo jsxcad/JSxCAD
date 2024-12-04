@@ -1,6 +1,7 @@
 import { cross, normalize, squaredLength, subtract } from './vector.js';
 
 import { getInverseMatrices } from './tagged/getInverseMatrices.js';
+import { makeApproximateMatrix } from '@jsxcad/algorithm-cgal';
 import { transform } from './transform.js';
 import { translate } from './translate.js';
 
@@ -42,7 +43,7 @@ export const orient = (
   }
   x = normalize(x);
   let y = cross(z, x);
-  const lookAt = [
+  const lookAt = makeApproximateMatrix([
     x[X],
     x[Y],
     x[Z],
@@ -59,9 +60,7 @@ export const orient = (
     0,
     0,
     1,
-  ];
-  // FIX: Move this to CGAL.
-  lookAt.blessed = true;
+  ]);
   const a = transform(geometry, local);
   const b = transform(a, lookAt);
   const c = translate(b, at);
