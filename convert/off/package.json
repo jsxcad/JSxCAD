@@ -23,6 +23,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-cgal": "^0.0.79",
     "@jsxcad/geometry": "^0.0.79",
     "@jsxcad/sys": "^0.0.79"
   },

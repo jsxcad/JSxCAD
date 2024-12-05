@@ -1,5 +1,5 @@
-import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, invertTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, computeNormal as computeNormal$1, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, pack as pack$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, raycast, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, trim as trim$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
-export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity } from './jsxcad-algorithm-cgal.js';
+import { composeTransforms, fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, invertTransform, eagerTransform as eagerTransform$1, involute as involute$1, computeBoundingBox, fromScaleToTransform, link as link$1, fromSegmentToInverseTransform, computeNormal as computeNormal$1, toApproximateMatrix, makeAbsolute as makeAbsolute$1, fromTranslateToTransform, extrude as extrude$1, fill as fill$2, fuse as fuse$1, convexHull as convexHull$1, computeSkeleton as computeSkeleton$1, eachPoint, clip as clip$1, cut as cut$1, section as section$1, iron as iron$1, makeUnitSphere, route, approximate as approximate$1, disjoint as disjoint$1, bend as bend$1, serialize as serialize$1, cast as cast$1, computeCentroid as computeCentroid$1, computeImplicitVolume as computeImplicitVolume$1, computeOrientedBoundingBox as computeOrientedBoundingBox$1, computeReliefFromImage as computeReliefFromImage$1, computeToolpath as computeToolpath$1, convertPolygonsToMeshes as convertPolygonsToMeshes$1, deform as deform$1, demesh as demesh$1, dilateXY as dilateXY$1, faceEdges, outline as outline$1, eachTriangle as eachTriangle$1, separate as separate$1, fair as fair$1, fix as fix$1, fromPolygonSoup as fromPolygonSoup$1, generateEnvelope, grow as grow$1, inset as inset$1, join as join$1, loft as loft$1, computeArea, computeVolume, minimizeOverhang as minimizeOverhang$1, offset as offset$1, makeApproximateMatrix, pack as pack$1, reconstruct as reconstruct$1, refine as refine$1, remesh as remesh$1, raycast, repair as repair$1, withIsExteriorPoint, seam as seam$1, shell as shell$1, simplify as simplify$1, smooth as smooth$1, trim as trim$1, identity, twist as twist$1, unfold as unfold$1, validate as validate$1, wrap as wrap$1 } from './jsxcad-algorithm-cgal.js';
+export { fromRotateXToTransform, fromRotateYToTransform, fromRotateZToTransform, fromScaleToTransform, fromTranslateToTransform, identity, identityMatrix, toApproximateMatrix } from './jsxcad-algorithm-cgal.js';
 import { toTagsFromName } from './jsxcad-algorithm-material.js';
 import { toTagsFromName as toTagsFromName$1 } from './jsxcad-algorithm-color.js';
 import { emit, computeHash, write as write$1, read as read$1, readNonblocking as readNonblocking$1, ErrorWouldBlock, addPending, log as log$1 } from './jsxcad-sys.js';
@@ -800,8 +800,10 @@ const computeNormal = (geometry) =>
   Group(computeNormal$1(linearize(geometry, filter$M)));
 
 // TODO: Make this more robust.
-const computeNormalCoordinate = (geometry) =>
-  transformCoordinate([0, 0, 0], computeNormal(geometry).matrix);
+const computeNormalCoordinate = (geometry) => {
+  const normal = computeNormal(geometry);
+  return transformCoordinate([0, 0, 0], toApproximateMatrix(normal.matrix)[1]);
+};
 
 const filter$L = (geometry) =>
   ['graph', 'polygonsWithHoles', 'segments', 'points'].includes(
@@ -1076,7 +1078,7 @@ const makeArc =
         from: start - 1 / 4,
         upto: end - 1 / 4,
         by: effectiveStep,
-      }).map((t) => rotateZ(Point(0.5), t))
+      }).map(([t]) => rotateZ(Point(0.5), t))
     );
 
     if (
@@ -1211,9 +1213,10 @@ const taggedSegments = (
 
 const Edge = (s = [0, 0, 0], t = [0, 0, 0], n = [1, 0, 0]) => {
   const inverse = fromSegmentToInverseTransform([s, t], n);
+  const approximateInverse = toApproximateMatrix(inverse)[1];
   const baseSegment = [
-    transformCoordinate(s, inverse),
-    transformCoordinate(t, inverse),
+    transformCoordinate(s, approximateInverse),
+    transformCoordinate(t, approximateInverse),
   ];
   const matrix = invertTransform(inverse);
   return taggedSegments({ matrix }, [baseSegment]);
@@ -4122,17 +4125,19 @@ const disorientSegment = (segment, matrix, normal) => {
     absoluteSegment,
     absoluteNormal
   );
+  const approximateInverse = toApproximateMatrix(inverse)[1];
   const oppositeInverse = fromSegmentToInverseTransform(
     absoluteOppositeSegment,
     absoluteNormal
   );
+  const approximateOppositeInverse = toApproximateMatrix(inverse)[1];
   const baseSegment = [
-    transformCoordinate(absoluteSegment[SOURCE$1], inverse),
-    transformCoordinate(absoluteSegment[TARGET$1], inverse),
+    transformCoordinate(absoluteSegment[SOURCE$1], approximateInverse),
+    transformCoordinate(absoluteSegment[TARGET$1], approximateInverse),
   ];
   const oppositeSegment = [
-    transformCoordinate(absoluteSegment[TARGET$1], oppositeInverse),
-    transformCoordinate(absoluteSegment[SOURCE$1], oppositeInverse),
+    transformCoordinate(absoluteSegment[TARGET$1], approximateOppositeInverse),
+    transformCoordinate(absoluteSegment[SOURCE$1], approximateOppositeInverse),
   ];
   const inverseMatrix = invertTransform(inverse);
   const oppositeInverseMatrix = invertTransform(oppositeInverse);
@@ -4237,12 +4242,13 @@ const toOrientedFaceEdgesList = (
   for (const { face, edges } of faceEdgesList) {
     const edgeResults = [];
     const { matrix, segments, normals } = edges;
+    const approximateMatrix = toApproximateMatrix(matrix)[1];
     if (segments) {
       for (let nth = 0; nth < segments.length; nth++) {
         const baseSegment = segments[nth];
         const [forward, backward] = disorientSegment(
           baseSegment,
-          matrix,
+          approximateMatrix,
           normals ? normals[nth] : undefined
         );
         edgeResults.push({
@@ -4967,7 +4973,7 @@ const orient = (
   }
   x = normalize$1(x);
   let y = cross$1(z, x);
-  const lookAt = [
+  const lookAt = makeApproximateMatrix([
     x[X$2],
     x[Y$2],
     x[Z$2],
@@ -4984,9 +4990,7 @@ const orient = (
     0,
     0,
     1,
-  ];
-  // FIX: Move this to CGAL.
-  lookAt.blessed = true;
+  ]);
   const a = transform(geometry, local);
   const b = transform(a, lookAt);
   const c = translate(b, at);
@@ -5439,7 +5443,14 @@ const smooth = (
   return taggedGroup({}, replacer(inputs, outputs, count)(geometry), ...ghosts);
 };
 
+const toApproximateGeometry = (geometry) => {
+  const op = (geometry, descend) =>
+    descend({ matrix: toApproximateMatrix(geometry.matrix) });
+  return rewrite(geometry, op);
+};
+
 const soup = (geometry) => {
+  /*
   const op = (geometry, descend) => {
     switch (geometry.type) {
       case 'graph': {
@@ -5476,11 +5487,10 @@ const soup = (geometry) => {
         throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
     }
   };
+  */
 
-  return rewrite(
-    serialize(convertPolygonsToMeshes(toConcreteGeometry(geometry))),
-    op
-  );
+  // const processed = serialize(convertPolygonsToMeshes(geometry));
+  return toApproximateGeometry(convertPolygonsToMeshes(geometry));
 };
 
 const taggedDisplayGeometry = (

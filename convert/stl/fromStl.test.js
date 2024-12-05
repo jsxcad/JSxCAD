@@ -1,7 +1,8 @@
+import { identityMatrix, serialize } from '@jsxcad/geometry';
+
 import { boot } from '@jsxcad/sys';
 import { fromStl } from './fromStl.js';
 import { readFileSync } from 'fs';
-import { serialize } from '@jsxcad/geometry';
 import test from 'ava';
 
 test('Read example', async (t) => {
@@ -10,25 +11,7 @@ test('Read example', async (t) => {
   const geometry = await fromStl(stl);
   t.deepEqual(JSON.parse(JSON.stringify(serialize(geometry))), {
     type: 'graph',
-    matrix: [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      '1 0 0 0 0 1 0 0 0 0 1 0 1',
-    ],
+    matrix: identityMatrix,
     tags: [],
     graph: {
       serializedSurfaceMesh:

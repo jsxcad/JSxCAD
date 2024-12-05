@@ -1,8 +1,7 @@
-import '@jsxcad/algorithm-cgal';
-
 import { boot } from '@jsxcad/sys';
 import { fromSvgToThreejs } from './fromSvgToThreejs.js';
 import { fromThreejsToGeometry } from './fromThreejsToGeometry.js';
+import { identityMatrix } from '@jsxcad/algorithm-cgal';
 import { serialize } from '@jsxcad/geometry';
 import test from 'ava';
 
@@ -30,25 +29,7 @@ test('Simple import', async (t) => {
     content: [
       {
         type: 'graph',
-        matrix: [
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          '1 0 0 0 0 1 0 0 0 0 1 0 1',
-        ],
+        matrix: identityMatrix,
         tags: ['color:#b20ab2'],
         graph: {
           serializedSurfaceMesh:
@@ -58,25 +39,7 @@ test('Simple import', async (t) => {
       },
       {
         type: 'graph',
-        matrix: [
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          '1 0 0 0 0 1 0 0 0 0 1 0 1',
-        ],
+        matrix: identityMatrix,
         tags: ['color:#ffff00'],
         graph: {
           serializedSurfaceMesh:
@@ -86,25 +49,7 @@ test('Simple import', async (t) => {
       },
       {
         type: 'graph',
-        matrix: [
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          '1 0 0 0 0 1 0 0 0 0 1 0 1',
-        ],
+        matrix: identityMatrix,
         tags: ['color:#000009'],
         graph: {
           serializedSurfaceMesh:

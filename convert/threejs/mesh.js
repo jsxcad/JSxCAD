@@ -21,6 +21,10 @@ import {
 } from '@jsxcad/algorithm-threejs';
 
 import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
+import {
+  TRANSFORM_APPROXIMATE,
+  TRANSFORM_IDENTITY,
+} from '@jsxcad/algorithm-cgal';
 
 import { buildMeshMaterial } from './material.js';
 import { setColor } from './color.js';
@@ -228,8 +232,24 @@ export const buildMeshes = async ({
   if (geometry.matrix) {
     matrix = new Matrix4();
     // Bypass matrix.set to use column-major ordering.
-    for (let nth = 0; nth < 16; nth++) {
-      matrix.elements[nth] = geometry.matrix[nth];
+    switch (geometry.matrix[0]) {
+      case TRANSFORM_APPROXIMATE: {
+        for (let nth = 0; nth < 16; nth++) {
+          matrix.elements[nth] = geometry.matrix[1][nth];
+        }
+        break;
+      }
+      case TRANSFORM_IDENTITY: {
+        // Identity matrix is the default.
+        break;
+      }
+      default: {
+        throw new Error(
+          `Unexpected matrix type: ${
+            geometry.matrix[0]
+          }. Geometry=${JSON.stringify(geometry)}`
+        );
+      }
     }
   }
 

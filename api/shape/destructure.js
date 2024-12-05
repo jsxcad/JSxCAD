@@ -197,7 +197,7 @@ export const destructure2 = async (names, input, originalArgs, ...specs) => {
         }
         output.push(out);
         if (specs.length > 0) {
-          out.push(...seq(...specs));
+          out.push(...seq(...specs).map(([value]) => value));
         }
         break;
       }

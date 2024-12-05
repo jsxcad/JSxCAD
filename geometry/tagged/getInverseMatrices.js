@@ -1,7 +1,4 @@
-import {
-  // fromSegmentToInverseTransform,
-  invertTransform,
-} from '@jsxcad/algorithm-cgal';
+import { invertTransform } from '@jsxcad/algorithm-cgal';
 
 import { toConcreteGeometry } from './toConcreteGeometry.js';
 

@@ -104,6 +104,7 @@ export { fresh } from './tagged/fresh.js';
 export { fromPolygonSoup } from './fromPolygonSoup.js';
 export {
   identity,
+  identityMatrix,
   fromRotateXToTransform,
   fromRotateYToTransform,
   fromRotateZToTransform,
@@ -274,7 +275,11 @@ export { taggedPolygonsWithHoles } from './tagged/taggedPolygonsWithHoles.js';
 export { taggedSegments } from './tagged/taggedSegments.js';
 export { taggedSketch } from './tagged/taggedSketch.js';
 export { taggedTriangles } from './tagged/taggedTriangles.js';
-export { transformCoordinate, transformingCoordinates } from './transform.js';
+export {
+  toApproximateMatrix,
+  transformCoordinate,
+  transformingCoordinates,
+} from './transform.js';
 export { translate } from './translate.js';
 export { trim } from './trim.js';
 export { to } from './to.js';

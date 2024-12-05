@@ -1,6 +1,6 @@
 import { boot, read } from '@jsxcad/sys';
+import { identityMatrix, serialize } from '@jsxcad/geometry';
 
-import { serialize } from '@jsxcad/geometry';
 import test from 'ava';
 import { toFont } from './toFont.js';
 
@@ -20,25 +20,7 @@ test('Render a letter', async (t) => {
       {
         type: 'polygonsWithHoles',
         tags: [],
-        matrix: [
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          '1 0 0 0 0 1 0 0 0 0 1 0 1',
-        ],
+        matrix: identityMatrix,
         plane: [0, 0, 1, 0],
         exactPlane: '0 0 1 0',
         polygonsWithHoles: [
@@ -220,25 +202,7 @@ test('Render a letter', async (t) => {
       {
         type: 'polygonsWithHoles',
         tags: [],
-        matrix: [
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
-          '1 0 0 0 0 1 0 0 0 0 1 0 1',
-        ],
+        matrix: identityMatrix,
         plane: [0, 0, 1, 0],
         exactPlane: '0 0 1 0',
         polygonsWithHoles: [

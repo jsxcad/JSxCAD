@@ -1,5 +1,6 @@
 import { computeArea } from './computeArea.js';
 import { initCgal } from './getCgal.js';
+import { makeApproximateMatrix } from './transform.js';
 
 import test from 'ava';
 
@@ -35,7 +36,9 @@ test('Area of polygon with hole', (t) => {
         },
       ],
       plane: [0, 0, 1, 0],
-      matrix: [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+      matrix: makeApproximateMatrix([
+        2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+      ]),
     },
   ]);
   t.is(area.toFixed(4), (6).toFixed(4));

@@ -10,35 +10,75 @@ typedef CGAL::Exact_predicates_exact_constructions_kernel EK;
 
 namespace wrapped {
 static EK::Aff_transformation_3 to_transform(emscripten::val& js) {
-  if (js[16] != js.undefined()) {
-    return ::to_transform(js[16].as<std::string>());
-  } else {
-    return ::to_transform(js[0].as<double>(),   // M00
-                          js[4].as<double>(),   // M01
-                          js[8].as<double>(),   // M02
-                          js[12].as<double>(),  // M03
+  switch (js[0].as<uint32_t>()) {
+    case TRANSFORM_COMPOSE: {
+      emscripten::val a = js[1];
+      emscripten::val b = js[2];
+      return to_transform(a) * to_transform(b);
+    }
+    case TRANSFORM_EXACT: {
+      return ::to_transform(js[1].as<std::string>());
+    }
+    case TRANSFORM_APPROXIMATE: {
+      return ::to_transform(js[0].as<double>(),   // M00
+                            js[4].as<double>(),   // M01
+                            js[8].as<double>(),   // M02
+                            js[12].as<double>(),  // M03
 
-                          js[1].as<double>(),   // M10
-                          js[5].as<double>(),   // M11
-                          js[9].as<double>(),   // M12
-                          js[13].as<double>(),  // M13
+                            js[1].as<double>(),   // M10
+                            js[5].as<double>(),   // M11
+                            js[9].as<double>(),   // M12
+                            js[13].as<double>(),  // M13
 
-                          js[2].as<double>(),    // M20
-                          js[6].as<double>(),    // M21
-                          js[10].as<double>(),   // M21
-                          js[14].as<double>(),   // M21
-                          js[15].as<double>());  // HW
+                            js[2].as<double>(),    // M20
+                            js[6].as<double>(),    // M21
+                            js[10].as<double>(),   // M21
+                            js[14].as<double>(),   // M21
+                            js[15].as<double>());  // HW
+    }
+    case TRANSFORM_INVERT: {
+      emscripten::val a = js[1];
+      return to_transform(a).inverse();
+    }
+    case TRANSFORM_ROTATE_X: {
+      return TransformationFromXTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(
+          js[1].as<double>());
+    }
+    case TRANSFORM_ROTATE_Y: {
+      return TransformationFromYTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(
+          js[1].as<double>());
+    }
+    case TRANSFORM_ROTATE_Z: {
+      return TransformationFromZTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(
+          js[1].as<double>());
+    }
+    case TRANSFORM_TRANSLATE: {
+      const auto& v = js[1];
+      return ::TranslateTransform(v[0].as<double>(), v[1].as<double>(),
+                                  v[2].as<double>());
+    }
+    case TRANSFORM_SCALE: {
+      const auto& v = js[1];
+      return ::ScaleTransform(v[0].as<double>(), v[1].as<double>(),
+                              v[2].as<double>());
+    }
+    case TRANSFORM_IDENTITY: {
+      return EK::Aff_transformation_3(CGAL::IDENTITY);
+    }
   }
+  std::cout << "to_transform: unexpected type=" << js[0].as<uint32_t>()
+            << std::endl;
+  assert(false);
 }
 
 static void to_js(const EK::Aff_transformation_3& transform,
                   emscripten::val& js) {
-  double doubles[16];
-  to_doubles(transform, doubles);
-  for (size_t nth = 0; nth < 16; nth++) {
-    js.set(nth, doubles[nth]);
+  if (transform == CGAL::Aff_transformation_3<EK>(CGAL::IDENTITY)) {
+    js.set(0, uint32_t(TRANSFORM_IDENTITY));
+  } else {
+    js.set(0, uint32_t(TRANSFORM_EXACT));
+    js.set(1, to_exact(transform));
   }
-  js.set(16, to_exact(transform));
 }
 
 static int ComposeTransforms(emscripten::val js_a, emscripten::val js_b,
@@ -383,6 +423,31 @@ static int Repair(Geometry* geometry, emscripten::val js_strategies) {
 static int SetTransform(Geometry* geometry, int nth,
                         emscripten::val js_transform) {
   geometry->setTransform(nth, to_transform(js_transform));
+  switch (js_transform[0].as<uint32_t>()) {
+    case TRANSFORM_EXACT:
+    case TRANSFORM_IDENTITY: {
+      // These are already simple.
+      break;
+    }
+    default: {
+      // Propagate the simplified transform back.
+      to_js(geometry->transform(nth), js_transform);
+      break;
+    }
+  }
+  return STATUS_OK;
+}
+
+static int ToApproximateMatrix(emscripten::val in, emscripten::val out) {
+  CGAL::Aff_transformation_3<EK> transform = to_transform(in);
+  double doubles[16];
+  to_doubles(transform, doubles);
+  emscripten::val o = emscripten::val::array();
+  for (uint32_t nth = 0; nth < 16; nth++) {
+    o.set(nth, doubles[nth]);
+  }
+  out.set(0, uint32_t(TRANSFORM_APPROXIMATE));
+  out.set(1, o);
   return STATUS_OK;
 }
 
@@ -552,6 +617,8 @@ EMSCRIPTEN_BINDINGS(module) {
   emscripten::function("TranslateTransform", &wrapped::TranslateTransform);
   emscripten::function("Trim", &Trim, emscripten::allow_raw_pointers());
   emscripten::function("Twist", &Twist, emscripten::allow_raw_pointers());
+  emscripten::function("ToApproximateMatrix", &wrapped::ToApproximateMatrix,
+                       emscripten::allow_raw_pointers());
   emscripten::function("Unfold", &wrapped::Unfold,
                        emscripten::allow_raw_pointers());
   emscripten::function("Validate", &wrapped::Validate,

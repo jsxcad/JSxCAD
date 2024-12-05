@@ -51,34 +51,67 @@ static void fill_strategies(const Napi::Array& js_strategies, std::vector<int>& 
 
 static CGAL::Aff_transformation_3<EK> to_transform(const Napi::Value& v) {
   Napi::Array js = v.As<Napi::Array>();
-  if (js.Has(16)) {
-    return ::to_transform(js.Get(uint32_t(16)).As<Napi::String>().Utf8Value());
-  } else {
-    return ::to_transform(js.Get(uint32_t(0)).As<Napi::Number>().DoubleValue(),   // M00
-                          js.Get(uint32_t(4)).As<Napi::Number>().DoubleValue(),   // M01
-                          js.Get(uint32_t(8)).As<Napi::Number>().DoubleValue(),   // M02
-                          js.Get(uint32_t(12)).As<Napi::Number>().DoubleValue(),  // M03
+  size_t size = js.Length();
+  switch (js.Get(uint32_t(0)).As<Napi::Number>().Uint32Value()) {
+    case TRANSFORM_COMPOSE:
+      return to_transform(js.Get(uint32_t(1))) * to_transform(js.Get(uint32_t(2)));
+    case TRANSFORM_EXACT:
+      return ::to_transform(js.Get(uint32_t(1)).As<Napi::String>().Utf8Value());
+    case TRANSFORM_APPROXIMATE: {
+      Napi::Array v = js.Get(uint32_t(1)).As<Napi::Array>();
+      return ::to_transform(v.Get(uint32_t(0)).As<Napi::Number>().DoubleValue(),   // M00
+                            v.Get(uint32_t(4)).As<Napi::Number>().DoubleValue(),   // M01
+                            v.Get(uint32_t(8)).As<Napi::Number>().DoubleValue(),   // M02
+                            v.Get(uint32_t(12)).As<Napi::Number>().DoubleValue(),  // M03
 
-                          js.Get(uint32_t(1)).As<Napi::Number>().DoubleValue(),   // M10
-                          js.Get(uint32_t(5)).As<Napi::Number>().DoubleValue(),   // M11
-                          js.Get(uint32_t(9)).As<Napi::Number>().DoubleValue(),   // M12
-                          js.Get(uint32_t(13)).As<Napi::Number>().DoubleValue(),  // M13
+                            v.Get(uint32_t(1)).As<Napi::Number>().DoubleValue(),   // M10
+                            v.Get(uint32_t(5)).As<Napi::Number>().DoubleValue(),   // M11
+                            v.Get(uint32_t(9)).As<Napi::Number>().DoubleValue(),   // M12
+                            v.Get(uint32_t(13)).As<Napi::Number>().DoubleValue(),  // M13
 
-                          js.Get(uint32_t(2)).As<Napi::Number>().DoubleValue(),    // M20
-                          js.Get(uint32_t(6)).As<Napi::Number>().DoubleValue(),    // M21
-                          js.Get(uint32_t(10)).As<Napi::Number>().DoubleValue(),   // M21
-                          js.Get(uint32_t(14)).As<Napi::Number>().DoubleValue(),   // M21
-                          js.Get(uint32_t(15)).As<Napi::Number>().DoubleValue());  // HW
+                            v.Get(uint32_t(2)).As<Napi::Number>().DoubleValue(),    // M20
+                            v.Get(uint32_t(6)).As<Napi::Number>().DoubleValue(),    // M21
+                            v.Get(uint32_t(10)).As<Napi::Number>().DoubleValue(),   // M21
+                            v.Get(uint32_t(14)).As<Napi::Number>().DoubleValue(),   // M21
+                            v.Get(uint32_t(15)).As<Napi::Number>().DoubleValue());  // HW
+    }
+    case TRANSFORM_INVERT:
+      return to_transform(js.Get(uint32_t(1))).inverse();
+    case TRANSFORM_ROTATE_X:
+      return TransformationFromXTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(js.Get(uint32_t(1)).As<Napi::Number>().DoubleValue());
+    case TRANSFORM_ROTATE_Y:
+      return TransformationFromYTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(js.Get(uint32_t(1)).As<Napi::Number>().DoubleValue());
+    case TRANSFORM_ROTATE_Z:
+      return TransformationFromZTurn<CGAL::Aff_transformation_3<EK>, EK::RT>(js.Get(uint32_t(1)).As<Napi::Number>().DoubleValue());
+    case TRANSFORM_TRANSLATE: {
+      Napi::Array v = js.Get(uint32_t(1)).As<Napi::Array>();
+      return ::TranslateTransform(v.Get(uint32_t(0)).As<Napi::Number>().DoubleValue(),
+                                  v.Get(uint32_t(1)).As<Napi::Number>().DoubleValue(),
+                                  v.Get(uint32_t(2)).As<Napi::Number>().DoubleValue());
+    }
+    case TRANSFORM_SCALE: {
+      Napi::Array v = js.Get(uint32_t(1)).As<Napi::Array>();
+      return ::ScaleTransform(v.Get(uint32_t(0)).As<Napi::Number>().DoubleValue(),
+                              v.Get(uint32_t(1)).As<Napi::Number>().DoubleValue(),
+                              v.Get(uint32_t(2)).As<Napi::Number>().DoubleValue());
+    }
+    case TRANSFORM_IDENTITY: {
+      return CGAL::Aff_transformation_3<EK>(CGAL::IDENTITY);
+    }
   }
+  assert(false);
 }
 
 static void to_js(const CGAL::Aff_transformation_3<EK>& transform, Napi::Array& o) {
-  double doubles[16];
-  to_doubles(transform, doubles);
-  for (uint32_t nth = 0; nth < 16; nth++) {
-    o.Set(nth, doubles[nth]);
+  if (transform == CGAL::Aff_transformation_3<EK>(CGAL::IDENTITY)) {
+    o.Set(uint32_t(0), uint32_t(TRANSFORM_IDENTITY));
+  } else {
+    o.Set(uint32_t(0), uint32_t(TRANSFORM_EXACT));
+    o.Set(uint32_t(1), to_exact(transform));
+    if (o.Length() > 2) {
+      o.Set(uint32_t(2), o.Env().Undefined());
+    }
   }
-  o.Set(uint32_t(16), to_exact(transform));
 }
 
 static Napi::FunctionReference *Surface_mesh_constructor = nullptr;
@@ -1214,6 +1247,11 @@ static Napi::Value SetTransform(const Napi::CallbackInfo& info) {
   uint32_t nth = info[1].As<Napi::Number>().Uint32Value();
   Napi::Array js = info[2].As<Napi::Array>();
   geometry->setTransform(nth, to_transform(js));
+  if (js.Get(uint32_t(0)).As<Napi::Number>().Uint32Value() != TRANSFORM_EXACT) {
+    // Destructively modify the input matrix to its resolved value.
+    // This should simplify the input geometry.
+    to_js(geometry->transform(nth), js);
+  }
   return Napi::Number::New(info.Env(), STATUS_OK);
 }
 
@@ -1256,6 +1294,21 @@ static Napi::Value Smooth(const Napi::CallbackInfo& info) {
   uint32_t remesh_relaxation_steps = info[6].As<Napi::Number>().Uint32Value();
   size_t status = ::Smooth(geometry, count, resolution, iterations, time, remesh_iterations, remesh_relaxation_steps);
   return Napi::Number::New(info.Env(), status);
+}
+
+static Napi::Value ToApproximateMatrix(const Napi::CallbackInfo& info) {
+  assertArgCount(info, 2);
+  Napi::Array out = info[1].As<Napi::Array>();
+  CGAL::Aff_transformation_3<EK> transform = to_transform(info[0]);
+  double doubles[16];
+  to_doubles(transform, doubles);
+  Napi::Array o = Napi::Array::New(out.Env());
+  for (uint32_t nth = 0; nth < 16; nth++) {
+    o.Set(nth, doubles[nth]);
+  }
+  out.Set(uint32_t(0), uint32_t(TRANSFORM_APPROXIMATE));
+  out.Set(uint32_t(1), o);
+  return Napi::Number::New(info.Env(), STATUS_OK);
 }
 
 static Napi::Value TranslateTransform(const Napi::CallbackInfo& info) {
@@ -1428,6 +1481,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "Shell"), Napi::Function::New(env, Shell));
   exports.Set(Napi::String::New(env, "Simplify"), Napi::Function::New(env, Simplify));
   exports.Set(Napi::String::New(env, "Smooth"), Napi::Function::New(env, Smooth));
+  exports.Set(Napi::String::New(env, "ToApproximateMatrix"), Napi::Function::New(env, ToApproximateMatrix));
   exports.Set(Napi::String::New(env, "TranslateTransform"), Napi::Function::New(env, TranslateTransform));
   exports.Set(Napi::String::New(env, "Trim"), Napi::Function::New(env, Trim));
   exports.Set(Napi::String::New(env, "Twist"), Napi::Function::New(env, Twist));

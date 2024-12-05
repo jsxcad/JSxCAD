@@ -1,4 +1,5 @@
 import { computeCentroid } from './computeCentroid.js';
+import { identityMatrix } from './transform.js';
 import { initCgal } from './getCgal.js';
 
 import test from 'ava';
@@ -28,55 +29,19 @@ test('Compute Centroid', (t) => {
       ],
       plane: [0, 0, 1, 0],
       exactPlane: '0 0 1 0',
-      matrix: [
-        1,
-        0,
-        0,
-        1,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        '1 0 0 1 0 1 0 0 0 0 1 0 1',
-      ],
+      matrix: identityMatrix,
       tags: [],
     },
   ]);
   t.deepEqual(JSON.parse(JSON.stringify(centroid)), [
     {
       type: 'points',
-      points: [[1, -5.551115123125783e-17, 0]],
-      exactPoints: [
-        '243388915243820068069523124935687/243388915243820045087367015432192 -1/18014398509481984 0',
-      ],
-      matrix: [
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        '1 0 0 0 0 1 0 0 0 0 1 0 1',
-      ],
+      matrix: identityMatrix,
       tags: [],
+      points: [[9.442564829413299e-17, -5.551115123125783e-17, 0]],
+      exactPoints: [
+        '22982156109503495/243388915243820045087367015432192 -1/18014398509481984 0',
+      ],
     },
   ]);
 });

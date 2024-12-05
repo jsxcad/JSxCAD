@@ -1,4 +1,6 @@
 export {
+  TRANSFORM_APPROXIMATE,
+  TRANSFORM_IDENTITY,
   composeTransforms,
   fromRotateXToTransform,
   fromRotateYToTransform,
@@ -7,8 +9,12 @@ export {
   fromSegmentToInverseTransform,
   fromTranslateToTransform,
   identity,
+  identityMatrix,
   invertTransform,
+  makeApproximateMatrix,
+  makeExactMatrix,
   matrix6,
+  toApproximateMatrix,
 } from './transform.js';
 
 export { approximate } from './approximate.js';

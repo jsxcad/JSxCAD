@@ -1,5 +1,9 @@
+import {
+  computeNormal as computeNormalWithCgal,
+  toApproximateMatrix,
+} from '@jsxcad/algorithm-cgal';
+
 import { Group } from './Group.js';
-import { computeNormal as computeNormalWithCgal } from '@jsxcad/algorithm-cgal';
 import { isNotTypeGhost } from './tagged/type.js';
 import { linearize } from './tagged/linearize.js';
 import { transformCoordinate } from './transform.js';
@@ -12,5 +16,7 @@ export const computeNormal = (geometry) =>
   Group(computeNormalWithCgal(linearize(geometry, filter)));
 
 // TODO: Make this more robust.
-export const computeNormalCoordinate = (geometry) =>
-  transformCoordinate([0, 0, 0], computeNormal(geometry).matrix);
+export const computeNormalCoordinate = (geometry) => {
+  const normal = computeNormal(geometry);
+  return transformCoordinate([0, 0, 0], toApproximateMatrix(normal.matrix)[1]);
+};
