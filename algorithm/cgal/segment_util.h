@@ -90,3 +90,83 @@ static void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
     intersect_segment_with_volume(segment, tree, on_side, false, segments);
   }
 }
+
+static void clip_segment_with_segments(
+    const EK::Segment_3& in, const std::vector<EK::Segment_3>& segments,
+    std::vector<EK::Segment_3>& out) {
+  for (const auto& segment : segments) {
+    const auto result = CGAL::intersection(in, segment);
+    if (!result) {
+      continue;
+    }
+    const EK::Segment_3* s = std::get_if<EK::Segment_3>(&*result);
+    if (s) {
+      out.push_back(*s);
+      continue;
+    }
+    const EK::Point_3* p = std::get_if<EK::Point_3>(&*result);
+    if (p) {
+      out.emplace_back(*p, *p);
+      continue;
+    }
+  }
+}
+
+static void clip_segment_with_pwh(
+    const EK::Segment_2& segment,
+    const std::vector<CGAL::Polygon_with_holes_2<EK>>& pwhs,
+    std::vector<EK::Segment_2>& out) {
+  const auto& source = segment.source();
+  const auto& target = segment.target();
+  EK::Line_2 line(segment);
+  // CHECK: What happens if we touch a corner?
+  for (const auto& pwh : pwhs) {
+    std::vector<EK::Point_2> points;
+    for (const auto& edge : pwh.outer_boundary().edges()) {
+      const auto result = CGAL::intersection(line, edge);
+      if (!result) {
+        continue;
+      }
+      if (const auto pt = std::get_if<EK::Point_2>(&*result)) {
+        points.push_back(*pt);
+      }
+    }
+    for (const auto& hole : pwh.holes()) {
+      for (const auto& edge : hole.edges()) {
+        const auto result = CGAL::intersection(line, edge);
+        if (!result) {
+          continue;
+        }
+        if (const auto pt = std::get_if<EK::Point_2>(&*result)) {
+          points.push_back(*pt);
+        }
+      }
+    }
+    // Arrange the intersections linearly.
+    std::sort(points.begin(), points.end(),
+              [&](const EK::Point_2& a, const EK::Point_2& b) {
+                if (a.x() < b.x()) {
+                  return true;
+                }
+                if (a.x() > b.x()) {
+                  return false;
+                }
+                return a.y() < b.y();
+              });
+    // Each pair of interections produces a span.
+    // Every other pair is inside a polygon.
+    bool inside = true;
+    for (size_t nth = 1; nth < points.size(); nth++) {
+      if (inside) {
+        // Now intersect the span against the original segment.
+        EK::Segment_2 span(points[nth - 1], points[nth]);
+        if (const auto result = CGAL::intersection(span, segment)) {
+          if (const EK::Segment_2* s = std::get_if<EK::Segment_2>(&*result)) {
+            out.push_back(*s);
+          }
+        }
+      }
+      inside = !inside;
+    }
+  }
+}

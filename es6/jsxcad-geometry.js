@@ -648,6 +648,25 @@ const asPart = (geometry, names, geometries) =>
     Group([geometry, ...geometries])
   );
 
+const parts = (geometry, tag = '*') => {
+  const isMatchingTag = tagMatcher(tag, 'part');
+  const collected = [];
+  const op = (geometry, descend) => {
+    let found = false;
+    for (const tag of geometry.tags) {
+      if (isMatchingTag(tag)) {
+        collected.push(tag);
+        found = true;
+      }
+    }
+    if (!found) {
+      descend();
+    }
+  };
+  visit(geometry, op);
+  return collected;
+};
+
 const getValue = (geometry, tags) => {
   const values = [];
   for (const tag of tags) {
@@ -3153,6 +3172,7 @@ const clip = (
     linearize(geometry, filter$E(noVoid), inputs);
   }
   const outputs = clip$1(inputs, count, open, exact);
+  console.log(`QQ/clip: outputs=${JSON.stringify(outputs)}`);
   const ghosts = [];
   if (!noGhost) {
     for (let nth = 0; nth < inputs.length; nth++) {
@@ -3247,7 +3267,7 @@ const Ref = (name, nx = 0, ny = 0, nz = 1, coordinate) => {
   );
   const matrix = invertTransform(inverse);
   const point = Point(0, 0, 0);
-  const content = name ? as(point, [name]) : point;
+  const content = name ? as(point, [name], []) : point;
   return hasTypeReference(transform(content, matrix));
 };
 
@@ -5449,49 +5469,8 @@ const toApproximateGeometry = (geometry) => {
   return rewrite(geometry, op);
 };
 
-const soup = (geometry) => {
-  /*
-  const op = (geometry, descend) => {
-    switch (geometry.type) {
-      case 'graph': {
-        const { graph } = geometry;
-        if (graph.isEmpty) {
-          return taggedGroup({});
-        } else {
-          return geometry;
-        }
-      }
-      // Unreachable.
-      case 'polygonsWithHoles':
-        return geometry;
-      case 'segments':
-      case 'triangles':
-      case 'points':
-      case 'paths':
-        // Already soupy enough.
-        return geometry;
-      case 'toolpath':
-        // Drop toolpaths for now.
-        return taggedGroup({});
-      case 'displayGeometry':
-        // soup can handle displayGeometry.
-        return descend();
-      case 'layout':
-      case 'plan':
-      case 'item':
-      case 'sketch':
-      case 'group': {
-        return descend();
-      }
-      default:
-        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
-    }
-  };
-  */
-
-  // const processed = serialize(convertPolygonsToMeshes(geometry));
-  return toApproximateGeometry(convertPolygonsToMeshes(geometry));
-};
+const soup = (geometry) =>
+  toApproximateGeometry(convertPolygonsToMeshes(geometry));
 
 const taggedDisplayGeometry = (
   { tags = [], matrix, provenance },
@@ -5761,4 +5740,4 @@ const wrap = (
     tags(geometry)
   );
 
-export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Triangle, Wrap, X$4 as X, XY, XZ, Y$4 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, base, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, obb, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, read, readNonblocking, reconstruct, ref, refine, reify, remesh, render, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, trim, turnX, turnXs, turnY, turnYs, turnZ, turnZs, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };
+export { And, Arc, ArcX, ArcY, ArcZ, As, AsPart, Box, ChainConvexHull, ComputeSkeleton, ConvexHull, Curve, Disjoint, Edge, Empty, Fuse, Gauge, Group, Hershey, Hexagon, Icosahedron, Iron, Label, Link, Loop, Octagon, Orb, OrientedPoint, Pentagon, Point, Points, RX, RY, RZ, Ref, Route, Segments$1 as Segments, Triangle, Wrap, X$4 as X, XY, XZ, Y$4 as Y, YX, YZ, Z$3 as Z, ZX, ZY, abstract, align, alignment, allTags, and, approximate, as, asPart, assemble, at, base, bb, bend, by, cached, cast, chainConvexHull, clip, clipFrom, commonVolume, computeCentroid, computeGeneralizedDiameter, computeImplicitVolume, computeNormal, computeOrientedBoundingBox, computeReliefFromImage, computeSkeleton, computeToolpath, convertPolygonsToMeshes, convexHull, copy, curve, cut, cutFrom, cutOut, deform, demesh, dilateXY, disjoint, disorientSegment, distance$1 as distance, drop, each, eachFaceEdges, eachItem, eachSegment, eachTriangle, eagerTransform, emitNote, ensurePages, exterior, extrude, extrudeAlong, extrudeAlongNormal, extrudeAlongX, extrudeAlongY, extrudeAlongZ, fair, fill$1 as fill, fit, fitTo, fix, flat, fresh, fromPolygonSoup, fuse, gap, gauge, generateLowerEnvelope, generateUpperEnvelope, get, getAll, getAllList, getAnySurfaces, getGraphs, getInverseMatrices, getItems, getLayouts, getLeafs, getLeafsIn, getList, getNot, getNotList, getPlans, getPoints, getTags, getValue, ghost, grow, hasColor, hasMaterial, hasNotShow, hasNotShowOutline, hasNotShowOverlay, hasNotShowSkin, hasNotShowWireframe, hasNotType, hasNotTypeGhost, hasNotTypeMasked, hasNotTypeReference, hasNotTypeVoid, hasShow, hasShowOutline, hasShowOverlay, hasShowSkin, hasShowWireframe, hasType, hasTypeGhost, hasTypeMasked, hasTypeReference, hasTypeVoid, hash, hold, inItem, inset, involute, iron, isNotShow, isNotShowOutline, isNotShowOverlay, isNotShowSkin, isNotShowWireframe, isNotType, isNotTypeGhost, isNotTypeMasked, isNotTypeReference, isNotTypeVoid, isSeqSpec, isShow, isShowOutline, isShowOverlay, isShowSkin, isShowWireframe, isType, isTypeGhost, isTypeMasked, isTypeReference, isTypeVoid, join, joinTo, keep, linearize, link, load, loadNonblocking, loft, log, loop, makeAbsolute, maskedBy, masking, measureArea, measureBoundingBox, measureVolume, minimizeOverhang, moveAlong, moveAlongNormal, noGhost, note, nth, obb, offset, on, onPost, onPre, oneOfTagMatcher, op, orient, origin, outline, pack, parts, read, readNonblocking, reconstruct, ref, refine, reify, remesh, render, repair, replacer, retag, rewrite, rewriteTags, rotateX, rotateXs, rotateY, rotateYs, rotateZ, rotateZs, samplePointCloud, scale$1 as scale, scaleLazy, scaleToFit, seam, section, separate, seq, serialize, shell, showOutline, showOverlay, showSkin, showWireframe, simplify, smooth, soup, store, tag, tagMatcher, taggedDisplayGeometry, taggedGraph, taggedGroup, taggedItem, taggedLayout, taggedPlan, taggedPoints, taggedPolygons, taggedPolygonsWithHoles, taggedSegments, taggedSketch, taggedTriangles, tags, to, toConcreteGeometry, toCoordinates, toDisplayGeometry, toFaceEdgesList, toOrientedFaceEdgesList, toPointList, toPoints, toSegmentList, toSegments, toTransformedGeometry, toTriangleArray, toVoxelsFromCoordinates, toVoxelsFromGeometry, transform, transformCoordinate, transformingCoordinates, translate, trim, turnX, turnXs, turnY, turnYs, turnZ, turnZs, twist, typeGhost, typeMasked, typeReference, typeVoid, unfold, untag, update, validate, visit, wrap, write, writeNonblocking };

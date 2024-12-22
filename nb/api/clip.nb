@@ -30,3 +30,17 @@ Box(10, 10, 10)
   .clip(Box(12, 12, 8), 'open')
   .view()
   .note("Box(10, 10, 10).clip(Box(12, 12, 8), 'open')");
+
+Box(10)
+  .outline()
+  .clip(Line(20))
+  .clean()
+  .view()
+  .note("Box(10, 10, 10).outline().clip(Line(20))");
+
+Line(20)
+  .y({ from: -12, to: 12, by: 0.25 })
+  .clip(Arc(10).cut(inset(3)))
+  .clean()
+  .view()
+  .note("Line(20).y({ from: -12, to: 12, by: 0.25 }).clip(Arc(10).cut(inset(3))).clean()");

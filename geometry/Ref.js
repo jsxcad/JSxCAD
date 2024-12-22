@@ -29,7 +29,7 @@ export const Ref = (name, nx = 0, ny = 0, nz = 1, coordinate) => {
   );
   const matrix = invertTransform(inverse);
   const point = Point(0, 0, 0);
-  const content = name ? as(point, [name]) : point;
+  const content = name ? as(point, [name], []) : point;
   return hasTypeReference(transform(content, matrix));
 };
 

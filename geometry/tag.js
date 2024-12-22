@@ -1,7 +1,8 @@
+import { rewrite, visit } from './tagged/visit.js';
+
 import { Group } from './Group.js';
 import { getLeafs } from './tagged/getLeafs.js';
 import parseNumber from 'parse-number';
-import { rewrite } from './tagged/visit.js';
 import { taggedItem } from './tagged/taggedItem.js';
 
 export const qualifyTag = (tag, namespace = 'user') => {
@@ -116,6 +117,25 @@ export const asPart = (geometry, names, geometries) =>
     { tags: names.map((name) => `part:${name}`) },
     Group([geometry, ...geometries])
   );
+
+export const parts = (geometry, tag = '*') => {
+  const isMatchingTag = tagMatcher(tag, 'part');
+  const collected = [];
+  const op = (geometry, descend) => {
+    let found = false;
+    for (const tag of geometry.tags) {
+      if (isMatchingTag(tag)) {
+        collected.push(tag);
+        found = true;
+      }
+    }
+    if (!found) {
+      descend();
+    }
+  };
+  visit(geometry, op);
+  return collected;
+};
 
 export const getValue = (geometry, tags) => {
   const values = [];

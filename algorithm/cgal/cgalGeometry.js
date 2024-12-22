@@ -269,11 +269,6 @@ export const fromCgalGeometry = (geometry, inputs, length = inputs.length, start
   } else {
     output = results.slice(start);
   }
-  /*
-  if (output.some(value => value === undefined)) {
-    throw Error(`QQ/producing undefined output`);
-  }
-  */
   return output.filter(value => value !== undefined);
 };
 
@@ -284,7 +279,7 @@ export const withCgalGeometry = (name, inputs, op) => {
     const result = op(cgalGeometry, g);
     return result;
   } catch (error) {
-    console.log(`QQ/withCgalGeometry/error: ${name}`);
+    console.log(`withCgalGeometry error: ${name}`);
     console.log(error.stack);
     throw error;
   } finally {

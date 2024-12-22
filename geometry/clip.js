@@ -27,6 +27,7 @@ export const clip = (
     linearize(geometry, filter(noVoid), inputs);
   }
   const outputs = clipWithCgal(inputs, count, open, exact);
+  console.log(`QQ/clip: outputs=${JSON.stringify(outputs)}`);
   const ghosts = [];
   if (!noGhost) {
     for (let nth = 0; nth < inputs.length; nth++) {

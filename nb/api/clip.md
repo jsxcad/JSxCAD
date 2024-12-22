@@ -46,3 +46,29 @@ Box(10, 10, 10)
   .view()
   .note("Box(10, 10, 10).clip(Box(12, 12, 8), 'open')");
 ```
+
+![Image](clip.md.$5.png)
+
+Box(10, 10, 10).outline().clip(Line(20))
+
+```JavaScript
+Box(10)
+  .outline()
+  .clip(Line(20))
+  .clean()
+  .view()
+  .note("Box(10, 10, 10).outline().clip(Line(20))");
+```
+
+![Image](clip.md.$6.png)
+
+Line(20).y({ from: -12, to: 12, by: 0.25 }).clip(Arc(10).cut(inset(3))).clean()
+
+```JavaScript
+Line(20)
+  .y({ from: -12, to: 12, by: 0.25 })
+  .clip(Arc(10).cut(inset(3)))
+  .clean()
+  .view()
+  .note("Line(20).y({ from: -12, to: 12, by: 0.25 }).clip(Arc(10).cut(inset(3))).clean()");
+```
