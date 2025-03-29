@@ -33,6 +33,7 @@ static void intersect_segment_with_volume(const Segment& segment,
                                           AABB_tree& tree,
                                           Side_of_triangle_mesh& on_side,
                                           bool clip, Segments& segments) {
+  std::cout << "intersect_segment_with_volume" << std::endl;
   const Point& source = segment.source();
   const Point& target = segment.target();
   std::list<Segment_intersection> intersections;
@@ -41,15 +42,23 @@ static void intersect_segment_with_volume(const Segment& segment,
   points.push_back(source);
   points.push_back(target);
   for (const auto& intersection : intersections) {
+    std::cout << "intersect_segment_with_volume: intersection" << std::endl;
     if (!intersection) {
+      std::cout << "intersect_segment_with_volume: skip" << std::endl;
       continue;
     }
     if (const Point* point = std::get_if<Point>(&intersection->first)) {
+      std::cout << "intersect_segment_with_volume: point=" << *point
+                << std::endl;
       points.push_back(*point);
+      continue;
     }
     if (const Segment* segment = std::get_if<Segment>(&intersection->first)) {
+      std::cout << "intersect_segment_with_volume: segment=" << *segment
+                << std::endl;
       points.push_back(segment->source());
       points.push_back(segment->target());
+      continue;
     }
   }
   std::sort(points.begin(), points.end(), [&](const Point& a, const Point& b) {
@@ -60,14 +69,20 @@ static void intersect_segment_with_volume(const Segment& segment,
   for (size_t index = 1; index < points.size(); index++) {
     const Point& source = points[index - 1];
     const Point& target = points[index];
+    std::cout << "intersect_segment_with_volume: test="
+              << Segment(source, target) << std::endl;
     bool is_outside =
         on_side(CGAL::midpoint(source, target)) == CGAL::ON_UNBOUNDED_SIDE;
     if (is_outside) {
-      if (!clip) {
+      std::cout << "intersect_segment_with_volume: outside" << std::endl;
+      if (clip) {
+        std::cout << "intersect_segment_with_volume: output" << std::endl;
         segments.emplace_back(source, target);
       }
     } else {
-      if (clip) {
+      std::cout << "intersect_segment_with_volume: inside" << std::endl;
+      if (!clip) {
+        std::cout << "intersect_segment_with_volume: output" << std::endl;
         segments.emplace_back(source, target);
       }
     }
@@ -89,4 +104,98 @@ static void cut_segment_with_volume(const Segment& segment, AABB_tree& tree,
   if (!segment.is_degenerate()) {
     intersect_segment_with_volume(segment, tree, on_side, false, segments);
   }
+}
+
+static void clip_segment_with_segments(
+    const EK::Segment_3& in, const std::vector<EK::Segment_3>& segments,
+    std::vector<EK::Segment_3>& out) {
+  for (const auto& segment : segments) {
+    const auto result = CGAL::intersection(in, segment);
+    if (!result) {
+      continue;
+    }
+    const EK::Segment_3* s = std::get_if<EK::Segment_3>(&*result);
+    if (s) {
+      out.push_back(*s);
+      continue;
+    }
+    const EK::Point_3* p = std::get_if<EK::Point_3>(&*result);
+    if (p) {
+      out.emplace_back(*p, *p);
+      continue;
+    }
+  }
+}
+
+static void intersect_segment_with_pwh(
+    const EK::Segment_2& segment,
+    const std::vector<CGAL::Polygon_with_holes_2<EK>>& pwhs, bool clip,
+    std::vector<EK::Segment_2>& out) {
+  const auto& source = segment.source();
+  const auto& target = segment.target();
+  EK::Line_2 line(segment);
+  // CHECK: What happens if we touch a corner?
+  for (const auto& pwh : pwhs) {
+    std::vector<EK::Point_2> points;
+    for (const auto& edge : pwh.outer_boundary().edges()) {
+      const auto result = CGAL::intersection(line, edge);
+      if (!result) {
+        continue;
+      }
+      if (const auto pt = std::get_if<EK::Point_2>(&*result)) {
+        points.push_back(*pt);
+      }
+    }
+    for (const auto& hole : pwh.holes()) {
+      for (const auto& edge : hole.edges()) {
+        const auto result = CGAL::intersection(line, edge);
+        if (!result) {
+          continue;
+        }
+        if (const auto pt = std::get_if<EK::Point_2>(&*result)) {
+          points.push_back(*pt);
+        }
+      }
+    }
+    // Arrange the intersections linearly.
+    std::sort(points.begin(), points.end(),
+              [&](const EK::Point_2& a, const EK::Point_2& b) {
+                if (a.x() < b.x()) {
+                  return true;
+                }
+                if (a.x() > b.x()) {
+                  return false;
+                }
+                return a.y() < b.y();
+              });
+    // Each pair of interections produces a span.
+    // Every other pair is inside a polygon.
+    bool inside = clip;
+    for (size_t nth = 1; nth < points.size(); nth++) {
+      if (inside) {
+        // Now intersect the span against the original segment.
+        EK::Segment_2 span(points[nth - 1], points[nth]);
+        if (const auto result = CGAL::intersection(span, segment)) {
+          if (const EK::Segment_2* s = std::get_if<EK::Segment_2>(&*result)) {
+            out.push_back(*s);
+          }
+        }
+      }
+      inside = !inside;
+    }
+  }
+}
+
+static void clip_segment_with_pwh(
+    const EK::Segment_2& segment,
+    const std::vector<CGAL::Polygon_with_holes_2<EK>>& pwhs,
+    std::vector<EK::Segment_2>& out) {
+  return intersect_segment_with_pwh(segment, pwhs, /*clip=*/true, out);
+}
+
+static void cut_segment_with_pwh(
+    const EK::Segment_2& segment,
+    const std::vector<CGAL::Polygon_with_holes_2<EK>>& pwhs,
+    std::vector<EK::Segment_2>& out) {
+  return intersect_segment_with_pwh(segment, pwhs, /*clip=*/false, out);
 }

@@ -15,7 +15,7 @@ export const clip = (inputs, targetsLength, open = false, exact = false) =>
       case STATUS_ZERO_THICKNESS:
         throw new ErrorZeroThickness('Zero thickness produced by clip');
       case STATUS_OK:
-        return fromCgalGeometry(cgalGeometry, inputs, targetsLength);
+        return fromCgalGeometry(cgalGeometry, inputs, cgalGeometry.getSize());
       default:
         throw new Error(`Unexpected status ${status} in clip`);
     }

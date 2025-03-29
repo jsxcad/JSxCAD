@@ -91,9 +91,9 @@ bool cut_mesh_by_mesh(Surface_mesh& a, Surface_mesh& b, bool open = false,
             CGAL::parameters::throw_on_self_intersection(true),
             CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
       std::cout << "cut_mesh_by_mesh: exact cut is non-manifold" << std::endl;
-    }
-    if (!repair_boolean<EK>(a, false)) {
-      return false;
+      if (!repair_boolean<EK>(a, false)) {
+        return false;
+      }
     }
     demesh(a);
     return true;
@@ -133,8 +133,8 @@ bool join_mesh_to_mesh(Surface_mesh& a, Surface_mesh& b, bool exact = false) {
           a, working_mesh, a, CGAL::parameters::all_default(),
           CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
     std::cout << "join_mesh_to_mesh: exact join is non-manifold." << std::endl;
+    assert(repair_boolean<EK>(a, false));
   }
-  assert(repair_boolean<EK>(a, false));
   demesh(a);
   return true;
 };
@@ -147,9 +147,8 @@ bool clip_mesh_by_mesh(Surface_mesh& a, Surface_mesh& b, bool open = false,
     if (!CGAL::Polygon_mesh_processing::clip(
             a, working_mesh, CGAL::parameters::use_compact_clipper(true),
             CGAL::parameters::use_compact_clipper(true))) {
-      return false;
+      assert(repair_boolean<EK>(a, false));
     }
-    assert(repair_boolean<EK>(a, false));
     demesh(a);
     return true;
   }
@@ -189,8 +188,8 @@ bool clip_mesh_by_mesh(Surface_mesh& a, Surface_mesh& b, bool open = false,
           a, working_mesh, a, CGAL::parameters::all_default(),
           CGAL::parameters::all_default(), CGAL::parameters::all_default())) {
     std::cout << "clip_mesh_by_mesh: exact clip is non-manifold." << std::endl;
+    assert(repair_boolean<EK>(a, false));
   }
-  assert(repair_boolean<EK>(a, false));
   demesh(a);
   return true;
 };

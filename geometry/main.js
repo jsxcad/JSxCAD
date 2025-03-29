@@ -245,6 +245,7 @@ export {
   as,
   asPart,
   oneOfTagMatcher,
+  parts,
   retag,
   tag,
   tags,

@@ -50,6 +50,7 @@ export { base } from './base.js';
 export { bb } from './bb.js';
 export { bend } from './bend.js';
 export { billOfMaterials } from './billOfMaterials.js';
+export { bom } from './billOfMaterials.js';
 export { by } from './by.js';
 export { centroid } from './centroid.js';
 export { chainHull } from './ChainHull.js';

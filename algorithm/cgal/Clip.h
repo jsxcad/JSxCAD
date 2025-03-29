@@ -78,25 +78,58 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
         }
         case GEOMETRY_SEGMENTS: {
           // TODO: Support clipping segments by PolygonsWithHoles.
-          std::vector<Segment> in;
+          std::vector<EK::Segment_3> in;
           geometry->segments(target).swap(in);
-          std::vector<Segment> out;
           for (size_t nth = targets; nth < size; nth++) {
-            if (!geometry->is_mesh(nth) || geometry->is_empty_mesh(nth)) {
-              continue;
-            }
-            AABB_tree& tree = geometry->aabb_tree(nth);
-            Side_of_triangle_mesh& on_side = geometry->on_side(nth);
-            for (const Segment& segment : in) {
-              // FIX: Handle degenerate segments properly.
-              if (segment.source() != segment.target()) {
-                clip_segment_with_volume(segment, tree, on_side, out);
+            switch (geometry->getType(nth)) {
+              case GEOMETRY_MESH: {
+                std::cout << "clip: segment vs mesh" << std::endl;
+                std::vector<EK::Segment_3> out;
+                if (geometry->is_empty_mesh(nth)) {
+                  continue;
+                }
+                AABB_tree& tree = geometry->aabb_tree(nth);
+                Side_of_triangle_mesh& on_side = geometry->on_side(nth);
+                for (const Segment& segment : in) {
+                  clip_segment_with_volume(segment, tree, on_side, out);
+                }
+                in.swap(out);
+                out.clear();
+                break;
+              }
+              case GEOMETRY_SEGMENTS: {
+                std::vector<EK::Segment_3> out;
+                for (const Segment& segment : in) {
+                  clip_segment_with_segments(segment, geometry->segments(nth),
+                                             out);
+                }
+                in.swap(out);
+                out.clear();
+                break;
+              }
+              case GEOMETRY_POLYGONS_WITH_HOLES: {
+                const auto& transform = geometry->transform(nth);
+                const auto inverse = transform.inverse();
+                const EK::Plane_3 zero(EK::Point_3(0, 0, 0),
+                                       EK::Vector_3(0, 0, 1));
+                std::vector<EK::Segment_2> o2s;
+                for (const EK::Segment_3& s3 : in) {
+                  EK::Segment_2 s2(zero.to_2d(s3.source().transform(inverse)),
+                                   zero.to_2d(s3.target().transform(inverse)));
+                  clip_segment_with_pwh(s2, geometry->pwh(nth), o2s);
+                }
+                std::vector<EK::Segment_3> o3s;
+                for (const auto& o2 : o2s) {
+                  o3s.emplace_back(
+                      zero.to_3d(o2.source()).transform(transform),
+                      zero.to_3d(o2.target()).transform(transform));
+                }
+                in.swap(o3s);
+                geometry->segments(target).swap(in);
+                break;
               }
             }
-            in.swap(out);
-            out.clear();
           }
-          geometry->segments(target).swap(in);
           break;
         }
         case GEOMETRY_POINTS: {
@@ -130,11 +163,13 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
       }
     }
 
-    geometry->resize(targets);
+    for (size_t nth = targets; nth < size; nth++) {
+      geometry->setType(nth, GEOMETRY_EMPTY);
+    }
+
     geometry->removeEmptyMeshes();
     geometry->copyGeneralPolygonSetsToPolygonsWithHoles();
     geometry->transformToLocalFrame();
-
   } catch (const std::exception& e) {
     std::cout << "Clip: " << std::endl;
     std::cout << e.what() << std::endl;
