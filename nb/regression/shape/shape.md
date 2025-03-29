@@ -317,6 +317,8 @@ Segments(
 )
   .rz(1 / 8)
   .clip(Arc(5).cut(Arc(2)).ez([1, -1]))
+  .clean()
+  .color('green')
   .gridView();
 ```
 

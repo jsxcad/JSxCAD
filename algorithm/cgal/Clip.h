@@ -83,6 +83,7 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
           for (size_t nth = targets; nth < size; nth++) {
             switch (geometry->getType(nth)) {
               case GEOMETRY_MESH: {
+                std::cout << "clip: segment vs mesh" << std::endl;
                 std::vector<EK::Segment_3> out;
                 if (geometry->is_empty_mesh(nth)) {
                   continue;
@@ -90,10 +91,7 @@ static int Clip(Geometry* geometry, size_t targets, bool open, bool exact) {
                 AABB_tree& tree = geometry->aabb_tree(nth);
                 Side_of_triangle_mesh& on_side = geometry->on_side(nth);
                 for (const Segment& segment : in) {
-                  // FIX: Handle degenerate segments properly.
-                  if (segment.source() != segment.target()) {
-                    clip_segment_with_volume(segment, tree, on_side, out);
-                  }
+                  clip_segment_with_volume(segment, tree, on_side, out);
                 }
                 in.swap(out);
                 out.clear();

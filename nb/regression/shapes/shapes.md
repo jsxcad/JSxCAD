@@ -314,6 +314,8 @@ const q = Group(
 Line([15, -15])
   .seq({ from: -10, upto: 11 }, y, Group)
   .clip(Arc(20).cut(Arc(10)))
+  .clean()
+  .color('red')
   .view();
 ```
 
